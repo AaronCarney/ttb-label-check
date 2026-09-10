@@ -1,0 +1,21 @@
+# Credentials: never committed
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+
+# Local Claude Code settings
+.claude/settings.local.json
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*:Zone.Identifier
+*.swp
+.vscode/
+.idea/
+
+# Logs and scratch
+*.log
+*.tmp
