@@ -14,6 +14,8 @@ No stack is chosen yet, so there are no build, test or run commands. Add them he
 
 | Path | Holds |
 |---|---|
+| `ARCHITECTURE.md` | How the system is laid out, and where the code that does each thing lives. |
+| `CHANGELOG.md` | What changed in each version. |
 | `docs/README.md` | Index of every document under `docs/`, one line each. |
 | `docs/PRD.md` | What is being built, for whom, and why. |
 | `docs/PRD-decisions.md` | Every change to the PRD's text, once it has been approved. |
