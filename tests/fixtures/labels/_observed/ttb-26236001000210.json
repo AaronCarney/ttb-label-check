@@ -1,0 +1,13 @@
+{
+  "brand_name": "LOST LANTERN",
+  "abv": "ALC BY VOL 60.0 %",
+  "net_contents": "750 ML",
+  "warning_text": "GOVERNMENT WARNING: (1) ACCORDING TO THE SURGEON GENERAL, WOMEN SHOULD NOT DRINK ALCOHOLIC BEVERAGES DURING PREGNANCY BECAUSE OF THE RISK OF BIRTH DEFECTS. (2) CONSUMPTION OF ALCOHOLIC BEVERAGES IMPAIRS YOUR ABILITY TO DRIVE A CAR OR OPERATE MACHINERY, AND MAY CAUSE HEALTH PROBLEMS.",
+  "warning_heading_all_caps": true,
+  "notes": [
+    "Brand is set as 'LOST LANTERN' in small capitals with oversized L's, with no space between the words on the front; the back sets it the same way.",
+    "The alcohol declaration is laid out in three parts in one cell at the foot of the front: 'ALC' over 'BY VOL' in printed capitals at the left, the figure '60.0' handwritten in the middle, and a raised printed '%' at the right. Read across, it is 'ALC BY VOL 60.0 %'. There is no single printed string to copy character for character, and the figure is not typeset.",
+    "Net contents is set sideways up the right edge of the front: '750 ML'.",
+    "'McCARTHY'S' on the front is the fanciful name, not the brand."
+  ]
+}

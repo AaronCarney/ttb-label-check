@@ -1,0 +1,14 @@
+{
+  "brand_name": "Black & White",
+  "abv": "40% alc./vol.",
+  "net_contents": "700 mL",
+  "warning_text": "GOVERNMENT WARNING: (1) ACCORDING TO THE  SUR-\nGEON GENERAL, WOMEN SHOULD NOT DRINK ALCOHOLIC\nBEVERAGES DURING PREGNANCY BECAUSE OF THE RISK\n OF BIRTH DEFECTS. (2) CONSUMPTION OF  ALCOHOLIC BEV-\nERAGES IMPAIRS YOUR ABILITY TO DRIVE A CAR OR OP-\nERATE MACHINERY, AND MAY CAUSE HEALTH PROBLEMS.",
+  "warning_heading_all_caps": true,
+  "notes": [
+    "Brand is mixed case with an ampersand, 'Black & White', followed by a trademark symbol.",
+    "Alcohol and net contents sit at the foot of the front in lower case: '40% alc./vol.' and '700 mL'.",
+    "The warning's line breaks split three words with hyphens, 'SUR-GEON', 'BEV-ERAGES' and 'OP-ERATE', so the transcription keeps the printed line breaks.",
+    "Wider gaps appear inside 'TO THE  SUR-' and 'CONSUMPTION OF  ALCOHOLIC', and the fourth line begins with a leading space; all three are kept in the transcription.",
+    "The back's Serving Facts panel separately states 'Alcohol by volume: 40% (80 proof)'; the front's declaration is the one transcribed above."
+  ]
+}

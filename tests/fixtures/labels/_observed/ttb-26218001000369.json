@@ -1,0 +1,13 @@
+{
+  "brand_name": "AODH",
+  "abv": "Alc. 42.8% by vol.",
+  "net_contents": "750ml",
+  "warning_text": "GOVERNMENT WARNING:  (1) ACCORDING TO THE SURGEON GENERAL, WOMEN SHOULD NOT DRINK ALCOHOLIC BEVERAGES DURING PREGNANCY BECAUSE OF THE RISK OF BIRTH DEFECTS. (2) CONSUMPTION OF ALCOHOLIC BEVERAGES IMPAIRS YOUR ABILITY TO DRIVE A CAR OR OPERATE MACHINERY, AND MAY CAUSE HEALTH PROBLEMS.",
+  "warning_heading_all_caps": true,
+  "notes": [
+    "Net contents is labelled 'CONTENTS:' with '750ml' on the line below, in lower case and with no space; both faces print it that way.",
+    "Alcohol reads 'Alc. 42.8% by vol.' in mixed case, with '85.6 US PROOF' on the line below; both faces print it that way.",
+    "A wider gap follows the warning's colon; transcribed as a double space.",
+    "The back also prints 'FOR OVERSEAS EXPORT ONLY.'"
+  ]
+}

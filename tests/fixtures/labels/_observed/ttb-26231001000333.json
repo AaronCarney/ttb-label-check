@@ -1,0 +1,15 @@
+{
+  "brand_name": "SALTIRE RARE MALT WHISKY COMPANY",
+  "abv": "48.8%Alc./Vol.",
+  "net_contents": "700ml",
+  "warning_text": "GOVERNMENT WARNING:(1) ACCORDING TO THE SURGEON GENERAL,\nWOMEN SHOULD NOT DRINK ALCOHOLIC BEVERAGES DURING PREG-\nNANCY BECAUSE OF THE RISK OF BIRTH DEFECTS. (2) CONSUMPTION\nOF ALCOHOLIC BEVERAGES IMPAIRS YOUR ABILITY TO DRIVE A CAR\nOR OPERATE MACHINERY, AND MAY CAUSE HEALTH PROBLEMS.",
+  "warning_heading_all_caps": true,
+  "notes": [
+    "The brand lockup on the front is set on two lines: 'SALTIRE' in display size over 'RARE MALT WHISKY COMPANY' in small capitals. Both lines are transcribed as the printed brand.",
+    "Alcohol prints with no spaces, '48.8%Alc./Vol.', in mixed case, on both the front and the back.",
+    "Net contents prints as '700ml' in lower case, followed by the estimated-sign mark; the quantity wording itself is '700ml'.",
+    "The warning has no space after the colon: it prints 'GOVERNMENT WARNING:(1) ACCORDING'.",
+    "The warning's line break splits 'PREG-NANCY' with a hyphen, so the transcription keeps the printed line breaks.",
+    "The warning appears on the back only; the front carries no warning."
+  ]
+}

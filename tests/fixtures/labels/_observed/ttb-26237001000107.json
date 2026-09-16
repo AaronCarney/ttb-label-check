@@ -1,0 +1,12 @@
+{
+  "brand_name": "JUAN LOBO",
+  "abv": "40% ALC./VOL.",
+  "net_contents": "750mL",
+  "warning_text": "GOVERNMENT WARNING: (1)ACCORDING TO THE SURGEON GENERAL, WOMEN SHOULD NOT DRINK ALCOHOLIC BEVERAGES DURING PREGNANCY BECAUSE OF THE RISK OF BIRTH DEFECTS. (2) CONSUMPTION OF ALCOHOLIC BEVERAGES IMPAIRS YOUR ABILITY TO DRIVE A CAR OR OPERATE MACHINERY, AND MAY CAUSE HEALTH PROBLEMS.",
+  "warning_heading_all_caps": true,
+  "notes": [
+    "Net contents sits under the signature at the foot of the front and is letterspaced, '750mL'; the gap between '0' and 'm' matches the gap between the digits, so no word space is visible.",
+    "Alcohol reads '40% ALC./VOL.' with '80 PROOF' on the line below.",
+    "The warning has no space after '(1)': it prints '(1)ACCORDING'. The '(2)' later in the same paragraph does have its space."
+  ]
+}
