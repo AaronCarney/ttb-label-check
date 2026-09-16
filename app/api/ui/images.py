@@ -85,8 +85,12 @@ class UploadImageStore:
     def get(self, evaluation_id: str) -> tuple[str, bytes] | None:
         """The image kept for one evaluation, with its media type, or nothing.
 
-        Nothing is the honest answer for an id that was never stored and for
-        one whose image has expired; the route turns both into a 404.
+        Nothing is the honest answer for an id that was never stored, for one
+        that is not an id at all, and for one whose file the sweep has already
+        dropped; the route turns each into a 404. An expired image still reads
+        until that sweep runs, because the sweep runs on a write: the retention
+        window bounds what the directory holds, not what a reader may see. A
+        file that exists but cannot be read is answered the same way.
         """
         if not _EVALUATION_ID.match(evaluation_id):
             return None
