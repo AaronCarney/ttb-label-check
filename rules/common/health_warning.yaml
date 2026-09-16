@@ -1,0 +1,149 @@
+rule_pack: common
+rule_pack_version: "0.1.0"
+rules:
+  - rule_id: common.warning.present
+    cfr_citation: "27 CFR §16.21"
+    applies_to_classes: [wine, spirits, malt]
+    reason_code: WARNING.PRESENCE.MISSING
+    severity: reject
+    match_policy: exact
+    validator: presence_check
+    evidence_required: [warning_block]
+    confidence_floor: 0.50
+    effective_date: "1989-11-18"
+    test_fixtures: [F-COMMON-WARN-PASS-01, F-COMMON-WARN-MISSING-01]
+
+  - rule_id: common.warning.verbatim
+    cfr_citation: "27 CFR §16.21"
+    applies_to_classes: [wine, spirits, malt]
+    reason_code: WARNING.VERBATIM.MISMATCH
+    severity: reject
+    match_policy: verbatim_hash
+    validator: verbatim_hash
+    parameters:
+      asset_key: govt_warning_16_21
+    asset:
+      path: assets/warnings/govt_warning_16_21.txt
+      sha256_pin: "35e1f5d39ee341ac7c114f8159956cb0cc1981b94e4ffeee194ff5060bf99fbc"
+      normalization: [nfkc, ascii_quotes, collapse_whitespace, strip_outer_ws]
+    evidence_required: [warning_block]
+    confidence_floor: 0.60
+    effective_date: "1989-11-18"
+    test_fixtures: [F-COMMON-WARN-PASS-01, F-COMMON-WARN-PARAPHRASE-01]
+
+  - rule_id: common.warning.heading_caps_bold
+    cfr_citation: "27 CFR §16.22(a)(2)"
+    applies_to_classes: [wine, spirits, malt]
+    reason_code: WARNING.STYLE.HEADING_NOT_BOLD_CAPS
+    severity: reject
+    match_policy: layout
+    validator: heading_style_check
+    parameters:
+      target_phrase: "GOVERNMENT WARNING"
+      required_case: upper
+      required_weight: bold
+    evidence_required: [warning_block]
+    confidence_floor: 0.50
+    effective_date: "1989-11-18"
+    test_fixtures: [F-COMMON-WARN-STYLE-PASS-01, F-COMMON-WARN-STYLE-FAIL-01]
+
+  - rule_id: common.warning.contrasting_bg
+    cfr_citation: "27 CFR §16.22(a)(1)"
+    applies_to_classes: [wine, spirits, malt]
+    reason_code: WARNING.LEGIBILITY.NO_CONTRAST
+    severity: reject
+    match_policy: layout
+    validator: contrast_ratio_check
+    parameters:
+      min_contrast_ratio: 4.5
+    evidence_required: [warning_block]
+    disabled: true
+    notes: >-
+      Out of scope, decision 0006. The reader reports no contrast measurement,
+      so this rule fails every label, compliant ones included. TTB's own Form
+      5100.31 instructions say TTB does not routinely review labels for
+      contrasting background.
+    confidence_floor: 0.40
+    effective_date: "1989-11-18"
+    test_fixtures: [F-COMMON-WARN-CONTRAST-PASS-01]
+
+  - rule_id: common.warning.cpi_max
+    cfr_citation: "27 CFR §16.22(a)(4)"
+    applies_to_classes: [wine, spirits, malt]
+    reason_code: WARNING.TYPE_SIZE.CPI_EXCEEDED
+    severity: reject
+    match_policy: lookup
+    validator: cpi_lookup
+    decision_table_ref: cpi_16_22_a_4
+    parameters:
+      observed_cpi_field: cpi
+      observed_height_field: height_mm
+    evidence_required: [warning_block]
+    disabled: true
+    notes: >-
+      Out of scope, decision 0006. Characters per inch needs the image's
+      physical scale, which a photograph does not carry, so the reader reports
+      no measurement and this rule fails every label. TTB does not routinely
+      review characters per inch.
+    confidence_floor: 0.50
+    effective_date: "1990-02-14"
+    test_fixtures: [F-COMMON-CPI-PASS-01, F-COMMON-CPI-FAIL-1MM-01]
+
+  - rule_id: common.warning.separate_apart
+    cfr_citation: "27 CFR §16.21"
+    applies_to_classes: [wine, spirits, malt]
+    reason_code: WARNING.PLACEMENT.NOT_SEPARATE
+    severity: reject
+    match_policy: layout
+    validator: layout_isolation_check
+    parameters:
+      min_isolation_px: 4
+    evidence_required: [warning_block]
+    disabled: true
+    notes: >-
+      Out of scope, decision 0006. Measurable from a photograph in principle,
+      but no reader emits a neighbour distance, so the rule fails every label.
+      Unbuilt rather than unbuildable.
+    confidence_floor: 0.40
+    effective_date: "1989-11-18"
+    test_fixtures: [F-COMMON-WARN-ISOLATION-PASS-01, F-COMMON-WARN-ISOLATION-FAIL-01]
+
+  - rule_id: common.warning.type_size_min
+    cfr_citation: "27 CFR §16.22(b)"
+    applies_to_classes: [wine, spirits, malt]
+    reason_code: WARNING.TYPE_SIZE.UNDER_MIN
+    severity: reject
+    match_policy: layout
+    validator: type_size_check
+    parameters:
+      min_type_size_pt: 2.0
+    evidence_required: [warning_block]
+    disabled: true
+    notes: >-
+      Out of scope, decision 0006. §16.22(b) sets the minimum in millimetres
+      and keys it to container size (1 mm at 237 mL or less, 2 mm up to 3 L,
+      3 mm above). This rule compares a point value against a fixed 2.0 and
+      ignores container size, so a pass here does not mean what it says. Type
+      height also needs the image's physical scale, which a photograph does
+      not carry.
+    confidence_floor: 0.40
+    effective_date: "1989-11-18"
+    test_fixtures: [F-COMMON-WARN-TYPE-SIZE-PASS-01, F-COMMON-WARN-TYPE-SIZE-FAIL-01]
+
+  - rule_id: common.warning.heading_phrase
+    cfr_citation: "27 CFR §16.21"
+    applies_to_classes: [wine, spirits, malt]
+    reason_code: WARNING.VERBATIM.MISMATCH
+    severity: reject
+    match_policy: normalized
+    validator: equality_match
+    evidence_required: [warning_heading]
+    disabled: true
+    notes: >-
+      Out of scope, decision 0006. No reader emits `warning_heading`, so the
+      rule never ran, and common.warning.heading_caps_bold already checks the
+      same two words along with the capitals and bold weight §16.22(a)(2)
+      requires.
+    confidence_floor: 0.50
+    effective_date: "1989-11-18"
+    test_fixtures: [F-COMMON-WARN-HEADING-PASS-01, F-COMMON-WARN-HEADING-MISMATCH-01]

@@ -1,0 +1,27 @@
+# Which malt-beverage designations fall within the class "beer".
+#
+# A registry application routinely declares the bare class BEER where the
+# label designates the style it is sold as, so without this table a label
+# reading "LAGER" disagrees with an application reading "BEER". TTB approved
+# both, which is the ground truth this table is built from: every pairing
+# below appears among the approved labels in tests/fixtures/labels/manifest.json
+# or is the same relationship one step further out.
+#
+# Read one way only. The label's designation may be narrower than the class
+# the application declared; the reverse is a disagreement.
+interpolation: none
+entries:
+  - class: Beer
+    designations_within:
+      - Ale
+      - Lager
+      - Stout
+      - Porter
+      - Pilsner
+      - India Pale Ale
+      - Pale Ale
+      - Malt Liquor
+      - Bock
+      - Marzen
+      - Wheat Beer
+      - Cerveza

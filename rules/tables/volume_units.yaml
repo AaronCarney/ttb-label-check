@@ -1,0 +1,45 @@
+# Net-contents units a label may state, and how many millilitres one of each
+# makes. The application records net contents in millilitres, so a label
+# reading is converted into millilitres before the two are compared.
+#
+# The customary factors are exact by definition: one US gallon is 3.785411784
+# litres, and the smaller customary units are fixed fractions of it.
+#
+# A unit this table does not list converts by 1, which is the reader's own
+# unit. A unit whose factor is left empty cannot be converted, and the check
+# goes to a reviewer rather than comparing two numbers that mean different
+# things.
+interpolation: none
+entries:
+  - unit: mL
+    factor: 1
+  - unit: cL
+    factor: 10
+  - unit: L
+    factor: 1000
+  - unit: liter
+    factor: 1000
+  - unit: liters
+    factor: 1000
+  - unit: litre
+    factor: 1000
+  - unit: litres
+    factor: 1000
+  - unit: fl oz
+    factor: 29.5735295625
+  - unit: fluid ounce
+    factor: 29.5735295625
+  - unit: fluid ounces
+    factor: 29.5735295625
+  - unit: pint
+    factor: 473.176473
+  - unit: pints
+    factor: 473.176473
+  - unit: quart
+    factor: 946.352946
+  - unit: quarts
+    factor: 946.352946
+  - unit: gallon
+    factor: 3785.411784
+  - unit: gallons
+    factor: 3785.411784

@@ -1,0 +1,248 @@
+# Reason-code registry. Every code a rule can emit is declared here, with the
+# grammar BIN.SUB.SPECIFIC[.QUALIFIER]. Loader cross-check 7 refuses startup if
+# any rule references a code not present here. Adding a new code is a one-line registry edit; removing
+# one when a rule still references it fails the loader.
+version: "0.1.0"
+
+bins:
+  BRAND: "Brand-name fields"
+  CLASS_TYPE: "Class / type designation"
+  ALCOHOL_CONTENT: "Alcohol-content statement"
+  NAME_ADDRESS: "Bottler / packer / importer name and address"
+  NET_CONTENTS: "Net-contents statement"
+  ORIGIN: "Country-of-origin statement (imports)"
+  WARNING: "27 CFR Part 16 GOVERNMENT WARNING"
+  LEGIBILITY: "Legibility / readability"
+  ENGINE: "Engine-internal failure modes"
+  AGE_STATEMENT: "Age statements (spirits-deep)"
+
+codes:
+  # ---- BRAND ----
+  BRAND.PRESENCE.MISSING:
+    description: "Brand name field absent on the label."
+    cfr_anchors: ["27 CFR §4.32(a)(1)", "27 CFR §5.63(a)", "27 CFR §7.63(a)(1)"]
+    severity: reject
+  BRAND.NAME.MISMATCH:
+    description: "Label brand fails fuzzy match against the application brand."
+    cfr_anchors: ["27 CFR §4.33", "27 CFR §5.64", "27 CFR §7.64"]
+    severity: reject
+  BRAND.NAME.NEEDS_REVIEW:
+    description: "Brand match falls in the borderline band — orchestrator should disambiguate."
+    cfr_anchors: ["27 CFR §4.33", "27 CFR §5.64", "27 CFR §7.64"]
+    severity: warn
+
+  # ---- CLASS_TYPE ----
+  CLASS_TYPE.PRESENCE.MISSING:
+    description: "Class / type designation absent."
+    cfr_anchors: ["27 CFR §4.32(a)(2)", "27 CFR §5.63(a)", "27 CFR §7.63(a)(2)"]
+    severity: reject
+  CLASS_TYPE.SOI.NO_MATCH:
+    description: "Spirits class/type does not match a Standard of Identity (Part 5 Subpart I)."
+    cfr_anchors: ["27 CFR §5 Subpart I"]
+    severity: reject
+  CLASS_TYPE.INPUT.UNKNOWN:
+    description: "Beverage class could not be determined from application."
+    cfr_anchors: []
+    severity: reject
+  CLASS_TYPE.MATCH.APPLICATION_LABEL_DISAGREE:
+    description: "Application class disagrees with label-implied class."
+    cfr_anchors: []
+    severity: reject
+  CLASS_TYPE.MATCH.NEEDS_REVIEW:
+    description: "Label designation and application class cannot be lined up against the recognised classes; a reviewer decides."
+    cfr_anchors: []
+    severity: warn
+
+  # ---- ALCOHOL_CONTENT ----
+  ALCOHOL_CONTENT.PRESENCE.MISSING:
+    description: "Alcohol-content statement required but absent."
+    cfr_anchors: ["27 CFR §4.32(b)(1)", "27 CFR §4.36(a)", "27 CFR §5.63(a)", "27 CFR §5.65(a)", "27 CFR §7.63(a)(3)"]
+    severity: reject
+  ALCOHOL_CONTENT.FORMAT.INVALID:
+    description: "Alcohol-content statement format does not satisfy regulation pattern."
+    cfr_anchors: ["27 CFR §4.36(b)(1)", "27 CFR §5.65(b)", "27 CFR §7.65(b)"]
+    severity: reject
+  ALCOHOL_CONTENT.TOLERANCE.OUT_OF_BAND:
+    description: "Labeled vs. actual alcohol content exceeds the regulation tolerance."
+    cfr_anchors: ["27 CFR §4.36(b)(1)", "27 CFR §5.65(c)", "27 CFR §7.65(c)"]
+    severity: reject
+  ALCOHOL_CONTENT.TOLERANCE.CROSSES_CLASS_BOUNDARY:
+    description: "Alcohol-content tolerance, even if numerically valid, crosses a §4.36(c) class boundary."
+    cfr_anchors: ["27 CFR §4.36(c)"]
+    severity: reject
+  ALCOHOL_CONTENT.TOLERANCE.BELOW_HARD_FLOOR:
+    description: "Malt beverage labeled below the §7.65(c) 0.5% hard floor; tolerance does not relax this."
+    cfr_anchors: ["27 CFR §7.65(c)"]
+    severity: reject
+  ALCOHOL_CONTENT.MATCH.APPLICATION_LABEL_DISAGREE:
+    description: "Label alcohol content is not the alcohol content the application declared."
+    cfr_anchors: []
+    severity: reject
+  ALCOHOL_CONTENT.MATCH.NEEDS_REVIEW:
+    description: "Label or application alcohol content yields no single number to compare; a reviewer decides."
+    cfr_anchors: []
+    severity: warn
+
+  # ---- NAME_ADDRESS / NET_CONTENTS ----
+  NAME_ADDRESS.PRESENCE.MISSING:
+    description: "Bottler / packer / importer name and address statement absent."
+    cfr_anchors: ["27 CFR §4.32(a)(3)", "27 CFR §4.35", "27 CFR §5.63(b)(1)", "27 CFR §7.63(a)(4)"]
+    severity: reject
+  NET_CONTENTS.PRESENCE.MISSING:
+    description: "Net-contents statement absent."
+    cfr_anchors: ["27 CFR §4.32(b)(2)", "27 CFR §4.37", "27 CFR §5.63(b)(2)", "27 CFR §5.70", "27 CFR §7.63(a)(5)", "27 CFR §7.70"]
+    severity: reject
+  NAME_ADDRESS.MATCH.NEEDS_REVIEW:
+    description: "Label name and address cannot be lined up with the applicant, its trade names or its city and State; a reviewer decides."
+    cfr_anchors: []
+    severity: warn
+  NET_CONTENTS.MATCH.APPLICATION_LABEL_DISAGREE:
+    description: "Label net contents are not the net contents the application declared."
+    cfr_anchors: []
+    severity: reject
+  NET_CONTENTS.MATCH.NEEDS_REVIEW:
+    description: "Label or application net contents yield no single quantity to compare; a reviewer decides."
+    cfr_anchors: []
+    severity: warn
+
+  # ---- ORIGIN ----
+  ORIGIN.PRESENCE.MISSING:
+    description: "Imported product, and the label carries no country-of-origin statement."
+    cfr_anchors: ["27 CFR §4.35(e)", "27 CFR §5.69", "27 CFR §7.69", "19 CFR §134.45(a)(1)"]
+    severity: reject
+  ORIGIN.MATCH.APPLICATION_LABEL_DISAGREE:
+    description: "Label origin statement does not name the country the application declared."
+    cfr_anchors: []
+    severity: reject
+  ORIGIN.MATCH.NEEDS_REVIEW:
+    description: "Application says the product is imported but names no country; a reviewer decides."
+    cfr_anchors: []
+    severity: warn
+
+  # ---- WARNING ----
+  WARNING.PRESENCE.MISSING:
+    description: "27 CFR §16.21 GOVERNMENT WARNING absent from the label."
+    cfr_anchors: ["27 CFR §16.21"]
+    severity: reject
+  WARNING.VERBATIM.MISMATCH:
+    description: "GOVERNMENT WARNING text does not match the verbatim §16.21 string (after canonicalization)."
+    cfr_anchors: ["27 CFR §16.21"]
+    severity: reject
+  WARNING.STYLE.HEADING_NOT_BOLD_CAPS:
+    description: "Heading is not bold uppercase as required by §16.22(a)(2)."
+    cfr_anchors: ["27 CFR §16.22(a)(2)"]
+    severity: reject
+  WARNING.LEGIBILITY.NO_CONTRAST:
+    description: "Warning is not on a contrasting background as required by §16.22(a)(1)."
+    cfr_anchors: ["27 CFR §16.22(a)(1)"]
+    severity: reject
+  WARNING.LEGIBILITY.LOW_RESOLUTION:
+    description: "Image quality insufficient to verify warning legibility."
+    cfr_anchors: ["27 CFR §16.22(a)(1)"]
+    severity: warn
+  WARNING.LEGIBILITY.GLARE:
+    description: "Specular highlights or overexposed regions in the warning area prevent reliable extraction."
+    cfr_anchors: ["27 CFR §16.21"]
+    severity: warn
+  WARNING.LEGIBILITY.MOTION_BLUR:
+    description: "Motion blur in the warning area exceeds the legibility gate; extraction unreliable."
+    cfr_anchors: ["27 CFR §16.21"]
+    severity: warn
+  WARNING.TYPE_SIZE.UNDER_MIN:
+    description: "Warning text height is under the §16.22(b) minimum for the container size."
+    cfr_anchors: ["27 CFR §16.22(b)"]
+    severity: reject
+  WARNING.TYPE_SIZE.CPI_EXCEEDED:
+    description: "Warning text exceeds maximum characters-per-inch per §16.22(a)(4) decision table."
+    cfr_anchors: ["27 CFR §16.22(a)(4)"]
+    severity: reject
+  WARNING.PLACEMENT.NOT_SEPARATE:
+    description: "Warning is not separate and apart from other label information."
+    cfr_anchors: ["27 CFR §16.21"]
+    severity: reject
+
+  # ---- LEGIBILITY ----
+  LEGIBILITY.FIELD_OF_VISION.SPLIT:
+    description: "Required spirits fields are not in the same field of vision (§5.63(a))."
+    cfr_anchors: ["27 CFR §5.63(a)"]
+    severity: reject
+
+  # ---- AGE_STATEMENT ----
+  AGE_STATEMENT.FLOOR.MISSING:
+    description: "Age statement required by §5.74 missing or below the regulatory floor."
+    cfr_anchors: ["27 CFR §5.74"]
+    severity: reject
+
+  # ---- ENGINE ----
+  ENGINE.INPUT.APPLICATION_MISSING:
+    description: "Application data missing at evaluation time."
+    cfr_anchors: []
+    severity: reject
+  ENGINE.INPUT.LABEL_IMAGE_MISSING:
+    description: "Label image missing at evaluation time."
+    cfr_anchors: []
+    severity: reject
+  ENGINE.RULE.CONFLICT:
+    description: "Two or more rules emit conflicting dispositions for the same field."
+    cfr_anchors: []
+    severity: reject
+  ENGINE.OBSERVATION.AMBIGUOUS:
+    description: "OCR returned multiple plausible candidates with no winner after orchestration."
+    cfr_anchors: []
+    severity: warn
+  ENGINE.RULESET.VERSION_NOT_FOUND:
+    description: "Requested rule-set version is outside the engine-supported range."
+    cfr_anchors: []
+    severity: reject
+  ENGINE.VALIDATOR.EXCEPTION:
+    description: "An uncaught exception was raised inside a validator."
+    cfr_anchors: []
+    severity: reject
+  ENGINE.VALIDATOR.NOT_FOUND:
+    description: "Rule references a validator name not present in VALIDATOR_REGISTRY (a configuration error; loader cross-check 6 normally prevents reaching this branch at runtime)."
+    cfr_anchors: []
+    severity: reject
+  ENGINE.VALIDATOR.TIMEOUT:
+    description: "Per-rule timeout exceeded."
+    cfr_anchors: []
+    severity: warn
+  ENGINE.SLA.TIMEOUT:
+    description: "Whole-evaluation 5 s SLA exhausted before completion."
+    cfr_anchors: []
+    severity: warn
+  ENGINE.MEASUREMENT.MISSING_DPI:
+    description: "Measurement-bearing rule missing required DPI metadata."
+    cfr_anchors: []
+    severity: warn
+  ENGINE.REFERENCE_DATA.UNAVAILABLE:
+    description: "Reference data (e.g., AVA whitelist, decision table) failed to load."
+    cfr_anchors: []
+    severity: reject
+  ENGINE.MODEL.UNAVAILABLE:
+    description: "LLM endpoint unavailable when the orchestrator was invoked."
+    cfr_anchors: []
+    severity: reject
+  ENGINE.EXTRACTION.UNAVAILABLE:
+    description: "Vision extractor raised before producing any FieldObservation (chokepoint routes to needs_review per evaluator P4)."
+    cfr_anchors: []
+    severity: warn
+  ENGINE.RULES.UNAVAILABLE:
+    description: "Rule engine raised before producing any ValidationResult (chokepoint routes to needs_review per evaluator P4)."
+    cfr_anchors: []
+    severity: warn
+  ENGINE.WORKER.UNHANDLED:
+    description: "Batch worker caught an unhandled exception during per-label evaluation; SSE stream-end carries the error class."
+    cfr_anchors: []
+    severity: warn
+  ENGINE.BATCH.CONFLICT:
+    description: "POST /batches received a batch_id already in flight."
+    cfr_anchors: []
+    severity: reject
+  ENGINE.BATCH.NOT_FOUND:
+    description: "Snapshot or stream requested for an unknown batch_id."
+    cfr_anchors: []
+    severity: warn
+  ENGINE.OK.NONE:
+    description: "Sentinel for happy-path log lines that carry the structured reason_code field by convention."
+    cfr_anchors: []
+    severity: warn

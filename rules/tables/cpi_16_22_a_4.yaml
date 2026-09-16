@@ -1,0 +1,13 @@
+# §16.22(a)(4) maximum characters per inch by minimum required type size.
+# Source: 27 CFR §16.22(a)(4) (current eCFR; T.D. ATF-294, 55 FR 5421, Feb. 14, 1990,
+# as amended by T.D. 372, 61 FR 20723, May 8, 1996; T.D. TTB-91, 76 FR 5477, Feb. 1, 2011).
+# This table is normative — no interpolation between rows is authorized by the regulation.
+# Loader populates RuleSet.decision_tables[<key derived from filename stem>].
+interpolation: none
+entries:
+  - min_required_type_height_mm: 1
+    max_characters_per_inch: 40
+  - min_required_type_height_mm: 2
+    max_characters_per_inch: 25
+  - min_required_type_height_mm: 3
+    max_characters_per_inch: 12

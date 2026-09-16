@@ -1,0 +1,252 @@
+rule_pack: malt
+rule_pack_version: "0.1.0"
+rules:
+  - rule_id: malt.brand.present
+    cfr_citation: "27 CFR §7.63(a)(1), §7.64"
+    applies_to_classes: [malt]
+    reason_code: BRAND.PRESENCE.MISSING
+    severity: reject
+    match_policy: exact
+    validator: presence_check
+    evidence_required: [brand]
+    effective_date: "2022-02-09"
+    test_fixtures: [F-MALT-BRAND-PRESENT-01, F-MALT-BRAND-MISSING-01]
+
+  - rule_id: malt.brand.matches_application
+    cfr_citation: "27 CFR §7.64"
+    applies_to_classes: [malt]
+    # The brand is the one element where the label and the application are
+    # expected to carry the same words, so the comparison is on the words
+    # themselves. Case, punctuation, a legal suffix and a leading "The" are
+    # dropped first, which is what makes "STONE'S THROW" and "Stone's Throw"
+    # the same brand. What is left is scored, and a near miss goes to a
+    # reviewer rather than being called a mismatch.
+    reason_code: BRAND.NAME.MISMATCH
+    severity: reject
+    match_policy: fuzzy
+    validator: fuzzy_brand
+    parameters:
+      pass_threshold: 0.92
+      needs_review_threshold: 0.85
+      needs_review_reason_code: BRAND.NAME.NEEDS_REVIEW
+    evidence_required: [brand]
+    effective_date: "2022-02-09"
+    test_fixtures: [F-MALT-BRAND-APP-MATCH-01, F-MALT-BRAND-APP-MISMATCH-01]
+
+  - rule_id: malt.class_type.present
+    cfr_citation: "27 CFR §7.63(a)(2), Subpart I"
+    applies_to_classes: [malt]
+    reason_code: CLASS_TYPE.PRESENCE.MISSING
+    severity: reject
+    match_policy: lookup
+    validator: enumerated_match
+    parameters:
+      # A malt label's designation carries style words around the class —
+      # "INDIA PALE ALE". Same reasoning as spirits.class_type.present.
+      match_mode: contains_designation
+      allowed_values: ["Beer", "Ale", "Lager", "Stout", "Porter", "Pilsner", "IPA", "Malt Liquor"]
+    evidence_required: [class_type]
+    effective_date: "2022-02-09"
+    test_fixtures: [F-MALT-CLASS-PASS-01, F-MALT-CLASS-MISSING-01]
+
+  - rule_id: malt.alcohol.conditional_required
+    cfr_citation: "27 CFR §7.63(a)(3)"
+    applies_to_classes: [malt]
+    reason_code: ALCOHOL_CONTENT.PRESENCE.MISSING
+    severity: reject
+    match_policy: exact
+    validator: conditional_presence
+    parameters:
+      required_when: abv_required
+    evidence_required: [alc_text]
+    effective_date: "2022-02-09"
+    test_fixtures: [F-MALT-ALC-CONDITIONAL-PASS-01, F-MALT-ALC-CONDITIONAL-NA-01]
+
+  - rule_id: malt.alcohol.format
+    cfr_citation: "27 CFR §7.65(b)"
+    applies_to_classes: [malt]
+    reason_code: ALCOHOL_CONTENT.FORMAT.INVALID
+    severity: reject
+    match_policy: regex
+    validator: regex_match
+    parameters:
+      pattern: '^\s*(?:alcohol|alc\.?)\s*[0-9]{1,2}(?:\.[0-9]+)?\s*%?\s*(?:by\s+volume|/\s*vol\.?|vol\.?)\s*$'
+      ignore_case: true
+    evidence_required: [alc_text]
+    effective_date: "2022-02-09"
+    test_fixtures: [F-MALT-ALC-FORMAT-PASS-01, F-MALT-ALC-FORMAT-FAIL-01]
+
+  - rule_id: malt.alcohol.tolerance_band
+    cfr_citation: "27 CFR §7.65(c)"
+    applies_to_classes: [malt]
+    reason_code: ALCOHOL_CONTENT.TOLERANCE.OUT_OF_BAND
+    severity: reject
+    match_policy: tolerance
+    validator: abv_band
+    tolerance:
+      plus_pp: 0.3
+      minus_pp: 0.3
+    evidence_required: [abv]
+    effective_date: "2022-02-09"
+    test_fixtures: [F-MALT-ALC-PASS-01, F-MALT-ALC-FAIL-LOW-01]
+
+  - rule_id: malt.alcohol.floor_05
+    cfr_citation: "27 CFR §7.65(c)"
+    applies_to_classes: [malt]
+    reason_code: ALCOHOL_CONTENT.TOLERANCE.BELOW_HARD_FLOOR
+    severity: reject
+    match_policy: tolerance
+    validator: abv_hard_floor
+    parameters:
+      floor_pct: 0.5
+    evidence_required: [abv]
+    effective_date: "2022-02-09"
+    test_fixtures: [F-MALT-ALC-FLOOR-FAIL-01, F-MALT-ALC-FLOOR-PASS-01]
+
+  - rule_id: malt.name_address.present
+    cfr_citation: "27 CFR §7.63(a)(4)"
+    applies_to_classes: [malt]
+    reason_code: NAME_ADDRESS.PRESENCE.MISSING
+    severity: reject
+    match_policy: exact
+    validator: presence_check
+    evidence_required: [bottler]
+    effective_date: "2022-02-09"
+    test_fixtures: [F-MALT-NAME-PASS-01, F-MALT-NAME-MISSING-01]
+
+  - rule_id: malt.net_contents.present
+    cfr_citation: "27 CFR §7.63(a)(5), §7.70"
+    applies_to_classes: [malt]
+    reason_code: NET_CONTENTS.PRESENCE.MISSING
+    severity: reject
+    match_policy: exact
+    validator: presence_check
+    evidence_required: [net_contents]
+    effective_date: "2022-02-09"
+    test_fixtures: [F-MALT-NET-PASS-01, F-MALT-NET-MISSING-01]
+
+  # ------------------------------------------------------------------
+  # Label against application.
+  #
+  # The rules above ask whether the label carries what the regulations
+  # require. These ask the separate question the product exists for:
+  # whether what the label says is what the application for that label
+  # declared. One rule per element, each named for the element it
+  # compares, so a result can be read without knowing the rule pack.
+  #
+  # An element the application says nothing about produces a result of
+  # "does not apply", never a failure. A difference a reviewer should
+  # look at rather than a rejection carries a warn severity.
+  # ------------------------------------------------------------------
+
+  - rule_id: malt.class_type.matches_application
+    cfr_citation: "27 CFR §7.63(a)(2), Subpart I"
+    applies_to_classes: [malt]
+    reason_code: CLASS_TYPE.MATCH.APPLICATION_LABEL_DISAGREE
+    severity: reject
+    match_policy: lookup
+    validator: designation_match
+    decision_table_ref: malt_designations
+    parameters:
+      # An application for a malt beverage routinely declares the bare
+      # class BEER where the label designates the style it sells as. The
+      # decision table is what makes a label reading "LAGER" agree with
+      # it; without the table the two would be read as different classes.
+      needs_review_reason_code: CLASS_TYPE.MATCH.NEEDS_REVIEW
+      disagreement_reason_code: CLASS_TYPE.MATCH.APPLICATION_LABEL_DISAGREE
+      recognised_classes:
+        - "Beer"
+        - "Ale"
+        - "Lager"
+        - "Stout"
+        - "Porter"
+        - "Pilsner"
+        - "India Pale Ale"
+        - "IPA"
+        - "Malt Liquor"
+        - "Cerveza"
+    evidence_required: [class_type]
+    effective_date: "2022-02-09"
+    test_fixtures: [F-MALT-CLASS-APP-MATCH-01, F-MALT-CLASS-APP-DISAGREE-01]
+
+  - rule_id: malt.alcohol.matches_application
+    cfr_citation: "27 CFR §7.65"
+    applies_to_classes: [malt]
+    # Two declared percentages, compared as numbers and required to be
+    # equal. The tolerance bands elsewhere in this pack compare a label
+    # against the liquid in the bottle, which is a laboratory result; this
+    # compares two documents, which either agree or do not.
+    reason_code: ALCOHOL_CONTENT.MATCH.APPLICATION_LABEL_DISAGREE
+    severity: reject
+    match_policy: exact
+    validator: quantity_match
+    parameters:
+      amount_field: abv_labeled_pct
+      needs_review_reason_code: ALCOHOL_CONTENT.MATCH.NEEDS_REVIEW
+      disagreement_reason_code: ALCOHOL_CONTENT.MATCH.APPLICATION_LABEL_DISAGREE
+    evidence_required: [abv]
+    effective_date: "2022-02-09"
+    test_fixtures: [F-MALT-ALC-APP-MATCH-01, F-MALT-ALC-APP-DISAGREE-01]
+
+  - rule_id: malt.net_contents.matches_application
+    cfr_citation: "27 CFR §7.70"
+    applies_to_classes: [malt]
+    reason_code: NET_CONTENTS.MATCH.APPLICATION_LABEL_DISAGREE
+    severity: reject
+    match_policy: exact
+    validator: quantity_match
+    decision_table_ref: volume_units
+    parameters:
+      # The label states its own unit and the application records
+      # millilitres, so the label's number is converted before the two are
+      # compared. Where the application's declared contents name no single
+      # quantity — a keg collar listing several sizes with one struck
+      # through — there is nothing to compare and a reviewer decides.
+      amount_field: container_volume_ml
+      needs_review_reason_code: NET_CONTENTS.MATCH.NEEDS_REVIEW
+      disagreement_reason_code: NET_CONTENTS.MATCH.APPLICATION_LABEL_DISAGREE
+    evidence_required: [net_contents]
+    effective_date: "2022-02-09"
+    test_fixtures: [F-MALT-NET-APP-MATCH-01, F-MALT-NET-APP-DISAGREE-01]
+
+  - rule_id: malt.name_address.matches_application
+    cfr_citation: "27 CFR §7.66"
+    applies_to_classes: [malt]
+    # This comparison never rejects. The application's entry is a free-text
+    # block carrying the applicant's trading name, its legal name, a street
+    # address and any trade name marked as used on the label; the label
+    # prints one of those names with a city and a State. A name the block
+    # does not carry is not evidence the label is wrong, so the outcome is
+    # a reviewer's. Whether the label carries a name and address at all is
+    # the presence rule above, and that one does reject.
+    reason_code: NAME_ADDRESS.MATCH.NEEDS_REVIEW
+    severity: warn
+    match_policy: normalized
+    validator: name_address_match
+    parameters:
+      lead_in_ends_with: by
+      lead_in_window_words: 8
+      anchor_words: 2
+    evidence_required: [bottler]
+    effective_date: "2022-02-09"
+    test_fixtures: [F-MALT-NAME-APP-MATCH-01, F-MALT-NAME-APP-REVIEW-01]
+
+  - rule_id: malt.origin.matches_application
+    cfr_citation: "27 CFR §7.69, 19 CFR §134.45"
+    applies_to_classes: [malt]
+    # The application answers domestic or imported before it names a place.
+    # Domestic means no country-of-origin statement is required, so the
+    # check does not apply; the place a domestic application names is a
+    # State, which is not what an origin statement carries.
+    reason_code: ORIGIN.PRESENCE.MISSING
+    severity: reject
+    match_policy: normalized
+    validator: origin_match
+    parameters:
+      source_field: source_of_product
+      imported_value: imported
+      needs_review_reason_code: ORIGIN.MATCH.NEEDS_REVIEW
+      disagreement_reason_code: ORIGIN.MATCH.APPLICATION_LABEL_DISAGREE
+    evidence_required: [country_origin]
+    effective_date: "2022-02-09"
+    test_fixtures: [F-MALT-ORIGIN-APP-MATCH-01, F-MALT-ORIGIN-DOMESTIC-NA-01]

@@ -1,0 +1,48 @@
+rule_pack: spirits-deep
+rule_pack_version: "0.1.0"
+rules:
+  - rule_id: spirits.class_type.matches_soi
+    cfr_citation: "27 CFR §5 Subpart I"
+    applies_to_classes: [spirits]
+    reason_code: CLASS_TYPE.SOI.NO_MATCH
+    severity: reject
+    match_policy: lookup
+    validator: enumerated_match
+    parameters:
+      # See spirits.class_type.present: the designation includes the standard
+      # of identity rather than equalling it, and §5.143(b) permits either
+      # spelling of "whisky".
+      match_mode: contains_designation
+      allowed_values:
+        - "Bourbon Whisky"
+        - "Bourbon Whiskey"
+        - "Rye Whisky"
+        - "Rye Whiskey"
+        - "Tennessee Whisky"
+        - "Tennessee Whiskey"
+        - "Scotch Whisky"
+        - "Scotch Whiskey"
+        - "Irish Whisky"
+        - "Irish Whiskey"
+        - "Vodka"
+        - "Gin"
+        - "Tequila"
+        - "Mezcal"
+        - "Rum"
+        - "Brandy"
+    evidence_required: [class_type]
+    effective_date: "2022-02-09"
+    test_fixtures: [F-SD-SOI-PASS-01, F-SD-SOI-FAIL-01]
+
+  - rule_id: spirits.age_statement.floor
+    cfr_citation: "27 CFR §5.74"
+    applies_to_classes: [spirits]
+    reason_code: AGE_STATEMENT.FLOOR.MISSING
+    severity: reject
+    match_policy: exact
+    validator: conditional_presence
+    parameters:
+      required_when: age_required
+    evidence_required: [age_statement]
+    effective_date: "2022-02-09"
+    test_fixtures: [F-SD-AGE-PRESENT-01, F-SD-AGE-MISSING-01]
