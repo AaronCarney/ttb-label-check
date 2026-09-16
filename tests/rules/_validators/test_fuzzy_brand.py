@@ -66,7 +66,7 @@ def test_stage_b_borderline_emits_needs_review() -> None:
             f"outside (0.85, 0.92); retune the input pair or the normalization"
         )
     res = fuzzy_brand(obs, exp, _rule(), make_context())
-    assert res.outcome is Outcome.FAIL
+    assert res.outcome is Outcome.INSUFFICIENT_EVIDENCE
     assert res.reason_code == "BRAND.NAME.NEEDS_REVIEW"
 
 

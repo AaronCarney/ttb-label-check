@@ -92,5 +92,5 @@ def test_borderline_brand_emits_needs_review_code() -> None:
     obs = make_obs(field_id="brand", value=obs_value)
     exp = make_expected(field_id="brand", value=exp_value)
     res = VALIDATOR_REGISTRY["fuzzy_brand"](obs, exp, _rule(), make_context())
-    assert res.outcome is Outcome.FAIL
+    assert res.outcome is Outcome.INSUFFICIENT_EVIDENCE
     assert res.reason_code == "BRAND.NAME.NEEDS_REVIEW"
