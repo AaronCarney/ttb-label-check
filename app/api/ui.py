@@ -276,51 +276,43 @@ async def batches_upload_page(
     )
 
 
-_ACTIVE_CORPUS_PATH = (
-    Path(__file__).resolve().parent.parent.parent / "fixtures" / "_corpus" / "_active.txt"
+# The sample label images ship inside the application, one directory per TTB
+# ID. Serving a sample fetches nothing over the network, so the product works
+# with outbound traffic blocked (PRD C-4) and a clone needs no extra download.
+_SAMPLE_LABELS_DIR = (
+    Path(__file__).resolve().parent.parent.parent / "tests" / "fixtures" / "labels"
 )
-# Sample label images ship inside the application. Nothing is fetched over the
-# network to serve a sample, so the product works with outbound traffic blocked
-# (PRD C-4) and a clone needs no extra download.
-_CORPUS_RAW_BASE = None
+_SAMPLE_FACE = "front.jpg"
 
 
-def _load_active_ttbids() -> list[str]:
-    if not _ACTIVE_CORPUS_PATH.is_file():
+def _load_sample_ttbids() -> list[str]:
+    """TTB IDs of the sample labels installed with the app."""
+    if not _SAMPLE_LABELS_DIR.is_dir():
         return []
-    return [line.strip() for line in _ACTIVE_CORPUS_PATH.read_text().splitlines() if line.strip()]
+    return sorted(
+        d.name for d in _SAMPLE_LABELS_DIR.iterdir() if (d / _SAMPLE_FACE).is_file()
+    )
 
 
-def _read_label_bytes(ttbid_dirname: str) -> bytes | None:
-    """Return the JPEG bytes for one ttbid, preferring local disk (dev /
-    GitHub clone) and falling back to GitHub raw (HF Space deploy)."""
-    local = _ACTIVE_CORPUS_PATH.parent / ttbid_dirname / "label.jpg"
+def _read_label_bytes(ttbid: str) -> bytes | None:
+    """The front-face JPEG for one TTB ID, or None if it is not installed."""
+    local = _SAMPLE_LABELS_DIR / ttbid / _SAMPLE_FACE
     if local.is_file():
         return local.read_bytes()
-    import urllib.error
-    import urllib.request
-    url = f"{_CORPUS_RAW_BASE}/{ttbid_dirname}/label.jpg"
-    try:
-        with urllib.request.urlopen(url, timeout=10) as resp:
-            if resp.status != 200:
-                return None
-            return resp.read()
-    except (urllib.error.URLError, TimeoutError):
-        return None
+    return None
 
 
 @router.get("/batches/sample.zip")
 async def batches_sample_zip(n: int = 10) -> Response:
-    """Stream a zip of N random labels from the active corpus.
+    """Stream a zip of N random sample labels.
 
-    Lets a grader try the bulk pipeline against real CC0 TTB Public COLA
+    Lets a reviewer try the bulk pipeline against real CC0 TTB Public COLA
     Registry labels without needing their own files: download → drop into
     the upload form on /batches → real worker runs through the same code
     path a production caller would hit.
 
-    Image bytes come from local disk if present (dev / GitHub clone) or
-    GitHub raw at request time (HF Space deploy, where the corpus isn't
-    bundled).
+    Every image is read from the copy installed with the app, so the download
+    works with outbound traffic blocked (PRD C-4).
     """
     if n <= 0:
         return Response(
@@ -329,10 +321,10 @@ async def batches_sample_zip(n: int = 10) -> Response:
             media_type="text/plain",
         )
 
-    active = _load_active_ttbids()
-    if not active:
+    available = _load_sample_ttbids()
+    if not available:
         return Response(
-            content=b"active corpus list is empty (fixtures/_corpus/_active.txt missing)",
+            content=b"no sample labels are installed with this build",
             status_code=500,
             media_type="text/plain",
         )
@@ -341,16 +333,16 @@ async def batches_sample_zip(n: int = 10) -> Response:
     import random
     import zipfile
 
-    take = min(n, len(active))
-    chosen = random.sample(active, take)
+    take = min(n, len(available))
+    chosen = random.sample(available, take)
 
     buf = io.BytesIO()
     with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
-        for ttbid_dirname in chosen:
-            body = _read_label_bytes(ttbid_dirname)
+        for ttbid in chosen:
+            body = _read_label_bytes(ttbid)
             if body is None:
                 continue
-            zf.writestr(f"{ttbid_dirname}.jpg", body)
+            zf.writestr(f"{ttbid}-front.jpg", body)
     buf.seek(0)
     return Response(
         content=buf.getvalue(),

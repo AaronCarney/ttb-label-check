@@ -1,6 +1,6 @@
-"""GET /batches/sample.zip — downloadable sample batch from the active corpus.
+"""GET /batches/sample.zip — downloadable sample batch of installed labels.
 
-Deployed-app demo affordance: a grader can pull a sample of real TTB Public
+Deployed-app demo affordance: a reviewer can pull a sample of real TTB Public
 COLA Registry labels (CC0) and upload them through POST /batches/upload to
 exercise the real worker pipeline (no simulation).
 """
@@ -13,6 +13,7 @@ from pathlib import Path
 import pytest
 from fastapi.testclient import TestClient
 
+from app.api import ui
 from app.main import create_app
 
 
@@ -22,9 +23,9 @@ def client() -> TestClient:
 
 
 @pytest.fixture
-def active_ids() -> list[str]:
-    path = Path("fixtures/_corpus/_active.txt")
-    return [l.strip() for l in path.read_text().splitlines() if l.strip()]
+def sample_ids() -> list[str]:
+    """The TTB IDs the endpoint can draw from, read the way the app reads them."""
+    return ui._load_sample_ttbids()
 
 
 def test_sample_zip_default_returns_zip(client: TestClient) -> None:
@@ -49,13 +50,13 @@ def test_sample_zip_n_param_controls_count(client: TestClient) -> None:
     assert len(names) == 5
 
 
-def test_sample_zip_n_capped_at_active_size(client: TestClient, active_ids: list[str]) -> None:
+def test_sample_zip_n_capped_at_sample_size(client: TestClient, sample_ids: list[str]) -> None:
     """Asking for more than we have caps cleanly rather than 4xx."""
-    response = client.get(f"/batches/sample.zip?n={len(active_ids) + 100}")
+    response = client.get(f"/batches/sample.zip?n={len(sample_ids) + 100}")
     assert response.status_code == 200
     z = zipfile.ZipFile(io.BytesIO(response.content))
     names = [n for n in z.namelist() if n.lower().endswith((".jpg", ".jpeg", ".png"))]
-    assert len(names) == len(active_ids)
+    assert len(names) == len(sample_ids)
 
 
 def test_sample_zip_n_zero_is_400(client: TestClient) -> None:
@@ -63,19 +64,18 @@ def test_sample_zip_n_zero_is_400(client: TestClient) -> None:
     assert response.status_code == 400
 
 
-def test_sample_zip_entries_drawn_from_active_set(
-    client: TestClient, active_ids: list[str]
+def test_sample_zip_entries_named_for_an_installed_label(
+    client: TestClient, sample_ids: list[str]
 ) -> None:
-    """Every zipped image's name must reference a ttbid in _active.txt — the
-    pool labels are excluded from the deployed container per .dockerignore."""
-    active_set = set(active_ids)
-    response = client.get(f"/batches/sample.zip?n={len(active_ids)}")
+    """Every zipped image's name carries the TTB ID it came from, so a
+    reviewer can trace a sample back to its COLA registry record."""
+    installed = set(sample_ids)
+    response = client.get(f"/batches/sample.zip?n={len(sample_ids)}")
     z = zipfile.ZipFile(io.BytesIO(response.content))
     for name in z.namelist():
         if not name.lower().endswith((".jpg", ".jpeg", ".png")):
             continue
-        # Filenames embed the ttbid: cola-{ttbid}-...jpg or similar
-        assert any(tid in name for tid in active_set), f"{name!r} references unknown ttbid"
+        assert any(tid in name for tid in installed), f"{name!r} references unknown ttbid"
 
 
 def test_sample_zip_entries_are_valid_images(client: TestClient) -> None:
@@ -93,85 +93,37 @@ def test_sample_zip_entries_are_valid_images(client: TestClient) -> None:
 
 def test_upload_page_links_to_sample_zip(client: TestClient) -> None:
     """The /batches upload form must surface the sample-zip download —
-    otherwise a grader without their own labels can't try the bulk flow."""
+    otherwise a reviewer without their own labels can't try the bulk flow."""
     response = client.get("/batches")
     assert response.status_code == 200
     assert "/batches/sample.zip" in response.text
 
 
-def test_sample_zip_falls_back_to_github_raw_when_disk_missing(
+def test_sample_zip_makes_no_outbound_request(
     client: TestClient, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    """On HF Space the corpus jpgs aren't bundled (binary-blob policy), so
-    the endpoint must fetch from GitHub raw at request time."""
-    from app.api import ui
-
-    fake_jpeg = b"\xff\xd8\xff\xe0fake"
-    fetched_urls: list[str] = []
-
-    def fake_urlopen(url, timeout=10):
-        fetched_urls.append(url)
-
-        class FakeResp:
-            status = 200
-
-            def __enter__(self):
-                return self
-
-            def __exit__(self, *a):
-                pass
-
-            def read(self):
-                return fake_jpeg
-
-        return FakeResp()
-
-    # Disable disk path: point the active-corpus root at a tmp dir with no jpgs
-    import tempfile
-    tmp = Path(tempfile.mkdtemp())
-    active_path = tmp / "_active.txt"
-    active_path.write_text("cola-21210001000878\ncola-22032001001017\n")
-    monkeypatch.setattr(ui, "_ACTIVE_CORPUS_PATH", active_path)
+    """PRD C-4: the product works with outbound traffic blocked. The samples
+    ship in the app, so a download must not reach the network for them."""
     import urllib.request
-    monkeypatch.setattr(urllib.request, "urlopen", fake_urlopen)
+
+    def _blocked(*args, **kwargs):
+        raise AssertionError("sample.zip attempted an outbound request")
+
+    monkeypatch.setattr(urllib.request, "urlopen", _blocked)
+
+    response = client.get("/batches/sample.zip?n=3")
+    assert response.status_code == 200
+    z = zipfile.ZipFile(io.BytesIO(response.content))
+    assert len(z.namelist()) == 3
+
+
+def test_sample_zip_500_when_no_labels_installed(
+    client: TestClient, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """A build with no sample labels says so rather than serving an empty zip
+    that looks like a working download."""
+    monkeypatch.setattr(ui, "_SAMPLE_LABELS_DIR", tmp_path)
 
     response = client.get("/batches/sample.zip?n=2")
-    assert response.status_code == 200
-
-    z = zipfile.ZipFile(io.BytesIO(response.content))
-    names = z.namelist()
-    assert len(names) == 2
-    for n in names:
-        assert z.read(n) == fake_jpeg
-    # Both ttbids fetched from the GitHub raw base
-    assert all(
-        "http" in u
-        for u in fetched_urls
-    )
-
-
-def test_sample_zip_skips_entries_when_both_disk_and_remote_fail(
-    client: TestClient, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    """If a label can't be sourced anywhere (corrupted active list, GH down),
-    skip it — don't 500. Caller still gets a usable zip with whatever we
-    could fetch."""
-    from app.api import ui
-    import tempfile
-    import urllib.error
-
-    tmp = Path(tempfile.mkdtemp())
-    active_path = tmp / "_active.txt"
-    active_path.write_text("cola-99999999999999\n")  # bogus, not on disk
-    monkeypatch.setattr(ui, "_ACTIVE_CORPUS_PATH", active_path)
-
-    def always_fail(url, timeout=10):
-        raise urllib.error.URLError("offline")
-
-    import urllib.request
-    monkeypatch.setattr(urllib.request, "urlopen", always_fail)
-
-    response = client.get("/batches/sample.zip?n=1")
-    assert response.status_code == 200
-    z = zipfile.ZipFile(io.BytesIO(response.content))
-    assert z.namelist() == []  # nothing fetched, but request still succeeds
+    assert response.status_code == 500
+    assert b"no sample labels" in response.content
