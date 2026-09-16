@@ -19,8 +19,8 @@ for one of them is that size converted and rounded to a tenth of a fluid ounce. 
 fluid ounces, and the label prints `12.7 FL. OZ.`. Converting 12.7 back gives 375.58 mL, not 375.
 
 So a comparison that demands equality rejects a compliant label **by construction**: the rounding
-is in the regulation's own published equivalents, and no reader or parser can undo it. Four of the
-nine failures the answer key uncovered are this shape.
+is already in the figure the label prints, and no reader or parser can undo it. Four of the nine
+failures the answer key uncovered are this shape.
 
 ## Why 1%, and not some other number
 
@@ -30,9 +30,10 @@ for wine and §5.203 for distilled spirits, as amended by T.D. TTB-200, effectiv
 in `docs/research/2026-09-15-ttb-regulatory-framework.md`.
 
 **The floor: 0.633%.** Converting every authorized size to fluid ounces and rounding to a tenth —
-the convention the CFR's own published equivalents use, which gives 50 mL as 1.7 FL OZ and 375 mL as
-12.7 FL OZ — the worst case is 0.550%, at 50, 100, 200 and 250 mL. A label may also print the tenth
-*below* the true figure so the customary statement does not overstate the contents: a 250 mL can
+the precision the labels in `tests/fixtures/labels/manifest.json` actually print, which gives 50 mL
+as 1.7 FL OZ and 375 mL as 12.7 FL OZ — the worst case is 0.550%, at 50, 100, 200 and 250 mL. A
+label may also print the tenth *below* the true figure so the customary statement does not
+overstate the contents: a 250 mL can
 prints `8.4 FL OZ`, which is 0.633% low. That is the widest gap a printed customary figure opens on
 an authorized size, so the tolerance must be at least 0.633%.
 
@@ -43,6 +44,17 @@ or above that would let a 720 mL label pass against a 710 mL application. So the
 below 1.216%.
 
 1% sits between the two, and is the round number in that gap.
+
+**Where the tenth comes from.** It is observed, not cited. Every customary figure in the fixture
+corpus is printed to a tenth of a fluid ounce — `12.7 FL. OZ.` on a 375 mL label,
+`11.2 FL. OUNCES` on a 331 mL one, `1 PT. 0.9 FL. OZ. (500 mL)` on a 500 mL one — and each matches
+its metric size converted and rounded to a tenth.
+`docs/research/2026-09-15-ttb-regulatory-framework.md` records that equivalent customary units are
+*permitted* alongside metric (§5.70(a), §7.70(a),
+§4.37) but prescribes no precision for them and publishes no equivalents table; its only rounding
+note, "Liters use decimals to nearest hundredth," is about metric liters. If the regulation does
+fix a precision and it is coarser than a tenth, the floor below rises and 1% may no longer clear
+it — that is the one thing worth re-checking against the regulation itself.
 
 `tests/rules/_validators/test_quantity_match.py` recomputes both bounds from the two size lists and
 asserts the shipped tolerance sits between them, so an edit that loosens it fails with the reason

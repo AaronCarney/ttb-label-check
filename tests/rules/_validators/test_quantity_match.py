@@ -183,8 +183,10 @@ def test_an_unconvertible_unit_goes_to_a_reviewer_not_to_a_failure() -> None:
 
 def _printed_fl_oz(millilitres: float) -> float:
     """The customary figure a label prints for a metric size: converted, and
-    rounded to the tenth of a fluid ounce the CFR's own published equivalents
-    use — 50 mL as 1.7 FL OZ, 375 mL as 12.7 FL OZ."""
+    rounded to a tenth of a fluid ounce, which is the precision every customary
+    figure in the fixture corpus is printed to — 50 mL as 1.7 FL OZ, 375 mL as
+    12.7 FL OZ. Observed from those labels, not read out of the regulation; see
+    docs/decisions/0014."""
     return round(millilitres / _FL_OZ_ML, 1)
 
 
@@ -196,9 +198,9 @@ def test_the_shipped_tolerance_sits_between_its_two_derived_bounds() -> None:
 
     The floor is the widest gap a printed customary figure opens on a size it
     describes. Two conventions are in use and both count: the nearest tenth,
-    which is what the CFR's published equivalents give, and the tenth below it,
-    which a label uses so its customary statement does not overstate the
-    contents.
+    which is what the printed figures in the fixture corpus show, and the tenth
+    below it, which a label uses so its customary statement does not overstate
+    the contents.
 
     The ceiling is the distance from an authorized size to the customary figure
     printed for the nearest size that prints a different one. At or above that,
