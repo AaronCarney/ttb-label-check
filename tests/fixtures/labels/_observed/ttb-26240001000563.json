@@ -1,0 +1,14 @@
+{
+  "brand_name": "OKTOBERFEST",
+  "abv": "6% ALC/VOL",
+  "net_contents": "1 PINT (16 FL OZ)",
+  "warning_text": "GOVERNMENT WARNING: (1) ACCORDING TO THE SURGEON GENERAL, WOMEN SHOULD NOT DRINK ALCOHOLIC BEVERAGES DURING PREGNANCY BECAUSE OF THE RISK OF BIRTH DEFECTS. (2) CONSUMPTION OF ALCOHOLIC BEVERAGES IMPAIRS YOUR ABILITY TO DRIVE A CAR OR OPERATE MACHINERY, AND MAY CAUSE HEALTH PROBLEMS.",
+  "warning_heading_all_caps": true,
+  "notes": [
+    "One flat can wrap, so there is a single image.",
+    "Two names are printed. 'OKTOBERFEST' is the largest text, arched across the top; 'KEYWORTH' over 'BREWING COMPANY' is a framed logo at the right. The reading above is the arched name in the brand position; the brewery logo is the other candidate.",
+    "The bottom banner reads '1 PINT (16 FL OZ)   6% ALC/VOL 19 IBU' on one line. The alcohol wording has no full stops and no space around the slash, and '19 IBU' follows it directly.",
+    "Warning is printed small at the bottom left over the illustration, in capitals, with 'GOVERNMENT WARNING:' on its own line above the body.",
+    "In that small type the marks after 'GENERAL' and after 'MACHINERY' are a single blob a few pixels across; transcribed as commas, which the wording calls for, but the image cannot settle comma against full stop."
+  ]
+}

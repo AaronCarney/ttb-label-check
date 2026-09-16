@@ -1,0 +1,13 @@
+{
+  "brand_name": "FREISINGER",
+  "abv": "4.9% ALC. / VOL.",
+  "net_contents": "11.2 FL. OUNCES",
+  "warning_text": "GOVERNMENT WARNING: (1) ACCORDING TO THE SURGEON GENERAL, WOMEN SHOULD NOT DRINK ALCOHOLIC BEVERAGES DURING PREGNANCY BECAUSE OF THE RISK OF BIRTH DEFECTS. (2) CONSUMPTION OF ALCOHOLIC BEVERAGES IMPAIRS YOUR ABILITY TO DRIVE A CAR OR OPERATE MACHINERY, AND MAY CAUSE HEALTH PROBLEMS.",
+  "warning_heading_all_caps": true,
+  "notes": [
+    "Front brand is set in small capitals with an oversized initial, 'FREISINGER', over 'LAGER'.",
+    "The net-contents unit is spelled out as words: '11.2 FL. OUNCES', not FL. OZ. and not a millilitre figure. There is no metric equivalent anywhere on either image.",
+    "The front's bottom band reads '4.9% ALC. / VOL.' at the left, 'IMPORTED' in the centre and '11.2 FL. OUNCES' at the right; the alcohol wording carries spaces either side of the slash.",
+    "Warning is on the back, body fully justified in capitals; the heading 'GOVERNMENT WARNING' is bold capitals followed by a colon in the same weight as the body."
+  ]
+}

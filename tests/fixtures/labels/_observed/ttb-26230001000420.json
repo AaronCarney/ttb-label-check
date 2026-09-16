@@ -1,0 +1,13 @@
+{
+  "brand_name": "The Bruery",
+  "abv": "ALC. 20.3% BY VOL.",
+  "net_contents": "12.7 FL. OZ.",
+  "warning_text": "GOVERNMENT WARNING: (1) ACCORDING TO THE SURGEON GENERAL, WOMEN SHOULD NOT DRINK ALCOHOLIC BEVERAGES DURING PREGNANCY BECAUSE OF THE RISK OF BIRTH DEFECTS. (2) CONSUMPTION OF ALCOHOLIC BEVERAGES IMPAIRS YOUR ABILITY TO DRIVE A CAR OR OPERATE MACHINERY, AND MAY CAUSE HEALTH PROBLEMS.",
+  "warning_heading_all_caps": true,
+  "notes": [
+    "Front: the brand is a script logo reading 'The Bruery' with a registered-trademark symbol, set in mixed case, not capitals.",
+    "Front carries one line, 'ALC. 20.3% BY VOL. 12.7 FL. OZ.'; the alcohol wording and the net-contents wording are both taken from it. The label prints the fluid-ounce figure only, with no millilitre equivalent.",
+    "Back repeats the alcohol statement beside a glass icon as 'ALC. 20.3%' over 'by vol.' in lower case.",
+    "Warning is on the back, body justified in capitals across nine lines; the heading 'GOVERNMENT WARNING:' is bold capitals."
+  ]
+}

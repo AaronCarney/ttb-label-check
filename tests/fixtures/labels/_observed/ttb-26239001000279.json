@@ -1,0 +1,14 @@
+{
+  "brand_name": "Hop Butcher",
+  "abv": "ALC. 8.0% BY VOL.",
+  "net_contents": "ONE PINT (16 FL OZ)",
+  "warning_text": "GOVERNMENT WARNING: (1) ACCORDING TO THE SURGEON GENERAL, WOMEN SHOULD NOT DRINK ALCOHOLIC BEVERAGES DURING PREGNANCY BECAUSE OF THE RISK OF BIRTH DEFECTS. (2) CONSUMPTION OF ALCOHOLIC BEVERAGES IMPAIRS YOUR ABILITY TO DRIVE A CAR OR OPERATE MACHINERY, AND MAY CAUSE HEALTH PROBLEMS.",
+  "warning_heading_all_caps": true,
+  "notes": [
+    "One flat can wrap, so there is a single image; the mandatory text sits at the left of it.",
+    "The brand is a brush-script logo, 'Hop' over 'Butcher', in mixed case, with a small brushed banner under it reading 'FOR THE WORLD'. The brand reading above is the script itself; the banner words are printed separately beneath.",
+    "The bottom right line reads 'ALC. 8.0% BY VOL. | ONE PINT (16 FL OZ)' with a vertical bar between the two statements.",
+    "Net contents spells the quantity in words, 'ONE PINT', with '(16 FL OZ)' after it and no full stops in FL OZ.",
+    "Warning is set in capitals in a condensed serif; the heading 'GOVERNMENT WARNING:' is larger than the body."
+  ]
+}

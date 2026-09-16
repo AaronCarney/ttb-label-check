@@ -1,0 +1,14 @@
+{
+  "brand_name": "Gallo",
+  "abv": "ALC. BY VOL. 5%",
+  "net_contents": "350 ML / 12 FL OZ",
+  "warning_text": "GOVERNMENT WARNING: (1) According to the Surgeon General, women should not drink alcoholic beverages during pregnancy because of the risk of birth defects. (2) Consumption of alcoholic beverages impairs your ability to drive a car or operate machinery, and may cause health problems.",
+  "warning_heading_all_caps": true,
+  "notes": [
+    "The brand is an italic script logo on a red panel, 'Gallo', with a registered-trademark symbol. Its first letter is a stylised capital whose bowl and tail can be taken for a lower-case q; the word reads Gallo, and the same logo on the back sits above 'CERVEZA LAGER' / 'LAGER BEER'.",
+    "Under the logo the front prints 'LAYER PREMIUM BEER', spelled LAYER, not LAGER.",
+    "The front's curved bottom line reads 'NET CONT. 350 ML / 12 FL OZ'; the reading above drops the 'NET CONT.' prefix and keeps the declaration. Both units are printed, with capital ML and no full stops in FL OZ. 12 FL OZ is about 355 mL, so the two figures the label itself prints are not equal.",
+    "The alcohol statement sits above it as 'ALC. BY VOL. 5%', with the figure after the words.",
+    "Warning is on the back, heading 'GOVERNMENT WARNING:' in bold capitals on its own line, body in sentence case."
+  ]
+}
