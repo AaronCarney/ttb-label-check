@@ -1,0 +1,13 @@
+{
+  "brand_name": "GAIFFE-BRUN",
+  "abv": "ALC. 12,5% BY VOL.",
+  "net_contents": "750 ml",
+  "warning_text": "GOVERNMENT WARNING: (1) According to the Surgeon General, women should not drink alcoholic beverages during pregnancy because of the risk of birth defects. (2) Consumption of alcoholic beverages impairs your ability to drive a car or operate machinery, and may cause health problems.",
+  "warning_heading_all_caps": true,
+  "notes": [
+    "Read from front.jpg (852x1002), the image carrying all mandatory text; back.jpg prints 'CHAMPAGNE GAIFFE-BRUN' and 'EMOTION'.",
+    "The alcohol statement uses a decimal comma: 'ALC. 12,5% BY VOL.'",
+    "Net contents are printed in lower case with a space: '750 ml'.",
+    "Warning body is in sentence case inside a ruled box; the heading 'GOVERNMENT WARNING:' is in capitals and bold."
+  ]
+}

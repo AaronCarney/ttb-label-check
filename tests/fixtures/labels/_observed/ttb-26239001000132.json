@@ -1,0 +1,12 @@
+{
+  "brand_name": "FABIO SIGNORELLI",
+  "abv": "12% ALC. BY VOL.",
+  "net_contents": "750 ML",
+  "warning_text": "GOVERNMENT WARNING: (1) ACCORDING TO THE SURGEON GENERAL, WOMEN SHOULD NOT DRINK ALCOHOLIC BEVERAGES DURING PREGNANCY BECAUSE OF THE RISK OF BIRTH DEFECTS. (2) CONSUMPTION OF ALCOHOLIC BEVERAGES IMPAIRS YOUR ABILITY TO DRIVE A CAR OR OPERATE MACHINERY, AND MAY CAUSE HEALTH PROBLEMS.",
+  "warning_heading_all_caps": true,
+  "notes": [
+    "Read from front.jpg (2516x1594), the image carrying all mandatory text; back.jpg is artwork printing 'Rossastro', 'Quasi Rosso - RST24' and 'FABIO SIGNORELLI'.",
+    "Net contents appear inside a pipe-separated line: 'ROSE WINE | ITALY | PRODUCT OF ITALY | 750 ML'. The alcohol statement is on the line below: '12% ALC. BY VOL. | CONTAINS SULFITES'.",
+    "Warning heading is in capitals and bold; the label sets the colon outside the bold run ('GOVERNMENT WARNING' bold, then ':')."
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "brand_name": "BEAR PATH",
+  "abv": "ALC. 12.8% BY VOL.",
+  "net_contents": "750ML",
+  "warning_text": "GOVERNMENT WARNING: (1) According to the Surgeon General, women should not drink alcoholic beverages during pregnancy because of the risk of birth defects. (2) Consumption of alcoholic beverages impairs your ability to drive a car or operate machinery, and may cause health problems.",
+  "warning_heading_all_caps": true,
+  "notes": [
+    "Brand and alcohol read from front.jpg; net contents, alcohol and the warning read from back.jpg.",
+    "Both images print the alcohol statement identically: 'ALC. 12.8% BY VOL.'",
+    "Warning body is in sentence case; only the heading 'GOVERNMENT WARNING:' is in capitals, and it is set in the same regular weight as the body, not bold."
+  ]
+}

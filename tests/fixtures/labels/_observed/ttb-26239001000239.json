@@ -1,0 +1,14 @@
+{
+  "brand_name": "DOMAINE DU GRAND TINEL",
+  "abv": "ALC. 14 % BY VOL.",
+  "net_contents": "NET CONTENTS 750 ML",
+  "warning_text": "GOVERNMENT WARNING : (1) ACCORDING TO THE SURGEON GENERAL, WOMEN SHOULD NOT DRINK ALCOHOLIC BEVERAGES DURING PREGNANCY BECAUSE OF THE RISK OF BIRTH DEFECTS. (2) CONSUMPTION OF ALCOHOLIC BEVERAGES IMPAIRS YOUR ABILITY TO DRIVE A CAR OR OPERATE MACHINERY, AND MAY CAUSE HEALTH PROBLEMS.",
+  "warning_heading_all_caps": true,
+  "notes": [
+    "Read from front.jpg (483x632), the image carrying all mandatory text; enlarged 3x. back.jpg is the decorative label, printing the brand in upper and lower case as 'Domaine du Grand Tinel'.",
+    "The net contents statement is printed with its prefix, 'NET CONTENTS 750 ML', on its own line; the quantity and unit as printed are '750 ML'.",
+    "The alcohol statement has a space before the per-cent sign: 'ALC. 14 % BY VOL.'",
+    "The warning heading has a space before its colon: 'GOVERNMENT WARNING :'. warning_text keeps that space.",
+    "Warning heading is in capitals, in the same weight as the body."
+  ]
+}

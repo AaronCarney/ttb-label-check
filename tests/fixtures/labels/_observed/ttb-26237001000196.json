@@ -1,0 +1,14 @@
+{
+  "brand_name": "MARK WEST.",
+  "abv": "ALC. 14.5% BY VOLUME",
+  "net_contents": "750mL",
+  "warning_text": "GOVERNMENT WARNING: (1) ACCORDING TO THE SURGEON GENERAL, WOMEN SHOULD NOT DRINK ALCOHOLIC BEVERAGES DURING PREGNANCY BECAUSE OF THE RISK OF BIRTH DEFECTS. (2) CONSUMPTION OF ALCOHOLIC BEVERAGES IMPAIRS YOUR ABILITY TO DRIVE A CAR OR OPERATE MACHINERY, AND MAY CAUSE HEALTH PROBLEMS.",
+  "warning_heading_all_caps": true,
+  "notes": [
+    "Images are small (front 284x222, back 505x463); both enlarged 4x to read. Warning, alcohol and net contents are on back.jpg.",
+    "The brand logotype carries a trailing full stop, printed 'MARK WEST.' on both images.",
+    "The label breaks CONSUMPTION across a line as 'CON-' / 'SUMPTION'; warning_text records the unhyphenated word, per the manifest's warning_exact rule that a hyphen splitting a word at a line end is ignored.",
+    "Letter spacing inside the warning is irregular, with wide gaps between some words ('GOVERNMENT   WARNING:', 'NOT  D R I N K'); warning_text records single spaces.",
+    "Warning heading is in capitals but in the same weight as the warning body."
+  ]
+}

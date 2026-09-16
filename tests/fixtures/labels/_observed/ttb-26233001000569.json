@@ -1,0 +1,13 @@
+{
+  "brand_name": "Portalupi",
+  "abv": "ALC 14.0% BY VOLUME",
+  "net_contents": "750ML",
+  "warning_text": "GOVERNMENT WARNING: (1) ACCORDING TO THE SURGEON GENERAL, WOMEN SHOULD NOT DRINK ALCOHOLIC BEVERAGES DURING PREGNANCY BECAUSE OF THE RISK OF BIRTH DEFECTS. (2) CONSUMPTION OF ALCOHOLIC BEVERAGES IMPAIRS YOUR ABILITY TO DRIVE A CAR OR OPERATE MACHINERY, AND MAY CAUSE HEALTH PROBLEMS.",
+  "warning_heading_all_caps": true,
+  "notes": [
+    "Read from back.jpg (371x397, light text on black); enlarged 3x to read.",
+    "Front prints the brand as 'Portalupi' in a serif display face; the back heads the panel 'Portalupi Wines'.",
+    "Alcohol and net contents share one line: '750ML ALC 14.0% BY VOLUME'.",
+    "Warning heading 'GOVERNMENT WARNING:' is in capitals and set bolder than the body."
+  ]
+}
