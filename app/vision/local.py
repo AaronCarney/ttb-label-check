@@ -27,6 +27,7 @@ import asyncio
 import hashlib
 import json
 import logging
+import os
 import re
 import threading
 import time
@@ -45,7 +46,7 @@ from app.schemas.expected import BeverageClass
 from app.schemas.extracted import Evidence, EvidenceSource, FieldObservation, MatchKind
 from app.schemas.label import Label
 from app.vision import quality
-from app.vision.heading_measure import measure_heading_bold
+from app.vision.heading_measure import HeadingMeasurement, measure_heading_bold_image
 
 _logger = logging.getLogger("app.vision.local")
 
@@ -115,6 +116,103 @@ class _Box:
         return (int(self.x0), int(self.y0), int(self.x1), int(self.y1))
 
 
+@dataclass(frozen=True)
+class _Reading:
+    """Everything the engine and the pixels gave back, before any parsing.
+
+    This is the seam the frozen recordings sit on. Everything above it needs an
+    image, an OCR engine and a second of CPU; everything below it — `_parse` and
+    the seven field extractors — is a pure function of what is in here. Freezing
+    one of these turns the parsing layer into something a test can drive in
+    milliseconds with no model, no image and no network.
+
+    `warning_boxes` is a separate list because the warning is not always read
+    from the upright frame: a label photographed on its side is tried at 90° and
+    270°, and the frame that finds the heading is the frame the statement is read
+    from. A recording that kept only the upright pass would lose it.
+    """
+
+    boxes: list[_Box]
+    warning_boxes: list[_Box]
+    rotation: int
+    heading_measurement: HeadingMeasurement | None
+    frame_size: tuple[int, int]
+
+
+FROZEN_SCHEMA_VERSION = 1
+
+
+def freeze_reading(reading: _Reading) -> dict:
+    """One reading as plain JSON-safe data."""
+    def box(b: _Box) -> dict:
+        return {
+            "box": [round(b.x0, 2), round(b.y0, 2), round(b.x1, 2), round(b.y1, 2)],
+            "text": b.text,
+            "score": round(b.score, 4),
+        }
+
+    measurement = reading.heading_measurement
+    return {
+        "schema_version": FROZEN_SCHEMA_VERSION,
+        "frame_size": list(reading.frame_size),
+        "rotation_deg": reading.rotation,
+        "boxes": [box(b) for b in reading.boxes],
+        # Written out even when it is the same list as `boxes`, so a reader of
+        # the file never has to know the rule that decides when it differs.
+        "warning_boxes": [box(b) for b in reading.warning_boxes],
+        "heading_measurement": None if measurement is None else {
+            "is_bold": measurement.is_bold,
+            "mean_stroke_width": round(measurement.mean_stroke_width, 4),
+            "mean_character_height": round(measurement.mean_character_height, 4),
+            "width_height_ratio": round(measurement.width_height_ratio, 4),
+            "confident": measurement.confident,
+        },
+    }
+
+
+def thaw_reading(data: dict) -> _Reading:
+    """A frozen reading back into the objects `_parse` takes."""
+    if data.get("schema_version") != FROZEN_SCHEMA_VERSION:
+        raise ValueError(
+            f"frozen reading schema {data.get('schema_version')!r}, "
+            f"expected {FROZEN_SCHEMA_VERSION}"
+        )
+
+    def box(raw: dict) -> _Box:
+        x0, y0, x1, y1 = raw["box"]
+        return _Box(x0=x0, y0=y0, x1=x1, y1=y1, text=raw["text"], score=raw["score"])
+
+    measurement = data["heading_measurement"]
+    return _Reading(
+        boxes=[box(b) for b in data["boxes"]],
+        warning_boxes=[box(b) for b in data["warning_boxes"]],
+        rotation=int(data["rotation_deg"]),
+        heading_measurement=None if measurement is None else HeadingMeasurement(
+            is_bold=measurement["is_bold"],
+            mean_stroke_width=measurement["mean_stroke_width"],
+            mean_character_height=measurement["mean_character_height"],
+            width_height_ratio=measurement["width_height_ratio"],
+            confident=measurement["confident"],
+        ),
+        frame_size=tuple(data["frame_size"]),
+    )
+
+
+def parse_reading(reading: _Reading) -> dict[str, dict]:
+    """The seven field payloads a reading produces, keyed by field.
+
+    The production path itself, minus the pixels: `extract` reports exactly
+    these payloads. It is what the replay suite drives and what scores a frozen
+    recording.
+    """
+    return {field: payload for field, (payload, _bbox, _text) in _parse(
+        boxes=reading.boxes,
+        warning_boxes=reading.warning_boxes,
+        rotation=reading.rotation,
+        heading_measurement=reading.heading_measurement,
+    ).items()}
+
+
 def _fold(text: str) -> str:
     """One string reduced for matching only: accents dropped, case folded.
 
@@ -147,6 +245,7 @@ class LocalVisionExtractor:
         self._settings = settings
         self._ring = ring_buffer
         self._engine = None
+        self.last_reading: _Reading | None = None
         # One reader serves the whole process (``app/deps.py``), so these guard
         # against callers in different requests, and the requests run in
         # different event loops across a process's life. Both locks are
@@ -158,11 +257,64 @@ class LocalVisionExtractor:
 
     # -- lifecycle ---------------------------------------------------------
 
+    def _thread_cap(self) -> int:
+        """How many CPU threads this reader may use, inside the window the
+        engine will actually accept.
+
+        rapidocr applies a thread setting only when ``1 <= n <= os.cpu_count()``
+        (``rapidocr/inference_engine/onnxruntime/main.py``). A value outside that
+        window is dropped with no error and no log line, and the engine then
+        takes every core on the machine — the failure this cap exists to
+        prevent. So the configured number is clamped into the window here
+        rather than passed through and silently ignored.
+        """
+        available = os.cpu_count() or 1
+        return max(1, min(int(self._settings.ocr_num_threads), available))
+
     def _load(self) -> object:
-        """Build the engine. Blocking: the models are read off disk."""
+        """Build the engine, held to its thread cap. Blocking: the models are
+        read off disk.
+
+        Three libraries decide how much of the machine one read lights up, and
+        capping one leaves the others wide:
+
+        * **onnxruntime** runs the three models. Its two thread counts are set
+          at construction, which is the only opportunity — all three
+          ``InferenceSession`` objects are built before ``RapidOCR.__init__``
+          returns. It links no OpenMP, so ``OMP_NUM_THREADS`` governs nothing
+          here however plausible it looks.
+        * **OpenCV** resizes every image on the way in, and reads
+          ``setNumThreads`` rather than any environment variable. Left alone it
+          runs one thread per core.
+        * **OpenBLAS**, underneath OpenCV and NumPy, reads ``OPENBLAS_NUM_THREADS``
+          when the library loads, which is before any code here runs — this
+          module imports NumPy and pulls in OpenCV at import time. So that one
+          cannot be set from here at all: it belongs in the process environment,
+          and the container image is where the deployed product sets it.
+        """
+        threads = self._thread_cap()
+
+        import cv2
+
+        cv2.setNumThreads(threads)
+
         from rapidocr import RapidOCR
 
-        return RapidOCR()
+        engine = RapidOCR(
+            params={
+                "EngineConfig.onnxruntime.intra_op_num_threads": threads,
+                "EngineConfig.onnxruntime.inter_op_num_threads": threads,
+            }
+        )
+        _logger.info(
+            "ocr_engine_loaded",
+            extra={
+                "requested_threads": self._settings.ocr_num_threads,
+                "effective_threads": threads,
+                "cv2_threads": cv2.getNumThreads(),
+            },
+        )
+        return engine
 
     async def ensure_loaded(self) -> None:
         """Load the models before a read rather than during one.
@@ -289,11 +441,12 @@ class LocalVisionExtractor:
         with self._read_lock:
             return self._read(image_bytes)
 
-    def _read(self, image_bytes: bytes) -> tuple[dict, dict]:
-        """OCR one image and cut its text into the seven fields.
+    def look(self, image_bytes: bytes) -> _Reading:
+        """Everything one image gives the engine, before any parsing.
 
-        Returns the per-field payloads and a small record of how the read went,
-        which the audit trail carries.
+        Blocking, and the expensive half of a read: the detector runs here, up
+        to three times on a label photographed on its side. Separated from the
+        parsing so a reading can be frozen and replayed — see `_Reading`.
         """
         image = Image.open(BytesIO(image_bytes)).convert("RGB")
         if max(image.size) > MAX_EDGE_PX:
@@ -306,31 +459,64 @@ class LocalVisionExtractor:
         warning_boxes = boxes
         rotation = 0
         warning_image = image
-        if not _find_heading(boxes):
+        found = _find_heading(boxes)
+        if found is None:
             for angle in (90, 270):
                 rotated = image.rotate(angle, expand=True)
                 candidate = self._boxes(rotated)
-                if _find_heading(candidate):
+                candidate_heading = _find_heading(candidate)
+                if candidate_heading is not None:
                     warning_boxes, rotation, warning_image = candidate, angle, rotated
+                    found = candidate_heading
                     break
 
-        rotated_bytes = image_bytes
-        if rotation:
-            buffer = BytesIO()
-            warning_image.save(buffer, format="PNG")
-            rotated_bytes = buffer.getvalue()
+        # The heading's boldness is measured here rather than inside `_parse`,
+        # for two reasons that pull the same way. It is the one step of the
+        # reading that needs pixels, so taking it here leaves `_parse` a pure
+        # function of the boxes — testable against a frozen reading with no
+        # image, no model and no network. And it is measured on `warning_image`,
+        # the frame the boxes were actually computed from: the bbox is in that
+        # frame's pixel space, and the measurement does not rescale, so handing
+        # it the original full-size image would crop the wrong part of a label
+        # that was downscaled on the way in and report a real stroke width about
+        # the wrong pixels.
+        heading_measurement = (
+            measure_heading_bold_image(warning_image, found[0].as_bbox())
+            if found is not None
+            else None
+        )
 
-        payloads = _parse(
+        return _Reading(
             boxes=boxes,
             warning_boxes=warning_boxes,
-            warning_image_bytes=rotated_bytes,
             rotation=rotation,
+            heading_measurement=heading_measurement,
+            frame_size=image.size,
+        )
+
+    def _read(self, image_bytes: bytes) -> tuple[dict, dict]:
+        """OCR one image and cut its text into the seven fields.
+
+        Returns the per-field payloads and a small record of how the read went,
+        which the audit trail carries.
+        """
+        reading = self.look(image_bytes)
+        # Kept so the pass that reads a label can also record what it saw,
+        # rather than a recording costing a second pass over the same image.
+        # Reads are serialised on `_read_lock`, so this is the reading of the
+        # call that has just returned. Nothing in the app reads it.
+        self.last_reading = reading
+        payloads = _parse(
+            boxes=reading.boxes,
+            warning_boxes=reading.warning_boxes,
+            rotation=reading.rotation,
+            heading_measurement=reading.heading_measurement,
         )
         meta = {
             "reader": "local",
             "engine": "rapidocr",
-            "rotation_deg": rotation,
-            "boxes_found": len(boxes),
+            "rotation_deg": reading.rotation,
+            "boxes_found": len(reading.boxes),
         }
         return payloads, meta
 
@@ -551,10 +737,15 @@ def _parse(
     *,
     boxes: list[_Box],
     warning_boxes: list[_Box],
-    warning_image_bytes: bytes,
     rotation: int,
+    heading_measurement: HeadingMeasurement | None = None,
 ) -> dict[str, tuple[dict, tuple[int, int, int, int] | None, str | None]]:
-    """Every field's payload, its box and the text it was read from."""
+    """Every field's payload, its box and the text it was read from.
+
+    Pure: it reads the boxes and nothing else. `heading_measurement` is the one
+    reading that needs the image itself, and `_read` takes it before calling
+    here, so a reading frozen as boxes can be re-parsed with no image at all.
+    """
     out: dict[str, tuple[dict, tuple[int, int, int, int] | None, str | None]] = {}
 
     # -- the government warning ------------------------------------------
@@ -571,7 +762,9 @@ def _parse(
     else:
         text, heading_text, heading_box, block_boxes = block
         letters = [c for c in heading_text if c.isalpha()]
-        measurement = measure_heading_bold(warning_image_bytes, heading_box.as_bbox())
+        measurement = heading_measurement or HeadingMeasurement(
+            False, 0.0, 0.0, 0.0, confident=False
+        )
         factor = _ROTATED_FRAME_PENALTY if rotation else 1.0
         payload = {
             "text": text,

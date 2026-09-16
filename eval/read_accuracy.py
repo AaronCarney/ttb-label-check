@@ -60,6 +60,7 @@ from app.config import Settings
 from app.rules._validators._helpers import normalize_words, word_run_present
 from app.rules.units import UnitTable, millilitres, shipped_table
 from app.schemas.label import Label
+from app.vision.local import freeze_reading, parse_reading, thaw_reading
 
 LABELS_ROOT = Path("tests/fixtures/labels")
 WARNING_ASSET = Path("assets/warnings/govt_warning_16_21.txt")
@@ -170,8 +171,60 @@ def _has_reading(payload: dict | None) -> bool:
     )
 
 
-async def _read_faces(reader, entry: dict) -> tuple[dict[str, dict], float]:
-    """Read every face of one label; return the merged payloads and the seconds.
+def _recording_path(freeze_dir: Path, relative: str) -> Path:
+    """Where one image's frozen reading lives, mirroring the corpus layout."""
+    return (freeze_dir / relative).with_suffix(".json")
+
+
+async def _read_one_face(
+    reader, entry: dict, face: str, relative: str, freeze_dir: Path | None
+) -> tuple[dict[str, dict], bool]:
+    """One face's payloads, and whether they came off disk rather than the reader.
+
+    With `--freeze`, an image whose recording already exists is not read again:
+    the recording is thawed and parsed, which is the same parsing the reader
+    does and costs no CPU. That is what makes a corpus pass restartable — stop
+    it after any image and the next run picks up where it left off — and it is
+    also why two labels sharing a face read it once.
+    """
+    path = LABELS_ROOT / relative
+    if freeze_dir is not None:
+        recording = _recording_path(freeze_dir, relative)
+        if recording.exists():
+            return parse_reading(thaw_reading(json.loads(recording.read_text()))), True
+
+    label = Label(
+        label_id=f"{entry['id']}-{face}",
+        batch_id="read-accuracy",
+        image_bytes=path.read_bytes(),
+        content_type="image/jpeg" if path.suffix.lower() in (".jpg", ".jpeg") else "image/png",
+        face_tag="front" if face == "front" else "back",
+    )
+    # Cleared first so a recording is never written from the previous image:
+    # a label the quality gate turns away never reaches the engine and produces
+    # no reading at all.
+    setattr(reader, "last_reading", None)
+    payloads: dict[str, dict] = {}
+    for observation in await reader.extract(label):
+        if isinstance(observation.observed_value, dict):
+            payloads[observation.field_id] = observation.observed_value
+
+    if freeze_dir is not None:
+        reading = getattr(reader, "last_reading", None)
+        if reading is not None:
+            recording = _recording_path(freeze_dir, relative)
+            recording.parent.mkdir(parents=True, exist_ok=True)
+            recording.write_text(
+                json.dumps({"image": relative, **freeze_reading(reading)}, indent=1)
+            )
+    return payloads, False
+
+
+async def _read_faces(
+    reader, entry: dict, freeze_dir: Path | None = None
+) -> tuple[dict[str, dict], float, int]:
+    """Read every face of one label; return the merged payloads, the seconds and
+    how many of its faces came from a recording rather than from the reader.
 
     A label's elements are spread over its faces, and the front carries the
     ones the regulations put in the same field of vision, so the faces are read
@@ -180,33 +233,27 @@ async def _read_faces(reader, entry: dict) -> tuple[dict[str, dict], float]:
     """
     merged: dict[str, dict] = {}
     started = time.perf_counter()
+    replayed = 0
     faces = sorted(
         entry["images"].items(),
         key=lambda kv: ("front", "back", "neck", "side").index(kv[0])
         if kv[0] in ("front", "back", "neck", "side") else 9,
     )
     for face, relative in faces:
-        path = LABELS_ROOT / relative
-        if not path.exists():
+        if not (LABELS_ROOT / relative).exists():
             continue
-        label = Label(
-            label_id=f"{entry['id']}-{face}",
-            batch_id="read-accuracy",
-            image_bytes=path.read_bytes(),
-            content_type="image/jpeg" if path.suffix.lower() in (".jpg", ".jpeg") else "image/png",
-            face_tag="front" if face == "front" else "back",
+        payloads, from_recording = await _read_one_face(
+            reader, entry, face, relative, freeze_dir
         )
-        for observation in await reader.extract(label):
-            payload = observation.observed_value
-            if not isinstance(payload, dict):
-                continue
-            if _has_reading(merged.get(observation.field_id)):
+        replayed += int(from_recording)
+        for field_id, payload in payloads.items():
+            if _has_reading(merged.get(field_id)):
                 continue
             if _has_reading(payload):
-                merged[observation.field_id] = payload
+                merged[field_id] = payload
             else:
-                merged.setdefault(observation.field_id, payload)
-    return merged, time.perf_counter() - started
+                merged.setdefault(field_id, payload)
+    return merged, time.perf_counter() - started, replayed
 
 
 def _score(entry: dict, read: dict[str, dict], warning_text: str) -> dict[str, bool | None]:
@@ -296,7 +343,9 @@ def _score(entry: dict, read: dict[str, dict], warning_text: str) -> dict[str, b
     return got
 
 
-def _summarize(rows: list[dict], seconds: list[float], reader: str) -> None:
+def _summarize(
+    rows: list[dict], seconds: list[float], reader: str, replayed: int = 0, read: int = 0
+) -> None:
     """Print the scoreboard for one run.
 
     Its own function so it can be driven without a reader, an image or a model:
@@ -306,6 +355,12 @@ def _summarize(rows: list[dict], seconds: list[float], reader: str) -> None:
     """
     total = len(rows)
     print(f"\nreader: {reader}    labels: {total}\n")
+    if replayed or read:
+        # Where the readings came from, because the denominator is the thing a
+        # reader of this scoreboard can most easily get wrong. A replayed face
+        # is this same reader's own output over the same image, recorded on an
+        # earlier run; it is not a stub and it is not a second reader.
+        print(f"faces read now: {read}    faces replayed from recordings: {replayed}\n")
     print(f"{'check':<22} {'correct of scoreable':>20}")
     print("-" * 44)
     for check in CHECKS:
@@ -333,25 +388,65 @@ async def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--reader", choices=("local", "cloud"), default="local")
     parser.add_argument("--limit", type=int, default=0, help="score the first N labels only")
+    parser.add_argument(
+        "--only",
+        default="",
+        help=(
+            "walk these manifest ids instead of every real label, comma separated. "
+            "Which labels are worth reading first is a question of what they can "
+            "prove, not of where they sit in the file, and --limit can only take "
+            "the head of the list. Variants may be named here: they are read and "
+            "recorded, and still not scored."
+        ),
+    )
+    parser.add_argument(
+        "--freeze",
+        type=Path,
+        default=None,
+        help=(
+            "record each image's reading here as JSON, and replay an image whose "
+            "recording already exists instead of reading it again. Makes a corpus "
+            "pass restartable and gives the replay suite its fixtures."
+        ),
+    )
     parser.add_argument("--json", type=Path, default=None, help="also write the per-label results here")
     args = parser.parse_args()
 
     manifest = json.loads((LABELS_ROOT / "manifest.json").read_text())
     warning_text = WARNING_ASSET.read_text()
-    entries = [e for e in manifest["labels"] if e["kind"] == "real"]
+
+    if args.only:
+        wanted = [name.strip() for name in args.only.split(",") if name.strip()]
+        by_id = {e["id"]: e for e in manifest["labels"]}
+        missing = [name for name in wanted if name not in by_id]
+        if missing:
+            raise SystemExit(f"--only names labels the manifest does not carry: {', '.join(missing)}")
+        entries = [by_id[name] for name in wanted]
+    else:
+        entries = [e for e in manifest["labels"] if e["kind"] == "real"]
     if args.limit:
         entries = entries[: args.limit]
+
+    if args.freeze is not None and args.reader != "local":
+        raise SystemExit("--freeze records the local reader's own boxes; it has nothing to record for --reader cloud.")
 
     reader = _build_reader(args.reader)
     await reader.ensure_loaded()
 
     rows, seconds = [], []
+    faces_replayed = faces_read = 0
     for entry in entries:
-        read, elapsed = await _read_faces(reader, entry)
+        read, elapsed, replayed = await _read_faces(reader, entry, args.freeze)
+        faces_replayed += replayed
+        faces_read += len(entry["images"]) - replayed
+        # A variant is a damaged copy of a real label: it exercises the rules,
+        # not the reader, so it is recorded but never scored.
+        if entry["kind"] != "real":
+            continue
         seconds.append(elapsed)
         rows.append({"id": entry["id"], "seconds": round(elapsed, 2), **_score(entry, read, warning_text)})
 
-    _summarize(rows, seconds, args.reader)
+    _summarize(rows, seconds, args.reader, replayed=faces_replayed, read=faces_read)
     if args.json:
         args.json.write_text(json.dumps({"reader": args.reader, "labels": rows}, indent=1))
         print(f"\nper-label results written to {args.json}")

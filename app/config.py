@@ -47,6 +47,12 @@ class Settings(BaseSettings):
     # Batch lookahead window.
     lookahead_k: int = Field(default=3, ge=1, alias="LOOKAHEAD_K")
 
+    # How many CPU threads the local OCR reader is allowed. The default is the
+    # deploy target's core count — Hugging Face Spaces CPU Basic is 2 vCPU
+    # (decision 0023) — so a developer's machine reads a label the way the
+    # deployed product does instead of taking every core it can find.
+    ocr_num_threads: int = Field(default=2, ge=1, alias="OCR_NUM_THREADS")
+
     # Dev-only routes. Empty string and unset both coerce to False.
     dev_mode: bool = Field(default=False, alias="DEV_MODE")
 

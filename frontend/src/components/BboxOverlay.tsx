@@ -3,6 +3,12 @@ import { cn } from "../lib/cn";
 
 export interface BboxItem {
   id: string;
+  /**
+   * The box as the reader reports it: `[x0, y0, x1, y1]`, two opposite
+   * corners in image pixels — not `[x, y, width, height]`. Both backends emit
+   * this shape (`_Box.as_bbox()` in `app/vision/local.py`), so it is what the
+   * envelope carries and what this component has to draw.
+   */
   bbox: [number, number, number, number];
   label: string;
 }
@@ -56,7 +62,9 @@ export function BboxOverlay({
         className="absolute inset-0 h-full w-full"
       >
         {bboxes.map(({ id, bbox, label }) => {
-          const [x, y, w, h] = bbox;
+          const [x0, y0, x1, y1] = bbox;
+          const w = x1 - x0;
+          const h = y1 - y0;
           const isPressed = pressed.has(id);
           return (
             <g
@@ -75,8 +83,8 @@ export function BboxOverlay({
               className="cursor-pointer outline-none focus-visible:[outline:3px_solid_hsl(var(--ring))]"
             >
               <rect
-                x={x}
-                y={y}
+                x={x0}
+                y={y0}
                 width={w}
                 height={h}
                 fill={isPressed ? "hsl(var(--uswds-primary)/0.18)" : "transparent"}

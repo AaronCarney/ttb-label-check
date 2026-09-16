@@ -59,16 +59,41 @@ def measure_heading_bold(
     image_bytes: bytes,
     bbox: tuple[int, int, int, int] | None,
 ) -> HeadingMeasurement:
-    """Run the SWT-style measurement on the heading region.
+    """Run the SWT-style measurement on the heading region of encoded bytes.
 
     `bbox` is `(x0, y0, x1, y1)` in pixel coordinates produced by the layout
     call. It is the heading's own region, and there is no substitute for it:
     with no usable bbox the measurement is not taken, and the result reports
     `confident=False` so the caller knows the boldness was never measured.
+
+    **The bbox and the image must be in the same pixel space.** Nothing here
+    rescales: a bbox measured on a downscaled copy, applied to the original,
+    crops the wrong part of the label and reports a real stroke width about the
+    wrong pixels. A caller that already holds the image the bbox came from
+    should pass it to `measure_heading_bold_image` instead of re-encoding it.
     """
     try:
-        full = Image.open(BytesIO(image_bytes)).convert("L")
+        full = Image.open(BytesIO(image_bytes))
     except Exception:  # noqa: BLE001 — defensive: malformed PNG
+        return HeadingMeasurement(False, 0.0, 0.0, 0.0, confident=False)
+
+    return measure_heading_bold_image(full, bbox)
+
+
+def measure_heading_bold_image(
+    image: "Image.Image",
+    bbox: tuple[int, int, int, int] | None,
+) -> HeadingMeasurement:
+    """The same measurement over an image already in memory.
+
+    The reader computes its boxes on a downscaled copy of the label, so this is
+    the entry point that keeps the measurement in the pixel space the bbox was
+    measured in. Encoding that copy back to bytes only to decode it again would
+    cost a PNG round trip per read and buy nothing.
+    """
+    try:
+        full = image.convert("L")
+    except Exception:  # noqa: BLE001 — defensive: an unreadable frame
         return HeadingMeasurement(False, 0.0, 0.0, 0.0, confident=False)
 
     crop = _resolve_crop(full, bbox)

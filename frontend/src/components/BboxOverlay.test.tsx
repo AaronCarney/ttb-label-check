@@ -4,9 +4,10 @@ import { axe } from "vitest-axe";
 import { renderWithProviders } from "../test/render";
 import { BboxOverlay } from "./BboxOverlay";
 
+// Two corners each, `[x0, y0, x1, y1]`, which is what the reader emits.
 const _bboxes = [
   { id: "a", bbox: [10, 10, 50, 30] as [number, number, number, number], label: "Brand" },
-  { id: "b", bbox: [70, 80, 40, 20] as [number, number, number, number], label: "ABV" },
+  { id: "b", bbox: [70, 80, 110, 100] as [number, number, number, number], label: "ABV" },
 ];
 
 describe("BboxOverlay", () => {
@@ -54,6 +55,25 @@ describe("BboxOverlay", () => {
       <BboxOverlay imageSrc="/x.png" imageWidth={200} imageHeight={150} bboxes={_bboxes} altText="Front label" />,
     );
     expect(getByRole("img", { name: /Front label/i })).toBeInTheDocument();
+  });
+
+  it("draws each box as the two corners the reader reports, not width and height", async () => {
+    // The backend emits (x0, y0, x1, y1) from `_Box.as_bbox()`. Read as
+    // [x, y, width, height] the first box would be 50 wide and 30 tall and
+    // would run off its own label; it is 40 by 20, starting at (10, 10).
+    const { container } = renderWithProviders(
+      <BboxOverlay imageSrc="/x.png" imageWidth={200} imageHeight={150} bboxes={_bboxes} />,
+    );
+    const rects = Array.from(container.querySelectorAll("rect"));
+    expect(rects).toHaveLength(2);
+    expect(rects[0]).toHaveAttribute("x", "10");
+    expect(rects[0]).toHaveAttribute("y", "10");
+    expect(rects[0]).toHaveAttribute("width", "40");
+    expect(rects[0]).toHaveAttribute("height", "20");
+    expect(rects[1]).toHaveAttribute("x", "70");
+    expect(rects[1]).toHaveAttribute("y", "80");
+    expect(rects[1]).toHaveAttribute("width", "40");
+    expect(rects[1]).toHaveAttribute("height", "20");
   });
 
   it("has no axe violations", async () => {
