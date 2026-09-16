@@ -1,0 +1,660 @@
+{
+ "image": "26230001000420/back.jpg",
+ "schema_version": 1,
+ "frame_size": [
+  1409,
+  1245
+ ],
+ "rotation_deg": 0,
+ "boxes": [
+  {
+   "box": [
+    345.0,
+    174.0,
+    1072.0,
+    252.0
+   ],
+   "text": "BLACK TUESDAY",
+   "score": 0.9959
+  },
+  {
+   "box": [
+    441.0,
+    253.0,
+    992.0,
+    302.0
+   ],
+   "text": "PRIVATEBARREL",
+   "score": 0.9978
+  },
+  {
+   "box": [
+    442.0,
+    333.0,
+    978.0,
+    369.0
+   ],
+   "text": "BARREL-AGED IMPERIAL STOUT",
+   "score": 0.9971
+  },
+  {
+   "box": [
+    264.0,
+    409.0,
+    968.0,
+    445.0
+   ],
+   "text": "Born in the quiet shadows of our cellar, this Private",
+   "score": 0.9998
+  },
+  {
+   "box": [
+    1036.0,
+    403.0,
+    1101.0,
+    440.0
+   ],
+   "text": "2026",
+   "score": 1.0
+  },
+  {
+   "box": [
+    262.0,
+    444.0,
+    967.0,
+    485.0
+   ],
+   "text": "Barrel of Black Tuesday is a singular expression of time,",
+   "score": 0.9975
+  },
+  {
+   "box": [
+    1020.0,
+    438.0,
+    1117.0,
+    465.0
+   ],
+   "text": "EDITION",
+   "score": 0.9998
+  },
+  {
+   "box": [
+    263.0,
+    485.0,
+    968.0,
+    521.0
+   ],
+   "text": "oak, and intent. Rich layers of dark chocolate, notes",
+   "score": 0.9959
+  },
+  {
+   "box": [
+    261.0,
+    519.0,
+    967.0,
+    561.0
+   ],
+   "text": "of vanilla, and toasted oak unfold with each sip,",
+   "score": 0.9852
+  },
+  {
+   "box": [
+    261.0,
+    558.0,
+    969.0,
+    600.0
+   ],
+   "text": "revealing a story shaped by patience. Meant to be",
+   "score": 0.9841
+  },
+  {
+   "box": [
+    261.0,
+    597.0,
+    971.0,
+    635.0
+   ],
+   "text": "savored slowly, this rare release captures a moment",
+   "score": 0.9996
+  },
+  {
+   "box": [
+    994.0,
+    597.0,
+    1145.0,
+    640.0
+   ],
+   "text": "ALC. 20.3%",
+   "score": 0.9924
+  },
+  {
+   "box": [
+    262.0,
+    632.0,
+    620.0,
+    675.0
+   ],
+   "text": "that will never come again.",
+   "score": 0.9999
+  },
+  {
+   "box": [
+    1025.0,
+    634.0,
+    1113.0,
+    678.0
+   ],
+   "text": "by vol.",
+   "score": 0.9999
+  },
+  {
+   "box": [
+    260.0,
+    713.0,
+    389.0,
+    743.0
+   ],
+   "text": "BEST",
+   "score": 0.9981
+  },
+  {
+   "box": [
+    400.0,
+    715.0,
+    596.0,
+    742.0
+   ],
+   "text": "STORED",
+   "score": 0.9987
+  },
+  {
+   "box": [
+    613.0,
+    715.0,
+    717.0,
+    742.0
+   ],
+   "text": "AND",
+   "score": 0.9995
+  },
+  {
+   "box": [
+    732.0,
+    715.0,
+    927.0,
+    742.0
+   ],
+   "text": "SERVED",
+   "score": 0.9974
+  },
+  {
+   "box": [
+    944.0,
+    714.0,
+    1009.0,
+    743.0
+   ],
+   "text": "AT",
+   "score": 0.9987
+  },
+  {
+   "box": [
+    1024.0,
+    714.0,
+    1087.0,
+    743.0
+   ],
+   "text": "55",
+   "score": 0.9999
+  },
+  {
+   "box": [
+    1128.0,
+    718.0,
+    1153.0,
+    740.0
+   ],
+   "text": "F",
+   "score": 0.9999
+  },
+  {
+   "box": [
+    259.0,
+    790.0,
+    706.0,
+    820.0
+   ],
+   "text": "GOVERNMENT WARNING: (1) ACCORDING TO",
+   "score": 0.9982
+  },
+  {
+   "box": [
+    259.0,
+    824.0,
+    706.0,
+    854.0
+   ],
+   "text": "THE SURGEON GENERAL, WOMEN SHOULD",
+   "score": 0.9785
+  },
+  {
+   "box": [
+    259.0,
+    858.0,
+    706.0,
+    888.0
+   ],
+   "text": "NOT DRINK ALCOHOLIC BEVERAGES",
+   "score": 0.9976
+  },
+  {
+   "box": [
+    731.0,
+    856.0,
+    759.0,
+    890.0
+   ],
+   "text": "8",
+   "score": 1.0
+  },
+  {
+   "box": [
+    803.0,
+    854.0,
+    1071.0,
+    891.0
+   ],
+   "text": "10139\"03061",
+   "score": 0.9927
+  },
+  {
+   "box": [
+    258.0,
+    892.0,
+    706.0,
+    921.0
+   ],
+   "text": "DURING PREGNANCY BECAUSE OF THE RISK OF",
+   "score": 0.9892
+  },
+  {
+   "box": [
+    741.0,
+    895.0,
+    1130.0,
+    965.0
+   ],
+   "text": "CA CASH REFUND",
+   "score": 0.9775
+  },
+  {
+   "box": [
+    258.0,
+    925.0,
+    709.0,
+    958.0
+   ],
+   "text": "BIRTH DEFECTS. (2) CONSUMPTION OF",
+   "score": 0.9784
+  },
+  {
+   "box": [
+    259.0,
+    961.0,
+    704.0,
+    991.0
+   ],
+   "text": "ALCOHOLIC BEVERAGES IMPAIRS YOUR ABILITY",
+   "score": 0.9843
+  },
+  {
+   "box": [
+    257.0,
+    994.0,
+    703.0,
+    1025.0
+   ],
+   "text": "TO DRIVE A CAR OR OPERATE MACHINERY,",
+   "score": 0.9966
+  },
+  {
+   "box": [
+    258.0,
+    1029.0,
+    703.0,
+    1058.0
+   ],
+   "text": "AND MAY CAUSE HEALTH PROBLEMS.",
+   "score": 0.9901
+  }
+ ],
+ "warning_boxes": [
+  {
+   "box": [
+    345.0,
+    174.0,
+    1072.0,
+    252.0
+   ],
+   "text": "BLACK TUESDAY",
+   "score": 0.9959
+  },
+  {
+   "box": [
+    441.0,
+    253.0,
+    992.0,
+    302.0
+   ],
+   "text": "PRIVATEBARREL",
+   "score": 0.9978
+  },
+  {
+   "box": [
+    442.0,
+    333.0,
+    978.0,
+    369.0
+   ],
+   "text": "BARREL-AGED IMPERIAL STOUT",
+   "score": 0.9971
+  },
+  {
+   "box": [
+    264.0,
+    409.0,
+    968.0,
+    445.0
+   ],
+   "text": "Born in the quiet shadows of our cellar, this Private",
+   "score": 0.9998
+  },
+  {
+   "box": [
+    1036.0,
+    403.0,
+    1101.0,
+    440.0
+   ],
+   "text": "2026",
+   "score": 1.0
+  },
+  {
+   "box": [
+    262.0,
+    444.0,
+    967.0,
+    485.0
+   ],
+   "text": "Barrel of Black Tuesday is a singular expression of time,",
+   "score": 0.9975
+  },
+  {
+   "box": [
+    1020.0,
+    438.0,
+    1117.0,
+    465.0
+   ],
+   "text": "EDITION",
+   "score": 0.9998
+  },
+  {
+   "box": [
+    263.0,
+    485.0,
+    968.0,
+    521.0
+   ],
+   "text": "oak, and intent. Rich layers of dark chocolate, notes",
+   "score": 0.9959
+  },
+  {
+   "box": [
+    261.0,
+    519.0,
+    967.0,
+    561.0
+   ],
+   "text": "of vanilla, and toasted oak unfold with each sip,",
+   "score": 0.9852
+  },
+  {
+   "box": [
+    261.0,
+    558.0,
+    969.0,
+    600.0
+   ],
+   "text": "revealing a story shaped by patience. Meant to be",
+   "score": 0.9841
+  },
+  {
+   "box": [
+    261.0,
+    597.0,
+    971.0,
+    635.0
+   ],
+   "text": "savored slowly, this rare release captures a moment",
+   "score": 0.9996
+  },
+  {
+   "box": [
+    994.0,
+    597.0,
+    1145.0,
+    640.0
+   ],
+   "text": "ALC. 20.3%",
+   "score": 0.9924
+  },
+  {
+   "box": [
+    262.0,
+    632.0,
+    620.0,
+    675.0
+   ],
+   "text": "that will never come again.",
+   "score": 0.9999
+  },
+  {
+   "box": [
+    1025.0,
+    634.0,
+    1113.0,
+    678.0
+   ],
+   "text": "by vol.",
+   "score": 0.9999
+  },
+  {
+   "box": [
+    260.0,
+    713.0,
+    389.0,
+    743.0
+   ],
+   "text": "BEST",
+   "score": 0.9981
+  },
+  {
+   "box": [
+    400.0,
+    715.0,
+    596.0,
+    742.0
+   ],
+   "text": "STORED",
+   "score": 0.9987
+  },
+  {
+   "box": [
+    613.0,
+    715.0,
+    717.0,
+    742.0
+   ],
+   "text": "AND",
+   "score": 0.9995
+  },
+  {
+   "box": [
+    732.0,
+    715.0,
+    927.0,
+    742.0
+   ],
+   "text": "SERVED",
+   "score": 0.9974
+  },
+  {
+   "box": [
+    944.0,
+    714.0,
+    1009.0,
+    743.0
+   ],
+   "text": "AT",
+   "score": 0.9987
+  },
+  {
+   "box": [
+    1024.0,
+    714.0,
+    1087.0,
+    743.0
+   ],
+   "text": "55",
+   "score": 0.9999
+  },
+  {
+   "box": [
+    1128.0,
+    718.0,
+    1153.0,
+    740.0
+   ],
+   "text": "F",
+   "score": 0.9999
+  },
+  {
+   "box": [
+    259.0,
+    790.0,
+    706.0,
+    820.0
+   ],
+   "text": "GOVERNMENT WARNING: (1) ACCORDING TO",
+   "score": 0.9982
+  },
+  {
+   "box": [
+    259.0,
+    824.0,
+    706.0,
+    854.0
+   ],
+   "text": "THE SURGEON GENERAL, WOMEN SHOULD",
+   "score": 0.9785
+  },
+  {
+   "box": [
+    259.0,
+    858.0,
+    706.0,
+    888.0
+   ],
+   "text": "NOT DRINK ALCOHOLIC BEVERAGES",
+   "score": 0.9976
+  },
+  {
+   "box": [
+    731.0,
+    856.0,
+    759.0,
+    890.0
+   ],
+   "text": "8",
+   "score": 1.0
+  },
+  {
+   "box": [
+    803.0,
+    854.0,
+    1071.0,
+    891.0
+   ],
+   "text": "10139\"03061",
+   "score": 0.9927
+  },
+  {
+   "box": [
+    258.0,
+    892.0,
+    706.0,
+    921.0
+   ],
+   "text": "DURING PREGNANCY BECAUSE OF THE RISK OF",
+   "score": 0.9892
+  },
+  {
+   "box": [
+    741.0,
+    895.0,
+    1130.0,
+    965.0
+   ],
+   "text": "CA CASH REFUND",
+   "score": 0.9775
+  },
+  {
+   "box": [
+    258.0,
+    925.0,
+    709.0,
+    958.0
+   ],
+   "text": "BIRTH DEFECTS. (2) CONSUMPTION OF",
+   "score": 0.9784
+  },
+  {
+   "box": [
+    259.0,
+    961.0,
+    704.0,
+    991.0
+   ],
+   "text": "ALCOHOLIC BEVERAGES IMPAIRS YOUR ABILITY",
+   "score": 0.9843
+  },
+  {
+   "box": [
+    257.0,
+    994.0,
+    703.0,
+    1025.0
+   ],
+   "text": "TO DRIVE A CAR OR OPERATE MACHINERY,",
+   "score": 0.9966
+  },
+  {
+   "box": [
+    258.0,
+    1029.0,
+    703.0,
+    1058.0
+   ],
+   "text": "AND MAY CAUSE HEALTH PROBLEMS.",
+   "score": 0.9901
+  }
+ ],
+ "heading_measurement": {
+  "is_bold": true,
+  "mean_stroke_width": 3.4099,
+  "mean_character_height": 12.2,
+  "width_height_ratio": 0.2795,
+  "confident": true
+ }
+}

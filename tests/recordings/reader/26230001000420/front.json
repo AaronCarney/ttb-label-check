@@ -1,0 +1,154 @@
+{
+ "image": "26230001000420/front.jpg",
+ "schema_version": 1,
+ "frame_size": [
+  1600,
+  1073
+ ],
+ "rotation_deg": 0,
+ "boxes": [
+  {
+   "box": [
+    368.0,
+    359.0,
+    1274.0,
+    461.0
+   ],
+   "text": "BLACK TUESDAY",
+   "score": 0.995
+  },
+  {
+   "box": [
+    493.0,
+    472.0,
+    1167.0,
+    531.0
+   ],
+   "text": "PRIVATEBARREL",
+   "score": 0.9991
+  },
+  {
+   "box": [
+    141.0,
+    503.0,
+    183.0,
+    607.0
+   ],
+   "text": "PRIVATE",
+   "score": 0.9999
+  },
+  {
+   "box": [
+    122.0,
+    567.0,
+    310.0,
+    733.0
+   ],
+   "text": "TE OLLECTION",
+   "score": 0.8882
+  },
+  {
+   "box": [
+    493.0,
+    598.0,
+    1151.0,
+    640.0
+   ],
+   "text": "BARREL-AGED IMPERIAL STOUT",
+   "score": 0.9976
+  },
+  {
+   "box": [
+    530.0,
+    691.0,
+    1112.0,
+    731.0
+   ],
+   "text": "ALC. 20.3% BY VOL. 12.7 FL. OZ.",
+   "score": 0.982
+  },
+  {
+   "box": [
+    482.0,
+    765.0,
+    1167.0,
+    871.0
+   ],
+   "text": "Total Wine & More",
+   "score": 0.9803
+  }
+ ],
+ "warning_boxes": [
+  {
+   "box": [
+    368.0,
+    359.0,
+    1274.0,
+    461.0
+   ],
+   "text": "BLACK TUESDAY",
+   "score": 0.995
+  },
+  {
+   "box": [
+    493.0,
+    472.0,
+    1167.0,
+    531.0
+   ],
+   "text": "PRIVATEBARREL",
+   "score": 0.9991
+  },
+  {
+   "box": [
+    141.0,
+    503.0,
+    183.0,
+    607.0
+   ],
+   "text": "PRIVATE",
+   "score": 0.9999
+  },
+  {
+   "box": [
+    122.0,
+    567.0,
+    310.0,
+    733.0
+   ],
+   "text": "TE OLLECTION",
+   "score": 0.8882
+  },
+  {
+   "box": [
+    493.0,
+    598.0,
+    1151.0,
+    640.0
+   ],
+   "text": "BARREL-AGED IMPERIAL STOUT",
+   "score": 0.9976
+  },
+  {
+   "box": [
+    530.0,
+    691.0,
+    1112.0,
+    731.0
+   ],
+   "text": "ALC. 20.3% BY VOL. 12.7 FL. OZ.",
+   "score": 0.982
+  },
+  {
+   "box": [
+    482.0,
+    765.0,
+    1167.0,
+    871.0
+   ],
+   "text": "Total Wine & More",
+   "score": 0.9803
+  }
+ ],
+ "heading_measurement": null
+}

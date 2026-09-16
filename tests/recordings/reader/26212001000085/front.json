@@ -1,0 +1,310 @@
+{
+ "image": "26212001000085/front.jpg",
+ "schema_version": 1,
+ "frame_size": [
+  901,
+  638
+ ],
+ "rotation_deg": 90,
+ "boxes": [
+  {
+   "box": [
+    41.0,
+    5.0,
+    256.0,
+    149.0
+   ],
+   "text": "Ferore",
+   "score": 0.7592
+  },
+  {
+   "box": [
+    667.0,
+    16.0,
+    713.0,
+    146.0
+   ],
+   "text": "HE SURGEON",
+   "score": 0.9963
+  },
+  {
+   "box": [
+    713.0,
+    23.0,
+    749.0,
+    132.0
+   ],
+   "text": "BEVERAGES",
+   "score": 0.9997
+  },
+  {
+   "box": [
+    778.0,
+    16.0,
+    833.0,
+    513.0
+   ],
+   "text": "MPTION OF ALCOHOLIC BEVERAGE IMPAIRS YOUR",
+   "score": 0.9867
+  },
+  {
+   "box": [
+    816.0,
+    54.0,
+    868.0,
+    515.0
+   ],
+   "text": "DRIVE A CAR OR OPERATE MACHINERY, AND",
+   "score": 0.9713
+  },
+  {
+   "box": [
+    131.0,
+    158.0,
+    441.0,
+    237.0
+   ],
+   "text": "Cognac XO",
+   "score": 0.922
+  },
+  {
+   "box": [
+    58.0,
+    218.0,
+    506.0,
+    311.0
+   ],
+   "text": "Cognae PefiteChampagne",
+   "score": 0.9025
+  },
+  {
+   "box": [
+    56.0,
+    309.0,
+    548.0,
+    335.0
+   ],
+   "text": "APPELLAT'ON COGNAC PETITE CHAMPAGNE CONTR\u00d3L\u00c9E",
+   "score": 0.989
+  },
+  {
+   "box": [
+    18.0,
+    338.0,
+    671.0,
+    385.0
+   ],
+   "text": "PRODUCED BY COGNAC LHERAUD -16120 ANGEAC CHARENTE -FRANCE",
+   "score": 0.9699
+  },
+  {
+   "box": [
+    20.0,
+    382.0,
+    269.0,
+    425.0
+   ],
+   "text": "PRODUCT OF FRANCE",
+   "score": 0.9991
+  },
+  {
+   "box": [
+    367.0,
+    382.0,
+    611.0,
+    428.0
+   ],
+   "text": "40% ALC. BY VOL-700 mL",
+   "score": 0.931
+  },
+  {
+   "box": [
+    858.0,
+    408.0,
+    897.0,
+    512.0
+   ],
+   "text": "TH PROBLE",
+   "score": 0.9664
+  },
+  {
+   "box": [
+    18.0,
+    420.0,
+    671.0,
+    470.0
+   ],
+   "text": "IMPORTED BY WINE WINE SITUATION LLC-SIGNAC HILL, CA",
+   "score": 0.9795
+  },
+  {
+   "box": [
+    36.0,
+    468.0,
+    190.0,
+    518.0
+   ],
+   "text": "OHEO",
+   "score": 0.6861
+  },
+  {
+   "box": [
+    259.0,
+    569.0,
+    659.0,
+    616.0
+   ],
+   "text": "810156380310",
+   "score": 0.9921
+  }
+ ],
+ "warning_boxes": [
+  {
+   "box": [
+    365.0,
+    0.0,
+    627.0,
+    40.0
+   ],
+   "text": "CAUSE HEALTH PROBLEMS.",
+   "score": 0.996
+  },
+  {
+   "box": [
+    15.0,
+    31.0,
+    627.0,
+    79.0
+   ],
+   "text": "ABILITY TO DRIVE A CAR OR OPERATE MACHINERY, AND MAY",
+   "score": 0.9944
+  },
+  {
+   "box": [
+    16.0,
+    110.0,
+    627.0,
+    153.0
+   ],
+   "text": "DUR B  R    B CTS.",
+   "score": 0.6091
+  },
+  {
+   "box": [
+    12.0,
+    147.0,
+    626.0,
+    193.0
+   ],
+   "text": "GEN A L D DS D GES",
+   "score": 0.5947
+  },
+  {
+   "box": [
+    10.0,
+    186.0,
+    625.0,
+    233.0
+   ],
+   "text": "GOVERNMENT WARNING: (1) ACCORDING TO THE SURGEON",
+   "score": 0.9952
+  },
+  {
+   "box": [
+    428.0,
+    233.0,
+    466.0,
+    272.0
+   ],
+   "text": "CA",
+   "score": 0.7138
+  },
+  {
+   "box": [
+    583.0,
+    248.0,
+    610.0,
+    277.0
+   ],
+   "text": "0",
+   "score": 0.9956
+  },
+  {
+   "box": [
+    417.0,
+    268.0,
+    472.0,
+    878.0
+   ],
+   "text": "IMPORTED BY WINE WINE SITUATION LLC-SIGNAC HILL,",
+   "score": 0.992
+  },
+  {
+   "box": [
+    378.0,
+    283.0,
+    432.0,
+    536.0
+   ],
+   "text": "40%ALC. BY VOL-700mL",
+   "score": 0.9552
+  },
+  {
+   "box": [
+    309.0,
+    348.0,
+    336.0,
+    844.0
+   ],
+   "text": "AP GC C C LE",
+   "score": 0.6388
+  },
+  {
+   "box": [
+    226.0,
+    396.0,
+    311.0,
+    837.0
+   ],
+   "text": "Cognae Pefite Chompagne",
+   "score": 0.9532
+  },
+  {
+   "box": [
+    156.0,
+    453.0,
+    239.0,
+    764.0
+   ],
+   "text": "Cognac XO",
+   "score": 0.9745
+  },
+  {
+   "box": [
+    576.0,
+    605.0,
+    609.0,
+    634.0
+   ],
+   "text": "8",
+   "score": 0.9926
+  },
+  {
+   "box": [
+    381.0,
+    622.0,
+    427.0,
+    877.0
+   ],
+   "text": "PRODUCT OF FRANCE",
+   "score": 0.9729
+  }
+ ],
+ "heading_measurement": {
+  "is_bold": false,
+  "mean_stroke_width": 2.4155,
+  "mean_character_height": 15.1818,
+  "width_height_ratio": 0.1591,
+  "confident": true
+ }
+}

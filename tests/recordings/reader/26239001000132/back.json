@@ -1,0 +1,74 @@
+{
+ "image": "26239001000132/back.jpg",
+ "schema_version": 1,
+ "frame_size": [
+  360,
+  500
+ ],
+ "rotation_deg": 0,
+ "boxes": [
+  {
+   "box": [
+    35.0,
+    30.0,
+    56.0,
+    188.0
+   ],
+   "text": "Quasi Rosso - RST24",
+   "score": 0.9448
+  },
+  {
+   "box": [
+    24.0,
+    295.0,
+    62.0,
+    477.0
+   ],
+   "text": "Rossastro",
+   "score": 1.0
+  },
+  {
+   "box": [
+    313.0,
+    336.0,
+    330.0,
+    452.0
+   ],
+   "text": "FABIO SIGNORELLI",
+   "score": 0.9989
+  }
+ ],
+ "warning_boxes": [
+  {
+   "box": [
+    35.0,
+    30.0,
+    56.0,
+    188.0
+   ],
+   "text": "Quasi Rosso - RST24",
+   "score": 0.9448
+  },
+  {
+   "box": [
+    24.0,
+    295.0,
+    62.0,
+    477.0
+   ],
+   "text": "Rossastro",
+   "score": 1.0
+  },
+  {
+   "box": [
+    313.0,
+    336.0,
+    330.0,
+    452.0
+   ],
+   "text": "FABIO SIGNORELLI",
+   "score": 0.9989
+  }
+ ],
+ "heading_measurement": null
+}

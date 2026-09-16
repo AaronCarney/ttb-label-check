@@ -1,0 +1,380 @@
+{
+ "image": "26229001000034/back.jpg",
+ "schema_version": 1,
+ "frame_size": [
+  914,
+  994
+ ],
+ "rotation_deg": 0,
+ "boxes": [
+  {
+   "box": [
+    126.0,
+    147.0,
+    779.0,
+    187.0
+   ],
+   "text": "PRODUCED AND BOTTLED BY",
+   "score": 0.9966
+  },
+  {
+   "box": [
+    139.0,
+    193.0,
+    775.0,
+    236.0
+   ],
+   "text": "KLOCKE ESTATE DISTILLERY,",
+   "score": 0.9903
+  },
+  {
+   "box": [
+    323.0,
+    239.0,
+    609.0,
+    287.0
+   ],
+   "text": "HUDSON, NY",
+   "score": 0.9635
+  },
+  {
+   "box": [
+    290.0,
+    301.0,
+    693.0,
+    340.0
+   ],
+   "text": "KLOCKE-ESTATE.COM",
+   "score": 1.0
+  },
+  {
+   "box": [
+    123.0,
+    392.0,
+    543.0,
+    438.0
+   ],
+   "text": "GOVERNMENT WARNING: (1)",
+   "score": 0.9791
+  },
+  {
+   "box": [
+    739.0,
+    408.0,
+    775.0,
+    436.0
+   ],
+   "text": "2",
+   "score": 0.9999
+  },
+  {
+   "box": [
+    125.0,
+    438.0,
+    544.0,
+    478.0
+   ],
+   "text": "ACCORDING TO THE SURGEON",
+   "score": 0.9905
+  },
+  {
+   "box": [
+    125.0,
+    481.0,
+    543.0,
+    521.0
+   ],
+   "text": "GENERAL, WOMEN SHOULD NOT",
+   "score": 0.9984
+  },
+  {
+   "box": [
+    726.0,
+    482.0,
+    778.0,
+    783.0
+   ],
+   "text": "50049\"75132",
+   "score": 0.9939
+  },
+  {
+   "box": [
+    124.0,
+    523.0,
+    543.0,
+    563.0
+   ],
+   "text": "DRINK ALCOHOLIC BEVERAGES",
+   "score": 0.9995
+  },
+  {
+   "box": [
+    125.0,
+    567.0,
+    544.0,
+    607.0
+   ],
+   "text": "DURING PREGNANCY BECAUSE",
+   "score": 0.9838
+  },
+  {
+   "box": [
+    125.0,
+    609.0,
+    542.0,
+    652.0
+   ],
+   "text": "OF THE RISKS OF BIRTH DEFECTS.",
+   "score": 0.9995
+  },
+  {
+   "box": [
+    125.0,
+    648.0,
+    546.0,
+    699.0
+   ],
+   "text": "(2) CONSUMPTION OF ALCOHOLIC",
+   "score": 0.9869
+  },
+  {
+   "box": [
+    124.0,
+    697.0,
+    545.0,
+    737.0
+   ],
+   "text": "BEVERAGES IMPAIRS YOUR ABILITY",
+   "score": 0.986
+  },
+  {
+   "box": [
+    124.0,
+    738.0,
+    544.0,
+    782.0
+   ],
+   "text": "TO DRIVE A CAR OR OPERATE",
+   "score": 0.9871
+  },
+  {
+   "box": [
+    124.0,
+    783.0,
+    546.0,
+    826.0
+   ],
+   "text": "MACHINERY, AND MAY CAUSE",
+   "score": 0.9899
+  },
+  {
+   "box": [
+    124.0,
+    827.0,
+    391.0,
+    867.0
+   ],
+   "text": "HEALTH PROBLEMS.",
+   "score": 0.9997
+  },
+  {
+   "box": [
+    736.0,
+    823.0,
+    774.0,
+    852.0
+   ],
+   "text": "8",
+   "score": 0.9959
+  }
+ ],
+ "warning_boxes": [
+  {
+   "box": [
+    126.0,
+    147.0,
+    779.0,
+    187.0
+   ],
+   "text": "PRODUCED AND BOTTLED BY",
+   "score": 0.9966
+  },
+  {
+   "box": [
+    139.0,
+    193.0,
+    775.0,
+    236.0
+   ],
+   "text": "KLOCKE ESTATE DISTILLERY,",
+   "score": 0.9903
+  },
+  {
+   "box": [
+    323.0,
+    239.0,
+    609.0,
+    287.0
+   ],
+   "text": "HUDSON, NY",
+   "score": 0.9635
+  },
+  {
+   "box": [
+    290.0,
+    301.0,
+    693.0,
+    340.0
+   ],
+   "text": "KLOCKE-ESTATE.COM",
+   "score": 1.0
+  },
+  {
+   "box": [
+    123.0,
+    392.0,
+    543.0,
+    438.0
+   ],
+   "text": "GOVERNMENT WARNING: (1)",
+   "score": 0.9791
+  },
+  {
+   "box": [
+    739.0,
+    408.0,
+    775.0,
+    436.0
+   ],
+   "text": "2",
+   "score": 0.9999
+  },
+  {
+   "box": [
+    125.0,
+    438.0,
+    544.0,
+    478.0
+   ],
+   "text": "ACCORDING TO THE SURGEON",
+   "score": 0.9905
+  },
+  {
+   "box": [
+    125.0,
+    481.0,
+    543.0,
+    521.0
+   ],
+   "text": "GENERAL, WOMEN SHOULD NOT",
+   "score": 0.9984
+  },
+  {
+   "box": [
+    726.0,
+    482.0,
+    778.0,
+    783.0
+   ],
+   "text": "50049\"75132",
+   "score": 0.9939
+  },
+  {
+   "box": [
+    124.0,
+    523.0,
+    543.0,
+    563.0
+   ],
+   "text": "DRINK ALCOHOLIC BEVERAGES",
+   "score": 0.9995
+  },
+  {
+   "box": [
+    125.0,
+    567.0,
+    544.0,
+    607.0
+   ],
+   "text": "DURING PREGNANCY BECAUSE",
+   "score": 0.9838
+  },
+  {
+   "box": [
+    125.0,
+    609.0,
+    542.0,
+    652.0
+   ],
+   "text": "OF THE RISKS OF BIRTH DEFECTS.",
+   "score": 0.9995
+  },
+  {
+   "box": [
+    125.0,
+    648.0,
+    546.0,
+    699.0
+   ],
+   "text": "(2) CONSUMPTION OF ALCOHOLIC",
+   "score": 0.9869
+  },
+  {
+   "box": [
+    124.0,
+    697.0,
+    545.0,
+    737.0
+   ],
+   "text": "BEVERAGES IMPAIRS YOUR ABILITY",
+   "score": 0.986
+  },
+  {
+   "box": [
+    124.0,
+    738.0,
+    544.0,
+    782.0
+   ],
+   "text": "TO DRIVE A CAR OR OPERATE",
+   "score": 0.9871
+  },
+  {
+   "box": [
+    124.0,
+    783.0,
+    546.0,
+    826.0
+   ],
+   "text": "MACHINERY, AND MAY CAUSE",
+   "score": 0.9899
+  },
+  {
+   "box": [
+    124.0,
+    827.0,
+    391.0,
+    867.0
+   ],
+   "text": "HEALTH PROBLEMS.",
+   "score": 0.9997
+  },
+  {
+   "box": [
+    736.0,
+    823.0,
+    774.0,
+    852.0
+   ],
+   "text": "8",
+   "score": 0.9959
+  }
+ ],
+ "heading_measurement": {
+  "is_bold": false,
+  "mean_stroke_width": 3.2268,
+  "mean_character_height": 14.5714,
+  "width_height_ratio": 0.2214,
+  "confident": true
+ }
+}

@@ -1,0 +1,460 @@
+{
+ "image": "26237001000107/back.jpg",
+ "schema_version": 1,
+ "frame_size": [
+  1051,
+  976
+ ],
+ "rotation_deg": 0,
+ "boxes": [
+  {
+   "box": [
+    335.0,
+    153.0,
+    746.0,
+    281.0
+   ],
+   "text": "JUAN LOBO",
+   "score": 0.9967
+  },
+  {
+   "box": [
+    428.0,
+    269.0,
+    655.0,
+    313.0
+   ],
+   "text": "*TEQUILA*",
+   "score": 0.9961
+  },
+  {
+   "box": [
+    122.0,
+    326.0,
+    945.0,
+    360.0
+   ],
+   "text": "The wolf, in old Aztec lore, was believed to have guided brave",
+   "score": 0.9999
+  },
+  {
+   "box": [
+    127.0,
+    360.0,
+    938.0,
+    393.0
+   ],
+   "text": "warriors through the underworld \u2013 one has guided you here.",
+   "score": 0.9917
+  },
+  {
+   "box": [
+    90.0,
+    393.0,
+    977.0,
+    427.0
+   ],
+   "text": "From five generations of agave farmers, Juan Lobo Tequila is hand",
+   "score": 0.9923
+  },
+  {
+   "box": [
+    94.0,
+    427.0,
+    972.0,
+    461.0
+   ],
+   "text": "crafted in the Highlands of Jalisco, Mexico. Enriched in tradition,",
+   "score": 0.9995
+  },
+  {
+   "box": [
+    151.0,
+    460.0,
+    915.0,
+    493.0
+   ],
+   "text": "slow cooked in brick ovens, fermented to classical music,",
+   "score": 0.998
+  },
+  {
+   "box": [
+    111.0,
+    493.0,
+    955.0,
+    527.0
+   ],
+   "text": "and distilled in copper pot stills. Our careful process delivers a",
+   "score": 0.9949
+  },
+  {
+   "box": [
+    127.0,
+    525.0,
+    936.0,
+    562.0
+   ],
+   "text": "smooth, full-bodied spirit abounding with aroma and flavor.",
+   "score": 0.9928
+  },
+  {
+   "box": [
+    180.0,
+    560.0,
+    887.0,
+    594.0
+   ],
+   "text": "Welcome to the pack. Welcome to Juan Lobo Tequila.",
+   "score": 0.9967
+  },
+  {
+   "box": [
+    83.0,
+    618.0,
+    984.0,
+    650.0
+   ],
+   "text": "HECHO EN MEXICO - BOTTLED AT ORIGIN - DRINK RESPONSIBLY",
+   "score": 0.9826
+  },
+  {
+   "box": [
+    92.0,
+    668.0,
+    619.0,
+    705.0
+   ],
+   "text": "GOVERNMENT WARNING: (I)ACCORDING TO THE SURGEON",
+   "score": 0.993
+  },
+  {
+   "box": [
+    702.0,
+    670.0,
+    913.0,
+    720.0
+   ],
+   "text": "NOM 1414CRT",
+   "score": 0.9422
+  },
+  {
+   "box": [
+    94.0,
+    703.0,
+    619.0,
+    736.0
+   ],
+   "text": "GENERAL, WOMEN SHOULD NOT DRINK ALCOHOLIC",
+   "score": 0.9785
+  },
+  {
+   "box": [
+    95.0,
+    735.0,
+    619.0,
+    769.0
+   ],
+   "text": "BEVERAGES DURING PREGNANCY BECAUSE OF THE RISK OF",
+   "score": 0.9943
+  },
+  {
+   "box": [
+    94.0,
+    766.0,
+    619.0,
+    799.0
+   ],
+   "text": "BIRTH DEFECTS. (2) CONSUMPTION OF ALCOHOLIC",
+   "score": 0.9822
+  },
+  {
+   "box": [
+    94.0,
+    798.0,
+    620.0,
+    832.0
+   ],
+   "text": "BEVERAGES IMPAIRS YOUR ABILITY TO DRIVE A CAR OR",
+   "score": 0.9917
+  },
+  {
+   "box": [
+    93.0,
+    829.0,
+    653.0,
+    863.0
+   ],
+   "text": "OPERATE MACHINERY, AND MAY CAUSE HEALTH PROBLEMS. 8",
+   "score": 0.9986
+  },
+  {
+   "box": [
+    688.0,
+    824.0,
+    925.0,
+    860.0
+   ],
+   "text": "60000\"55881",
+   "score": 0.9646
+  },
+  {
+   "box": [
+    959.0,
+    834.0,
+    980.0,
+    858.0
+   ],
+   "text": "5",
+   "score": 1.0
+  },
+  {
+   "box": [
+    85.0,
+    886.0,
+    632.0,
+    919.0
+   ],
+   "text": "IMPORTED BY JUAN LOBO TEQUILA, LLC BUDA, TEXAS",
+   "score": 0.9857
+  },
+  {
+   "box": [
+    680.0,
+    886.0,
+    980.0,
+    919.0
+   ],
+   "text": "WWW.JUANLOBOTEQUILA.COM",
+   "score": 0.9999
+  }
+ ],
+ "warning_boxes": [
+  {
+   "box": [
+    335.0,
+    153.0,
+    746.0,
+    281.0
+   ],
+   "text": "JUAN LOBO",
+   "score": 0.9967
+  },
+  {
+   "box": [
+    428.0,
+    269.0,
+    655.0,
+    313.0
+   ],
+   "text": "*TEQUILA*",
+   "score": 0.9961
+  },
+  {
+   "box": [
+    122.0,
+    326.0,
+    945.0,
+    360.0
+   ],
+   "text": "The wolf, in old Aztec lore, was believed to have guided brave",
+   "score": 0.9999
+  },
+  {
+   "box": [
+    127.0,
+    360.0,
+    938.0,
+    393.0
+   ],
+   "text": "warriors through the underworld \u2013 one has guided you here.",
+   "score": 0.9917
+  },
+  {
+   "box": [
+    90.0,
+    393.0,
+    977.0,
+    427.0
+   ],
+   "text": "From five generations of agave farmers, Juan Lobo Tequila is hand",
+   "score": 0.9923
+  },
+  {
+   "box": [
+    94.0,
+    427.0,
+    972.0,
+    461.0
+   ],
+   "text": "crafted in the Highlands of Jalisco, Mexico. Enriched in tradition,",
+   "score": 0.9995
+  },
+  {
+   "box": [
+    151.0,
+    460.0,
+    915.0,
+    493.0
+   ],
+   "text": "slow cooked in brick ovens, fermented to classical music,",
+   "score": 0.998
+  },
+  {
+   "box": [
+    111.0,
+    493.0,
+    955.0,
+    527.0
+   ],
+   "text": "and distilled in copper pot stills. Our careful process delivers a",
+   "score": 0.9949
+  },
+  {
+   "box": [
+    127.0,
+    525.0,
+    936.0,
+    562.0
+   ],
+   "text": "smooth, full-bodied spirit abounding with aroma and flavor.",
+   "score": 0.9928
+  },
+  {
+   "box": [
+    180.0,
+    560.0,
+    887.0,
+    594.0
+   ],
+   "text": "Welcome to the pack. Welcome to Juan Lobo Tequila.",
+   "score": 0.9967
+  },
+  {
+   "box": [
+    83.0,
+    618.0,
+    984.0,
+    650.0
+   ],
+   "text": "HECHO EN MEXICO - BOTTLED AT ORIGIN - DRINK RESPONSIBLY",
+   "score": 0.9826
+  },
+  {
+   "box": [
+    92.0,
+    668.0,
+    619.0,
+    705.0
+   ],
+   "text": "GOVERNMENT WARNING: (I)ACCORDING TO THE SURGEON",
+   "score": 0.993
+  },
+  {
+   "box": [
+    702.0,
+    670.0,
+    913.0,
+    720.0
+   ],
+   "text": "NOM 1414CRT",
+   "score": 0.9422
+  },
+  {
+   "box": [
+    94.0,
+    703.0,
+    619.0,
+    736.0
+   ],
+   "text": "GENERAL, WOMEN SHOULD NOT DRINK ALCOHOLIC",
+   "score": 0.9785
+  },
+  {
+   "box": [
+    95.0,
+    735.0,
+    619.0,
+    769.0
+   ],
+   "text": "BEVERAGES DURING PREGNANCY BECAUSE OF THE RISK OF",
+   "score": 0.9943
+  },
+  {
+   "box": [
+    94.0,
+    766.0,
+    619.0,
+    799.0
+   ],
+   "text": "BIRTH DEFECTS. (2) CONSUMPTION OF ALCOHOLIC",
+   "score": 0.9822
+  },
+  {
+   "box": [
+    94.0,
+    798.0,
+    620.0,
+    832.0
+   ],
+   "text": "BEVERAGES IMPAIRS YOUR ABILITY TO DRIVE A CAR OR",
+   "score": 0.9917
+  },
+  {
+   "box": [
+    93.0,
+    829.0,
+    653.0,
+    863.0
+   ],
+   "text": "OPERATE MACHINERY, AND MAY CAUSE HEALTH PROBLEMS. 8",
+   "score": 0.9986
+  },
+  {
+   "box": [
+    688.0,
+    824.0,
+    925.0,
+    860.0
+   ],
+   "text": "60000\"55881",
+   "score": 0.9646
+  },
+  {
+   "box": [
+    959.0,
+    834.0,
+    980.0,
+    858.0
+   ],
+   "text": "5",
+   "score": 1.0
+  },
+  {
+   "box": [
+    85.0,
+    886.0,
+    632.0,
+    919.0
+   ],
+   "text": "IMPORTED BY JUAN LOBO TEQUILA, LLC BUDA, TEXAS",
+   "score": 0.9857
+  },
+  {
+   "box": [
+    680.0,
+    886.0,
+    980.0,
+    919.0
+   ],
+   "text": "WWW.JUANLOBOTEQUILA.COM",
+   "score": 0.9999
+  }
+ ],
+ "heading_measurement": {
+  "is_bold": false,
+  "mean_stroke_width": 2.6115,
+  "mean_character_height": 21.9565,
+  "width_height_ratio": 0.1189,
+  "confident": true
+ }
+}

@@ -1,0 +1,74 @@
+{
+ "image": "26229001000034/front.jpg",
+ "schema_version": 1,
+ "frame_size": [
+  974,
+  1047
+ ],
+ "rotation_deg": 0,
+ "boxes": [
+  {
+   "box": [
+    152.0,
+    498.0,
+    827.0,
+    626.0
+   ],
+   "text": "CR\u00c8ME DE CASSIS",
+   "score": 0.9968
+  },
+  {
+   "box": [
+    335.0,
+    697.0,
+    655.0,
+    750.0
+   ],
+   "text": "LIQUEUR",
+   "score": 0.9952
+  },
+  {
+   "box": [
+    533.0,
+    812.0,
+    727.0,
+    863.0
+   ],
+   "text": "AEV",
+   "score": 0.697
+  }
+ ],
+ "warning_boxes": [
+  {
+   "box": [
+    152.0,
+    498.0,
+    827.0,
+    626.0
+   ],
+   "text": "CR\u00c8ME DE CASSIS",
+   "score": 0.9968
+  },
+  {
+   "box": [
+    335.0,
+    697.0,
+    655.0,
+    750.0
+   ],
+   "text": "LIQUEUR",
+   "score": 0.9952
+  },
+  {
+   "box": [
+    533.0,
+    812.0,
+    727.0,
+    863.0
+   ],
+   "text": "AEV",
+   "score": 0.697
+  }
+ ],
+ "heading_measurement": null
+}

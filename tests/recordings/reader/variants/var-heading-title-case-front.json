@@ -1,0 +1,400 @@
+{
+ "image": "variants/var-heading-title-case-front.jpg",
+ "schema_version": 1,
+ "frame_size": [
+  1600,
+  1014
+ ],
+ "rotation_deg": 0,
+ "boxes": [
+  {
+   "box": [
+    92.0,
+    108.0,
+    468.0,
+    160.0
+   ],
+   "text": "FABIO SIGNORELLI",
+   "score": 0.9558
+  },
+  {
+   "box": [
+    740.0,
+    106.0,
+    1048.0,
+    172.0
+   ],
+   "text": "ROSSASTRO",
+   "score": 0.9999
+  },
+  {
+   "box": [
+    1196.0,
+    106.0,
+    1324.0,
+    179.0
+   ],
+   "text": "2024",
+   "score": 1.0
+  },
+  {
+   "box": [
+    296.0,
+    234.0,
+    531.0,
+    277.0
+   ],
+   "text": "PRODUCED BY:",
+   "score": 0.9999
+  },
+  {
+   "box": [
+    1053.0,
+    229.0,
+    1317.0,
+    278.0
+   ],
+   "text": "IMPORTED BY:",
+   "score": 0.9999
+  },
+  {
+   "box": [
+    167.0,
+    282.0,
+    657.0,
+    327.0
+   ],
+   "text": "AZIENDA AGRICOLASIGNORELLI",
+   "score": 0.9831
+  },
+  {
+   "box": [
+    1042.0,
+    277.0,
+    1326.0,
+    327.0
+   ],
+   "text": "WHITSERVELLC",
+   "score": 0.9999
+  },
+  {
+   "box": [
+    171.0,
+    329.0,
+    652.0,
+    381.0
+   ],
+   "text": "PIEDIMONTE ETNEO (CT) - ITALY",
+   "score": 0.9744
+  },
+  {
+   "box": [
+    945.0,
+    326.0,
+    1420.0,
+    375.0
+   ],
+   "text": "STAMFORD, CONNECTICUT",
+   "score": 0.9872
+  },
+  {
+   "box": [
+    122.0,
+    449.0,
+    1075.0,
+    499.0
+   ],
+   "text": "Government Warning: (1) ACCORDING TO THE",
+   "score": 0.9838
+  },
+  {
+   "box": [
+    125.0,
+    498.0,
+    1094.0,
+    541.0
+   ],
+   "text": "SURGEON GENERAL, WOMEN SHOULD NOT DRINK",
+   "score": 0.9923
+  },
+  {
+   "box": [
+    124.0,
+    543.0,
+    1010.0,
+    586.0
+   ],
+   "text": "ALCOHOLIC BEVERAGES DURING PREGNANCY",
+   "score": 0.9993
+  },
+  {
+   "box": [
+    123.0,
+    587.0,
+    1016.0,
+    635.0
+   ],
+   "text": "BECAUSE OF THE RISK OF BIRTH DEFECTS. (2)",
+   "score": 0.9862
+  },
+  {
+   "box": [
+    1135.0,
+    588.0,
+    1464.0,
+    680.0
+   ],
+   "text": "WhitServe",
+   "score": 1.0
+  },
+  {
+   "box": [
+    124.0,
+    632.0,
+    1127.0,
+    678.0
+   ],
+   "text": "CONSUMPTION OF ALCOHOLIC BEVERAGES IMPAIRS",
+   "score": 0.9998
+  },
+  {
+   "box": [
+    124.0,
+    681.0,
+    972.0,
+    723.0
+   ],
+   "text": "YOUR ABILITY TO DRIVE A CAR OR OPERATE",
+   "score": 0.9886
+  },
+  {
+   "box": [
+    125.0,
+    727.0,
+    1090.0,
+    769.0
+   ],
+   "text": "MACHINERY, AND MAY CAUSE HEALTH PROBLEMS.",
+   "score": 0.9901
+  },
+  {
+   "box": [
+    406.0,
+    817.0,
+    1232.0,
+    872.0
+   ],
+   "text": "ROSE WINE|ITALY| PRODUCT OF ITALY| 750 ML",
+   "score": 0.9577
+  },
+  {
+   "box": [
+    479.0,
+    886.0,
+    1157.0,
+    935.0
+   ],
+   "text": "12% ALC. BY VOL. | CONTAINS SULFITES",
+   "score": 0.9844
+  }
+ ],
+ "warning_boxes": [
+  {
+   "box": [
+    92.0,
+    108.0,
+    468.0,
+    160.0
+   ],
+   "text": "FABIO SIGNORELLI",
+   "score": 0.9558
+  },
+  {
+   "box": [
+    740.0,
+    106.0,
+    1048.0,
+    172.0
+   ],
+   "text": "ROSSASTRO",
+   "score": 0.9999
+  },
+  {
+   "box": [
+    1196.0,
+    106.0,
+    1324.0,
+    179.0
+   ],
+   "text": "2024",
+   "score": 1.0
+  },
+  {
+   "box": [
+    296.0,
+    234.0,
+    531.0,
+    277.0
+   ],
+   "text": "PRODUCED BY:",
+   "score": 0.9999
+  },
+  {
+   "box": [
+    1053.0,
+    229.0,
+    1317.0,
+    278.0
+   ],
+   "text": "IMPORTED BY:",
+   "score": 0.9999
+  },
+  {
+   "box": [
+    167.0,
+    282.0,
+    657.0,
+    327.0
+   ],
+   "text": "AZIENDA AGRICOLASIGNORELLI",
+   "score": 0.9831
+  },
+  {
+   "box": [
+    1042.0,
+    277.0,
+    1326.0,
+    327.0
+   ],
+   "text": "WHITSERVELLC",
+   "score": 0.9999
+  },
+  {
+   "box": [
+    171.0,
+    329.0,
+    652.0,
+    381.0
+   ],
+   "text": "PIEDIMONTE ETNEO (CT) - ITALY",
+   "score": 0.9744
+  },
+  {
+   "box": [
+    945.0,
+    326.0,
+    1420.0,
+    375.0
+   ],
+   "text": "STAMFORD, CONNECTICUT",
+   "score": 0.9872
+  },
+  {
+   "box": [
+    122.0,
+    449.0,
+    1075.0,
+    499.0
+   ],
+   "text": "Government Warning: (1) ACCORDING TO THE",
+   "score": 0.9838
+  },
+  {
+   "box": [
+    125.0,
+    498.0,
+    1094.0,
+    541.0
+   ],
+   "text": "SURGEON GENERAL, WOMEN SHOULD NOT DRINK",
+   "score": 0.9923
+  },
+  {
+   "box": [
+    124.0,
+    543.0,
+    1010.0,
+    586.0
+   ],
+   "text": "ALCOHOLIC BEVERAGES DURING PREGNANCY",
+   "score": 0.9993
+  },
+  {
+   "box": [
+    123.0,
+    587.0,
+    1016.0,
+    635.0
+   ],
+   "text": "BECAUSE OF THE RISK OF BIRTH DEFECTS. (2)",
+   "score": 0.9862
+  },
+  {
+   "box": [
+    1135.0,
+    588.0,
+    1464.0,
+    680.0
+   ],
+   "text": "WhitServe",
+   "score": 1.0
+  },
+  {
+   "box": [
+    124.0,
+    632.0,
+    1127.0,
+    678.0
+   ],
+   "text": "CONSUMPTION OF ALCOHOLIC BEVERAGES IMPAIRS",
+   "score": 0.9998
+  },
+  {
+   "box": [
+    124.0,
+    681.0,
+    972.0,
+    723.0
+   ],
+   "text": "YOUR ABILITY TO DRIVE A CAR OR OPERATE",
+   "score": 0.9886
+  },
+  {
+   "box": [
+    125.0,
+    727.0,
+    1090.0,
+    769.0
+   ],
+   "text": "MACHINERY, AND MAY CAUSE HEALTH PROBLEMS.",
+   "score": 0.9901
+  },
+  {
+   "box": [
+    406.0,
+    817.0,
+    1232.0,
+    872.0
+   ],
+   "text": "ROSE WINE|ITALY| PRODUCT OF ITALY| 750 ML",
+   "score": 0.9577
+  },
+  {
+   "box": [
+    479.0,
+    886.0,
+    1157.0,
+    935.0
+   ],
+   "text": "12% ALC. BY VOL. | CONTAINS SULFITES",
+   "score": 0.9844
+  }
+ ],
+ "heading_measurement": {
+  "is_bold": false,
+  "mean_stroke_width": 3.3527,
+  "mean_character_height": 24.4054,
+  "width_height_ratio": 0.1374,
+  "confident": true
+ }
+}
