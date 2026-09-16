@@ -32,7 +32,7 @@ convert back to exactly 375 rejects a compliant label by construction. The
 tolerance that closes that gap is data in the rule pack — the `tolerance`
 block of the rule — not a constant in this file, so a reviewer can read the
 number that decided a verdict, and the same input always gives the same
-answer. `docs/decisions/0011` records where the number comes from. A rule that
+answer. `docs/decisions/0014` records where the number comes from. A rule that
 carries no tolerance compares exactly, in either case.
 
 Unit conversions come from the rule pack's decision table, read through

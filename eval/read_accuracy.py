@@ -33,10 +33,12 @@ and address is looked for the same way round, because the printed line carries
 lead-in words the reader does not report ("AGED AND BOTTLED BY").
 
 Every check uses the same comparison the rule pack uses, from
-`app.rules._validators._helpers`, so a score here means what a result in the
-running app means. The warning is the exception: it is compared word for word
-after the normalization the rule pack pins to the regulation text, because
-that is what 27 CFR 16.21 requires of it.
+`app.rules._validators._helpers`, and net contents is converted with the rule
+pack's own shipped unit table through `app.rules.units`, so a score here means
+what a result in the running app means and a unit the app can read is never a
+unit this harness scores as unreadable. The warning is the exception: it is
+compared word for word after the normalization the rule pack pins to the
+regulation text, because that is what 27 CFR 16.21 requires of it.
 
 The numbers this prints are the only numbers the README states about reading
 accuracy.
@@ -51,10 +53,12 @@ import statistics
 import time
 import unicodedata
 from collections import deque
+from functools import lru_cache
 from pathlib import Path
 
 from app.config import Settings
 from app.rules._validators._helpers import normalize_words, word_run_present
+from app.rules.units import UnitTable, millilitres, shipped_table
 from app.schemas.label import Label
 
 LABELS_ROOT = Path("tests/fixtures/labels")
@@ -73,40 +77,33 @@ CHECKS = (
     "warning_heading_caps",
 )
 
-# Keyed on the unit stripped of everything that is not a letter or a digit, so
-# one entry covers every way a label writes it: "FL. OZ.", "FL OZ" and "fl.oz"
-# are all FLOZ. Both sides of the comparison are keyed the same way, because
-# the label and the reader spell the unit as they find it.
-_ML_PER_UNIT = {
-    "ML": 1.0, "MLS": 1.0, "MILLILITER": 1.0, "MILLILITERS": 1.0,
-    "CL": 10.0,
-    "L": 1000.0, "LITER": 1000.0, "LITERS": 1000.0, "LITRE": 1000.0, "LITRES": 1000.0,
-    "FLOZ": 29.5735, "OZ": 29.5735, "FLOUNCES": 29.5735, "FLOUNCE": 29.5735,
-    "PINT": 473.176, "PINTS": 473.176, "PT": 473.176,
-    "QUART": 946.353, "QUARTS": 946.353, "QT": 946.353,
-    "GALLON": 3785.41, "GALLONS": 3785.41, "GAL": 3785.41,
-    "USGALLON": 3785.41, "USGALLONS": 3785.41,
-}
-
 # A parenthesis in a transcription holds the transcriber's note, not printed
 # words: "Double India Pale Ale (handwritten)" prints four words, not five.
 _ANNOTATION_RE = re.compile(r"\([^)]*\)")
 
 
+@lru_cache(maxsize=1)
+def _units() -> UnitTable:
+    """The unit table the running app uses, read once. `RULES_ROOT` picks the
+    rule tree here exactly as it picks it for the app."""
+    return shipped_table(Settings().rules_root)
+
+
 def _millilitres(amount: object, unit: object) -> float | None:
     """One net-contents figure in millilitres, or None where there is no figure.
+
+    The units and factors are the rule pack's own — `rules/tables/volume_units.yaml`,
+    read through `app.rules.units` — so a spelling this harness scores as
+    unreadable is exactly a spelling the running app cannot convert either.
+    While the two carried separate lists they disagreed, and the harness scored
+    a reader correct on a unit the app sent to a reviewer.
 
     Used for both sides. On the truth side None means the label prints no
     single figure to compare against, which makes the check not scoreable; on
     the reading side it means the reader returned nothing usable, which is a
     miss.
     """
-    if amount is None:
-        return None
-    key = re.sub(r"[^0-9A-Za-z]", "", str(unit or "")).upper()
-    if key not in _ML_PER_UNIT:
-        return None
-    return float(amount) * _ML_PER_UNIT[key]
+    return millilitres(amount, unit, _units())
 
 
 def _designations(printed: str | None) -> tuple[tuple[str, ...], ...]:

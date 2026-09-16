@@ -8,14 +8,32 @@ comparison rules need.
 """
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 import pytest
+import yaml
 
 from app.schemas.expected import BeverageClass
 from app.services.application_form import ApplicationFormError, record_from_form
 
 RULES_ROOT = Path("rules").resolve()
+MANIFEST = Path("tests/fixtures/labels/manifest.json").resolve()
+
+
+def _rule_tolerance() -> float:
+    """The tolerance the net-contents rule ships, as a fraction of the declared
+    figure.
+
+    The answer key below allows exactly this much, and no more. What the form
+    parses is what the rule then compares, so a form reading further from the
+    application's own figure than the rule forgives would fail the label the
+    form was filled in for. Read from the pack rather than written here, so the
+    two cannot drift.
+    """
+    rules = yaml.safe_load((RULES_ROOT / "malt" / "malt.yaml").read_text())["rules"]
+    rule = next(r for r in rules if r["rule_id"] == "malt.net_contents.matches_application")
+    return float(rule["tolerance"]["cross_unit_relative"])
 
 
 def _form(**overrides):
@@ -129,6 +147,86 @@ def test_net_contents_converts_to_millilitres(typed, millilitres):
 def test_net_contents_naming_no_number_goes_to_a_reviewer():
     record = _form(net_contents="see keg collar")
     assert record.net_contents.amount is None
+
+
+def test_the_unit_is_the_one_written_next_to_the_number():
+    """A compound statement names two quantities and this does not add them up,
+    so nobody can say which the application meant and a reviewer decides.
+
+    It used to read `1 PINT 9 FL OZ` as **1 fluid ounce**: the whole remainder
+    after the first number was searched for any unit at all, longest first, and
+    the fluid ounces belonging to the second figure were taken as the first
+    figure's unit.
+    """
+    assert _form(net_contents="1 PINT 9 FL OZ").net_contents.amount is None
+
+
+def test_a_number_in_a_name_is_not_a_net_contents_figure():
+    """Only a number with a unit written next to it declares a quantity."""
+    assert _form(net_contents="Cask 750 Reserve, 500 mL").net_contents.amount == pytest.approx(500)
+
+
+def test_a_unit_nobody_can_convert_goes_to_a_reviewer():
+    """It used to convert by 1 and declare 1 millilitre. The comparison then
+    ran on a number that means nothing, and told the reviewer the label
+    disagreed with the application on that basis."""
+    assert _form(net_contents="1 HOGSHEAD").net_contents.amount is None
+
+
+def test_a_metric_figure_beside_a_customary_one_is_the_declaration():
+    """The application records millilitres. Where the declared words carry
+    both, the metric figure is what was declared and the customary one is the
+    same quantity rounded — 350, not the 354.88 its twelve fluid ounces
+    convert to."""
+    assert _form(net_contents="NET CONT. 350 ML / 12 FL OZ").net_contents.amount == pytest.approx(350)
+
+
+def test_two_customary_figures_naming_one_quantity_are_that_quantity():
+    """A pint is sixteen fluid ounces by definition, so `1 PINT (16 FL OZ)` is
+    one container stated twice, not two."""
+    assert _form(net_contents="1 PINT (16 FL OZ)").net_contents.amount == pytest.approx(473.176473)
+
+
+def _application_net_contents() -> list[tuple[str, int | None]]:
+    """Every distinct net-contents string a real application in the fixture set
+    declares, with the millilitres the manifest records for it."""
+    labels = json.loads(MANIFEST.read_text())["labels"]
+    seen: dict[str, int | None] = {}
+    for entry in labels:
+        declared = (entry.get("application") or {}).get("net_contents")
+        if declared:
+            seen.setdefault(declared["value"], declared["ml"])
+    return sorted(seen.items())
+
+
+@pytest.mark.parametrize(("typed", "millilitres"), _application_net_contents())
+def test_every_real_application_string_parses_to_what_the_manifest_records(typed, millilitres):
+    """The answer key: the 20 distinct net-contents strings the real COLA
+    applications in `tests/fixtures/labels/manifest.json` declare.
+
+    Within the rule's own tolerance rather than exactly, because a customary
+    declaration cannot convert exactly into the metric figure the manifest
+    records — `11.2 FL. OUNCES` is 331.22 against a recorded 331, and that gap
+    is the reason the tolerance exists.
+
+    A manifest entry recording no millilitres — the keg collar stating four
+    volumes with one struck through — must parse to nothing, so the rule sends
+    it to a reviewer instead of comparing a number nobody can justify.
+    """
+    parsed = _form(net_contents=typed).net_contents.amount
+    if millilitres is None:
+        assert parsed is None, f"{typed!r} names no single quantity; the manifest records none"
+        return
+    assert parsed is not None, f"{typed!r} declares {millilitres} mL and parsed to nothing"
+    assert abs(parsed - millilitres) <= millilitres * _rule_tolerance()
+
+
+def test_the_answer_key_is_the_whole_fixture_set():
+    """A guard on the case above: if the manifest stops carrying application
+    net contents, that test would pass by running on nothing."""
+    key = _application_net_contents()
+    assert len(key) == 20
+    assert sum(1 for _, ml in key if ml is None) == 1
 
 
 def test_source_of_product_is_lowercased():

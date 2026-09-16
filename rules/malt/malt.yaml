@@ -202,10 +202,13 @@ rules:
       # two figures in the same unit are still compared exactly. The container
       # sizes the regulations authorize are rounded metric equivalents of
       # customary ones, so "12.7 FL. OZ." and 375 mL never convert into each
-      # other exactly. 1% is above the 0.550% that rounding needs across the
-      # sizes §4.72 and §5.203 authorize, and below the 1.408% between the two
-      # closest of them that print different customary figures.
-      # docs/decisions/0011 carries the working.
+      # other exactly. 1% is above the 0.633% the worst of that rounding needs
+      # across the sizes §4.72 and §5.203 authorize, and below the 1.216% that
+      # separates an authorized size from the customary figure printed for its
+      # nearest neighbour, so no authorized size can pass as another.
+      # docs/decisions/0014 carries the working, and
+      # tests/rules/_validators/test_quantity_match.py recomputes both bounds
+      # from the authorized size lists so a later edit cannot quietly loosen it.
       cross_unit_relative: 0.01
     evidence_required: [net_contents]
     effective_date: "2022-02-09"

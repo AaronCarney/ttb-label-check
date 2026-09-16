@@ -15,27 +15,23 @@ label is checked only for what must be on every label regardless.
 
 A declared quantity is words, and the rules compare numbers. Alcohol content
 keeps its words and yields the first percentage in them. Net contents keeps
-its words and yields millilitres, converted with the same table the rule pack
-uses, so adding a unit stays an edit to the rule pack.
+its words and yields millilitres, read by `app.rules.units` off the same
+shipped table the net-contents rule and the reading-accuracy harness read, so
+adding a unit stays an edit to `rules/tables/volume_units.yaml` and the form
+cannot drift from the rule that checks what the form declared.
 
 A blank field is not a value. It means the application declared nothing for
 that element, and the check against it reports that it does not apply.
 """
 from __future__ import annotations
 
-import re
-from functools import lru_cache
 from pathlib import Path
 
-import yaml
+from app.rules._validators._helpers import first_number
 
-# The unit words are matched exactly as the net-contents validator matches
-# them, so the form and the rule cannot read the same table two ways.
-from app.rules._validators._helpers import (
-    first_number,
-    normalize_words,
-    word_run_present,
-)
+# One parser, reading the rule pack's own unit table. The form, the
+# net-contents rule and the reading-accuracy harness all go through it.
+from app.rules.units import millilitres_from_text, shipped_table
 from app.schemas.application_record import (
     ApplicationRecord,
     BeverageType,
@@ -52,10 +48,6 @@ _BEVERAGE_TYPE_LABELS = {
     "malt_beverage": "malt beverage",
 }
 
-# The same table `rules/tables/volume_units.yaml` is registered under for the
-# net-contents rule: the loader keys a decision table by its file name.
-_VOLUME_UNITS_TABLE = Path("tables") / "volume_units.yaml"
-
 
 class ApplicationFormError(ValueError):
     """The posted application cannot be read. The message is shown to the user."""
@@ -67,50 +59,6 @@ def _clean(value: str | None) -> str | None:
         return None
     stripped = value.strip()
     return stripped or None
-
-
-@lru_cache(maxsize=4)
-def _volume_factors(rules_root: Path) -> tuple[tuple[tuple[str, ...], float | None], ...]:
-    """Each net-contents unit as its plain words, and the millilitres it makes.
-
-    Longest first, so "fluid ounces" is recognised before any shorter unit
-    whose words it contains.
-    """
-    path = rules_root / _VOLUME_UNITS_TABLE
-    if not path.is_file():
-        return ()
-    table = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
-    factors: list[tuple[tuple[str, ...], float | None]] = []
-    for entry in table.get("entries", []):
-        unit = normalize_words(str(entry.get("unit", "")))
-        if not unit:
-            continue
-        factor = entry.get("factor")
-        factors.append((unit, None if factor is None else float(factor)))
-    factors.sort(key=lambda pair: len(pair[0]), reverse=True)
-    return tuple(factors)
-
-
-def _millilitres(text: str, rules_root: Path) -> float | None:
-    """The millilitres a declared net contents means, or nothing.
-
-    Nothing when the words name no number, and nothing when they name a unit
-    the rule pack lists but cannot convert — in both cases the comparison has
-    no two numbers to put side by side and a reviewer decides.
-    """
-    amount = first_number(text)
-    if amount is None:
-        return None
-    # Only the words after the number can be its unit; a "750" in a brand name
-    # ahead of it is not.
-    match = re.search(r"[0-9]+(?:\.[0-9]+)?", text)
-    remainder = normalize_words(text[match.end():]) if match else ()
-    for unit, factor in _volume_factors(rules_root):
-        if word_run_present(remainder, unit):
-            return None if factor is None else amount * factor
-    # A unit the table does not list converts by 1, which is the rule pack's
-    # own reading of an unrecognised unit.
-    return amount
 
 
 def _quantity(text: str | None, amount: float | None) -> DeclaredQuantity | None:
@@ -172,7 +120,8 @@ def record_from_form(
         beverage_type=kind,
         alcohol_content=_quantity(alcohol_text, first_number(alcohol_text)),
         net_contents=_quantity(
-            net_text, _millilitres(net_text, rules_root) if net_text else None
+            net_text,
+            millilitres_from_text(net_text, shipped_table(rules_root)) if net_text else None,
         ),
         source_of_product=source,
         **declared,
