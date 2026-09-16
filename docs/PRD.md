@@ -100,12 +100,26 @@ needs review where it cannot tell.
 **FR-7** — If a label value differs from its application value only in a way the matching rules treat
 as the same value, the product reports a match. Brand name, class/type designation, name and address
 and country of origin are compared ignoring letter case, runs of spaces and line breaks, curly
-against straight quotes, and the ™, ® and © marks. Class/type also treats "whisky" and "whiskey" as
-the same. Name and address also ignores a "Bottled by"-style phrase, street, ZIP code, phone and
-website, and a State name against its postal code. Country of origin also accepts the abbreviations
-and variant spellings 19 CFR 134.45 allows. Alcohol content and net contents are compared as
-numbers, net contents after converting units, and a stated proof must equal twice the alcohol by
-volume. Where these rules cannot settle a difference, the product reports needs review.
+against straight quotes, the ™, ® and © marks, and accents. Class/type, name and address and country
+of origin also ignore punctuation. Class/type also treats "whisky" and "whiskey" as the same. Name
+and address also ignores a "Bottled by"-style phrase, street, ZIP code, phone and website, and a
+State name against its postal code.
+
+Brand name is the exception: it keeps punctuation and scores the difference rather than ignoring it,
+so the answer depends on how much of the name the punctuation is. "Stones Throw" against an
+application's "Stone's Throw" scores 0.9846 where a match needs 0.92, and reports a match; the same
+dropped character in a short name falls into the review band on its own. Brand is also compared
+against every name the application says the label may carry, not its brand-name field alone. See
+`docs/decisions.md#0017` and `docs/decisions.md#0015`.
+
+Country of origin is read only as the English name the application declares, appearing as whole
+words inside the label's wording. The abbreviations, adjectival forms, other-language names and
+variant spellings 19 CFR 134.45 allows are not read; a label stating its origin in one of those
+forms goes to a reviewer rather than being rejected. See `docs/decisions.md#0016`.
+
+Alcohol content and net contents are compared as numbers, net contents after converting units, and a
+stated proof must equal twice the alcohol by volume. Where these rules cannot settle a difference,
+the product reports needs review.
 
 **FR-8** — For every check, the product shows the value it read from the label beside the application
 value.

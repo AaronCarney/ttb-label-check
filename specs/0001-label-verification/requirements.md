@@ -101,7 +101,13 @@ and country of origin are each compared with the application where the applicati
 - Given the variant whose application brand differs from the label only in case and punctuation
   ("STONE'S THROW" against "Stone's Throw"), when it is checked, then the brand is a match.
 - Given a brand of "Stones Throw" against an application's "Stone's Throw", when it is checked, then
-  the brand is needs review.
+  the brand is a match, and the finding carries the similarity score the two reached (0.9846) so the
+  reviewer sees the difference. The dropped apostrophe is a spelling change Form TTB F 5100.31
+  item 3.b permits without a new approval; it is scored rather than ignored, so the same dropped
+  character in a short name reaches the review band instead. See `docs/decisions.md#0017`.
+- Given a brand mark of "BONEFISH" against an application whose brand-name field says "TACONIC
+  DISTILLERY" and whose applicant block lists "BONEFISH (Used on label)", when it is checked, then
+  the brand is a match and the finding names which declared value matched.
 - Given a class/type of "Bourbon Whiskey" against an application's "Bourbon Whisky", when it is
   checked, then the class/type is a match.
 - Given an alcohol statement of "45% Alc./Vol. (90 Proof)" against an application's "45%", when it is
@@ -111,7 +117,11 @@ and country of origin are each compared with the application where the applicati
 - Given a name and address that differs from the application only by "Bottled by", the ZIP code and
   "California" against "CA", when it is checked, then name and address is a match.
 - Given a country of origin of "Brasil" against an application's "Brazil", when it is checked, then
-  country of origin is a match.
+  country of origin is needs review, not a match and not a rejection. The check reads one form of
+  the country's name — the English name the application declares — and reports that it could not
+  settle anything else, because 19 CFR 134.45 gives the acceptable variants by a test
+  ("unmistakably indicates") rather than as a table, and a wrong verdict on a real label is the one
+  failure this product cannot have. See `docs/decisions.md#0016`.
 **Priority**: P0
 
 ### R8: Values side by side

@@ -65,5 +65,5 @@ the default, and a cloud vision reader (`docs/decisions.md#0005`).
 - A rule the app applies lives in the YAML pack with its CFR citation, not in Python. Validator code
   carries no regulation citation; `tests/test_validator_registry.py` enforces that.
 - A comment or docstring explains what the code does and why, and cites this project's own records
-  (`docs/decisions/`, `docs/PRD.md`) or the CFR. It does not reference a planning stage, a work
+  (`docs/decisions.md`, `docs/PRD.md`) or the CFR. It does not reference a planning stage, a work
   cycle, or a document that does not exist in this repository.

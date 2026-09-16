@@ -10,7 +10,6 @@ All notable changes to this project are recorded here. The format follows
 
 - A label is read on this machine, with no outbound call, and that reader is the default. A second
   reader using a vision model sits behind the same interface. See `docs/decisions.md#0005`.
-- The reader's accuracy is scored against the real labels and their recorded ground truth.
 - Every declared element of an application — brand name, class and type, alcohol content, net
   contents, name and address, country of origin, and the health warning — is compared against what
   the label says, and each comparison states what counts as the same value.
@@ -26,9 +25,29 @@ All notable changes to this project are recorded here. The format follows
   to the label's own precision. Two numbers in the same unit are still compared exactly.
 - The unit table now lists the spelled-out forms `fl ounce` and `fl ounces`, so a label reading
   `11.2 FL. OUNCES` converts instead of going to a reviewer as unreadable.
+- A brand is compared against every name the application says the label may carry — the declared
+  brand, the fanciful name, and each trade name the applicant marks "(Used on label)" — instead of
+  against the brand-name field alone, and the finding names which of them matched. Three approved
+  labels in the test corpus were being rejected for carrying a name their own application states in
+  writing. The comparison also folds accents, as every other check already did, and a brand whose
+  first letter disagrees goes to a reviewer instead of being rejected outright, because a stylised
+  first letter is the most likely reading error. See `docs/decisions.md#0015`.
 
 ### Changed
 
+- The reader's accuracy is scored against what each label prints, transcribed from the label itself,
+  rather than against the application the label was filed under. The two records routinely differ
+  without either being a misreading, so the old comparison counted a correct reading as wrong.
+- A label filed without a declared beverage is checked against nothing rather than against the
+  spirits rules, and every reply now names the rule set that ran. See `docs/decisions.md#0010`.
+- A country of origin the app cannot read goes to a reviewer instead of being rejected. The check
+  reads the English name the application declares; the other forms customs marking rules accept — the
+  country's own language, an abbreviation, the adjectival form — are not read, and a label using one
+  of those was previously reported as failing. See `docs/decisions.md#0016`.
+- The alcohol-content wording check no longer runs, with its reason recorded in the rule pack. The
+  figure on the label is still compared with the figure the application declares; what is not checked
+  is whether the statement is phrased the way the regulations require, because the reader returns the
+  percentage it found and not the words the label printed. See `docs/decisions.md#0011`.
 - The app loads the OCR models once for the process instead of once for every label, so a label no
   longer waits about a second for them, and the readiness check at `/healthz` warms the reader that
   serves submissions rather than one it discards.

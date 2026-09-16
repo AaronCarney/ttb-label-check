@@ -91,11 +91,33 @@ Punctuation other than quote style is kept, because dropping it can change a nam
 | Country of origin (imports) | **Normalised against a list** of English names plus accepted abbreviations and variants | Not recognised: needs review | 19 CFR 134.45 |
 | Required presence | Per beverage type (see [label-elements.md](../reference/label-elements.md)) | Required field absent: fail; optional field absent: pass | 4.32, 4.36(a), 5.63, 7.63 |
 
+**Corrected 2026-09-16. Two of the proposals above were settled the other way, and the table is kept
+as written so the change is legible.**
+
+- **Brand name.** The row proposes "differs only by punctuation … needs review", which contradicts
+  this document's own opening paragraph: allowable revision 3.b permits a label to change punctuation
+  without a new approval. The product keeps punctuation and **scores** the difference instead of
+  ignoring it or routing it to a person, so the answer depends on how much of the name the
+  punctuation is — "Stones Throw" against "Stone's Throw" scores 0.9846 where a match needs 0.92 and
+  reports a match, while the same dropped character in a short name reaches the review band on its
+  own. The comparison also runs against every name the application says the label may carry, not its
+  brand-name field alone. See [decision 0017](../decisions.md#0017) and
+  [decision 0015](../decisions.md#0015).
+- **Country of origin.** The row proposes a list of "English names plus accepted abbreviations and
+  variants". No such list exists to load: 19 CFR 134.45(b)–(c) gives the acceptable forms by example
+  and by the test "unmistakably indicates", not as a table, so building one means writing a
+  judgement call per country. The product reads the English name the application declares and sends
+  every other form to a reviewer at warn severity rather than rejecting it. See
+  [decision 0016](../decisions.md#0016).
+
 ## Cases worked through
 
 - "STONE'S THROW" vs "Stone's Throw": equal after case-folding. Pass, with the case difference shown.
 - "Stone’s Throw" (curly) vs "Stone's Throw": equal after quote mapping. Pass.
-- "Stones Throw" vs "Stone's Throw": punctuation differs. Needs review.
+- "Stones Throw" vs "Stone's Throw": punctuation differs. Scored 0.9846 against a 0.92 match
+  threshold. Pass, with the score shown. *(Corrected 2026-09-16 — this line read "Needs review",
+  against the allowable revision this document's own opening paragraph cites. See
+  [decision 0017](../decisions.md#0017).)*
 - "45% Alc./Vol. (90 Proof)" vs application "45%": ABV 45 = 45; proof 90 = 2 × 45; format uses "%",
   "alc", "/" and "vol" with periods, all permitted. Pass.
 - "Alc. 45% by Vol." vs "45% Alc./Vol.": both 45. Pass.

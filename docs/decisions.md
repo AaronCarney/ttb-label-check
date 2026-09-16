@@ -987,3 +987,74 @@ label names the right country in a form this product does not recognise", so **b
 label that genuinely names the wrong country is not rejected outright; it is flagged for a person. That is
 the trade this product chooses: a wrong verdict on a real label is the one failure it cannot have, and an
 extra review is not a wrong verdict.
+
+<a id="0017"></a>
+## 0017. A punctuation-only brand difference is a match, and the requirement text is corrected to say so
+
+**Decided:** 2026-09-16. **Evidence:** Form TTB F 5100.31, allowable revisions item 3.b; measured against
+the shipped comparison; [0015](#0015), which recorded the conflict and left it open.
+
+**Chosen.** Where a label's brand mark differs from the application's only in punctuation, the product
+reports a **match**, graded by how much of the name the punctuation is. The four places that said it
+should report needs review are corrected to describe what the product does and why:
+
+| Document | What it said | What it says now |
+|---|---|---|
+| `docs/PRD.md` FR-7 | Listed what brand comparison ignores, and punctuation was not on the list | Brand keeps punctuation and scores the difference; the score and the threshold are named |
+| `specs/0001-label-verification/requirements.md` R7 | *"Given a brand of 'Stones Throw' against an application's 'Stone's Throw' … then the brand is needs review"* | …then the brand is a match, and the finding carries the score |
+| `docs/research/2026-09-15-matching-rules.md`, "Proposed rule per field" | Brand row: *"Differs only by punctuation or a likely misread: needs review"* | Kept as written, with a dated correction under the table |
+| the same document, "Cases worked through" | *"'Stones Throw' vs 'Stone's Throw': punctuation differs. Needs review."* | Scored 0.9846, pass, with the score shown |
+
+Measured here on 2026-09-16 against `app/rules/brand_match.py` as shipped:
+
+| Route | `Stones Throw` / `Stone's Throw` |
+|---|---|
+| Exact, punctuation kept | no — `stones throw` against `stone's throw` |
+| Whole words | no — `("stones","throw")` against `("stone","s","throw")` |
+| Score (Jaro-Winkler) | **0.9846**, against a match threshold of 0.92 and a review floor of 0.85 |
+
+**Why.** The regulator's own form settles it. Form TTB F 5100.31's allowable revisions, item 3.b, permits
+an approved label to change "the spelling (including punctuation marks, changing letters from upper case
+to lower case and vice versa, and abbreviations) of words" with no new approval, provided the change does
+not alter the meaning. A dropped apostrophe is exactly that change, so a product that stopped such a label
+for review would be stopping a revision TTB has already said needs no approval.
+
+The research document was the source all four texts descended from, and it **contradicted itself**: its
+opening paragraph cites that same item 3.b, and its worked case says needs review. The requirement text
+inherited the worked case rather than the citation. The corpus answer key,
+`tests/fixtures/labels/manifest.json`, has always said pass with no other outcome acceptable, and it is
+transcribed from the labels — the one source here that is not an opinion.
+
+This is also what the brief asks for in the place it is loudest. Dave Morrison's complaint is that
+trivial differences consume the judgement he is paid for: *"Technically a mismatch? Sure. But it's
+obviously the same thing."* Sending every dropped apostrophe to a person is that complaint, implemented.
+
+**Rejected.** *Change the engine to report needs review instead* — it would keep the documents as
+written at the price of routing a permitted revision to a reviewer on every label that drops a mark,
+which is the cost the brief's senior agent names first, and it would have the product disagree with the
+answer key transcribed off the labels. *Restore the punctuation strip, so the difference is ignored
+outright* — measured and rejected in [0015](#0015): stripping produced a silent **exact** match on a pair
+that differed, and the envelope then told the reviewer the brand matched the application exactly, which is
+a false statement about two strings. Scoring says the true thing and shows it. *Leave the documents and
+let this entry carry the difference* — this document's own preamble puts a governing document above an
+entry, so an uncorrected FR-7 would make the engine the defect and oblige a later lane to "fix" working
+code back to a wrong answer. *Widen the manifest to whichever answer the documents preferred* — the
+manifest is ground truth transcribed from the labels and never moves to make a suite agree with prose.
+
+**Because** a requirement that contradicts the regulator's own allowable-revision list — and the source
+document it was drawn from, in that document's own opening paragraph — is the text that is wrong, not the
+product built against the list.
+
+**Cost, stated.**
+
+- **The product reports a match on a brand pair that is not character-for-character identical, without
+  asking a person.** The guard is that the score is in the finding and the reviewer sees it; there is no
+  route by which a punctuation difference is silently erased, which is the failure [0015](#0015) removed.
+- **The grading is by proportion of the name, not by meaning.** A long brand absorbs a punctuation
+  difference that a short one does not, so two names that differ in the same way can be answered
+  differently depending on their length. That is deliberate — a character is a larger share of a short
+  name, and the short case is the one where a dropped mark is more likely to be a different name — but it
+  is a rule about string length, and it cannot detect the rare punctuation change that does alter meaning.
+- **Two approved documents changed after approval.** `docs/PRD.md` FR-7 and
+  `specs/0001-label-verification/requirements.md` R7 were amended rather than the code; the amendment is
+  logged in `docs/PRD-decisions.md`, which had no entries before this one.
