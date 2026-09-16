@@ -9,6 +9,6 @@
     "The net contents statement is printed with its prefix, 'NET CONTENTS 750 ML', on its own line; the quantity and unit as printed are '750 ML'.",
     "The alcohol statement has a space before the per-cent sign: 'ALC. 14 % BY VOL.'",
     "The warning heading has a space before its colon: 'GOVERNMENT WARNING :'. warning_text keeps that space.",
-    "Warning heading is in capitals, in the same weight as the body."
+    "Warning heading is in capitals and set in a bold serif, heavier than the body."
   ]
 }

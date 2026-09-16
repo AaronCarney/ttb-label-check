@@ -9,6 +9,6 @@
     "The brand logotype carries a trailing full stop, printed 'MARK WEST.' on both images.",
     "The label breaks CONSUMPTION across a line as 'CON-' / 'SUMPTION'; warning_text records the unhyphenated word, per the manifest's warning_exact rule that a hyphen splitting a word at a line end is ignored.",
     "Letter spacing inside the warning is irregular, with wide gaps between some words ('GOVERNMENT   WARNING:', 'NOT  D R I N K'); warning_text records single spaces.",
-    "Warning heading is in capitals but in the same weight as the warning body."
+    "Warning heading is in capitals and set bolder than the warning body."
   ]
 }
