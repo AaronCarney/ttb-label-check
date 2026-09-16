@@ -34,9 +34,10 @@ class BatchItem(BaseModel):
 class BatchInFlightState(BaseModel):
     """Session-scoped state for an in-progress batch.
 
-    The actual ``recent_dispositions`` deque and ``calls`` ring buffer are
-    in-memory mutable structures held outside the Pydantic envelope, on
-    ``InFlightBatch``; this model captures only the serializable subset.
+    The actual ``recent_dispositions`` deque is an in-memory mutable structure
+    held outside the Pydantic envelope, on ``InFlightBatch``; this model
+    captures only the serializable subset. Reader calls are not per-batch state
+    at all — they go to the one ring buffer the process-wide reader holds.
     """
 
     model_config = ConfigDict(extra="forbid", frozen=True)

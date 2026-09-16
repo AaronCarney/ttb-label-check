@@ -34,8 +34,6 @@ def test_in_flight_batch_constructs_with_items_and_lookahead():
     assert in_flight.results == {}
     assert isinstance(in_flight.recent_dispositions, deque)
     assert in_flight.recent_dispositions.maxlen == 10
-    assert isinstance(in_flight.calls, deque)
-    assert in_flight.calls.maxlen == 200
 
 
 def test_in_flight_batch_queue_is_bounded_by_lookahead_plus_one():
@@ -81,3 +79,13 @@ def test_in_flight_batch_does_not_carry_subscriber_state():
     items = (_stub_item("lbl-0", position=0),)
     in_flight = InFlightBatch(batch_id="B-005", agent_id="a", items=items, lookahead_k=3)
     assert not hasattr(in_flight, "subscribers")
+
+
+def test_in_flight_batch_does_not_carry_a_call_buffer():
+    """Reader calls are recorded once, into the ring buffer the process-wide
+    reader holds, and every record carries its own batch and label. A second
+    per-batch copy here would be a duplicate nothing writes or reads, so this
+    test pins its absence."""
+    items = (_stub_item("lbl-0", position=0),)
+    in_flight = InFlightBatch(batch_id="B-006", agent_id="a", items=items, lookahead_k=3)
+    assert not hasattr(in_flight, "calls")

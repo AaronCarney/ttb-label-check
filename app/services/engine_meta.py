@@ -28,7 +28,6 @@ class EvaluationTimeline:
     completed_at: datetime | None = None
     total_duration_ms: int = 0
     vision_duration_ms: int = 0
-    orchestrator_duration_ms: int = 0
     per_rule_durations: dict[str, int] = field(default_factory=dict)
     per_rule_dispositions: dict[str, str] = field(default_factory=dict)
     per_rule_evidence_refs: dict[str, str] = field(default_factory=dict)
@@ -39,9 +38,6 @@ class EvaluationTimeline:
 
     def record_vision_done(self, duration_ms: int) -> None:
         self.vision_duration_ms = duration_ms
-
-    def record_orchestrator_done(self, duration_ms: int) -> None:
-        self.orchestrator_duration_ms = duration_ms
 
     def record_rule_done(self, *, rule_id: str, duration_ms: int, disposition: str, evidence_ref: str) -> None:
         self.per_rule_durations[rule_id] = duration_ms

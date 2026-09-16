@@ -9,7 +9,6 @@ def test_timeline_constructs_with_evaluation_id():
     t = EvaluationTimeline(evaluation_id="EV-001")
     assert t.evaluation_id == "EV-001"
     assert t.vision_duration_ms == 0
-    assert t.orchestrator_duration_ms == 0
     assert t.per_rule_durations == {}
     assert t.failures == []
 
@@ -18,12 +17,6 @@ def test_timeline_records_vision_duration():
     t = EvaluationTimeline(evaluation_id="EV-001")
     t.record_vision_done(123)
     assert t.vision_duration_ms == 123
-
-
-def test_timeline_records_orchestrator_duration():
-    t = EvaluationTimeline(evaluation_id="EV-001")
-    t.record_orchestrator_done(456)
-    assert t.orchestrator_duration_ms == 456
 
 
 def test_timeline_records_per_rule_outcome():

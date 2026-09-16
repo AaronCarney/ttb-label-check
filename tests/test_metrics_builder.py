@@ -6,7 +6,6 @@ from app.services.metrics_builder import MetricsBuilder
 def test_build_returns_metrics():
     t = EvaluationTimeline(evaluation_id="EV-001")
     t.record_vision_done(100)
-    t.record_orchestrator_done(200)
     t.record_rule_done(rule_id="R-001", duration_ms=10, disposition="pass", evidence_ref="r1")
     t.record_rule_done(rule_id="R-002", duration_ms=20, disposition="fail", evidence_ref="r2")
     t.finish(total_duration_ms=400)
@@ -15,7 +14,6 @@ def test_build_returns_metrics():
     assert isinstance(m, Metrics)
     assert m.total_duration_ms == 400
     assert m.vision_duration_ms == 100
-    assert m.orchestrator_duration_ms == 200
     assert {(e.rule_id, e.duration_ms) for e in m.per_rule_durations_ms} == {
         ("R-001", 10), ("R-002", 20),
     }

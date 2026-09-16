@@ -230,7 +230,7 @@ class CloudVisionExtractor:
                 ts=datetime.now(timezone.utc),
                 batch_id=label.batch_id,
                 label_id=label.label_id,
-                stage="vision.gpt4o_tiebreak",
+                stage="vision.cloud_read",
                 request={
                     "field_name": field_name,
                     "call_kind": call_kind,

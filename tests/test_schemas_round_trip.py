@@ -313,7 +313,7 @@ def test_call_record_round_trip() -> None:
         ts=datetime(2026, 4, 1, 12, 0, 0, tzinfo=timezone.utc),
         batch_id="b1",
         label_id="l1",
-        stage="orch.brand_disambig",
+        stage="vision.cloud_read",
         request={"prompt_hash": "abc", "params": {"temperature": 0}},
         response={"text": "match"},
         latency_ms=420,

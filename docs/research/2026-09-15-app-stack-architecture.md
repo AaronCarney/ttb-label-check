@@ -148,6 +148,23 @@ calls: deque[CallRecord] = field(default_factory=lambda: deque(maxlen=200))
 The `C-RawJSONDrawer` component fetches `GET /batches/{batch_id}/labels/{label_id}/calls` and renders the records grouped by stage. Reject "log to file only" — reviewer can't see it. Reject "full unbounded list" — a stuck batch could OOM the process; a 200-record cap × ~12 KB/record ≈ 2.4 MB, safe.
 *Grounding:* [T8](./2026-09-15-federal-ux-for-senior-users.md)'s `C-RawJSONDrawer` requirement explicitly demands "the full structured RejectionReason JSON, the full orchestrator prompt + output (when an LLM was involved), the full vision response envelope," and [T5](./2026-09-15-llm-orchestration-architecture.md) §Recommendation #8 demands `prompt_version`, `model_version`, `rule_set_version`, `input_hash`, `output_hash`, `latency_ms`, `ttft_ms`. The deque keeps insertion O(1) and capped, matching [T6](./2026-09-15-batch-processing-architecture.md)'s "in-memory per-batch state."
 
+**As built, 2026-09-16.** The decision holds — every reader call is captured in full, into a
+bounded in-memory ring buffer. The *shape* it assumed was overtaken. Two things changed after it
+was written. The readers became one per process rather than one per request, so the buffer they
+record into (`app/logging/ring_buffer.py`, held by `app/deps.py`) outlives any single request and
+already spans every batch. And `CallRecord` carries `batch_id` and `label_id` on every entry, so
+the per-batch view this decision asked for is a filter over that one buffer, not a second copy of
+it. A per-batch `calls` deque was therefore carried on `InFlightBatch` for a while, written by
+nothing and read by nothing; it is deleted. The 200-record cap and the O(1) reasoning above are
+unchanged and now apply to the single buffer.
+
+The raw-call panel itself is **not built**, and the route it would fetch does not exist. It checks
+no label and scores nothing in the brief, so it sits behind every check that does. It goes in the
+README's list of what this project does not do, with that reason, in the form
+`docs/decisions/0006` sets for a deliberate omission. Nothing about that is a change to this
+decision — the capture it asked for is in place, so the panel is a view away whenever it is worth
+building.
+
 ### Rule data
 
 **Q15 — Rule data location.**

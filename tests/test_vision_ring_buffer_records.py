@@ -46,10 +46,11 @@ async def test_cloud_writes_9_call_records():
         await extractor.extract(label)
     assert len(ring) == 8
     stages = [r.stage for r in ring]
-    # 1 layout call + 7 per-field calls (heading_typography folded into
-    # gov_warning post-consolidation); all under vision.gpt4o_tiebreak per
-    # cloud-mode policy.
-    assert all(s == "vision.gpt4o_tiebreak" for s in stages)
+    # 1 layout call + 7 per-field calls; the heading-typography check is made
+    # inside the government-warning call rather than as a call of its own. The
+    # cloud reader reads the whole label, so every one of them is recorded
+    # under the single stage vision.cloud_read.
+    assert all(s == "vision.cloud_read" for s in stages)
     assert all(r.provider == "openai" for r in ring)
     assert all(r.model == "gpt-4o-2024-08-06" for r in ring)
 

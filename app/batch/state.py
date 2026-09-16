@@ -2,8 +2,14 @@
 
 Owns the per-batch state machinery that does not belong inside frozen Pydantic:
 the per-batch ``asyncio.Queue`` (intake → worker), the SSE subscriber set, the
-``recent_dispositions`` sliding window, the ``calls`` ring buffer, the per-label
-``results`` map, and the ``current_index`` cursor.
+``recent_dispositions`` sliding window, the per-label ``results`` map, and the
+``current_index`` cursor.
+
+Calls the readers make are not held here. One reader serves the process
+(``app/deps.py``) and records into the one ring buffer it holds, which outlives
+the request; every ``CallRecord`` carries its own ``batch_id`` and ``label_id``,
+so a per-batch view of those calls is a filter over that buffer rather than a
+second copy of it.
 
 Lives in ``app.state.batches: dict[str, InFlightBatch]`` — process-local, with
 nothing about a submission persisted. Lifespan teardown evicts.
@@ -15,7 +21,6 @@ from dataclasses import dataclass, field
 
 from app.batch.queue import BoundedQueue
 from app.schemas.batch import BatchInFlightState, BatchItem
-from app.schemas.calls import CallRecord
 from app.schemas.wire.disposition import DispositionEnvelope
 
 
@@ -38,7 +43,6 @@ class InFlightBatch:
     recent_dispositions: deque = field(
         default_factory=lambda: deque(maxlen=10)
     )
-    calls: deque = field(default_factory=lambda: deque(maxlen=200))
     queue: "BoundedQueue[BatchItem]" = field(init=False)
 
     def __post_init__(self) -> None:
