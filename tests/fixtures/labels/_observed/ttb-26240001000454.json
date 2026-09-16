@@ -1,12 +1,13 @@
 {
   "brand_name": "I Heard Cassarole",
   "abv": "ALC. / VOL. 8.0 %",
-  "net_contents": null,
+  "net_contents": "15.5 US GALLONS / 10.8 US GALLONS / 7.75 US GALLONS / 5.16 US GALLONS",
   "warning_text": "GOVERNMENT WARNING: (1) ACCORDING TO THE SURGEON GENERAL, WOMEN SHOULD NOT DRINK ALCOHOLIC BEVERAGES DURING PREGNANCY BECAUSE OF THE RISK OF BIRTH DEFECTS. (2) CONSUMPTION OF ALCOHOLIC BEVERAGES IMPAIRS YOUR ABILITY TO DRIVE A CAR OR OPERATE MACHINERY, AND MAY CAUSE HEALTH PROBLEMS\"",
   "warning_heading_all_caps": true,
   "notes": [
     "A photograph of a printed keg collar lying on concrete, not flat artwork, so the small type is soft and the disc is slightly tilted.",
-    "net_contents is null because the collar declares no single quantity. It preprints four sizes on four lines - '15.5 US GALLONS', '10.8 US GALLONS', '7.75 US GALLONS', '5.16 US GALLONS' - and a hand-drawn stroke crosses the '7.7' of the third. The stroke could be a tick selecting that size or a line cancelling it; the image does not settle which, so no value is recorded rather than a guess.",
+    "The collar declares no single quantity. It preprints four sizes on four lines under the heading 'NET CONTENTS:', and the reading above joins those four lines in printed order with ' / '. Each of the four is transcribed as printed.",
+    "A hand-drawn stroke crosses the '7.7' of the third line, '7.75 US GALLONS'. It could be a tick selecting that size or a line cancelling it; the photograph does not settle which, so no single value is picked out of the four.",
     "The brand is handwritten in marker, 'I Heard Cassarole', below the net-contents list. The final letter of 'Cassarole' is a loop that could also be read as 'u'.",
     "The printed brewery logo reads 'Mash Cult' over 'Brewery' in a handwriting-style face, at the top centre. It is the other name on the collar.",
     "The alcohol statement is part printed, part handwritten: printed 'ALC. / VOL.', then '8.0' in marker, then a printed '%'.",

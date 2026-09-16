@@ -8,7 +8,8 @@
     "One flat can wrap, so there is a single image covering the whole can.",
     "The brand carries a diacritic: the first letter is S with a caron, 'ŠVYTURYS', inside a black oval with '1784' below it. It is printed the same way on the bottom band.",
     "The front panel states the alcohol as '5.2% ALC./VOL.' with no space around the slash; the side information panel states it as 'BEER - 5.2% ALC./VOL.' with an en dash after BEER. The reading above is the front panel's.",
-    "Net contents appears once, in the side panel: '1 PT. 3.2 FL. OZ. / 568 mL.', with a full stop after mL. The gap between 'FL.' and 'OZ.' is narrower than the other word spaces and may be no space at all; the image cannot settle it.",
+    "Net contents appears once, in the side panel. The space between 'FL.' and 'OZ.' was measured on the pixels rather than judged by eye: it is 3 columns of blank, which matches the narrowest confirmed word space on the same line ('/' to '568' and '568' to 'mL' are both 3) and is wider than every gap inside a token (1 to 2). So it is a space, and the wording is 'FL. OZ.'",
+    "The full stop after mL is printed faintly - about grey 165 where the background is 210 and the letter strokes are 88 to 138 - but it is present, three columns past the foot of the L.",
     "Warning is in the side panel, body in sentence case wrapped over narrow lines; the heading 'GOVERNMENT WARNING:' is bold capitals."
   ]
 }
