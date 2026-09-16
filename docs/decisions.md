@@ -1058,3 +1058,87 @@ product built against the list.
 - **Two approved documents changed after approval.** `docs/PRD.md` FR-7 and
   `specs/0001-label-verification/requirements.md` R7 were amended rather than the code; the amendment is
   logged in `docs/PRD-decisions.md`, which had no entries before this one.
+
+<a id="0018"></a>
+## 0018. An uploaded label image is kept as a file, not in the process that received it
+
+**Decided:** 2026-09-16.
+
+**Chosen.** The image a grader uploads is written to a file — one per evaluation, named for the
+evaluation id and suffixed with its media type — in a directory under the machine's temporary
+directory, and `GET /labels/{evaluation_id}/image` reads it back from there. Three properties come
+with it. An id that is not letters, digits, hyphen or underscore is refused, so nothing a caller puts
+in the URL can name a file outside that directory. A write lands on a staging name and is then moved
+onto its final name, so a process reading the directory never sees a half-written image. And an image
+is dropped once it is seven days old, swept when the next one is written.
+
+**Rejected.** *The 64-entry dictionary of raw bytes held in one process, which this replaces.* It
+failed three ways a grader meets in normal use: the 65th upload evicted the first page's image, a
+restart lost every image, and where the service runs more than one worker the page and its image came
+from different processes so the image was missing about half the time. All three are one property —
+the bytes lived in one process's memory — and no bound on the dictionary fixes any of them.
+
+*A `data:` URI embedded in the result page.* It needs no store at all, which is genuinely simpler,
+but it inflates the page by a third of the image's size and re-sends it whole on every render, and
+the image then exists only inside one rendered page, so a reviewer cannot reopen a result or send
+someone a link to it.
+
+*SQLite.* Durable, single-file, and no harder to deploy — but it adds a schema and a blob column to
+store what the filesystem already stores as files, and it answers no question the files do not.
+
+*Object storage, S3 or equivalent.* The only option that also survives the container being replaced
+and a deployment of more than one container. It needs an account, a key and an outbound call, and
+[0004](#0004) requires the same application to run from a clone with none of those.
+
+**Because** [0004](#0004) makes the local clone and the deployed container the same application, so
+the store has to need nothing from either environment: no account, no service, no configuration. A
+directory of files is the only one of the four that needs nothing from both.
+
+**Cost, stated.**
+
+- **The images do not survive the container being replaced.** A rebuild or a redeploy starts with an
+  empty directory, so a result page opened before it shows a broken image. Surviving that means paid
+  persistent storage, which is a cost this prototype has no reason to carry.
+- **A deployment of more than one container does not share the directory.** Every worker on one host
+  does, which is the shape this deploys in; two hosts do not. Object storage is the answer if that
+  ever changes, and nothing here has to be undone to get there.
+- **The bound on growth is age, not size.** A burst of large uploads inside the retention window is
+  bounded only by the disk under it. Age was chosen over a count because a count is exactly what put
+  a live page's own image at risk.
+- **The sweep reads the whole directory on every write.** At this scale it is nothing beside the
+  label read it follows. At a scale where it is not, the sweep is the part that changes.
+
+<a id="0019"></a>
+## 0019. The browser-facing surface is one module per job, behind one router
+
+**Decided:** 2026-09-16.
+
+**Chosen.** `app/api/ui.py` — 482 lines doing six unrelated jobs — becomes the package `app/api/ui/`,
+one module per job: the three page shells, the single-label upload, the image route and its store,
+the sample download, the bulk upload, and two support modules for what more than one of them needs.
+`app/api/ui/__init__.py` mounts all of them on one `router`, so `app/main.py` still includes one
+router, and the two dependencies a test overrides are still imported from `app.api.ui`.
+
+**Rejected.** *Leaving it as one module.* Its own docstring claimed the module "does NOT import from
+`app.services`, `app.vision`, or `app.rules`", and that was false: two of the six jobs run the
+engine and four do not. One module cannot carry a true statement about what it depends on while its
+jobs disagree about the answer, and that statement is the one a reader needs in order to know which
+routes can fail for engine reasons.
+
+*Six modules registered one by one in `app/main.py`.* It puts the shape of the browser surface in the
+file that is about boot order, and it makes adding a page an edit to the application factory.
+
+*Splitting on the URL instead of on the job.* `/batches` renders a form, `/batches/sample.zip`
+streams a download and `/batches/upload` starts a batch worker. They share a prefix and nothing else,
+so a split on the path would have put three unrelated jobs back in one module.
+
+**Because** the jobs differ in what they depend on, not in what they are called: page rendering needs
+Jinja and the settings, and the two upload routes additionally need the evaluator, the rule pack and
+the reader. Splitting on that line is what lets each module say truthfully what it reaches for.
+
+**Cost, stated.**
+
+- **Six files where there was one, and two of them exist only to be shared.** Finding where the Jinja
+  environment is built is now one import hop rather than a scroll.
+- **Two names are importable from two places.** `app.api.ui` re-exports the two dependency-override
+  seams so existing imports keep working, and they also live in the modules that define them.

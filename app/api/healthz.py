@@ -29,10 +29,11 @@ async def healthz(settings: Settings = Depends(_get_settings)) -> JSONResponse:
     — and the next call tries again. Later calls answer from what the first one
     found, so a health check stays fast.
 
-    What this does not do is warm the serving path. Every request builds its
-    own evaluator (``app/deps.py``), so the models loaded here are discarded
-    with the evaluator that loaded them. Sparing a submission the load would
-    mean giving the process one shared reader to hand out.
+    It also warms the serving path, which it did not always do. The local
+    reader is one object for the whole process (``app/deps.py``), so the models
+    this call loads are the ones the next submission reads with, and that
+    submission does not pay the load again. The hosted reader loads nothing, so
+    there is nothing to warm.
 
     No label is read here.
     """

@@ -13,7 +13,7 @@ from pathlib import Path
 import pytest
 from fastapi.testclient import TestClient
 
-from app.api import ui
+from app.api.ui import samples
 from app.main import create_app
 
 
@@ -25,7 +25,7 @@ def client() -> TestClient:
 @pytest.fixture
 def sample_ids() -> list[str]:
     """The TTB IDs the endpoint can draw from, read the way the app reads them."""
-    return ui._load_sample_ttbids()
+    return samples._load_sample_ttbids()
 
 
 def test_sample_zip_default_returns_zip(client: TestClient) -> None:
@@ -122,7 +122,7 @@ def test_sample_zip_500_when_no_labels_installed(
 ) -> None:
     """A build with no sample labels says so rather than serving an empty zip
     that looks like a working download."""
-    monkeypatch.setattr(ui, "_SAMPLE_LABELS_DIR", tmp_path)
+    monkeypatch.setattr(samples, "_SAMPLE_LABELS_DIR", tmp_path)
 
     response = client.get("/batches/sample.zip?n=2")
     assert response.status_code == 500
