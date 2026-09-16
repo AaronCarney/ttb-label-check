@@ -1,0 +1,48 @@
+/* USWDS v3 system color tokens — HSL form for shadcn compatibility.
+   Source: https://designsystem.digital.gov/design-tokens/color/system-tokens/ */
+:root {
+  /* Neutrals (USWDS "base" family) */
+  --uswds-base-lightest: 240 9% 96%;   /* #f0f0f0 */
+  --uswds-base-lighter:  240 4% 88%;   /* #dfe1e2 */
+  --uswds-base-light:    240 3% 75%;   /* #a9aeb1 */
+  --uswds-base:          210 8% 49%;   /* #71767a */
+  --uswds-base-dark:     210 9% 31%;   /* #565c65 */
+  --uswds-base-darker:   213 18% 22%;  /* #3d4551 */
+  --uswds-base-darkest:  213 28% 14%;  /* #1b1b1b */
+  --uswds-ink:           213 28% 14%;  /* #1b1b1b */
+  --uswds-white:         0 0% 100%;
+
+  /* Primary (USWDS "blue" family — federal default) */
+  --uswds-primary-lighter: 209 71% 90%; /* #d9e8f6 */
+  --uswds-primary-light:   209 65% 73%; /* #73b3e7 */
+  --uswds-primary:         209 64% 41%; /* #005ea2 */
+  --uswds-primary-vivid:   211 79% 36%; /* #0050d8 */
+  --uswds-primary-dark:    211 76% 28%; /* #1a4480 */
+  --uswds-primary-darker:  214 56% 21%; /* #162e51 */
+
+  /* Secondary (USWDS "red" family) */
+  --uswds-secondary-lighter: 359 100% 95%;
+  --uswds-secondary-light:   358 73% 79%;
+  --uswds-secondary:         356 67% 49%; /* #d83933 */
+  --uswds-secondary-dark:    355 79% 35%; /* #b50909 */
+  --uswds-secondary-darker:  351 75% 22%;
+
+  /* State colors */
+  --uswds-success-light:   97 56% 80%;
+  --uswds-success:         99 52% 32%;  /* #00a91c */
+  --uswds-success-dark:    99 64% 19%;
+  --uswds-warning-light:   45 100% 84%;
+  --uswds-warning:         44 100% 50%; /* #ffbe2e */
+  --uswds-warning-dark:    36 100% 31%; /* #936f38 */
+  --uswds-error-lighter:   359 100% 92%;
+  --uswds-error:           356 67% 49%; /* #d54309 */
+  --uswds-error-dark:      355 79% 35%; /* #b50909 */
+  --uswds-info-light:      198 100% 90%;
+  --uswds-info:            198 65% 39%; /* #00bde3 */
+  --uswds-info-dark:       198 100% 24%;
+
+  /* Disposition palette, layered atop the USWDS state tokens */
+  --uswds-disposition-pass:         var(--uswds-success);
+  --uswds-disposition-fail:         var(--uswds-error);
+  --uswds-disposition-needs-review: var(--uswds-warning-dark);
+}

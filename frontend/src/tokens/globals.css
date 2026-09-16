@@ -1,0 +1,324 @@
+@import "./uswds-tokens.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* shadcn-compatible variable layer — bound to USWDS tokens so the cascade has
+   a single source. */
+:root {
+  --background: var(--uswds-white);
+  --foreground: var(--uswds-base-darkest);
+
+  --primary: var(--uswds-primary);
+  --primary-foreground: var(--uswds-white);
+
+  --destructive: var(--uswds-error);
+  --destructive-foreground: var(--uswds-white);
+
+  --warning: var(--uswds-warning-dark);
+  --warning-foreground: var(--uswds-white);
+
+  --muted: var(--uswds-base-lightest);
+  --muted-foreground: var(--uswds-base-dark);
+
+  --border: var(--uswds-base-lighter);
+  --ring: var(--uswds-primary-vivid);
+
+  --radius: 0.375rem;
+}
+
+/* Body baseline — senior-friendly defaults for the 73-year-old reviewer this
+   console is built for: readable line-height, generous default font,
+   high-contrast text. */
+html {
+  font-size: 18px;
+  line-height: 1.5;
+}
+
+body {
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-family: system-ui, -apple-system, "Segoe UI", "Public Sans", sans-serif;
+}
+
+/* Skip link — visually hidden until focused (NFR-A11Y-002 keyboard-operable). */
+.skip-link {
+  position: absolute;
+  top: -100px;
+  left: 0;
+  padding: 0.5rem 1rem;
+  background: hsl(var(--foreground));
+  color: hsl(var(--background));
+  z-index: 50;
+}
+.skip-link:focus {
+  top: 0;
+}
+
+/* Focus visible — strong outline for keyboard users. */
+:focus-visible {
+  outline: 3px solid hsl(var(--ring));
+  outline-offset: 2px;
+}
+
+/* Reduced-motion gate (NFR-A11Y-004). All component animations sit under
+   @media (prefers-reduced-motion: no-preference); this rule is the canary. */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ---------- Page chrome ---------- */
+
+body {
+  margin: 0 auto;
+  padding: 0 1.5rem 3rem;
+  max-width: 64rem;
+}
+
+header[role="banner"] {
+  padding: 1.5rem 0 1rem;
+  border-bottom: 1px solid hsl(var(--border));
+  margin-bottom: 1.5rem;
+}
+header[role="banner"] h1 {
+  margin: 0 0 0.25rem;
+  font-size: 1.75rem;
+  color: hsl(var(--uswds-primary-darker));
+}
+header[role="banner"] > p {
+  margin: 0 0 0.75rem;
+  color: hsl(var(--muted-foreground));
+}
+
+/* Default link styling — visible underlines + USWDS primary blue. The
+   reviewer console targets a 73-year-old reader, so links
+   must look like links, not paint-the-wall text. */
+a {
+  color: hsl(var(--uswds-primary));
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+a:hover {
+  color: hsl(var(--uswds-primary-dark));
+}
+a:visited {
+  color: hsl(var(--uswds-primary-darker));
+}
+
+/* Top nav landmark — a horizontal row of strong, distinct text-links. */
+.primary-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+  align-items: center;
+}
+.primary-nav a {
+  font-weight: 600;
+  padding: 0.5rem 0;
+}
+
+/* ---------- Buttons ---------- */
+
+button,
+.button,
+.primary-button,
+input[type="submit"] {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: hsl(var(--uswds-primary));
+  color: hsl(var(--uswds-white));
+  border: 1px solid hsl(var(--uswds-primary-dark));
+  padding: 0.625rem 1.25rem;
+  border-radius: var(--radius);
+  font-size: 1rem;
+  font-weight: 600;
+  font-family: inherit;
+  line-height: 1.25;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background-color 120ms ease, color 120ms ease;
+}
+button:hover,
+.button:hover,
+.primary-button:hover,
+input[type="submit"]:hover {
+  background: hsl(var(--uswds-primary-dark));
+  color: hsl(var(--uswds-white));
+}
+button:disabled,
+.primary-button:disabled,
+input[type="submit"]:disabled {
+  background: hsl(var(--uswds-base-light));
+  border-color: hsl(var(--uswds-base));
+  cursor: not-allowed;
+}
+
+/* Secondary action — strong link styling, not a button. */
+.secondary-link {
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+/* ---------- Empty inbox + dropzone ---------- */
+
+.empty-inbox {
+  background: hsl(var(--uswds-primary-lighter));
+  border-left: 4px solid hsl(var(--uswds-primary));
+  padding: 1.5rem;
+  border-radius: var(--radius);
+  margin-bottom: 1.5rem;
+}
+.empty-inbox h2 {
+  margin: 0 0 0.5rem;
+  font-size: 1.5rem;
+  color: hsl(var(--uswds-primary-darker));
+}
+.empty-inbox-lead {
+  margin: 0;
+  font-size: 1.125rem;
+  color: hsl(var(--uswds-base-darker));
+}
+
+.upload-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem;
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius);
+  background: hsl(var(--background));
+  margin-bottom: 1.25rem;
+}
+.upload-form-label {
+  font-weight: 600;
+  color: hsl(var(--uswds-base-darker));
+}
+.dropzone {
+  border: 2px dashed hsl(var(--uswds-primary-light));
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  background: hsl(var(--uswds-base-lightest));
+  transition: border-color 120ms ease, background-color 120ms ease;
+}
+.dropzone:hover,
+.dropzone:focus-within {
+  border-color: hsl(var(--uswds-primary));
+  background: hsl(var(--uswds-primary-lighter));
+}
+.dropzone input[type="file"] {
+  display: block;
+  width: 100%;
+  font-size: 1rem;
+  font-family: inherit;
+}
+.upload-form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+}
+
+/* ---------- The application fields beside the upload ---------- */
+
+.application-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 1rem;
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius);
+}
+.application-fields legend {
+  padding: 0 0.25rem;
+  font-weight: 600;
+  color: hsl(var(--uswds-base-darker));
+}
+.application-fields-hint {
+  margin: 0;
+  color: hsl(var(--uswds-base-darker));
+}
+.application-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+.application-field label {
+  font-weight: 600;
+  color: hsl(var(--uswds-base-darker));
+}
+.application-field input[type="text"],
+.application-field select {
+  width: 100%;
+  max-width: 40rem;
+  padding: 0.5rem;
+  font-size: 1rem;
+  font-family: inherit;
+  color: hsl(var(--foreground));
+  background: hsl(var(--background));
+  border: 1px solid hsl(var(--uswds-base));
+  border-radius: var(--radius);
+}
+
+/* Starter-pack hint paragraph. */
+.sample-batch-hint {
+  color: hsl(var(--uswds-base-darker));
+  margin: 0 0 1.25rem;
+}
+.sample-batch-hint a {
+  font-weight: 600;
+}
+
+/* ---------- Bulk upload page ---------- */
+
+.bulk-upload h2 {
+  margin-top: 0;
+  color: hsl(var(--uswds-primary-darker));
+}
+
+/* ---------- Error banner ---------- */
+
+.upload-error {
+  background: hsl(var(--uswds-error-lighter));
+  border: 1px solid hsl(var(--uswds-error));
+  color: hsl(var(--uswds-secondary-darker));
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius);
+  margin-bottom: 1rem;
+  font-weight: 500;
+}
+
+/* ---------- Label preview figure ---------- */
+
+.label-preview {
+  margin: 0 0 1.5rem;
+}
+.label-preview img {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--radius);
+  border: 1px solid hsl(var(--border));
+}
+.label-preview figcaption {
+  color: hsl(var(--muted-foreground));
+  font-size: 0.95rem;
+  margin-top: 0.5rem;
+}
+
+/* ---------- Footer ---------- */
+
+footer[role="contentinfo"] {
+  margin-top: 3rem;
+  padding-top: 1rem;
+  border-top: 1px solid hsl(var(--border));
+  color: hsl(var(--muted-foreground));
+  font-size: 0.95rem;
+}
