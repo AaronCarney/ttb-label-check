@@ -94,6 +94,13 @@ class Evaluator:
         self._last_timeline = timeline
         self._last_t_total = t_total
 
+        # Which set of rules a label was checked against is the first thing a
+        # reviewer needs and the last thing they can reconstruct, so it is
+        # recorded before anything can go wrong. Every envelope this call can
+        # produce — success, image-quality short circuit, timeout — is built
+        # from this timeline, so every one of them carries the row.
+        self._record_rule_pack(timeline, application.beverage_class)
+
         # Step 1: vision
         t0 = time.monotonic()
         try:
@@ -119,11 +126,25 @@ class Evaluator:
         # from a spirit. Re-tagging here, rather than telling the reader what
         # to expect, keeps the reader reporting only what it saw and still
         # sends every reading to the rule pack the application selected.
+        #
+        # When the application names no class, no pack can be selected and
+        # nothing is checked — docs/decisions/0010. The reader's own tag is
+        # not a fallback: both readers label everything they see `spirits`,
+        # so inheriting it would score a wine against the spirits pack.
+        # `FieldObservation.beverage_class` has no value for "unknown", so the
+        # unknown case is expressed by handing the rules no readings at all:
+        # `yaml_engine` selects a rule only where a reading's class is one the
+        # rule applies to, so an empty sequence produces exactly what an
+        # unknown class should produce — no rule evaluated. The readings still
+        # reach the envelope below, so the reviewer sees what the label says.
         if application.beverage_class is not None:
             observations = [
                 obs.model_copy(update={"beverage_class": application.beverage_class})
                 for obs in observations
             ]
+            readings_for_rules = observations
+        else:
+            readings_for_rules = []
 
         # Step 2: image-quality short-circuit. Name the image problem rather
         # than guess at an unreadable label (docs/PRD.md FR-10).
@@ -149,7 +170,7 @@ class Evaluator:
             started_at_ms = int(time.monotonic() * 1000)
             ctx = self._rules.build_validator_context(started_at_ms=started_at_ms)
             expected = tuple(application.expected_values)
-            results = await self._rules.evaluate(observations, expected, ctx)
+            results = await self._rules.evaluate(readings_for_rules, expected, ctx)
         except Exception as e:  # noqa: BLE001
             timeline.record_failure(
                 reason_code="ENGINE.RULES.UNAVAILABLE",
@@ -212,6 +233,33 @@ class Evaluator:
         )
         return envelope
 
+    # The two audit-trail rows that name the rules a label was checked
+    # against. Both are engine facts rather than rule outcomes, which is the
+    # same footing as ENGINE.EXTRACTION.UNAVAILABLE and ENGINE.SLA.TIMEOUT
+    # already surfaced in this trace.
+    _PACK_SELECTED = "ENGINE.RULE_PACK.SELECTED"
+    _PACK_NOT_SELECTED = "ENGINE.RULE_PACK.NOT_SELECTED"
+
+    @classmethod
+    def _record_rule_pack(cls, timeline, beverage_class) -> None:
+        """Name the rules this evaluation ran, in the audit trail.
+
+        `rule_pack/wine` means the wine rules plus the ones that apply to
+        every class; `rule_pack/none` means the application named no beverage,
+        so no rule could be selected and nothing was checked.
+        """
+        if beverage_class is None:
+            timeline.record_rule_done(
+                rule_id=cls._PACK_NOT_SELECTED, duration_ms=0,
+                disposition="needs_review", evidence_ref="rule_pack/none",
+            )
+            return
+        timeline.record_rule_done(
+            rule_id=cls._PACK_SELECTED, duration_ms=0,
+            disposition="not_applicable",
+            evidence_ref=f"rule_pack/{beverage_class.value}",
+        )
+
     def _short_circuit(self, application, label, timeline, reason_code: str, t_total: float):
         from app.services.audit import AuditRecorder
         from app.services.envelope_builder import build_short_circuit_envelope
@@ -244,6 +292,10 @@ class Evaluator:
         timeline = getattr(self, "_last_timeline", None) or EvaluationTimeline(
             evaluation_id=application.evaluation_id
         )
+        # A timeout that fired before `_evaluate_inner` recorded anything gets
+        # a fresh timeline, and that envelope must still name its rules.
+        # Re-recording on an existing timeline rewrites the same row.
+        self._record_rule_pack(timeline, application.beverage_class)
         timeline.record_failure(
             reason_code="ENGINE.SLA.TIMEOUT",
             message="whole-eval timeout exceeded",

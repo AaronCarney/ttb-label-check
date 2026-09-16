@@ -5,6 +5,13 @@ A reader reports what it can see on a label. Nothing on a bottle reliably says
 evaluator tags every reading with the class the application declared before the
 rules run. Without that step a wine label reaches the spirits rule pack and none
 of the wine rules ever fire.
+
+Where the application names no class there is nothing to tag with, and the
+reader's own tag is not a substitute: both readers call everything they see
+spirits. So no rule runs, and the audit trail says so. `docs/decisions/0010`
+carries the argument; `tests/rules/test_label_matches_application.py`'s
+`test_no_application_means_no_comparison_applies` states the matching contract
+on the rules side.
 """
 from __future__ import annotations
 
@@ -30,13 +37,20 @@ def _bypass_legibility(monkeypatch):
 
 
 class _RecordingRuleEngine(FakeRuleEngine):
-    """A rule engine that keeps the readings it was handed."""
+    """A rule engine that keeps the readings it was handed, and counts calls.
+
+    The count matters: "the rules saw no readings" and "the rules were never
+    reached" look identical from `seen` alone, and only the first is what the
+    evaluator should do with an unclassified label.
+    """
 
     def __init__(self) -> None:
         super().__init__()
         self.seen = ()
+        self.calls = 0
 
     async def evaluate(self, observations, expected, context):
+        self.calls += 1
         self.seen = tuple(observations)
         return ()
 
@@ -59,13 +73,29 @@ def _reader():
     )
 
 
-async def _classes_seen(application: Application) -> set[BeverageClass]:
+async def _evaluate(application: Application):
+    """One evaluation; the readings the rules were handed, and the envelope."""
     rules = _RecordingRuleEngine()
     evaluator = Evaluator(
         vision=_reader(), rules=rules, settings=Settings()
     )
-    await evaluator.evaluate(application=application, label=_stub_label())
+    envelope = await evaluator.evaluate(application=application, label=_stub_label())
+    return rules, envelope
+
+
+async def _classes_seen(application: Application) -> set[BeverageClass]:
+    rules, _ = await _evaluate(application)
     return {obs.beverage_class for obs in rules.seen}
+
+
+def _pack_row(envelope):
+    """The audit-trail row naming the rules this evaluation ran."""
+    rows = [
+        entry for entry in envelope.audit_trail.per_rule_trace
+        if entry.rule_id.startswith("ENGINE.RULE_PACK.")
+    ]
+    assert len(rows) == 1, [e.rule_id for e in envelope.audit_trail.per_rule_trace]
+    return rows[0]
 
 
 @pytest.mark.asyncio
@@ -79,10 +109,41 @@ async def test_the_declared_class_replaces_the_readers_tag():
 
 
 @pytest.mark.asyncio
-async def test_an_application_declaring_no_class_leaves_the_reading_alone():
-    """Nothing in the product should invent a class the application never gave."""
-    seen = await _classes_seen(Application(application_id="A", evaluation_id="EV-001"))
-    assert seen == {BeverageClass.SPIRITS}
+async def test_an_application_declaring_no_class_gets_no_rules_at_all():
+    """Nothing in the product may invent a class the application never gave.
+
+    The reader's tag is not a fallback — it says spirits for every label it
+    has ever seen — so an image filed without an application is checked
+    against nothing rather than against the spirits pack.
+    """
+    rules, _ = await _evaluate(Application(application_id="A", evaluation_id="EV-001"))
+    assert rules.calls == 1
+    assert rules.seen == ()
+
+
+@pytest.mark.asyncio
+async def test_the_envelope_names_the_rules_that_ran():
+    """A reviewer cannot tell from a verdict which rules produced it, and
+    cannot reconstruct it later, so the audit trail states it."""
+    _, envelope = await _evaluate(
+        Application(
+            application_id="A", evaluation_id="EV-001", beverage_class=BeverageClass.WINE
+        )
+    )
+    row = _pack_row(envelope)
+    assert row.rule_id == "ENGINE.RULE_PACK.SELECTED"
+    assert row.evidence_ref == "rule_pack/wine"
+
+
+@pytest.mark.asyncio
+async def test_the_envelope_says_when_no_rules_could_be_chosen():
+    """The one thing an image-only upload must not look like is a label that
+    passed every check."""
+    _, envelope = await _evaluate(Application(application_id="A", evaluation_id="EV-001"))
+    row = _pack_row(envelope)
+    assert row.rule_id == "ENGINE.RULE_PACK.NOT_SELECTED"
+    assert row.evidence_ref == "rule_pack/none"
+    assert row.disposition == "needs_review"
 
 
 @pytest.mark.asyncio

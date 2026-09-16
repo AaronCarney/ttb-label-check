@@ -164,10 +164,12 @@ async def single_label_upload(
     """Check one uploaded label against the application filed for it.
 
     The page posts the application's own fields beside the image, because a
-    comparison needs both sides. Every application field is optional: an empty
-    one means the application declared nothing for that element, so the check
-    against it reports that it does not apply, and a grader who picks only an
-    image still gets the presence and health-warning checks.
+    comparison needs both sides. Every application field is optional except the
+    beverage type: an empty one means the application declared nothing for that
+    element, so the check against it reports that it does not apply. The
+    beverage type is the exception because it decides which rules apply at all
+    — a grader who skips it gets the reading and no checks, and the reply says
+    so (`docs/decisions/0010`).
 
     Returns the same template as `/` so the React island mounts identically;
     a bad upload or an unreadable application renders an inline banner with
@@ -372,9 +374,9 @@ async def batches_upload_submit(
 
     A bulk upload carries images and no applications, so there is nothing to
     compare each label against. The one thing the form can ask for is which
-    beverage the set is, because a folder of wine labels checked against the
-    spirits pack fires none of the wine rules. A grader who skips it gets the
-    reader's own class.
+    beverage the set is, because it decides which rules apply at all. A grader
+    who skips it gets each label read and nothing checked, and each reply says
+    so (`docs/decisions/0010`).
     """
     from app.api._sse_bus import SSEBus
     from app.batch.anomaly import AnomalyDetector
