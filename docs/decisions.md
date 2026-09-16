@@ -1230,13 +1230,28 @@ $0 is a $0 that traffic can move. A bounded cost beats an unbounded one when nob
   create: PRO for personal accounts, Team or Enterprise for organizations" — and CPU Basic's zero
   hourly rate describes the hardware, not the right to create the Space.
 
-  **Confirmed against the live platform, 2026-09-16.** The gate was tested rather than read. A
-  request to create a private Docker Space on a free personal account was refused with HTTP 402 and
-  this body: `{"error":"Static Spaces are free for everyone, but hosting Gradio and Docker Spaces on
-  free cpu-basic requires a PRO subscription. Subscribe at https://huggingface.co/pro"}`. The
-  platform's own wording is wider than its documentation's: the subscription gates **hosting** on
-  free CPU Basic, not only creation, so a Space that already existed would not escape the fee. The
-  probe created nothing.
+  **Confirmed against the live platform, 2026-09-16, and dated.** The gate was tested rather than
+  read: a request to create a private Docker Space on a free personal account was refused with HTTP
+  402 and this body: `{"error":"Static Spaces are free for everyone, but hosting Gradio and Docker
+  Spaces on free cpu-basic requires a PRO subscription. Subscribe at https://huggingface.co/pro"}`.
+  Nothing was created.
+
+  **The gate is recent, and that matters for reading any older evidence.** It landed in
+  `huggingface/hub-docs` commit `34ee0f00` on 2026-07-21, *"Update Spaces docs: paid plan required
+  for compute Spaces, ZeroGPU free tier"*. The previous revision of that page said the opposite:
+  *"Each Spaces environment is limited to 16GB RAM, 2 CPU cores and 50GB of (not persistent) disk
+  space by default, which you can use free of charge"*, with no plan gate anywhere in it. So any
+  account, note or memory of a free compute Space from before 2026-07-21 is accurate and does not
+  contradict this decision.
+
+  **What the documentation does not say, and this record will not claim.** Every clause of the new
+  text is about creating — *"require a paid plan to create"*, and *"Duplicating follows the same
+  rules as creating a new Space"*. **Nothing states what happens to a compute Space that already
+  existed on a free account when the policy landed.** That is undocumented, not settled, and this
+  decision does not rest on it either way: the deploy needs a Space created now, and creating one
+  now is refused. The one documented exception does not reach this app — *"Free personal accounts
+  in good standing can still host up to 2 Gradio Spaces running on ZeroGPU"* is a Gradio-SDK
+  allowance, and this app ships a Docker image.
 - **The Space sleeps when idle** on free hardware and the restart time is not documented. A reviewer
   arriving after a quiet period waits for a container start before the first page. This is named in
   the README rather than papered over, and it is the one thing a keep-warm ping would fix if it turns
