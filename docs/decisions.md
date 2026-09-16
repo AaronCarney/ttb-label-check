@@ -1205,6 +1205,14 @@ $0 is a $0 that traffic can move. A bounded cost beats an unbounded one when nob
   Spaces are free for everyone. Gradio and Docker Spaces run on compute and require a paid plan to
   create: PRO for personal accounts, Team or Enterprise for organizations" — and CPU Basic's zero
   hourly rate describes the hardware, not the right to create the Space.
+
+  **Confirmed against the live platform, 2026-09-16.** The gate was tested rather than read. A
+  request to create a private Docker Space on a free personal account was refused with HTTP 402 and
+  this body: `{"error":"Static Spaces are free for everyone, but hosting Gradio and Docker Spaces on
+  free cpu-basic requires a PRO subscription. Subscribe at https://huggingface.co/pro"}`. The
+  platform's own wording is wider than its documentation's: the subscription gates **hosting** on
+  free CPU Basic, not only creation, so a Space that already existed would not escape the fee. The
+  probe created nothing.
 - **The Space sleeps when idle** on free hardware and the restart time is not documented. A reviewer
   arriving after a quiet period waits for a container start before the first page. This is named in
   the README rather than papered over, and it is the one thing a keep-warm ping would fix if it turns

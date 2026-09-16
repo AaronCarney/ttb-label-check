@@ -174,10 +174,11 @@ different ways and an average hides that. The figures go here when the run lands
 
 ## Trade-offs
 
-- **A narrow core that works, over broad coverage that does not.** Where a check could not be made
-  correct, it reports that the measurement was not taken instead of returning a verdict it has not
-  earned, and it is named under Limitations. A wrong verdict on a real label is the one failure this
-  product cannot have.
+- **A narrow core that works, over broad coverage that does not.** Where a check can be made on some
+  labels and not others, it says on which it could not and sends that point to a reviewer. Where it
+  could not be made correct at all, it is switched off in the rule pack rather than returning a
+  verdict it has not earned, and it is named under Limitations. A wrong verdict on a real label is
+  the one failure this product cannot have.
 - **Determinism over capability.** Rules decide, models only read. The cost is that anything needing
   judgement beyond a scored comparison goes to a person rather than being resolved automatically.
 - **Local CPU reading by default, accuracy second.** The hosted reader is better on hard images. It
@@ -201,7 +202,7 @@ The seven label elements the brief lists, and where each is answered:
 | Net contents | Checked — compared as a quantity, with units converted before comparing | `rules/tables/volume_units.yaml` |
 | Name and address | Checked — applicant or declared trade name, plus city and state | the three class packs |
 | Country of origin | Checked for imports, against the application's English country name. The other forms customs accepts are a named limitation | the three class packs |
-| Government Health Warning | Checked — present, word for word against the pinned 27 CFR 16.21 text, heading in capitals, heading boldness measured where it can be. Four typography rules report that the measurement was not taken | `rules/common/health_warning.yaml`, `assets/warnings/govt_warning_16_21.txt` |
+| Government Health Warning | Checked — present, word for word against the pinned 27 CFR 16.21 text, heading in capitals, heading boldness measured where it can be. Four typography rules are switched off, because a photograph does not carry what they measure | `rules/common/health_warning.yaml`, `assets/warnings/govt_warning_16_21.txt` |
 
 Both deliverables:
 
