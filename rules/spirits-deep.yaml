@@ -4,32 +4,49 @@ rules:
   - rule_id: spirits.class_type.matches_soi
     cfr_citation: "27 CFR §5 Subpart I"
     applies_to_classes: [spirits]
+    # A reviewer's finding, not a rejection. Subpart I lets a spirit with no
+    # standard of identity be designated by a fanciful name alongside a
+    # truthful statement of composition, so a designation this list does not
+    # carry is not evidence the label is wrong — it is a designation the
+    # product cannot place. Rejecting on it turned three approved labels in
+    # the fixture set into rejections: "Cognac XO", "CRÈME DE CASSIS LIQUEUR"
+    # and "PEATED OREGON AMERICAN SINGLE MALT WHISKEY". See
+    # docs/decisions/0012.
     reason_code: CLASS_TYPE.SOI.NO_MATCH
-    severity: reject
+    severity: warn
     match_policy: lookup
     validator: enumerated_match
     parameters:
-      # See spirits.class_type.present: the designation includes the standard
-      # of identity rather than equalling it, and §5.143(b) permits either
-      # spelling of "whisky".
+      # The designation includes the standard of identity rather than
+      # equalling it, so a bare class word covers every form the regulations
+      # permit around it: "Whisky" matches "KENTUCKY STRAIGHT BOURBON
+      # WHISKEY", and the qualified spellings do not need their own entries.
+      # §5.143(b) permits "whisky" or "whiskey", so both are listed. The
+      # entries below are Subpart I's own classes and the types it names
+      # within them, including the designations it reserves to a place of
+      # production.
       match_mode: contains_designation
       allowed_values:
-        - "Bourbon Whisky"
-        - "Bourbon Whiskey"
-        - "Rye Whisky"
-        - "Rye Whiskey"
-        - "Tennessee Whisky"
-        - "Tennessee Whiskey"
-        - "Scotch Whisky"
-        - "Scotch Whiskey"
-        - "Irish Whisky"
-        - "Irish Whiskey"
+        - "Neutral Spirits"
+        - "Grain Spirits"
         - "Vodka"
+        - "Whisky"
+        - "Whiskey"
         - "Gin"
+        - "Brandy"
+        - "Cognac"
+        - "Armagnac"
+        - "Calvados"
+        - "Applejack"
+        - "Pisco"
+        - "Rum"
+        - "Cachaca"
+        - "Cachaça"
         - "Tequila"
         - "Mezcal"
-        - "Rum"
-        - "Brandy"
+        - "Agave Spirits"
+        - "Liqueur"
+        - "Cordial"
     evidence_required: [class_type]
     effective_date: "2022-02-09"
     test_fixtures: [F-SD-SOI-PASS-01, F-SD-SOI-FAIL-01]

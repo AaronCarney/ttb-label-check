@@ -1,0 +1,31 @@
+# Which wine designations name the same wine as the class they sit under.
+#
+# 27 CFR §4.21(b)(2) makes champagne a type of sparkling light wine, and
+# §4.34(a) says the type designation "champagne" or "crackling wine"
+# ("petillant wine", "frizzante wine") "may appear in lieu of the class
+# designation 'sparkling wine'". So an application declaring SPARKLING WINE
+# and a label reading CHAMPAGNE name the same wine, and neither is evidence
+# against the other. Without this table the rule reads the two as different
+# classes and reports a disagreement the regulation expressly permits.
+#
+# Read both ways, which is where this table differs from malt_designations.
+# There the label may be narrower than the class the application declared and
+# the reverse is a disagreement, because a brewer who filed for an ale and
+# labelled a beer has told TTB less than it was told. Here the regulation
+# itself offers the two designations as alternatives for one wine, so a label
+# reading SPARKLING WINE against an application reading CHAMPAGNE is the same
+# permitted substitution in the other direction. Both entries below say so.
+#
+# Every designation named here is also in the `recognised_classes` parameter
+# of wine.class_type.matches_application. It has to be: the validator works
+# out which classes each side names from that list before it consults this
+# table, so a designation only this file knows would never be recognised on
+# the label and its entry here would never fire.
+interpolation: none
+entries:
+  - class: Sparkling Wine
+    designations_within:
+      - Champagne
+  - class: Champagne
+    designations_within:
+      - Sparkling Wine

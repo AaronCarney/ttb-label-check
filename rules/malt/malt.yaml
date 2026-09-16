@@ -34,17 +34,19 @@ rules:
     test_fixtures: [F-MALT-BRAND-APP-MATCH-01, F-MALT-BRAND-APP-MISMATCH-01]
 
   - rule_id: malt.class_type.present
-    cfr_citation: "27 CFR §7.63(a)(2), Subpart I"
+    cfr_citation: "27 CFR §7.63(a)(2)"
     applies_to_classes: [malt]
+    # §7.63(a)(2) requires a class-and-type designation to appear on the
+    # label, and that is all this rule asks. Whether the designation agrees
+    # with the application is malt.class_type.matches_application's question,
+    # and that rule sends a designation it cannot place to a reviewer rather
+    # than rejecting it. Checking presence against an allow-list instead
+    # rejected any style the list did not happen to carry — a bock, a
+    # märzen, a cerveza. See docs/decisions/0012.
     reason_code: CLASS_TYPE.PRESENCE.MISSING
     severity: reject
-    match_policy: lookup
-    validator: enumerated_match
-    parameters:
-      # A malt label's designation carries style words around the class —
-      # "INDIA PALE ALE". Same reasoning as spirits.class_type.present.
-      match_mode: contains_designation
-      allowed_values: ["Beer", "Ale", "Lager", "Stout", "Porter", "Pilsner", "IPA", "Malt Liquor"]
+    match_policy: exact
+    validator: presence_check
     evidence_required: [class_type]
     effective_date: "2022-02-09"
     test_fixtures: [F-MALT-CLASS-PASS-01, F-MALT-CLASS-MISSING-01]
@@ -73,6 +75,15 @@ rules:
       pattern: '^\s*(?:alcohol|alc\.?)\s*[0-9]{1,2}(?:\.[0-9]+)?\s*%?\s*(?:by\s+volume|/\s*vol\.?|vol\.?)\s*$'
       ignore_case: true
     evidence_required: [alc_text]
+    disabled: true
+    notes: >-
+      Switched off, decision 0011. The check needs the alcohol statement as
+      the label prints it, and no reader returns that: the reading arrives as
+      a number and a unit, and the validator rebuilt a sentence from them and
+      matched the pattern against its own construction. So the rule passed
+      whenever any number was read and failed when none was, which on a malt beverage, where §7.63(a)(3) does not require the statement at all is
+      a rejection of a label that complies. Switch it back on when the reader
+      returns the raw alcohol text.
     effective_date: "2022-02-09"
     test_fixtures: [F-MALT-ALC-FORMAT-PASS-01, F-MALT-ALC-FORMAT-FAIL-01]
 
@@ -127,6 +138,10 @@ rules:
       # it; without the table the two would be read as different classes.
       needs_review_reason_code: CLASS_TYPE.MATCH.NEEDS_REVIEW
       disagreement_reason_code: CLASS_TYPE.MATCH.APPLICATION_LABEL_DISAGREE
+      # Every designation the decision table places within a class is listed
+      # here too. A designation the table knows but this list does not can
+      # never be recognised on the label, so its table entry is unreachable
+      # and the pairing the table exists to allow never happens.
       recognised_classes:
         - "Beer"
         - "Ale"
@@ -134,9 +149,13 @@ rules:
         - "Stout"
         - "Porter"
         - "Pilsner"
+        - "Pale Ale"
         - "India Pale Ale"
         - "IPA"
         - "Malt Liquor"
+        - "Bock"
+        - "Marzen"
+        - "Wheat Beer"
         - "Cerveza"
     evidence_required: [class_type]
     effective_date: "2022-02-09"

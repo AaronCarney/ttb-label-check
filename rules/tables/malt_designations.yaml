@@ -9,6 +9,12 @@
 #
 # Read one way only. The label's designation may be narrower than the class
 # the application declared; the reverse is a disagreement.
+#
+# Every designation below is also listed in the `recognised_classes` parameter
+# of malt.class_type.matches_application, and it has to be: the validator
+# works out which classes the label names from that list before it consults
+# this table, so a designation only this file knows is never recognised on the
+# label and its entry here never fires. The two lists are kept in step.
 interpolation: none
 entries:
   - class: Beer
@@ -18,8 +24,9 @@ entries:
       - Stout
       - Porter
       - Pilsner
-      - India Pale Ale
       - Pale Ale
+      - India Pale Ale
+      - IPA
       - Malt Liquor
       - Bock
       - Marzen

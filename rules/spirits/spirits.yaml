@@ -34,30 +34,20 @@ rules:
     test_fixtures: [F-SPIRITS-BRAND-APP-MATCH-01, F-SPIRITS-BRAND-APP-MISMATCH-01]
 
   - rule_id: spirits.class_type.present
-    cfr_citation: "27 CFR §5.63(a), Subpart I"
+    cfr_citation: "27 CFR §5.63(a)"
     applies_to_classes: [spirits]
+    # §5.63(a) requires a class-and-type designation to appear on the label,
+    # and that is all this rule asks. Whether the designation names a
+    # recognised standard of identity is Subpart I's question, and
+    # spirits.class_type.matches_soi asks it; whether it agrees with the
+    # application is spirits.class_type.matches_application's. Checking
+    # presence against an allow-list conflated all three and rejected
+    # approved labels whose designation the list did not happen to carry —
+    # "Cognac XO", "CRÈME DE CASSIS LIQUEUR". See docs/decisions/0012.
     reason_code: CLASS_TYPE.PRESENCE.MISSING
     severity: reject
-    match_policy: lookup
-    validator: enumerated_match
-    parameters:
-      # A label's designation carries the qualifiers the regulation permits
-      # around the class or type — "KENTUCKY STRAIGHT BOURBON WHISKEY" — so
-      # the check asks whether it includes a recognised class, not whether it
-      # equals one. Both spellings are listed because §5.143(b) permits
-      # "whisky" or "whiskey".
-      match_mode: contains_designation
-      allowed_values:
-        - "Bourbon Whisky"
-        - "Bourbon Whiskey"
-        - "Rye Whisky"
-        - "Rye Whiskey"
-        - "Whisky"
-        - "Whiskey"
-        - "Vodka"
-        - "Gin"
-        - "Tequila"
-        - "Rum"
+    match_policy: exact
+    validator: presence_check
     evidence_required: [class_type]
     effective_date: "2022-02-09"
     test_fixtures: [F-SPIRITS-CLASS-PASS-01, F-SPIRITS-CLASS-MISSING-01]
@@ -84,6 +74,15 @@ rules:
       pattern: '^\s*(?:alcohol|alc\.?)\s*[0-9]{1,2}(?:\.[0-9]+)?\s*%?\s*(?:by\s+volume|/\s*vol\.?|vol\.?)\s*$'
       ignore_case: true
     evidence_required: [alc_text]
+    disabled: true
+    notes: >-
+      Switched off, decision 0011. The check needs the alcohol statement as
+      the label prints it, and no reader returns that: the reading arrives as
+      a number and a unit, and the validator rebuilt a sentence from them and
+      matched the pattern against its own construction. So the rule passed
+      whenever any number was read and failed when none was, which on a spirits label whose statement the reader could not place is
+      a rejection of a label that complies. Switch it back on when the reader
+      returns the raw alcohol text.
     effective_date: "2022-02-09"
     test_fixtures: [F-SPIRITS-ALC-FORMAT-PASS-01, F-SPIRITS-ALC-FORMAT-FAIL-01]
 

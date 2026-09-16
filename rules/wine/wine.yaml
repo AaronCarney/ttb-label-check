@@ -34,18 +34,25 @@ rules:
     test_fixtures: [F-WINE-BRAND-APP-MATCH-01, F-WINE-BRAND-APP-MISMATCH-01]
 
   - rule_id: wine.class_type.present
-    cfr_citation: "27 CFR §4.32(a)(2), §4.34"
+    cfr_citation: "27 CFR §4.32(a)(2)"
     applies_to_classes: [wine]
+    # §4.32(a)(2) requires a "class, type, or other designation" on the brand
+    # label, and that is all this rule asks. It cannot ask more: §4.34(a) lets
+    # a still grape wine be designated, in lieu of its class, by "any varietal
+    # (grape type) designation, type designation of varietal significance,
+    # semigeneric geographic type designation, or geographic distinctive
+    # designation", and by a statement of composition where the class is not
+    # defined at all. No allow-list holds those — the prime grape names in
+    # §4.91 alone run to several hundred — so checking presence against one
+    # rejected approved labels reading SANGIOVESE, CHARDONNAY, GEWURZTRAMINER,
+    # PINOT NOIR, ROSE WINE and WHITE RHONE WINE. Whether the designation
+    # agrees with the application is wine.class_type.matches_application's
+    # question, and that rule sends what it cannot place to a reviewer instead
+    # of rejecting it. See docs/decisions/0012.
     reason_code: CLASS_TYPE.PRESENCE.MISSING
     severity: reject
-    match_policy: lookup
-    validator: enumerated_match
-    parameters:
-      # A wine label's designation carries an appellation or a grape variety
-      # around the class — "CALIFORNIA TABLE WINE". Same reasoning as
-      # spirits.class_type.present.
-      match_mode: contains_designation
-      allowed_values: ["Table Wine", "Light Wine", "Dessert Wine", "Sparkling Wine", "Sherry"]
+    match_policy: exact
+    validator: presence_check
     evidence_required: [class_type]
     effective_date: "1936-12-15"
     test_fixtures: [F-WINE-CLASS-PASS-01, F-WINE-CLASS-MISSING-01]
@@ -74,6 +81,15 @@ rules:
       pattern: '^\s*(?:alcohol|alc\.?)\s*[0-9]{1,2}(?:\.[0-9]+)?\s*%?\s*(?:by\s+volume|/\s*vol\.?|vol\.?)\s*$'
       ignore_case: true
     evidence_required: [alc_text]
+    disabled: true
+    notes: >-
+      Switched off, decision 0011. The check needs the alcohol statement as
+      the label prints it, and no reader returns that: the reading arrives as
+      a number and a unit, and the validator rebuilt a sentence from them and
+      matched the pattern against its own construction. So the rule passed
+      whenever any number was read and failed when none was, which on a table wine, where §4.36(a) lets the designation carry the statement instead is
+      a rejection of a label that complies. Switch it back on when the reader
+      returns the raw alcohol text.
     effective_date: "1936-12-15"
     test_fixtures: [F-WINE-ALC-FORMAT-PASS-01, F-WINE-ALC-FORMAT-FAIL-01]
 
@@ -120,6 +136,7 @@ rules:
     severity: reject
     match_policy: lookup
     validator: designation_match
+    decision_table_ref: wine_designations
     parameters:
       # "Wine" is on the list on purpose, and it is what makes a label
       # reading "WHITE RHONE WINE" agree with an application reading
@@ -129,6 +146,20 @@ rules:
       # grape variety instead — "SANGIOVESE", "CHARDONNAY" — names no
       # class at all and goes to a reviewer, which is the outcome the
       # approved labels in the fixture set record as correct.
+      #
+      # "Champagne" is here because §4.21(b)(2) makes it a type of sparkling
+      # light wine and §4.34(a) lets the type designation "champagne" appear
+      # "in lieu of the class designation 'sparkling wine'", so the two name
+      # the same wine and the decision table above says so. Listing it
+      # without that table would turn the substitution the regulation permits
+      # into a reported disagreement.
+      #
+      # A colour is not a class, so "Rose Wine" is not here: §4.21(a)(4) puts
+      # "pink (or rose) wine" beside "red wine", "amber wine" and "white
+      # wine" as ways of designating the colour of a Class 1 grape wine, not
+      # as a class of its own. Nothing is lost by dropping it — every
+      # designation carrying "rose wine" carries "wine", which is listed, so
+      # both sides already name that class and agree there.
       needs_review_reason_code: CLASS_TYPE.MATCH.NEEDS_REVIEW
       disagreement_reason_code: CLASS_TYPE.MATCH.APPLICATION_LABEL_DISAGREE
       recognised_classes:
@@ -137,7 +168,6 @@ rules:
         - "Light Wine"
         - "Dessert Wine"
         - "Sparkling Wine"
-        - "Rose Wine"
         - "Champagne"
         - "Sherry"
     evidence_required: [class_type]
