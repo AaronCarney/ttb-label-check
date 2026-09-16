@@ -1,4 +1,9 @@
-# docker-compose.yml
+# The one-command container path. `docker compose up demo` builds the same
+# image the deploy runs and serves it on http://localhost:8000.
+#
+# It needs no secrets: VISION_MODE defaults to the in-process OCR reader, which
+# is what a clone uses too. Set OPENAI_API_KEY and VISION_MODE=cloud only to
+# swap in the hosted reader.
 services:
   demo:
     build:
@@ -7,8 +12,13 @@ services:
     ports:
       - "8000:8000"
     environment:
-      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      # The reader. `local` reads labels inside the process with no key and no
+      # outbound call; `cloud` calls a hosted vision model and needs the key
+      # below. Matches the app's own default (app/config.py).
+      VISION_MODE: ${VISION_MODE:-local}
+      # Read only when VISION_MODE=cloud. Empty is correct for the default path.
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      # Pinned so two runs of the same label through the hosted reader agree.
       LLM_MODEL_SNAPSHOT: ${LLM_MODEL_SNAPSHOT:-gpt-4o-2024-08-06}
+      # How many labels in a batch are read ahead of the one on screen.
       LOOKAHEAD_K: ${LOOKAHEAD_K:-3}
-      VISION_MODE: ${VISION_MODE:-cloud}
-      DEMO_CACHE: ${DEMO_CACHE:-1}

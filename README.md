@@ -1,15 +1,224 @@
-# ttb-label-check
+---
+title: TTB Label Check
+emoji: 🏷️
+colorFrom: blue
+colorTo: indigo
+sdk: docker
+app_port: 8000
+suggested_hardware: cpu-basic
+pinned: false
+short_description: Checks an alcohol beverage label against the application filed for it.
+---
+
+# TTB Label Check
+
+Checks a photograph of an alcohol beverage label against the application filed for it, element by
+element, and tells the reviewing agent which fields match, which do not, and which need a person to
+look. The decision to approve or reject stays with the agent.
+
+## Deployed URL
+
+Not up yet; the URL goes here when it is published.
+
+The host is settled — Hugging Face Spaces on its Docker path, argued in
+[decision 0023](docs/decisions.md#0023) — and the deploy is a single push. The Space builds the
+`Dockerfile` at the root of this repository and configures itself from the block at the top of this
+file, so there is no build pipeline in between:
+
+```bash
+scripts/deploy.sh --check    # every check that needs no network; pushes nothing
+TTB_SPACE=owner/name scripts/deploy.sh
+```
+
+`--check` is what proves the repository is deployable without making it public: it confirms the
+image has something to build, that the Space card and the container agree on a port, that the built
+frontend is committed, and that every path the build copies is in the tree. It runs as part of the
+test suite.
+
+Everything below runs today from a clone, which is the other half of the same deliverable.
 
 ## What it is
 
+TTB's compliance agents review roughly 150,000 label applications a year, and most of each review is
+matching: does the brand name printed on the artwork say what the application says, is the alcohol
+content the declared one, is the Government Health Warning present and word for word. A simple
+application takes five to ten minutes by eye. In peak season importers file hundreds at once.
+
+This app does the matching. You give it an application's declared values and the label images filed
+with it; it reads the label, compares the two, and returns one verdict per element with the rule and
+the regulation behind it. Three outcomes only — **match**, **mismatch**, or **needs review** — and
+the third is a real answer, used wherever the app can see the element but cannot honestly decide it.
+
+It handles one label at a time through a web page, or a batch of them through an upload that streams
+results back as each finishes.
+
 ## Getting started
 
-## Status
+You need [uv](https://docs.astral.sh/uv/) and Python 3.12 or newer. Nothing else — **no API key, no
+account, and no outbound network call.** The reader that turns a photograph into text runs inside the
+process, and its models are installed with the dependencies.
 
-In development. The rule engine runs: a label and the application filed for it are compared element
-by element through the page and through the batch route, and every finding names the rule and the
-regulation behind it. The reader that turns a label photograph into fields is the part still being
-worked on, and the limitations below say which checks that costs.
+```bash
+git clone https://gitlab.com/aaroncarney1/ttb-label-check.git
+cd ttb-label-check
+uv sync
+uv run task demo
+```
+
+Then open <http://localhost:8000>. Upload a label image, fill in the application fields beside it,
+and submit. To try the batch path, open `/batches`, or take the sample archive the page offers —
+it is built from real label images shipped in this repository.
+
+The first label is slower than the rest: the OCR models are read off disk once, on first use, and
+kept for the life of the process.
+
+### The container path
+
+Same app, one command, if you would rather not install anything:
+
+```bash
+docker compose up demo
+```
+
+It serves the same <http://localhost:8000> and needs no secrets either.
+
+### Using a hosted reader instead
+
+There is a second reader that sends label crops to a hosted vision model. It reads harder images
+more accurately and costs money per label. It is off by default and is not needed for anything in
+this README:
+
+```bash
+export VISION_MODE=cloud
+export OPENAI_API_KEY=sk-...
+uv run task demo
+```
+
+`.env.example` lists every environment variable the app reads, with what each one does.
+
+## How it works
+
+Three stages, and the split between them is the design:
+
+**1. Read.** An OCR engine finds text and its position on the image, and a parsing layer turns that
+into seven fields — brand name, class/type, alcohol content, net contents, name and address, country
+of origin, and the health warning — each carrying the box on the image it came from. The reader is
+an interface with two implementations behind it, so the local engine and the hosted model are
+swappable without anything downstream knowing which ran.
+
+**2. Compare.** A rule pack decides. The rules are YAML — 46 of them across a common pack and one
+per beverage class — and each names a validator by string from a registry of thirteen. A rule says
+what it checks, which regulation it comes from, and what outcome each result maps to. Adding a check
+is a YAML edit, and the reference tables the rules read (volume units, class/type designations,
+characters-per-inch limits) are data files rather than code.
+
+**3. Report.** Each check returns a verdict, a reason code, a citation to the regulation, and the
+region of the image the evidence came from, so a reviewer can see why and not just what.
+
+**No model decides a verdict.** A model may read a label — that is the part no deterministic code
+can do — but the comparison is rules over the text it produced. The same label and the same
+application give the same answer every time, with a citation attached. An earlier layer that sent
+finished results to a language model for a second opinion was removed for exactly this reason
+([decision 0009](docs/decisions.md#0009)).
+
+**Nothing is kept.** Batch state lives in the process and is dropped when the response is returned or
+the server stops. There is no database and no COLA integration.
+
+## Tools, and why each one
+
+| Tool | What it does here | Why this one |
+|---|---|---|
+| FastAPI + Uvicorn | HTTP, the server-side page shells, and the batch event stream | Async server-sent events for batch progress, and Pydantic request and response models for free |
+| Pydantic v2 | Every envelope, rule definition and settings object | One schema layer for the YAML loader, the API and the config, so a malformed rule pack fails at load rather than mid-review |
+| Jinja2 + a React island | Pages are server-rendered; one bundled component tree handles the image-and-evidence area | The interactive part needs real keyboard semantics over bounding boxes; the rest does not need a client framework, and the built bundle ships in the repository so no Node is needed to run this |
+| RapidOCR on ONNX Runtime | The default reader, on CPU | Ships its own models in the wheel, so a clone needs no download, no key and no GPU |
+| RapidFuzz | Brand-name similarity scoring | The brand check needs a graded score, not a yes or no, because a dropped apostrophe is not a different product |
+| PyYAML | Loads the rule packs and reference tables | The rules are data a compliance reader should be able to read |
+| uv | Dependency resolution and the lockfile | One locked environment, reproducible from a single binary |
+| pytest | The suite | — |
+
+The optional hosted reader calls OpenAI's `gpt-4o`, pinned to a dated snapshot so two runs of the
+same label agree.
+
+## Reading accuracy
+
+**Not published yet, on purpose.** This project puts no number in front of a reviewer that a run on
+this machine did not produce, and the reading-accuracy run has not happened.
+
+The harness is written and committed. It scores the reader against the 30 real labels in
+`tests/fixtures/labels`, using the transcription in that corpus's manifest as the answer key, over
+nine checks per label:
+
+```bash
+uv run python -m eval.read_accuracy
+```
+
+It reports each check separately rather than one blended figure, because the checks fail in
+different ways and an average hides that. The figures go here when the run lands.
+
+## Assumptions
+
+- **The application is right and the label is what is being checked.** Where the two disagree, the
+  app reports a mismatch on the label; it never assumes the application is the error.
+- **The application names the beverage type**, and that is what selects the rule pack. A label
+  submitted with no application is read but not checked, because nothing says which rules apply.
+- **A submitted photograph is meant to be legible.** Severe glare, steep angles and motion blur are
+  out of scope; the app says it could not read a field rather than guessing at one.
+- **The warning text is fixed.** 27 CFR 16.21's wording is pinned as a committed asset and compared
+  against by hash, so a change to the regulation is a deliberate edit and not a silent drift.
+- **Nothing sensitive is stored.** Images and application data live only as long as the request that
+  carried them, which keeps the prototype clear of retention and PII obligations it is not built to
+  meet.
+- **No integration with COLA or any other TTB system**, which was an explicit constraint from the
+  systems administrator in the brief.
+
+## Trade-offs
+
+- **A narrow core that works, over broad coverage that does not.** Where a check could not be made
+  correct, it reports that the measurement was not taken instead of returning a verdict it has not
+  earned, and it is named under Limitations. A wrong verdict on a real label is the one failure this
+  product cannot have.
+- **Determinism over capability.** Rules decide, models only read. The cost is that anything needing
+  judgement beyond a scored comparison goes to a person rather than being resolved automatically.
+- **Local CPU reading by default, accuracy second.** The hosted reader is better on hard images. It
+  is not the default, because a reviewer should be able to clone and run this with no account.
+- **State in memory.** A server restart loses an in-flight batch and the reviewer re-uploads. A
+  prototype that stores nothing is easier to trust than one that stores label images.
+- **Scored brand matching rather than exact matching.** A punctuation difference scores just below
+  identical and passes, with the score shown, rather than sending every dropped apostrophe to a
+  person. What it buys and what it costs are argued in
+  [decision 0017](docs/decisions.md#0017).
+
+## What the brief asked for
+
+The seven label elements the brief lists, and where each is answered:
+
+| Element | Status | Where |
+|---|---|---|
+| Brand name | Checked — scored against the application's brand, fanciful and trade names | `rules/wine/wine.yaml`, `rules/spirits/spirits.yaml`, `rules/malt/malt.yaml` |
+| Class/type designation | Checked — matched against the application and against the designation tables; for spirits, also against the standards of identity | `rules/tables/wine_designations.yaml`, `rules/tables/malt_designations.yaml`, `rules/spirits-deep.yaml` |
+| Alcohol content | Checked — format, and the figure against the application. Required-or-not follows the beverage class | the three class packs |
+| Net contents | Checked — compared as a quantity, with units converted before comparing | `rules/tables/volume_units.yaml` |
+| Name and address | Checked — applicant or declared trade name, plus city and state | the three class packs |
+| Country of origin | Checked for imports, against the application's English country name. The other forms customs accepts are a named limitation | the three class packs |
+| Government Health Warning | Checked — present, word for word against the pinned 27 CFR 16.21 text, heading in capitals, heading boldness measured where it can be. Four typography rules report that the measurement was not taken | `rules/common/health_warning.yaml`, `assets/warnings/govt_warning_16_21.txt` |
+
+Both deliverables:
+
+| Deliverable | Status |
+|---|---|
+| Source code repository — all source, a README with setup and run instructions, and documentation of approach, tools and assumptions | This repository and this file |
+| Deployed application URL — a working prototype Treasury can access and test | Host settled and the build is one command; the push is the owner's to authorise. See "Deployed URL" above |
+
+## Where to look next
+
+| Question | Document |
+|---|---|
+| What is this supposed to do, and for whom? | [docs/PRD.md](docs/PRD.md) |
+| How is it put together? | [ARCHITECTURE.md](ARCHITECTURE.md) |
+| Why was it done this way and not another? | [docs/decisions.md](docs/decisions.md) |
+| What does the regulation actually say? | [docs/reference/](docs/reference/) |
+| What changed and when? | [CHANGELOG.md](CHANGELOG.md) |
 
 ## Limitations
 

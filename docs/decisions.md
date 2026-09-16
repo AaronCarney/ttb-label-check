@@ -1059,6 +1059,209 @@ product built against the list.
   `specs/0001-label-verification/requirements.md` R7 were amended rather than the code; the amendment is
   logged in `docs/PRD-decisions.md`, which had no entries before this one.
 
+<a id="0022"></a>
+## 0022. The reason-code registry states which of its codes nothing emits, and a test holds both halves
+
+**Decided:** 2026-09-16. **Evidence:** measured here against the shipped tree — 60 registered codes,
+46 rules across five packs, and the scan that found `ENGINE.OVERRIDE.NOT_FOUND` unregistered.
+
+**Chosen.** `rules/reason_codes.yaml` gains a `reviewer_vocabulary:` block listing every registered
+code that no rule and no line of application code produces, each with the reason it stays, and
+`tests/rules/test_reason_code_registry.py` checks the registry from both directions:
+
+| Direction | What is checked | Where it was before |
+|---|---|---|
+| Rule → registry | Every rule's `reason_code`, and every rule parameter ending `reason_code`, is registered and has a description | Enforced silently at load time by the loader's cross-check 7, `app/rules/loader.py:213-223`. The only test that said so covered four codes |
+| Application source → registry | Every reason code written as a quoted string in tracked `app/` or `eval/` Python is registered | Nothing checked this |
+| Registry → emitter | Every registered code is emitted by a rule or by Python, **or** is declared in `reviewer_vocabulary` | Nothing checked this |
+| Registry → allow-list | No `reviewer_vocabulary` entry names an unregistered code, and none names a code something does emit | Did not exist |
+
+A code counts as written into Python when it appears as a quoted string whose first segment is a key
+of the registry's own `bins:`. Two further checks in `tests/rules/test_reason_codes_yaml.py` keep
+that anchor sound: every registered code sits in a declared bin, and every declared bin carries at
+least one code.
+
+**One defect was fixed by the work.** `app/api/overrides.py:115` logs
+`reason_code="ENGINE.OVERRIDE.NOT_FOUND"` when a reviewer's override names an evaluation that carries
+no result. The code was not in the registry, so it reached the log as an identifier with no declared
+meaning, and a reviewer could not have applied it through the override endpoint, which refuses any
+code the registry does not carry. It is registered, at `warn`, rather than folded into
+`ENGINE.BATCH.NOT_FOUND`, which names a different condition — an unknown batch id, not an evaluation
+with no result yet.
+
+**Why.** Fourteen of the sixty registered codes are produced by nothing. That is not a fault:
+`app/api/overrides.py` accepts any registered code, so each of the fourteen is a sentence a reviewer
+can put on a label by hand, and four of them — `WARNING.LEGIBILITY.NO_CONTRAST`,
+`WARNING.PLACEMENT.NOT_SEPARATE`, `WARNING.TYPE_SIZE.CPI_EXCEEDED`, `WARNING.TYPE_SIZE.UNDER_MIN` —
+are exactly the judgements a person can make that [0013](#0013) records the product as unable to
+measure. But before this entry the only way to know that a code was deliberately unemitted was a
+comment beside two of the fourteen, and the other twelve looked identical to an orphan left behind by
+a rename. The allow-list turns that from something a reader has to notice into something the file
+says, and because the check fails on a stale entry and on a redundant one alike, the statement cannot
+quietly stop being true.
+
+It earned that within the hour. The block first listed `ENGINE.INPUT.LABEL_IMAGE_MISSING` as emitted
+by nothing, which was true when it was written; the batch lane's work on `app/batch/worker.py` then
+started emitting it, and the check went red on the next run rather than leaving the registry saying
+something that had stopped being true. The entry was removed.
+
+**Rejected.** *A plain orphan check, modelled on the validator one in
+`tests/test_rules_yaml_round_trip.py:34-49`, with no allow-list* — it fails on purpose against the
+file as shipped, so it could only have been landed by deleting fourteen codes the reviewer can still
+reach for. *An allow-list covering every code no **rule** names* — thirty entries, sixteen of which
+the application does emit, so the block would assert something false about more than half of what it
+listed; that is why reachability counts application Python and not rules alone. *A per-code
+`reviewer_vocabulary: true` field beside each entry* — it reads better next to the description, but
+`ReasonCodeEntry` is `extra="forbid"` (`app/schemas/rules.py:35-40`) and the loader refuses any field
+beyond `description`, `cfr_anchors` and `severity`; a top-level block needs no schema change, because
+`_load_registry` reads only `version` and `codes`. *Changing `app/api/overrides.py` to log a code that
+was already registered* — it would have removed the symptom and kept the gap, and the log line names
+the condition correctly.
+
+**Because** a registry edited by hand across concurrent lanes drifts mechanically, and the cure that
+worked for the same failure in the decision document was a check rather than a convention.
+
+**Cost, stated.**
+
+- **The source scan reads quoted strings, not the program.** A reason code built by concatenation, or
+  read from configuration, is invisible to it, and would show up as a registered code nothing emits —
+  a false failure whose fix is to declare it or to write it as a literal.
+- **The scan is blind outside the declared bins.** A code in a bin the file does not declare is not
+  recognised as a reason code at all. The two bin checks in `tests/rules/test_reason_codes_yaml.py`
+  close that from the registry side; nothing closes it from the Python side.
+- **The rule → registry checks cannot fail in a tree where the loader runs.** The loader refuses the
+  pack first, with its own message. They earn their place by stating the intent and by being proved
+  against planted input in the same file, not by being the thing that catches the defect.
+- **Fourteen reasons are now prose that can go stale.** If a rule starts emitting one of the fourteen,
+  the redundancy check fails and the entry must go — but if the *reason* stops being true while the
+  code stays unemitted, nothing notices.
+
+<a id="0023"></a>
+## 0023. The deploy runs on Hugging Face Spaces, Docker SDK, CPU Basic hardware
+
+**Decided:** 2026-09-16. **Evidence:** `app/config.py:37`, `docs/research/2026-09-15-hosting.md`,
+`huggingface.co/docs/hub/spaces-overview` and `/spaces-config-reference`, both read 2026-09-16.
+
+**What was unsettled.** Two of this project's own documents disagreed. One research record picked
+Hugging Face Spaces and three tracked files already assumed it; the plan of work said the host was
+still unpicked. A third record, written the same day, contradicted the first on the fact the whole
+choice turned on. The picking record's reasoning was a GPU argument — a GPU OCR engine, two vision
+models, a dedicated accelerator tier — and every one of those premises has gone: none of those
+components is in this tree, the model reasoning layer was removed ([0009](#0009)), and the reader
+that ships runs on CPU. So the choice is made again here, from the architecture as it stands.
+
+**What the deploy has to carry.** `VISION_MODE` defaults to `local` (`app/config.py:37`), so the
+deployed container reads labels with an OCR engine inside the process, exactly as a clone does. Its
+three ONNX models are installed by `uv sync` from the `rapidocr` wheel — 31 MB, already in the image
+— so the container downloads nothing at runtime and makes no outbound call, which is what
+[0004](#0004) promises. The working set for that reader is recorded in
+`docs/research/2026-09-15-hosting.md` as 1.5–2 GB; it has not been re-measured here, because
+measuring it means running OCR and this machine's CPU is rationed.
+
+**Chosen.** **Hugging Face Spaces, Docker SDK, CPU Basic hardware.** CPU Basic is 2 vCPU and 16 GB
+of RAM at an hourly price of zero. The platform issues TLS and a stable `*.hf.space` URL. The deploy
+is a `git push` against the `Dockerfile` already in this repository — the platform builds it — so it
+is one command with no build pipeline to maintain. The Space is configured from a YAML block at the
+top of `README.md`; the key that matters is `app_port: 8000`, because the platform's default is 7860
+and a missing line serves a reviewer a blank page.
+
+**Because the demo URL is unauthenticated, and so the cost has to be bounded by the plan rather than
+by traffic.** This is the constraint that decided it. Deliverable 2 is a URL handed to a reviewer,
+with no sign-in and no rate limit in front of it. On CPU Basic the hardware costs nothing per hour,
+so no amount of traffic — a reviewer, a crawler, a batch of 300 labels run twice — can produce a
+charge. The fee is the plan's, it is $9 a month, and it is known before anything is pushed. The two
+cheaper-looking options are metered: both require a payment method on file and bill by use, so their
+$0 is a $0 that traffic can move. A bounded cost beats an unbounded one when nobody else is paying.
+
+**Rejected.**
+
+- *Render, Railway, Koyeb, Azure App Service F1* — all four fail on memory before anything else is
+  weighed. Their free tiers are 512 MB, 0.5 GB, 512 MB and 1 GB against a 1.5–2 GB reader. Render
+  also documents a ~1-minute cold start after 15 minutes idle, and Koyeb's own documentation bars
+  free instances from production workloads.
+- *Google Cloud Run* — clears the memory bar, deploys in one command, and is free inside a monthly
+  quota. Rejected on the metering above: a billing account with a payment method is required even to
+  use the free tier, and Google's own guidance is that budget controls alert rather than hard-stop.
+  Its cold-start time for an image this size is not documented anywhere primary.
+- *Fly.io* — the fastest documented cold start of any host checked, and sizable to 4 GB. Rejected on
+  the same metering, and more sharply: it has no ongoing free tier at all, only a time-boxed trial,
+  after which a card is required.
+- *Oracle Cloud Always Free* — genuinely $0 with no meter, 12 GB of RAM, and always-on, so no cold
+  start at all. Rejected because it is a bare VM: Docker, a reverse proxy and TLS certificates are
+  all hand-built and maintained, which is not one command and not hours this project has. Oracle's
+  own documentation also warns that Always Free shapes can be refused for capacity, so the deploy
+  can fail at the moment it is needed.
+- *Cloudflare and Vercel* — neither runs a persistent container on a free tier. Cloudflare's Python
+  Workers run under WebAssembly rather than in a container and cap CPU at 10 ms per request;
+  Cloudflare Containers has no free tier. Vercel is a serverless-function platform, and its Hobby
+  plan is restricted to non-commercial personal use, which a job-application prototype does not
+  clearly satisfy.
+- *Keeping the GPU tier from the original record* — there is no GPU work left in this product to put
+  on it.
+
+**Cost, stated.**
+
+- **$9 a month**, for as long as the URL is up. Docker Spaces require a paid plan to create — "Static
+  Spaces are free for everyone. Gradio and Docker Spaces run on compute and require a paid plan to
+  create: PRO for personal accounts, Team or Enterprise for organizations" — and CPU Basic's zero
+  hourly rate describes the hardware, not the right to create the Space.
+- **The Space sleeps when idle** on free hardware and the restart time is not documented. A reviewer
+  arriving after a quiet period waits for a container start before the first page. This is named in
+  the README rather than papered over, and it is the one thing a keep-warm ping would fix if it turns
+  out to matter.
+- **Nothing is deployed by this decision.** Making the app publicly reachable is the owner's call.
+  [0004](#0004) settles that a deployed URL is required, not when it goes up.
+
+<a id="0024"></a>
+## 0024. The README's specification is four tests; the demo-runbook tests are removed
+
+**Decided:** 2026-09-16. **Evidence:** the eight failures run and read here before any edit.
+
+**What was wrong.** Eight tests asserting over `README.md` and a `DEMO-RUNBOOK.md` failed, and none
+of the eight was a code defect. They described a different project: a development process with
+stages this project never ran, links to `docs/ARCHITECTURE.md`, `docs/03-decisions.md` and
+`DEMO-RUNBOOK.md` — none of which is a path in this tree — and a rehearsed demo-day script counted
+down in T-30, T-5, T-1 and T-0. Because these tests are the README's specification, writing README
+prose against them would have written that other project into the deliverable.
+
+**Chosen, for the runbook tests: removed, with the file they assert over never written.**
+`tests/test_demo_runbook_present.py` asserted that a `DEMO-RUNBOOK.md` documents demo-day timings, a
+failure-recovery procedure and a six-stage path. No such document exists, the pipeline it describes
+is not this one, and nothing in the plan of work asks for a runbook. Deliverable 2 is a URL a
+reviewer opens unattended, not a demo somebody presents, so the artifact those tests demanded has no
+reader.
+
+**Chosen, for the README tests: rewritten as a specification of this README**, in
+`tests/test_readme_content.py`. Two of them stopped being content checks and became guards, because
+the failure each catches is the failure that actually happened:
+
+- every document path the README names is resolved on disk, so a dead link fails in the suite rather
+  than in front of a reviewer — this is the general form of the three missing paths above;
+- the reading-accuracy section may contain no percentage, because this project publishes only
+  figures a run on this machine produced and no such run has happened. An estimate presented as a
+  measurement is the one thing that section may not hold.
+
+**Chosen, for the deploy lint:** the duplicated Space-card assertion in `tests/test_dockerfile_lint.py`
+is replaced by the check nothing else makes — that the card's `app_port` equals the port the
+container's `CMD` binds. Two files asserting the same string caught nothing twice; the disagreement
+between them is what serves a blank page.
+
+**A defect in the assertions themselves, found while rewriting.** Both copies required
+`hardware: cpu-basic` in the README. `hardware` is not a key the platform defines. The documented key
+is `suggested_hardware`, and the reference states plainly that setting it "will not automatically
+assign an hardware to this Space" — it is a suggestion for whoever duplicates the Space, and the real
+hardware is chosen in the Space's own settings. The tests now require the key that exists.
+
+**Rejected.** *Writing a `DEMO-RUNBOOK.md` to make the three tests pass* — it would add a document
+nobody asked for and nobody reads, to satisfy assertions inherited rather than chosen. *Deleting the
+README tests outright* — the README is the larger half of deliverable 1 and the only tracked file
+with no other check on it; the assertions were pointed at the wrong project, not worthless.
+*Loosening them until they passed* — that is the move this project refuses everywhere else.
+
+**Because** a test is a statement about what the product must be, and eight statements about a
+different product are worse than none: they pass responsibility for the README to a specification
+nobody here wrote.
+
 <a id="0018"></a>
 ## 0018. An uploaded label image is kept as a file, not in the process that received it
 
