@@ -15,66 +15,55 @@ Four outcomes:
   - The label states no number a reader could pull out, and a reviewer decides.
     A label carrying no statement at all is the presence rule's business, not
     this one's.
-  - Both sides give a number, and they must be equal.
+  - Both sides give a number, and they must agree.
 
-The two numbers are compared for equality, not against a tolerance. A
-tolerance covers the difference between what a label claims and what is in the
-bottle, which is a laboratory result nobody here has. Two declarations of the
-same value on two documents either agree or they do not.
+**Two figures in the same unit must be equal.** Nothing was rounded away
+between them, so nothing is forgiven: a label reading 12 against a declared
+12.5 disagrees. The margin there exists only because a number that travelled
+through a float cannot be trusted to compare exactly against the same value
+written as a decimal.
 
-Unit conversions come from the rule pack's decision table, so adding a unit is
-an edit to the rule pack and not to this file.
+**Two figures in different units agree within the rule's own tolerance.** The
+container sizes the regulations authorize are rounded metric equivalents of
+customary ones, so a label stating the customary size and an application
+stating the metric one can never convert into each other exactly: 375 mL is
+12.68 fluid ounces, which a label prints as 12.7, and demanding that 12.7
+convert back to exactly 375 rejects a compliant label by construction. The
+tolerance that closes that gap is data in the rule pack — the `tolerance`
+block of the rule — not a constant in this file, so a reviewer can read the
+number that decided a verdict, and the same input always gives the same
+answer. `docs/decisions/0011` records where the number comes from. A rule that
+carries no tolerance compares exactly, in either case.
+
+Unit conversions come from the rule pack's decision table, read through
+`app.rules.units`, which is also what the application form and the
+reading-accuracy harness read it with. Adding a unit is an edit to the rule
+pack and not to this file.
 """
 from __future__ import annotations
-
-import re
-from decimal import ROUND_HALF_UP, Decimal
 
 from app.rules._validators import ValidatorContext, register
 from app.rules._validators._helpers import (
     _build_meta,
     _conf,
     first_number,
-    normalize_words,
     project_reading,
 )
+from app.rules.units import table_from_entries
 from app.schemas.expected import ExpectedValue
 from app.schemas.extracted import FieldObservation
 from app.schemas.rejection import Outcome, Severity, ValidationResult
 from app.schemas.rules import RuleDefinition
 
-# Two declared numbers agree when they are the same number. The margin exists
-# only because a reading that travelled through a float cannot be trusted to
-# compare exactly against the same value written as a decimal.
+# Two declared numbers in the same unit agree when they are the same number.
+# The margin exists only because a reading that travelled through a float
+# cannot be trusted to compare exactly against the same value written as a
+# decimal.
 _EQUALITY_MARGIN = 1e-9
 
-# The digits of the first number in a reading, kept apart so the printed
-# precision can be read off the text rather than inferred from a float.
-_NUMBER_RE = re.compile(r"[0-9]+(?:\.([0-9]+))?")
-
-
-def _number_and_precision(reading: str) -> tuple[float, int] | None:
-    """The label's first number, and how many decimal places it was printed to.
-
-    The precision is what makes a cross-unit comparison possible. A label
-    states a rounded figure -- "12.7 FL. OZ." is as precise as a tenth of a
-    fluid ounce gets -- so the only fair question is whether the application's
-    figure, written the same way, would print the same digits.
-    """
-    match = _NUMBER_RE.search(reading)
-    if match is None:
-        return None
-    decimals = match.group(1)
-    return float(match.group()), len(decimals) if decimals else 0
-
-
-def _round_half_up(value: float, places: int) -> float:
-    """Round with a half always going up, which is how a printed figure is
-    rounded. Python's own round() sends a half to the nearest even number, so
-    12.5 becomes 12 and 13.5 becomes 14; a compliance check must not have a
-    rule that changes with the digit before it."""
-    quantum = Decimal(1).scaleb(-places)
-    return float(Decimal(repr(value)).quantize(quantum, rounding=ROUND_HALF_UP))
+# The rule's own name for the tolerance a converted comparison allows, as a
+# fraction of the figure the application declared.
+_CROSS_UNIT_TOLERANCE = "cross_unit_relative"
 
 
 def _observed_unit(obs: FieldObservation) -> str:
@@ -100,22 +89,29 @@ def _conversion_factor(unit: str, rule: RuleDefinition, ctx: ValidatorContext) -
     "1 PT" came to be compared with 750 millilitres and rejected: the two
     numbers are not the same measurement, and the product must not say a label
     is wrong on that basis.
-
-    A unit's words are run together before they are compared, because a reader
-    may or may not keep the space inside one. The local reader strips it, so
-    "FL. OZ." arrives as "FLOZ" and would never match the table's "fl oz" if
-    the two were compared word for word.
     """
     ref = rule.decision_table_ref
     table = ctx.decision_tables.get(ref) if ref else None
     if table is None or not unit:
         return 1.0
-    wanted = "".join(normalize_words(unit))
-    for entry in table.entries:
-        if "".join(normalize_words(str(entry.get("unit", "")))) == wanted:
-            factor = entry.get("factor")
-            return None if factor is None else float(factor)
-    return None
+    return table_from_entries(table.entries).factor(unit)
+
+
+def _margin(declared_amount: float, factor: float, rule: RuleDefinition) -> float:
+    """How far apart the two figures may be and still agree.
+
+    Nothing, beyond float noise, where no conversion happened. Where one
+    happened, the rule pack's own tolerance, because the two figures are a
+    customary size and its rounded metric equivalent and cannot be expected to
+    convert into each other exactly.
+    """
+    noise = abs(declared_amount) * _EQUALITY_MARGIN
+    if factor == 1.0:
+        return max(noise, _EQUALITY_MARGIN)
+    ratio = (rule.tolerance or {}).get(_CROSS_UNIT_TOLERANCE)
+    if ratio is None:
+        return max(noise, _EQUALITY_MARGIN)
+    return max(abs(declared_amount) * float(ratio), _EQUALITY_MARGIN)
 
 
 @register("quantity_match")
@@ -164,35 +160,17 @@ def quantity_match(
     if declared_amount is None:
         return cannot_check()
 
-    reading = _number_and_precision(project_reading(obs))
-    if reading is None:
+    observed_amount = first_number(project_reading(obs))
+    if observed_amount is None:
         return cannot_check()
-    observed_amount, observed_precision = reading
 
     factor = _conversion_factor(_observed_unit(obs), rule, ctx)
     if factor is None:
         return cannot_check()
 
-    # The two are compared in the label's unit, at the label's precision. A
-    # label printing a customary size and an application recording millilitres
-    # describe the same container in two ways, and the customary figure is a
-    # rounded one: 375 mL is 12.68 fluid ounces, which a label prints as 12.7.
-    # Demanding that 12.7 fluid ounces convert back to exactly 375 rejects a
-    # compliant label, because the rounding can never be undone. Asking
-    # instead what the label would print if it stated the application's figure
-    # answers the real question. Where no conversion happened, nothing was
-    # rounded away and the two numbers must still be equal outright.
-    if factor == 1.0:
-        # Same unit on both sides. Nothing was rounded away, so the two
-        # numbers must simply be equal.
-        agrees = abs(observed_amount - float(declared_amount)) <= _EQUALITY_MARGIN
-    else:
-        declared_in_label_unit = float(declared_amount) / factor
-        agrees = (
-            abs(_round_half_up(declared_in_label_unit, observed_precision) - observed_amount)
-            <= _EQUALITY_MARGIN
-        )
-    if agrees:
+    declared = float(declared_amount)
+    difference = abs(observed_amount * factor - declared)
+    if difference <= _margin(declared, factor, rule):
         return result(Outcome.PASS, rule.severity, None)
     return result(
         Outcome.FAIL,

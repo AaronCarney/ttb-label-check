@@ -11,44 +11,87 @@
 # treated as the application's own millilitres is how a compliant bottle came
 # to be rejected against 750.
 #
+# `metric: true` marks the units the application itself records in. Where a
+# declared net contents names both — "NET CONT. 350 ML / 12 FL OZ" — the metric
+# figure is the declaration and the customary one is that same quantity
+# rounded, so the metric figure is the one taken.
+#
 # Spelled-out and abbreviated forms are both listed because a label prints
-# either, and the words are run together before they are matched, so
-# "FL. OUNCES" and "fl ounces" are the same entry.
+# either, and a unit is matched on its letters and digits alone, so "FL. OZ.",
+# "FL OZ" and "fl.oz" are one entry and "FL. OUNCES" is another.
+#
+# `app/rules/units.py` is the only parser that reads this table, and the rule
+# pack, the application form and the reading-accuracy harness all go through
+# it. Adding a unit is an edit to this file and to nothing else.
 interpolation: none
 entries:
   - unit: mL
     factor: 1
+    metric: true
+  - unit: mLs
+    factor: 1
+    metric: true
+  - unit: milliliter
+    factor: 1
+    metric: true
+  - unit: milliliters
+    factor: 1
+    metric: true
+  - unit: millilitre
+    factor: 1
+    metric: true
+  - unit: millilitres
+    factor: 1
+    metric: true
   - unit: cL
     factor: 10
+    metric: true
   - unit: L
     factor: 1000
+    metric: true
   - unit: liter
     factor: 1000
+    metric: true
   - unit: liters
     factor: 1000
+    metric: true
   - unit: litre
     factor: 1000
+    metric: true
   - unit: litres
     factor: 1000
+    metric: true
   - unit: fl oz
+    factor: 29.5735295625
+  - unit: oz
     factor: 29.5735295625
   - unit: fluid ounce
     factor: 29.5735295625
   - unit: fluid ounces
     factor: 29.5735295625
-  - unit: fl ounces
-    factor: 29.5735295625
   - unit: fl ounce
+    factor: 29.5735295625
+  - unit: fl ounces
     factor: 29.5735295625
   - unit: pint
     factor: 473.176473
   - unit: pints
     factor: 473.176473
+  - unit: pt
+    factor: 473.176473
   - unit: quart
     factor: 946.352946
   - unit: quarts
     factor: 946.352946
+  - unit: qt
+    factor: 946.352946
   - unit: gallon
     factor: 3785.411784
   - unit: gallons
+    factor: 3785.411784
+  - unit: gal
+    factor: 3785.411784
+  - unit: US gallon
+    factor: 3785.411784
+  - unit: US gallons
     factor: 3785.411784

@@ -204,6 +204,16 @@ rules:
       amount_field: container_volume_ml
       needs_review_reason_code: NET_CONTENTS.MATCH.NEEDS_REVIEW
       disagreement_reason_code: NET_CONTENTS.MATCH.APPLICATION_LABEL_DISAGREE
+    tolerance:
+      # A converted comparison is forgiven this much of the declared figure;
+      # two figures in the same unit are still compared exactly. The container
+      # sizes the regulations authorize are rounded metric equivalents of
+      # customary ones, so "12.7 FL. OZ." and 375 mL never convert into each
+      # other exactly. 1% is above the 0.550% that rounding needs across the
+      # sizes §4.72 and §5.203 authorize, and below the 1.408% between the two
+      # closest of them that print different customary figures.
+      # docs/decisions/0011 carries the working.
+      cross_unit_relative: 0.01
     evidence_required: [net_contents]
     effective_date: "2022-02-09"
     test_fixtures: [F-SPIRITS-NET-APP-MATCH-01, F-SPIRITS-NET-APP-DISAGREE-01]
