@@ -1,16 +1,36 @@
-"""Score a reader against the real labels and their verified values.
+"""Score a reader against the real labels and what is printed on them.
 
-What it answers: on labels approved by TTB, paired with the application each
-was approved against, how often does the reader report the value that is
-really there?
+What it answers: on labels approved by TTB, how often does the reader report
+the value the label itself carries?
 
     uv run python -m eval.read_accuracy                # the local reader
     uv run python -m eval.read_accuracy --reader cloud # needs OPENAI_API_KEY
 
-The ground truth is `tests/fixtures/labels/manifest.json`: 30 labels read out
-of the TTB Public COLA Registry, each with the application's own fields, and
-8 variants derived from them by damaging the image or the warning. Only the
-real labels are scored here; the variants exercise the rules, not the reader.
+The ground truth is the `label_observed` block of
+`tests/fixtures/labels/manifest.json`: for each of 30 labels read out of the
+TTB Public COLA Registry, a transcription of what the label prints, element by
+element. The 8 variants derived from those labels by damaging the image or the
+warning are not scored here; they exercise the rules, not the reader.
+
+Nothing here is compared with the application the label was filed under. An
+application is a second declaration about the same bottle, made on a form, and
+it routinely differs from the label in ways that are nobody's misreading: the
+application's origin field for a domestic product names a State ("KENTUCKY")
+where the label prints "PRODUCT OF THE USA". Scoring a reader against it
+measures the two records disagreeing, not the reader.
+
+A check the label cannot settle is reported as not scoreable and left out of
+that check's denominator, so a value nobody can compare against is not counted
+against the reader. One label does this today: a keg collar printing four
+volumes at once carries no single net-contents figure.
+
+Two checks are shaped by what the reader reports against what the label
+prints. The country of origin is scored on every label, domestic and imported
+alike, including the 15 that print no origin statement, where the correct
+reading is nothing; the reader reports a place name and the truth is the whole
+printed statement, so the reading is looked for inside the statement. The name
+and address is looked for the same way round, because the printed line carries
+lead-in words the reader does not report ("AGED AND BOTTLED BY").
 
 Every check uses the same comparison the rule pack uses, from
 `app.rules._validators._helpers`, so a score here means what a result in the
@@ -53,15 +73,56 @@ CHECKS = (
     "warning_heading_caps",
 )
 
+# Keyed on the unit stripped of everything that is not a letter or a digit, so
+# one entry covers every way a label writes it: "FL. OZ.", "FL OZ" and "fl.oz"
+# are all FLOZ. Both sides of the comparison are keyed the same way, because
+# the label and the reader spell the unit as they find it.
 _ML_PER_UNIT = {
     "ML": 1.0, "MLS": 1.0, "MILLILITER": 1.0, "MILLILITERS": 1.0,
     "CL": 10.0,
     "L": 1000.0, "LITER": 1000.0, "LITERS": 1000.0, "LITRE": 1000.0, "LITRES": 1000.0,
-    "FLOZ": 29.5735, "OZ": 29.5735,
+    "FLOZ": 29.5735, "OZ": 29.5735, "FLOUNCES": 29.5735, "FLOUNCE": 29.5735,
     "PINT": 473.176, "PINTS": 473.176, "PT": 473.176,
     "QUART": 946.353, "QUARTS": 946.353, "QT": 946.353,
     "GALLON": 3785.41, "GALLONS": 3785.41, "GAL": 3785.41,
+    "USGALLON": 3785.41, "USGALLONS": 3785.41,
 }
+
+# A parenthesis in a transcription holds the transcriber's note, not printed
+# words: "Double India Pale Ale (handwritten)" prints four words, not five.
+_ANNOTATION_RE = re.compile(r"\([^)]*\)")
+
+
+def _millilitres(amount: object, unit: object) -> float | None:
+    """One net-contents figure in millilitres, or None where there is no figure.
+
+    Used for both sides. On the truth side None means the label prints no
+    single figure to compare against, which makes the check not scoreable; on
+    the reading side it means the reader returned nothing usable, which is a
+    miss.
+    """
+    if amount is None:
+        return None
+    key = re.sub(r"[^0-9A-Za-z]", "", str(unit or "")).upper()
+    if key not in _ML_PER_UNIT:
+        return None
+    return float(amount) * _ML_PER_UNIT[key]
+
+
+def _designations(printed: str | None) -> tuple[tuple[str, ...], ...]:
+    """A printed element split into the designations a reader may report one of.
+
+    A label often prints its class and type as several separate phrases —
+    "TEQUILA", "100% BLUE AGAVE" and "REPOSADO" sit in three places on the same
+    front label — and the manifest records them separated by "/". The reader
+    returns the one line it found, so reporting any one of them is correct;
+    demanding all of them in one run would score a perfect reading as a miss.
+    """
+    if not printed:
+        return ()
+    plain = _ANNOTATION_RE.sub(" ", printed)
+    parts = (normalize_words(part) for part in plain.split("/"))
+    return tuple(part for part in parts if part)
 
 
 def _normalize_warning(text: str) -> str:
@@ -151,59 +212,77 @@ async def _read_faces(reader, entry: dict) -> tuple[dict[str, dict], float]:
     return merged, time.perf_counter() - started
 
 
-def _score(entry: dict, read: dict[str, dict], warning_text: str) -> dict[str, bool]:
-    """Every check for one label: did the reader report what is really there?"""
-    application = entry["application"]
-    observed = entry.get("label_observed", {})
-    got: dict[str, bool] = {}
+def _score(entry: dict, read: dict[str, dict], warning_text: str) -> dict[str, bool | None]:
+    """Every check for one label: did the reader report what the label prints?
 
-    brand = (read.get("brand_name") or {}).get("brand_name") or ""
-    got["brand"] = word_run_present(
-        normalize_words(brand), normalize_words(application["brand_name"] or "")
+    True when the reader got it, False when it did not, and None when the label
+    carries nothing to score the check against. None keeps that label out of
+    the check's denominator instead of counting it as a reader miss.
+    """
+    observed = entry["label_observed"]
+    got: dict[str, bool | None] = {}
+
+    # The truth is the whole printed brand; the reader may return more around
+    # it (a fanciful name on the same line), so the printed words must appear
+    # in the reading as one run.
+    brand_truth = normalize_words(observed["brand_name"] or "")
+    brand_read = normalize_words((read.get("brand_name") or {}).get("brand_name") or "")
+    got["brand"] = word_run_present(brand_read, brand_truth) if brand_truth else None
+
+    class_read = normalize_words((read.get("class_type") or {}).get("class_type") or "")
+    class_truth = _designations(observed["class_type"])
+    got["class_type"] = (
+        any(word_run_present(class_read, alt) for alt in class_truth)
+        if class_truth
+        else None
     )
 
-    # The verified class is what the label shows where the ground truth
-    # recorded it, and the application's class otherwise.
-    class_truth = observed.get("class_type") or application.get("class_type") or ""
-    class_read = (read.get("class_type") or {}).get("class_type") or ""
-    got["class_type"] = word_run_present(
-        normalize_words(class_read), normalize_words(class_truth)
-    )
-
-    percent = (application.get("alcohol_content") or {}).get("percent")
+    percent = (observed.get("abv") or {}).get("percent")
     abv_read = (read.get("abv") or {}).get("abv_pct")
-    got["abv"] = percent is not None and abv_read is not None and abs(float(abv_read) - float(percent)) < 0.05
+    got["abv"] = (
+        None if percent is None
+        else abv_read is not None and abs(float(abv_read) - float(percent)) < 0.05
+    )
 
-    millilitres = (application.get("net_contents") or {}).get("ml")
+    truth_net = observed.get("net_contents") or {}
+    truth_ml = _millilitres(truth_net.get("amount"), truth_net.get("unit"))
     net = read.get("net_contents") or {}
-    value, unit = net.get("net_contents_value"), (net.get("unit") or "").upper()
-    converted = None
-    if value is not None and unit in _ML_PER_UNIT:
-        converted = float(value) * _ML_PER_UNIT[unit]
+    converted = _millilitres(net.get("net_contents_value"), net.get("unit"))
     got["net_contents"] = (
-        millilitres is not None and converted is not None
-        and abs(converted - float(millilitres)) <= max(1.0, float(millilitres) * 0.01)
+        None if truth_ml is None
+        else converted is not None
+        and abs(converted - truth_ml) <= max(1.0, truth_ml * 0.01)
     )
 
-    # The applicant's entry is a free-text block carrying several names; the
-    # label prints one of them. The reading counts when the block carries it.
+    # The printed line carries lead-in words the reader never reports ("AGED
+    # AND BOTTLED BY"), so the reading's own anchor words are looked for in the
+    # printed line rather than the other way round.
     name_read = read.get("name_address") or {}
-    printed = ", ".join(
-        str(name_read.get(k) or "").strip() for k in ("name", "city", "state")
+    printed = normalize_words(
+        ", ".join(str(name_read.get(k) or "").strip() for k in ("name", "city", "state"))
     )
-    block = normalize_words(application.get("applicant_name_address") or "")
-    anchors = [w for w in normalize_words(printed) if len(w) > 3]
-    got["name_address"] = bool(anchors) and any(
-        word_run_present(block, (w,)) for w in anchors
-    )
-
-    if (application.get("source_of_product") or "").strip().lower() != "imported":
-        got["origin"] = True  # domestic: no country-of-origin statement is required
+    if observed["name_address"] is None:
+        # A transcribed absence, not a gap: this label prints no bottler line
+        # at all, so the correct reading is nothing.
+        got["name_address"] = not printed
     else:
-        country_read = (read.get("country_origin") or {}).get("country") or ""
-        got["origin"] = word_run_present(
-            normalize_words(country_read),
-            normalize_words(application.get("origin") or ""),
+        block = normalize_words(observed["name_address"])
+        anchors = [w for w in printed if len(w) > 3]
+        got["name_address"] = bool(anchors) and any(
+            word_run_present(block, (w,)) for w in anchors
+        )
+
+    # Scored on every label, not only the imported ones. Returning True for
+    # free on a domestic label measured nothing on half the set, and 15 of
+    # these labels print no origin statement, where the correct reading is
+    # nothing — which is a reading the reader can get wrong.
+    country_read = normalize_words((read.get("country_origin") or {}).get("country") or "")
+    statement = observed["origin_statement"]
+    if statement is None:
+        got["origin"] = not country_read
+    else:
+        got["origin"] = bool(country_read) and word_run_present(
+            normalize_words(statement), country_read
         )
 
     expected = entry["expected"]
@@ -218,6 +297,39 @@ def _score(entry: dict, read: dict[str, dict], warning_text: str) -> dict[str, b
         expected["warning_heading_caps"]
     )
     return got
+
+
+def _summarize(rows: list[dict], seconds: list[float], reader: str) -> None:
+    """Print the scoreboard for one run.
+
+    Its own function so it can be driven without a reader, an image or a model:
+    `plans/step0_score_probe.py` scores every label off the manifest and prints
+    through here, which is the only way this output gets exercised without
+    spending the CPU budget a real run costs.
+    """
+    total = len(rows)
+    print(f"\nreader: {reader}    labels: {total}\n")
+    print(f"{'check':<22} {'correct of scoreable':>20}")
+    print("-" * 44)
+    for check in CHECKS:
+        # A label the check cannot be scored on is out of the denominator, not
+        # counted as a miss: it is the answer key that is silent, not the
+        # reader that is wrong.
+        scored = [r[check] for r in rows if r[check] is not None]
+        correct = sum(1 for value in scored if value)
+        unscoreable = total - len(scored)
+        aside = f"   ({unscoreable} not scoreable)" if unscoreable else ""
+        print(f"{check:<22} {correct:>8} of {len(scored):<3}{aside}")
+    print("-" * 44)
+    if seconds:
+        ordered = sorted(seconds)
+        print(
+            f"seconds per label: median {statistics.median(ordered):.2f}, "
+            f"slowest {ordered[-1]:.2f}, whole run {sum(ordered):.1f}"
+        )
+    misses = [r["id"] for r in rows if r["warning_exact"] is False]
+    if misses:
+        print(f"\nwarning not word for word on {len(misses)}: {', '.join(misses)}")
 
 
 async def main() -> int:
@@ -242,22 +354,7 @@ async def main() -> int:
         seconds.append(elapsed)
         rows.append({"id": entry["id"], "seconds": round(elapsed, 2), **_score(entry, read, warning_text)})
 
-    total = len(rows)
-    print(f"\nreader: {args.reader}    labels: {total}\n")
-    print(f"{'check':<22} {'correct':>9}")
-    print("-" * 32)
-    for check in CHECKS:
-        correct = sum(1 for r in rows if r[check])
-        print(f"{check:<22} {correct:>4} of {total}")
-    print("-" * 32)
-    ordered = sorted(seconds)
-    print(
-        f"seconds per label: median {statistics.median(ordered):.2f}, "
-        f"slowest {ordered[-1]:.2f}, whole run {sum(ordered):.1f}"
-    )
-    misses = [r["id"] for r in rows if not r["warning_exact"]]
-    if misses:
-        print(f"\nwarning not word for word on {len(misses)}: {', '.join(misses)}")
+    _summarize(rows, seconds, args.reader)
     if args.json:
         args.json.write_text(json.dumps({"reader": args.reader, "labels": rows}, indent=1))
         print(f"\nper-label results written to {args.json}")
