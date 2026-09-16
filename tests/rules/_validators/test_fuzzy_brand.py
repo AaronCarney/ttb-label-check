@@ -1,8 +1,8 @@
 """fuzzy_brand runs Stage A first; on a miss it runs Stage B and routes by the
 thresholds the rule pack supplies. The borderline band
 (`needs_review_threshold` ≤ score < `pass_threshold`) emits exactly the reason
-code BRAND.NAME.NEEDS_REVIEW, which is what the evaluator watches for when it
-decides whether to call the orchestrator.
+code BRAND.NAME.NEEDS_REVIEW, which sends the label to a reviewer instead of
+rejecting it.
 """
 from __future__ import annotations
 

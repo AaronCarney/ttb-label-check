@@ -10,7 +10,6 @@ from app.schemas.expected import BeverageClass
 from app.schemas.rejection import EngineMeta, Outcome, Severity, ValidationResult
 from app.services.evaluator import Evaluator
 from app.vision.quality import QualityReport
-from tests._fakes.orchestrator import FakeOrchestrator
 from tests._fakes.rules import FakeRuleEngine
 from tests._fakes.vision import FakeVisionExtractor
 from tests.conftest import _stub_label
@@ -43,7 +42,7 @@ async def test_conflicting_rules():
                          outcome=Outcome.FAIL, severity=Severity.REJECT, reason_code="X.CONFLICT.DETECTED",
                          aggregated_confidence=0.95, engine_meta=_em()),
     ))
-    e = Evaluator(vision=FakeVisionExtractor(observations=[]), rules=rules, orchestrator=FakeOrchestrator(), settings=Settings())
+    e = Evaluator(vision=FakeVisionExtractor(observations=[]), rules=rules, settings=Settings())
     envelope = await e.evaluate(application=_stub_app(), label=_stub_label())
     assert envelope.disposition == "fail"
 
@@ -68,7 +67,7 @@ async def test_registry_reason_codes_route_to_needs_review(reason_code, outcome,
         ),
     ))
     e = Evaluator(vision=FakeVisionExtractor(observations=[]), rules=rules,
-                  orchestrator=FakeOrchestrator(), settings=Settings())
+                  settings=Settings())
     envelope = await e.evaluate(application=_stub_app(), label=_stub_label())
     assert envelope.disposition == "needs_review", f"{case_label} did not route to needs_review"
     rule_ids = {entry.rule_id for entry in envelope.audit_trail.per_rule_trace}
@@ -86,7 +85,7 @@ async def test_validator_exception():
 
     e = Evaluator(vision=FakeVisionExtractor(observations=[]),
                   rules=FailingRules(results=()),
-                  orchestrator=FakeOrchestrator(), settings=Settings())
+                  settings=Settings())
     envelope = await e.evaluate(application=_stub_app(), label=_stub_label())
     assert envelope.disposition == "needs_review"
 
@@ -102,7 +101,7 @@ async def test_per_rule_timeout_outcome_routes_to_needs_review():
                          outcome=Outcome.PASS, severity=Severity.INFO,
                          aggregated_confidence=0.95, engine_meta=_em()),
     ))
-    e = Evaluator(vision=FakeVisionExtractor(observations=[]), rules=rules, orchestrator=FakeOrchestrator(), settings=Settings())
+    e = Evaluator(vision=FakeVisionExtractor(observations=[]), rules=rules, settings=Settings())
     envelope = await e.evaluate(application=_stub_app(), label=_stub_label())
     assert envelope.disposition == "needs_review"
 
@@ -116,7 +115,7 @@ async def test_whole_eval_timeout():
 
     e = Evaluator(vision=FakeVisionExtractor(observations=[]),
                   rules=SlowRules(results=()),
-                  orchestrator=FakeOrchestrator(), settings=Settings())
+                  settings=Settings())
     e._sla_seconds = 0.1
     envelope = await e.evaluate(application=_stub_app(), label=_stub_label())
     assert envelope.disposition == "needs_review"
@@ -132,27 +131,9 @@ async def test_reference_data_unavailable():
                          reason_code="ENGINE.REFERENCE_DATA.UNAVAILABLE",
                          aggregated_confidence=0.0, engine_meta=_em()),
     ))
-    e = Evaluator(vision=FakeVisionExtractor(observations=[]), rules=rules, orchestrator=FakeOrchestrator(), settings=Settings())
+    e = Evaluator(vision=FakeVisionExtractor(observations=[]), rules=rules, settings=Settings())
     envelope = await e.evaluate(application=_stub_app(), label=_stub_label())
     assert envelope.disposition == "needs_review"
-
-
-@pytest.mark.asyncio
-async def test_model_unavailable():
-    rules = FakeRuleEngine(results=(
-        ValidationResult(rule_id="X.brand.present", cfr_citation="27 CFR §5.42",
-                         beverage_class=BeverageClass.SPIRITS,
-                         outcome=Outcome.INSUFFICIENT_EVIDENCE, severity=Severity.WARN,
-                         reason_code="BRAND.NAME.NEEDS_REVIEW",
-                         aggregated_confidence=0.6, engine_meta=_em()),
-    ))
-    orch = FakeOrchestrator(refined_outputs=[], raise_on_call=1)
-    e = Evaluator(vision=FakeVisionExtractor(observations=[]), rules=rules, orchestrator=orch,
-                  settings=Settings(orchestrator_enabled=True))
-    envelope = await e.evaluate(application=_stub_app(), label=_stub_label())
-    assert envelope.disposition == "needs_review"
-    rule_ids = {entry.rule_id for entry in envelope.audit_trail.per_rule_trace}
-    assert any("ENGINE.MODEL" in c for c in rule_ids)
 
 
 @pytest.mark.asyncio
@@ -167,7 +148,7 @@ async def test_short_circuit_preserves_prior_failures_in_audit():
 
     e = Evaluator(vision=CrashingVision(observations=[]),
                   rules=FakeRuleEngine(results=()),
-                  orchestrator=FakeOrchestrator(), settings=Settings())
+                  settings=Settings())
     # _stub_label ships 8-byte PNG-magic stub; assess_quality routes it to
     # needs_better_photo via the decode-error guard, triggering _short_circuit.
     envelope = await e.evaluate(application=_stub_app(), label=_stub_label())

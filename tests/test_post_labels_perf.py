@@ -2,8 +2,8 @@
 P99 ≤ 5.0 s, inside the five-second budget in docs/PRD.md NFR-1.
 
 Measures the API, evaluator and serialization overhead against deterministic
-seams — a fake reader and a fake orchestrator. Reader load time and LLM latency
-are bypassed deliberately; they are measured where they are spent, not here.
+seams — a fake reader. Reader load time is bypassed deliberately; it is
+measured where it is spent, not here.
 """
 import json
 import statistics
@@ -13,7 +13,6 @@ import pytest
 from fastapi.testclient import TestClient
 
 from app.main import app
-from tests._fakes.orchestrator import FakeOrchestrator
 from tests._fakes.vision import FakeVisionExtractor
 
 
@@ -22,10 +21,6 @@ def deterministic_seams(monkeypatch):
     monkeypatch.setattr(
         "app.deps.build_vision_extractor",
         lambda settings: FakeVisionExtractor(observations=[]),
-    )
-    monkeypatch.setattr(
-        "app.deps.build_orchestrator",
-        lambda settings: FakeOrchestrator(),
     )
 
 

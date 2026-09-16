@@ -7,7 +7,7 @@ Boot sequence:
 4. Register routers: /healthz, UI page shells.
 5. Mount static files at /static.
 
-Also wired into the app: rule-loader startup, vision/orchestrator wiring, label/batch/
+Also wired into the app: rule-loader startup, reader wiring, label/batch/
 override routes, SSE.
 """
 from __future__ import annotations
@@ -70,9 +70,6 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     from app.api import labels as labels_module
     application.include_router(labels_module.router)
-
-    from app.api import raw as raw_module
-    application.include_router(raw_module.router)
 
     from app.api import batches as batches_module
     application.include_router(batches_module.router)

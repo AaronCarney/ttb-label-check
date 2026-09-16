@@ -36,24 +36,11 @@ class Settings(BaseSettings):
     # vision model, reads more accurately, and needs OPENAI_API_KEY.
     vision_mode: Literal["local", "cloud"] = Field(default="local", alias="VISION_MODE")
 
-    # Orchestrator selection.
-    orchestrator_backend: Literal["openai", "anthropic"] = Field(
-        default="openai", alias="ORCHESTRATOR_BACKEND"
-    )
-
-    # Orchestrator-on-the-hot-path master switch. Default OFF: the brief
-    # called for AI-powered verification but every hard requirement is a
-    # deterministic check, and Marcus flagged outbound-LLM traffic as
-    # firewall-hostile. The seam is wired (the orchestrator contract bars the model
-    # from touching outcome/severity/reason_code), but the model does not
-    # run during the default demo. Flip ORCHESTRATOR_ENABLED=1 to enable.
-    orchestrator_enabled: bool = Field(default=False, alias="ORCHESTRATOR_ENABLED")
-
-    # Secrets — required at request time when the corresponding seam is invoked.
+    # Secret — required only when VISION_MODE=cloud selects the hosted reader.
     openai_api_key: str | None = Field(default=None, alias="OPENAI_API_KEY")
-    anthropic_api_key: str | None = Field(default=None, alias="ANTHROPIC_API_KEY")
 
-    # Pinned model + prompt versions.
+    # Pinned model + prompt versions for the cloud reader. Pinning keeps its
+    # readings reproducible across runs.
     llm_model_snapshot: str = Field(default="gpt-4o-2024-08-06", alias="LLM_MODEL_SNAPSHOT")
     prompt_version: str = Field(default="v1", alias="PROMPT_VERSION")
 

@@ -5,10 +5,10 @@ import inspect
 from app.services.evaluator import Evaluator
 
 
-def test_evaluator_init_accepts_5_deps():
+def test_evaluator_init_accepts_4_deps():
     sig = inspect.signature(Evaluator.__init__)
     params = list(sig.parameters.keys())
-    for name in ("vision", "rules", "orchestrator", "settings", "cache"):
+    for name in ("vision", "rules", "settings", "cache"):
         assert name in params
 
 

@@ -44,8 +44,8 @@ def test_every_code_has_required_fields() -> None:
 
 
 def test_brand_needs_review_code_present() -> None:
-    """BRAND.NAME.NEEDS_REVIEW must be in the registry: it is the code the
-    evaluator watches for when deciding whether to call the orchestrator."""
+    """BRAND.NAME.NEEDS_REVIEW must be in the registry: it is the code a
+    borderline brand match reports, which sends the label to a reviewer."""
     data = yaml.safe_load(REGISTRY.read_text(encoding="utf-8"))
     assert "BRAND.NAME.NEEDS_REVIEW" in data["codes"]
 

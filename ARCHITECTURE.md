@@ -60,13 +60,12 @@ as it finishes, so a 300-label batch shows its first verdicts immediately instea
 | `app/main.py` | Builds the FastAPI application: logging, routers, static files, and the per-process state a batch needs. |
 | `app/config.py` | Every setting and every secret name, read here and only here. |
 | `app/deps.py` | Chooses the reader and assembles the evaluator for a request. |
-| `app/api/` | HTTP surface. `labels.py` evaluates one submission; `batches.py` accepts a batch and streams its results; `ui.py` serves the pages and the upload form; `healthz.py` reports readiness; `overrides.py` records an agent's decision to overrule a check; `raw.py` and `eval.py` are development-only. |
+| `app/api/` | HTTP surface. `labels.py` evaluates one submission; `batches.py` accepts a batch and streams its results; `ui.py` serves the pages and the upload form; `healthz.py` reports readiness; `overrides.py` records an agent's decision to overrule a check; `eval.py` is development-only. |
 | `app/vision/` | The readers. `base.py` is the interface both implement; `local.py` reads on this machine with no outbound call and is the default; `cloud.py` reads with a vision model; `quality.py` gates unusable images; `heading_measure.py` measures whether the warning heading is set in bold. |
 | `app/rules/` | The engine. `loader.py` reads and cross-checks the YAML pack at startup; `yaml_engine.py` selects the rules that apply to each observation and runs them; `_validators/` holds one function per comparison kind, registered by name. |
 | `app/services/` | One step of the flow each: `evaluator.py` composes them, and `disposition.py`, `aggregation.py`, `confidence.py`, `envelope_builder.py`, `audit.py`, `metrics_builder.py`, `cache.py` do the rest. `application_mapper.py` and `application_form.py` turn an application into the declared values the rules compare against. |
 | `app/batch/` | The batch path: a bounded queue, a worker, and the anomaly check that flags a batch failing far more often than its neighbours. |
 | `app/schemas/` | The pydantic types. `wire/` holds what crosses the HTTP boundary; the rest are internal. |
-| `app/orchestrator/` | The optional model layer, off by default, with one module per task it may perform. |
 | `app/logging/` | JSON-line logging, secret redaction, and a ring buffer of recent calls for the development view. |
 | `app/ui/` | Jinja page shells and the built frontend bundle they mount. |
 | `rules/` | The rule pack: `common/` for the health warning, then one file per beverage type, plus `tables/` for unit conversions and `reason_codes.yaml` for the code each finding reports. |

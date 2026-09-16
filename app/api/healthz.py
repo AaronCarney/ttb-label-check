@@ -1,4 +1,4 @@
-"""GET /healthz — readiness, including whether the reader and orchestrator have warmed up."""
+"""GET /healthz — readiness, including whether the reader has warmed up."""
 from __future__ import annotations
 
 import logging
@@ -23,7 +23,7 @@ async def healthz(settings: Settings = Depends(_get_settings)) -> dict[str, obje
     body: dict[str, object] = {
         "status": "ok",
         "version": settings.app_version,
-        "mode": {"vision": settings.vision_mode, "orchestrator": settings.orchestrator_backend},
+        "mode": {"vision": settings.vision_mode},
     }
     if not _warmed["done"]:
         try:
@@ -33,7 +33,6 @@ async def healthz(settings: Settings = Depends(_get_settings)) -> dict[str, obje
 
             evaluator = build_evaluator(settings)
             await evaluator._vision.ensure_loaded()
-            await evaluator._orchestrator.ensure_client()
             fixture_path = Path("fixtures/01-spirits-clean/label.png")
             if fixture_path.exists():
                 label = Label(

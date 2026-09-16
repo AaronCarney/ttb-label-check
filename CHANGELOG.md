@@ -23,6 +23,12 @@ All notable changes to this project are recorded here. The format follows
 
 ### Removed
 
+- The optional layer that asked a language model for a second opinion on a finished rule result is
+  gone, along with the two language-model SDK dependencies it needed and the development-only route
+  that showed its raw calls. It was switched off by default and could not change a verdict: its
+  output was discarded before it reached a rule result, and the channel that would have shown it to
+  a reviewer was sealed. The reader that uses a vision model to turn a label photograph into fields
+  is unaffected. See `docs/decisions/0009`.
 - Installed dependencies and compiled Python are no longer tracked: `frontend/node_modules` and
   `__pycache__` are build output and are rebuilt from `uv.lock` and `pnpm-lock.yaml`.
 

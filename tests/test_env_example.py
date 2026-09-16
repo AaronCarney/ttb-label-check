@@ -5,9 +5,7 @@ from pathlib import Path
 
 REQUIRED_KEYS = {
     "VISION_MODE",
-    "ORCHESTRATOR_BACKEND",
     "OPENAI_API_KEY",
-    "ANTHROPIC_API_KEY",
     "LLM_MODEL_SNAPSHOT",
     "PROMPT_VERSION",
     "LOOKAHEAD_K",

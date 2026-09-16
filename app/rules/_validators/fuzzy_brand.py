@@ -5,7 +5,6 @@
     score >= pass_threshold       → PASS  (kind=fuzzy, score recorded)
     needs_review_threshold <= s < pass_threshold → FAIL with severity=warn,
                                   reason_code=BRAND.NAME.NEEDS_REVIEW
-                                  (what triggers an orchestrator call)
     score < needs_review_threshold → FAIL with reason_code=BRAND.NAME.MISMATCH
 """
 from __future__ import annotations

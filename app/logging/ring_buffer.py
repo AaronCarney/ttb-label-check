@@ -1,7 +1,7 @@
 """``CallRecord`` deque construction.
 
 This module ships the constructor only, so a layer can hold a reference at
-startup; the reader and orchestrator do the recording into it.
+startup; the reader does the recording into it.
 """
 from __future__ import annotations
 

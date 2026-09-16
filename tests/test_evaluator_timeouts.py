@@ -7,7 +7,6 @@ from app.config import Settings
 from app.schemas.application import Application
 from app.services.evaluator import Evaluator
 from app.vision.quality import QualityReport
-from tests._fakes.orchestrator import FakeOrchestrator
 from tests._fakes.rules import FakeRuleEngine
 from tests._fakes.vision import FakeVisionExtractor
 from tests.conftest import _stub_label
@@ -27,7 +26,7 @@ async def test_whole_eval_timeout_routes_to_needs_review(monkeypatch):
 
     e = Evaluator(vision=FakeVisionExtractor(observations=[]),
                   rules=SlowRules(results=()),
-                  orchestrator=FakeOrchestrator(), settings=Settings())
+                  settings=Settings())
     e._sla_seconds = 0.1
     envelope = await e.evaluate(
         application=Application(application_id="A", evaluation_id="EV-001"),

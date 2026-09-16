@@ -128,24 +128,19 @@ def test_healthz_emits_one_json_log_line(capsys) -> None:
 
 
 def test_di_providers_return_real_impls() -> None:
-    """Both dependency seams return a real implementation.
+    """The reader seam returns a real implementation.
 
-    The vision provider returns a ``VisionExtractor`` chosen by VISION_MODE and
-    the orchestrator provider returns an ``Orchestrator`` chosen by
-    ORCHESTRATOR_BACKEND. Neither is a placeholder that raises
-    NotImplementedError.
+    The vision provider returns a ``VisionExtractor`` chosen by VISION_MODE,
+    not a placeholder that raises NotImplementedError.
     """
     from app.config import Settings
-    from app.deps import build_orchestrator, build_vision_extractor
-    from app.orchestrator.base import Orchestrator
+    from app.deps import build_vision_extractor
     from app.vision.base import VisionExtractor
 
     s = Settings()
     extractor = build_vision_extractor(s)
-    orch = build_orchestrator(s)
 
     assert isinstance(extractor, VisionExtractor) or hasattr(extractor, "extract")
-    assert isinstance(orch, Orchestrator)
 
 
 def test_rule_set_canonically_declared_in_app_schemas_rules() -> None:

@@ -30,9 +30,7 @@ def test_settings_defaults_when_only_required_provided() -> None:
 
     with _env(
         OPENAI_API_KEY="sk-test",
-        ANTHROPIC_API_KEY=None,
         VISION_MODE=None,
-        ORCHESTRATOR_BACKEND=None,
         LOOKAHEAD_K=None,
         DEV_MODE=None,
         OTEL_EXPORTER_OTLP_ENDPOINT=None,
@@ -40,8 +38,9 @@ def test_settings_defaults_when_only_required_provided() -> None:
         PROMPT_VERSION=None,
     ):
         s = Settings()
-        assert s.vision_mode == "cloud"
-        assert s.orchestrator_backend == "openai"
+        # Local-by-default (docs/decisions/0005): a clone reads labels with no
+        # key and no outbound call unless VISION_MODE says otherwise.
+        assert s.vision_mode == "local"
         assert s.lookahead_k == 3
         assert s.dev_mode is False
         assert s.llm_model_snapshot == "gpt-4o-2024-08-06"

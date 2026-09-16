@@ -5,7 +5,6 @@ import pytest
 from fastapi.testclient import TestClient
 
 from app.main import app
-from tests._fakes.orchestrator import FakeOrchestrator
 from tests._fakes.rules import FakeRuleEngine
 from tests._fakes.vision import FakeVisionExtractor
 
@@ -17,10 +16,6 @@ def deterministic_seams(monkeypatch):
     monkeypatch.setattr(
         "app.deps.build_vision_extractor",
         lambda settings: FakeVisionExtractor(observations=[]),
-    )
-    monkeypatch.setattr(
-        "app.deps.build_orchestrator",
-        lambda settings: FakeOrchestrator(),
     )
 
 

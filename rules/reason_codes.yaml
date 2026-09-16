@@ -27,7 +27,7 @@ codes:
     cfr_anchors: ["27 CFR §4.33", "27 CFR §5.64", "27 CFR §7.64"]
     severity: reject
   BRAND.NAME.NEEDS_REVIEW:
-    description: "Brand match falls in the borderline band — orchestrator should disambiguate."
+    description: "Brand match falls in the borderline band — a reviewer decides."
     cfr_anchors: ["27 CFR §4.33", "27 CFR §5.64", "27 CFR §7.64"]
     severity: warn
 
@@ -183,7 +183,7 @@ codes:
     cfr_anchors: []
     severity: reject
   ENGINE.OBSERVATION.AMBIGUOUS:
-    description: "OCR returned multiple plausible candidates with no winner after orchestration."
+    description: "OCR returned multiple plausible candidates with no clear winner."
     cfr_anchors: []
     severity: warn
   ENGINE.RULESET.VERSION_NOT_FOUND:
@@ -215,7 +215,7 @@ codes:
     cfr_anchors: []
     severity: reject
   ENGINE.MODEL.UNAVAILABLE:
-    description: "LLM endpoint unavailable when the orchestrator was invoked."
+    description: "The hosted reader's endpoint was unavailable when it was called."
     cfr_anchors: []
     severity: reject
   ENGINE.EXTRACTION.UNAVAILABLE:

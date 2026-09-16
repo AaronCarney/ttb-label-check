@@ -15,7 +15,6 @@ from app.schemas.application import Application
 from app.schemas.expected import BeverageClass
 from app.services.evaluator import Evaluator
 from app.vision.quality import QualityReport
-from tests._fakes.orchestrator import FakeOrchestrator
 from tests._fakes.rules import FakeRuleEngine
 from tests._fakes.vision import FakeVisionExtractor
 from tests.conftest import _stub_label
@@ -63,7 +62,7 @@ def _reader():
 async def _classes_seen(application: Application) -> set[BeverageClass]:
     rules = _RecordingRuleEngine()
     evaluator = Evaluator(
-        vision=_reader(), rules=rules, orchestrator=FakeOrchestrator(), settings=Settings()
+        vision=_reader(), rules=rules, settings=Settings()
     )
     await evaluator.evaluate(application=application, label=_stub_label())
     return {obs.beverage_class for obs in rules.seen}
@@ -97,8 +96,7 @@ async def test_two_classes_do_not_share_a_cached_result():
     for beverage_class in (BeverageClass.WINE, BeverageClass.MALT):
         rules = _RecordingRuleEngine()
         evaluator = Evaluator(
-            vision=_reader(), rules=rules, orchestrator=FakeOrchestrator(),
-            settings=Settings(), cache=cache,
+            vision=_reader(), rules=rules, settings=Settings(), cache=cache,
         )
         await evaluator.evaluate(
             application=Application(

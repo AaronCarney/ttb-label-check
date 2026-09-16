@@ -7,7 +7,6 @@ from app.config import Settings
 from app.schemas.application import Application
 from app.services.evaluator import Evaluator
 from app.vision.quality import QualityReport
-from tests._fakes.orchestrator import FakeOrchestrator
 from tests._fakes.rules import FakeRuleEngine
 from tests._fakes.vision import FakeVisionExtractor
 from tests.conftest import _stub_label as _label
@@ -32,7 +31,7 @@ async def test_vision_exception_routes_to_needs_review(caplog):
             return None
 
     e = Evaluator(vision=FailingVision(), rules=FakeRuleEngine(results=()),  # type: ignore[arg-type]
-                  orchestrator=FakeOrchestrator(), settings=Settings())
+                  settings=Settings())
     envelope = await e.evaluate(application=Application(application_id="A", evaluation_id="EV-001"), label=_label())
     assert envelope.disposition == "needs_review"
     rule_ids = {entry.rule_id for entry in envelope.audit_trail.per_rule_trace}
@@ -53,7 +52,7 @@ async def test_rule_engine_exception_routes_to_needs_review(caplog):
 
     e = Evaluator(vision=FakeVisionExtractor(observations=[]),
                   rules=FailingRules(results=()),
-                  orchestrator=FakeOrchestrator(), settings=Settings())
+                  settings=Settings())
     envelope = await e.evaluate(application=Application(application_id="A", evaluation_id="EV-001"), label=_label())
     assert envelope.disposition == "needs_review"
     assert any(

@@ -8,7 +8,6 @@ from app.schemas.rejection import EngineMeta, Outcome, Severity, ValidationResul
 from app.services.cache import SessionCache
 from app.services.evaluator import Evaluator
 from app.vision.quality import QualityReport
-from tests._fakes.orchestrator import FakeOrchestrator
 from tests._fakes.rules import FakeRuleEngine
 from tests._fakes.vision import FakeVisionExtractor
 from tests.conftest import _stub_label
@@ -34,7 +33,7 @@ async def test_happy_path_pass_disposition():
         for i in range(3)
     ))
     e = Evaluator(vision=FakeVisionExtractor(observations=[]), rules=rules,
-                  orchestrator=FakeOrchestrator(), settings=Settings())
+                  settings=Settings())
     envelope = await e.evaluate(application=Application(application_id="A", evaluation_id="EV-001"), label=_stub_label())
     assert envelope.evaluation_id == "EV-001"
     assert envelope.disposition == "pass"
@@ -50,7 +49,7 @@ async def test_fail_disposition():
                          aggregated_confidence=0.95, engine_meta=_em()),
     ))
     e = Evaluator(vision=FakeVisionExtractor(observations=[]), rules=rules,
-                  orchestrator=FakeOrchestrator(), settings=Settings())
+                  settings=Settings())
     envelope = await e.evaluate(application=Application(application_id="A", evaluation_id="EV-001"), label=_stub_label())
     assert envelope.disposition == "fail"
 
@@ -67,7 +66,7 @@ async def test_cache_hit_replaces_evaluation_id():
             return await super().extract(label)
 
     e = Evaluator(vision=CountingVision(observations=[]), rules=rules,
-                  orchestrator=FakeOrchestrator(), settings=Settings(), cache=cache)
+                  settings=Settings(), cache=cache)
     label = _stub_label()
     e1 = await e.evaluate(application=Application(application_id="A", evaluation_id="EV-1"), label=label)
     e2 = await e.evaluate(application=Application(application_id="A", evaluation_id="EV-2"), label=label)

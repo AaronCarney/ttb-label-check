@@ -32,6 +32,6 @@ class CallRecord(BaseModel):
     response: dict[str, Any]
     latency_ms: int
     model: str | None = None
-    provider: Literal["openai", "anthropic", "local.rapidocr", "local.paddleocr"] | None = None
+    provider: Literal["openai", "local.rapidocr", "local.paddleocr"] | None = None
     prompt_version: str | None = None
     output_hash: str

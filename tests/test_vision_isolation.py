@@ -1,7 +1,7 @@
 # tests/test_vision_isolation.py
 """Inference dependencies stay behind the reader's seam: only app/vision/ may
 import openai, paddleocr, cv2 or torch.
-tests/test_orchestrator_isolation.py makes the same check from the other side."""
+The reader is the only place a hosted model may be reached from."""
 from pathlib import Path
 import re
 

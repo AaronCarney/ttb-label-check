@@ -32,7 +32,6 @@ from app.rules import build_rule_engine
 from app.schemas.expected import BeverageClass
 from app.services.evaluator import Evaluator
 from app.vision.quality import QualityReport
-from tests._fakes.orchestrator import FakeOrchestrator
 from tests._fakes.vision import FakeVisionExtractor
 from tests.rules.fixtures import make_obs
 from tests.rules.manifest_labels import entries_by_id
@@ -92,7 +91,6 @@ def _client_for(label_id: str) -> TestClient:
     evaluator = Evaluator(
         vision=FakeVisionExtractor(observations=_readings(entries_by_id()[label_id])),
         rules=build_rule_engine(Settings()),
-        orchestrator=FakeOrchestrator(),
         settings=Settings(),
     )
     app = create_app()

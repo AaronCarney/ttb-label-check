@@ -1,12 +1,12 @@
 """Application Service chokepoint.
 
-Composes the reader, the rule engine and the orchestrator into one end-to-end
-evaluation behind ``POST /labels``.
+Composes the reader and the rule engine into one end-to-end evaluation behind
+``POST /labels``.
 
 Thin — all logic lives in helpers under ``app/services/`` (disposition,
-aggregation, patcher, triggers, envelope_builder, audit, metrics_builder,
-cache, engine_meta). The Evaluator's job is composition, and routing every
-downstream exception to needs_review rather than to a 500.
+aggregation, envelope_builder, audit, metrics_builder, cache, engine_meta).
+The Evaluator's job is composition, and routing every downstream exception to
+needs_review rather than to a 500.
 """
 from __future__ import annotations
 
@@ -15,7 +15,6 @@ import logging
 import time
 
 from app.config import Settings
-from app.orchestrator.base import Orchestrator
 from app.rules.engine import RuleEngine
 from app.schemas.application import Application
 from app.schemas.label import Label
@@ -36,13 +35,11 @@ class Evaluator:
         *,
         vision: VisionExtractor,
         rules: RuleEngine,
-        orchestrator: Orchestrator,
         settings: Settings,
         cache: SessionCache | None = None,
     ) -> None:
         self._vision = vision
         self._rules = rules
-        self._orchestrator = orchestrator
         self._settings = settings
         self._cache = cache
 
@@ -168,44 +165,13 @@ class Evaluator:
             )
             results = ()
 
-        # Step 5-6: orchestrator (conditional), then patching its notes in.
-        # Master switch: settings.orchestrator_enabled gates the entire
-        # AI-on-the-hot-path layer. Default OFF — the brief required AI but
-        # every check on the requirements list is deterministic, and Marcus
-        # flagged outbound-LLM traffic as firewall-hostile. The patcher already
-        # bars the model from touching outcome/severity/reason_code; the
-        # switch is the additional defense-in-depth that keeps the demo
-        # zero-LLM-call by default.
-        from app.services.patcher import patch_validation_results
-        from app.services.triggers import should_invoke_orchestrator
-        if self._settings.orchestrator_enabled and should_invoke_orchestrator(results):
-            t_orch = time.monotonic()
-            try:
-                refined = await self._orchestrator.refine(application, list(observations), list(results))
-                results = patch_validation_results(results, refined)
-            except Exception as e:  # noqa: BLE001
-                timeline.record_failure(
-                    reason_code="ENGINE.MODEL.UNAVAILABLE",
-                    message=str(e), exception_class=type(e).__name__,
-                )
-                _logger.info(
-                    "engine_failure_routed",
-                    extra={
-                        "reason_code": "ENGINE.MODEL.UNAVAILABLE",
-                        "evaluation_id": application.evaluation_id,
-                        "error_class": type(e).__name__,
-                    },
-                )
-            finally:
-                timeline.record_orchestrator_done(int((time.monotonic() - t_orch) * 1000))
-
         # Surface failures into per_rule_trace so AuditRecorder picks them up.
         for failure in timeline.failures:
             timeline.record_rule_done(rule_id=failure.reason_code, duration_ms=0,
                                       disposition="needs_review",
                                       evidence_ref=f"engine_failure/{failure.exception_class}")
 
-        # Step 7-8: disposition + per-rule timeline updates
+        # Step 5-6: disposition + per-rule timeline updates
         from app.services.disposition import compute_disposition
         for vr in results:
             # A warn-severity failure is a reviewer's call, not a rejection,
@@ -230,7 +196,7 @@ class Evaluator:
                 )
         disposition = compute_disposition(results)
 
-        # Step 9-10: assembly
+        # Step 7-8: assembly
         timeline.finish(total_duration_ms=int((time.monotonic() - t_total) * 1000))
         field_findings = build_field_findings(
             results=results,

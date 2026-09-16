@@ -137,28 +137,6 @@ def test_validation_result_round_trip() -> None:
     assert vr2 == vr
 
 
-def test_refined_round_trip() -> None:
-    from app.schemas.refined import Refined
-
-    r = Refined(evaluation_id="00000000-0000-4000-8000-000000000001")
-    r2 = Refined.model_validate_json(r.model_dump_json())
-    assert r2 == r
-
-
-def test_refined_has_no_disposition_field() -> None:
-    """The orchestrator output schema must NOT carry a top-level ``disposition``
-    field: the model never decides pass or fail.
-    ``model_disposition`` is permitted (it is the model's *suggestion*, not the
-    deterministic verdict). The forbidden field is the bare ``disposition``.
-    """
-    from app.schemas.refined import Refined
-
-    fields = Refined.model_fields
-    assert "disposition" not in fields, (
-        "Refined.disposition would let the model decide pass/fail."
-    )
-
-
 def test_audit_record_round_trip() -> None:
     from datetime import datetime, timezone
 

@@ -3,8 +3,8 @@
 Validates the abstract method on the concrete YamlRuleEngine the
 build_rule_engine factory returns: assets, decision tables and engine version
 come off the engine's own rule set, and the per-evaluation clock comes from the
-caller. The FakeRuleEngine implementation is exercised in
-test_fakes_orchestrator_rules.py, so this file stays on the production path.
+caller. The fake rule engine is exercised elsewhere, so this file stays on the
+production path.
 """
 from app.config import Settings
 from app.rules import build_rule_engine

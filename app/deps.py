@@ -1,12 +1,9 @@
-"""DI container — selects VisionExtractor and Orchestrator per env."""
+"""DI container — selects the VisionExtractor named by the environment."""
 from __future__ import annotations
 
 from collections import deque
 
 from app.config import Settings
-from app.orchestrator.base import Orchestrator
-from app.orchestrator.openai_strict import OpenAIStrictOrchestrator
-from app.orchestrator.anthropic_strict import AnthropicStrictOrchestrator
 from app.vision.base import VisionExtractor
 from app.vision.cloud import CloudVisionExtractor
 from app.vision.local import LocalVisionExtractor
@@ -35,20 +32,6 @@ def build_vision_extractor(settings: Settings) -> VisionExtractor:
     return LocalVisionExtractor(settings=settings, ring_buffer=ring)
 
 
-def build_orchestrator(settings: Settings) -> Orchestrator:
-    backend = settings.orchestrator_backend
-    ring: deque = deque(maxlen=200)
-    if backend == "openai":
-        return OpenAIStrictOrchestrator(
-            settings=settings, ring_buffer=ring, api_key=settings.openai_api_key or ""
-        )
-    if backend == "anthropic":
-        return AnthropicStrictOrchestrator(
-            settings=settings, ring_buffer=ring, api_key=settings.anthropic_api_key or "",
-        )
-    raise ValueError(f"Unknown orchestrator_backend: {backend!r}")
-
-
 _session_cache_singleton: "SessionCache | None" = None
 
 
@@ -71,11 +54,10 @@ def reset_session_cache() -> None:
 
 
 def build_evaluator(settings: "Settings") -> "Evaluator":
-    """Construct an Evaluator wired to all four real dependencies."""
+    """Construct an Evaluator wired to all three real dependencies."""
     from app.rules import build_rule_engine
     from app.services.evaluator import Evaluator
     vision = build_vision_extractor(settings)
     rules = build_rule_engine(settings)
-    orchestrator = build_orchestrator(settings)
     cache = _get_session_cache()
-    return Evaluator(vision=vision, rules=rules, orchestrator=orchestrator, settings=settings, cache=cache)
+    return Evaluator(vision=vision, rules=rules, settings=settings, cache=cache)

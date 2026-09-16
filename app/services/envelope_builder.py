@@ -29,14 +29,6 @@ from app.services.confidence import to_band
 from app.services.engine_meta import EvaluationTimeline
 
 
-# Orchestrator task names → the enum the wire envelope uses.
-_TASK_WIRE_NAME = {
-    "brand_disambig": "brand_borderline",
-    "reasoning_enrich": "reasoning_enrichment",
-    "ocr_reconcile": "ocr_reconciliation",
-}
-
-
 # Canonical field id → wire field_name enum. Two input forms route to the
 # same wire slot: the long canonical form (`alcohol_content`, …) used by
 # Application input + hand-built fixtures, and the short extractor form

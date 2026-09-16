@@ -1,10 +1,10 @@
-"""Application input identity, as the orchestrator and the services see it.
+"""Application input identity, as the services see it.
 
 The full Application contract — applicant, formula, type_of_application, labels,
 etc. — lives in `app/schemas/wire/application.py::ApplicationEnvelope`. This
 module exposes only the identity surface (`application_id`, `evaluation_id`) the
-orchestrator and downstream services key off. Keep it minimal, so no
-orchestrator test comes to depend on a field that is not part of that identity.
+the downstream services key off. Keep it minimal, so no test comes to depend
+on a field that is not part of that identity.
 """
 from __future__ import annotations
 

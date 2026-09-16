@@ -1,7 +1,7 @@
 """Page-shell GET routes for the React island.
 
 This module is template-rendering only. It does NOT import from
-``app.services``, ``app.orchestrator``, ``app.vision``, or ``app.rules``.
+``app.services``, ``app.vision``, or ``app.rules``.
 Engine logic lives in the JSON API routes (``app.api.labels``,
 ``app.api.batches``, ``app.api.overrides``).
 """

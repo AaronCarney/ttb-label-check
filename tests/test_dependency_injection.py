@@ -1,4 +1,4 @@
-"""The dependency container: which VisionExtractor and which Orchestrator the
+"""The dependency container: which VisionExtractor the
 providers hand back for a given set of settings.
 """
 from __future__ import annotations
@@ -43,12 +43,3 @@ def test_vision_extractor_provider_returns_cloud() -> None:
     s = _settings_with(OPENAI_API_KEY="sk", VISION_MODE="cloud")
     assert isinstance(build_vision_extractor(s), CloudVisionExtractor)
 
-
-def test_orchestrator_provider_dispatches_on_backend() -> None:
-    from app.deps import build_orchestrator
-
-    s_o = _settings_with(OPENAI_API_KEY="sk", ORCHESTRATOR_BACKEND="openai")
-    s_a = _settings_with(ANTHROPIC_API_KEY="sk", ORCHESTRATOR_BACKEND="anthropic")
-    o_open = build_orchestrator(s_o)
-    o_anth = build_orchestrator(s_a)
-    assert type(o_open).__name__ != type(o_anth).__name__
