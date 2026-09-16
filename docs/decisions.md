@@ -1343,6 +1343,32 @@ directory of files is the only one of the four that needs nothing from both.
 - **The sweep reads the whole directory on every write.** At this scale it is nothing beside the
   label read it follows. At a scale where it is not, the sweep is the part that changes.
 
+**Amended 2026-09-16 — the prototype does not meet C-2, and that is deliberate.**
+
+`docs/PRD.md` C-2 says the product "retains no label image or application data on its server once it
+has returned the results for them". A store that keeps an image for seven days does not meet it, and
+the entry above did not weigh it. The owner settled it on 2026-09-16: **this is a demo, and C-2 is a
+production requirement rather than a demo one.** The labels this ships are public TTB COLA Registry
+images under CC0 (`app/api/ui/samples.py`), so nothing it holds is anyone's private material. C-2
+stays in the PRD unchanged, because it is the right requirement for the real thing.
+
+Only half of C-2 is engaged in any case. The one disk write anywhere in this application is the label
+image — checked across `app/` — so application data, including the applicant name and address the
+form collects, exists for the life of the request and is never stored or written to a log.
+
+**What a real deployment would do instead**, none of which the prototype carries:
+
+- **Hold the image only until the result has been delivered**, dropping it when the reviewer leaves
+  the result rather than on a seven-day sweep. That is C-2 as written.
+- **Keep it inside the agency's own boundary**, in an authorized environment rather than on
+  third-party hosting, because a label filed with a pending application is not public until the
+  certificate issues.
+- **Encrypt at rest, restrict reads by role, and log every access**, so that holding anything at all
+  is accountable.
+
+The README currently states the opposite — that nothing is stored — which was true before this
+entry. Correcting it is handed to lane D under "For the close" in `plans/wave3-s1.md`.
+
 <a id="0019"></a>
 ## 0019. The browser-facing surface is one module per job, behind one router
 
