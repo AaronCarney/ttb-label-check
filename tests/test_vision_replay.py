@@ -381,3 +381,70 @@ def test_the_elements_printed_under_a_warning_are_still_read() -> None:
     assert payloads["net_contents"]["unit"] == "ML"
     assert "ITALY" in payloads["country_origin"]["country"].upper()
     assert "WINE" in payloads["class_type"]["class_type"].upper()
+
+
+def test_a_boldness_that_could_not_be_measured_is_absent_not_false() -> None:
+    """Row 1.2 of the Tier 2 table, on the label that actually produces it.
+
+    `26240001000454/front.jpg` is a handwritten keg collar and its heading's
+    stroke width could not be measured — `confident` is False in the recording.
+    The payload used to record that as `heading_bold: False`, which is a claim
+    about the label rather than about the reading, and it disagreed with
+    `app/vision/cloud.py`, which leaves the key alone on the same signal.
+    `26230001000420/back.jpg` is the other side of it: measured, and bold.
+    """
+    unmeasured = parse_reading(
+        thaw_reading(json.loads(_recording("26240001000454/front.jpg").read_text()))
+    )["gov_warning"]
+    assert unmeasured["heading_bold_measured_confident"] is False
+    assert "heading_bold" not in unmeasured
+
+    measured = parse_reading(
+        thaw_reading(json.loads(_recording("26230001000420/back.jpg").read_text()))
+    )["gov_warning"]
+    assert measured["heading_bold_measured_confident"] is True
+    assert measured["heading_bold"] is True
+
+
+def test_the_alcohol_statement_is_returned_as_the_label_prints_it() -> None:
+    """Row 1.3 of the Tier 2 table, against the manifest's own transcription.
+
+    The reader used to keep the percentage and throw the matched characters
+    away, so `format_check.py` compared the rule pack's regex against a sentence
+    it had built from those numbers — a check that passed every label it was
+    shown (`docs/decisions.md#0011`). `alc_text` is the key the rule packs
+    already name in `evidence_required`.
+
+    Compared with spacing collapsed: the transcription is of the label, the
+    reading is of the pixels, and `40 % ALC. BY VOL` against `40% ALC. BY VOL`
+    is a difference in kerning rather than in wording.
+    """
+    def spacing_removed(text: str) -> str:
+        return "".join(text.split()).upper().rstrip(".")
+
+    entries = _entries()
+    for label_id in ENTRIES:
+        payload = _replay(entries[label_id])["abv"]
+        assert "alc_text" in payload, label_id
+        if payload["abv_pct"] is None:
+            assert payload["alc_text"] == "", label_id
+            continue
+        printed = (entries[label_id]["label_observed"].get("abv") or {}).get("text")
+        assert spacing_removed(payload["alc_text"]) == spacing_removed(printed), (
+            label_id, payload["alc_text"], printed
+        )
+
+
+def test_the_statement_is_cut_out_of_a_box_that_carries_other_text() -> None:
+    """Three real boxes carry the statement alongside something else, and the
+    statement returned is the statement rather than the box."""
+    readings = {
+        "26212001000085/front.jpg": "40% ALC. BY VOL",       # box: '40% ALC. BY VOL-700 mL'
+        "26230001000420/front.jpg": "ALC. 20.3% BY VOL.",    # box: '... 12.7 FL. OZ.'
+        "variants/var-heading-title-case-front.jpg": "12% ALC. BY VOL.",  # box: '... | CONTAINS SULFITES'
+    }
+    for image, statement in readings.items():
+        payload = parse_reading(
+            thaw_reading(json.loads(_recording(image).read_text()))
+        )["abv"]
+        assert payload["alc_text"] == statement, image

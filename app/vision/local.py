@@ -696,6 +696,18 @@ _ABV_RE = re.compile(
     r"(?:ALC(?:OHOL)?\.?\s*)(\d{1,2}(?:[.,]\d{1,2})?)\s*(?:%|DEGREES?)?\s*(?:BY\s*)?VOL",
     re.I,
 )
+# The alcohol statement as the label prints it, which is a different question
+# from what the percentage is. `_ABV_RE` finds the figure; this finds the words
+# around it, in either of the orders a label uses — "ALCOHOL 40% BY VOLUME" and
+# "40% ALC. BY VOL." are both printed, and 27 CFR §5.65(b) is about exactly that
+# form of words. A label that prints a bare "12.5%" yields a bare "12.5%", which
+# is the fact the format rule needs rather than a hole in the payload.
+_ALC_STATEMENT_RE = re.compile(
+    r"(?:ALC(?:OHOL)?\.?\s*)?"
+    r"\d{1,2}(?:[.,]\d{1,2})?\s*%?"
+    r"(?:\s*(?:ALC(?:OHOL)?\.?)?\s*(?:BY\s*VOL(?:UME)?|/\s*VOL|VOL)\.?)?",
+    re.I,
+)
 _NET_RE = re.compile(
     r"(\d+(?:[.,]\d+)?)\s*(ML|MLS|MILLILITERS?|L|LITERS?|LITRES?|CL|"
     r"FL\.?\s*OZ\.?|OZ\.?|PINTS?|PT|QUARTS?|QT|GALLONS?|GAL)\b",
@@ -794,7 +806,6 @@ def _parse(
             "text": text,
             "heading_text": heading_text,
             "heading_all_caps": bool(letters) and all(c.isupper() for c in letters),
-            "heading_bold": measurement.is_bold if measurement.confident else False,
             # The reader reports no type size: a photograph does not carry the
             # scale that would turn pixels into points. Decision 0006 puts the
             # rules that need one out of scope.
@@ -804,6 +815,16 @@ def _parse(
             "heading_bold_measured_confident": measurement.confident,
             "heading_bold_width_height_ratio": measurement.width_height_ratio,
         }
+        # A boldness that could not be measured is absent, not false. Writing
+        # `False` here stated a measurement nobody took: a heading the reader
+        # could not measure was recorded as *not bold*, which is a claim about
+        # the label rather than about the reading. It also put the two readers
+        # at odds — `app/vision/cloud.py` leaves the key alone on an unconfident
+        # measurement — over the same signal. Absent is what both now mean by
+        # "not measured", and `heading_bold_measured_confident` is how a rule
+        # asks.
+        if measurement.confident:
+            payload["heading_bold"] = measurement.is_bold
         out["gov_warning"] = (payload, heading_box.as_bbox(), text)
 
     warning_texts = {b.text for b in (block[3] if block else [])}
@@ -814,17 +835,27 @@ def _parse(
     abv_box, abv_match = _first_match(body, _ABV_RE)
     if abv_match:
         raw = next(g for g in abv_match.groups() if g)
+        # The label's own wording, alongside the number rather than instead of
+        # it. Keeping only the number left the format check comparing the rule
+        # pack's regex against a sentence the validator had written itself, so
+        # it passed every label it was shown and rejected every label it was
+        # shown nothing about (`docs/decisions.md#0011`). The rule packs already
+        # name the key they want for this: `evidence_required: [alc_text]`.
+        alc_text = _alcohol_statement(abv_box.text, raw) or abv_match.group(0).strip()
         out["abv"] = (
             {
                 "abv_pct": float(raw.replace(",", ".")),
                 "unit": "%",
+                "alc_text": alc_text,
                 "confidence": _confidence("abv", [abv_box]),
             },
             abv_box.as_bbox(),
-            abv_match.group(0).strip(),
+            alc_text,
         )
     else:
-        out["abv"] = ({"abv_pct": None, "unit": "", "confidence": 0.0}, None, None)
+        out["abv"] = (
+            {"abv_pct": None, "unit": "", "alc_text": "", "confidence": 0.0}, None, None
+        )
 
     # -- net contents -----------------------------------------------------
     net_box, net_match = _first_match(body, _NET_RE)
@@ -910,6 +941,21 @@ def _parse(
     # -- name and address -------------------------------------------------
     out["name_address"] = _name_address(body, joined)
     return out
+
+
+def _alcohol_statement(text: str, figure: str) -> str:
+    """The alcohol statement inside one box's text, as printed.
+
+    A box often carries more than the statement — `40% ALC. BY VOL-700 mL` is
+    one box on a real label, and so is `12% ALC. BY VOL. | CONTAINS SULFITES`.
+    The candidate taken is the first that carries the figure the percentage was
+    parsed from, so a net-contents number earlier in the same box cannot be
+    returned as the alcohol statement.
+    """
+    for candidate in _ALC_STATEMENT_RE.finditer(text):
+        if figure in candidate.group(0):
+            return candidate.group(0).strip()
+    return ""
 
 
 def _names_a_state(match: re.Match) -> bool:
