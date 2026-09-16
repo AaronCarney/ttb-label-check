@@ -1528,3 +1528,96 @@ costs something is what makes `LOOKAHEAD_K` govern anything at all.
 - **The slowest subscriber governs everyone.** Two reviewers watching one batch means the batch runs
   at the pace of whichever one is behind. For this product's one-reviewer-per-batch shape that is the
   intended behaviour rather than a compromise.
+
+<a id="0025"></a>
+## 0025. The deploy runs on Google Cloud Run, reached through this project's own DNS zone
+
+**Decided:** 2026-09-16, superseding [0023](#0023). **Evidence:**
+`cloud.google.com/free/docs/free-cloud-features`, `developers.cloudflare.com/workers/platform/limits`
+and `developers.cloudflare.com/containers/pricing`, all read 2026-09-16; `app/config.py:37`;
+`docs/research/2026-09-15-hosting.md`.
+
+**What changed.** [0023](#0023) is not wrong about any fact it states, and none of its vendor
+quotations has moved. It rejected Cloud Run on one ground only — that a metered host bills an
+unauthenticated URL without a hard stop, while a $9 plan fee is known in advance — and it weighed
+that against no mechanism for bounding the meter, because none was on the table. A front door was:
+this project's DNS zone already exists, and a proxy in front of the service takes a rate limit. With
+the meter bounded at the edge, the $9 fee buys nothing the free tier does not already give, and the
+owner settled the fork on 2026-09-16.
+
+**Chosen.** **Google Cloud Run, one service, 4 vCPU and 4 GiB, scaling to zero,** built from source
+by Cloud Build so no image is built on a developer's machine. The free tier is 2 million requests,
+**180,000 vCPU-seconds and 360,000 GB-seconds of memory per month**. Builds are free to 2,500
+build-minutes a month on `e2-standard-2`, the default pool; naming any other machine type forfeits
+that allowance entirely.
+
+**The size is set by which allowance runs out first, and it is not the obvious one.** At 4 vCPU the
+CPU allowance covers 45,000 instance-seconds a month — twelve and a half hours of request-handling,
+or roughly 38,000 label checks at the reader's measured 1.18-second median ([0005](#0005)), against
+an expected demand of one reviewer. In those same 45,000 seconds a 4 GiB instance consumes 180,000
+GB-seconds, which is **half** the memory allowance. Memory therefore cannot be the binding
+constraint at this core count, and the second and third gigabyte are free. That matters because the
+reader's working set is the carried-over 1.5-2 GB figure that [0023](#0023) records as never
+measured: sizing at 4 GiB buys roughly double the top of an unverified range for nothing. Memory
+only begins to bind at 8 GiB, where the two allowances are exhausted together.
+
+**Because the bound moved from the plan to the edge.** The demand [0023](#0023) makes of a host is
+that an unauthenticated URL cannot run up a bill. Four settings meet it without paying a plan fee:
+the service caps at two instances, takes one request at a time, times out, and sits behind a proxy
+on this project's own zone carrying a rate-limiting rule. One request at a time is not only a cost
+control — it is what the five-second requirement needs, and it is what makes four cores worth
+having, because the reader's own measurements show eight concurrent readers pushing the 95th
+percentile from 2.26 seconds to 10.02 seconds when ONNX Runtime threads contend for the same cores.
+One reader alone on four cores is the opposite of that case, and `OCR_NUM_THREADS` defaults to the
+service's core count so a developer's machine reads the way the deployed product does.
+
+**And because the cold start stops being unfixable.** [0023](#0023) records one unresolved cost:
+free Spaces hardware sleeps after 48 hours idle, so a reviewer arriving cold waits through a
+container start and a model load, and names a keep-warm ping as the thing that would fix it. On
+Cloud Run a ping costs almost nothing, because CPU is billed only while a request is in flight — so
+a scheduled request every ten minutes holds an instance warm for a few hundred vCPU-seconds a month
+out of 180,000. Ten minutes is the interval the vendor's own figure sets: Cloud Run "might keep
+instances idle for a period of time after they finish handling requests (up to 15 minutes)". The
+reviewer opens a warm URL. The service also runs with startup CPU boost, which doubles the
+allocation to eight cores for the first ten seconds, so the start a ping pays for is the shortest
+the platform offers.
+
+**What no vendor documents, and this record will not invent.** Google publishes no cold-start figure
+for Cloud Run, for any image size. The components of one that this project has measured are the OCR
+engine's 0.4-0.9 second load, once per process; container pull and interpreter start are unmeasured
+here. **The deployed cold start is therefore unknown until it is timed on the service**, and the
+warm path is what the keep-warm ping exists to make the one a reviewer meets.
+
+**Rejected.**
+
+- *Hugging Face Spaces at $9 a month* — [0023](#0023)'s reasoning in full, and still sound on its own
+  terms. Rejected because the constraint it was built to satisfy is now satisfied for nothing, and
+  because it leaves the cold start unaddressed while Cloud Run does not.
+- *Cloudflare alone* — it cannot run this app at any price short of the Workers Paid plan. Python
+  Workers run under WebAssembly rather than in a Linux container, and the free plan allows **10 ms of
+  CPU per request** against a reader whose median read is 1.18 seconds. Cloudflare Containers does
+  run the image, and is **"$5 USD per month"** on Workers Paid with no free tier at all. Cloudflare
+  keeps the job it is good at: DNS, TLS, the rate limit, and the scheduled ping.
+- *Oracle Cloud Always Free* — still genuinely unmetered, and [0023](#0023)'s objection still holds:
+  a bare VM means Docker, a reverse proxy and TLS built and maintained by hand. A tunnel removes the
+  proxy and the certificates, which is most of that objection, but not the machine, its patching, or
+  Oracle's documented capacity refusals. Held as the fallback if the meter ever proves unbounded in
+  practice.
+- *Every host rejected on memory in [0023](#0023)* — unchanged. The 1.5-2 GB reader still does not
+  fit a 512 MB instance.
+
+**Cost, stated.**
+
+- **A billing account with a payment method is required, and Google's budgets alert rather than
+  stop.** This is the exact objection [0023](#0023) raised, it is still true, and the instance cap,
+  the request timeout and the edge rate limit are what answer it. A budget alert at one dollar is the
+  tripwire, not the brake. The brake that does exist — a budget notification wired to switch billing
+  off — is a documented pattern this project has not built.
+- **Storage is not free.** Artifact Registry gives **0.5 GB a month**; this image will exceed it, and
+  the overage rate is ten cents per GB per month. The true figure is therefore small change, not
+  zero, and it is not known until an image is built and measured.
+- **The reader's 1.5-2 GB working set is still an unverified carried-over figure**, for the reason
+  [0023](#0023) gives. The service is sized at 2 GiB against it. If a real run exceeds that, the
+  instance is killed and the size has to go up, which costs GB-seconds against the same allowance.
+- **Nothing is deployed by this decision.** Making the app publicly reachable is the owner's call.
+  [0004](#0004) settles that a deployed URL is required, not when it goes up.

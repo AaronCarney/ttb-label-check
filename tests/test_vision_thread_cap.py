@@ -40,12 +40,12 @@ class _StubRapidOCR:
 
 
 def test_default_thread_cap_is_the_deploy_targets_core_count() -> None:
-    """Two, because Hugging Face Spaces CPU Basic is 2 vCPU (decision 0023).
+    """Four, because the Cloud Run service is 4 vCPU (decision 0025).
 
     The local run then behaves like the deployed product rather than like a
     16-core developer machine.
     """
-    assert Settings().ocr_num_threads == 2
+    assert Settings().ocr_num_threads == 4
 
 
 def test_cap_is_clamped_into_the_window_onnxruntime_accepts() -> None:
