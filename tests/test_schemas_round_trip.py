@@ -226,16 +226,20 @@ def test_rule_set_round_trip() -> None:
     )
 
     rule = RuleDefinition(
-        rule_id="spirits.alcohol.tolerance_band",
-        cfr_citation="27 CFR §5.65(c)",
+        rule_id="spirits.alcohol.matches_application",
+        cfr_citation="27 CFR §5.65",
         applies_to_classes=(BeverageClass.SPIRITS,),
-        reason_code="ALCOHOL_CONTENT.TOLERANCE.OUT_OF_BAND",
+        reason_code="ALCOHOL_CONTENT.MATCH.APPLICATION_LABEL_DISAGREE",
         severity=Severity.REJECT,
-        match_policy=MatchPolicy.TOLERANCE,
-        validator="abv_band",
+        match_policy=MatchPolicy.EXACT,
+        validator="quantity_match",
         evidence_required=("abv",),
         confidence_floor=0.5,
-        parameters={"tolerance_pp": 0.3, "arithmetic": "decimal"},
+        parameters={
+            "amount_field": "abv_labeled_pct",
+            "needs_review_reason_code": "ALCOHOL_CONTENT.MATCH.NEEDS_REVIEW",
+            "disagreement_reason_code": "ALCOHOL_CONTENT.MATCH.APPLICATION_LABEL_DISAGREE",
+        },
         tolerance=None,
         decision_table=None,
         decision_table_ref=None,
@@ -244,7 +248,7 @@ def test_rule_set_round_trip() -> None:
         supersedes=(),
         rule_pack_version="0.1.0",
         rule_pack="spirits",
-        test_fixtures=("F-SPIRITS-ALC-36-PASS-01",),
+        test_fixtures=("F-SPIRITS-ALC-APP-MATCH-01",),
         disabled=False,
         notes=None,
     )
@@ -254,9 +258,12 @@ def test_rule_set_round_trip() -> None:
         effective_date="2026-09-15",
         rules=(rule,),
         reason_codes={
-            "ALCOHOL_CONTENT.TOLERANCE.OUT_OF_BAND": ReasonCodeEntry(
-                description="ABV outside the regulatory tolerance band.",
-                cfr_anchors=("27 CFR §5.65(c)",),
+            "ALCOHOL_CONTENT.MATCH.APPLICATION_LABEL_DISAGREE": ReasonCodeEntry(
+                description=(
+                    "Label alcohol content is not the alcohol content the "
+                    "application declared."
+                ),
+                cfr_anchors=(),
                 severity=Severity.REJECT,
             ),
         },

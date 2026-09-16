@@ -27,7 +27,7 @@ BATCH_DIR = FIXTURE_ROOT / "batch"
         "02-bourbon-stones-throw.json",
         "03-warning-title-case.json",
         "04-low-res-blurry.json",
-        "06-abv-out-of-tolerance.json",
+        "06-abv-application-disagreement.json",
         "07-borderline-confidence.json",
     ],
 )

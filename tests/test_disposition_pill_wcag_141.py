@@ -19,7 +19,7 @@ FIXTURES = ROOT / "tests" / "fixtures" / "envelopes" / "single"
         ("01-spirits-clean.json", "pass", "check", "Pass"),
         ("03-warning-title-case.json", "fail", "x", "Fail"),
         ("04-low-res-blurry.json", "needs_review", "question", "Needs review"),
-        ("06-abv-out-of-tolerance.json", "fail", "x", "Fail"),
+        ("06-abv-application-disagreement.json", "fail", "x", "Fail"),
         ("07-borderline-confidence.json", "needs_review", "question", "Needs review"),
     ],
 )

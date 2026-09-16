@@ -465,7 +465,7 @@ The take-home is graded on a 5–10-minute demo. The path below hits Sarah's, Da
 | `fixture-03-warning-titlecase.pdf` + label | Stage 3 government-warning fail | Warning text in title case, otherwise correct. |
 | `fixture-04-glare-low-res.jpg` | Stage 4 needs-better-photo | Real glare on the warning region; OCR confidence < 0.5. |
 | `fixture-05-batch-50-mixed.zip` | Stage 5 batch | 50 labels, ~70% pass / 20% needs-review / 10% fail. |
-| `fixture-06-abv-out-of-tolerance.pdf` + label | Stage 6 override + calibration | Label ABV 40.5%, application 39.8% (delta 0.7 pp; exceeds the spirits ABV tolerance ±0.3 pp). |
+| `fixture-06-abv-application-disagreement.pdf` + label | Stage 6 override + calibration | Label ABV 45%, application 40%; the two declared figures do not agree. |
 | `fixture-07-network-toggle` | Stage 7 failure recovery | A scriptable network toggle (browser DevTools "Offline" mode is sufficient for the demo). |
 
 ### Demo failure-recovery patterns
