@@ -1,4 +1,4 @@
-"""GET /healthz — readiness, including whether the reader has warmed up."""
+"""GET /healthz — readiness: can this process build a reader and load its rules."""
 from __future__ import annotations
 
 import logging
@@ -22,19 +22,24 @@ def _get_settings() -> Settings:
 async def healthz(settings: Settings = Depends(_get_settings)) -> JSONResponse:
     """Report whether the app is ready to evaluate a label.
 
-    The first call also warms the app up: it builds the evaluator and loads the
-    reader's models, so that cost falls on the container's start-up probe
-    rather than on the first real submission. A warm-up that raises answers
-    HTTP 503 with ``status: not_ready``, which is what lets an orchestrator
-    hold traffic back; the next call retries the warm-up.
+    The first call proves readiness the only way that settles it: it builds the
+    same evaluator a submission builds, which loads the rule pack and the
+    reader's models, and reports what happened. A failure answers HTTP 503 with
+    ``status: not_ready`` — that is what lets an orchestrator hold traffic back
+    — and the next call tries again. Later calls answer from what the first one
+    found, so a health check stays fast.
 
-    No label is read here. The probe loads the reader; it never runs one.
+    What this does not do is warm the serving path. Every request builds its
+    own evaluator (``app/deps.py``), so the models loaded here are discarded
+    with the evaluator that loaded them. Sparing a submission the load would
+    mean giving the process one shared reader to hand out.
+
+    No label is read here.
     """
     body: dict[str, object] = {
         "status": "ok",
         "version": settings.app_version,
         "mode": {"vision": settings.vision_mode},
-        "reader_loaded": _warmed["done"],
         "warmup_ran": False,
     }
     if not _warmed["done"]:
@@ -43,7 +48,7 @@ async def healthz(settings: Settings = Depends(_get_settings)) -> JSONResponse:
 
             evaluator = build_evaluator(settings)
             await evaluator._vision.ensure_loaded()
-        except Exception as exc:  # noqa: BLE001 — any failure to warm up means not ready
+        except Exception as exc:  # noqa: BLE001 — anything that raises here means not ready
             body["status"] = "not_ready"
             body["warmup_error"] = str(exc)
             _logger.warning(
@@ -52,7 +57,6 @@ async def healthz(settings: Settings = Depends(_get_settings)) -> JSONResponse:
             )
             return JSONResponse(status_code=503, content=body)
         _warmed["done"] = True
-        body["reader_loaded"] = True
         body["warmup_ran"] = True
     _logger.info("healthz_invoked", extra={"reason_code": "ENGINE.OK.NONE"})
     return JSONResponse(status_code=200, content=body)
