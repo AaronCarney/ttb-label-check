@@ -599,6 +599,22 @@ def _reading_order(boxes: list[_Box]) -> list[_Box]:
     return ordered
 
 
+def _boxes_spanning(parts: list[str], cutoff: int) -> int:
+    """How many of these box texts it takes to reach `cutoff` in their join.
+
+    The join is rebuilt the same way the block's text is — one space between
+    parts, runs of whitespace collapsed — so the count is exact rather than an
+    estimate from character offsets. A box the cutoff falls inside is counted:
+    it did contribute words to the statement.
+    """
+    running = ""
+    for index, part in enumerate(parts):
+        running = re.sub(r"\s+", " ", f"{running} {part}").strip()
+        if len(running) >= cutoff:
+            return index + 1
+    return len(parts)
+
+
 def _warning_block(boxes: list[_Box]) -> tuple[str, str, _Box, list[_Box]] | None:
     """The warning's text, its heading, the heading's box and the block's boxes.
 
@@ -645,18 +661,26 @@ def _warning_block(boxes: list[_Box]) -> tuple[str, str, _Box, list[_Box]] | Non
     if start is None:
         start = next((i for i, b in enumerate(ordered) if b is heading), 0)
     ordered = ordered[start:]
-    parts = [b.text for b in ordered if b.text.strip()]
+    spoken = [b for b in ordered if b.text.strip()]
+    parts = [b.text for b in spoken]
     if parts:
         opening = re.search(r"GOVERNMENT\s*WARNING", parts[0], re.I)
         if opening:
             parts[0] = parts[0][opening.start():]
     text = re.sub(r"\s+", " ", " ".join(parts)).strip()
 
-    # The statement ends at its own last words. Anything the block swept up
-    # after them belongs to the label, not to the warning.
+    # The statement ends at its own last words, and the **boxes** end there
+    # too. `_parse` subtracts this box list from the body before it looks for
+    # any other element, so a box kept here is a box no other field can be read
+    # from. Trimming only the text left the label's own lines inside the block:
+    # measured over the frozen slice, that threw away `12% ALC. BY VOL.`,
+    # `750 ML`, `PRODUCT OF ITALY` and an importer's name and city, each of
+    # which the engine had read correctly and none of which the warning
+    # contains.
     end = _BLOCK_END_RE.search(text)
     if end:
         text = text[: end.end()]
+        ordered = spoken[: _boxes_spanning(parts, end.end())]
 
     heading_text = " ".join(b.text for b in heading_boxes).strip()
     match = re.search(r"WARNING\s*[:：]?", _fold(heading_text))

@@ -108,25 +108,16 @@ KNOWN_MISSES: dict[tuple[str, str], str] = {
     ("ttb-26230001000420", "warning_exact"): "the reader's warning text is not word for word and the answer key says this label's is",
     ("ttb-26237001000107", "abv"): "the front is refused by the quality gate and the back prints no ABV",
     ("ttb-26237001000107", "net_contents"): "same as above",
-    ("ttb-26237001000107", "name_address"): "A — 'IMPORTED BY JUAN LOBO TEQUILA, LLC BUDA, TEXAS' is swallowed by the warning block",
     ("ttb-26237001000107", "origin"): "A — the same swallowed box carries the origin words",
     ("ttb-26237001000107", "warning_exact"): "the back's warning is not read word for word",
     ("ttb-26240001000454", "brand"): "B — returned 'NOV' for 'I Heard Cassarole'",
     ("ttb-26240001000454", "class_type"): "C — returned nothing; 'Double India Pale Ale' is handwritten on a keg collar",
     ("ttb-26240001000454", "abv"): "the keg collar's '8%' is not matched",
     ("var-heading-title-case", "brand"): "B — returned the fanciful name 'ROSSASTRO' for the brand 'FABIO SIGNORELLI'",
-    ("var-heading-title-case", "class_type"): "A — 'ROSE WINE' is inside a box the warning block swallowed; what is left returns the lead-in 'IMPORTED BY:'",
-    ("var-heading-title-case", "abv"): "A — '12% ALC. BY VOL.' is inside a swallowed box",
-    ("var-heading-title-case", "net_contents"): "A — '750 ML' is inside a swallowed box",
     ("var-heading-title-case", "name_address"): "C/A — returned the lead-in 'PRODUCED BY:' rather than the importer's name and city",
-    ("var-heading-title-case", "origin"): "A — 'PRODUCT OF ITALY' is inside a swallowed box",
     ("var-heading-title-case", "warning_exact"): "the answer key says this variant's wording is exact; the reader's reading of it is not",
     ("var-warning-wording", "brand"): "B — as the other variant; same image but for the warning",
-    ("var-warning-wording", "class_type"): "A — as the other variant",
-    ("var-warning-wording", "abv"): "A — as the other variant",
-    ("var-warning-wording", "net_contents"): "A — as the other variant",
     ("var-warning-wording", "name_address"): "C/A — as the other variant",
-    ("var-warning-wording", "origin"): "A — as the other variant",
 }
 
 _FACE_ORDER = ("front", "back", "neck", "side")
@@ -343,3 +334,50 @@ def test_a_rotated_reading_keeps_the_frame_it_was_read_from() -> None:
     warning = parse_reading(reading)["gov_warning"]
     assert "GOVERNMENT WARNING" in warning["text"].upper()
     assert warning["heading_all_caps"] is True
+
+
+def test_the_warning_block_gives_back_the_label_lines_it_swept_up() -> None:
+    """The warning's box list stops where the warning's text stops.
+
+    `_parse` subtracts the block's boxes from the body before it looks for any
+    other element, so a box the block keeps is a box no field can be read from.
+    The block already trimmed its *text* at the statement's last words and kept
+    the boxes past that point, which discarded mandatory elements the engine had
+    read perfectly — on these eleven recordings, `12% ALC. BY VOL.`, `750 ML`,
+    `PRODUCT OF ITALY` and an importer's name and city.
+
+    Checked on the real frozen boxes, in the form the defect took: no box the
+    block returns may sit entirely after the statement's end.
+    """
+    import re
+
+    from app.vision.local import _BLOCK_END_RE, _warning_block
+
+    for path in sorted(RECORDINGS.rglob("*.json")):
+        data = json.loads(path.read_text())
+        block = _warning_block(thaw_reading(data).warning_boxes)
+        if block is None:
+            continue
+        text, _heading_text, _heading_box, boxes = block
+        if not _BLOCK_END_RE.search(text):
+            continue
+        running = ""
+        for box in boxes:
+            before = running
+            running = re.sub(r"\s+", " ", f"{running} {box.text}").strip()
+            assert len(before) < len(text), (
+                f"{data['image']}: the block keeps {box.text!r}, which is wholly "
+                f"past the statement's end — no other field can be read from it"
+            )
+
+
+def test_the_elements_printed_under_a_warning_are_still_read() -> None:
+    """The fix above, stated as what a reviewer would see, on the label that
+    prints four of its mandatory elements below the warning statement."""
+    payloads = _replay(_entries()["var-heading-title-case"])
+
+    assert payloads["abv"]["abv_pct"] == 12.0
+    assert payloads["net_contents"]["net_contents_value"] == 750.0
+    assert payloads["net_contents"]["unit"] == "ML"
+    assert "ITALY" in payloads["country_origin"]["country"].upper()
+    assert "WINE" in payloads["class_type"]["class_type"].upper()
