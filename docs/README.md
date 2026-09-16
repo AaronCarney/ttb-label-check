@@ -15,6 +15,10 @@ One settled build decision per record, numbered, written the day it settled.
 - [0006 The health warning's typography rules are out of scope](decisions/0006-typography-rules-are-out-of-scope.md) — what a photograph cannot measure, and what is reported instead.
 - [0007 A class-and-type designation includes its standard of identity](decisions/0007-a-designation-includes-its-standard-of-identity.md) — when a designation counts as matching.
 - [0008 The alcohol-content tolerance rules are out of scope](decisions/0008-alcohol-tolerance-rules-are-out-of-scope.md) — why a label checker cannot compare the label against the liquid.
+- [0011 The alcohol-content format check is switched off](decisions/0011-the-alcohol-format-check-is-switched-off.md) — why a rule that never sees the label's wording cannot judge it.
+- [0012 A designation the app cannot place goes to a reviewer](decisions/0012-a-designation-the-app-cannot-place-goes-to-a-reviewer.md) — why no class-and-type rule rejects a label for being absent from a list.
+- [0015 The brand check compares an admissible set, not one string](decisions/0015-the-brand-check-compares-an-admissible-set.md) — every name the application says the label may carry, and how a mark is matched against them.
+- [0016 The country-of-origin abbreviation table is not built](decisions/0016-the-19-cfr-134-45-abbreviation-table-is-not-built.md) — which forms of a country's name the app reads, and what it does with the rest.
 
 ## Reference
 
