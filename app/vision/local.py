@@ -157,10 +157,13 @@ class LocalVisionExtractor:
         return RapidOCR()
 
     async def ensure_loaded(self) -> None:
-        """Load the models once, before the first label rather than during it.
+        """Load this instance's models before a read rather than during one.
 
-        The load costs about a second. Paying it on the first request would
-        put it inside that request's latency, so the app calls this at start-up.
+        The load costs about a second and blocks, so it runs in a thread behind
+        a lock: concurrent callers wait on the one load instead of each building
+        an engine. The engine is per instance, and ``app/deps.py`` builds a new
+        extractor for every request, so that second is currently paid for every
+        label. Paying it once would mean one reader shared by the process.
         """
         if self._engine is not None:
             return

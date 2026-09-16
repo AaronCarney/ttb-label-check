@@ -1,4 +1,11 @@
-"""/healthz upgraded — runs full sentinel pipeline against fixture-01."""
+"""``GET /healthz`` proves readiness once, then answers from process state.
+
+The first call builds the same evaluator a submission builds and loads the
+reader's models, so this module drives the real reader and costs that load. The
+second call must not repeat it: the endpoint has to stay cheap enough to be
+polled. The failure answer, HTTP 503 ``not_ready``, is guarded in
+``tests/test_healthz_not_ready.py``.
+"""
 import time
 
 import pytest
