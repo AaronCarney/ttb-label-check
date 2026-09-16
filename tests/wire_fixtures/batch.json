@@ -1,0 +1,9 @@
+{
+  "batch_id": "00000000-0000-4000-8000-00000000b001",
+  "agent_id": "session-abc123",
+  "submitted_at": "2026-09-15T12:00:00.000Z",
+  "items": [
+    {"label_ref": "label-front-001", "application_ref": "app-001"},
+    {"label_ref": "label-front-002", "application_ref": "app-002"}
+  ]
+}

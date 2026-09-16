@@ -1,0 +1,46 @@
+{
+  "rep_id": null,
+  "permit_number": "DSP-CA-12345",
+  "source_of_product": "domestic",
+  "serial_number": "26-042",
+  "type_of_product": "distilled_spirits",
+  "brand_name": "Stone's Throw",
+  "fanciful_name": null,
+  "applicant": {
+    "name": "Stone's Throw Distilling LLC",
+    "address": {
+      "street": "100 Main St",
+      "city": "Napa",
+      "state": "CA",
+      "zip": "94559",
+      "country": "USA"
+    },
+    "mailing_address": null
+  },
+  "formula": null,
+  "grape_varietals": null,
+  "wine_appellation": null,
+  "phone": "+1-707-555-0100",
+  "email": "labels@stonesthrow.example",
+  "type_of_application": {
+    "cola": true,
+    "exemption": false,
+    "exemption_state": null,
+    "distinctive_bottle": false,
+    "bottle_capacity": null,
+    "resubmission": false,
+    "prior_ttb_id": null
+  },
+  "blown_branded_embossed_text": null,
+  "date_of_application": "2026-09-15",
+  "applicant_signature": "e-filed",
+  "applicant_print_name": "Jane Doe",
+  "perjury_attested": true,
+  "labels": [
+    {
+      "image_ref": "label-front-001",
+      "face_tag": "front",
+      "dimensions": {"width_px": 1200, "height_px": 1800, "dpi": 300}
+    }
+  ]
+}

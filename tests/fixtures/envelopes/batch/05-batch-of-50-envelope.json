@@ -1,0 +1,12 @@
+{
+  "batch_id": "00000000-0000-4000-8000-00000000b005",
+  "agent_id": "session-batch-005",
+  "submitted_at": "2026-09-15T12:10:00.000Z",
+  "items": [
+    {"label_ref": "batch-005-item-01", "application_ref": "app-batch-005-01"},
+    {"label_ref": "batch-005-item-02", "application_ref": "app-batch-005-02"},
+    {"label_ref": "batch-005-item-03", "application_ref": "app-batch-005-03"},
+    {"label_ref": "batch-005-item-04", "application_ref": "app-batch-005-04"},
+    {"label_ref": "batch-005-item-05", "application_ref": "app-batch-005-05"}
+  ]
+}

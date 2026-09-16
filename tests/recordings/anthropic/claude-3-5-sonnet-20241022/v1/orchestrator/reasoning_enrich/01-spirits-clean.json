@@ -1,0 +1,14 @@
+{
+  "id": "msg-test", "type": "message", "role": "assistant",
+  "model": "claude-3-5-sonnet-20241022",
+  "content": [
+    {
+      "type": "tool_use",
+      "id": "toolu_test",
+      "name": "reasoning_enrich",
+      "input": {"plain_language": "This bourbon meets the labeling rules.", "citation_anchor": "27 CFR §5.42"}
+    }
+  ],
+  "stop_reason": "tool_use",
+  "usage": {"input_tokens": 100, "output_tokens": 10}
+}

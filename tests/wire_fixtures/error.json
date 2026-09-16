@@ -1,0 +1,9 @@
+{
+  "error_kind": "rejected_input",
+  "reason_code": "ENGINE.INPUT.APPLICATION_MISSING",
+  "message": "Application envelope missing required field: brand_name.",
+  "details": {
+    "expected_inputs": ["brand_name"],
+    "received_inputs": []
+  }
+}

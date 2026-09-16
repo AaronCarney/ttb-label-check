@@ -1,0 +1,7 @@
+{
+  "id": "chatcmpl-test",
+  "object": "chat.completion",
+  "model": "gpt-4o-2024-08-06",
+  "choices": [{"index": 0, "message": {"role": "assistant", "content": "{\"plain_language\":\"This bourbon's brand has a phonetic variant accepted as a match.\",\"citation_anchor\":\"27 CFR \\u00a75.42\"}"}, "finish_reason": "stop"}],
+  "usage": {"prompt_tokens": 100, "completion_tokens": 10, "total_tokens": 110}
+}

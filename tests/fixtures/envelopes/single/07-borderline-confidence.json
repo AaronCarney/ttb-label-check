@@ -1,0 +1,39 @@
+{
+  "evaluation_id": "00000000-0000-4000-8000-000000000007",
+  "label_ref": "fixture-07-front",
+  "disposition": "needs_review",
+  "disposition_confidence": {"band": "low", "numeric": 0.49},
+  "fields": [
+    {
+      "field_name": "brand_name",
+      "extracted_value": "STONES THROW",
+      "expected_value": "Stone's Throw",
+      "evidence": {"bbox": [120, 240, 800, 120], "crop_ref": "crop-brand-007", "extraction_confidence": 0.49},
+      "rule_findings": [
+        {"rule_id": "common.brand.exact_or_normalized", "cfr_citation": "27 CFR §5.64", "disposition": "needs_review", "reason_code": "BRAND.NAME.NEEDS_REVIEW", "plain_language_explanation": "Borderline match — apostrophe absent in extracted text; orchestrator disambiguation requested."}
+      ],
+      "ai_suggestion": {"present": true, "task": "brand_borderline", "text": "Confidence floor applied: extraction band low but normalized identity matches. Recommending reviewer confirmation rather than auto-pass.", "model_disposition": "needs_review"},
+      "field_confidence": {"band": "low", "numeric": 0.49}
+    }
+  ],
+  "audit_trail": {
+    "evaluation_id": "00000000-0000-4000-8000-000000000007",
+    "rule_set_version": "0.1.0",
+    "model_version": "gpt-4o-2024-08-06",
+    "prompt_version": "v1",
+    "input_hash": "000000000000000000000000000000000000000000000000000000000000000b",
+    "output_hash": "000000000000000000000000000000000000000000000000000000000000000c",
+    "started_at": "2026-09-15T12:05:00.000Z",
+    "completed_at": "2026-09-15T12:05:01.760Z",
+    "per_rule_trace": [
+      {"rule_id": "common.brand.exact_or_normalized", "disposition": "needs_review", "evidence_ref": "crop-brand-007"}
+    ],
+    "overrides": []
+  },
+  "metrics": {
+    "total_duration_ms": 1760,
+    "per_rule_durations_ms": [{"rule_id": "common.brand.exact_or_normalized", "duration_ms": 14}],
+    "vision_duration_ms": 720,
+    "orchestrator_duration_ms": 1020
+  }
+}

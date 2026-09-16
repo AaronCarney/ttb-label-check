@@ -1,0 +1,67 @@
+{
+  "evaluation_id": "00000000-0000-4000-8000-000000000001",
+  "label_ref": "fixture-01-front",
+  "disposition": "pass",
+  "disposition_confidence": {"band": "high", "numeric": 0.94},
+  "fields": [
+    {
+      "field_name": "brand_name",
+      "extracted_value": "Stone's Throw",
+      "expected_value": "Stone's Throw",
+      "evidence": {"bbox": [120, 240, 800, 120], "crop_ref": "crop-brand-001", "extraction_confidence": 0.96},
+      "rule_findings": [
+        {"rule_id": "common.brand.exact_or_normalized", "cfr_citation": "27 CFR §5.64", "disposition": "pass", "reason_code": "BRAND.NAME.MATCH", "plain_language_explanation": "Brand name matches application after normalization."}
+      ],
+      "ai_suggestion": {"present": false, "task": null, "text": null, "model_disposition": null},
+      "field_confidence": {"band": "high", "numeric": 0.94}
+    },
+    {
+      "field_name": "alcohol_content",
+      "extracted_value": "40% ALC/VOL",
+      "expected_value": "40% ALC/VOL",
+      "evidence": {"bbox": [180, 1200, 400, 60], "crop_ref": "crop-abv-001", "extraction_confidence": 0.97},
+      "rule_findings": [
+        {"rule_id": "spirits.alcohol_content.tolerance", "cfr_citation": "27 CFR §5.65(b)", "disposition": "pass", "reason_code": "ALCOHOL_CONTENT.TOLERANCE.IN_BAND", "plain_language_explanation": "ABV statement within tolerance band."}
+      ],
+      "ai_suggestion": {"present": false, "task": null, "text": null, "model_disposition": null},
+      "field_confidence": {"band": "high", "numeric": 0.97}
+    },
+    {
+      "field_name": "warning",
+      "extracted_value": "GOVERNMENT WARNING: (1) ACCORDING TO THE SURGEON GENERAL...",
+      "expected_value": "GOVERNMENT WARNING: (1) ACCORDING TO THE SURGEON GENERAL...",
+      "evidence": {"bbox": [80, 1500, 920, 280], "crop_ref": "crop-warning-001", "extraction_confidence": 0.91},
+      "rule_findings": [
+        {"rule_id": "common.warning.verbatim", "cfr_citation": "27 CFR §16.21", "disposition": "pass", "reason_code": "WARNING.VERBATIM.MATCH", "plain_language_explanation": "Health warning matches §16.21 verbatim."}
+      ],
+      "ai_suggestion": {"present": false, "task": null, "text": null, "model_disposition": null},
+      "field_confidence": {"band": "high", "numeric": 0.91}
+    }
+  ],
+  "audit_trail": {
+    "evaluation_id": "00000000-0000-4000-8000-000000000001",
+    "rule_set_version": "0.1.0",
+    "model_version": "gpt-4o-2024-08-06",
+    "prompt_version": "v1",
+    "input_hash": "0000000000000000000000000000000000000000000000000000000000000001",
+    "output_hash": "0000000000000000000000000000000000000000000000000000000000000002",
+    "started_at": "2026-09-15T12:00:00.000Z",
+    "completed_at": "2026-09-15T12:00:01.230Z",
+    "per_rule_trace": [
+      {"rule_id": "common.brand.exact_or_normalized", "disposition": "pass", "evidence_ref": "crop-brand-001"},
+      {"rule_id": "spirits.alcohol_content.tolerance", "disposition": "pass", "evidence_ref": "crop-abv-001"},
+      {"rule_id": "common.warning.verbatim", "disposition": "pass", "evidence_ref": "crop-warning-001"}
+    ],
+    "overrides": []
+  },
+  "metrics": {
+    "total_duration_ms": 1230,
+    "per_rule_durations_ms": [
+      {"rule_id": "common.brand.exact_or_normalized", "duration_ms": 8},
+      {"rule_id": "spirits.alcohol_content.tolerance", "duration_ms": 12},
+      {"rule_id": "common.warning.verbatim", "duration_ms": 15}
+    ],
+    "vision_duration_ms": 720,
+    "orchestrator_duration_ms": 480
+  }
+}

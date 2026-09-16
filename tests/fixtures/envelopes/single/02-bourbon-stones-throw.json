@@ -1,0 +1,54 @@
+{
+  "evaluation_id": "00000000-0000-4000-8000-000000000002",
+  "label_ref": "fixture-02-front",
+  "disposition": "pass",
+  "disposition_confidence": {"band": "medium", "numeric": 0.78},
+  "fields": [
+    {
+      "field_name": "brand_name",
+      "extracted_value": "STONE'S THROW",
+      "expected_value": "Stone's Throw",
+      "evidence": {"bbox": [120, 240, 800, 120], "crop_ref": "crop-brand-002", "extraction_confidence": 0.83},
+      "rule_findings": [
+        {"rule_id": "common.brand.exact_or_normalized", "cfr_citation": "27 CFR §5.64", "disposition": "needs_review", "reason_code": "BRAND.NAME.NEEDS_REVIEW", "plain_language_explanation": "Brand match falls in the borderline band — orchestrator disambiguates."}
+      ],
+      "ai_suggestion": {"present": true, "task": "brand_borderline", "text": "Apostrophe normalization brings extracted brand 'STONE'S THROW' into agreement with application 'Stone's Throw'. Surface formatting differs from application but identity is consistent.", "model_disposition": "pass"},
+      "field_confidence": {"band": "medium", "numeric": 0.78}
+    },
+    {
+      "field_name": "class_type",
+      "extracted_value": "STRAIGHT BOURBON WHISKEY",
+      "expected_value": "STRAIGHT BOURBON WHISKEY",
+      "evidence": {"bbox": [200, 380, 720, 80], "crop_ref": "crop-class-002", "extraction_confidence": 0.95},
+      "rule_findings": [
+        {"rule_id": "spirits.class_type.soi_match", "cfr_citation": "27 CFR §5 Subpart I", "disposition": "pass", "reason_code": "CLASS_TYPE.SOI.MATCH", "plain_language_explanation": "Class designation matches Standard of Identity for Bourbon."}
+      ],
+      "ai_suggestion": {"present": false, "task": null, "text": null, "model_disposition": null},
+      "field_confidence": {"band": "high", "numeric": 0.95}
+    }
+  ],
+  "audit_trail": {
+    "evaluation_id": "00000000-0000-4000-8000-000000000002",
+    "rule_set_version": "0.1.0",
+    "model_version": "gpt-4o-2024-08-06",
+    "prompt_version": "v1",
+    "input_hash": "0000000000000000000000000000000000000000000000000000000000000003",
+    "output_hash": "0000000000000000000000000000000000000000000000000000000000000004",
+    "started_at": "2026-09-15T12:01:00.000Z",
+    "completed_at": "2026-09-15T12:01:02.110Z",
+    "per_rule_trace": [
+      {"rule_id": "common.brand.exact_or_normalized", "disposition": "needs_review", "evidence_ref": "crop-brand-002"},
+      {"rule_id": "spirits.class_type.soi_match", "disposition": "pass", "evidence_ref": "crop-class-002"}
+    ],
+    "overrides": []
+  },
+  "metrics": {
+    "total_duration_ms": 2110,
+    "per_rule_durations_ms": [
+      {"rule_id": "common.brand.exact_or_normalized", "duration_ms": 12},
+      {"rule_id": "spirits.class_type.soi_match", "duration_ms": 9}
+    ],
+    "vision_duration_ms": 750,
+    "orchestrator_duration_ms": 1340
+  }
+}

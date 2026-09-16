@@ -1,0 +1,39 @@
+{
+  "evaluation_id": "00000000-0000-4000-8000-000000000006",
+  "label_ref": "fixture-06-front",
+  "disposition": "fail",
+  "disposition_confidence": {"band": "high", "numeric": 0.96},
+  "fields": [
+    {
+      "field_name": "alcohol_content",
+      "extracted_value": "45% ALC/VOL",
+      "expected_value": "40% ALC/VOL",
+      "evidence": {"bbox": [180, 1200, 400, 60], "crop_ref": "crop-abv-006", "extraction_confidence": 0.97},
+      "rule_findings": [
+        {"rule_id": "spirits.alcohol_content.tolerance", "cfr_citation": "27 CFR §5.65(b)", "disposition": "fail", "reason_code": "ALCOHOL_CONTENT.TOLERANCE.OUT_OF_BAND", "plain_language_explanation": "Label states 45% ALC/VOL, application is 40% ALC/VOL. Difference (5.0%) exceeds the ±0.3% tolerance band."}
+      ],
+      "ai_suggestion": {"present": false, "task": null, "text": null, "model_disposition": null},
+      "field_confidence": {"band": "high", "numeric": 0.97}
+    }
+  ],
+  "audit_trail": {
+    "evaluation_id": "00000000-0000-4000-8000-000000000006",
+    "rule_set_version": "0.1.0",
+    "model_version": "gpt-4o-2024-08-06",
+    "prompt_version": "v1",
+    "input_hash": "0000000000000000000000000000000000000000000000000000000000000009",
+    "output_hash": "000000000000000000000000000000000000000000000000000000000000000a",
+    "started_at": "2026-09-15T12:04:00.000Z",
+    "completed_at": "2026-09-15T12:04:00.890Z",
+    "per_rule_trace": [
+      {"rule_id": "spirits.alcohol_content.tolerance", "disposition": "fail", "evidence_ref": "crop-abv-006"}
+    ],
+    "overrides": []
+  },
+  "metrics": {
+    "total_duration_ms": 890,
+    "per_rule_durations_ms": [{"rule_id": "spirits.alcohol_content.tolerance", "duration_ms": 18}],
+    "vision_duration_ms": 740,
+    "orchestrator_duration_ms": 0
+  }
+}

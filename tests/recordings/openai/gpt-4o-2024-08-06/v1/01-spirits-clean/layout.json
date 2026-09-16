@@ -1,0 +1,16 @@
+{
+  "id": "chatcmpl-test",
+  "object": "chat.completion",
+  "model": "gpt-4o-2024-08-06",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "{\"fields\":[{\"id\":\"brand_name\",\"bbox\":[10,10,80,30]},{\"id\":\"class_type\",\"bbox\":[10,30,80,50]},{\"id\":\"abv\",\"bbox\":[10,50,80,70]},{\"id\":\"net_contents\",\"bbox\":[10,70,80,90]},{\"id\":\"gov_warning\",\"bbox\":[10,90,180,150]},{\"id\":\"heading_typography\",\"bbox\":[10,10,80,30]},{\"id\":\"name_address\",\"bbox\":[10,150,180,180]},{\"id\":\"country_origin\",\"bbox\":[10,180,180,200]}]}"
+      },
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {"prompt_tokens": 100, "completion_tokens": 10, "total_tokens": 110}
+}

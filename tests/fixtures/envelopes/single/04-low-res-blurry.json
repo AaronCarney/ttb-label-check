@@ -1,0 +1,39 @@
+{
+  "evaluation_id": "00000000-0000-4000-8000-000000000004",
+  "label_ref": "fixture-04-front",
+  "disposition": "needs_review",
+  "disposition_confidence": {"band": "low", "numeric": 0.31},
+  "fields": [
+    {
+      "field_name": "warning",
+      "extracted_value": "",
+      "expected_value": "GOVERNMENT WARNING: (1) ACCORDING TO THE SURGEON GENERAL...",
+      "evidence": {"bbox": [0, 0, 0, 0], "crop_ref": "crop-warning-004", "extraction_confidence": 0.0},
+      "rule_findings": [
+        {"rule_id": "common.warning.legibility_gate", "cfr_citation": "27 CFR §16.21", "disposition": "needs_review", "reason_code": "WARNING.LEGIBILITY.LOW_RESOLUTION", "plain_language_explanation": "Image resolution is below the threshold required to verify the health warning. A higher-resolution photo is needed."}
+      ],
+      "ai_suggestion": {"present": false, "task": null, "text": null, "model_disposition": null},
+      "field_confidence": {"band": "low", "numeric": 0.31}
+    }
+  ],
+  "audit_trail": {
+    "evaluation_id": "00000000-0000-4000-8000-000000000004",
+    "rule_set_version": "0.1.0",
+    "model_version": null,
+    "prompt_version": null,
+    "input_hash": "0000000000000000000000000000000000000000000000000000000000000007",
+    "output_hash": "0000000000000000000000000000000000000000000000000000000000000008",
+    "started_at": "2026-09-15T12:03:00.000Z",
+    "completed_at": "2026-09-15T12:03:00.180Z",
+    "per_rule_trace": [
+      {"rule_id": "common.warning.legibility_gate", "disposition": "needs_review", "evidence_ref": "crop-warning-004"}
+    ],
+    "overrides": []
+  },
+  "metrics": {
+    "total_duration_ms": 180,
+    "per_rule_durations_ms": [{"rule_id": "common.warning.legibility_gate", "duration_ms": 4}],
+    "vision_duration_ms": 175,
+    "orchestrator_duration_ms": 0
+  }
+}

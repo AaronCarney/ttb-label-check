@@ -1,0 +1,16 @@
+{
+  "id": "chatcmpl-test",
+  "object": "chat.completion",
+  "model": "gpt-4o-2024-08-06",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "{\"all_caps\":true,\"bold\":true,\"type_size_pt\":4.0}"
+      },
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {"prompt_tokens": 100, "completion_tokens": 10, "total_tokens": 110}
+}

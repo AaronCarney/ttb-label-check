@@ -1,0 +1,39 @@
+{
+  "evaluation_id": "00000000-0000-4000-8000-000000000003",
+  "label_ref": "fixture-03-front",
+  "disposition": "fail",
+  "disposition_confidence": {"band": "high", "numeric": 0.92},
+  "fields": [
+    {
+      "field_name": "warning",
+      "extracted_value": "Government Warning: (1) According to the Surgeon General...",
+      "expected_value": "GOVERNMENT WARNING: (1) ACCORDING TO THE SURGEON GENERAL...",
+      "evidence": {"bbox": [80, 1500, 920, 280], "crop_ref": "crop-warning-003", "extraction_confidence": 0.92},
+      "rule_findings": [
+        {"rule_id": "common.warning.heading_style", "cfr_citation": "27 CFR §16.21(a)", "disposition": "fail", "reason_code": "WARNING.STYLE.HEADING_NOT_BOLD_CAPS", "plain_language_explanation": "Health warning heading is not in bold capital letters as required by §16.21(a)."}
+      ],
+      "ai_suggestion": {"present": false, "task": null, "text": null, "model_disposition": null},
+      "field_confidence": {"band": "high", "numeric": 0.92}
+    }
+  ],
+  "audit_trail": {
+    "evaluation_id": "00000000-0000-4000-8000-000000000003",
+    "rule_set_version": "0.1.0",
+    "model_version": "gpt-4o-2024-08-06",
+    "prompt_version": "v1",
+    "input_hash": "0000000000000000000000000000000000000000000000000000000000000005",
+    "output_hash": "0000000000000000000000000000000000000000000000000000000000000006",
+    "started_at": "2026-09-15T12:02:00.000Z",
+    "completed_at": "2026-09-15T12:02:00.840Z",
+    "per_rule_trace": [
+      {"rule_id": "common.warning.heading_style", "disposition": "fail", "evidence_ref": "crop-warning-003"}
+    ],
+    "overrides": []
+  },
+  "metrics": {
+    "total_duration_ms": 840,
+    "per_rule_durations_ms": [{"rule_id": "common.warning.heading_style", "duration_ms": 22}],
+    "vision_duration_ms": 690,
+    "orchestrator_duration_ms": 0
+  }
+}

@@ -1,0 +1,60 @@
+{
+  "evaluation_id": "00000000-0000-4000-8000-000000000001",
+  "label_ref": "label-front-001",
+  "disposition": "pass",
+  "disposition_confidence": {"band": "high", "numeric": 0.94},
+  "fields": [
+    {
+      "field_name": "brand_name",
+      "extracted_value": "Stone's Throw",
+      "expected_value": "Stone's Throw",
+      "evidence": {
+        "bbox": [120, 240, 800, 120],
+        "crop_ref": "crop-brand-001",
+        "extraction_confidence": 0.96
+      },
+      "rule_findings": [
+        {
+          "rule_id": "common.brand.exact_or_normalized",
+          "cfr_citation": "27 CFR §4.33(a)",
+          "disposition": "pass",
+          "reason_code": "BRAND.NAME.MATCH",
+          "plain_language_explanation": "Brand name matches application after normalization."
+        }
+      ],
+      "ai_suggestion": {
+        "present": false,
+        "task": null,
+        "text": null,
+        "model_disposition": null
+      },
+      "field_confidence": {"band": "high", "numeric": 0.94}
+    }
+  ],
+  "audit_trail": {
+    "evaluation_id": "00000000-0000-4000-8000-000000000001",
+    "rule_set_version": "0.1.0",
+    "model_version": "gpt-4o-2024-08-06",
+    "prompt_version": "v1",
+    "input_hash": "0000000000000000000000000000000000000000000000000000000000000001",
+    "output_hash": "0000000000000000000000000000000000000000000000000000000000000002",
+    "started_at": "2026-09-15T12:00:00.000Z",
+    "completed_at": "2026-09-15T12:00:01.230Z",
+    "per_rule_trace": [
+      {
+        "rule_id": "common.brand.exact_or_normalized",
+        "disposition": "pass",
+        "evidence_ref": "crop-brand-001"
+      }
+    ],
+    "overrides": []
+  },
+  "metrics": {
+    "total_duration_ms": 1230,
+    "per_rule_durations_ms": [
+      {"rule_id": "common.brand.exact_or_normalized", "duration_ms": 8}
+    ],
+    "vision_duration_ms": 720,
+    "orchestrator_duration_ms": 480
+  }
+}
