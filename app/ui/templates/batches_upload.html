@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Bulk upload — TTB Label Verification{% endblock %}
+{% block bundle_name_script %}single{% endblock %}
+{% block content %}
+  <section class="bulk-upload" aria-labelledby="bulk-heading">
+    <h2 id="bulk-heading">Bulk label upload</h2>
+    <p>Pick multiple PNG or JPEG files. Each becomes one label in a single
+    batch; the streaming results page opens once the worker spawns.</p>
+    <p class="sample-batch-hint">
+      Don&rsquo;t have label images?
+      <a href="/batches/sample.zip" download>Download a 10-label sample</a>
+      pulled from the TTB Public COLA Registry (CC0). Unzip and drop into
+      the file picker below to exercise the full pipeline.
+    </p>
+    <form action="/batches/upload" method="post" enctype="multipart/form-data" class="upload-form">
+      <label for="bulk-labels">Label images (multi-select)</label>
+      <input id="bulk-labels" type="file" name="labels" accept="image/png,image/jpeg" multiple required />
+      <div class="application-field">
+        <label for="bulk-beverage-type">Beverage type for every label in this batch</label>
+        <select id="bulk-beverage-type" name="beverage_type">
+          <option value="">Not stated</option>
+          <option value="distilled_spirits">Distilled spirits</option>
+          <option value="wine">Wine</option>
+          <option value="malt_beverage">Malt beverage</option>
+        </select>
+      </div>
+      <p class="application-fields-hint">
+        A bulk upload carries images and no applications, so nothing is
+        compared against one. The beverage type still decides which rules
+        apply: a wine label checked against the spirits rules fires none of
+        the wine rules. To compare a label against its application, submit it
+        on the <a href="/">single-label page</a>.
+      </p>
+      <button type="submit">Submit batch</button>
+    </form>
+    {% if upload_error %}
+    <div role="alert" class="upload-error">{{ upload_error }}</div>
+    {% endif %}
+    <p><a href="/">← Back to single-label review</a></p>
+  </section>
+{% endblock %}

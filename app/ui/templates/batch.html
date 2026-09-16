@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block title %}Batch review — TTB Label Verification{% endblock %}
+{% block bundle_name_script %}batch{% endblock %}
+{% block content %}
+  <div id="root" data-mode="batch" data-batch-id="{{ batch_id }}">
+    <p>Connecting to batch stream…</p>
+  </div>
+{% endblock %}

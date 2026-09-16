@@ -1,0 +1,38 @@
+{# app/ui/templates/base.html — global page shell.
+   ARIA semantics — skip-link to #main, footer landmark. USWDS tokens preloaded
+   from /static/island/style.css (Vite emits one CSS bundle for all entries
+   with cssCodeSplit:false — see frontend/vite.config.ts). #}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light only" />
+    <title>{% block title %}TTB Label Verification{% endblock %}</title>
+    <link rel="stylesheet" href="/static/island/style.css" />
+  </head>
+  <body data-dev-mode="{{ '1' if dev_mode else '0' }}">
+    <a class="skip-link" href="#main">Skip to main content</a>
+    <header role="banner">
+      <h1>TTB Label Verification</h1>
+      <p>Reviewer console — prototype</p>
+      <nav class="primary-nav" aria-label="Primary">
+        <a href="/">Single label</a>
+        <a href="/batches">Bulk batch</a>
+      </nav>
+    </header>
+    <main id="main" role="main">
+      {% block content %}{% endblock %}
+    </main>
+    <noscript>
+      <p><strong>JavaScript is required for the reviewer UI.</strong> For
+      programmatic submissions, use the API at <code>POST /labels</code>.
+      See the project README for details.</p>
+    </noscript>
+    <footer role="contentinfo">
+      <p>TTB AI-Powered Alcohol Label Verification — prototype.
+      <a href="https://www.ttb.gov/labeling">TTB labeling regulations</a>.</p>
+    </footer>
+    <script type="module" src="/static/island/{% block bundle_name_script %}single{% endblock %}.js"></script>
+  </body>
+</html>

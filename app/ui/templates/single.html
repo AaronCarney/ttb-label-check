@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% block title %}Review label — TTB Label Verification{% endblock %}
+{% block bundle_name_script %}single{% endblock %}
+{% block content %}
+  {% if envelope_json %}
+    {% if image_url %}
+    <figure class="label-preview">
+      <img src="{{ image_url }}" alt="The label image being reviewed" />
+      <figcaption>Source label image — what the extractor saw.</figcaption>
+    </figure>
+    {% endif %}
+  {% else %}
+    {# Demo metaphor: a reviewer arrives at the start of a shift; the inbox
+       is empty until labels are dropped in. No pre-loaded fixtures. #}
+    <section class="empty-inbox" aria-labelledby="empty-inbox-heading">
+      <h2 id="empty-inbox-heading">Your inbox is empty</h2>
+      <p class="empty-inbox-lead">Drop new labels here to begin reviewing.</p>
+    </section>
+  {% endif %}
+  <form action="/" method="post" enctype="multipart/form-data" class="upload-form" aria-label="Upload a label for evaluation">
+    <label for="label-upload" class="upload-form-label">Upload a label (PNG or JPEG)</label>
+    <div class="dropzone">
+      <input id="label-upload" type="file" name="label" accept="image/png,image/jpeg" required />
+    </div>
+    {% set app_form = application_form or {} %}
+    <fieldset class="application-fields">
+      <legend>The application filed for this label</legend>
+      <p class="application-fields-hint">
+        The check compares the label against the application. Fill in what the
+        application declares; a field left empty is not checked, and the label
+        is still checked for what every label must carry.
+      </p>
+      <div class="application-field">
+        <label for="app-beverage-type">Beverage type</label>
+        <select id="app-beverage-type" name="beverage_type" required>
+          <option value="" {{ 'selected' if not app_form.get('beverage_type') }}>Choose one</option>
+          <option value="distilled_spirits" {{ 'selected' if app_form.get('beverage_type') == 'distilled_spirits' }}>Distilled spirits</option>
+          <option value="wine" {{ 'selected' if app_form.get('beverage_type') == 'wine' }}>Wine</option>
+          <option value="malt_beverage" {{ 'selected' if app_form.get('beverage_type') == 'malt_beverage' }}>Malt beverage</option>
+        </select>
+      </div>
+      <div class="application-field">
+        <label for="app-brand-name">Brand name</label>
+        <input id="app-brand-name" type="text" name="brand_name" value="{{ app_form.get('brand_name', '') }}" autocomplete="off" />
+      </div>
+      <div class="application-field">
+        <label for="app-fanciful-name">Fanciful name, if the application gives one</label>
+        <input id="app-fanciful-name" type="text" name="fanciful_name" value="{{ app_form.get('fanciful_name', '') }}" autocomplete="off" />
+      </div>
+      <div class="application-field">
+        <label for="app-class-type">Class or type, for example Kentucky Straight Bourbon Whiskey</label>
+        <input id="app-class-type" type="text" name="class_type" value="{{ app_form.get('class_type', '') }}" autocomplete="off" />
+      </div>
+      <div class="application-field">
+        <label for="app-alcohol-content">Alcohol content, as the application words it, for example 40% ALC/VOL</label>
+        <input id="app-alcohol-content" type="text" name="alcohol_content" value="{{ app_form.get('alcohol_content', '') }}" autocomplete="off" />
+      </div>
+      <div class="application-field">
+        <label for="app-net-contents">Net contents, as the application words it, for example 750 mL</label>
+        <input id="app-net-contents" type="text" name="net_contents" value="{{ app_form.get('net_contents', '') }}" autocomplete="off" />
+      </div>
+      <div class="application-field">
+        <label for="app-name-address">Applicant name and address</label>
+        <input id="app-name-address" type="text" name="applicant_name_address" value="{{ app_form.get('applicant_name_address', '') }}" autocomplete="off" />
+      </div>
+      <div class="application-field">
+        <label for="app-source">Where the product comes from</label>
+        <select id="app-source" name="source_of_product">
+          <option value="" {{ 'selected' if not app_form.get('source_of_product') }}>Not stated</option>
+          <option value="domestic" {{ 'selected' if app_form.get('source_of_product') == 'domestic' }}>Domestic</option>
+          <option value="imported" {{ 'selected' if app_form.get('source_of_product') == 'imported' }}>Imported</option>
+        </select>
+      </div>
+      <div class="application-field">
+        <label for="app-origin">Country of origin, for an imported product</label>
+        <input id="app-origin" type="text" name="origin" value="{{ app_form.get('origin', '') }}" autocomplete="off" />
+      </div>
+      <div class="application-field">
+        <label for="app-wine-appellation">Appellation of origin, for a wine</label>
+        <input id="app-wine-appellation" type="text" name="wine_appellation" value="{{ app_form.get('wine_appellation', '') }}" autocomplete="off" />
+      </div>
+    </fieldset>
+    <div class="upload-form-actions">
+      <button type="submit" class="primary-button">Evaluate</button>
+      <a href="/batches" class="secondary-link bulk-link">Bulk upload (multiple labels) →</a>
+    </div>
+  </form>
+  {% if not envelope_json %}
+  <p class="sample-batch-hint">
+    Don&rsquo;t have label images?
+    <a href="/batches/sample.zip" download>Try a starter pack</a>
+    pulled from the TTB Public COLA Registry (CC0). Unzip and drop above to
+    exercise the full evaluation pipeline.
+  </p>
+  {% endif %}
+  {% if upload_error %}
+  <div role="alert" class="upload-error">{{ upload_error }}</div>
+  {% endif %}
+  <div id="root" data-mode="single">
+    <p>Loading review surface…</p>
+  </div>
+  {% if envelope_json %}
+  <script id="envelope" type="application/json">{{ envelope_json | safe }}</script>
+  {% endif %}
+{% endblock %}
