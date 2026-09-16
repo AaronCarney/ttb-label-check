@@ -67,7 +67,7 @@ codes:
     # Reviewer vocabulary only: no enabled rule emits this. The three
     # `alcohol.format` rules that reference it are switched off, because no
     # reader returns the label's own alcohol wording and the check cannot be
-    # made without it. See docs/decisions/0011.
+    # made without it. See docs/decisions.md#0011.
     description: "Alcohol-content statement format does not satisfy regulation pattern."
     cfr_anchors: ["27 CFR §4.36(b)(1)", "27 CFR §5.65(b)", "27 CFR §7.65(b)"]
     severity: reject
@@ -75,7 +75,7 @@ codes:
     # Reviewer vocabulary only: no rule emits this. A reviewer who has a
     # laboratory figure the application does not carry can still override a
     # label with it, and app/api/overrides.py refuses any code absent here.
-    # See docs/decisions/0008.
+    # See docs/decisions.md#0008.
     description: "Reviewer judged the stated alcohol content to disagree with the product."
     cfr_anchors: ["27 CFR §4.36(b)(1)", "27 CFR §5.65(c)", "27 CFR §7.65(c)"]
     severity: reject

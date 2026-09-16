@@ -78,7 +78,7 @@ def stage_a_normalized(observed: str, expected: str) -> bool:
 def stage_a_word_run(observed: str, expected: str) -> bool:
     """True when either value's whole words sit inside the other's as a run.
 
-    Whole words, not letters, for the reason `docs/decisions/0007` gives for
+    Whole words, not letters, for the reason `docs/decisions.md#0007` gives for
     the class-and-type lists: a substring test finds "gin" inside "Virginia".
     """
     a, b = _run_words(observed), _run_words(expected)

@@ -3,7 +3,7 @@
 `layout_isolation_check` was the other name here: it compared a payload's
 `min_neighbor_distance_px` against a threshold for `common.warning.separate_apart`.
 No reader emits that distance, so the check could never run on a real label, and
-docs/decisions/0013 moved the rule to the `unmeasurable` validator. The
+docs/decisions.md#0013 moved the rule to the `unmeasurable` validator. The
 registration went with it — an unreferenced validator name fails the orphan check
 in `tests/test_rules_yaml_round_trip.py::test_no_orphan_validators_in_registry` by
 design. When a reader does emit a neighbour distance, the lane that lands it

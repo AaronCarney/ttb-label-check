@@ -10,7 +10,7 @@ ounces, which a label prints as `12.7 FL. OZ.`. Converting that back gives
 The rule is therefore: **two figures in different units agree within the rule
 pack's own tolerance; two figures in the same unit must be equal.** Nothing was
 rounded away between two figures in the same unit, so nothing is forgiven
-there. `docs/decisions/0014` records where the tolerance comes from, and
+there. `docs/decisions.md#0014` records where the tolerance comes from, and
 `test_the_shipped_tolerance_sits_between_its_two_derived_bounds` below
 recomputes both of its bounds from the authorized standards of fill, so an edit
 that loosens the number fails here with the reason attached.
@@ -186,7 +186,7 @@ def _printed_fl_oz(millilitres: float) -> float:
     rounded to a tenth of a fluid ounce, which is the precision every customary
     figure in the fixture corpus is printed to — 50 mL as 1.7 FL OZ, 375 mL as
     12.7 FL OZ. Observed from those labels, not read out of the regulation; see
-    docs/decisions/0014."""
+    docs/decisions.md#0014."""
     return round(millilitres / _FL_OZ_ML, 1)
 
 
@@ -231,7 +231,7 @@ def test_the_shipped_tolerance_sits_between_its_two_derived_bounds() -> None:
         f"the shipped tolerance {shipped:.4%} must absorb the {floor:.4%} that "
         f"rounding a printed customary figure needs, and must stay under the "
         f"{ceiling:.4%} that separates two authorized sizes. "
-        f"docs/decisions/0014 carries the working."
+        f"docs/decisions.md#0014 carries the working."
     )
     # The bounds themselves, so a change in the size lists is visible here too.
     assert round(floor, 5) == 0.00633, f"floor moved to {floor:.5%}"

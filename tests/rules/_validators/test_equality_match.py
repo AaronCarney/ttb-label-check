@@ -2,7 +2,7 @@
 an allow-list provided in `rule.parameters['allowed_values']`.
 
 The module's other name, 'equality_match', went when the only rule using it was
-deleted (docs/decisions/0013); its cases went with it.
+deleted (docs/decisions.md#0013); its cases went with it.
 """
 from __future__ import annotations
 

@@ -33,7 +33,7 @@ Python 3.12 with FastAPI and pydantic; the rules the app applies are a YAML pack
 loaded and validated at startup rather than written in Python. The interface is a Jinja page shell
 with a React island mounted into it, built by Vite. A label is read by one of two extractors behind
 a single interface — a local OCR reader that ships in the app and needs no outbound call, which is
-the default, and a cloud vision reader (`docs/decisions/0005`).
+the default, and a cloud vision reader (`docs/decisions.md#0005`).
 
 ## Layout
 
@@ -44,7 +44,7 @@ the default, and a cloud vision reader (`docs/decisions/0005`).
 | `docs/README.md` | Index of every document under `docs/`, one line each. |
 | `docs/PRD.md` | What is being built, for whom, and why. |
 | `docs/PRD-decisions.md` | Every change to the PRD's text, once it has been approved. |
-| `docs/decisions/NNNN-*.md` | One settled build decision per file, numbered. |
+| `docs/decisions.md` | One document. One entry per settled build decision, numbered. |
 | `docs/research/YYYY-MM-DD-*.md` | One dated finding per file. |
 | `docs/reference/` | Rule text the app checks, each copy pinned to the date it was read. |
 | `specs/NNNN-slug/` | One directory per specified change. |

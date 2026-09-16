@@ -161,7 +161,7 @@ unchanged and now apply to the single buffer.
 The raw-call panel itself is **not built**, and the route it would fetch does not exist. It checks
 no label and scores nothing in the brief, so it sits behind every check that does. It goes in the
 README's list of what this project does not do, with that reason, in the form
-`docs/decisions/0006` sets for a deliberate omission. Nothing about that is a change to this
+`docs/decisions.md#0006` sets for a deliberate omission. Nothing about that is a change to this
 decision — the capture it asked for is in place, so the panel is a view away whenever it is worth
 building.
 

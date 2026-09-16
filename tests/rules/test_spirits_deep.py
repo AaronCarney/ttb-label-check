@@ -40,7 +40,7 @@ def test_soi_match_pos(ruleset) -> None:
 def test_soi_match_accepts_a_class_carried_inside_the_designation(ruleset, designation) -> None:
     # Both are TTB-approved labels in the fixture set. Subpart I names Cognac
     # and Liqueur, and the designation carries the class rather than equalling
-    # it (docs/decisions/0007), so the qualifiers around it do not matter.
+    # it (docs/decisions.md#0007), so the qualifiers around it do not matter.
     rule = _r(ruleset, "spirits.class_type.matches_soi")
     obs = make_obs(field_id="class_type", value=designation, beverage_class=BeverageClass.SPIRITS)
     assert VALIDATOR_REGISTRY[rule.validator](obs, make_expected(field_id="class_type"), rule, _ctx(ruleset)).outcome is Outcome.PASS
@@ -51,7 +51,7 @@ def test_soi_match_neg(ruleset) -> None:
     # rejection: Subpart I lets a spirit with no standard of identity be
     # designated by a fanciful name with a statement of composition, so an
     # unrecognised designation is no evidence the label is wrong.
-    # docs/decisions/0012.
+    # docs/decisions.md#0012.
     rule = _r(ruleset, "spirits.class_type.matches_soi")
     obs = make_obs(field_id="class_type", value="Mystery Hooch", beverage_class=BeverageClass.SPIRITS)
     res = VALIDATOR_REGISTRY[rule.validator](obs, make_expected(field_id="class_type"), rule, _ctx(ruleset))

@@ -5,7 +5,7 @@
 
 `layout_isolation_check` was the other, and it is gone: no reader emits the
 neighbour distance it compared, so `common.warning.separate_apart` now answers
-`unmeasurable` instead (docs/decisions/0013).
+`unmeasurable` instead (docs/decisions.md#0013).
 """
 from __future__ import annotations
 

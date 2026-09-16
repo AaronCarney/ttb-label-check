@@ -43,7 +43,7 @@ rules:
     # application is spirits.class_type.matches_application's. Checking
     # presence against an allow-list conflated all three and rejected
     # approved labels whose designation the list did not happen to carry —
-    # "Cognac XO", "CRÈME DE CASSIS LIQUEUR". See docs/decisions/0012.
+    # "Cognac XO", "CRÈME DE CASSIS LIQUEUR". See docs/decisions.md#0012.
     reason_code: CLASS_TYPE.PRESENCE.MISSING
     severity: reject
     match_policy: exact
@@ -213,7 +213,7 @@ rules:
       # across the sizes §4.72 and §5.203 authorize, and below the 1.216% that
       # separates an authorized size from the customary figure printed for its
       # nearest neighbour, so no authorized size can pass as another.
-      # docs/decisions/0014 carries the working, and
+      # docs/decisions.md#0014 carries the working, and
       # tests/rules/_validators/test_quantity_match.py recomputes both bounds
       # from the authorized size lists so a later edit cannot quietly loosen it.
       cross_unit_relative: 0.01

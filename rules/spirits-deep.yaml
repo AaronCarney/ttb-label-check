@@ -11,7 +11,7 @@ rules:
     # product cannot place. Rejecting on it turned three approved labels in
     # the fixture set into rejections: "Cognac XO", "CRÈME DE CASSIS LIQUEUR"
     # and "PEATED OREGON AMERICAN SINGLE MALT WHISKEY". See
-    # docs/decisions/0012.
+    # docs/decisions.md#0012.
     reason_code: CLASS_TYPE.SOI.NO_MATCH
     severity: warn
     match_policy: lookup

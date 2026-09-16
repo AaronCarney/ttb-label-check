@@ -10,7 +10,7 @@ per field and comparing its repr matches nothing.
 
 A second name, `equality_match`, once lived here: single-value exact or
 normalized comparison. The only rule that used it was
-`common.warning.heading_phrase`, which docs/decisions/0013 deleted as
+`common.warning.heading_phrase`, which docs/decisions.md#0013 deleted as
 redundant with `common.warning.heading_caps_bold`. An unreferenced
 registration fails the orphan check in
 `tests/test_rules_yaml_round_trip.py::test_no_orphan_validators_in_registry`

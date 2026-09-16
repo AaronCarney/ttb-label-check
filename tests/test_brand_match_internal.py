@@ -94,7 +94,7 @@ def test_a_leading_article_is_not_part_of_the_mark() -> None:
 
 
 def test_a_run_is_whole_words_not_letters() -> None:
-    """The reason docs/decisions/0007 gives for the class-and-type lists: a
+    """The reason docs/decisions.md#0007 gives for the class-and-type lists: a
     substring test finds "gin" inside "Virginia"."""
     assert stage_a_word_run("Gin", "Virginia Spirits") is False
 

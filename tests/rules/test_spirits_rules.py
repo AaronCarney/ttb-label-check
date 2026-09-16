@@ -55,7 +55,7 @@ def test_class_type_accepts_a_designation_no_list_carries(ruleset) -> None:
     # Part 5 Subpart I lets a spirit with no standard of identity be designated
     # by a fanciful name with a statement of composition, so an unlisted
     # designation is not evidence the label is wrong. §5.63(a) asks only that a
-    # designation be there. docs/decisions/0012.
+    # designation be there. docs/decisions.md#0012.
     rule = _r(ruleset, "spirits.class_type.present")
     obs = make_obs(field_id="class_type", value="CRÈME DE CASSIS LIQUEUR", beverage_class=BeverageClass.SPIRITS)
     assert VALIDATOR_REGISTRY[rule.validator](obs, make_expected(field_id="class_type"), rule, _ctx(ruleset)).outcome is Outcome.PASS
@@ -81,7 +81,7 @@ def test_alcohol_present_neg(ruleset) -> None:
 
 
 def test_format_is_switched_off(ruleset) -> None:
-    # Switched off, docs/decisions/0011: the validator matches the pack's regex
+    # Switched off, docs/decisions.md#0011: the validator matches the pack's regex
     # against a sentence it builds from the reader's percentage, never against
     # the label's own wording. Exercising it here would test that construction
     # and report a check the app does not make. The engine skips the rule

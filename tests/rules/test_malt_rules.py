@@ -54,7 +54,7 @@ def test_class_type_pos(ruleset) -> None:
 def test_class_type_accepts_a_style_no_list_carries(ruleset) -> None:
     # §7.63(a)(2) asks that a designation appear on the label, not that it be
     # one of a short set. Checking presence against an allow-list rejected any
-    # style the list did not happen to carry. docs/decisions/0012.
+    # style the list did not happen to carry. docs/decisions.md#0012.
     rule = _r(ruleset, "malt.class_type.present")
     obs = make_obs(field_id="class_type", value="MÄRZEN", beverage_class=BeverageClass.MALT)
     assert VALIDATOR_REGISTRY[rule.validator](obs, make_expected(field_id="class_type"), rule, _ctx(ruleset)).outcome is Outcome.PASS
@@ -93,7 +93,7 @@ def test_alcohol_conditional_not_applicable(ruleset) -> None:
 
 
 def test_format_is_switched_off(ruleset) -> None:
-    # Switched off, docs/decisions/0011: the validator matches the pack's regex
+    # Switched off, docs/decisions.md#0011: the validator matches the pack's regex
     # against a sentence it builds from the reader's percentage, never against
     # the label's own wording. On a malt beverage that is worse than useless —
     # §7.63(a)(3) requires the statement only where the alcohol comes from

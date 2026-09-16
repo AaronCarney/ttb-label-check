@@ -128,7 +128,7 @@ class Evaluator:
         # sends every reading to the rule pack the application selected.
         #
         # When the application names no class, no pack can be selected and
-        # nothing is checked — docs/decisions/0010. The reader's own tag is
+        # nothing is checked — docs/decisions.md#0010. The reader's own tag is
         # not a fallback: both readers label everything they see `spirits`,
         # so inheriting it would score a wine against the spirits pack.
         # `FieldObservation.beverage_class` has no value for "unknown", so the

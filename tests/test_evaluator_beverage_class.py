@@ -8,7 +8,7 @@ of the wine rules ever fire.
 
 Where the application names no class there is nothing to tag with, and the
 reader's own tag is not a substitute: both readers call everything they see
-spirits. So no rule runs, and the audit trail says so. `docs/decisions/0010`
+spirits. So no rule runs, and the audit trail says so. `docs/decisions.md#0010`
 carries the argument; `tests/rules/test_label_matches_application.py`'s
 `test_no_application_means_no_comparison_applies` states the matching contract
 on the rules side.

@@ -13,7 +13,7 @@ from app.schemas.label import Label
 
 @runtime_checkable
 class VisionExtractor(Protocol):
-    """The reader seam. Two concrete impls: cloud + local (docs/decisions/0005)."""
+    """The reader seam. Two concrete impls: cloud + local (docs/decisions.md#0005)."""
 
     async def extract(self, label: Label) -> list[FieldObservation]: ...
 

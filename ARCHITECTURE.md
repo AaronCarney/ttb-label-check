@@ -21,7 +21,7 @@ all; `tests/test_validator_registry.py` enforces that, and the citation lives wi
 **Reading works with no outbound connection.** A local OCR reader ships inside the app and is the
 default, because the agents who would use this work behind a firewall that blocks outbound calls.
 A cloud vision reader sits behind the same interface for comparison. Neither is wired into the rule
-engine's decisions (`docs/decisions/0005`).
+engine's decisions (`docs/decisions.md#0005`).
 
 A verdict of `fail` means a rule the pack lets reject found a disagreement. `needs_review` means
 either a rule whose disagreement is a reviewer's call rather than evidence the label is wrong, or a

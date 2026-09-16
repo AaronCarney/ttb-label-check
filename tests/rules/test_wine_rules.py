@@ -61,7 +61,7 @@ def test_wine_class_type_pos(ruleset) -> None:
 def test_wine_class_type_accepts_a_varietal_designation(ruleset) -> None:
     # §4.34(b) lets a varietal name be the designation in lieu of a class, and
     # TTB approved this label. The rule asks whether a designation is on the
-    # label, so one that no allow-list carries still passes. docs/decisions/0012.
+    # label, so one that no allow-list carries still passes. docs/decisions.md#0012.
     rule = _r(ruleset, "wine.class_type.present")
     obs = make_obs(field_id="class_type", value="SANGIOVESE", beverage_class=BeverageClass.WINE)
     res = VALIDATOR_REGISTRY[rule.validator](obs, make_expected(field_id="class_type"), rule, _ctx(ruleset))
@@ -114,7 +114,7 @@ def test_wine_alcohol_present_or_table_neg(ruleset) -> None:
 
 
 def test_wine_alcohol_format_is_switched_off(ruleset) -> None:
-    # Switched off, docs/decisions/0011: the validator matches the pack's regex
+    # Switched off, docs/decisions.md#0011: the validator matches the pack's regex
     # against a sentence it builds from the reader's percentage, never against
     # the label's own wording. Exercising it here would test that construction
     # and report a check the app does not make. The engine skips the rule

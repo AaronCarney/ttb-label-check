@@ -25,7 +25,7 @@ the adjectival form — "HECHO EN MEXICO", "U.K.", "Irish". The customs marking
 reference gives those by example rather than as a list, so none of them are
 built here, and rejecting on their account would reject compliant labels. The
 citation for the rule sits in the rule pack, with the decision record at
-docs/decisions/0016.
+docs/decisions.md#0016.
 
 The cost of that is real and is the cost this product chooses: a label that
 genuinely names the wrong country reaches a reviewer rather than being

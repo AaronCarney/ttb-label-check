@@ -4,7 +4,7 @@ It takes the reader's alcohol observation — a percentage and a unit — builds
 the sentence "alcohol N% by volume" from it, and matches the rule's regex
 against that construction. So it passes whenever a number was read, whatever
 the label printed, and fails when none was. The three rules that used it are
-switched off for that reason (docs/decisions/0011), and the tests below say
+switched off for that reason (docs/decisions.md#0011), and the tests below say
 what the validator is rather than exercising it as a live check.
 
 It stays registered because app/rules/loader.py refuses startup when a rule
@@ -91,7 +91,7 @@ def test_a_string_reading_passes_through_to_the_pattern() -> None:
     # The path that would make the rule real: a reading that is already the
     # label's own wording reaches the pattern unchanged. No reader returns one
     # today — both discard the matched text and keep the number — which is what
-    # docs/decisions/0011 names as the condition for switching the rules on.
+    # docs/decisions.md#0011 names as the condition for switching the rules on.
     obs = make_obs(field_id="alc_text", value="ALCOHOL 12.5% BY VOLUME")
     res = regex_match(obs, make_expected(field_id="alc_text"), _rule(), make_context())
     assert res.outcome is Outcome.PASS

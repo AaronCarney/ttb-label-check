@@ -38,7 +38,7 @@ def test_settings_defaults_when_only_required_provided() -> None:
         PROMPT_VERSION=None,
     ):
         s = Settings()
-        # Local-by-default (docs/decisions/0005): a clone reads labels with no
+        # Local-by-default (docs/decisions.md#0005): a clone reads labels with no
         # key and no outbound call unless VISION_MODE says otherwise.
         assert s.vision_mode == "local"
         assert s.lookahead_k == 3

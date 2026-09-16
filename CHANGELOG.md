@@ -9,7 +9,7 @@ All notable changes to this project are recorded here. The format follows
 ### Added
 
 - A label is read on this machine, with no outbound call, and that reader is the default. A second
-  reader using a vision model sits behind the same interface. See `docs/decisions/0005`.
+  reader using a vision model sits behind the same interface. See `docs/decisions.md#0005`.
 - The reader's accuracy is scored against the real labels and their recorded ground truth.
 - Every declared element of an application — brand name, class and type, alcohol content, net
   contents, name and address, country of origin, and the health warning — is compared against what
@@ -42,7 +42,7 @@ All notable changes to this project are recorded here. The format follows
   that showed its raw calls. It was switched off by default and could not change a verdict: its
   output was discarded before it reached a rule result, and the channel that would have shown it to
   a reviewer was sealed. The reader that uses a vision model to turn a label photograph into fields
-  is unaffected. See `docs/decisions/0009`.
+  is unaffected. See `docs/decisions.md#0009`.
 - Installed dependencies and compiled Python are no longer tracked: `frontend/node_modules` and
   `__pycache__` are build output and are rebuilt from `uv.lock` and `pnpm-lock.yaml`.
 - The telemetry block sent with each result no longer carries `orchestrator_duration_ms`. It timed a
@@ -68,7 +68,7 @@ All notable changes to this project are recorded here. The format follows
 
 - The health warning's four typography rules — contrasting background, characters per inch, type
   size and separate-and-apart — no longer run, each with its reason recorded in the rule pack. See
-  `docs/decisions/0006`. `common.warning.heading_phrase` no longer runs as a duplicate of
+  `docs/decisions.md#0006`. `common.warning.heading_phrase` no longer runs as a duplicate of
   `common.warning.heading_caps_bold`.
 - A class-and-type designation passes when it includes a recognised standard of identity as whole
-  words, and both permitted spellings of "whisky" are accepted. See `docs/decisions/0007`.
+  words, and both permitted spellings of "whisky" are accepted. See `docs/decisions.md#0007`.
