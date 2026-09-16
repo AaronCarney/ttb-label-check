@@ -14,7 +14,7 @@ that governs — never an entry itself as the reason something must be done. Whe
 governing document disagree, the governing document wins and the entry is a stale record to date and
 correct.
 
-Standard: `olorin/standards-library/workflow/decision-document.md`. Consolidated 2026-09-16 out of
+Standard: `olorin/standards/workflow/decision-document.md`. Consolidated 2026-09-16 out of
 sixteen separate files under `docs/decisions/`, which was a departure from the workspace's practice
 of one decision document per project. The entry numbers are the numbers those files carried, so an
 existing citation to `docs/decisions/0011` is entry 0011 here and links resolve as
@@ -596,7 +596,9 @@ severity on that branch, and the country-of-origin comparison was settled the sa
 `spirits.class_type.matches_soi` now says the same thing: it passes what Subpart I names, and sends
 what it does not recognise to a human rather than rejecting the label.
 
-*Champagne and Rose Wine, measured against the CFR text.* Champagne belongs, and listing it alone was
+*Champagne and Rose Wine, measured against the CFR text.* Both were on
+`wine.class_type.matches_application`'s recognised list, and whether either belonged there is a
+measurement, not a judgement. Champagne belongs, and listing it alone was
 not enough: §4.21(b)(2) makes champagne a type of sparkling light wine and §4.34(a) says the type
 designation "champagne" "may appear in lieu of the class designation 'sparkling wine'", and
 §4.24(b)(2) additionally lists it among the semi-generic names, so a label reading CHAMPAGNE and an
