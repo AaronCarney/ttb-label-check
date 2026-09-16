@@ -12,6 +12,10 @@ from app.schemas.label import Dimensions, Label
 from app.vision.cloud import CloudVisionExtractor
 
 RECORDINGS_DIR = Path("tests/recordings/openai/gpt-4o-2024-08-06/v1/01-spirits-clean")
+# A real CC0 label from the TTB Public COLA Registry, front face: distilled
+# spirits, 1200x1800 JPEG. It passes the vision quality gates, so a test
+# using it exercises the path a submitted label takes.
+FIXTURE = Path("tests/fixtures/labels/26231001000662/front.jpg")
 
 
 @pytest.mark.asyncio
@@ -21,9 +25,9 @@ async def test_cloud_writes_9_call_records():
     extractor = CloudVisionExtractor(settings=settings, ring_buffer=ring, api_key="sk-test")
     label = Label(
         label_id="L-001", batch_id="B-001",
-        image_bytes=Path("fixtures/01-spirits-clean/label.png").read_bytes(),
-        content_type="image/png", face_tag="front",
-        dimensions=Dimensions(width_px=200, height_px=200, dpi=300),
+        image_bytes=FIXTURE.read_bytes(),
+        content_type="image/jpeg", face_tag="front",
+        dimensions=Dimensions(width_px=1200, height_px=1800, dpi=300),
     )
     # respx 0.23.1 dedupes same-URL/method routes (only the last mount survives),
     # so the closure-per-recording pattern collapses. Equivalent dispatcher keyed

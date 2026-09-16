@@ -20,7 +20,10 @@ from PIL import Image, TiffImagePlugin
 from app.schemas.label import Dimensions, Label
 from app.vision.quality import _extract_dpi, assess
 
-FIXTURE = Path("fixtures/01-spirits-clean/label.png")
+# A real CC0 label from the TTB Public COLA Registry, front face: distilled
+# spirits, 1200x1800 JPEG. It passes the vision quality gates, so a test
+# using it exercises the path a submitted label takes.
+FIXTURE = Path("tests/fixtures/labels/26231001000662/front.jpg")
 
 
 def _png_with_dpi(dpi: int) -> bytes:
@@ -94,27 +97,20 @@ def test_extract_dpi_none_when_all_sources_missing():
 def test_assess_surfaces_dpi_none_for_downstream_missing_dpi_signal():
     """When no DPI source resolves, `assess()` returns `dpi=None` so the rule
     engine can attach `ENGINE.MEASUREMENT.MISSING_DPI`. Disposition stays `ok` —
-    missing DPI is a measurement-engine concern, not a legibility gate."""
+    missing DPI is a measurement-engine concern, not a legibility gate.
+
+    The real label is the case that matters: a COLA registry JPEG carries no
+    pHYs chunk, no EXIF resolution and no JFIF density marker, and an applicant
+    who supplies no dimensions leaves the last source empty too.
+    """
     label = Label(
         label_id="L-MISSING-DPI",
         batch_id="B-001",
-        image_bytes=FIXTURE.read_bytes(),  # known-good fixture passes quality gates
-        content_type="image/png",
+        image_bytes=FIXTURE.read_bytes(),
+        content_type="image/jpeg",
         face_tag="front",
         dimensions=None,
     )
-    # The fixture has its own pHYs chunk; strip it by re-encoding without dpi.
-    img = Image.open(io.BytesIO(label.image_bytes)).convert("RGB")
-    buf = io.BytesIO()
-    img.save(buf, format="PNG")  # no dpi kwarg → no pHYs
-    stripped = Label(
-        label_id="L-MISSING-DPI",
-        batch_id="B-001",
-        image_bytes=buf.getvalue(),
-        content_type="image/png",
-        face_tag="front",
-        dimensions=None,
-    )
-    report = assess(stripped)
+    report = assess(label)
     assert report.dpi is None
     assert report.disposition == "ok"

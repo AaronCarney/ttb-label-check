@@ -2,13 +2,15 @@ import io
 from pathlib import Path
 
 import numpy as np
-import pytest
 from PIL import Image
 
 from app.schemas.label import Dimensions, Label
-from app.vision.quality import QualityReport, assess
+from app.vision.quality import assess
 
-FIXTURE = Path("fixtures/01-spirits-clean/label.png")
+# A real CC0 label from the TTB Public COLA Registry, front face: distilled
+# spirits, 1200x1800 JPEG. It passes the vision quality gates, so a test
+# using it exercises the path a submitted label takes.
+FIXTURE = Path("tests/fixtures/labels/26231001000662/front.jpg")
 
 
 def _png_bytes(arr: np.ndarray) -> bytes:
@@ -28,8 +30,20 @@ def _label(image_bytes: bytes, dpi: int | None = 300) -> Label:
     )
 
 
+def _fixture_label(dpi: int | None = None) -> Label:
+    """The real label, described as the applicant's record describes it."""
+    return Label(
+        label_id="L-FIXTURE",
+        batch_id="B-001",
+        image_bytes=FIXTURE.read_bytes(),
+        content_type="image/jpeg",
+        face_tag="front",
+        dimensions=Dimensions(width_px=1200, height_px=1800, dpi=dpi),
+    )
+
+
 def test_clean_fixture_passes():
-    report = assess(_label(FIXTURE.read_bytes()))
+    report = assess(_fixture_label())
     assert report.disposition == "ok"
     assert report.reason_code is None
 
@@ -73,8 +87,14 @@ def _textured_no_meta_png() -> bytes:
 
 
 def test_dpi_from_png_phys():
-    # Existing fixture has pHYs chunk → PIL info["dpi"] ≈ (300, 300)
-    report = assess(_label(FIXTURE.read_bytes(), dpi=None))
+    """A PNG's pHYs chunk carries its resolution, and PIL surfaces it as
+    info["dpi"]. The real labels are JPEGs with no resolution tag of any kind,
+    so covering this source needs an image built here."""
+    rng = np.random.default_rng(7)
+    arr = (rng.random((200, 200)) * 200).astype(np.uint8)
+    buf = io.BytesIO()
+    Image.fromarray(arr).save(buf, format="PNG", dpi=(300, 300))
+    report = assess(_label(buf.getvalue(), dpi=None))
     assert report.dpi == 300
 
 

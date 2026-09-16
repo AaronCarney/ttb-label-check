@@ -11,7 +11,10 @@ from app.schemas.label import Dimensions, Label
 from app.vision.cloud import CloudVisionExtractor
 
 RECORDINGS_DIR = Path("tests/recordings/openai/gpt-4o-2024-08-06/v1/01-spirits-clean")
-FIXTURE = Path("fixtures/01-spirits-clean/label.png")
+# A real CC0 label from the TTB Public COLA Registry, front face: distilled
+# spirits, 1200x1800 JPEG. It passes the vision quality gates, so a test
+# using it exercises the path a submitted label takes.
+FIXTURE = Path("tests/fixtures/labels/26231001000662/front.jpg")
 EXPECTED_FIELD_IDS = {
     "brand_name", "class_type", "abv", "net_contents",
     "gov_warning", "name_address", "country_origin",
@@ -28,9 +31,9 @@ async def test_cloud_extracts_fr_001_to_008(monkeypatch):
         label_id="L-001",
         batch_id="B-001",
         image_bytes=FIXTURE.read_bytes(),
-        content_type="image/png",
+        content_type="image/jpeg",
         face_tag="front",
-        dimensions=Dimensions(width_px=200, height_px=200, dpi=300),
+        dimensions=Dimensions(width_px=1200, height_px=1800, dpi=300),
     )
     # respx 0.23.1 deduplicates same-URL/method routes (only the last mount
     # survives), so the planned per-recording mount-with-fall-through pattern
@@ -67,9 +70,9 @@ async def test_cloud_threads_self_reported_confidence(monkeypatch):
         label_id="L-conf",
         batch_id="B-conf",
         image_bytes=FIXTURE.read_bytes(),
-        content_type="image/png",
+        content_type="image/jpeg",
         face_tag="front",
-        dimensions=Dimensions(width_px=200, height_px=200, dpi=300),
+        dimensions=Dimensions(width_px=1200, height_px=1800, dpi=300),
     )
     per_field = {
         "brand_name": {"brand_name": "ACME BOURBON", "confidence": 0.92},
@@ -122,9 +125,9 @@ async def test_cloud_falls_back_when_confidence_absent(monkeypatch):
         label_id="L-old",
         batch_id="B-old",
         image_bytes=FIXTURE.read_bytes(),
-        content_type="image/png",
+        content_type="image/jpeg",
         face_tag="front",
-        dimensions=Dimensions(width_px=200, height_px=200, dpi=300),
+        dimensions=Dimensions(width_px=1200, height_px=1800, dpi=300),
     )
     # Old-shape responses missing the confidence key; replays the on-disk recordings.
     recordings = {p.stem: json.loads(p.read_text()) for p in RECORDINGS_DIR.glob("*.json")}
