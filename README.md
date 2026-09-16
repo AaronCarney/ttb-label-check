@@ -65,8 +65,9 @@ application takes five to ten minutes by eye. In peak season importers file hund
 
 This app does the matching. You give it an application's declared values and the label images filed
 with it; it reads the label, compares the two, and returns one verdict per element with the rule and
-the regulation behind it. Three outcomes only — **match**, **mismatch**, or **needs review** — and
-the third is a real answer, used wherever the app can see the element but cannot honestly decide it.
+the regulation behind it. Three outcomes only — **match**, **mismatch**, or **needs review**, which
+the interface labels Pass, Fail and Needs review — and the third is a real answer, used wherever the
+app can see the element but cannot honestly decide it.
 
 It handles one label at a time through a web page, or a batch of them through an upload that streams
 results back as each finishes.
@@ -131,8 +132,9 @@ what it checks, which regulation it comes from, and what outcome each result map
 is a YAML edit, and the reference tables the rules read (volume units, class/type designations,
 characters-per-inch limits) are data files rather than code.
 
-**3. Report.** Each check returns a verdict, a reason code, a citation to the regulation, and the
-region of the image the evidence came from, so a reviewer can see why and not just what.
+**3. Report.** Each check returns a verdict, a reason code, and a citation to the regulation it came
+from, so a reviewer can see why and not just what. The result also carries the region of the image
+the reading was taken from; the interface does not draw that region on the label yet.
 
 **No model decides a verdict.** A model may read a label — that is the part no deterministic code
 can do — but the comparison is rules over the text it produced. The same label and the same
@@ -268,8 +270,9 @@ check listed here is switched off in the rule pack rather than reporting a verdi
   inch (§16.22(a)(4)), its type height (§16.22(b)), or that it stands separate and apart from other
   information (§16.21). The first three need the colour of the ink or the physical scale of the
   label, and a photograph carries neither; the fourth is visible in a photograph but no reader
-  measures it yet. Each of those four rules stays in the pack and reports that the measurement was
-  not taken, so a label is never passed or rejected on one. TTB says it does not routinely review
+  measures it yet. Each of those four rules stays in the pack with its citation and the reason it is
+  switched off, and a switched-off rule produces no finding at all, so a label is never passed or
+  rejected on one. TTB says it does not routinely review
   labels for type size, characters per inch or contrasting background either. See
   `docs/decisions.md#0006` and `docs/decisions.md#0013`.
 
