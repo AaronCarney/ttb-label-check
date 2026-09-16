@@ -28,6 +28,7 @@ import hashlib
 import json
 import logging
 import re
+import threading
 import time
 import unicodedata
 from collections import deque
@@ -146,7 +147,14 @@ class LocalVisionExtractor:
         self._settings = settings
         self._ring = ring_buffer
         self._engine = None
-        self._load_lock = asyncio.Lock()
+        # One reader serves the whole process (``app/deps.py``), so these guard
+        # against callers in different requests, and the requests run in
+        # different event loops across a process's life. Both locks are
+        # threading locks, held inside the worker thread, because an
+        # ``asyncio.Lock`` binds to the first loop that awaits it and refuses
+        # the next one.
+        self._load_lock = threading.Lock()
+        self._read_lock = threading.Lock()
 
     # -- lifecycle ---------------------------------------------------------
 
@@ -157,19 +165,23 @@ class LocalVisionExtractor:
         return RapidOCR()
 
     async def ensure_loaded(self) -> None:
-        """Load this instance's models before a read rather than during one.
+        """Load the models before a read rather than during one.
 
-        The load costs about a second and blocks, so it runs in a thread behind
-        a lock: concurrent callers wait on the one load instead of each building
-        an engine. The engine is per instance, and ``app/deps.py`` builds a new
-        extractor for every request, so that second is currently paid for every
-        label. Paying it once would mean one reader shared by the process.
+        The load costs about a second and blocks, so it runs in a worker thread
+        behind a lock: whoever gets there second waits on the one load instead
+        of building a second engine. ``app/deps.py`` hands the whole process one
+        reader, so this is paid once per process, and ``/healthz`` can pay it
+        before any label arrives.
         """
         if self._engine is not None:
             return
-        async with self._load_lock:
+        await asyncio.to_thread(self._load_once)
+
+    def _load_once(self) -> None:
+        """Build the engine unless another thread already did. Blocking."""
+        with self._load_lock:
             if self._engine is None:
-                self._engine = await asyncio.to_thread(self._load)
+                self._engine = self._load()
 
     # -- reading -----------------------------------------------------------
 
@@ -217,7 +229,7 @@ class LocalVisionExtractor:
 
         await self.ensure_loaded()
         t0 = time.monotonic()
-        payloads, meta = await asyncio.to_thread(self._read, label.image_bytes)
+        payloads, meta = await asyncio.to_thread(self._read_serialised, label.image_bytes)
         elapsed_ms = int((time.monotonic() - t0) * 1000)
         self._record(label=label, payloads=payloads, meta=meta, elapsed_ms=elapsed_ms)
 
@@ -265,6 +277,17 @@ class LocalVisionExtractor:
         )
 
     # -- the pipeline, off the event loop ----------------------------------
+
+    def _read_serialised(self, image_bytes: bytes) -> tuple[dict, dict]:
+        """Read one image, one at a time. Blocking; runs in a worker thread.
+
+        The process shares one engine (``app/deps.py``), and the OCR library
+        makes no promise about being called from two threads at once, so reads
+        queue rather than overlap. On a machine reading labels this also keeps
+        one OCR pass on the CPU at a time instead of several.
+        """
+        with self._read_lock:
+            return self._read(image_bytes)
 
     def _read(self, image_bytes: bytes) -> tuple[dict, dict]:
         """OCR one image and cut its text into the seven fields.

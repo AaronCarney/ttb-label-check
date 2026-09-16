@@ -12,6 +12,7 @@ import time
 import pytest
 from fastapi.testclient import TestClient
 
+from app.deps import reset_vision_extractor
 from app.main import app
 from tests._fakes.vision import FakeVisionExtractor
 
@@ -22,6 +23,12 @@ def deterministic_seams(monkeypatch):
         "app.deps.build_vision_extractor",
         lambda settings: FakeVisionExtractor(observations=[]),
     )
+    # The reader is shared per process (``app/deps.py``), so drop whatever is
+    # cached: before, so this test gets the fake, and after, so the next test
+    # does not inherit it.
+    reset_vision_extractor()
+    yield
+    reset_vision_extractor()
 
 
 @pytest.mark.slow

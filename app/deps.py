@@ -1,9 +1,8 @@
 """DI container — selects the VisionExtractor named by the environment."""
 from __future__ import annotations
 
-from collections import deque
-
 from app.config import Settings
+from app.logging.ring_buffer import new_call_ring_buffer
 from app.vision.base import VisionExtractor
 from app.vision.cloud import CloudVisionExtractor
 from app.vision.local import LocalVisionExtractor
@@ -17,7 +16,7 @@ def build_vision_extractor(settings: Settings) -> VisionExtractor:
     is a configuration error, and saying so here beats failing per request
     with an authentication error from the vendor.
     """
-    ring: deque = deque(maxlen=200)
+    ring = new_call_ring_buffer()
     if settings.vision_mode == "cloud":
         if not settings.openai_api_key:
             raise ValueError(
@@ -30,6 +29,33 @@ def build_vision_extractor(settings: Settings) -> VisionExtractor:
             api_key=settings.openai_api_key,
         )
     return LocalVisionExtractor(settings=settings, ring_buffer=ring)
+
+
+_vision_singleton: "tuple[str, VisionExtractor] | None" = None
+
+
+def get_vision_extractor(settings: Settings) -> VisionExtractor:
+    """Process-wide reader, so a label does not pay for loading the models.
+
+    The local reader reads about a second of OCR models off disk the first time
+    it is asked for text. Built per request, that second landed on every label,
+    ``/healthz`` warmed a reader it then threw away, and the reader's call ring
+    buffer died with the request that made it. One reader for the process pays
+    the load once and keeps the record.
+
+    Keyed by ``VISION_MODE`` so a process told to use the other reader gets the
+    one it asked for rather than the one it built first (decision 0005).
+    """
+    global _vision_singleton
+    if _vision_singleton is None or _vision_singleton[0] != settings.vision_mode:
+        _vision_singleton = (settings.vision_mode, build_vision_extractor(settings))
+    return _vision_singleton[1]
+
+
+def reset_vision_extractor() -> None:
+    """Test-only: drop the shared reader so the next call builds a new one."""
+    global _vision_singleton
+    _vision_singleton = None
 
 
 _session_cache_singleton: "SessionCache | None" = None
@@ -57,7 +83,7 @@ def build_evaluator(settings: "Settings") -> "Evaluator":
     """Construct an Evaluator wired to all three real dependencies."""
     from app.rules import build_rule_engine
     from app.services.evaluator import Evaluator
-    vision = build_vision_extractor(settings)
+    vision = get_vision_extractor(settings)
     rules = build_rule_engine(settings)
     cache = _get_session_cache()
     return Evaluator(vision=vision, rules=rules, settings=settings, cache=cache)
