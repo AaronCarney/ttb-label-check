@@ -18,6 +18,9 @@ All notable changes to this project are recorded here. The format follows
 
 ### Changed
 
+- The app loads the OCR models once for the process instead of once for every label, so a label no
+  longer waits about a second for them, and the readiness check at `/healthz` warms the reader that
+  serves submissions rather than one it discards.
 - The bird's-eye view and the codemap in `ARCHITECTURE.md`, and the build, test and run commands in
   `CLAUDE.md`, describe the application as it now stands.
 
