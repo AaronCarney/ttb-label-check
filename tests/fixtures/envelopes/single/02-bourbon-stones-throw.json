@@ -10,7 +10,7 @@
       "expected_value": "Stone's Throw",
       "evidence": {"bbox": [120, 240, 800, 120], "crop_ref": "crop-brand-002", "extraction_confidence": 0.83},
       "rule_findings": [
-        {"rule_id": "common.brand.exact_or_normalized", "cfr_citation": "27 CFR §5.64", "disposition": "needs_review", "reason_code": "BRAND.NAME.NEEDS_REVIEW", "plain_language_explanation": "Brand match falls in the borderline band — orchestrator disambiguates."}
+        {"rule_id": "common.brand.exact_or_normalized", "cfr_citation": "27 CFR §5.64", "disposition": "needs_review", "reason_code": "BRAND.NAME.NEEDS_REVIEW", "plain_language_explanation": "Brand match falls in the borderline band — a reviewer decides."}
       ],
       "ai_suggestion": {"present": true, "task": "brand_borderline", "text": "Apostrophe normalization brings extracted brand 'STONE'S THROW' into agreement with application 'Stone's Throw'. Surface formatting differs from application but identity is consistent.", "model_disposition": "pass"},
       "field_confidence": {"band": "medium", "numeric": 0.78}

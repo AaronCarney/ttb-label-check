@@ -10,7 +10,7 @@
       "expected_value": "Stone's Throw",
       "evidence": {"bbox": [120, 240, 800, 120], "crop_ref": "crop-brand-007", "extraction_confidence": 0.49},
       "rule_findings": [
-        {"rule_id": "common.brand.exact_or_normalized", "cfr_citation": "27 CFR §5.64", "disposition": "needs_review", "reason_code": "BRAND.NAME.NEEDS_REVIEW", "plain_language_explanation": "Borderline match — apostrophe absent in extracted text; orchestrator disambiguation requested."}
+        {"rule_id": "common.brand.exact_or_normalized", "cfr_citation": "27 CFR §5.64", "disposition": "needs_review", "reason_code": "BRAND.NAME.NEEDS_REVIEW", "plain_language_explanation": "Borderline match — apostrophe absent in extracted text; sent to a reviewer."}
       ],
       "ai_suggestion": {"present": true, "task": "brand_borderline", "text": "Confidence floor applied: extraction band low but normalized identity matches. Recommending reviewer confirmation rather than auto-pass.", "model_disposition": "needs_review"},
       "field_confidence": {"band": "low", "numeric": 0.49}
