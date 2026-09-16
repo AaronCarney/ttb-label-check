@@ -275,6 +275,14 @@ codes:
     description: "Snapshot or stream requested for an unknown batch_id."
     cfr_anchors: []
     severity: warn
+  ENGINE.RULE_PACK.SELECTED:
+    description: "Names the rules this evaluation ran: the beverage the application declared, plus the rules that apply to every beverage."
+    cfr_anchors: []
+    severity: info
+  ENGINE.RULE_PACK.NOT_SELECTED:
+    description: "The application named no beverage, so no rule could be selected and nothing was checked."
+    cfr_anchors: []
+    severity: warn
   ENGINE.OK.NONE:
     description: "Sentinel for happy-path log lines that carry the structured reason_code field by convention."
     cfr_anchors: []

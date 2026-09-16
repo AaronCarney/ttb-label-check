@@ -3,6 +3,8 @@ the rule inputs here are Python builders, so the tests stay skim-readable.
 """
 from __future__ import annotations
 
+import importlib
+import pkgutil
 from decimal import Decimal
 from typing import Any
 
@@ -11,6 +13,22 @@ from app.schemas.expected import BeverageClass, ExpectedValue
 from app.schemas.extracted import Evidence, EvidenceSource, FieldObservation, MatchKind
 from app.schemas.rejection import EngineMeta, Severity
 from app.schemas.rules import AssetRef, DecisionTable, MatchPolicy, RuleDefinition
+
+
+def load_all_validators() -> None:
+    """Register every validator, the way the running app does.
+
+    A validator registers itself when its module is imported, and
+    `YamlRuleLoader` refuses to load a pack that names a validator the registry
+    has not got. The app never hits that: `app/rules/__init__.py` walks the
+    validator package and imports every module before it loads the pack. A test
+    that loads the pack itself has to do the same thing, and the ones that
+    listed the modules by hand instead loaded only while some other test file in
+    the same run happened to import the rest first.
+    """
+    package = importlib.import_module("app.rules._validators")
+    for module in pkgutil.iter_modules(package.__path__):
+        importlib.import_module(f"app.rules._validators.{module.name}")
 
 
 def make_evidence(

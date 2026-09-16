@@ -8,17 +8,14 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-import app.rules._validators.equality_match  # noqa: F401
-import app.rules._validators.unmeasurable  # noqa: F401
-import app.rules._validators.fuzzy_brand  # noqa: F401
-import app.rules._validators.heading_style_check  # noqa: F401
-import app.rules._validators.layout_check  # noqa: F401
-import app.rules._validators.presence_check  # noqa: F401
-import app.rules._validators.verbatim_hash  # noqa: F401
-import app.rules._validators.format_check  # noqa: F401
-
 from app.rules.loader import YamlRuleLoader
 from app.schemas.rules import RuleSet
+from tests.rules.fixtures import load_all_validators
+
+# The loader refuses a pack naming a validator the registry has not got, and a
+# validator registers on import. Register them all here, as the running app
+# does, so this file loads the real pack whether it runs alone or in a suite.
+load_all_validators()
 
 
 def test_real_rule_tree_loads() -> None:

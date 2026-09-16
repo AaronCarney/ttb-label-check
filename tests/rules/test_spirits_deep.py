@@ -6,23 +6,18 @@ from pathlib import Path
 
 import pytest
 
-import app.rules._validators.equality_match  # noqa: F401
-import app.rules._validators.unmeasurable  # noqa: F401
-import app.rules._validators.format_check  # noqa: F401
-import app.rules._validators.fuzzy_brand  # noqa: F401
-import app.rules._validators.heading_style_check  # noqa: F401
-import app.rules._validators.layout_check  # noqa: F401
-import app.rules._validators.presence_check  # noqa: F401
-import app.rules._validators.verbatim_hash  # noqa: F401
 from app.rules._validators import VALIDATOR_REGISTRY
 from app.rules.loader import YamlRuleLoader
 from app.schemas.expected import BeverageClass
 from app.schemas.rejection import Outcome, Severity
-from tests.rules.fixtures import make_context, make_expected, make_obs
+from tests.rules.fixtures import load_all_validators, make_context, make_expected, make_obs
 
 
 @pytest.fixture(scope="module")
 def ruleset():
+    # The loader refuses a pack naming a validator the registry has not got,
+    # so register them all first, exactly as the running app does.
+    load_all_validators()
     return YamlRuleLoader().load(Path("rules"))
 
 

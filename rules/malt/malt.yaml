@@ -15,12 +15,16 @@ rules:
   - rule_id: malt.brand.matches_application
     cfr_citation: "27 CFR §7.64"
     applies_to_classes: [malt]
-    # The brand is the one element where the label and the application are
-    # expected to carry the same words, so the comparison is on the words
-    # themselves. Case, punctuation, a legal suffix and a leading "The" are
-    # dropped first, which is what makes "STONE'S THROW" and "Stone's Throw"
-    # the same brand. What is left is scored, and a near miss goes to a
-    # reviewer rather than being called a mismatch.
+    # The application does not declare one name. It declares a brand, often a
+    # fanciful name beside it, and sometimes a trade name it told TTB is used
+    # on the label, and a mark carrying any of those carries a name its own
+    # application declared — so the comparison is against all of them. Case,
+    # curly quotes, the trademark glyphs and accents fold away first;
+    # punctuation is kept, because dropping it can change a name. A mark that
+    # equals a declared name once folded, or carries one as a run of whole
+    # words, is that brand. Otherwise the two spellings are scored and a near
+    # miss goes to a reviewer rather than being called a mismatch.
+    # docs/decisions.md#0015 carries the reasoning.
     reason_code: BRAND.NAME.MISMATCH
     severity: reject
     match_policy: fuzzy
@@ -77,12 +81,14 @@ rules:
     evidence_required: [alc_text]
     disabled: true
     notes: >-
-      Switched off, decision 0011. The check needs the alcohol statement as
-      the label prints it, and no reader returns that: the reading arrives as
-      a number and a unit, and the validator rebuilt a sentence from them and
-      matched the pattern against its own construction. So the rule passed
-      whenever any number was read and failed when none was, which on a malt beverage, where §7.63(a)(3) does not require the statement at all is
-      a rejection of a label that complies. Switch it back on when the reader
+      Switched off, docs/decisions.md#0011. The check needs the alcohol
+      statement as the label prints it, and no reader returns that: the
+      reading arrives as a number and a unit, and the validator rebuilt a
+      sentence from them and matched the pattern against its own
+      construction. So the rule passed whenever any number was read and
+      failed when none was — and on a malt beverage, where §7.63(a)(3) does not
+      require the statement at all, that is a rejection of a label that
+      complies. Switch it back on when the reader
       returns the raw alcohol text.
     effective_date: "2022-02-09"
     test_fixtures: [F-MALT-ALC-FORMAT-PASS-01, F-MALT-ALC-FORMAT-FAIL-01]
@@ -199,10 +205,11 @@ rules:
       disagreement_reason_code: NET_CONTENTS.MATCH.APPLICATION_LABEL_DISAGREE
     tolerance:
       # A converted comparison is forgiven this much of the declared figure;
-      # two figures in the same unit are still compared exactly. The container
-      # sizes the regulations authorize are rounded metric equivalents of
-      # customary ones, so "12.7 FL. OZ." and 375 mL never convert into each
-      # other exactly. 1% is above the 0.633% the worst of that rounding needs
+      # two figures in the same unit are still compared exactly. A label
+      # states a customary size to a tenth of a fluid ounce while the
+      # application records the authorized metric one, so the two never
+      # convert into each other exactly: 375 mL is 12.68 fluid ounces, and the
+      # label prints "12.7 FL. OZ.". 1% is above the 0.633% that rounding needs
       # across the sizes §4.72 and §5.203 authorize, and below the 1.216% that
       # separates an authorized size from the customary figure printed for its
       # nearest neighbour, so no authorized size can pass as another.

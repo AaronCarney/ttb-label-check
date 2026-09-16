@@ -6,12 +6,20 @@
 
 ## Status
 
-Planning. Nothing is built yet.
+In development. The rule engine runs: a label and the application filed for it are compared element
+by element through the page and through the batch route, and every finding names the rule and the
+regulation behind it. The reader that turns a label photograph into fields is the part still being
+worked on, and the limitations below say which checks that costs.
 
 ## Limitations
 
 Checks this app does not make, and why. Each entry names the decision record that settled it, and a
 check listed here is switched off in the rule pack rather than reporting a verdict it has not earned.
+
+- **An upload with no application is read but not checked.** The beverage the application declares
+  is what decides which rules apply, so a label submitted on its own is read and reported, and no
+  check runs against it — including the government-warning checks, which every beverage shares but
+  which are still written per beverage class. See `docs/decisions.md#0010`.
 
 - **The wording of an alcohol-content statement is not checked.** The app checks that a label states
   its alcohol content where the regulations require one, and that the figure on the label is the
