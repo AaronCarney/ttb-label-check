@@ -81,8 +81,12 @@ def name_address_match(
             engine_meta=meta,
         )
 
-    def needs_review() -> ValidationResult:
-        return result(Outcome.FAIL, Severity.WARN, rule.reason_code)
+    def cannot_check() -> ValidationResult:
+        """The label's name cannot be lined up with the application's block,
+        which is not evidence the label is wrong — the block need not carry
+        every name the label may print. The check reports that it could not be
+        settled and a reviewer reads both."""
+        return result(Outcome.INSUFFICIENT_EVIDENCE, Severity.WARN, rule.reason_code)
 
     declared = "" if exp.value is None else str(exp.value).strip()
     if not declared:
@@ -90,7 +94,7 @@ def name_address_match(
 
     observed = project_reading(obs).strip()
     if not observed:
-        return needs_review()
+        return cannot_check()
 
     lead_in_word = str(rule.parameters.get("lead_in_ends_with", "by"))
     window = int(rule.parameters.get("lead_in_window_words", 8))
@@ -101,10 +105,10 @@ def name_address_match(
 
     anchor = label_words[:anchor_length]
     if not anchor or not word_run_present(application_words, anchor):
-        return needs_review()
+        return cannot_check()
 
     corroborating = set(label_words[anchor_length:]) & set(application_words)
     if not corroborating:
-        return needs_review()
+        return cannot_check()
 
     return result(Outcome.PASS, rule.severity, None)

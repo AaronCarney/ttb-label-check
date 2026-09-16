@@ -3,8 +3,9 @@
   Stage A — normalized exact. Pass immediately if equal; record kind=normalized.
   Stage B — Jaro-Winkler fuzzy.
     score >= pass_threshold       → PASS  (kind=fuzzy, score recorded)
-    needs_review_threshold <= s < pass_threshold → FAIL with severity=warn,
-                                  reason_code=BRAND.NAME.NEEDS_REVIEW
+    needs_review_threshold <= s < pass_threshold → INSUFFICIENT_EVIDENCE with
+                                  reason_code=BRAND.NAME.NEEDS_REVIEW: too
+                                  close to call, so a reviewer decides
     score < needs_review_threshold → FAIL with reason_code=BRAND.NAME.MISMATCH
 """
 from __future__ import annotations
@@ -89,10 +90,13 @@ def fuzzy_brand(
             aggregated_confidence=_conf(obs), evidence=obs.evidence,
             expected=exp, observed=obs, engine_meta=meta,
         )
+    # The borderline band. The two names are close enough that the difference
+    # may be how the label was read rather than a different brand, so the
+    # check reports that it could not be settled and a reviewer compares them.
     if score >= nr_th:
         return ValidationResult(
             rule_id=rule.rule_id, cfr_citation=rule.cfr_citation,
-            beverage_class=obs.beverage_class, outcome=Outcome.FAIL,
+            beverage_class=obs.beverage_class, outcome=Outcome.INSUFFICIENT_EVIDENCE,
             severity=Severity.WARN, reason_code=nr_code,
             aggregated_confidence=_conf(obs), evidence=obs.evidence,
             expected=exp, observed=obs, engine_meta=meta,

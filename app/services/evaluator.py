@@ -18,7 +18,7 @@ from app.config import Settings
 from app.rules.engine import RuleEngine
 from app.schemas.application import Application
 from app.schemas.label import Label
-from app.schemas.rejection import Outcome, Severity
+from app.schemas.rejection import Outcome
 from app.schemas.wire.disposition import DispositionEnvelope
 from app.services.cache import SessionCache
 from app.vision.base import VisionExtractor
@@ -172,17 +172,11 @@ class Evaluator:
                                       evidence_ref=f"engine_failure/{failure.exception_class}")
 
         # Step 5-6: disposition + per-rule timeline updates
-        from app.services.disposition import compute_disposition
+        from app.services.disposition import compute_disposition, rule_disposition
         for vr in results:
-            # A warn-severity failure is a reviewer's call, not a rejection,
-            # and the audit has to say so or it contradicts the disposition
-            # the same results produced.
-            disposition_label = (
-                "pass" if vr.outcome == Outcome.PASS else
-                "not_applicable" if vr.outcome == Outcome.NOT_APPLICABLE else
-                "fail" if vr.outcome == Outcome.FAIL and vr.severity != Severity.WARN else
-                "needs_review"
-            )
+            # One mapping, shared with the reviewer's field card and with the
+            # overall result, so the audit trail cannot contradict either.
+            disposition_label = rule_disposition(vr)
             timeline.record_rule_done(rule_id=vr.rule_id, duration_ms=vr.engine_meta.elapsed_ms,
                                       disposition=disposition_label, evidence_ref=f"vr/{vr.rule_id}")
             # Surface YAML-registry reason_code as a separate trace entry so

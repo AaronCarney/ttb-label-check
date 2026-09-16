@@ -40,6 +40,14 @@ from app.schemas.rules import RuleSet
 
 PER_RULE_TIMEOUT_S = 0.25
 
+# The two outcomes that assert something about the label, and so are the two
+# the rule's confidence floor guards. The rest already say that no comparison
+# was reached.
+_ASSERTS_A_VERDICT = frozenset({Outcome.PASS, Outcome.FAIL})
+
+# What a rule reports when its reading scored below the rule's own floor.
+BELOW_CONFIDENCE_FLOOR = "ENGINE.EVIDENCE.BELOW_CONFIDENCE_FLOOR"
+
 # Three vocabularies name the same label element, and the engine sits between
 # all three. The reader emits physical field ids (`brand_name`, `abv`,
 # `gov_warning`). The rule pack asks for evidence by semantic name (`brand`,
@@ -141,6 +149,54 @@ class YamlRuleEngine(RuleEngine):
                 return exp
         return ExpectedValue(field_id=field_id)
 
+    def _finish(self, rule, result: ValidationResult, meta: EngineMeta) -> ValidationResult:
+        """Every result leaves the engine through here, carrying its timing,
+        the rule's confidence floor and the sentence a reviewer reads."""
+        result = self._apply_confidence_floor(rule, result)
+        return result.model_copy(
+            update={"engine_meta": meta, "message": self._explain(result)}
+        )
+
+    @staticmethod
+    def _apply_confidence_floor(rule, result: ValidationResult) -> ValidationResult:
+        """A verdict is only as good as the reading it was measured from.
+
+        Each rule declares the confidence its reading must reach before the
+        answer can be relied on (`confidence_floor`). Below it, the rule
+        reports that it could not be settled instead of passing or rejecting,
+        so a reading the reader is unsure of goes to a reviewer rather than
+        rejecting the label as a confident one would.
+
+        The floor applies only where there was a reading to score. A result
+        with no evidence — a required statement that is simply absent — scores
+        zero because nothing was read, not because the reading was poor, and
+        the rule that found it missing is entitled to say so.
+        """
+        if result.outcome not in _ASSERTS_A_VERDICT or not result.evidence:
+            return result
+        if result.aggregated_confidence >= rule.confidence_floor:
+            return result
+        return result.model_copy(update={
+            "outcome": Outcome.INSUFFICIENT_EVIDENCE,
+            "severity": Severity.WARN,
+            "reason_code": BELOW_CONFIDENCE_FLOOR,
+        })
+
+    def _explain(self, result: ValidationResult) -> str | None:
+        """The finding's explanation, in the rule pack's own words.
+
+        `rules/reason_codes.yaml` gives every reason code a description
+        written for a reviewer; this is where it reaches one. A validator that
+        wrote its own message keeps it, and a finding with no reason code — a
+        plain pass — has nothing to explain.
+        """
+        if result.message:
+            return result.message
+        if not result.reason_code:
+            return None
+        entry = self._ruleset.reason_codes.get(result.reason_code)
+        return entry.description if entry is not None else None
+
     async def _run_one(self, rule, obs, exp, ctx) -> ValidationResult:
         validator = VALIDATOR_REGISTRY.get(rule.validator)
         started_at_ms = int(time.monotonic() * 1000)
@@ -156,13 +212,13 @@ class YamlRuleEngine(RuleEngine):
             )
 
         if validator is None:
-            return ValidationResult(
+            return self._finish(rule, ValidationResult(
                 rule_id=rule.rule_id, cfr_citation=rule.cfr_citation,
                 beverage_class=obs.beverage_class, outcome=Outcome.ERROR,
                 severity=Severity.REJECT, reason_code="ENGINE.VALIDATOR.NOT_FOUND",
                 aggregated_confidence=0.0, evidence=obs.evidence,
                 expected=exp, observed=obs, engine_meta=_meta(0),
-            )
+            ), _meta(0))
         try:
             result = await asyncio.wait_for(
                 asyncio.to_thread(validator, obs, exp, rule, ctx),
@@ -170,22 +226,22 @@ class YamlRuleEngine(RuleEngine):
             )
         except asyncio.TimeoutError:
             elapsed_ms = int((time.monotonic() - t0) * 1000)
-            return ValidationResult(
+            return self._finish(rule, ValidationResult(
                 rule_id=rule.rule_id, cfr_citation=rule.cfr_citation,
                 beverage_class=obs.beverage_class, outcome=Outcome.TIMEOUT,
                 severity=Severity.WARN, reason_code="ENGINE.VALIDATOR.TIMEOUT",
                 aggregated_confidence=0.0, evidence=obs.evidence,
                 expected=exp, observed=obs, engine_meta=_meta(elapsed_ms),
-            )
+            ), _meta(elapsed_ms))
         except Exception:
             elapsed_ms = int((time.monotonic() - t0) * 1000)
             _log.exception("validator %r raised", rule.rule_id)
-            return ValidationResult(
+            return self._finish(rule, ValidationResult(
                 rule_id=rule.rule_id, cfr_citation=rule.cfr_citation,
                 beverage_class=obs.beverage_class, outcome=Outcome.ERROR,
                 severity=Severity.REJECT, reason_code="ENGINE.VALIDATOR.EXCEPTION",
                 aggregated_confidence=0.0, evidence=obs.evidence,
                 expected=exp, observed=obs, engine_meta=_meta(elapsed_ms),
-            )
+            ), _meta(elapsed_ms))
         elapsed_ms = int((time.monotonic() - t0) * 1000)
-        return result.model_copy(update={"engine_meta": _meta(elapsed_ms)})
+        return self._finish(rule, result, _meta(elapsed_ms))

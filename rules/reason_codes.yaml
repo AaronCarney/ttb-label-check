@@ -97,7 +97,7 @@ codes:
     cfr_anchors: []
     severity: reject
   NET_CONTENTS.MATCH.NEEDS_REVIEW:
-    description: "Label or application net contents yield no single quantity to compare; a reviewer decides."
+    description: "Label and application net contents could not be compared: one of them states no single quantity, or the label's unit has no conversion into the unit the application declared. A reviewer decides."
     cfr_anchors: []
     severity: warn
 
@@ -182,6 +182,10 @@ codes:
     description: "Two or more rules emit conflicting dispositions for the same field."
     cfr_anchors: []
     severity: reject
+  ENGINE.EVIDENCE.BELOW_CONFIDENCE_FLOOR:
+    description: "The label reading this check rests on scored below the confidence the rule requires, so the check could not be settled; a reviewer reads the label."
+    cfr_anchors: []
+    severity: warn
   ENGINE.OBSERVATION.AMBIGUOUS:
     description: "OCR returned multiple plausible candidates with no clear winner."
     cfr_anchors: []

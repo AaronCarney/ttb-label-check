@@ -14,7 +14,7 @@ from app.schemas.expected import ExpectedValue
 from app.schemas.extracted import FieldObservation
 from app.schemas.label import Label
 from app.schemas.metrics import Metrics
-from app.schemas.rejection import Outcome, ValidationResult
+from app.schemas.rejection import ValidationResult
 from app.schemas.wire.disposition import (
     AISuggestionWire,
     ConfidenceBand,
@@ -26,6 +26,7 @@ from app.schemas.wire.disposition import (
 from app.vision.cloud import OBSERVED_VALUE_AUDIT_KEYS
 from app.services.aggregation import min_aggregate_confidence
 from app.services.confidence import to_band
+from app.services.disposition import rule_disposition
 from app.services.engine_meta import EvaluationTimeline
 
 
@@ -118,37 +119,37 @@ def build_field_findings(
             crop_ref=ev.image_uri or "",
             extraction_confidence=ev.confidence,
         )
+        # What the card says a rule found comes from `rule_disposition`, the
+        # one mapping the audit trail and the overall result also use. Reading
+        # the outcome here instead is how a field came to say *fail* beside an
+        # audit trail saying *needs_review* for the same rule.
+        #
         # NOT_APPLICABLE rules are filtered out: the wire enum only models
         # {pass, fail, needs_review}, so bucketing not_applicable as
         # needs_review would mislead the reviewer into looking at a rule that
         # explicitly opted out (e.g. fuzzy_brand with no expected value).
-        # The audit trail still carries them — see evaluator.py disposition
-        # mapping which preserves the not_applicable label for per_rule_trace.
-        rule_findings_for_field = tuple(
-            RuleFindingWire(
+        # The audit trail still carries them.
+        #
+        # Confidence is the minimum over the rules that did evaluate; a rule
+        # that opted out carries the observation's confidence by default but
+        # measured nothing, so excluding it keeps the aggregate honest.
+        rule_findings: list[RuleFindingWire] = []
+        confidences: list[float] = []
+        for vr in results_by_field.get(fid, []):
+            verdict = rule_disposition(vr)
+            if verdict == "not_applicable":
+                continue
+            rule_findings.append(RuleFindingWire(
                 rule_id=vr.rule_id,
                 cfr_citation=vr.cfr_citation,
-                disposition=(
-                    "pass" if vr.outcome.value == "pass" else
-                    "fail" if vr.outcome.value == "fail" else
-                    "needs_review"
-                ),
+                disposition=verdict,
                 reason_code=vr.reason_code or "",
                 plain_language_explanation=vr.message or "",
-            )
-            for vr in results_by_field.get(fid, [])
-            if vr.outcome != Outcome.NOT_APPLICABLE
-        )
-        # Min confidence over this field's validators; fall back to
-        # the observation's evidence confidence when no rule fired.
-        # NOT_APPLICABLE rules carry the observation's confidence by default
-        # but they didn't actually evaluate, so excluding them keeps the
-        # aggregate honest if a future validator reports a distinct value.
-        confidences = [
-            vr.aggregated_confidence
-            for vr in results_by_field.get(fid, [])
-            if vr.outcome != Outcome.NOT_APPLICABLE
-        ]
+            ))
+            confidences.append(vr.aggregated_confidence)
+        rule_findings_for_field = tuple(rule_findings)
+        # Fall back to the observation's own evidence confidence when no rule
+        # fired on this field.
         numeric = min(confidences) if confidences else ev.confidence
         out.append(FieldFindingWire(
             field_name=_FIELD_CANONICAL_TO_WIRE[fid],  # type: ignore[arg-type]

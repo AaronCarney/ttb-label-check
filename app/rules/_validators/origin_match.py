@@ -74,10 +74,14 @@ def origin_match(
     if source is None or str(source) != imported_value:
         return result(Outcome.NOT_APPLICABLE, rule.severity, None)
 
+    # Imported, but the application names no country. There is nothing to
+    # compare the label's statement against, so the check reports that it
+    # could not be settled rather than failing a label on a gap in the
+    # application.
     country = "" if exp.value is None else str(exp.value).strip()
     if not country:
         return result(
-            Outcome.FAIL,
+            Outcome.INSUFFICIENT_EVIDENCE,
             Severity.WARN,
             rule.parameters.get("needs_review_reason_code", rule.reason_code),
         )

@@ -7,6 +7,12 @@ from app.schemas.rejection import Outcome, Severity, ValidationResult
 
 
 Disposition = Literal["pass", "fail", "needs_review"]
+
+# One finding on its own reads as one of four things. A rule that did not
+# apply is not a pass, and the reviewer is told so rather than shown a check
+# that only ever had one side.
+RuleDisposition = Literal["pass", "fail", "needs_review", "not_applicable"]
+
 _PASS_LIKE = {Outcome.PASS, Outcome.NOT_APPLICABLE}
 
 
@@ -20,6 +26,28 @@ def _rejects(result: ValidationResult) -> bool:
     distinction away and reject most real labels.
     """
     return result.outcome == Outcome.FAIL and result.severity != Severity.WARN
+
+
+def rule_disposition(result: ValidationResult) -> RuleDisposition:
+    """What one finding says, in the words a reviewer is shown.
+
+    This is the only place an outcome becomes a verdict. Every surface that
+    shows a per-rule verdict — the audit trail, the reviewer's field card, the
+    overall result below — calls this one function, because a reviewer who
+    reads *fail* on a field and *needs_review* on the same rule in the audit
+    trail cannot tell which is the product's answer.
+
+    A check the label's reading was too poor to settle says so:
+    `INSUFFICIENT_EVIDENCE` is neither a pass nor a rejection, so it lands in
+    `needs_review`, and so do a timed-out and an errored rule.
+    """
+    if result.outcome == Outcome.PASS:
+        return "pass"
+    if result.outcome == Outcome.NOT_APPLICABLE:
+        return "not_applicable"
+    if _rejects(result):
+        return "fail"
+    return "needs_review"
 
 
 def compute_disposition(results: Iterable[ValidationResult]) -> Disposition:

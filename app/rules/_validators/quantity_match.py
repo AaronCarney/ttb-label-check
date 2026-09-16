@@ -56,10 +56,19 @@ def _observed_unit(obs: FieldObservation) -> str:
 
 
 def _conversion_factor(unit: str, rule: RuleDefinition, ctx: ValidatorContext) -> float | None:
-    """How many of the application's units one of `unit` makes.
+    """How many of the application's units one of `unit` makes, or None when
+    the label's unit cannot be converted into the application's.
 
-    An empty unit, or one the table does not list, converts by 1: the reader
-    reports the same unit the application declares unless it says otherwise.
+    A reading with no unit, and a rule with no conversion table, convert by 1:
+    the reader reports the same unit the application declares unless it says
+    otherwise.
+
+    A unit the table does not list cannot be converted, and neither can one it
+    lists with no factor. Both report that the check could not be settled.
+    Treating an unlisted unit as the application's own is how a label reading
+    "1 PT" came to be compared with 750 millilitres and rejected: the two
+    numbers are not the same measurement, and the product must not say a label
+    is wrong on that basis.
     """
     ref = rule.decision_table_ref
     table = ctx.decision_tables.get(ref) if ref else None
@@ -70,7 +79,7 @@ def _conversion_factor(unit: str, rule: RuleDefinition, ctx: ValidatorContext) -
         if normalize_words(str(entry.get("unit", ""))) == wanted:
             factor = entry.get("factor")
             return None if factor is None else float(factor)
-    return 1.0
+    return None
 
 
 @register("quantity_match")
@@ -97,9 +106,12 @@ def quantity_match(
             engine_meta=meta,
         )
 
-    def needs_review() -> ValidationResult:
+    def cannot_check() -> ValidationResult:
+        """No number to compare, so the check reports that it could not be
+        settled. Reporting a failure would tell the reviewer the label is
+        wrong on evidence that says nothing either way."""
         return result(
-            Outcome.FAIL,
+            Outcome.INSUFFICIENT_EVIDENCE,
             Severity.WARN,
             rule.parameters.get("needs_review_reason_code", rule.reason_code),
         )
@@ -114,15 +126,15 @@ def quantity_match(
 
     # It said something, but no one number: a reviewer reads the words.
     if declared_amount is None:
-        return needs_review()
+        return cannot_check()
 
     observed_amount = first_number(project_reading(obs))
     if observed_amount is None:
-        return needs_review()
+        return cannot_check()
 
     factor = _conversion_factor(_observed_unit(obs), rule, ctx)
     if factor is None:
-        return needs_review()
+        return cannot_check()
 
     if abs(observed_amount * factor - float(declared_amount)) <= _EQUALITY_MARGIN:
         return result(Outcome.PASS, rule.severity, None)

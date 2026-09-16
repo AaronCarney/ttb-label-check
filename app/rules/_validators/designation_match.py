@@ -128,9 +128,11 @@ def designation_match(
             rule.parameters.get("disagreement_reason_code", rule.reason_code),
         )
 
-    # 4b. Neither side lines up with the list — a reviewer decides.
+    # 4b. Neither side lines up with the list, so the check could not be
+    # settled and a reviewer decides. This is not a disagreement: a
+    # designation the list does not know is no evidence the label is wrong.
     return result(
-        Outcome.FAIL,
+        Outcome.INSUFFICIENT_EVIDENCE,
         Severity.WARN,
         rule.parameters.get("needs_review_reason_code", rule.reason_code),
     )

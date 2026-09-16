@@ -212,6 +212,16 @@ class YamlRuleLoader:
                 acc.errors.append(f"{path}/{rd.rule_id}: unknown validator {rd.validator!r}")
             if rd.reason_code not in registry:
                 acc.errors.append(f"{path}/{rd.rule_id}: reason_code {rd.reason_code!r} not in registry")
+            # A rule's parameters name the codes it emits on its other
+            # branches — the borderline brand match, the quantity with no
+            # number to compare. Those codes carry the sentence the reviewer
+            # reads, so one that is absent from the registry ships a finding
+            # with no explanation. Fail at startup instead.
+            for key, value in rd.parameters.items():
+                if key.endswith("reason_code") and isinstance(value, str) and value not in registry:
+                    acc.errors.append(
+                        f"{path}/{rd.rule_id}: parameter {key} {value!r} not in registry"
+                    )
             if not rd.test_fixtures:
                 acc.errors.append(f"{path}/{rd.rule_id}: test_fixtures must be non-empty")
             if rd.decision_table_ref:
