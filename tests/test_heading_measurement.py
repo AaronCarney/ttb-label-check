@@ -53,23 +53,6 @@ def test_regular_text_classified_as_not_bold():
     assert m.width_height_ratio <= WIDTH_HEIGHT_RATIO_BOLD_MIN
 
 
-def test_zero_bbox_returns_unconfident_when_no_text_present():
-    """A degenerate bbox + a blank lower half can't be measured."""
-    blank = Image.new("L", (200, 80), color=255)
-    out = BytesIO()
-    blank.save(out, "PNG")
-    m = measure_heading_bold(out.getvalue(), (0, 0, 0, 0))
-    assert not m.confident
-
-
-def test_none_bbox_returns_unconfident_when_no_text_present():
-    blank = Image.new("L", (200, 80), color=255)
-    out = BytesIO()
-    blank.save(out, "PNG")
-    m = measure_heading_bold(out.getvalue(), None)
-    assert not m.confident
-
-
 def test_tiny_crop_returns_unconfident():
     """A crop smaller than 8x8 pixels can't host enough components."""
     png = _png_text("GOVERNMENT WARNING", size=24, weight="bold")
@@ -77,12 +60,10 @@ def test_tiny_crop_returns_unconfident():
     assert not m.confident
 
 
-def test_zero_bbox_falls_back_to_lower_half_when_text_present():
-    """GPT-4o's layout call sometimes returns [0,0,0,0]. The measurement
-    must still run on a sensible region rather than punting to the LLM —
-    the heading lives in the lower half of TTB labels by regulation, so
-    that's the fallback crop."""
-    # 200x80 image: top half is white, bottom half has rendered bold text.
+def _lower_half_bold_text_png() -> bytes:
+    """A 200x80 label whose top half is blank and whose lower half carries bold
+    text — the shape that made the deleted lower-half fallback look plausible."""
+    import cv2
     img = Image.new("L", (200, 80), color=255)
     draw = ImageDraw.Draw(img)
     try:
@@ -91,53 +72,48 @@ def test_zero_bbox_falls_back_to_lower_half_when_text_present():
         font = ImageFont.load_default()
     draw.text((10, 50), "GOVERNMENT WARNING", fill=0, font=font)
     arr = np.asarray(img)
-    import cv2
     ink = (arr < 128).astype(np.uint8) * 255
     kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
     ink = cv2.dilate(ink, kernel, iterations=2)
     arr = np.where(ink > 0, 0, 255).astype(np.uint8)
     out = BytesIO()
     Image.fromarray(arr, mode="L").save(out, "PNG")
-    png = out.getvalue()
-
-    m = measure_heading_bold(png, (0, 0, 0, 0))
-    assert m.confident, "fallback must run when bbox is degenerate"
-    assert m.is_bold
+    return out.getvalue()
 
 
-def test_none_bbox_falls_back_to_lower_half():
-    img = Image.new("L", (200, 80), color=255)
-    draw = ImageDraw.Draw(img)
-    try:
-        font = ImageFont.load_default(24)
-    except TypeError:
-        font = ImageFont.load_default()
-    draw.text((10, 50), "GOVERNMENT WARNING", fill=0, font=font)
-    arr = np.asarray(img)
-    import cv2
-    ink = (arr < 128).astype(np.uint8) * 255
-    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
-    ink = cv2.dilate(ink, kernel, iterations=2)
-    arr = np.where(ink > 0, 0, 255).astype(np.uint8)
-    out = BytesIO()
-    Image.fromarray(arr, mode="L").save(out, "PNG")
-    png = out.getvalue()
+def test_zero_bbox_does_not_measure_the_lower_half():
+    """A degenerate bbox means no heading region, so no measurement.
 
-    m = measure_heading_bold(png, None)
-    assert m.confident
-    assert m.is_bold
+    The earlier version cropped the lower half of the whole image and reported
+    `confident=True` on whatever ink it found there. That crop is body copy and
+    the mandated statement, not the heading, so the ratio is a real number
+    about the wrong pixels and the caller cannot tell. Text being present in
+    the lower half is exactly what made it look right, so this is the case
+    that has to report unconfident.
+    """
+    m = measure_heading_bold(_lower_half_bold_text_png(), (0, 0, 0, 0))
+    assert not m.confident
+    assert not m.is_bold  # zeroed: "not measured", never "measured as not bold"
+    assert m.width_height_ratio == 0.0
 
 
-def test_blank_image_with_zero_bbox_returns_unconfident():
-    """Fallback only activates when the lower half actually has text. A
-    blank fallback crop must not silently classify as `not bold` with
-    confident=True — that would make the LLM fallback path unreachable."""
+def test_none_bbox_does_not_measure_the_lower_half():
+    """Same for a missing bbox: the layout call returning nothing for the
+    heading is the reader's failure, not evidence about the label."""
+    m = measure_heading_bold(_lower_half_bold_text_png(), None)
+    assert not m.confident
+    assert m.mean_character_height == 0.0
+
+
+def test_blank_crop_returns_unconfident():
+    """A real heading bbox over blank paper holds no ink to measure. Blank
+    must not classify as `not bold` with confident=True: there is a difference
+    between a heading measured as light and no heading found at all."""
     img = Image.new("L", (200, 80), color=255)
     out = BytesIO()
     img.save(out, "PNG")
-    png = out.getvalue()
 
-    m = measure_heading_bold(png, (0, 0, 0, 0))
+    m = measure_heading_bold(out.getvalue(), (10, 10, 190, 70))
     assert not m.confident
 
 
@@ -154,7 +130,7 @@ def test_single_noise_speck_returns_unconfident():
     Image.fromarray(arr, mode="L").save(out, "PNG")
     png = out.getvalue()
 
-    m = measure_heading_bold(png, (0, 0, 0, 0))
+    m = measure_heading_bold(png, (90, 30, 120, 60))
     assert not m.confident, (
         f"a 3x3 dust speck must not be confidently classified as a heading; "
         f"got is_bold={m.is_bold} ratio={m.width_height_ratio:.3f} mean_h={m.mean_character_height:.2f}"

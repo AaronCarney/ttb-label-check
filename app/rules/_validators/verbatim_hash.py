@@ -7,7 +7,19 @@ unit tests using ``make_rule``), the default op list applies. The loader
 runs the SAME op pipeline before hashing the asset bytes, so loader and
 validator produce identical hashes, which the loader cross-checks.
 
-Supported ops: ``nfkc``, ``ascii_quotes``, ``collapse_whitespace``,
+What the canonical form throws away, and why it throws away exactly that:
+the mandated statement fixes the words, the numbers and the punctuation. It
+does not fix the letter case of the statement's body — the separate heading
+rule is what requires the heading's capitals — and it does not fix how the
+printer spaced or broke the lines. So the canonical form folds case, joins a
+word a line break split with a hyphen, and takes spacing out of the
+comparison altogether. A label that prints "GOVERNMENT WARNING  :" and one
+that prints "GOVERNMENT WARNING:(1)" both reach the same canonical string as
+the regulation's own text; a label that prints a different word, or ends the
+statement with a quotation mark instead of a full stop, does not.
+
+Supported ops: ``nfkc``, ``ascii_quotes``, ``join_line_break_hyphens``,
+``collapse_whitespace``, ``tighten_punctuation_spacing``, ``casefold``,
 ``strip_outer_ws``.
 """
 from __future__ import annotations
@@ -26,8 +38,24 @@ from app.schemas.rules import RuleDefinition
 
 
 DEFAULT_NORMALIZATION_OPS: tuple[str, ...] = (
-    "nfkc", "ascii_quotes", "collapse_whitespace", "strip_outer_ws",
+    "nfkc",
+    "ascii_quotes",
+    "join_line_break_hyphens",
+    "collapse_whitespace",
+    "tighten_punctuation_spacing",
+    "casefold",
+    "strip_outer_ws",
 )
+
+# A hyphen with whitespace after it is a word a line break split. The mandated
+# statement contains no hyphen of its own, so nothing legitimate is joined here.
+_LINE_BREAK_HYPHEN = re.compile(r"-\s+")
+
+# Whitespace on either side of a punctuation mark. Removing it rather than
+# collapsing it is what makes "WARNING  :", "WARNING :" and "WARNING:" one
+# string: a label that omits the space is as common as one that doubles it,
+# and neither is a difference in the words the regulation mandates.
+_SPACE_AROUND_PUNCTUATION = re.compile(r"""\s*([(),.;:!?"'])\s*""")
 
 
 def canonicalize_text(s: str, ops: Sequence[str] = DEFAULT_NORMALIZATION_OPS) -> str:
@@ -41,8 +69,14 @@ def canonicalize_text(s: str, ops: Sequence[str] = DEFAULT_NORMALIZATION_OPS) ->
         elif op == "ascii_quotes":
             s = (s.replace("“", '"').replace("”", '"')
                   .replace("‘", "'").replace("’", "'"))
+        elif op == "join_line_break_hyphens":
+            s = _LINE_BREAK_HYPHEN.sub("", s)
         elif op == "collapse_whitespace":
             s = re.sub(r"\s+", " ", s)
+        elif op == "tighten_punctuation_spacing":
+            s = _SPACE_AROUND_PUNCTUATION.sub(r"\1", s)
+        elif op == "casefold":
+            s = s.casefold()
         elif op == "strip_outer_ws":
             s = s.strip()
         else:

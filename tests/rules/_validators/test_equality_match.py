@@ -1,14 +1,14 @@
-"""equality_match supports two registered names: 'equality_match' (single-value
-exact / case-insensitive / normalized) and 'enumerated_match' (lookup against
-an allow-list provided in `rule.parameters['allowed_values']`).
+"""equality_match.py registers one name: 'enumerated_match', a lookup against
+an allow-list provided in `rule.parameters['allowed_values']`.
+
+The module's other name, 'equality_match', went when the only rule using it was
+deleted (docs/decisions/0013); its cases went with it.
 """
 from __future__ import annotations
 
-import pytest
-
 from app.rules._validators import VALIDATOR_REGISTRY
-from app.rules._validators.equality_match import equality_match, enumerated_match  # noqa: F401  (forces import / registration)
-from app.schemas.rejection import Outcome, Severity
+from app.rules._validators.equality_match import enumerated_match  # noqa: F401  (forces import / registration)
+from app.schemas.rejection import Outcome
 from app.schemas.rules import MatchPolicy
 from tests.rules.fixtures import make_context, make_expected, make_obs, make_rule
 
@@ -22,23 +22,6 @@ def _rule(validator: str, params: dict | None = None, policy: MatchPolicy = Matc
         match_policy=policy,
         parameters=params or {},
     )
-
-
-def test_equality_match_pass_normalized() -> None:
-    obs = make_obs(field_id="brand", value="STONE'S THROW")
-    exp = make_expected(field_id="brand", value="Stone's Throw")
-    rule = _rule("equality_match", policy=MatchPolicy.NORMALIZED)
-    result = equality_match(obs, exp, rule, make_context())
-    assert result.outcome is Outcome.PASS
-
-
-def test_equality_match_fail_when_different() -> None:
-    obs = make_obs(field_id="brand", value="ACME")
-    exp = make_expected(field_id="brand", value="Bizmark")
-    rule = _rule("equality_match")
-    result = equality_match(obs, exp, rule, make_context())
-    assert result.outcome is Outcome.FAIL
-    assert result.reason_code == "BRAND.PRESENCE.MISSING"
 
 
 def test_enumerated_match_pass_when_in_allow_list() -> None:
@@ -57,6 +40,6 @@ def test_enumerated_match_fail_when_not_in_allow_list() -> None:
     assert result.outcome is Outcome.FAIL
 
 
-def test_equality_match_registered() -> None:
-    assert "equality_match" in VALIDATOR_REGISTRY
+def test_enumerated_match_registered() -> None:
     assert "enumerated_match" in VALIDATOR_REGISTRY
+    assert "equality_match" not in VALIDATOR_REGISTRY

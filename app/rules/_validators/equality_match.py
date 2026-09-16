@@ -1,13 +1,20 @@
-"""Equality-style validators. Two registered names:
+"""Equality-style validation. One registered name:
 
-  equality_match    — single-value exact / case-insensitive / normalized
   enumerated_match  — lookup against `rule.parameters['allowed_values']`,
                       either whole-reading (`match_mode: exact`, the default)
                       or designation-includes (`match_mode:
                       contains_designation`)
 
-Both read through `project_reading`, because the reader returns a payload dict
+It reads through `project_reading`, because the reader returns a payload dict
 per field and comparing its repr matches nothing.
+
+A second name, `equality_match`, once lived here: single-value exact or
+normalized comparison. The only rule that used it was
+`common.warning.heading_phrase`, which docs/decisions/0013 deleted as
+redundant with `common.warning.heading_caps_bold`. An unreferenced
+registration fails the orphan check in
+`tests/test_rules_yaml_round_trip.py::test_no_orphan_validators_in_registry`
+by design, so the function went with the rule.
 
 This file carries no regulation citations; they live in the YAML rule pack.
 
@@ -24,7 +31,7 @@ from app.rules._validators._helpers import _build_meta, _conf, project_reading
 from app.schemas.expected import ExpectedValue
 from app.schemas.extracted import FieldObservation
 from app.schemas.rejection import Outcome, ValidationResult
-from app.schemas.rules import MatchPolicy, RuleDefinition
+from app.schemas.rules import RuleDefinition
 
 
 def _normalize(s: str) -> str:
@@ -51,38 +58,6 @@ def _contains_designation(observed: str, allowed: str) -> bool:
     return any(
         haystack[i:i + len(needle)] == needle
         for i in range(len(haystack) - len(needle) + 1)
-    )
-
-
-@register("equality_match")
-def equality_match(
-    obs: FieldObservation,
-    exp: ExpectedValue,
-    rule: RuleDefinition,
-    ctx: ValidatorContext,
-) -> ValidationResult:
-    observed = project_reading(obs) or None
-    expected = exp.value
-    matched = False
-    if observed is not None and expected is not None:
-        if rule.match_policy is MatchPolicy.NORMALIZED:
-            matched = _normalize(str(observed)) == _normalize(str(expected))
-        elif rule.match_policy is MatchPolicy.EXACT:
-            matched = str(observed) == str(expected)
-        else:
-            matched = _normalize(str(observed)) == _normalize(str(expected))
-    return ValidationResult(
-        rule_id=rule.rule_id,
-        cfr_citation=rule.cfr_citation,
-        beverage_class=obs.beverage_class,
-        outcome=Outcome.PASS if matched else Outcome.FAIL,
-        severity=rule.severity,
-        reason_code=None if matched else rule.reason_code,
-        aggregated_confidence=_conf(obs),
-        evidence=obs.evidence,
-        expected=exp,
-        observed=obs,
-        engine_meta=_build_meta(rule, ctx),
     )
 
 

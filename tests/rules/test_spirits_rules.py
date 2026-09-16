@@ -7,15 +7,13 @@ from pathlib import Path
 
 import pytest
 
-import app.rules._validators.contrast_ratio_check  # noqa: F401
-import app.rules._validators.cpi_lookup  # noqa: F401
 import app.rules._validators.equality_match  # noqa: F401
+import app.rules._validators.unmeasurable  # noqa: F401
 import app.rules._validators.format_check  # noqa: F401
 import app.rules._validators.fuzzy_brand  # noqa: F401
 import app.rules._validators.heading_style_check  # noqa: F401
 import app.rules._validators.layout_check  # noqa: F401
 import app.rules._validators.presence_check  # noqa: F401
-import app.rules._validators.type_size_check  # noqa: F401
 import app.rules._validators.verbatim_hash  # noqa: F401
 from app.rules._validators import VALIDATOR_REGISTRY
 from app.rules.loader import YamlRuleLoader
@@ -53,9 +51,20 @@ def test_class_type_pos(ruleset) -> None:
     assert VALIDATOR_REGISTRY[rule.validator](obs, make_expected(field_id="class_type"), rule, _ctx(ruleset)).outcome is Outcome.PASS
 
 
-def test_class_type_neg(ruleset) -> None:
+def test_class_type_accepts_a_designation_no_list_carries(ruleset) -> None:
+    # Part 5 Subpart I lets a spirit with no standard of identity be designated
+    # by a fanciful name with a statement of composition, so an unlisted
+    # designation is not evidence the label is wrong. §5.63(a) asks only that a
+    # designation be there. docs/decisions/0012.
     rule = _r(ruleset, "spirits.class_type.present")
-    obs = make_obs(field_id="class_type", value="Mystery Hooch", beverage_class=BeverageClass.SPIRITS)
+    obs = make_obs(field_id="class_type", value="CRÈME DE CASSIS LIQUEUR", beverage_class=BeverageClass.SPIRITS)
+    assert VALIDATOR_REGISTRY[rule.validator](obs, make_expected(field_id="class_type"), rule, _ctx(ruleset)).outcome is Outcome.PASS
+
+
+def test_class_type_neg(ruleset) -> None:
+    # Absence is the only failure this rule reports.
+    rule = _r(ruleset, "spirits.class_type.present")
+    obs = make_obs(field_id="class_type", value=None, beverage_class=BeverageClass.SPIRITS)
     assert VALIDATOR_REGISTRY[rule.validator](obs, make_expected(field_id="class_type"), rule, _ctx(ruleset)).outcome is Outcome.FAIL
 
 
@@ -71,16 +80,16 @@ def test_alcohol_present_neg(ruleset) -> None:
     assert VALIDATOR_REGISTRY[rule.validator](obs, make_expected(field_id="alc_text"), rule, _ctx(ruleset)).outcome is Outcome.FAIL
 
 
-def test_format_pos(ruleset) -> None:
+def test_format_is_switched_off(ruleset) -> None:
+    # Switched off, docs/decisions/0011: the validator matches the pack's regex
+    # against a sentence it builds from the reader's percentage, never against
+    # the label's own wording. Exercising it here would test that construction
+    # and report a check the app does not make. The engine skips the rule
+    # (app/rules/yaml_engine.py), so the only thing to assert is that it stays
+    # off until the reader returns the raw alcohol text.
     rule = _r(ruleset, "spirits.alcohol.format")
-    obs = make_obs(field_id="alc_text", value="Alcohol 40% by volume", beverage_class=BeverageClass.SPIRITS)
-    assert VALIDATOR_REGISTRY[rule.validator](obs, make_expected(field_id="alc_text"), rule, _ctx(ruleset)).outcome is Outcome.PASS
-
-
-def test_format_neg(ruleset) -> None:
-    rule = _r(ruleset, "spirits.alcohol.format")
-    obs = make_obs(field_id="alc_text", value="40 proof", beverage_class=BeverageClass.SPIRITS)
-    assert VALIDATOR_REGISTRY[rule.validator](obs, make_expected(field_id="alc_text"), rule, _ctx(ruleset)).outcome is Outcome.FAIL
+    assert rule.disabled is True
+    assert rule.validator in VALIDATOR_REGISTRY
 
 
 def test_same_field_of_vision_pos(ruleset) -> None:

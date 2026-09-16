@@ -40,9 +40,13 @@ Empirical re-tune against a labeled corpus is still to come."""
 
 @dataclass(frozen=True)
 class HeadingMeasurement:
-    """Measurement-grade signal for §16.22(a)(2). `confident` is False when the
-    crop was empty or too small to produce a meaningful component count, in
-    which case downstream code should fall back to the LLM's `heading_bold`."""
+    """Measurement-grade signal for §16.22(a)(2).
+
+    `confident` is False when there was no heading region to measure, or when
+    the region held too little ink to produce a meaningful stroke width. The
+    other fields are then zero and mean nothing: `is_bold=False` here says
+    "not measured", never "measured as not bold". A caller that treats it as
+    the latter rejects labels for the reader's blindness."""
 
     is_bold: bool
     mean_stroke_width: float
@@ -58,10 +62,9 @@ def measure_heading_bold(
     """Run the SWT-style measurement on the heading region.
 
     `bbox` is `(x0, y0, x1, y1)` in pixel coordinates produced by the layout
-    call. A `None` or zero-area bbox triggers a fallback: measure the lower
-    half of the full image, where the §16.22 warning heading lives by
-    regulation. The fallback only reports `confident=True` when there are
-    enough connected components to produce a stable stroke-width estimate.
+    call. It is the heading's own region, and there is no substitute for it:
+    with no usable bbox the measurement is not taken, and the result reports
+    `confident=False` so the caller knows the boldness was never measured.
     """
     try:
         full = Image.open(BytesIO(image_bytes)).convert("L")
@@ -79,34 +82,42 @@ def _resolve_crop(
     full: "Image.Image",
     bbox: tuple[int, int, int, int] | None,
 ) -> "Image.Image | None":
-    """Return the actual crop to measure, or None if no usable region."""
-    if bbox is not None:
-        x0, y0, x1, y1 = bbox
-        if x1 > x0 and y1 > y0:
-            try:
-                crop = full.crop((x0, y0, x1, y1))
-            except Exception:  # noqa: BLE001
-                return None
-            if crop.width >= 8 and crop.height >= 8:
-                return crop
-    # Fallback: the lower half of the image. §16.22(a) places the warning at
-    # the bottom of the label, so this is where the heading text lives.
-    h = full.height
-    if h < 16:
+    """The heading's own crop, or None when there is no usable region.
+
+    There is deliberately no fallback region. An earlier version measured the
+    lower half of the whole image whenever the bbox was missing or degenerate,
+    and reported `confident=True` on the result. That crop is most of the
+    label: body copy, the mandated statement itself, and whatever else is
+    printed down there. Its stroke-width-to-height ratio is a real number
+    about the wrong pixels, and a caller told the measurement was confident
+    has no way to tell the difference. Since the heading rule now sends an
+    unmeasured boldness to a reviewer rather than rejecting the label, the
+    honest answer costs nothing and the guess costs a wrong verdict.
+    """
+    if bbox is None:
+        _logger.info(
+            "heading_measurement_skipped",
+            extra={"reason": "missing_layout_bbox", "image_height": full.height},
+        )
         return None
-    # Logged at info because operating without a real bbox is the GPT-4o
-    # layout-call failure mode this fallback exists for; an ops dashboard
-    # tracking how often this fires gives an early signal that the layout
-    # prompt has regressed.
-    _logger.info(
-        "heading_bbox_fallback_to_lower_half",
-        extra={
-            "reason": "degenerate_layout_bbox" if bbox is not None else "missing_layout_bbox",
-            "image_height": h,
-            "image_width": full.width,
-        },
-    )
-    return full.crop((0, h // 2, full.width, h))
+    x0, y0, x1, y1 = bbox
+    if x1 <= x0 or y1 <= y0:
+        _logger.info(
+            "heading_measurement_skipped",
+            extra={"reason": "degenerate_layout_bbox", "bbox": bbox},
+        )
+        return None
+    try:
+        crop = full.crop((x0, y0, x1, y1))
+    except Exception:  # noqa: BLE001
+        return None
+    if crop.width < 8 or crop.height < 8:
+        _logger.debug(
+            "heading_measurement_skipped",
+            extra={"reason": "crop_too_small", "crop_width": crop.width, "crop_height": crop.height},
+        )
+        return None
+    return crop
 
 
 def _swt_on_crop(crop: "Image.Image") -> HeadingMeasurement:

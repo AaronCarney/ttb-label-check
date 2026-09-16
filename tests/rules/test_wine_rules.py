@@ -7,15 +7,13 @@ from pathlib import Path
 
 import pytest
 
-import app.rules._validators.contrast_ratio_check  # noqa: F401
-import app.rules._validators.cpi_lookup  # noqa: F401
 import app.rules._validators.equality_match  # noqa: F401
+import app.rules._validators.unmeasurable  # noqa: F401
 import app.rules._validators.format_check  # noqa: F401
 import app.rules._validators.fuzzy_brand  # noqa: F401
 import app.rules._validators.heading_style_check  # noqa: F401
 import app.rules._validators.layout_check  # noqa: F401
 import app.rules._validators.presence_check  # noqa: F401
-import app.rules._validators.type_size_check  # noqa: F401
 import app.rules._validators.verbatim_hash  # noqa: F401
 from app.rules._validators import VALIDATOR_REGISTRY
 from app.rules.loader import YamlRuleLoader
@@ -60,11 +58,43 @@ def test_wine_class_type_pos(ruleset) -> None:
     assert res.outcome is Outcome.PASS
 
 
-def test_wine_class_type_neg(ruleset) -> None:
+def test_wine_class_type_accepts_a_varietal_designation(ruleset) -> None:
+    # §4.34(b) lets a varietal name be the designation in lieu of a class, and
+    # TTB approved this label. The rule asks whether a designation is on the
+    # label, so one that no allow-list carries still passes. docs/decisions/0012.
     rule = _r(ruleset, "wine.class_type.present")
-    obs = make_obs(field_id="class_type", value="Mystery Wine", beverage_class=BeverageClass.WINE)
+    obs = make_obs(field_id="class_type", value="SANGIOVESE", beverage_class=BeverageClass.WINE)
+    res = VALIDATOR_REGISTRY[rule.validator](obs, make_expected(field_id="class_type"), rule, _ctx(ruleset))
+    assert res.outcome is Outcome.PASS
+
+
+def test_wine_class_type_neg(ruleset) -> None:
+    # Absence is the only failure this rule reports.
+    rule = _r(ruleset, "wine.class_type.present")
+    obs = make_obs(field_id="class_type", value=None, beverage_class=BeverageClass.WINE)
     res = VALIDATOR_REGISTRY[rule.validator](obs, make_expected(field_id="class_type"), rule, _ctx(ruleset))
     assert res.outcome is Outcome.FAIL
+
+
+def test_wine_class_type_champagne_matches_a_sparkling_wine_application(ruleset) -> None:
+    # §4.34(a): the type designation "champagne" may appear in lieu of the
+    # class designation "sparkling wine", so the two name the same wine.
+    # rules/tables/wine_designations.yaml records it.
+    rule = _r(ruleset, "wine.class_type.matches_application")
+    obs = make_obs(field_id="class_type", value="CHAMPAGNE", beverage_class=BeverageClass.WINE)
+    exp = make_expected(field_id="class_type", value="SPARKLING WINE")
+    res = VALIDATOR_REGISTRY[rule.validator](obs, exp, rule, _ctx(ruleset))
+    assert res.outcome is Outcome.PASS
+
+
+def test_wine_class_type_sparkling_wine_matches_a_champagne_application(ruleset) -> None:
+    # The same permitted substitution the other way round, which is why the
+    # table carries both directions.
+    rule = _r(ruleset, "wine.class_type.matches_application")
+    obs = make_obs(field_id="class_type", value="SPARKLING WINE", beverage_class=BeverageClass.WINE)
+    exp = make_expected(field_id="class_type", value="CHAMPAGNE")
+    res = VALIDATOR_REGISTRY[rule.validator](obs, exp, rule, _ctx(ruleset))
+    assert res.outcome is Outcome.PASS
 
 
 def test_wine_alcohol_present_or_table_pos(ruleset) -> None:
@@ -83,18 +113,16 @@ def test_wine_alcohol_present_or_table_neg(ruleset) -> None:
     assert res.outcome is Outcome.FAIL
 
 
-def test_wine_alcohol_format_pos(ruleset) -> None:
+def test_wine_alcohol_format_is_switched_off(ruleset) -> None:
+    # Switched off, docs/decisions/0011: the validator matches the pack's regex
+    # against a sentence it builds from the reader's percentage, never against
+    # the label's own wording. Exercising it here would test that construction
+    # and report a check the app does not make. The engine skips the rule
+    # (app/rules/yaml_engine.py), so the only thing to assert is that it stays
+    # off until the reader returns the raw alcohol text.
     rule = _r(ruleset, "wine.alcohol.format")
-    obs = make_obs(field_id="alc_text", value="Alcohol 12.5% by volume", beverage_class=BeverageClass.WINE)
-    res = VALIDATOR_REGISTRY[rule.validator](obs, make_expected(field_id="alc_text"), rule, _ctx(ruleset))
-    assert res.outcome is Outcome.PASS
-
-
-def test_wine_alcohol_format_neg(ruleset) -> None:
-    rule = _r(ruleset, "wine.alcohol.format")
-    obs = make_obs(field_id="alc_text", value="12.5", beverage_class=BeverageClass.WINE)
-    res = VALIDATOR_REGISTRY[rule.validator](obs, make_expected(field_id="alc_text"), rule, _ctx(ruleset))
-    assert res.outcome is Outcome.FAIL
+    assert rule.disabled is True
+    assert rule.validator in VALIDATOR_REGISTRY
 
 
 def test_wine_name_address_pos(ruleset) -> None:

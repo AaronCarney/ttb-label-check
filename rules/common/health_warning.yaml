@@ -24,8 +24,16 @@ rules:
       asset_key: govt_warning_16_21
     asset:
       path: assets/warnings/govt_warning_16_21.txt
-      sha256_pin: "35e1f5d39ee341ac7c114f8159956cb0cc1981b94e4ffeee194ff5060bf99fbc"
-      normalization: [nfkc, ascii_quotes, collapse_whitespace, strip_outer_ws]
+      sha256_pin: "b92d05da8bc5bc6f4e730685464d98d708a45594e5480fd7d7af54a9d1dfc53c"
+      # §16.21 fixes the words, the numbers and the punctuation of the
+      # statement. It does not fix the case of the body — §16.22(a)(2) rules
+      # the heading's capitals, and common.warning.heading_caps_bold scores
+      # them — and it does not fix how a printer spaced or broke the lines.
+      # So case, spacing and a line-break hyphen come out of the comparison
+      # and punctuation stays in.
+      normalization:
+        [nfkc, ascii_quotes, join_line_break_hyphens, collapse_whitespace,
+         tighten_punctuation_spacing, casefold, strip_outer_ws]
     evidence_required: [warning_block]
     confidence_floor: 0.60
     effective_date: "1989-11-18"
@@ -42,27 +50,40 @@ rules:
       target_phrase: "GOVERNMENT WARNING"
       required_case: upper
       required_weight: bold
+      # The capitals are read from the heading's own text and are decided
+      # here. Bold weight is a stroke-width measurement that needs the
+      # heading's own region of the image; where the reader could not make
+      # it, the rule reports this code and the label goes to a reviewer
+      # rather than being rejected for a boldness nobody measured.
+      unmeasured_weight_reason_code: WARNING.STYLE.BOLD_NOT_MEASURED
     evidence_required: [warning_block]
     confidence_floor: 0.50
     effective_date: "1989-11-18"
     test_fixtures: [F-COMMON-WARN-STYLE-PASS-01, F-COMMON-WARN-STYLE-FAIL-01]
 
+  # ------------------------------------------------------------------
+  # Below: the checks this product cannot make. Each one stays in the pack
+  # with its citation and its reason, and each answers `unmeasurable` —
+  # insufficient evidence, not a pass and not a rejection. The rule entry is
+  # the limitation list, in the same file as the coverage; decision 0013
+  # carries the argument.
+  # ------------------------------------------------------------------
+
   - rule_id: common.warning.contrasting_bg
     cfr_citation: "27 CFR §16.22(a)(1)"
     applies_to_classes: [wine, spirits, malt]
-    reason_code: WARNING.LEGIBILITY.NO_CONTRAST
-    severity: reject
+    reason_code: WARNING.LEGIBILITY.CONTRAST_NOT_MEASURED
+    severity: warn
     match_policy: layout
-    validator: contrast_ratio_check
-    parameters:
-      min_contrast_ratio: 4.5
+    validator: unmeasurable
     evidence_required: [warning_block]
     disabled: true
     notes: >-
-      Out of scope, decision 0006. The reader reports no contrast measurement,
-      so this rule fails every label, compliant ones included. TTB's own Form
-      5100.31 instructions say TTB does not routinely review labels for
-      contrasting background.
+      Not measurable here, decisions 0006 and 0013. No reader reports the
+      colour of the warning text or of the surface behind it, so there is no
+      contrast ratio to compare against the §16.22(a)(1) requirement. TTB's
+      own Form 5100.31 instructions say TTB does not routinely review labels
+      for contrasting background.
     confidence_floor: 0.40
     effective_date: "1989-11-18"
     test_fixtures: [F-COMMON-WARN-CONTRAST-PASS-01]
@@ -70,21 +91,19 @@ rules:
   - rule_id: common.warning.cpi_max
     cfr_citation: "27 CFR §16.22(a)(4)"
     applies_to_classes: [wine, spirits, malt]
-    reason_code: WARNING.TYPE_SIZE.CPI_EXCEEDED
-    severity: reject
+    reason_code: WARNING.TYPE_SIZE.CPI_NOT_MEASURED
+    severity: warn
     match_policy: lookup
-    validator: cpi_lookup
+    validator: unmeasurable
     decision_table_ref: cpi_16_22_a_4
-    parameters:
-      observed_cpi_field: cpi
-      observed_height_field: height_mm
     evidence_required: [warning_block]
     disabled: true
     notes: >-
-      Out of scope, decision 0006. Characters per inch needs the image's
-      physical scale, which a photograph does not carry, so the reader reports
-      no measurement and this rule fails every label. TTB does not routinely
-      review characters per inch.
+      Not measurable here, decisions 0006 and 0013. Characters per inch needs
+      the image's physical scale, which a photograph does not carry, so the
+      reader reports no measurement. The §16.22(a)(4) table stays at
+      decision_table_ref: it is the regulation's own three normative rows, and
+      it is what this check reads the day a reader reports a scale.
     confidence_floor: 0.50
     effective_date: "1990-02-14"
     test_fixtures: [F-COMMON-CPI-PASS-01, F-COMMON-CPI-FAIL-1MM-01]
@@ -92,18 +111,17 @@ rules:
   - rule_id: common.warning.separate_apart
     cfr_citation: "27 CFR §16.21"
     applies_to_classes: [wine, spirits, malt]
-    reason_code: WARNING.PLACEMENT.NOT_SEPARATE
-    severity: reject
+    reason_code: WARNING.PLACEMENT.ISOLATION_NOT_MEASURED
+    severity: warn
     match_policy: layout
-    validator: layout_isolation_check
-    parameters:
-      min_isolation_px: 4
+    validator: unmeasurable
     evidence_required: [warning_block]
     disabled: true
     notes: >-
-      Out of scope, decision 0006. Measurable from a photograph in principle,
-      but no reader emits a neighbour distance, so the rule fails every label.
-      Unbuilt rather than unbuildable.
+      Not measured here, decisions 0006 and 0013. Unbuilt rather than
+      unbuildable: whether the statement stands separate and apart from other
+      information is visible in a photograph, but no reader emits the distance
+      to the nearest neighbouring text. This rule switches on the day one does.
     confidence_floor: 0.40
     effective_date: "1989-11-18"
     test_fixtures: [F-COMMON-WARN-ISOLATION-PASS-01, F-COMMON-WARN-ISOLATION-FAIL-01]
@@ -111,39 +129,20 @@ rules:
   - rule_id: common.warning.type_size_min
     cfr_citation: "27 CFR §16.22(b)"
     applies_to_classes: [wine, spirits, malt]
-    reason_code: WARNING.TYPE_SIZE.UNDER_MIN
-    severity: reject
+    reason_code: WARNING.TYPE_SIZE.HEIGHT_NOT_MEASURED
+    severity: warn
     match_policy: layout
-    validator: type_size_check
-    parameters:
-      min_type_size_pt: 2.0
+    validator: unmeasurable
     evidence_required: [warning_block]
     disabled: true
     notes: >-
-      Out of scope, decision 0006. §16.22(b) sets the minimum in millimetres
-      and keys it to container size (1 mm at 237 mL or less, 2 mm up to 3 L,
-      3 mm above). This rule compares a point value against a fixed 2.0 and
-      ignores container size, so a pass here does not mean what it says. Type
-      height also needs the image's physical scale, which a photograph does
-      not carry.
+      Not measurable here, decisions 0006 and 0013. §16.22(b) sets the minimum
+      in millimetres and keys it to container size (1 mm at 237 mL or less,
+      2 mm up to 3 L, 3 mm above), and type height needs the image's physical
+      scale, which a photograph does not carry. The earlier implementation
+      compared a point value against a fixed 2.0 and ignored container size
+      entirely, so a pass from it did not mean what §16.22(b) says; it is
+      deleted rather than left switched off.
     confidence_floor: 0.40
     effective_date: "1989-11-18"
     test_fixtures: [F-COMMON-WARN-TYPE-SIZE-PASS-01, F-COMMON-WARN-TYPE-SIZE-FAIL-01]
-
-  - rule_id: common.warning.heading_phrase
-    cfr_citation: "27 CFR §16.21"
-    applies_to_classes: [wine, spirits, malt]
-    reason_code: WARNING.VERBATIM.MISMATCH
-    severity: reject
-    match_policy: normalized
-    validator: equality_match
-    evidence_required: [warning_heading]
-    disabled: true
-    notes: >-
-      Out of scope, decision 0006. No reader emits `warning_heading`, so the
-      rule never ran, and common.warning.heading_caps_bold already checks the
-      same two words along with the capitals and bold weight §16.22(a)(2)
-      requires.
-    confidence_floor: 0.50
-    effective_date: "1989-11-18"
-    test_fixtures: [F-COMMON-WARN-HEADING-PASS-01, F-COMMON-WARN-HEADING-MISMATCH-01]

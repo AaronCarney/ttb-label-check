@@ -7,8 +7,8 @@ private `_helpers` module makes the relationship explicit and matches Python
 conventions for internal package utilities (underscore prefix on the module).
 
 `equality_match.py` retains `_normalize` because it is genuinely equality-
-internal (only `equality_match` and `enumerated_match` use NFKC + casefold
-comparison).
+internal (only `enumerated_match`, the one name that file still registers,
+uses NFKC + casefold comparison).
 
 The orphan-validator check (`test_every_validator_module_registers_at_least_one_name`)
 walks `app/rules/_validators/*.py` and asserts each file registers ≥ 1 name.

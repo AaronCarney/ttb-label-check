@@ -170,10 +170,10 @@ def test_asset_file_missing_fails_closed(tmp_path: Path) -> None:
 
 
 def test_decision_table_ref_dangling_fails_closed(tmp_path: Path) -> None:
-    body = _baseline_rule_yaml(validator="cpi_lookup", reason="WARNING.PRESENCE.MISSING")
+    body = _baseline_rule_yaml(validator="unmeasurable", reason="WARNING.PRESENCE.MISSING")
     body = body.replace("evidence_required: [brand]", "evidence_required: [brand]\n            decision_table_ref: tables/does_not_exist")
     rules = _setup(tmp_path, body)
-    # cpi_lookup must be importable for the registry check; force-import here:
-    import app.rules._validators.cpi_lookup  # noqa: F401
+    # unmeasurable must be importable for the registry check; force-import here:
+    import app.rules._validators.unmeasurable  # noqa: F401
     with pytest.raises(RuleLoaderError, match="decision_table_ref"):
         YamlRuleLoader().load(rules)

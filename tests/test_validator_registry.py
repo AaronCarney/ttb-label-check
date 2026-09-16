@@ -21,15 +21,13 @@ import re
 from pathlib import Path
 
 EXPECTED_NAMES = {
-    "equality_match", "enumerated_match",
+    "enumerated_match",
     "presence_check", "conditional_presence",
     "regex_match",
     "verbatim_hash",
-    "cpi_lookup",
     "heading_style_check",
-    "contrast_ratio_check",
-    "type_size_check",
-    "layout_isolation_check", "same_field_of_vision_check",
+    "unmeasurable",
+    "same_field_of_vision_check",
     "fuzzy_brand",
 }
 
