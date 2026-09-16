@@ -116,9 +116,9 @@ codes:
     cfr_anchors: ["27 CFR §4.35(e)", "27 CFR §5.69", "27 CFR §7.69", "19 CFR §134.45(a)(1)"]
     severity: reject
   ORIGIN.MATCH.APPLICATION_LABEL_DISAGREE:
-    description: "Label origin statement does not name the country the application declared."
-    cfr_anchors: []
-    severity: reject
+    description: "Label origin statement does not carry the country the application declared in a form this check reads — it may name another country, or the same one in a language, abbreviation or adjectival form the check does not recognise (19 CFR §134.45(b), (c)); a reviewer decides."
+    cfr_anchors: ["19 CFR §134.45(b)", "19 CFR §134.45(c)"]
+    severity: warn
   ORIGIN.MATCH.NEEDS_REVIEW:
     description: "Application says the product is imported but names no country; a reviewer decides."
     cfr_anchors: []

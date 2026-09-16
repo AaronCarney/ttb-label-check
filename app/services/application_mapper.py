@@ -32,17 +32,24 @@ def expected_values_from(record: ApplicationRecord) -> tuple[ExpectedValue, ...]
     values: list[ExpectedValue] = []
 
     if record.brand_name:
+        # The brand field is not the only name the application says the label
+        # may show. A fanciful name is the second name an applicant may put on
+        # the label beside the brand, and a trade name marked "(Used on label)"
+        # is a name the applicant told TTB it prints there. A label carrying
+        # one of those instead of the brand field's wording is a match the
+        # reviewer should see, not a miss, so both travel with the brand
+        # reference value and `fuzzy_brand` compares against all of them.
+        brand_parameters: dict[str, object] = {}
+        if record.fanciful_name:
+            brand_parameters["fanciful_name"] = record.fanciful_name
+        trade_names = record.trade_names_used_on_label
+        if trade_names:
+            brand_parameters["trade_names_used_on_label"] = trade_names
         values.append(
             ExpectedValue(
                 field_id="brand_name",
                 value=record.brand_name,
-                # A fanciful name is the second name an applicant may put on
-                # the label beside the brand. A label carrying it instead of
-                # the brand is a match the reviewer should see, not a miss.
-                parameters=(
-                    {"fanciful_name": record.fanciful_name}
-                    if record.fanciful_name else {}
-                ),
+                parameters=brand_parameters,
             )
         )
 

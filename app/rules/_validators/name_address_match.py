@@ -21,6 +21,12 @@ label prints is one of the names the application block carries:
      a legal suffix corroborates the name rather than a single common word
      carrying the match alone.
 
+A State written out and the same State as its two-letter postal code are the
+same State, and the label and the registry routinely differ on which they
+write — "Healdsburg, California" against "HEALDSBURG CA 95448". Both sides are
+folded to the postal code before they are compared, so the State can do the
+corroborating in step 3 instead of the city having to carry it alone.
+
 Where that does not hold, the result is a reviewer's to settle, never a
 rejection. A trade name may be on the label without appearing in the block the
 registry happens to expose, and a name that is absent from the block is not
@@ -41,6 +47,63 @@ from app.schemas.expected import ExpectedValue
 from app.schemas.extracted import FieldObservation
 from app.schemas.rejection import Outcome, Severity, ValidationResult
 from app.schemas.rules import RuleDefinition
+
+
+# A State name and its postal code are the same State. The fold is applied
+# here rather than in shared normalisation because the equivalence belongs to
+# this element and to the clauses that permit it (27 CFR 4.35(c), 5.66(d)(1),
+# 7.66(c)): "California" is also a wine appellation and a country-of-origin
+# answer, and folding it to "CA" there would corrupt comparisons that turn on
+# the word itself. Both sides are folded, so an over-fold is symmetric — a
+# city named Washington becomes "wa" on the label and "wa" in the application.
+_STATE_POSTAL_CODES: dict[tuple[str, ...], str] = {
+    ("alabama",): "al", ("alaska",): "ak", ("arizona",): "az",
+    ("arkansas",): "ar", ("california",): "ca", ("colorado",): "co",
+    ("connecticut",): "ct", ("delaware",): "de", ("florida",): "fl",
+    ("georgia",): "ga", ("hawaii",): "hi", ("idaho",): "id",
+    ("illinois",): "il", ("indiana",): "in", ("iowa",): "ia",
+    ("kansas",): "ks", ("kentucky",): "ky", ("louisiana",): "la",
+    ("maine",): "me", ("maryland",): "md", ("massachusetts",): "ma",
+    ("michigan",): "mi", ("minnesota",): "mn", ("mississippi",): "ms",
+    ("missouri",): "mo", ("montana",): "mt", ("nebraska",): "ne",
+    ("nevada",): "nv", ("new", "hampshire"): "nh", ("new", "jersey"): "nj",
+    ("new", "mexico"): "nm", ("new", "york"): "ny",
+    ("north", "carolina"): "nc", ("north", "dakota"): "nd",
+    ("ohio",): "oh", ("oklahoma",): "ok", ("oregon",): "or",
+    ("pennsylvania",): "pa", ("rhode", "island"): "ri",
+    ("south", "carolina"): "sc", ("south", "dakota"): "sd",
+    ("tennessee",): "tn", ("texas",): "tx", ("utah",): "ut",
+    ("vermont",): "vt", ("virginia",): "va", ("washington",): "wa",
+    ("west", "virginia"): "wv", ("wisconsin",): "wi", ("wyoming",): "wy",
+    # The District and the territories that appear on TTB basic permits.
+    ("district", "of", "columbia"): "dc", ("d", "c"): "dc",
+    ("puerto", "rico"): "pr", ("virgin", "islands"): "vi",
+    ("guam",): "gu", ("american", "samoa"): "as",
+    ("northern", "mariana", "islands"): "mp",
+}
+_LONGEST_STATE_NAME = max(len(name) for name in _STATE_POSTAL_CODES)
+
+
+def _fold_state_names(words: tuple[str, ...]) -> tuple[str, ...]:
+    """The same words with every State name written as its postal code.
+
+    The longest run wins, so "west virginia" folds to "wv" before "west" and
+    "virginia" can be read as two separate words, and "district of columbia"
+    to "dc" rather than leaving "columbia" behind.
+    """
+    folded: list[str] = []
+    i = 0
+    while i < len(words):
+        for length in range(min(_LONGEST_STATE_NAME, len(words) - i), 0, -1):
+            code = _STATE_POSTAL_CODES.get(words[i:i + length])
+            if code is not None:
+                folded.append(code)
+                i += length
+                break
+        else:
+            folded.append(words[i])
+            i += 1
+    return tuple(folded)
 
 
 def _after_lead_in(words: tuple[str, ...], lead_in_word: str, window: int) -> tuple[str, ...]:
@@ -100,8 +163,10 @@ def name_address_match(
     window = int(rule.parameters.get("lead_in_window_words", 8))
     anchor_length = int(rule.parameters.get("anchor_words", 2))
 
-    label_words = _after_lead_in(normalize_words(observed), lead_in_word, window)
-    application_words = normalize_words(declared)
+    label_words = _fold_state_names(
+        _after_lead_in(normalize_words(observed), lead_in_word, window)
+    )
+    application_words = _fold_state_names(normalize_words(declared))
 
     anchor = label_words[:anchor_length]
     if not anchor or not word_run_present(application_words, anchor):

@@ -18,6 +18,7 @@ inventing a comparison.
 """
 from __future__ import annotations
 
+import re
 from typing import Literal
 
 from pydantic import BaseModel, ConfigDict
@@ -27,6 +28,13 @@ from app.schemas.expected import BeverageClass
 
 BeverageType = Literal["distilled_spirits", "wine", "malt_beverage"]
 SourceOfProduct = Literal["domestic", "imported"]
+
+# The registry writes the applicant block in a fixed order: trading name,
+# legal name, street, city, State, ZIP, and then any trade name the applicant
+# marked as used on the label. The ZIP is the only part of that order with a
+# shape of its own, so it is what separates the address from the trade names.
+_ZIP_RE = re.compile(r"\b\d{5}(?:-\d{4})?\b")
+_USED_ON_LABEL_RE = re.compile(r"\(\s*used on label\s*\)", re.IGNORECASE)
 
 _BEVERAGE_CLASS_BY_TYPE: dict[str, BeverageClass] = {
     "distilled_spirits": BeverageClass.SPIRITS,
@@ -76,3 +84,38 @@ class ApplicationRecord(BaseModel):
         """Which rule pack applies. The application declares the product type,
         so the product never has to guess it from the label image."""
         return _BEVERAGE_CLASS_BY_TYPE[self.beverage_type]
+
+    @property
+    def trade_names_used_on_label(self) -> tuple[str, ...]:
+        """The names the applicant told TTB it prints on the label.
+
+        An applicant may trade under a name other than the one the brand is
+        registered in, and the registry records that name inside the free-text
+        applicant block, each one followed by "(Used on label)":
+
+            Taconic Distillery, Taconic Distillery, LLC 179 BOWEN RD
+            Stanfordville NY 12581 BONEFISH (Used on label)
+
+        The label then carries BONEFISH as its brand mark, and an application
+        whose brand field says TACONIC DISTILLERY agrees with it. So these
+        names are read out and handed to the brand comparison as values the
+        label is allowed to show.
+
+        The names sit after the ZIP, and each is followed by the marker, so
+        anything before the first marker and after the ZIP is one name. A
+        block with no ZIP yields nothing rather than a guess: without the
+        anchor there is no way to tell a trade name from the street it
+        follows.
+        """
+        block = self.applicant_name_address or ""
+        anchors = list(_ZIP_RE.finditer(block))
+        if not anchors:
+            return ()
+        tail = block[anchors[-1].end():]
+        # The text after the final marker is whatever trails the list, not a
+        # name, so it is dropped.
+        names = [
+            segment.strip().strip(",;").strip()
+            for segment in _USED_ON_LABEL_RE.split(tail)[:-1]
+        ]
+        return tuple(dict.fromkeys(name for name in names if name))

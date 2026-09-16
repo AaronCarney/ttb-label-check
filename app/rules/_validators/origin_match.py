@@ -15,16 +15,23 @@ then names a place. That first answer decides whether there is a check at all:
   - Imported, with no country named. Nothing to compare, and a reviewer reads
     the application.
 
-A label that names a different country than the application is a real
-disagreement and is reported as one. An import whose label carries no origin
-statement at all fails the rule's own reason code.
+Where the label's statement does not carry the country as whole words, the
+check reports that it could not be settled and a reviewer reads the label. It
+does not reject, because it cannot tell the two cases apart: the label may
+name a different country, or it may name the right one in a form this product
+does not recognise. Customs marking rules accept the country's name in the
+language of the country, an abbreviation that unmistakably indicates it, and
+the adjectival form — "HECHO EN MEXICO", "U.K.", "Irish". The customs marking
+reference gives those by example rather than as a list, so none of them are
+built here, and rejecting on their account would reject compliant labels. The
+citation for the rule sits in the rule pack, with the decision record at
+docs/decisions/0016.
 
-Known gap: customs marking rules also accept an abbreviation that
-unmistakably indicates the country, a variant spelling of its English name,
-and the adjectival form. The reference gives those by example rather than as a
-list, so this check does not implement them, and an import whose label writes
-its country one of those ways is reported as a disagreement for a reviewer to
-overturn.
+The cost of that is real and is the cost this product chooses: a label that
+genuinely names the wrong country reaches a reviewer rather than being
+rejected outright. An import whose label carries no origin statement at all is
+a different matter — nothing was stated, so there is nothing to interpret, and
+that branch does reject under the rule's own reason code.
 """
 from __future__ import annotations
 
@@ -93,8 +100,11 @@ def origin_match(
     if word_run_present(normalize_words(observed), normalize_words(country)):
         return result(Outcome.PASS, rule.severity, None)
 
+    # The label states an origin and it does not carry the declared country in
+    # a form this check reads. That is a question for a person, not a verdict
+    # — see the note above.
     return result(
-        Outcome.FAIL,
-        Severity.REJECT,
+        Outcome.INSUFFICIENT_EVIDENCE,
+        Severity.WARN,
         rule.parameters.get("disagreement_reason_code", rule.reason_code),
     )

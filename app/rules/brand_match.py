@@ -52,8 +52,11 @@ _ARTICLES = frozenset({"the"})
 
 def canonicalize(s: str) -> str:
     """One value reduced to the form two values are compared in."""
-    s = unicodedata.normalize("NFKC", s).translate(_QUOTES)
+    # The glyphs go first, before NFKC: NFKC rewrites ™ as the letters "TM",
+    # and a mark stripped after that is stripped too late — "ACME™" would be
+    # compared as "acmetm" and would not match its own name.
     s = _TRADEMARK_RE.sub("", s)
+    s = unicodedata.normalize("NFKC", s).translate(_QUOTES)
     # Accents fold away. Every other comparison in the engine folds them
     # (`_helpers.normalize_words`), and a brand that did not was the one place
     # where a label spelling its own name with a diacritic — ŠVYTURYS against
