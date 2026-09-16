@@ -15,7 +15,10 @@
     "warning_heading_caps": "'GOVERNMENT WARNING' is in capital letters (27 CFR 16.22(a)(2)). Bold type, also required there, is not scored by this set.",
     "expected_for_real_labels": "Real labels were approved by TTB, so field checks expect 'pass'. Warning checks record what the label actually shows against the regulation text, so an approved label can expect warning_exact false.",
     "application_value_sources": "Current registry records do not carry alcohol content or net contents; where source is read_from_label, the value was read from the label image and stands in for the application value.",
-    "also_acceptable": "Other outcomes that count as correct for a check: 'needs_review' where the label and application differ in a way a reviewer should look at, and on every check of an image-degradation variant."
+    "also_acceptable": "Other outcomes that count as correct for a check: 'needs_review' where the label and application differ in a way a reviewer should look at, and on every check of an image-degradation variant.",
+    "label_observed": "What the label itself shows, transcribed from its images: the brand mark it displays, its alcohol and net-contents declarations with the unit words as printed, the name-and-address and origin statements, and the health warning. It is read off the label without reference to the application, so the two sides of every comparison are independent.",
+    "label_observed_brand": "The brand reading is the brand mark the label displays, not the application's brand string wherever it happens to be printed. Searching the label for a string the application already supplies would compare a value with itself, and a reader that has not seen the application cannot do it.",
+    "label_observed_net_contents": "The net-contents reading is the quantity the label declares, as a number plus the unit words as printed. Where the label prints the same quantity in both metric and US customary units, the reading is the metric figure the label itself prints. Where it prints no metric figure, the reading is the first numeric customary quantity. Where it declares several different quantities, there is no single reading and the amount is null."
   },
   "labels": [
     {
@@ -67,9 +70,21 @@
         "wine_appellation": null
       },
       "label_observed": {
+        "brand_name": "Lucky Lucy's",
         "class_type": "BOURBON WHISKEY",
+        "abv": {
+          "text": "40%ALC/VOL/80 PROOF",
+          "percent": 40.0
+        },
+        "net_contents": {
+          "text": "1 LITER",
+          "amount": 1,
+          "unit": "LITER"
+        },
         "name_address": "AGED AND BOTTLED BY CHICAGOLAND SPIRITS, ELK GROVE VILLAGE, IL.",
-        "origin_statement": "MADE IN THE USA"
+        "origin_statement": "MADE IN THE USA",
+        "warning_text": "GOVERNMENT WARNING  : (1) ACCORDING TO THE SURGEON GENERAL,  WOMEN SHOULD NOT DRINK ALCOHOLIC BEVERAGES DURING PREGNANCY BECAUSE OF THE RISK OF BIRTH DEFECTS. (2) CONSUMPTION OF ALCOHOLIC BEVERAGES IMPAIRS YOUR ABILITY TO DRIVE A CAR OR OPERATE MACHINERY,  AND MAY CAUSE HEALTH PROBLEMS.",
+        "warning_heading_all_caps": true
       },
       "expected": {
         "brand": "pass",
@@ -85,7 +100,10 @@
       "notes": [
         "Body set in capitals; extra space before the heading's colon ('GOVERNMENT WARNING   :').",
         "Label brand 'Lucky Lucy's' (mixed case, curly apostrophe) against application 'LUCKY LUCY'S': a real case-and-punctuation match.",
-        "Label names the DBA CHICAGOLAND SPIRITS, which the application lists as used on label."
+        "Label names the DBA CHICAGOLAND SPIRITS, which the application lists as used on label.",
+        "Brand read from the front logo as 'Lucky Lucy's' in mixed case with a curly apostrophe.",
+        "ABV and net contents read from the front, bottom two lines: '40%ALC/VOL/80 PROOF' and '1 LITER/ MADE IN THE USA'; the net contents wording is '1 LITER'.",
+        "Warning is on the back, body in capitals. A wider-than-normal gap sits before the heading's colon, and after 'GENERAL,' and 'MACHINERY,'; transcribed as double spaces."
       ]
     },
     {
@@ -137,9 +155,21 @@
         "wine_appellation": null
       },
       "label_observed": {
+        "brand_name": "BENT 301",
         "class_type": "Maryland rye whiskey",
+        "abv": {
+          "text": "45% ALC/VOL",
+          "percent": 45.0
+        },
+        "net_contents": {
+          "text": "750 mL",
+          "amount": 750,
+          "unit": "mL"
+        },
         "name_address": "DISTILLED, AGED & BOTTLED BY THE BALTIMORE SPIRITS COMPANY 1700 W 41ST ST STE 430 BALTIMORE MD 21211",
-        "origin_statement": null
+        "origin_statement": null,
+        "warning_text": "GOVERNMENT WARNING: (1) ACCORDING TO THE SURGEON GENERAL, WOMEN SHOULD NOT DRINK ALCOHOLIC BEVERAGES DURING PREGNANCY BECAUSE OF THE RISK OF BIRTH DEFECTS. (2) CONSUMPTION OF ALCOHOLIC BEVERAGES IMPAIRS YOUR ABILITY TO DRIVE A CAR OR OPERATE MACHINERY, AND MAY CAUSE HEALTH PROBLEMS.",
+        "warning_heading_all_caps": true
       },
       "expected": {
         "brand": "pass",
@@ -153,7 +183,10 @@
         "warning_heading_caps": true
       },
       "notes": [
-        "Whole statement set in bold condensed capitals; 16.22(a)(2) says the remainder may not be bold, which the checks in this set do not score."
+        "Whole statement set in bold condensed capitals; 16.22(a)(2) says the remainder may not be bold, which the checks in this set do not score.",
+        "Brand is set on two lines on the front, 'BENT' arched over '301'.",
+        "Front's bottom strip reads '45% ALC/VOL  •  90 PROOF  •  750 mL'; the alcohol wording is '45% ALC/VOL' and the net contents wording is '750 mL' with a lower-case 'm' and capital 'L'.",
+        "Warning is on the back, body in capitals, justified across nine lines."
       ]
     },
     {
@@ -205,9 +238,21 @@
         "wine_appellation": null
       },
       "label_observed": {
+        "brand_name": "BONEFISH",
         "class_type": "VODKA",
+        "abv": {
+          "text": "40% ALC/VOL",
+          "percent": 40.0
+        },
+        "net_contents": {
+          "text": "750 ML",
+          "amount": 750,
+          "unit": "ML"
+        },
         "name_address": "Produced by Taconic Distillery in Stanfordville, New York",
-        "origin_statement": null
+        "origin_statement": null,
+        "warning_text": "GOVERNMENT WARNING: (1) ACCORDING TO THE SURGEON GENERAL, WOMEN SHOULD NOT DRINK ALCOHOLIC BEVERAGES DURING PREGNANCY BECAUSE OF THE RISK OF BIRTH DEFECTS. (2) CONSUMPTION OF ALCOHOLIC BEVERAGES IMPAIRS YOUR ABILITY TO DRIVE A CAR OR OPERATE MACHINERY, AND MAY CAUSE HEALTH PROBLEMS.",
+        "warning_heading_all_caps": true
       },
       "expected": {
         "brand": "pass",
@@ -222,7 +267,9 @@
       },
       "notes": [
         "White text on a black band; body in capitals.",
-        "The dominant brand on the label is BONEFISH, a DBA the application lists as used on label. The application brand TACONIC DISTILLERY appears on the label only in the producer line, so a brand check has to find it there."
+        "The dominant brand on the label is BONEFISH, a DBA the application lists as used on label. The application brand TACONIC DISTILLERY appears on the label only in the producer line, so a brand check has to find it there.",
+        "Front's bottom row gives '80 PROOF | 40% ALC/VOL | 750 ML'; the net contents wording is '750 ML' in capitals.",
+        "Warning is on the back in reversed type, white on a black band; the heading is bold and the body is not."
       ]
     },
     {
@@ -274,9 +321,21 @@
         "wine_appellation": null
       },
       "label_observed": {
+        "brand_name": "AVIATION",
         "class_type": "AMERICAN VODKA",
+        "abv": {
+          "text": "40% ALC BY VOL",
+          "percent": 40.0
+        },
+        "net_contents": {
+          "text": "750 mL",
+          "amount": 750,
+          "unit": "mL"
+        },
         "name_address": "BOTTLED BY AVIATION VODKA, PLAINFIELD, IL.",
-        "origin_statement": null
+        "origin_statement": null,
+        "warning_text": "GOVERNMENT WARNING: (1) ACCORDING TO THE SURGEON GENERAL, WOMEN SHOULD NOT DRINK ALCOHOLIC BEVERAGES DURING PREGNANCY BECAUSE OF THE RISK OF BIRTH DEFECTS. (2) CONSUMPTION OF ALCOHOLIC BEVERAGES IMPAIRS YOUR ABILITY TO DRIVE A CAR OR OPERATE MACHINERY, AND MAY CAUSE HEALTH PROBLEMS.",
+        "warning_heading_all_caps": true
       },
       "expected": {
         "brand": "pass",
@@ -291,7 +350,10 @@
       },
       "notes": [
         "Body in condensed capitals.",
-        "Label names the DBA AVIATION VODKA, which the application lists as used on label; the applicant of record is DIAGEO AMERICAS SUPPLY, INC."
+        "Label names the DBA AVIATION VODKA, which the application lists as used on label; the applicant of record is DIAGEO AMERICAS SUPPLY, INC.",
+        "Front's bottom line reads '40% ALC BY VOL | 750 mL | GLUTEN FREE'; the alcohol wording is 'ALC BY VOL', not 'ALC/VOL'.",
+        "The back's Serving Facts panel separately states 'Alcohol by volume: 40%'; the front's declaration is the one transcribed above.",
+        "Warning is on the back, body in capitals, justified."
       ]
     },
     {
@@ -343,9 +405,21 @@
         "wine_appellation": null
       },
       "label_observed": {
+        "brand_name": "BONEFISH",
         "class_type": "AMERICAN DRY GIN",
+        "abv": {
+          "text": "40% ALC/VOL",
+          "percent": 40.0
+        },
+        "net_contents": {
+          "text": "750 ML",
+          "amount": 750,
+          "unit": "ML"
+        },
         "name_address": "Produced by Taconic Distillery in Stanfordville, New York",
-        "origin_statement": null
+        "origin_statement": null,
+        "warning_text": "GOVERNMENT WARNING: (1) ACCORDING TO THE SURGEON GENERAL, WOMEN SHOULD NOT DRINK ALCOHOLIC BEVERAGES DURING PREGNANCY BECAUSE OF THE RISK OF BIRTH DEFECTS. (2) CONSUMPTION OF ALCOHOLIC BEVERAGES IMPAIRS YOUR ABILITY TO DRIVE A CAR OR OPERATE MACHINERY, AND MAY CAUSE HEALTH PROBLEMS.",
+        "warning_heading_all_caps": true
       },
       "expected": {
         "brand": "pass",
@@ -360,7 +434,10 @@
       },
       "notes": [
         "White text on a blue band; body in capitals.",
-        "Same applicant and brand pattern as 26239001000079 (BONEFISH on the label, TACONIC DISTILLERY in the application)."
+        "Same applicant and brand pattern as 26239001000079 (BONEFISH on the label, TACONIC DISTILLERY in the application).",
+        "Same label design as ttb-26239001000079, printed in blue, for AMERICAN DRY GIN.",
+        "Front's bottom row gives '80 PROOF | 40% ALC/VOL | 750 ML'; the net contents wording is '750 ML' in capitals.",
+        "Warning is on the back in reversed type, white on a blue band; the heading is bold and the body is not."
       ]
     },
     {
@@ -412,9 +489,21 @@
         "wine_appellation": null
       },
       "label_observed": {
+        "brand_name": "SATVRNAL",
         "class_type": "GUAVA FORWARD GIN / DISTILLED FROM GRAIN",
+        "abv": {
+          "text": "46% ALC. BY VOL.",
+          "percent": 46.0
+        },
+        "net_contents": {
+          "text": "1 LITRE",
+          "amount": 1,
+          "unit": "LITRE"
+        },
         "name_address": "IMPORTED BY: WOLF BEVCO, LLC. BENICIA, CA.",
-        "origin_statement": "PRODUCT OF MEXICO"
+        "origin_statement": "PRODUCT OF MEXICO",
+        "warning_text": "GOVERNMENT WARNING: (1) ACCORDING TO THE SURGEON GENERAL, WOMEN SHOULD NOT DRINK ALCOHOLIC BEVERAGES DURING PREGNANCY BECAUSE OF THE RISK OF BIRTH DEFECTS. (2) CONSUMPTION OF ALCOHOLIC BEVERAGES IMPAIRS YOUR ABILITY TO DRIVE A CAR OR OPERATE MACHINERY, AND MAY CAUSE HEALTH PROBLEMS.",
+        "warning_heading_all_caps": true
       },
       "expected": {
         "brand": "pass",
@@ -428,7 +517,11 @@
         "warning_heading_caps": true
       },
       "notes": [
-        "Import: the label also names the foreign producer (AMOR AERIS S.A. DE C.V., Zapopan, Jalisco). Front text is hand-lettered on a patterned background."
+        "Import: the label also names the foreign producer (AMOR AERIS S.A. DE C.V., Zapopan, Jalisco). Front text is hand-lettered on a patterned background.",
+        "Brand is spelled with a V for the U, 'SATVRNAL', on both faces; the back adds a registered-trademark symbol.",
+        "Net contents reads '1 LITRE', the British spelling, not 'LITER' or a millilitre figure.",
+        "Alcohol reads '46% ALC. BY VOL.' across two lines on the front, with a full stop after 'ALC' and after 'VOL'.",
+        "Front is set in a distressed display face; brand, alcohol and net contents were read from enlarged crops of the original image."
       ]
     },
     {
@@ -480,9 +573,21 @@
         "wine_appellation": null
       },
       "label_observed": {
+        "brand_name": "FOURSQUARE",
         "class_type": "FINE BARBADOS RUM / SINGLE BLENDED RUM",
+        "abv": {
+          "text": "58% alc./vol.",
+          "percent": 58.0
+        },
+        "net_contents": {
+          "text": "700 mL",
+          "amount": 700,
+          "unit": "mL"
+        },
         "name_address": "IMPORTED BY ALTAMAR BRANDS LLC, CORONA DEL MAR, CA",
-        "origin_statement": "Product of Barbados"
+        "origin_statement": "Product of Barbados",
+        "warning_text": "GOVERNMENT WARNING: (1) ACCORD-\nING TO THE SURGEON GENERAL, WOMEN\nSHOULD NOT DRINK ALCOHOLIC\nBEVERAGES DURING PREGNANCY\nBECAUSE OF THE RISK OF BIRTH DEF-\nECTS. (2) CONSUMPTION OF ALCOHOLIC\nBEVERAGES IMPAIRS YOUR ABILITY TO\nDRIVE A CAR OR OPERATE MACHINERY,\nAND MAY CAUSE HEALTH PROBLEMS.",
+        "warning_heading_all_caps": true
       },
       "expected": {
         "brand": "pass",
@@ -497,7 +602,10 @@
       },
       "notes": [
         "Words split by hyphens at line ends (ACCORD-ING, DEF-ECTS); a checker has to rejoin them.",
-        "Fanciful name LYONESSE is on both images. The back image is small, so the warning text is only a few pixels high."
+        "Fanciful name LYONESSE is on both images. The back image is small, so the warning text is only a few pixels high.",
+        "The front's largest line is 'FOURSQUARE', with 'LYONESSE' beneath it as the fanciful name; the back carries 'LYONESSE' alone.",
+        "Alcohol and net contents are in lower case at the foot of the front: '58%' over 'alc./vol.' and '700' over 'mL'.",
+        "The warning's line breaks split two words with hyphens, 'ACCORD-ING' and 'DEF-ECTS', so the transcription keeps the printed line breaks."
       ]
     },
     {
@@ -549,9 +657,21 @@
         "wine_appellation": null
       },
       "label_observed": {
+        "brand_name": "JUAN LOBO",
         "class_type": "TEQUILA / 100% BLUE AGAVE / REPOSADO",
+        "abv": {
+          "text": "40% ALC./VOL.",
+          "percent": 40.0
+        },
+        "net_contents": {
+          "text": "750mL",
+          "amount": 750,
+          "unit": "mL"
+        },
         "name_address": "IMPORTED BY JUAN LOBO TEQUILA, LLC BUDA, TEXAS",
-        "origin_statement": "HECHO EN MEXICO"
+        "origin_statement": "HECHO EN MEXICO",
+        "warning_text": "GOVERNMENT WARNING: (1)ACCORDING TO THE SURGEON GENERAL, WOMEN SHOULD NOT DRINK ALCOHOLIC BEVERAGES DURING PREGNANCY BECAUSE OF THE RISK OF BIRTH DEFECTS. (2) CONSUMPTION OF ALCOHOLIC BEVERAGES IMPAIRS YOUR ABILITY TO DRIVE A CAR OR OPERATE MACHINERY, AND MAY CAUSE HEALTH PROBLEMS.",
+        "warning_heading_all_caps": true
       },
       "expected": {
         "brand": "pass",
@@ -566,7 +686,10 @@
       },
       "notes": [
         "No space in '(1)ACCORDING'; spacing is ignored by the exact rule.",
-        "Country of origin is stated in Spanish ('HECHO EN MEXICO'); the country name still matches the application."
+        "Country of origin is stated in Spanish ('HECHO EN MEXICO'); the country name still matches the application.",
+        "Net contents sits under the signature at the foot of the front and is letterspaced, '750mL'; the gap between '0' and 'm' matches the gap between the digits, so no word space is visible.",
+        "Alcohol reads '40% ALC./VOL.' with '80 PROOF' on the line below.",
+        "The warning has no space after '(1)': it prints '(1)ACCORDING'. The '(2)' later in the same paragraph does have its space."
       ]
     },
     {
@@ -618,9 +741,21 @@
         "wine_appellation": null
       },
       "label_observed": {
+        "brand_name": "Black & White",
         "class_type": "Blended Scotch Whisky",
+        "abv": {
+          "text": "40% alc./vol.",
+          "percent": 40.0
+        },
+        "net_contents": {
+          "text": "700 mL",
+          "amount": 700,
+          "unit": "mL"
+        },
         "name_address": "Imported by: MENDEZ & COMPANY, SAN JUAN, PUERTO RICO",
-        "origin_statement": "PRODUCT OF SCOTLAND"
+        "origin_statement": "PRODUCT OF SCOTLAND",
+        "warning_text": "GOVERNMENT WARNING: (1) ACCORDING TO THE  SUR-\nGEON GENERAL, WOMEN SHOULD NOT DRINK ALCOHOLIC\nBEVERAGES DURING PREGNANCY BECAUSE OF THE RISK\n OF BIRTH DEFECTS. (2) CONSUMPTION OF  ALCOHOLIC BEV-\nERAGES IMPAIRS YOUR ABILITY TO DRIVE A CAR OR OP-\nERATE MACHINERY, AND MAY CAUSE HEALTH PROBLEMS.",
+        "warning_heading_all_caps": true
       },
       "expected": {
         "brand": "pass",
@@ -636,7 +771,12 @@
       "notes": [
         "Words split by hyphens at line ends (SUR-GEON, BEV-ERAGES, OP-ERATE).",
         "Label city SAN JUAN differs from the application address (KM 2.4 GUAYNABO PR); the name matches the DBA MENDEZ & COMPANY used on label. TTB approved it; a checker that flags the city for review is also acceptable.",
-        "Brand in script-like serif with an ampersand: 'Black & White' against 'BLACK & WHITE'."
+        "Brand in script-like serif with an ampersand: 'Black & White' against 'BLACK & WHITE'.",
+        "Brand is mixed case with an ampersand, 'Black & White', followed by a trademark symbol.",
+        "Alcohol and net contents sit at the foot of the front in lower case: '40% alc./vol.' and '700 mL'.",
+        "The warning's line breaks split three words with hyphens, 'SUR-GEON', 'BEV-ERAGES' and 'OP-ERATE', so the transcription keeps the printed line breaks.",
+        "Wider gaps appear inside 'TO THE  SUR-' and 'CONSUMPTION OF  ALCOHOLIC', and the fourth line begins with a leading space; all three are kept in the transcription.",
+        "The back's Serving Facts panel separately states 'Alcohol by volume: 40% (80 proof)'; the front's declaration is the one transcribed above."
       ],
       "also_acceptable": {
         "name_address": [
@@ -693,9 +833,21 @@
         "wine_appellation": null
       },
       "label_observed": {
+        "brand_name": "SALTIRE RARE MALT WHISKY COMPANY",
         "class_type": "SINGLE MALT SCOTCH WHISKY",
+        "abv": {
+          "text": "48.8%Alc./Vol.",
+          "percent": 48.8
+        },
+        "net_contents": {
+          "text": "700ml",
+          "amount": 700,
+          "unit": "ml"
+        },
         "name_address": "IMPORTED BY: Park Street Imports, Miami, FL",
-        "origin_statement": "Bottled by: Saltire Rare Malt Whisky, The Old Town House, Falkland, Fife, Scotland KY15 7BU"
+        "origin_statement": "Bottled by: Saltire Rare Malt Whisky, The Old Town House, Falkland, Fife, Scotland KY15 7BU",
+        "warning_text": "GOVERNMENT WARNING:(1) ACCORDING TO THE SURGEON GENERAL,\nWOMEN SHOULD NOT DRINK ALCOHOLIC BEVERAGES DURING PREG-\nNANCY BECAUSE OF THE RISK OF BIRTH DEFECTS. (2) CONSUMPTION\nOF ALCOHOLIC BEVERAGES IMPAIRS YOUR ABILITY TO DRIVE A CAR\nOR OPERATE MACHINERY, AND MAY CAUSE HEALTH PROBLEMS.",
+        "warning_heading_all_caps": true
       },
       "expected": {
         "brand": "pass",
@@ -711,7 +863,13 @@
       "notes": [
         "Very small type in the lower right; PREG-NANCY split at a line end.",
         "Application brand SALTIRE RARE MALT WHISKY COMPANY is set on two lines ('SALTIRE' / 'RARE MALT WHISKY COMPANY').",
-        "No 'Product of Scotland' line; Scotland appears in the bottler's address and in 'SCOTCH WHISKY'."
+        "No 'Product of Scotland' line; Scotland appears in the bottler's address and in 'SCOTCH WHISKY'.",
+        "The brand lockup on the front is set on two lines: 'SALTIRE' in display size over 'RARE MALT WHISKY COMPANY' in small capitals. Both lines are transcribed as the printed brand.",
+        "Alcohol prints with no spaces, '48.8%Alc./Vol.', in mixed case, on both the front and the back.",
+        "Net contents prints as '700ml' in lower case, followed by the estimated-sign mark; the quantity wording itself is '700ml'.",
+        "The warning has no space after the colon: it prints 'GOVERNMENT WARNING:(1) ACCORDING'.",
+        "The warning's line break splits 'PREG-NANCY' with a hyphen, so the transcription keeps the printed line breaks.",
+        "The warning appears on the back only; the front carries no warning."
       ],
       "also_acceptable": {
         "origin": [
@@ -768,9 +926,21 @@
         "wine_appellation": null
       },
       "label_observed": {
+        "brand_name": "Terre et Bois de Pradière",
         "class_type": "Cognac XO / Cognac Petite Champagne",
+        "abv": {
+          "text": "40 % ALC. BY VOL",
+          "percent": 40.0
+        },
+        "net_contents": {
+          "text": "700 mL",
+          "amount": 700,
+          "unit": "mL"
+        },
         "name_address": "IMPORTED BY WINE WINE SITUATION LLC-SIGNAC HILL, CA",
-        "origin_statement": "PRODUCT OF FRANCE"
+        "origin_statement": "PRODUCT OF FRANCE",
+        "warning_text": "GOVERNMENT WARNING: (1) ACCORDING TO THE SURGEON GENERAL, WOMEN SHOULD NOT DRINK ALCOHOLIC BEVERAGES DURING PREGNANCY BECAUSE OF THE RISK OF BIRTH DEFECTS. (2) CONSUMPTION OF ALCOHOLIC BEVERAGE IMPAIRS YOUR ABILITY TO DRIVE A CAR OR OPERATE MACHINERY, AND MAY CAUSE HEALTH PROBLEMS.",
+        "warning_heading_all_caps": true
       },
       "expected": {
         "brand": "pass",
@@ -787,7 +957,12 @@
         "Warning is set sideways (rotated 90 degrees) on the image TTB tags as the brand label. It reads '(2) CONSUMPTION OF ALCOHOLIC BEVERAGE IMPAIRS YOUR ABILITY' (singular BEVERAGE) where 27 CFR 16.21 says 'alcoholic beverages impairs'; confirmed on a full-resolution crop. A real approved label whose warning is not word-for-word.",
         "The image TTB tags 'Brand (front)' carries the mandatory text and the warning; the image tagged 'Back' is the decorative label with ABV and net contents set sideways.",
         "Label spells the importer's city 'SIGNAC HILL'; the application says Signal Hill CA.",
-        "Brand TERRE ET BOIS DE PRADIÈRE is in handwriting script with an accented È."
+        "Brand TERRE ET BOIS DE PRADIÈRE is in handwriting script with an accented È.",
+        "The warning says 'ALCOHOLIC BEVERAGE IMPAIRS' in sentence (2), singular, where 27 CFR 16.21 says 'alcoholic beverages impairs'. Read from a rotated, enlarged crop of the front image.",
+        "The warning is set sideways up the right edge of the image TTB tags as the brand label; the label carries no other copy of it.",
+        "The two faces declare the same values in different words. The front reads '40 % ALC. BY VOL - 700 mL', with a space before the per-cent sign and a lower-case 'mL'. The back reads '40% ALC. BY VOL' and '700 ML', sideways up its left edge. The front's wording is transcribed above because that face carries the mandatory text.",
+        "Brand is handwriting script with an accented E: 'Terre et Bois de Pradière'. The 'de' is set small between 'Bois' and 'Pradière'.",
+        "The scan is low-resolution at the warning; the final mark after 'PROBLEMS' reads as a full stop."
       ],
       "also_acceptable": {
         "name_address": [
@@ -844,9 +1019,21 @@
         "wine_appellation": null
       },
       "label_observed": {
+        "brand_name": "BREVIS",
         "class_type": "CRÈME DE CASSIS LIQUEUR",
+        "abv": {
+          "text": "22.4% ALC/VOL",
+          "percent": 22.4
+        },
+        "net_contents": {
+          "text": "375mL",
+          "amount": 375,
+          "unit": "mL"
+        },
         "name_address": "PRODUCED AND BOTTLED BY KLOCKE ESTATE DISTILLERY, HUDSON, NY",
-        "origin_statement": null
+        "origin_statement": null,
+        "warning_text": "GOVERNMENT WARNING: (1) ACCORDING TO THE SURGEON GENERAL, WOMEN SHOULD NOT DRINK ALCOHOLIC BEVERAGES DURING PREGNANCY BECAUSE OF THE RISKS OF BIRTH DEFECTS. (2) CONSUMPTION OF ALCOHOLIC BEVERAGES IMPAIRS YOUR ABILITY TO DRIVE A CAR OR OPERATE MACHINERY, AND MAY CAUSE HEALTH PROBLEMS.",
+        "warning_heading_all_caps": true
       },
       "expected": {
         "brand": "pass",
@@ -862,7 +1049,9 @@
       "notes": [
         "Reads 'BECAUSE OF THE RISKS OF BIRTH DEFECTS' (plural RISKS) where 27 CFR 16.21 says 'the risk of birth defects'. A real approved label whose warning is not word-for-word.",
         "Low-contrast gold type on navy; ABV and net contents share one line on a patterned ground.",
-        "Fanciful name CREME DE CASSIS in the application is CRÈME DE CASSIS (accented) on the label."
+        "Fanciful name CREME DE CASSIS in the application is CRÈME DE CASSIS (accented) on the label.",
+        "The warning says 'THE RISKS OF BIRTH DEFECTS', plural, where 27 CFR 16.21 says 'the risk of birth defects'. Confirmed on an enlarged crop.",
+        "The front's last line reads '22.4% ALC/VOL, 375mL', with a comma between the two declarations and no space in '375mL'."
       ]
     },
     {
@@ -914,9 +1103,21 @@
         "wine_appellation": null
       },
       "label_observed": {
+        "brand_name": "LOST LANTERN",
         "class_type": "PEATED OREGON AMERICAN SINGLE MALT WHISKEY",
+        "abv": {
+          "text": "ALC BY VOL 60.0 %",
+          "percent": 60.0
+        },
+        "net_contents": {
+          "text": "750 ML",
+          "amount": 750,
+          "unit": "ML"
+        },
         "name_address": "SELECTED AND BOTTLED BY LOST LANTERN SPIRITS, VERGENNES, VT.",
-        "origin_statement": null
+        "origin_statement": null,
+        "warning_text": "GOVERNMENT WARNING: (1) ACCORDING TO THE SURGEON GENERAL, WOMEN SHOULD NOT DRINK ALCOHOLIC BEVERAGES DURING PREGNANCY BECAUSE OF THE RISK OF BIRTH DEFECTS. (2) CONSUMPTION OF ALCOHOLIC BEVERAGES IMPAIRS YOUR ABILITY TO DRIVE A CAR OR OPERATE MACHINERY, AND MAY CAUSE HEALTH PROBLEMS.",
+        "warning_heading_all_caps": true
       },
       "expected": {
         "brand": "pass",
@@ -930,7 +1131,11 @@
         "warning_heading_caps": true
       },
       "notes": [
-        "ABV figure is handwritten ('60.0') inside a printed box; net contents are set sideways."
+        "ABV figure is handwritten ('60.0') inside a printed box; net contents are set sideways.",
+        "Brand is set as 'LOST LANTERN' in small capitals with oversized L's, with no space between the words on the front; the back sets it the same way.",
+        "The alcohol declaration is laid out in three parts in one cell at the foot of the front: 'ALC' over 'BY VOL' in printed capitals at the left, the figure '60.0' handwritten in the middle, and a raised printed '%' at the right. Read across, it is 'ALC BY VOL 60.0 %'. There is no single printed string to copy character for character, and the figure is not typeset.",
+        "Net contents is set sideways up the right edge of the front: '750 ML'.",
+        "'McCARTHY'S' on the front is the fanciful name, not the brand."
       ]
     },
     {
@@ -982,9 +1187,21 @@
         "wine_appellation": null
       },
       "label_observed": {
+        "brand_name": "AODH",
         "class_type": "IRISH WHISKEY",
+        "abv": {
+          "text": "Alc. 42.8% by vol.",
+          "percent": 42.8
+        },
+        "net_contents": {
+          "text": "750ml",
+          "amount": 750,
+          "unit": "ml"
+        },
         "name_address": "IMPORTED BY: EASTERN LIQUORS USA. INC. 990 WESTBURY ROAD, 2ND FLOOR SUIT 200, A,B,C WESTBURY, NY 11590",
-        "origin_statement": "DISTILLED IN IRELAND"
+        "origin_statement": "DISTILLED IN IRELAND",
+        "warning_text": "GOVERNMENT WARNING:  (1) ACCORDING TO THE SURGEON GENERAL, WOMEN SHOULD NOT DRINK ALCOHOLIC BEVERAGES DURING PREGNANCY BECAUSE OF THE RISK OF BIRTH DEFECTS. (2) CONSUMPTION OF ALCOHOLIC BEVERAGES IMPAIRS YOUR ABILITY TO DRIVE A CAR OR OPERATE MACHINERY, AND MAY CAUSE HEALTH PROBLEMS.",
+        "warning_heading_all_caps": true
       },
       "expected": {
         "brand": "pass",
@@ -998,7 +1215,11 @@
         "warning_heading_caps": true
       },
       "notes": [
-        "Label says DISTILLED IN IRELAND and names an Indian bottler (Allied Blenders and Distillers, Maharashtra); there is no 'Product of' line. The application origin is IRELAND."
+        "Label says DISTILLED IN IRELAND and names an Indian bottler (Allied Blenders and Distillers, Maharashtra); there is no 'Product of' line. The application origin is IRELAND.",
+        "Net contents is labelled 'CONTENTS:' with '750ml' on the line below, in lower case and with no space; both faces print it that way.",
+        "Alcohol reads 'Alc. 42.8% by vol.' in mixed case, with '85.6 US PROOF' on the line below; both faces print it that way.",
+        "A wider gap follows the warning's colon; transcribed as a double space.",
+        "The back also prints 'FOR OVERSEAS EXPORT ONLY.'"
       ],
       "also_acceptable": {
         "origin": [
@@ -1055,9 +1276,21 @@
         "wine_appellation": "SONOMA VALLEY"
       },
       "label_observed": {
+        "brand_name": "Portalupi",
         "class_type": "SANGIOVESE",
+        "abv": {
+          "text": "ALC 14.0% BY VOLUME",
+          "percent": 14.0
+        },
+        "net_contents": {
+          "text": "750ML",
+          "amount": 750,
+          "unit": "ML"
+        },
         "name_address": "PRODUCED AND BOTTLED BY PORTALUPI WINES, SEBASTOPOL, CA",
-        "origin_statement": null
+        "origin_statement": null,
+        "warning_text": "GOVERNMENT WARNING: (1) ACCORDING TO THE SURGEON GENERAL, WOMEN SHOULD NOT DRINK ALCOHOLIC BEVERAGES DURING PREGNANCY BECAUSE OF THE RISK OF BIRTH DEFECTS. (2) CONSUMPTION OF ALCOHOLIC BEVERAGES IMPAIRS YOUR ABILITY TO DRIVE A CAR OR OPERATE MACHINERY, AND MAY CAUSE HEALTH PROBLEMS.",
+        "warning_heading_all_caps": true
       },
       "expected": {
         "brand": "pass",
@@ -1073,7 +1306,11 @@
       "notes": [
         "Light text on black.",
         "Class/type on the label is the grape varietal SANGIOVESE; the application class is TABLE RED WINE. The application's appellation (SONOMA VALLEY) is on both images.",
-        "Label carries vintage 2025; the application's vintage field is blank."
+        "Label carries vintage 2025; the application's vintage field is blank.",
+        "Read from back.jpg (371x397, light text on black); enlarged 3x to read.",
+        "Front prints the brand as 'Portalupi' in a serif display face; the back heads the panel 'Portalupi Wines'.",
+        "Alcohol and net contents share one line: '750ML ALC 14.0% BY VOLUME'.",
+        "Warning heading 'GOVERNMENT WARNING:' is in capitals and set bolder than the body."
       ],
       "also_acceptable": {
         "class_type": [
@@ -1130,9 +1367,21 @@
         "wine_appellation": "CALIFORNIA"
       },
       "label_observed": {
+        "brand_name": "THE UGLY",
         "class_type": "RED TABLE WINE",
+        "abv": {
+          "text": "ALC. 14% BY VOLUME",
+          "percent": 14.0
+        },
+        "net_contents": {
+          "text": "750ML",
+          "amount": 750,
+          "unit": "ML"
+        },
         "name_address": "CELLARED AND BOTTLED BY UGLY SWEATER HEALDSBURG, CA",
-        "origin_statement": "PRODUCT OF THE U.S.A."
+        "origin_statement": "PRODUCT OF THE U.S.A.",
+        "warning_text": "GOVERNMENT WARNING: (1) ACCORDING TO THE SURGEON GENERAL, WOMEN SHOULD NOT DRINK ALCOHOLIC BEVERAGES DURING PREGNANCY BECAUSE OF THE RISK OF BIRTH DEFECTS. (2) CONSUMPTION OF ALCOHOLIC BEVERAGES IMPAIRS YOUR ABILITY TO DRIVE A CAR OR OPERATE MACHINERY, AND MAY CAUSE HEALTH PROBLEMS.",
+        "warning_heading_all_caps": true
       },
       "expected": {
         "brand": "pass",
@@ -1148,7 +1397,11 @@
       "notes": [
         "Light text on black.",
         "The image TTB tags 'Brand (front)' carries the mandatory text and the warning; the image tagged 'Back' is artwork ('UGLY', 'Big Red', 'CALIFORNIA').",
-        "Label bottler name UGLY SWEATER is neither the applicant (CHATEAU DIANA, LLC) nor its listed DBA (UGLY WINES); the city HEALDSBURG, CA matches."
+        "Label bottler name UGLY SWEATER is neither the applicant (CHATEAU DIANA, LLC) nor its listed DBA (UGLY WINES); the city HEALDSBURG, CA matches.",
+        "Read from front.jpg (1050x1275), the image carrying all mandatory text; back.jpg is artwork.",
+        "Brand reading is a judgement call, so the whole picture is recorded here. The front's largest text is 'Red Blend', below it 'RED TABLE WINE'. 'THE UGLY' is set in a knit-pattern display face in the middle of the label and is the element that reads as the brand, so it is what brand_name carries. The application's brand name 'UGLY SWEATER' is printed nowhere as a brand mark; it appears only inside the bottler statement 'CELLARED AND BOTTLED BY UGLY SWEATER HEALDSBURG, CA'. The back artwork prints 'UGLY', 'Big Red' and 'CALIFORNIA'.",
+        "Bottom line reads 'ALC. 14% BY VOLUME   750ML   CONTAINS SULFITES'.",
+        "Warning heading is in capitals and bold."
       ],
       "also_acceptable": {
         "name_address": [
@@ -1205,9 +1458,21 @@
         "wine_appellation": "ANDERSON VALLEY"
       },
       "label_observed": {
+        "brand_name": "BEAR PATH",
         "class_type": "GEWURZTRAMINER",
+        "abv": {
+          "text": "ALC. 12.8% BY VOL.",
+          "percent": 12.8
+        },
+        "net_contents": {
+          "text": "750ML",
+          "amount": 750,
+          "unit": "ML"
+        },
         "name_address": "VINTED, CELLARED AND BOTTLED BY PROSPECT VINEYARDS UKIAH, CALIFORNIA",
-        "origin_statement": null
+        "origin_statement": null,
+        "warning_text": "GOVERNMENT WARNING: (1) According to the Surgeon General, women should not drink alcoholic beverages during pregnancy because of the risk of birth defects. (2) Consumption of alcoholic beverages impairs your ability to drive a car or operate machinery, and may cause health problems.",
+        "warning_heading_all_caps": true
       },
       "expected": {
         "brand": "pass",
@@ -1222,7 +1487,10 @@
       },
       "notes": [
         "Body in sentence case. The heading appears in the same regular weight as the body, not bold; 16.22(a)(2) requires bold, which the checks in this set do not score.",
-        "Class/type on the label is the varietal GEWURZTRAMINER; the application class is TABLE WHITE WINE. Appellation ANDERSON VALLEY and vintage 2025 are on the label."
+        "Class/type on the label is the varietal GEWURZTRAMINER; the application class is TABLE WHITE WINE. Appellation ANDERSON VALLEY and vintage 2025 are on the label.",
+        "Brand and alcohol read from front.jpg; net contents, alcohol and the warning read from back.jpg.",
+        "Both images print the alcohol statement identically: 'ALC. 12.8% BY VOL.'",
+        "Warning body is in sentence case; only the heading 'GOVERNMENT WARNING:' is in capitals, and it is set in the same regular weight as the body, not bold."
       ],
       "also_acceptable": {
         "class_type": [
@@ -1279,9 +1547,21 @@
         "wine_appellation": "RUSSIAN RIVER VALLEY"
       },
       "label_observed": {
+        "brand_name": "Patria",
         "class_type": "CHARDONNAY",
+        "abv": {
+          "text": "ALC 13.5% BY VOL.",
+          "percent": 13.5
+        },
+        "net_contents": {
+          "text": "750ML",
+          "amount": 750,
+          "unit": "ML"
+        },
         "name_address": "PRODUCED AND BOTTLED BY SEPIA WINES LLC, CALISTOGA, CA",
-        "origin_statement": null
+        "origin_statement": null,
+        "warning_text": "GOVERNMENT WARNING: (1) ACCORDING TO THE SURGEON GENERAL, WOMEN SHOULD NOT DRINK ALCOHOLIC BEVERAGES DURING PREGNANCY BECAUSE OF THE RISK OF BIRTH DEFECTS. (2) CONSUMPTION OF ALCOHOLIC BEVERAGES IMPAIRS YOUR ABILITY TO DRIVE A CAR OR OPERATE MACHINERY, AND MAY CAUSE HEALTH PROBLEMS.",
+        "warning_heading_all_caps": true
       },
       "expected": {
         "brand": "pass",
@@ -1297,7 +1577,11 @@
       "notes": [
         "White text on orange.",
         "Brand PATRIA is set in script ('Patria'). Class/type on the label is the varietal CHARDONNAY; the application class is TABLE WHITE WINE. Fanciful name CORPUEL VINEYARD and appellation RUSSIAN RIVER VALLEY are on the label.",
-        "The image TTB tags 'Brand (front)' carries all mandatory text; the image tagged 'Back' is artwork with the vintage only."
+        "The image TTB tags 'Brand (front)' carries all mandatory text; the image tagged 'Back' is artwork with the vintage only.",
+        "Read from front.jpg (900x975, white text on orange), the image carrying all mandatory text; back.jpg is artwork with 'v.2024' only.",
+        "Brand is set in script as 'Patria', not in capitals.",
+        "Bottom line reads 'ALC 13.5% BY VOL.   750ML   CONTAINS SULFITES'; note 'ALC' with no full stop.",
+        "Warning heading is in capitals and bold."
       ],
       "also_acceptable": {
         "class_type": [
@@ -1354,9 +1638,21 @@
         "wine_appellation": "ITALY"
       },
       "label_observed": {
+        "brand_name": "FABIO SIGNORELLI",
         "class_type": "ROSE WINE",
+        "abv": {
+          "text": "12% ALC. BY VOL.",
+          "percent": 12.0
+        },
+        "net_contents": {
+          "text": "750 ML",
+          "amount": 750,
+          "unit": "ML"
+        },
         "name_address": "IMPORTED BY: WHITSERVE LLC STAMFORD, CONNECTICUT",
-        "origin_statement": "PRODUCT OF ITALY"
+        "origin_statement": "PRODUCT OF ITALY",
+        "warning_text": "GOVERNMENT WARNING: (1) ACCORDING TO THE SURGEON GENERAL, WOMEN SHOULD NOT DRINK ALCOHOLIC BEVERAGES DURING PREGNANCY BECAUSE OF THE RISK OF BIRTH DEFECTS. (2) CONSUMPTION OF ALCOHOLIC BEVERAGES IMPAIRS YOUR ABILITY TO DRIVE A CAR OR OPERATE MACHINERY, AND MAY CAUSE HEALTH PROBLEMS.",
+        "warning_heading_all_caps": true
       },
       "expected": {
         "brand": "pass",
@@ -1371,7 +1667,10 @@
       },
       "notes": [
         "The image TTB tags 'Brand (front)' carries all mandatory text; the image tagged 'Back' is artwork ('Rossastro', 'Quasi Rosso - RST24').",
-        "Fanciful name ROSSASTRO and vintage 2024 are on the label; the foreign producer is named (AZIENDA AGRICOLA SIGNORELLI, Piedimonte Etneo, Italy)."
+        "Fanciful name ROSSASTRO and vintage 2024 are on the label; the foreign producer is named (AZIENDA AGRICOLA SIGNORELLI, Piedimonte Etneo, Italy).",
+        "Read from front.jpg (2516x1594), the image carrying all mandatory text; back.jpg is artwork printing 'Rossastro', 'Quasi Rosso - RST24' and 'FABIO SIGNORELLI'.",
+        "Net contents appear inside a pipe-separated line: 'ROSE WINE | ITALY | PRODUCT OF ITALY | 750 ML'. The alcohol statement is on the line below: '12% ALC. BY VOL. | CONTAINS SULFITES'.",
+        "Warning heading is in capitals and bold; the label sets the colon outside the bold run ('GOVERNMENT WARNING' bold, then ':')."
       ]
     },
     {
@@ -1423,9 +1722,21 @@
         "wine_appellation": "CA - SONOMA"
       },
       "label_observed": {
+        "brand_name": "MARK WEST.",
         "class_type": "PINOT NOIR",
+        "abv": {
+          "text": "ALC. 14.5% BY VOLUME",
+          "percent": 14.5
+        },
+        "net_contents": {
+          "text": "750mL",
+          "amount": 750,
+          "unit": "mL"
+        },
         "name_address": "VINTED & BOTTLED BY MARK WEST WINERY, MODESTO, CA",
-        "origin_statement": null
+        "origin_statement": null,
+        "warning_text": "GOVERNMENT WARNING: (1) ACCORDING TO THE SURGEON GENERAL, WOMEN SHOULD NOT DRINK ALCOHOLIC BEVERAGES DURING PREGNANCY BECAUSE OF THE RISK OF BIRTH DEFECTS. (2) CONSUMPTION OF ALCOHOLIC BEVERAGES IMPAIRS YOUR ABILITY TO DRIVE A CAR OR OPERATE MACHINERY, AND MAY CAUSE HEALTH PROBLEMS.",
+        "warning_heading_all_caps": true
       },
       "expected": {
         "brand": "pass",
@@ -1441,7 +1752,12 @@
       "notes": [
         "Small type with irregular letter spacing; CON-SUMPTION split at a line end.",
         "The application class is DESSERT /PORT/SHERRY/(COOKING) WINE (code 88) while the label designates PINOT NOIR at 14.5%; a checker that flags this for review is also acceptable.",
-        "Both images are small (front 285 px wide), so text is only a few pixels high."
+        "Both images are small (front 285 px wide), so text is only a few pixels high.",
+        "Images are small (front 284x222, back 505x463); both enlarged 4x to read. Warning, alcohol and net contents are on back.jpg.",
+        "The brand logotype carries a trailing full stop, printed 'MARK WEST.' on both images.",
+        "The label breaks CONSUMPTION across a line as 'CON-' / 'SUMPTION'; warning_text records the unhyphenated word, per the manifest's warning_exact rule that a hyphen splitting a word at a line end is ignored.",
+        "Letter spacing inside the warning is irregular, with wide gaps between some words ('GOVERNMENT   WARNING:', 'NOT  D R I N K'); warning_text records single spaces.",
+        "Warning heading is in capitals and set bolder than the warning body."
       ],
       "also_acceptable": {
         "class_type": [
@@ -1498,9 +1814,21 @@
         "wine_appellation": null
       },
       "label_observed": {
+        "brand_name": "The Bruery",
         "class_type": "BARREL-AGED IMPERIAL STOUT",
+        "abv": {
+          "text": "ALC. 20.3% BY VOL.",
+          "percent": 20.3
+        },
+        "net_contents": {
+          "text": "12.7 FL. OZ.",
+          "amount": 12.7,
+          "unit": "FL. OZ."
+        },
         "name_address": null,
-        "origin_statement": null
+        "origin_statement": null,
+        "warning_text": "GOVERNMENT WARNING: (1) ACCORDING TO THE SURGEON GENERAL, WOMEN SHOULD NOT DRINK ALCOHOLIC BEVERAGES DURING PREGNANCY BECAUSE OF THE RISK OF BIRTH DEFECTS. (2) CONSUMPTION OF ALCOHOLIC BEVERAGES IMPAIRS YOUR ABILITY TO DRIVE A CAR OR OPERATE MACHINERY, AND MAY CAUSE HEALTH PROBLEMS.",
+        "warning_heading_all_caps": true
       },
       "expected": {
         "brand": "pass",
@@ -1516,7 +1844,12 @@
       "notes": [
         "Light text on black.",
         "Neither image shows a bottler name and address; 'The Bruery' appears only as a script logo. The application names THE BRUERY LLC, Placentia CA. Expected outcome is to flag it (needs_review; fail also accepted).",
-        "Net contents 12.7 FL. OZ. is about 375 mL; the value compared is the label text."
+        "Net contents 12.7 FL. OZ. is about 375 mL; the value compared is the label text.",
+        "Front: the brand is a script logo reading 'The Bruery' with a registered-trademark symbol, set in mixed case, not capitals.",
+        "Two other names are printed on the front. 'BLACK TUESDAY' over 'PRIVATE BARREL' is the largest text on the label, set in display capitals across the middle at a 78-row cap height; 'Total Wine & More' is at the bottom, the retailer the release was bottled for. The reading above is the script logo at the top, which is in the brand position and carries the registered-trademark symbol; BLACK TUESDAY is the beer's own name and is the other candidate.",
+        "Front carries one line, 'ALC. 20.3% BY VOL. 12.7 FL. OZ.'; the alcohol wording and the net-contents wording are both taken from it. The label prints the fluid-ounce figure only, with no millilitre equivalent.",
+        "Back repeats the alcohol statement beside a glass icon as 'ALC. 20.3%' over 'by vol.' in lower case.",
+        "Warning is on the back, body justified in capitals across eight lines; the heading 'GOVERNMENT WARNING:' is bold capitals and runs in at the head of the first line. The line count was measured rather than judged by eye: the back is light text on black, so ink is grey above 140, and over x 248-711 the rows below the rule at y 760 give eight bands on a 34-row pitch - y 796-819, 830-848, 864-882, 898-916, 932-955, 967-985, 1001-1019 and 1035-1053."
       ],
       "also_acceptable": {
         "name_address": [
@@ -1573,9 +1906,21 @@
         "wine_appellation": null
       },
       "label_observed": {
+        "brand_name": "ZHIGULEVSKOYE",
         "class_type": "PALE LAGER / PALE PASTEURIZED BEER",
+        "abv": {
+          "text": "ALC. 5.2% BY VOL.",
+          "percent": 5.2
+        },
+        "net_contents": {
+          "text": "1 PT. 0.9 FL. OZ. (500 mL)",
+          "amount": 500,
+          "unit": "mL"
+        },
         "name_address": "IMPORTED BY FRS GROUP INC., FORT LAUDERDALE, FLORIDA.",
-        "origin_statement": "PRODUCT OF BELARUS"
+        "origin_statement": "PRODUCT OF BELARUS",
+        "warning_text": "GOVERNMENT WARNING: (1) According to the Surgeon General, women should not drink alcoholic beverages during pregnancy because of the risk of birth defects. (2) Consumption of alcoholic beverages impairs your ability to drive a car or operate machinery, and may cause health problems.",
+        "warning_heading_all_caps": true
       },
       "expected": {
         "brand": "pass",
@@ -1591,7 +1936,11 @@
       "notes": [
         "Body in sentence case.",
         "The back label spells the brand ZHIGUILEVSKOYE; the front and the application spell it ZHIGULEVSKOYE.",
-        "Label names the importer FRS GROUP INC.; the application lists Florida Royal Spirits, FRS Group INC."
+        "Label names the importer FRS GROUP INC.; the application lists Florida Royal Spirits, FRS Group INC.",
+        "Front brand plate reads 'ZHIGULEVSKOYE'. The smaller logo repeated at the top left of the back reads 'ZHIGUILEVSKOYE', with an extra I after the U; the back's body text spells it 'ZHIGULEVSKOYE SPECIAL'. The reading above is the front, the principal display panel.",
+        "Net contents is printed as a dual declaration, '1 PT. 0.9 FL. OZ. (500 mL)', on both front and back, with a lower-case m and capital L in mL.",
+        "Back repeats the alcohol statement as 'ALC. 5.2% BY VOL.'",
+        "Warning is on the back in a white box, body in sentence case; the heading 'GOVERNMENT WARNING:' is bold capitals."
       ]
     },
     {
@@ -1643,9 +1992,21 @@
         "wine_appellation": null
       },
       "label_observed": {
+        "brand_name": "FREISINGER",
         "class_type": "LAGER",
+        "abv": {
+          "text": "4.9% ALC. / VOL.",
+          "percent": 4.9
+        },
+        "net_contents": {
+          "text": "11.2 FL. OUNCES",
+          "amount": 11.2,
+          "unit": "FL. OUNCES"
+        },
         "name_address": "IMPORTED BY: PARK STREET IMPORTS MIAMI, FL",
-        "origin_statement": "PRODUCT OF GERMANY"
+        "origin_statement": "PRODUCT OF GERMANY",
+        "warning_text": "GOVERNMENT WARNING: (1) ACCORDING TO THE SURGEON GENERAL, WOMEN SHOULD NOT DRINK ALCOHOLIC BEVERAGES DURING PREGNANCY BECAUSE OF THE RISK OF BIRTH DEFECTS. (2) CONSUMPTION OF ALCOHOLIC BEVERAGES IMPAIRS YOUR ABILITY TO DRIVE A CAR OR OPERATE MACHINERY, AND MAY CAUSE HEALTH PROBLEMS.",
+        "warning_heading_all_caps": true
       },
       "expected": {
         "brand": "pass",
@@ -1661,7 +2022,12 @@
       "notes": [
         "Condensed capitals, widely justified.",
         "Application class is BEER; the label designates LAGER.",
-        "Net contents in US fluid ounces only (11.2 fl oz is about 331 mL)."
+        "Net contents in US fluid ounces only (11.2 fl oz is about 331 mL).",
+        "Front brand is set in small capitals with an oversized initial, 'FREISINGER', over 'LAGER'.",
+        "The back carries the name twice more: 'FREISINGER' over 'LAGER' at the top in the front's style, and 'FREISINGER LAGERBEER' on one line above the brewer's address, with LAGERBEER closed up as a single word.",
+        "The net-contents unit is spelled out as words: '11.2 FL. OUNCES', not FL. OZ. and not a millilitre figure. Neither image carries a metric equivalent, and the back states no quantity at all.",
+        "The front's bottom band reads '4.9% ALC. / VOL.' at the left, 'IMPORTED' in the centre and '11.2 FL. OUNCES' at the right; the alcohol wording carries spaces either side of the slash.",
+        "Warning is on the back, body fully justified in capitals; the heading 'GOVERNMENT WARNING' is bold capitals followed by a colon in the body weight. Both are set at a 22-row capital height, so the weights are comparable. With ink taken as grey below 140 against a paper near 194, the horizontal ink runs across the heading's letters average 3.9 pixels and the body's average 3.0; the commonest run is 3 for both, but the heading's next commonest is 4 (43 runs of 234) where the body's is 2 (137 runs of 463). The colon goes with the body by about one pixel, which is all the resolution allows: its dots, at x 293-295 y 472-474 and x 293-296 y 482-484, are 7 and 8 pixels in area and 3 to 4 columns wide, which falls at or below the body's own two full stops - 11 pixels and 4 columns after DEFECTS at x 217-220 y 559-562, and 8 pixels and 3 columns after PROBLEMS at x 665-667 y 611-613."
       ]
     },
     {
@@ -1710,9 +2076,21 @@
         "wine_appellation": null
       },
       "label_observed": {
+        "brand_name": "Hop Butcher FOR THE WORLD",
         "class_type": "DOUBLE INDIA PALE ALE",
+        "abv": {
+          "text": "ALC. 8.0% BY VOL.",
+          "percent": 8.0
+        },
+        "net_contents": {
+          "text": "ONE PINT (16 FL OZ)",
+          "amount": 16,
+          "unit": "FL OZ"
+        },
         "name_address": "BREWED AND CANNED BY HOP BUTCHER FOR THE WORLD IN CHICAGO, ILLINOIS AND BEDFORD PARK, ILLINOIS",
-        "origin_statement": null
+        "origin_statement": null,
+        "warning_text": "GOVERNMENT WARNING: (1) ACCORDING TO THE SURGEON GENERAL, WOMEN SHOULD NOT DRINK ALCOHOLIC BEVERAGES DURING PREGNANCY BECAUSE OF THE RISK OF BIRTH DEFECTS. (2) CONSUMPTION OF ALCOHOLIC BEVERAGES IMPAIRS YOUR ABILITY TO DRIVE A CAR OR OPERATE MACHINERY, AND MAY CAUSE HEALTH PROBLEMS.",
+        "warning_heading_all_caps": true
       },
       "expected": {
         "brand": "pass",
@@ -1728,7 +2106,13 @@
       "notes": [
         "Bold serif capitals throughout, in a narrow left column.",
         "Single wraparound can image; the registry record has no back image.",
-        "Fanciful name SATURATION ABOVE REPLACEMENT is hand-lettered over artwork."
+        "Fanciful name SATURATION ABOVE REPLACEMENT is hand-lettered over artwork.",
+        "One flat can wrap, so there is a single image; the mandatory text sits at the left of it.",
+        "The brand is one brush-script lockup: 'Hop' over 'Butcher' in mixed case, with a brushed banner directly beneath carrying 'FOR THE WORLD' in capitals. The reading above keeps both parts, because they are elements of a single mark rather than two names printed in different places.",
+        "'SATURATION ABOVE REPLACEMENT' is hand-lettered in capitals across the artwork on the right panel, and is set larger than the brand lockup: 511 pixels wide against the lockup's 170, with more than twice its ink. The reading above is the brush lockup at the top left, which is in the brand position and is the name the mandatory text repeats - 'BREWED AND CANNED BY HOP BUTCHER FOR THE WORLD IN CHICAGO, ILLINOIS AND BEDFORD PARK, ILLINOIS'. SATURATION ABOVE REPLACEMENT is the beer's own name and is the other candidate.",
+        "The bottom right line reads 'ALC. 8.0% BY VOL. | ONE PINT (16 FL OZ)' with a vertical bar between the two statements.",
+        "Net contents spells the quantity in words, 'ONE PINT', with '(16 FL OZ)' after it and no full stops in FL OZ.",
+        "Warning is set in capitals in a condensed serif; the heading 'GOVERNMENT WARNING:' is larger than the body."
       ]
     },
     {
@@ -1777,9 +2161,21 @@
         "wine_appellation": null
       },
       "label_observed": {
+        "brand_name": "OKTOBERFEST",
         "class_type": "GERMAN STYLE MÄRZEN LAGER",
+        "abv": {
+          "text": "6% ALC/VOL",
+          "percent": 6.0
+        },
+        "net_contents": {
+          "text": "1 PINT (16 FL OZ)",
+          "amount": 1,
+          "unit": "PINT"
+        },
         "name_address": "BREWED AND CANNED BY KEYWORTH BREWING COMPANY NORTH RICHLAND HILLS, TX",
-        "origin_statement": null
+        "origin_statement": null,
+        "warning_text": "GOVERNMENT WARNING: (1) ACCORDING TO THE SURGEON GENERAL, WOMEN SHOULD NOT DRINK ALCOHOLIC BEVERAGES DURING PREGNANCY BECAUSE OF THE RISK OF BIRTH DEFECTS. (2) CONSUMPTION OF ALCOHOLIC BEVERAGES IMPAIRS YOUR ABILITY TO DRIVE A CAR OR OPERATE MACHINERY, AND MAY CAUSE HEALTH PROBLEMS.",
+        "warning_heading_all_caps": true
       },
       "expected": {
         "brand": "pass",
@@ -1795,7 +2191,12 @@
       "notes": [
         "Tiny condensed capitals over patterned artwork in the lower-left corner, not bold; confirmed on a magnified crop.",
         "Single wraparound can image; the registry record has no back image.",
-        "Application class is BEER; the label designates MÄRZEN LAGER."
+        "Application class is BEER; the label designates MÄRZEN LAGER.",
+        "One flat can wrap, so there is a single image.",
+        "Two names are printed. 'OKTOBERFEST' is the largest text, arched across the top; 'KEYWORTH' over 'BREWING COMPANY' is a framed logo at the right. The reading above is the arched name in the brand position; the brewery logo is the other candidate.",
+        "The bottom banner reads '1 PINT (16 FL OZ)   6% ALC/VOL 19 IBU' on one line. The alcohol wording has no full stops and no space around the slash, and '19 IBU' follows it directly.",
+        "Warning is printed small at the bottom left over the illustration, in capitals, with 'GOVERNMENT WARNING:' on its own line above the body.",
+        "The marks after 'GENERAL' and after 'MACHINERY' are transcribed as commas, which the wording calls for, but the image cannot settle comma against full stop, and the measurement below is why. Ink is grey below 150 against a paper near 230, and the warning's capitals are 8 rows tall. Each of the four marks in the block is one column wide with ink over two rows: the suspect mark after GENERAL at x 206, greys 161 and 139 on y 829-830 against a baseline of y 830; the suspect mark after MACHINERY at x 253, greys 160, 120 and 159 on y 888-890 against a baseline of y 889; and the two certain full stops, DEFECTS. at x 248, greys 148 and 165 on y 859-860 against a baseline of y 859, and PROBLEMS. at x 181, greys 181 and 151 on y 903-904 against a baseline of y 904. The test that would separate the two shapes - whether the mark drops below the baseline - gives one row below for one certain full stop (DEFECTS.) and none for the other (PROBLEMS.), so the certain marks bracket the suspect ones and the test cannot decide them. The label's one certain comma at a larger size, in 'NORTH RICHLAND HILLS, TX' where the capitals are 14 rows tall, is at x 1373-1375, y 884-888: three columns wide, five rows tall, descending two rows below its baseline of y 886. Scaled to the warning's 8-row capitals that comma would be under two columns wide and under three rows tall, descending about one row, which is inside the one-row spread the four marks already show."
       ]
     },
     {
@@ -1844,9 +2245,21 @@
         "wine_appellation": null
       },
       "label_observed": {
+        "brand_name": "I Heard Cassarole",
         "class_type": "Double India Pale Ale (handwritten)",
+        "abv": {
+          "text": "ALC. / VOL. 8.0 %",
+          "percent": 8.0
+        },
+        "net_contents": {
+          "text": "15.5 US GALLONS / 10.8 US GALLONS / 7.75 US GALLONS / 5.16 US GALLONS",
+          "amount": null,
+          "unit": "US GALLONS"
+        },
         "name_address": "Mash Cult Brewery, FLORENCE, KY",
-        "origin_statement": "PRODUCT OF THE USA"
+        "origin_statement": "PRODUCT OF THE USA",
+        "warning_text": "GOVERNMENT WARNING: (1) ACCORDING TO THE SURGEON GENERAL, WOMEN SHOULD NOT DRINK ALCOHOLIC BEVERAGES DURING PREGNANCY BECAUSE OF THE RISK OF BIRTH DEFECTS. (2) CONSUMPTION OF ALCOHOLIC BEVERAGES IMPAIRS YOUR ABILITY TO DRIVE A CAR OR OPERATE MACHINERY, AND MAY CAUSE HEALTH PROBLEMS\"",
+        "warning_heading_all_caps": true
       },
       "expected": {
         "brand": "pass",
@@ -1864,7 +2277,15 @@
         "A real phone photo of a keg collar on a concrete floor, not flat artwork.",
         "Brand 'I Heard Cassarole', style and ABV are handwritten on the collar.",
         "The collar lists several keg sizes with one struck out, so there is no single net-contents value to match; expected outcome is needs_review.",
-        "Label names MASH CULT BREWERY, the DBA the application lists as used on label (applicant Party Town Liquor INC, Florence KY)."
+        "Label names MASH CULT BREWERY, the DBA the application lists as used on label (applicant Party Town Liquor INC, Florence KY).",
+        "A photograph of a printed keg collar lying on concrete, not flat artwork, so the small type is soft and the disc is slightly tilted.",
+        "The collar declares no single quantity. It preprints four sizes on four lines under the heading 'NET CONTENTS:', and the reading above joins those four lines in printed order with ' / '. Each of the four is transcribed as printed.",
+        "A hand-drawn stroke crosses the '7.7' of the third line, '7.75 US GALLONS'. It could be a tick selecting that size or a line cancelling it; the photograph does not settle which, so no single value is picked out of the four.",
+        "The brand is handwritten in marker, 'I Heard Cassarole', below the net-contents list. Two letters needed settling, and both were settled against the handwritten 'STYLE: Double India Pale Ale' line, which is the same hand at the same size - x-height 11 rows there, 11 rows in the brand. Coordinates below are front.jpg pixels; ink is grey below 160 against a page white near 225. Final letter is 'e', not 'u'. Every word on the style line that ends in 'e' - Double, Pale, Ale - ends in one downstroke with a hook leaving near the base to the right and no closing curve. The hand's only 'u', in 'Double' at x 178-183, y 508-518, is the other form: 6 columns wide and already at full width at the top of the letter. The brand's final glyph has ink in only 4 columns above its baseline, x 133-136; x 137 to x 145 is blank paper, grey 217 to 246, on every row from y 466 to y 477, and ink reaches x 139 only at the baseline, y 478-480. There is no room there for this hand's 'u'. Measuring spread - the columns between the rightmost ink in a letter's top half and its rightmost ink overall, over the letter's height - the brand glyph gives 0.27, the certain 'e's of Double, Pale and Ale give 0.20, 0.38 and 0.67, and the certain 'u' gives 0.00. Fifth letter is 'a', not 'e', so the brand is 'Cassarole' and not the ordinary spelling 'Casserole': it is a closed bowl, and the word holds exactly three enclosed counters, centred at x 89.5, x 109 and x 123, which are its two a's and its o. This hand's 'e' encloses nothing. The 'e' in 'Heard' could not be used for any of this; at this resolution the letters of that word run together.",
+        "The printed brewery logo reads 'Mash Cult' over 'Brewery' in a handwriting-style face, at the top centre. It is the other name on the collar.",
+        "The alcohol statement is part printed, part handwritten: printed 'ALC. / VOL.', then '8.0' in marker, then a printed '%'.",
+        "Other handwritten fields: 'BATCH # 003', 'BORN ON: 8/26/26', and 'STYLE: Double India Pale Ale'.",
+        "The warning body is in capitals and ends 'HEALTH PROBLEMS' followed by a raised mark, transcribed as a closing double quote. No opening quote appears before the heading. Ink is grey below 170 against a paper near 232. The mark is not a full stop: that line's capitals occupy y 360-364, and the mark occupies only y 360-361, with clean paper at y 362-364 (greys 218 to 238), so it is raised to the top of the capital band and never reaches the baseline. It is a doubled mark rather than a single tick, by comparison with this label's own certain comma after 'MACHINERY' three lines above, which is the same type size and the same two-row height: that comma spans two columns, x 122-123 on y 348-349, and carries about 178 grey-levels of ink; the mark spans three columns, x 54-56 on y 360-361 with its peak at x 55, and carries about 406, roughly double. Both totals take ink as paper minus grey summed over the mark's own columns, with the neighbouring letter's column excluded - the S at x 53 for the mark, the Y at x 121 for the comma."
       ],
       "also_acceptable": {
         "warning_exact": [
@@ -1925,9 +2346,21 @@
         "wine_appellation": null
       },
       "label_observed": {
+        "brand_name": "ŠVYTURYS",
         "class_type": "PREMIUM LAGER BEER / BEER",
+        "abv": {
+          "text": "5.2% ALC./VOL.",
+          "percent": 5.2
+        },
+        "net_contents": {
+          "text": "1 PT. 3.2 FL. OZ. / 568 mL.",
+          "amount": 568,
+          "unit": "mL"
+        },
         "name_address": "Imported by: B&I Overseas Trading, Inc., Van Nuys, California, USA",
-        "origin_statement": "PRODUCT OF LITHUANIA"
+        "origin_statement": "PRODUCT OF LITHUANIA",
+        "warning_text": "GOVERNMENT WARNING: (1) According to the Surgeon General, women should not drink alcoholic beverages during pregnancy because of the risk of birth defects. (2) Consumption of alcoholic beverages impairs your ability to drive a car or operate machinery, and may cause health problems.",
+        "warning_heading_all_caps": true
       },
       "expected": {
         "brand": "pass",
@@ -1943,7 +2376,14 @@
       "notes": [
         "Tiny sentence-case type in a narrow column at the right of the can wrap.",
         "Single can-wrap image; the registry record has no back image.",
-        "Label brand ŠVYTURYS carries a diacritic; the application spells it SVYTURYS. Fanciful name EKSTRA is on the label."
+        "Label brand ŠVYTURYS carries a diacritic; the application spells it SVYTURYS. Fanciful name EKSTRA is on the label.",
+        "One flat can wrap, so there is a single image covering the whole can.",
+        "The brand carries a diacritic: the first letter is S with a caron, 'ŠVYTURYS', inside a black oval with '1784' below it. It is printed the same way on the bottom band.",
+        "'EKSTRA' is the largest text on the label. It is set in capitals 89 rows tall across the front panel, well above the oval's ŠVYTURYS, and again as a single word running 563 pixels down the side panel. The side panel's information block opens 'ŠVYTURYS EKSTRA' on one line. The reading above is the oval mark, which is in the brand position and is repeated on the bottom band; EKSTRA is the beer's own name and is the other candidate.",
+        "The front panel states the alcohol as '5.2% ALC./VOL.' with no space around the slash; the side information panel states it as 'BEER - 5.2% ALC./VOL.' with an en dash after BEER. The reading above is the front panel's.",
+        "Net contents appears once, in the side panel. The space between 'FL.' and 'OZ.' was measured on the pixels rather than judged by eye: it is 3 columns of blank, which matches the narrowest confirmed word space on the same line ('/' to '568' and '568' to 'mL' are both 3) and is wider than every gap inside a token (1 to 2). So it is a space, and the wording is 'FL. OZ.'",
+        "The full stop after mL is printed faintly - about grey 165 where the background is 210 and the letter strokes are 88 to 138 - but it is present, three columns past the foot of the L.",
+        "Warning is in the side panel, body in sentence case wrapped over narrow lines; the heading 'GOVERNMENT WARNING:' is bold capitals."
       ]
     },
     {
@@ -1995,9 +2435,21 @@
         "wine_appellation": null
       },
       "label_observed": {
+        "brand_name": "Gallo",
         "class_type": "LAYER PREMIUM BEER / CERVEZA LAGER, LAGER BEER",
+        "abv": {
+          "text": "ALC. BY VOL. 5%",
+          "percent": 5.0
+        },
+        "net_contents": {
+          "text": "350 ML / 12 FL OZ",
+          "amount": 350,
+          "unit": "ML"
+        },
         "name_address": "Imported by Latin American Traders LLC 8859 NW 102nd Ct, Doral, FL 33178",
-        "origin_statement": "Product of Guatemala"
+        "origin_statement": "Product of Guatemala",
+        "warning_text": "GOVERNMENT WARNING: (1) According to the Surgeon General, women should not drink alcoholic beverages during pregnancy because of the risk of birth defects. (2) Consumption of alcoholic beverages impairs your ability to drive a car or operate machinery, and may cause health problems.",
+        "warning_heading_all_caps": true
       },
       "expected": {
         "brand": "pass",
@@ -2013,7 +2465,12 @@
       "notes": [
         "Whole statement in bold.",
         "The application brand is QALIO, but the label's script logo reads as 'Gallo' (its first letter looks like a Q). A checker that flags the brand for review is also acceptable.",
-        "The front misprints 'LAYER PREMIUM BEER' for lager; the back says 'CERVEZA LAGER / LAGER BEER'."
+        "The front misprints 'LAYER PREMIUM BEER' for lager; the back says 'CERVEZA LAGER / LAGER BEER'.",
+        "The brand is an italic script logo on a red panel, 'Gallo', with a registered-trademark symbol. Its first letter is a stylised capital whose bowl and tail can be taken for a lower-case q; the word reads Gallo, and the same logo on the back sits above 'CERVEZA LAGER' / 'LAGER BEER'.",
+        "Under the logo the front prints 'LAYER PREMIUM BEER', spelled LAYER, not LAGER.",
+        "The front's curved bottom line reads 'NET CONT. 350 ML / 12 FL OZ'; the reading above drops the 'NET CONT.' prefix and keeps the declaration. Both units are printed, with capital ML and no full stops in FL OZ. 12 FL OZ is about 355 mL, so the two figures the label itself prints are not equal.",
+        "The alcohol statement sits above it as 'ALC. BY VOL. 5%', with the figure after the words.",
+        "Warning is on the back, heading 'GOVERNMENT WARNING:' in bold capitals on its own line, body in sentence case."
       ],
       "also_acceptable": {
         "brand": [
@@ -2070,9 +2527,21 @@
         "wine_appellation": "CHATEAUNEUF-DU-PAPE"
       },
       "label_observed": {
+        "brand_name": "DOMAINE DU GRAND TINEL",
         "class_type": "WHITE RHONE WINE / CHATEAUNEUF-DU-PAPE",
+        "abv": {
+          "text": "ALC. 14 % BY VOL.",
+          "percent": 14.0
+        },
+        "net_contents": {
+          "text": "NET CONTENTS 750 ML",
+          "amount": 750,
+          "unit": "ML"
+        },
         "name_address": "IMPORTED BY BURKE SELECTIONS LLC, HOUSTON, TX",
-        "origin_statement": "PRODUCT OF FRANCE"
+        "origin_statement": "PRODUCT OF FRANCE",
+        "warning_text": "GOVERNMENT WARNING : (1) ACCORDING TO THE SURGEON GENERAL, WOMEN SHOULD NOT DRINK ALCOHOLIC BEVERAGES DURING PREGNANCY BECAUSE OF THE RISK OF BIRTH DEFECTS. (2) CONSUMPTION OF ALCOHOLIC BEVERAGES IMPAIRS YOUR ABILITY TO DRIVE A CAR OR OPERATE MACHINERY, AND MAY CAUSE HEALTH PROBLEMS.",
+        "warning_heading_all_caps": true
       },
       "expected": {
         "brand": "pass",
@@ -2088,7 +2557,12 @@
       "notes": [
         "Space before the heading's colon ('GOVERNMENT WARNING :').",
         "The image TTB tags 'Brand (front)' carries all mandatory text; the image tagged 'Back' is the decorative label.",
-        "Brand DOMAINE DU GRAND TINEL; appellation Châteauneuf-du-Pape and vintage 2025 on both images."
+        "Brand DOMAINE DU GRAND TINEL; appellation Châteauneuf-du-Pape and vintage 2025 on both images.",
+        "Read from front.jpg (483x632), the image carrying all mandatory text; enlarged 3x. back.jpg is the decorative label, printing the brand in upper and lower case as 'Domaine du Grand Tinel'.",
+        "The net contents statement is printed with its prefix, 'NET CONTENTS 750 ML', on its own line; the quantity and unit as printed are '750 ML'.",
+        "The alcohol statement has a space before the per-cent sign: 'ALC. 14 % BY VOL.'",
+        "The warning heading has a space before its colon: 'GOVERNMENT WARNING :'. warning_text keeps that space.",
+        "Warning heading is in capitals and set in a bold serif, heavier than the body."
       ]
     },
     {
@@ -2140,9 +2614,21 @@
         "wine_appellation": "CHAMPAGNE PREMIER CRU"
       },
       "label_observed": {
+        "brand_name": "GAIFFE-BRUN",
         "class_type": "Sparkling Wine / Champagne Premier Cru",
+        "abv": {
+          "text": "ALC. 12,5% BY VOL.",
+          "percent": 12.5
+        },
+        "net_contents": {
+          "text": "750 ml",
+          "amount": 750,
+          "unit": "ml"
+        },
         "name_address": "IMPORTED BY: WINERY DIRECT, STUDIO CITY, CA",
-        "origin_statement": "PRODUCT OF France"
+        "origin_statement": "PRODUCT OF France",
+        "warning_text": "GOVERNMENT WARNING: (1) According to the Surgeon General, women should not drink alcoholic beverages during pregnancy because of the risk of birth defects. (2) Consumption of alcoholic beverages impairs your ability to drive a car or operate machinery, and may cause health problems.",
+        "warning_heading_all_caps": true
       },
       "expected": {
         "brand": "pass",
@@ -2159,7 +2645,11 @@
         "Body in sentence case, boxed.",
         "Alcohol content uses a decimal comma (12,5%).",
         "Label names WINERY DIRECT, the DBA the application lists as used on label (applicant ACCOLADE BRANDS, INC., Studio City CA).",
-        "The image TTB tags 'Brand (front)' carries the mandatory text; the image tagged 'Back' shows CHAMPAGNE GAIFFE-BRUN ÉMOTION."
+        "The image TTB tags 'Brand (front)' carries the mandatory text; the image tagged 'Back' shows CHAMPAGNE GAIFFE-BRUN ÉMOTION.",
+        "Read from front.jpg (852x1002), the image carrying all mandatory text; back.jpg prints 'CHAMPAGNE GAIFFE-BRUN' and 'EMOTION'.",
+        "The alcohol statement uses a decimal comma: 'ALC. 12,5% BY VOL.'",
+        "Net contents are printed in lower case with a space: '750 ml'.",
+        "Warning body is in sentence case inside a ruled box; the heading 'GOVERNMENT WARNING:' is in capitals and bold."
       ]
     },
     {
@@ -2211,9 +2701,21 @@
         "wine_appellation": "ITALY"
       },
       "label_observed": {
+        "brand_name": "FABIO SIGNORELLI",
         "class_type": "ROSE WINE",
+        "abv": {
+          "text": "12% ALC. BY VOL.",
+          "percent": 12.0
+        },
+        "net_contents": {
+          "text": "750 ML",
+          "amount": 750,
+          "unit": "ML"
+        },
         "name_address": "IMPORTED BY: WHITSERVE LLC STAMFORD, CONNECTICUT",
-        "origin_statement": "PRODUCT OF ITALY"
+        "origin_statement": "PRODUCT OF ITALY",
+        "warning_text": "Government Warning: (1) ACCORDING TO THE SURGEON GENERAL, WOMEN SHOULD NOT DRINK ALCOHOLIC BEVERAGES DURING PREGNANCY BECAUSE OF THE RISK OF BIRTH DEFECTS. (2) CONSUMPTION OF ALCOHOLIC BEVERAGES IMPAIRS YOUR ABILITY TO DRIVE A CAR OR OPERATE MACHINERY, AND MAY CAUSE HEALTH PROBLEMS.",
+        "warning_heading_all_caps": false
       },
       "expected": {
         "brand": "pass",
@@ -2295,9 +2797,21 @@
         "wine_appellation": "ITALY"
       },
       "label_observed": {
+        "brand_name": "FABIO SIGNORELLI",
         "class_type": "ROSE WINE",
+        "abv": {
+          "text": "12% ALC. BY VOL.",
+          "percent": 12.0
+        },
+        "net_contents": {
+          "text": "750 ML",
+          "amount": 750,
+          "unit": "ML"
+        },
         "name_address": "IMPORTED BY: WHITSERVE LLC STAMFORD, CONNECTICUT",
-        "origin_statement": "PRODUCT OF ITALY"
+        "origin_statement": "PRODUCT OF ITALY",
+        "warning_text": "GOVERNMENT WARNING: (1) ACCORDING TO THE SURGEON GENERAL, WOMEN SHOULD NOT DRINK ALCOHOLIC BEVERAGES DURING PREGNANCY BECAUSE OF THE RISK OF BIRTH DEFECTS. (2) CONSUMPTION OF ALCOHOLIC BEVERAGES MAY IMPAIR YOUR ABILITY TO DRIVE A CAR OR OPERATE MACHINERY, AND MAY CAUSE HEALTH PROBLEMS.",
+        "warning_heading_all_caps": true
       },
       "expected": {
         "brand": "pass",
@@ -2378,9 +2892,21 @@
         "wine_appellation": null
       },
       "label_observed": {
+        "brand_name": "JUAN LOBO",
         "class_type": "TEQUILA / 100% BLUE AGAVE / REPOSADO",
+        "abv": {
+          "text": "40% ALC./VOL.",
+          "percent": 40.0
+        },
+        "net_contents": {
+          "text": "750mL",
+          "amount": 750,
+          "unit": "mL"
+        },
         "name_address": "IMPORTED BY JUAN LOBO TEQUILA, LLC BUDA, TEXAS",
-        "origin_statement": "HECHO EN MEXICO"
+        "origin_statement": "HECHO EN MEXICO",
+        "warning_text": "GOVERNMENT WARNING: (1)ACCORDING TO THE SURGEON GENERAL, WOMEN SHOULD NOT DRINK ALCOHOLIC BEVERAGES DURING PREGNANCY BECAUSE OF THE RISK OF BIRTH DEFECTS. (2) CONSUMPTION OF ALCOHOLIC BEVERAGES IMPAIRS YOUR ABILITY TO DRIVE A CAR OR OPERATE MACHINERY, AND MAY CAUSE HEALTH PROBLEMS.",
+        "warning_heading_all_caps": true
       },
       "expected": {
         "brand": "pass",
@@ -2451,9 +2977,21 @@
         "wine_appellation": null
       },
       "label_observed": {
+        "brand_name": "Lucky Lucy's",
         "class_type": "BOURBON WHISKEY",
+        "abv": {
+          "text": "40%ALC/VOL/80 PROOF",
+          "percent": 40.0
+        },
+        "net_contents": {
+          "text": "1 LITER",
+          "amount": 1,
+          "unit": "LITER"
+        },
         "name_address": "AGED AND BOTTLED BY CHICAGOLAND SPIRITS, ELK GROVE VILLAGE, IL.",
-        "origin_statement": "MADE IN THE USA"
+        "origin_statement": "MADE IN THE USA",
+        "warning_text": "GOVERNMENT WARNING  : (1) ACCORDING TO THE SURGEON GENERAL,  WOMEN SHOULD NOT DRINK ALCOHOLIC BEVERAGES DURING PREGNANCY BECAUSE OF THE RISK OF BIRTH DEFECTS. (2) CONSUMPTION OF ALCOHOLIC BEVERAGES IMPAIRS YOUR ABILITY TO DRIVE A CAR OR OPERATE MACHINERY,  AND MAY CAUSE HEALTH PROBLEMS.",
+        "warning_heading_all_caps": true
       },
       "expected": {
         "brand": "pass",
@@ -2524,9 +3062,21 @@
         "wine_appellation": "RUSSIAN RIVER VALLEY"
       },
       "label_observed": {
+        "brand_name": "Patria",
         "class_type": "CHARDONNAY",
+        "abv": {
+          "text": "ALC 13.5% BY VOL.",
+          "percent": 13.5
+        },
+        "net_contents": {
+          "text": "750ML",
+          "amount": 750,
+          "unit": "ML"
+        },
         "name_address": "PRODUCED AND BOTTLED BY SEPIA WINES LLC, CALISTOGA, CA",
-        "origin_statement": null
+        "origin_statement": null,
+        "warning_text": "GOVERNMENT WARNING: (1) ACCORDING TO THE SURGEON GENERAL, WOMEN SHOULD NOT DRINK ALCOHOLIC BEVERAGES DURING PREGNANCY BECAUSE OF THE RISK OF BIRTH DEFECTS. (2) CONSUMPTION OF ALCOHOLIC BEVERAGES IMPAIRS YOUR ABILITY TO DRIVE A CAR OR OPERATE MACHINERY, AND MAY CAUSE HEALTH PROBLEMS.",
+        "warning_heading_all_caps": true
       },
       "expected": {
         "brand": "pass",
@@ -2630,9 +3180,21 @@
         "wine_appellation": null
       },
       "label_observed": {
+        "brand_name": "AODH",
         "class_type": "IRISH WHISKEY",
+        "abv": {
+          "text": "Alc. 42.8% by vol.",
+          "percent": 42.8
+        },
+        "net_contents": {
+          "text": "750ml",
+          "amount": 750,
+          "unit": "ml"
+        },
         "name_address": "IMPORTED BY: EASTERN LIQUORS USA. INC. 990 WESTBURY ROAD, 2ND FLOOR SUIT 200, A,B,C WESTBURY, NY 11590",
-        "origin_statement": "DISTILLED IN IRELAND"
+        "origin_statement": "DISTILLED IN IRELAND",
+        "warning_text": "GOVERNMENT WARNING:  (1) ACCORDING TO THE SURGEON GENERAL, WOMEN SHOULD NOT DRINK ALCOHOLIC BEVERAGES DURING PREGNANCY BECAUSE OF THE RISK OF BIRTH DEFECTS. (2) CONSUMPTION OF ALCOHOLIC BEVERAGES IMPAIRS YOUR ABILITY TO DRIVE A CAR OR OPERATE MACHINERY, AND MAY CAUSE HEALTH PROBLEMS.",
+        "warning_heading_all_caps": true
       },
       "expected": {
         "brand": "pass",
@@ -2737,9 +3299,21 @@
         "wine_appellation": "ANDERSON VALLEY"
       },
       "label_observed": {
+        "brand_name": "BEAR PATH",
         "class_type": "GEWURZTRAMINER",
+        "abv": {
+          "text": "ALC. 12.8% BY VOL.",
+          "percent": 12.8
+        },
+        "net_contents": {
+          "text": "750ML",
+          "amount": 750,
+          "unit": "ML"
+        },
         "name_address": "VINTED, CELLARED AND BOTTLED BY PROSPECT VINEYARDS UKIAH, CALIFORNIA",
-        "origin_statement": null
+        "origin_statement": null,
+        "warning_text": "GOVERNMENT WARNING: (1) According to the Surgeon General, women should not drink alcoholic beverages during pregnancy because of the risk of birth defects. (2) Consumption of alcoholic beverages impairs your ability to drive a car or operate machinery, and may cause health problems.",
+        "warning_heading_all_caps": true
       },
       "expected": {
         "brand": "pass",
@@ -2842,9 +3416,21 @@
         "wine_appellation": null
       },
       "label_observed": {
+        "brand_name": "Black & White",
         "class_type": "Blended Scotch Whisky",
+        "abv": {
+          "text": "40% alc./vol.",
+          "percent": 40.0
+        },
+        "net_contents": {
+          "text": "700 mL",
+          "amount": 700,
+          "unit": "mL"
+        },
         "name_address": "Imported by: MENDEZ & COMPANY, SAN JUAN, PUERTO RICO",
-        "origin_statement": "PRODUCT OF SCOTLAND"
+        "origin_statement": "PRODUCT OF SCOTLAND",
+        "warning_text": "GOVERNMENT WARNING: (1) ACCORDING TO THE  SUR-\nGEON GENERAL, WOMEN SHOULD NOT DRINK ALCOHOLIC\nBEVERAGES DURING PREGNANCY BECAUSE OF THE RISK\n OF BIRTH DEFECTS. (2) CONSUMPTION OF  ALCOHOLIC BEV-\nERAGES IMPAIRS YOUR ABILITY TO DRIVE A CAR OR OP-\nERATE MACHINERY, AND MAY CAUSE HEALTH PROBLEMS.",
+        "warning_heading_all_caps": true
       },
       "expected": {
         "brand": "pass",

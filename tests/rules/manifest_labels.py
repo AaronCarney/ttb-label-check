@@ -6,13 +6,18 @@ element, what a correct check reports. It is the specification for what
 "the label matches the application" means, so the tests read it rather than
 restating it.
 
-The manifest records what the label shows for class and type, name and
-address, and the origin statement. It does not restate the brand, the alcohol
-content or the net contents as separate readings, because for an approved
-label those were read off the label in the first place and are already in its
-application record. A variant that alters the application therefore takes
-those three readings from the entry it derives from, which is exactly the
-mismatch the variant exists to create.
+Each entry's `label_observed` block is what the label itself shows,
+transcribed from its images without reference to the application: the brand
+mark it displays, its alcohol and net-contents declarations with the unit
+words as printed, the name-and-address and origin statements, and the health
+warning. Every reading here comes from that block, so the two sides of each
+comparison are independent — which is the point. A reading taken from the
+application record would make the rule engine compare a value with itself and
+report a pass it had not earned.
+
+A variant's block is its source label's, with the variant's own alteration
+applied: an altered application leaves the label's readings untouched, and a
+repainted warning block changes the warning reading alone.
 """
 from __future__ import annotations
 
@@ -62,34 +67,29 @@ def application_record(entry: dict[str, Any]) -> ApplicationRecord:
     )
 
 
-def _source_entry(entry: dict[str, Any]) -> dict[str, Any]:
-    """The entry whose application values were read off this label image.
-
-    For an approved label that is the entry itself. For a variant that altered
-    the application, it is the entry the variant derives from, because the
-    image — and so what the label reads — is unchanged.
-    """
-    derives_from = entry.get("variant", {}).get("derives_from")
-    return entries_by_id()[derives_from] if derives_from else entry
-
-
 def label_observations(entry: dict[str, Any]) -> tuple[FieldObservation, ...]:
     """What a reader returns for this label, in the payload shapes the
     extractor emits (`_SCHEMAS` in `app/vision/cloud.py`)."""
     observed = entry["label_observed"]
-    source = _source_entry(entry)["application"]
     beverage_class = application_record(entry).beverage_class
-    alcohol = source.get("alcohol_content") or {}
-    net = source.get("net_contents") or {}
+    alcohol = observed.get("abv") or {}
+    net = observed.get("net_contents") or {}
 
     def obs(field_id: str, value: Any) -> FieldObservation:
         return make_obs(field_id=field_id, value=value, beverage_class=beverage_class)
 
     return (
-        obs("brand_name", {"brand_name": source.get("brand_name") or "", "confidence": 0.95}),
+        obs("brand_name", {"brand_name": observed.get("brand_name") or "", "confidence": 0.95}),
         obs("class_type", {"class_type": observed.get("class_type") or "", "confidence": 0.95}),
         obs("abv", {"abv_pct": alcohol.get("percent"), "unit": "%", "confidence": 0.95}),
-        obs("net_contents", {"net_contents_value": net.get("ml"), "unit": "mL", "confidence": 0.95}),
+        obs(
+            "net_contents",
+            {
+                "net_contents_value": net.get("amount"),
+                "unit": net.get("unit") or "",
+                "confidence": 0.95,
+            },
+        ),
         obs(
             "name_address",
             {"name": observed.get("name_address") or "", "city": "", "state": "", "confidence": 0.95},
