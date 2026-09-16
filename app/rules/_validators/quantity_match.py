@@ -27,6 +27,9 @@ an edit to the rule pack and not to this file.
 """
 from __future__ import annotations
 
+import re
+from decimal import ROUND_HALF_UP, Decimal
+
 from app.rules._validators import ValidatorContext, register
 from app.rules._validators._helpers import (
     _build_meta,
@@ -44,6 +47,34 @@ from app.schemas.rules import RuleDefinition
 # only because a reading that travelled through a float cannot be trusted to
 # compare exactly against the same value written as a decimal.
 _EQUALITY_MARGIN = 1e-9
+
+# The digits of the first number in a reading, kept apart so the printed
+# precision can be read off the text rather than inferred from a float.
+_NUMBER_RE = re.compile(r"[0-9]+(?:\.([0-9]+))?")
+
+
+def _number_and_precision(reading: str) -> tuple[float, int] | None:
+    """The label's first number, and how many decimal places it was printed to.
+
+    The precision is what makes a cross-unit comparison possible. A label
+    states a rounded figure -- "12.7 FL. OZ." is as precise as a tenth of a
+    fluid ounce gets -- so the only fair question is whether the application's
+    figure, written the same way, would print the same digits.
+    """
+    match = _NUMBER_RE.search(reading)
+    if match is None:
+        return None
+    decimals = match.group(1)
+    return float(match.group()), len(decimals) if decimals else 0
+
+
+def _round_half_up(value: float, places: int) -> float:
+    """Round with a half always going up, which is how a printed figure is
+    rounded. Python's own round() sends a half to the nearest even number, so
+    12.5 becomes 12 and 13.5 becomes 14; a compliance check must not have a
+    rule that changes with the digit before it."""
+    quantum = Decimal(1).scaleb(-places)
+    return float(Decimal(repr(value)).quantize(quantum, rounding=ROUND_HALF_UP))
 
 
 def _observed_unit(obs: FieldObservation) -> str:
@@ -133,15 +164,35 @@ def quantity_match(
     if declared_amount is None:
         return cannot_check()
 
-    observed_amount = first_number(project_reading(obs))
-    if observed_amount is None:
+    reading = _number_and_precision(project_reading(obs))
+    if reading is None:
         return cannot_check()
+    observed_amount, observed_precision = reading
 
     factor = _conversion_factor(_observed_unit(obs), rule, ctx)
     if factor is None:
         return cannot_check()
 
-    if abs(observed_amount * factor - float(declared_amount)) <= _EQUALITY_MARGIN:
+    # The two are compared in the label's unit, at the label's precision. A
+    # label printing a customary size and an application recording millilitres
+    # describe the same container in two ways, and the customary figure is a
+    # rounded one: 375 mL is 12.68 fluid ounces, which a label prints as 12.7.
+    # Demanding that 12.7 fluid ounces convert back to exactly 375 rejects a
+    # compliant label, because the rounding can never be undone. Asking
+    # instead what the label would print if it stated the application's figure
+    # answers the real question. Where no conversion happened, nothing was
+    # rounded away and the two numbers must still be equal outright.
+    if factor == 1.0:
+        # Same unit on both sides. Nothing was rounded away, so the two
+        # numbers must simply be equal.
+        agrees = abs(observed_amount - float(declared_amount)) <= _EQUALITY_MARGIN
+    else:
+        declared_in_label_unit = float(declared_amount) / factor
+        agrees = (
+            abs(_round_half_up(declared_in_label_unit, observed_precision) - observed_amount)
+            <= _EQUALITY_MARGIN
+        )
+    if agrees:
         return result(Outcome.PASS, rule.severity, None)
     return result(
         Outcome.FAIL,

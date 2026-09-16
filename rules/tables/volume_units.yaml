@@ -5,10 +5,15 @@
 # The customary factors are exact by definition: one US gallon is 3.785411784
 # litres, and the smaller customary units are fixed fractions of it.
 #
-# A unit this table does not list converts by 1, which is the reader's own
-# unit. A unit whose factor is left empty cannot be converted, and the check
-# goes to a reviewer rather than comparing two numbers that mean different
-# things.
+# A unit this table does not list cannot be converted, and neither can one
+# whose factor is left empty. Both send the check to a reviewer rather than
+# comparing two numbers that mean different things. A label reading "1 PT"
+# treated as the application's own millilitres is how a compliant bottle came
+# to be rejected against 750.
+#
+# Spelled-out and abbreviated forms are both listed because a label prints
+# either, and the words are run together before they are matched, so
+# "FL. OUNCES" and "fl ounces" are the same entry.
 interpolation: none
 entries:
   - unit: mL
@@ -30,6 +35,10 @@ entries:
   - unit: fluid ounce
     factor: 29.5735295625
   - unit: fluid ounces
+    factor: 29.5735295625
+  - unit: fl ounces
+    factor: 29.5735295625
+  - unit: fl ounce
     factor: 29.5735295625
   - unit: pint
     factor: 473.176473

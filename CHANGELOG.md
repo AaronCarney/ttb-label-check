@@ -16,6 +16,17 @@ All notable changes to this project are recorded here. The format follows
   the label says, and each comparison states what counts as the same value.
 - A grader can enter an application's details on the page and check a label against them.
 
+### Fixed
+
+- A label stating its net contents in fluid ounces or pints is no longer rejected against an
+  application recording millilitres. The customary figure a label prints is a rounded one — 375 mL
+  is 12.68 fluid ounces, printed as 12.7 — so converting it back could never land on the
+  application's number exactly, and four compliant labels were reported as failing. The check now
+  asks what the label would print if it stated the application's figure in the label's own unit and
+  to the label's own precision. Two numbers in the same unit are still compared exactly.
+- The unit table now lists the spelled-out forms `fl ounce` and `fl ounces`, so a label reading
+  `11.2 FL. OUNCES` converts instead of going to a reviewer as unreadable.
+
 ### Changed
 
 - The app loads the OCR models once for the process instead of once for every label, so a label no
