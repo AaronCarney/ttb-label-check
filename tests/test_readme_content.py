@@ -122,3 +122,21 @@ def test_readme_coverage_table_answers_both_deliverables() -> None:
     coverage = _section(_readme(), "## What the brief asked for")
     for deliverable in ("Source code repository", "Deployed application URL"):
         assert deliverable in coverage, f"coverage table missing {deliverable!r}"
+
+
+def test_readme_records_the_latency_requirement_as_unverified() -> None:
+    """A P0 with no measurement has to be stated, not omitted.
+
+    R15/NFR-1 promises 95 percent of single checks inside five seconds and no
+    run has confirmed it. A README that simply stays quiet about it reads
+    exactly like one whose product met it, so the silence is the failure this
+    guard catches. The section also names the test that takes the number, so
+    whoever stands the Space up knows what to run.
+    """
+    deployed = _section(_readme(), "## Deployed URL")
+    assert "not verified" in deployed.lower(), (
+        "Deployed URL section no longer records R15/NFR-1 as unverified"
+    )
+    assert "tests/test_deploy_healthz.py" in deployed, (
+        "Deployed URL section does not name the test that measures it"
+    )

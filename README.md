@@ -35,6 +35,25 @@ image has something to build, that the Space card and the container agree on a p
 frontend is committed, and that every path the build copies is in the tree. It runs as part of the
 test suite.
 
+### The five-second requirement is not verified
+
+R15 in [the requirements](specs/0001-label-verification/requirements.md) and NFR-1 in
+[the PRD](docs/PRD.md) are one promise, and both mark it P0: 95 percent of single checks show
+results within five seconds. **No run has confirmed it, and this file publishes no figure for it.**
+
+Speed belongs to the machine doing the reading, and this prototype is built to read on the deployed
+Space rather than on a developer's computer, so a number measured here would describe the wrong
+hardware. The Space is not up, so the measurement has not been taken.
+
+The check itself is written and waiting. `tests/test_deploy_healthz.py` posts every test submission
+to the deployed single-check route one at a time, throws away the first as a cold start, and asserts
+the share that came back inside five seconds. It skips while there is no URL and runs the moment
+there is one:
+
+```bash
+TTB_DEPLOY_URL=https://owner-name.hf.space uv run pytest tests/test_deploy_healthz.py
+```
+
 Everything below runs today from a clone, which is the other half of the same deliverable.
 
 ## What it is
