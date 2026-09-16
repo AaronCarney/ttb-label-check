@@ -69,14 +69,19 @@ def _conversion_factor(unit: str, rule: RuleDefinition, ctx: ValidatorContext) -
     "1 PT" came to be compared with 750 millilitres and rejected: the two
     numbers are not the same measurement, and the product must not say a label
     is wrong on that basis.
+
+    A unit's words are run together before they are compared, because a reader
+    may or may not keep the space inside one. The local reader strips it, so
+    "FL. OZ." arrives as "FLOZ" and would never match the table's "fl oz" if
+    the two were compared word for word.
     """
     ref = rule.decision_table_ref
     table = ctx.decision_tables.get(ref) if ref else None
     if table is None or not unit:
         return 1.0
-    wanted = normalize_words(unit)
+    wanted = "".join(normalize_words(unit))
     for entry in table.entries:
-        if normalize_words(str(entry.get("unit", ""))) == wanted:
+        if "".join(normalize_words(str(entry.get("unit", "")))) == wanted:
             factor = entry.get("factor")
             return None if factor is None else float(factor)
     return None
