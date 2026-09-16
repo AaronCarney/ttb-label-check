@@ -71,6 +71,23 @@ def test_a_change_of_mode_gets_the_reader_it_asked_for(monkeypatch):
     )
 
 
+def test_the_cloud_reader_is_not_shared(monkeypatch):
+    """Only the reader with models to load is shared.
+
+    The cloud reader loads nothing, and it holds an ``asyncio.Semaphore``, which
+    binds to the first event loop that awaits it and rejects the next. Sharing
+    one across a process would hand a second loop a primitive it cannot use.
+    """
+    monkeypatch.setenv("VISION_MODE", "cloud")
+    monkeypatch.setenv("OPENAI_API_KEY", "sk-test")
+
+    first = get_vision_extractor(Settings())
+    second = get_vision_extractor(Settings())
+
+    assert isinstance(first, CloudVisionExtractor)
+    assert first is not second, "the cloud reader must be built per request"
+
+
 def test_reads_on_the_shared_reader_do_not_overlap():
     """One engine serves every request, so two reads must queue, not overlap."""
     reader = LocalVisionExtractor(settings=Settings(), ring_buffer=new_call_ring_buffer())

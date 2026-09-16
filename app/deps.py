@@ -1,6 +1,8 @@
 """DI container — selects the VisionExtractor named by the environment."""
 from __future__ import annotations
 
+import threading
+
 from app.config import Settings
 from app.logging.ring_buffer import new_call_ring_buffer
 from app.vision.base import VisionExtractor
@@ -31,31 +33,42 @@ def build_vision_extractor(settings: Settings) -> VisionExtractor:
     return LocalVisionExtractor(settings=settings, ring_buffer=ring)
 
 
-_vision_singleton: "tuple[str, VisionExtractor] | None" = None
+_local_reader_singleton: "LocalVisionExtractor | None" = None
+_local_reader_build_lock = threading.Lock()
 
 
 def get_vision_extractor(settings: Settings) -> VisionExtractor:
-    """Process-wide reader, so a label does not pay for loading the models.
+    """The reader for this request, sharing the local one across the process.
 
     The local reader reads about a second of OCR models off disk the first time
     it is asked for text. Built per request, that second landed on every label,
     ``/healthz`` warmed a reader it then threw away, and the reader's call ring
-    buffer died with the request that made it. One reader for the process pays
-    the load once and keeps the record.
+    buffer died with the request that made it. One local reader for the process
+    pays the load once and keeps the record.
 
-    Keyed by ``VISION_MODE`` so a process told to use the other reader gets the
-    one it asked for rather than the one it built first (decision 0005).
+    The cloud reader is still built per request, because sharing it buys nothing
+    and costs something. It loads no models — its ``ensure_loaded`` returns
+    immediately — and it holds an ``asyncio.Semaphore``, which binds to the
+    first event loop that awaits it and rejects the next. A per-request
+    instance never meets a second loop; a process-wide one would.
     """
-    global _vision_singleton
-    if _vision_singleton is None or _vision_singleton[0] != settings.vision_mode:
-        _vision_singleton = (settings.vision_mode, build_vision_extractor(settings))
-    return _vision_singleton[1]
+    if settings.vision_mode == "cloud":
+        return build_vision_extractor(settings)
+
+    global _local_reader_singleton
+    if _local_reader_singleton is None:
+        with _local_reader_build_lock:
+            # Checked again inside the lock: two threads arriving together must
+            # load the models once, not twice.
+            if _local_reader_singleton is None:
+                _local_reader_singleton = build_vision_extractor(settings)
+    return _local_reader_singleton
 
 
 def reset_vision_extractor() -> None:
     """Test-only: drop the shared reader so the next call builds a new one."""
-    global _vision_singleton
-    _vision_singleton = None
+    global _local_reader_singleton
+    _local_reader_singleton = None
 
 
 _session_cache_singleton: "SessionCache | None" = None

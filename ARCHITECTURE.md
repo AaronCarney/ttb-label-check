@@ -59,7 +59,7 @@ as it finishes, so a 300-label batch shows its first verdicts immediately instea
 |---|---|
 | `app/main.py` | Builds the FastAPI application: logging, routers, static files, and the per-process state a batch needs. |
 | `app/config.py` | Every setting and every secret name, read here and only here. |
-| `app/deps.py` | Chooses the reader, holds the one reader the process shares, and assembles the evaluator for a request. |
+| `app/deps.py` | Chooses the reader, holds the local one the process shares, and assembles the evaluator for a request. |
 | `app/api/` | HTTP surface. `labels.py` evaluates one submission; `batches.py` accepts a batch and streams its results; `ui.py` serves the pages and the upload form; `healthz.py` reports readiness; `overrides.py` records an agent's decision to overrule a check; `eval.py` is development-only. |
 | `app/vision/` | The readers. `base.py` is the interface both implement; `local.py` reads on this machine with no outbound call and is the default; `cloud.py` reads with a vision model; `quality.py` gates unusable images; `heading_measure.py` measures whether the warning heading is set in bold. |
 | `app/rules/` | The engine. `loader.py` reads and cross-checks the YAML pack at startup; `yaml_engine.py` selects the rules that apply to each observation and runs them; `_validators/` holds one function per comparison kind, registered by name. |
