@@ -121,9 +121,13 @@ def _build_application(
 
 
 def _get_upload_evaluator():
-    """Indirection for tests: returns the singleton evaluator built against
-    process settings. Tests override this dependency to inject a fake so the
-    upload endpoint never reaches OpenAI."""
+    """Indirection for tests: builds an evaluator against process settings.
+    Tests override this dependency to inject a fake so the upload endpoint
+    never reaches OpenAI.
+
+    Nothing here is shared between requests: `app/deps.py` builds a fresh
+    evaluator, and a fresh reader, on every call.
+    """
     from app.deps import build_evaluator
     return build_evaluator(Settings())
 
