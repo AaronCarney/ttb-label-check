@@ -1183,6 +1183,30 @@ $0 is a $0 that traffic can move. A bounded cost beats an unbounded one when nob
   quota. Rejected on the metering above: a billing account with a payment method is required even to
   use the free tier, and Google's own guidance is that budget controls alert rather than hard-stop.
   Its cold-start time for an image this size is not documented anywhere primary.
+- *Scaleway Serverless Containers* — clears the memory bar with room to spare: a container takes up
+  to 12,228 MB, and the grant is 400,000 GB-seconds and 200,000 vCPU-seconds per account per month.
+  Rejected on the metering. A card is required before anything can be ordered — "Ordering Scaleway
+  resources requires a valid credit card" — and past the grant every further GB-second is charged,
+  because the service is "billed on a pay-as-you-go basis, strictly on resource consumption (Memory
+  and CPU)". Scaleway documents no hard spending limit anywhere in its billing documentation; its
+  billing alerts notify only, and say so: "Billing alerts only provide a rough estimate of what may
+  be charged to your monthly invoice." It scales to zero after 15 minutes idle and publishes no
+  cold-start figure.
+- *Azure Container Apps* — clears the memory bar, and is rejected on the metering more sharply than
+  anything else here, because the vendor documents that the stop cannot be switched on. The grant is
+  180,000 vCPU-seconds, 360,000 GiB-seconds and 2 million requests per subscription per month, a
+  card is required at sign-up, and past the grant it bills per second on both compute and requests.
+  Azure does have a spending limit that disables deployed services — but "The spending limit isn't
+  available for subscriptions with commitment plans or with pay-as-you-go pricing. For those types
+  of subscriptions, a spending limit isn't shown in the Azure portal and you can't enable one."
+  Pay-as-you-go is exactly the state the subscription must reach to keep a URL up past the free
+  account's 30 days. That leaves budgets, which are notify-only: "Resources aren't affected, and
+  your consumption isn't stopped." Memory is also sold only in fixed pairs with vCPU, so 2 GiB costs
+  a full vCPU whether or not the work needs one.
+- *Both of the above were checked after this decision was first written*, because the record listed
+  only hosts eliminated on memory and these two clear it. Neither moves the conclusion: the argument
+  that rejects Cloud Run rejects them identically, and Azure's own documentation states the bound
+  this decision requires is unavailable.
 - *Fly.io* — the fastest documented cold start of any host checked, and sizable to 4 GB. Rejected on
   the same metering, and more sharply: it has no ongoing free tier at all, only a time-boxed trial,
   after which a card is required.
