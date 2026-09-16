@@ -61,7 +61,6 @@
       {"rule_id": "spirits.alcohol_content.tolerance", "duration_ms": 12},
       {"rule_id": "common.warning.verbatim", "duration_ms": 15}
     ],
-    "vision_duration_ms": 720,
-    "orchestrator_duration_ms": 480
+    "vision_duration_ms": 720
   }
 }

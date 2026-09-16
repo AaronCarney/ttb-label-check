@@ -92,7 +92,6 @@ def _stub_disposition_envelope(idx: int = 0, *, disposition: str = "pass") -> Di
             total_duration_ms=10,
             per_rule_durations_ms=(),
             vision_duration_ms=5,
-            orchestrator_duration_ms=0,
         ),
     )
 

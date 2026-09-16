@@ -33,7 +33,6 @@
   "metrics": {
     "total_duration_ms": 890,
     "per_rule_durations_ms": [{"rule_id": "spirits.alcohol.matches_application", "duration_ms": 18}],
-    "vision_duration_ms": 740,
-    "orchestrator_duration_ms": 0
+    "vision_duration_ms": 740
   }
 }

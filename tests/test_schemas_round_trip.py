@@ -185,7 +185,6 @@ def test_metrics_round_trip() -> None:
             PerRuleDurationEntry(rule_id="common.brand.exact_or_normalized", duration_ms=8),
         ),
         vision_duration_ms=720,
-        orchestrator_duration_ms=480,
     )
     m2 = Metrics.model_validate_json(m.model_dump_json())
     assert m2 == m

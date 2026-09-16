@@ -29,7 +29,6 @@ const _stubRow = (i: number, disposition: "pass" | "fail" | "needs_review"): Bat
     total_duration_ms: 1000,
     per_rule_durations_ms: [],
     vision_duration_ms: 500,
-    orchestrator_duration_ms: 0,
   },
 });
 

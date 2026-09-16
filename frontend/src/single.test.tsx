@@ -24,7 +24,6 @@ const ENVELOPE = JSON.stringify({
     total_duration_ms: 100,
     per_rule_durations_ms: [],
     vision_duration_ms: 50,
-    orchestrator_duration_ms: 0,
   },
 });
 

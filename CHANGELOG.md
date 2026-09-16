@@ -34,6 +34,9 @@ All notable changes to this project are recorded here. The format follows
   is unaffected. See `docs/decisions/0009`.
 - Installed dependencies and compiled Python are no longer tracked: `frontend/node_modules` and
   `__pycache__` are build output and are rebuilt from `uv.lock` and `pnpm-lock.yaml`.
+- The telemetry block sent with each result no longer carries `orchestrator_duration_ms`. It timed a
+  coordination step the app no longer performs, so it was always reported as zero, and nothing in
+  the interface read it. The other three timings — total, per-rule and reading — are unchanged.
 
 ## [0.1.1] - 2026-09-15
 

@@ -23,4 +23,3 @@ class Metrics(BaseModel):
     total_duration_ms: int
     per_rule_durations_ms: tuple[PerRuleDurationEntry, ...]
     vision_duration_ms: int
-    orchestrator_duration_ms: int

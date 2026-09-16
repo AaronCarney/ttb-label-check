@@ -83,7 +83,6 @@ def _envelope_with_reason_code(idx: int, code: str) -> DispositionEnvelope:
             total_duration_ms=10,
             per_rule_durations_ms=(),
             vision_duration_ms=5,
-            orchestrator_duration_ms=0,
         ),
     )
 
@@ -118,7 +117,6 @@ def _short_circuit_envelope_with_reason_code(idx: int, code: str) -> Disposition
             total_duration_ms=10,
             per_rule_durations_ms=(),
             vision_duration_ms=5,
-            orchestrator_duration_ms=0,
         ),
     )
 

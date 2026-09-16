@@ -102,7 +102,6 @@ export interface Metrics {
   total_duration_ms: number;
   per_rule_durations_ms: PerRuleDurationEntry[];
   vision_duration_ms: number;
-  orchestrator_duration_ms: number;
 }
 
 export interface DispositionEnvelope {

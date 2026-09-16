@@ -33,7 +33,6 @@
   "metrics": {
     "total_duration_ms": 1760,
     "per_rule_durations_ms": [{"rule_id": "common.brand.exact_or_normalized", "duration_ms": 14}],
-    "vision_duration_ms": 720,
-    "orchestrator_duration_ms": 1020
+    "vision_duration_ms": 720
   }
 }

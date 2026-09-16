@@ -59,7 +59,6 @@ function _envelope(label_ref: string, disposition: "pass" | "fail" | "needs_revi
       total_duration_ms: 10,
       per_rule_durations_ms: [],
       vision_duration_ms: 5,
-      orchestrator_duration_ms: 0,
     },
   };
 }

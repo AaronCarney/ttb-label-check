@@ -22,7 +22,7 @@ def _stub_envelope(eid="EV-001"):
             per_rule_trace=(),
         ),
         metrics=Metrics(total_duration_ms=0, per_rule_durations_ms=(),
-                        vision_duration_ms=0, orchestrator_duration_ms=0),
+                        vision_duration_ms=0),
     )
 
 

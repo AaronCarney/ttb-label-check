@@ -48,7 +48,6 @@
       {"rule_id": "common.brand.exact_or_normalized", "duration_ms": 12},
       {"rule_id": "spirits.class_type.soi_match", "duration_ms": 9}
     ],
-    "vision_duration_ms": 750,
-    "orchestrator_duration_ms": 1340
+    "vision_duration_ms": 750
   }
 }
