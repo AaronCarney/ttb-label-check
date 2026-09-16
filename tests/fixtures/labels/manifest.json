@@ -1,0 +1,2903 @@
+{
+  "schema_version": 1,
+  "description": "Real approved labels from the TTB Public COLA Registry, each paired with the application fields it must match, plus flawed variants derived from them. See docs/research/2026-09-15-test-labels.md.",
+  "sources_read": "2026-09-15",
+  "warning_text_27_cfr_16_21": "GOVERNMENT WARNING: (1) According to the Surgeon General, women should not drink alcoholic beverages during pregnancy because of the risk of birth defects. (2) Consumption of alcoholic beverages impairs your ability to drive a car or operate machinery, and may cause health problems.",
+  "check_rules": {
+    "brand": "Application brand name appears on the label; case, punctuation and spacing differences pass.",
+    "class_type": "Label class/type designation is the application's class/type or a designation within it (spelling variants such as WHISKY/WHISKEY pass).",
+    "abv": "Label alcohol content equals the application value.",
+    "net_contents": "Label net contents equal the application value.",
+    "name_address": "Label names the applicant or a DBA the application lists as used on label, with its city and state.",
+    "origin": "Imports: label states the application's country of origin. Domestic: not_applicable.",
+    "warning_present": "The 27 CFR 16.21 statement is on the label.",
+    "warning_exact": "Same words, numbers and punctuation as 27 CFR 16.21. Letter case, spacing, line breaks and hyphens that split a word at a line end are ignored; the heading's capitals are scored separately by warning_heading_caps.",
+    "warning_heading_caps": "'GOVERNMENT WARNING' is in capital letters (27 CFR 16.22(a)(2)). Bold type, also required there, is not scored by this set.",
+    "expected_for_real_labels": "Real labels were approved by TTB, so field checks expect 'pass'. Warning checks record what the label actually shows against the regulation text, so an approved label can expect warning_exact false.",
+    "application_value_sources": "Current registry records do not carry alcohol content or net contents; where source is read_from_label, the value was read from the label image and stands in for the application value.",
+    "also_acceptable": "Other outcomes that count as correct for a check: 'needs_review' where the label and application differ in a way a reviewer should look at, and on every check of an image-degradation variant."
+  },
+  "labels": [
+    {
+      "id": "ttb-26231001000662",
+      "kind": "real",
+      "beverage_type": "distilled_spirits",
+      "images": {
+        "front": "26231001000662/front.jpg",
+        "back": "26231001000662/back.jpg"
+      },
+      "warning_image": "back",
+      "registry": {
+        "ttb_id": "26231001000662",
+        "form_url": "https://www.ttbonline.gov/colasonline/viewColaDetails.do?action=publicFormDisplay&ttbid=26231001000662",
+        "detail_url": "https://www.ttbonline.gov/colasonline/viewColaDetails.do?action=publicDisplaySearchBasic&ttbid=26231001000662",
+        "image_urls": {
+          "front": "https://www.ttbonline.gov/colasonline/publicViewAttachment.do?filename=Lucy%20B%20Sub%20Front%202.jpg&filetype=l",
+          "back": "https://www.ttbonline.gov/colasonline/publicViewAttachment.do?filename=Lucy%20B%20Sub%20Back%202.jpg&filetype=l"
+        },
+        "image_types": {
+          "front": "Brand (front) or keg collar",
+          "back": "Back"
+        },
+        "status": "APPROVED",
+        "class_type_code": "141",
+        "origin_code": "04",
+        "permit_no": "DSP-IL-15026",
+        "verified_live": "2026-09-15"
+      },
+      "application": {
+        "brand_name": "LUCKY LUCY'S",
+        "fanciful_name": null,
+        "class_type": "BOURBON WHISKY",
+        "alcohol_content": {
+          "value": "40%ALC/VOL/80 PROOF",
+          "percent": 40.0,
+          "source": "read_from_label",
+          "read_from_image": "front"
+        },
+        "net_contents": {
+          "value": "1 LITER",
+          "ml": 1000,
+          "source": "read_from_label",
+          "read_from_image": "front"
+        },
+        "applicant_name_address": "Asbury Spirits, CELLO VIA, INC 45 GORDON ST Elk Grove Village IL 60007 CHICAGOLAND SPIRITS, INC. (Used on label)",
+        "source_of_product": "Domestic",
+        "origin": "ILLINOIS",
+        "wine_appellation": null
+      },
+      "label_observed": {
+        "class_type": "BOURBON WHISKEY",
+        "name_address": "AGED AND BOTTLED BY CHICAGOLAND SPIRITS, ELK GROVE VILLAGE, IL.",
+        "origin_statement": "MADE IN THE USA"
+      },
+      "expected": {
+        "brand": "pass",
+        "class_type": "pass",
+        "abv": "pass",
+        "net_contents": "pass",
+        "name_address": "pass",
+        "origin": "not_applicable",
+        "warning_present": true,
+        "warning_exact": true,
+        "warning_heading_caps": true
+      },
+      "notes": [
+        "Body set in capitals; extra space before the heading's colon ('GOVERNMENT WARNING   :').",
+        "Label brand 'Lucky Lucy's' (mixed case, curly apostrophe) against application 'LUCKY LUCY'S': a real case-and-punctuation match.",
+        "Label names the DBA CHICAGOLAND SPIRITS, which the application lists as used on label."
+      ]
+    },
+    {
+      "id": "ttb-26230001000540",
+      "kind": "real",
+      "beverage_type": "distilled_spirits",
+      "images": {
+        "front": "26230001000540/front.jpg",
+        "back": "26230001000540/back.jpg"
+      },
+      "warning_image": "back",
+      "registry": {
+        "ttb_id": "26230001000540",
+        "form_url": "https://www.ttbonline.gov/colasonline/viewColaDetails.do?action=publicFormDisplay&ttbid=26230001000540",
+        "detail_url": "https://www.ttbonline.gov/colasonline/viewColaDetails.do?action=publicDisplaySearchBasic&ttbid=26230001000540",
+        "image_urls": {
+          "front": "https://www.ttbonline.gov/colasonline/publicViewAttachment.do?filename=bent301_front_web.jpg&filetype=l",
+          "back": "https://www.ttbonline.gov/colasonline/publicViewAttachment.do?filename=bent301_back_web.jpg&filetype=l"
+        },
+        "image_types": {
+          "front": "Brand (front) or keg collar",
+          "back": "Back"
+        },
+        "status": "APPROVED",
+        "class_type_code": "142",
+        "origin_code": "25",
+        "permit_no": "DSP-MD-20010",
+        "verified_live": "2026-09-15"
+      },
+      "application": {
+        "brand_name": "BENT 301",
+        "fanciful_name": null,
+        "class_type": "RYE WHISKY",
+        "alcohol_content": {
+          "value": "45% ALC/VOL • 90 PROOF",
+          "percent": 45.0,
+          "source": "read_from_label",
+          "read_from_image": "front"
+        },
+        "net_contents": {
+          "value": "750 mL",
+          "ml": 750,
+          "source": "read_from_label",
+          "read_from_image": "front"
+        },
+        "applicant_name_address": "The Baltimore Spirits Company, The Baltimore Whiskey Company, LLC 1700 W 41ST ST STE 430 Baltimore MD 21211",
+        "source_of_product": "Domestic",
+        "origin": "MARYLAND",
+        "wine_appellation": null
+      },
+      "label_observed": {
+        "class_type": "Maryland rye whiskey",
+        "name_address": "DISTILLED, AGED & BOTTLED BY THE BALTIMORE SPIRITS COMPANY 1700 W 41ST ST STE 430 BALTIMORE MD 21211",
+        "origin_statement": null
+      },
+      "expected": {
+        "brand": "pass",
+        "class_type": "pass",
+        "abv": "pass",
+        "net_contents": "pass",
+        "name_address": "pass",
+        "origin": "not_applicable",
+        "warning_present": true,
+        "warning_exact": true,
+        "warning_heading_caps": true
+      },
+      "notes": [
+        "Whole statement set in bold condensed capitals; 16.22(a)(2) says the remainder may not be bold, which the checks in this set do not score."
+      ]
+    },
+    {
+      "id": "ttb-26239001000079",
+      "kind": "real",
+      "beverage_type": "distilled_spirits",
+      "images": {
+        "front": "26239001000079/front.jpg",
+        "back": "26239001000079/back.jpg"
+      },
+      "warning_image": "back",
+      "registry": {
+        "ttb_id": "26239001000079",
+        "form_url": "https://www.ttbonline.gov/colasonline/viewColaDetails.do?action=publicFormDisplay&ttbid=26239001000079",
+        "detail_url": "https://www.ttbonline.gov/colasonline/viewColaDetails.do?action=publicDisplaySearchBasic&ttbid=26239001000079",
+        "image_urls": {
+          "front": "https://www.ttbonline.gov/colasonline/publicViewAttachment.do?filename=BoneFish_Vodka__Label-01.jpg&filetype=l",
+          "back": "https://www.ttbonline.gov/colasonline/publicViewAttachment.do?filename=BoneFish_Vodka__Label-02.jpg&filetype=l"
+        },
+        "image_types": {
+          "front": "Brand (front) or keg collar",
+          "back": "Back"
+        },
+        "status": "APPROVED",
+        "class_type_code": "301",
+        "origin_code": "02",
+        "permit_no": "DSP-NY-21027",
+        "verified_live": "2026-09-15"
+      },
+      "application": {
+        "brand_name": "TACONIC DISTILLERY",
+        "fanciful_name": null,
+        "class_type": "VODKA 80-89 PROOF",
+        "alcohol_content": {
+          "value": "40% ALC/VOL (80 PROOF)",
+          "percent": 40.0,
+          "source": "read_from_label",
+          "read_from_image": "front"
+        },
+        "net_contents": {
+          "value": "750 ML",
+          "ml": 750,
+          "source": "read_from_label",
+          "read_from_image": "front"
+        },
+        "applicant_name_address": "Taconic Distillery, Taconic Distillery, LLC 179 BOWEN RD Stanfordville NY 12581 BONEFISH (Used on label)",
+        "source_of_product": "Domestic",
+        "origin": "NEW YORK",
+        "wine_appellation": null
+      },
+      "label_observed": {
+        "class_type": "VODKA",
+        "name_address": "Produced by Taconic Distillery in Stanfordville, New York",
+        "origin_statement": null
+      },
+      "expected": {
+        "brand": "pass",
+        "class_type": "pass",
+        "abv": "pass",
+        "net_contents": "pass",
+        "name_address": "pass",
+        "origin": "not_applicable",
+        "warning_present": true,
+        "warning_exact": true,
+        "warning_heading_caps": true
+      },
+      "notes": [
+        "White text on a black band; body in capitals.",
+        "The dominant brand on the label is BONEFISH, a DBA the application lists as used on label. The application brand TACONIC DISTILLERY appears on the label only in the producer line, so a brand check has to find it there."
+      ]
+    },
+    {
+      "id": "ttb-26236001000448",
+      "kind": "real",
+      "beverage_type": "distilled_spirits",
+      "images": {
+        "front": "26236001000448/front.jpg",
+        "back": "26236001000448/back.jpg"
+      },
+      "warning_image": "back",
+      "registry": {
+        "ttb_id": "26236001000448",
+        "form_url": "https://www.ttbonline.gov/colasonline/viewColaDetails.do?action=publicFormDisplay&ttbid=26236001000448",
+        "detail_url": "https://www.ttbonline.gov/colasonline/viewColaDetails.do?action=publicDisplaySearchBasic&ttbid=26236001000448",
+        "image_urls": {
+          "front": "https://www.ttbonline.gov/colasonline/publicViewAttachment.do?filename=Aviation%20Vodka%20front.png&filetype=l",
+          "back": "https://www.ttbonline.gov/colasonline/publicViewAttachment.do?filename=Aviation%20Vodka%20back.png&filetype=l"
+        },
+        "image_types": {
+          "front": "Brand (front) or keg collar",
+          "back": "Back"
+        },
+        "status": "APPROVED",
+        "class_type_code": "301",
+        "origin_code": "04",
+        "permit_no": "DSP-IL-58",
+        "verified_live": "2026-09-15"
+      },
+      "application": {
+        "brand_name": "AVIATION",
+        "fanciful_name": null,
+        "class_type": "VODKA 80-89 PROOF",
+        "alcohol_content": {
+          "value": "40% ALC BY VOL",
+          "percent": 40.0,
+          "source": "read_from_label",
+          "read_from_image": "front"
+        },
+        "net_contents": {
+          "value": "750 mL",
+          "ml": 750,
+          "source": "read_from_label",
+          "read_from_image": "front"
+        },
+        "applicant_name_address": "DIAGEO AMERICAS SUPPLY, INC. 24440 W 143RD ST PLAINFIELD IL 60544 AVIATION VODKA (Used on label)",
+        "source_of_product": "Domestic",
+        "origin": "ILLINOIS",
+        "wine_appellation": null
+      },
+      "label_observed": {
+        "class_type": "AMERICAN VODKA",
+        "name_address": "BOTTLED BY AVIATION VODKA, PLAINFIELD, IL.",
+        "origin_statement": null
+      },
+      "expected": {
+        "brand": "pass",
+        "class_type": "pass",
+        "abv": "pass",
+        "net_contents": "pass",
+        "name_address": "pass",
+        "origin": "not_applicable",
+        "warning_present": true,
+        "warning_exact": true,
+        "warning_heading_caps": true
+      },
+      "notes": [
+        "Body in condensed capitals.",
+        "Label names the DBA AVIATION VODKA, which the application lists as used on label; the applicant of record is DIAGEO AMERICAS SUPPLY, INC."
+      ]
+    },
+    {
+      "id": "ttb-26239001000081",
+      "kind": "real",
+      "beverage_type": "distilled_spirits",
+      "images": {
+        "front": "26239001000081/front.jpg",
+        "back": "26239001000081/back.jpg"
+      },
+      "warning_image": "back",
+      "registry": {
+        "ttb_id": "26239001000081",
+        "form_url": "https://www.ttbonline.gov/colasonline/viewColaDetails.do?action=publicFormDisplay&ttbid=26239001000081",
+        "detail_url": "https://www.ttbonline.gov/colasonline/viewColaDetails.do?action=publicDisplaySearchBasic&ttbid=26239001000081",
+        "image_urls": {
+          "front": "https://www.ttbonline.gov/colasonline/publicViewAttachment.do?filename=BoneFish_Gin__Label-01.jpg&filetype=l",
+          "back": "https://www.ttbonline.gov/colasonline/publicViewAttachment.do?filename=BoneFish_Gin__Label-02.jpg&filetype=l"
+        },
+        "image_types": {
+          "front": "Brand (front) or keg collar",
+          "back": "Back"
+        },
+        "status": "APPROVED",
+        "class_type_code": "209",
+        "origin_code": "02",
+        "permit_no": "DSP-NY-21027",
+        "verified_live": "2026-09-15"
+      },
+      "application": {
+        "brand_name": "TACONIC DISTILLERY",
+        "fanciful_name": null,
+        "class_type": "OTHER DISTILLED GIN",
+        "alcohol_content": {
+          "value": "40% ALC/VOL (80 PROOF)",
+          "percent": 40.0,
+          "source": "read_from_label",
+          "read_from_image": "front"
+        },
+        "net_contents": {
+          "value": "750 ML",
+          "ml": 750,
+          "source": "read_from_label",
+          "read_from_image": "front"
+        },
+        "applicant_name_address": "Taconic Distillery, Taconic Distillery, LLC 179 BOWEN RD Stanfordville NY 12581 BONEFISH (Used on label)",
+        "source_of_product": "Domestic",
+        "origin": "NEW YORK",
+        "wine_appellation": null
+      },
+      "label_observed": {
+        "class_type": "AMERICAN DRY GIN",
+        "name_address": "Produced by Taconic Distillery in Stanfordville, New York",
+        "origin_statement": null
+      },
+      "expected": {
+        "brand": "pass",
+        "class_type": "pass",
+        "abv": "pass",
+        "net_contents": "pass",
+        "name_address": "pass",
+        "origin": "not_applicable",
+        "warning_present": true,
+        "warning_exact": true,
+        "warning_heading_caps": true
+      },
+      "notes": [
+        "White text on a blue band; body in capitals.",
+        "Same applicant and brand pattern as 26239001000079 (BONEFISH on the label, TACONIC DISTILLERY in the application)."
+      ]
+    },
+    {
+      "id": "ttb-26229001000513",
+      "kind": "real",
+      "beverage_type": "distilled_spirits",
+      "images": {
+        "front": "26229001000513/front.jpg",
+        "back": "26229001000513/back.jpg"
+      },
+      "warning_image": "back",
+      "registry": {
+        "ttb_id": "26229001000513",
+        "form_url": "https://www.ttbonline.gov/colasonline/viewColaDetails.do?action=publicFormDisplay&ttbid=26229001000513",
+        "detail_url": "https://www.ttbonline.gov/colasonline/viewColaDetails.do?action=publicDisplaySearchBasic&ttbid=26229001000513",
+        "image_urls": {
+          "front": "https://www.ttbonline.gov/colasonline/publicViewAttachment.do?filename=Guava%20Gin%20FRONT.jpeg&filetype=l",
+          "back": "https://www.ttbonline.gov/colasonline/publicViewAttachment.do?filename=Guava%20Gin%20BACK.jpeg&filetype=l"
+        },
+        "image_types": {
+          "front": "Brand (front) or keg collar",
+          "back": "Back"
+        },
+        "status": "APPROVED",
+        "class_type_code": "268",
+        "origin_code": "81",
+        "permit_no": "CA-I-24240",
+        "verified_live": "2026-09-15"
+      },
+      "application": {
+        "brand_name": "SATVRNAL",
+        "fanciful_name": null,
+        "class_type": "OTHER GIN FB",
+        "alcohol_content": {
+          "value": "46% ALC. BY VOL.",
+          "percent": 46.0,
+          "source": "read_from_label",
+          "read_from_image": "front"
+        },
+        "net_contents": {
+          "value": "1 LITRE",
+          "ml": 1000,
+          "source": "read_from_label",
+          "read_from_image": "front"
+        },
+        "applicant_name_address": "WOLF BEVCO, WOLF BEVCO, LLC 4325 INDUSTRIAL WAY Benicia CA 94510 WOLF BEVCO LLC (Used on label)",
+        "source_of_product": "Imported",
+        "origin": "MEXICO",
+        "wine_appellation": null
+      },
+      "label_observed": {
+        "class_type": "GUAVA FORWARD GIN / DISTILLED FROM GRAIN",
+        "name_address": "IMPORTED BY: WOLF BEVCO, LLC. BENICIA, CA.",
+        "origin_statement": "PRODUCT OF MEXICO"
+      },
+      "expected": {
+        "brand": "pass",
+        "class_type": "pass",
+        "abv": "pass",
+        "net_contents": "pass",
+        "name_address": "pass",
+        "origin": "pass",
+        "warning_present": true,
+        "warning_exact": true,
+        "warning_heading_caps": true
+      },
+      "notes": [
+        "Import: the label also names the foreign producer (AMOR AERIS S.A. DE C.V., Zapopan, Jalisco). Front text is hand-lettered on a patterned background."
+      ]
+    },
+    {
+      "id": "ttb-26233001000189",
+      "kind": "real",
+      "beverage_type": "distilled_spirits",
+      "images": {
+        "front": "26233001000189/front.jpg",
+        "back": "26233001000189/back.jpg"
+      },
+      "warning_image": "back",
+      "registry": {
+        "ttb_id": "26233001000189",
+        "form_url": "https://www.ttbonline.gov/colasonline/viewColaDetails.do?action=publicFormDisplay&ttbid=26233001000189",
+        "detail_url": "https://www.ttbonline.gov/colasonline/viewColaDetails.do?action=publicDisplaySearchBasic&ttbid=26233001000189",
+        "image_urls": {
+          "front": "https://www.ttbonline.gov/colasonline/publicViewAttachment.do?filename=foursquare_lyonesse_front.png&filetype=l",
+          "back": "https://www.ttbonline.gov/colasonline/publicViewAttachment.do?filename=foursquare_lyonesse_back.jpg&filetype=l"
+        },
+        "image_types": {
+          "front": "Brand (front) or keg collar",
+          "back": "Back"
+        },
+        "status": "APPROVED",
+        "class_type_code": "493",
+        "origin_code": "4H",
+        "permit_no": "CA-I-15737",
+        "verified_live": "2026-09-15"
+      },
+      "application": {
+        "brand_name": "FOURSQUARE",
+        "fanciful_name": "LYONESSE",
+        "class_type": "OTHER RUM GOLD FB",
+        "alcohol_content": {
+          "value": "58% alc./vol.",
+          "percent": 58.0,
+          "source": "read_from_label",
+          "read_from_image": "front"
+        },
+        "net_contents": {
+          "value": "700 mL",
+          "ml": 700,
+          "source": "read_from_label",
+          "read_from_image": "front"
+        },
+        "applicant_name_address": "ALTAMAR BRANDS, LLC 2101 E COAST HWY SUITE 250 CORONA DEL MAR CA 92625",
+        "source_of_product": "Imported",
+        "origin": "BARBADOS",
+        "wine_appellation": null
+      },
+      "label_observed": {
+        "class_type": "FINE BARBADOS RUM / SINGLE BLENDED RUM",
+        "name_address": "IMPORTED BY ALTAMAR BRANDS LLC, CORONA DEL MAR, CA",
+        "origin_statement": "Product of Barbados"
+      },
+      "expected": {
+        "brand": "pass",
+        "class_type": "pass",
+        "abv": "pass",
+        "net_contents": "pass",
+        "name_address": "pass",
+        "origin": "pass",
+        "warning_present": true,
+        "warning_exact": true,
+        "warning_heading_caps": true
+      },
+      "notes": [
+        "Words split by hyphens at line ends (ACCORD-ING, DEF-ECTS); a checker has to rejoin them.",
+        "Fanciful name LYONESSE is on both images. The back image is small, so the warning text is only a few pixels high."
+      ]
+    },
+    {
+      "id": "ttb-26237001000107",
+      "kind": "real",
+      "beverage_type": "distilled_spirits",
+      "images": {
+        "front": "26237001000107/front.jpg",
+        "back": "26237001000107/back.jpg"
+      },
+      "warning_image": "back",
+      "registry": {
+        "ttb_id": "26237001000107",
+        "form_url": "https://www.ttbonline.gov/colasonline/viewColaDetails.do?action=publicFormDisplay&ttbid=26237001000107",
+        "detail_url": "https://www.ttbonline.gov/colasonline/viewColaDetails.do?action=publicDisplaySearchBasic&ttbid=26237001000107",
+        "image_urls": {
+          "front": "https://www.ttbonline.gov/colasonline/publicViewAttachment.do?filename=Reposado-front.jpg&filetype=l",
+          "back": "https://www.ttbonline.gov/colasonline/publicViewAttachment.do?filename=Reposado-back.jpg&filetype=l"
+        },
+        "image_types": {
+          "front": "Brand (front) or keg collar",
+          "back": "Back"
+        },
+        "status": "APPROVED",
+        "class_type_code": "977",
+        "origin_code": "81",
+        "permit_no": "TX-I-21390",
+        "verified_live": "2026-09-15"
+      },
+      "application": {
+        "brand_name": "JUAN LOBO",
+        "fanciful_name": "REPOSADO",
+        "class_type": "TEQUILA FB",
+        "alcohol_content": {
+          "value": "40% ALC./VOL. 80 PROOF",
+          "percent": 40.0,
+          "source": "read_from_label",
+          "read_from_image": "front"
+        },
+        "net_contents": {
+          "value": "750mL",
+          "ml": 750,
+          "source": "read_from_label",
+          "read_from_image": "front"
+        },
+        "applicant_name_address": "Juan Lobo Tequila, LLC 994 HOT SPRING VALLEY Buda TX 78610",
+        "source_of_product": "Imported",
+        "origin": "MEXICO",
+        "wine_appellation": null
+      },
+      "label_observed": {
+        "class_type": "TEQUILA / 100% BLUE AGAVE / REPOSADO",
+        "name_address": "IMPORTED BY JUAN LOBO TEQUILA, LLC BUDA, TEXAS",
+        "origin_statement": "HECHO EN MEXICO"
+      },
+      "expected": {
+        "brand": "pass",
+        "class_type": "pass",
+        "abv": "pass",
+        "net_contents": "pass",
+        "name_address": "pass",
+        "origin": "pass",
+        "warning_present": true,
+        "warning_exact": true,
+        "warning_heading_caps": true
+      },
+      "notes": [
+        "No space in '(1)ACCORDING'; spacing is ignored by the exact rule.",
+        "Country of origin is stated in Spanish ('HECHO EN MEXICO'); the country name still matches the application."
+      ]
+    },
+    {
+      "id": "ttb-26232001000404",
+      "kind": "real",
+      "beverage_type": "distilled_spirits",
+      "images": {
+        "front": "26232001000404/front.jpg",
+        "back": "26232001000404/back.jpg"
+      },
+      "warning_image": "back",
+      "registry": {
+        "ttb_id": "26232001000404",
+        "form_url": "https://www.ttbonline.gov/colasonline/viewColaDetails.do?action=publicFormDisplay&ttbid=26232001000404",
+        "detail_url": "https://www.ttbonline.gov/colasonline/viewColaDetails.do?action=publicDisplaySearchBasic&ttbid=26232001000404",
+        "image_urls": {
+          "front": "https://www.ttbonline.gov/colasonline/publicViewAttachment.do?filename=Black%20and%20White%20Blended%20Scotch%20Whisky%20Front%202026.jpg&filetype=l",
+          "back": "https://www.ttbonline.gov/colasonline/publicViewAttachment.do?filename=Black%20and%20White%20Blended%20Scotch%20Whisky%20Back%202026.jpg&filetype=l"
+        },
+        "image_types": {
+          "front": "Brand (front) or keg collar",
+          "back": "Back"
+        },
+        "status": "APPROVED",
+        "class_type_code": "151",
+        "origin_code": "5K",
+        "permit_no": "PR-I-765",
+        "verified_live": "2026-09-15"
+      },
+      "application": {
+        "brand_name": "BLACK & WHITE",
+        "fanciful_name": null,
+        "class_type": "SCOTCH WHISKY FB",
+        "alcohol_content": {
+          "value": "40% alc./vol.",
+          "percent": 40.0,
+          "source": "read_from_label",
+          "read_from_image": "front"
+        },
+        "net_contents": {
+          "value": "700 mL",
+          "ml": 700,
+          "source": "read_from_label",
+          "read_from_image": "front"
+        },
+        "applicant_name_address": "MENDEZ & CO. INC. KM 2.4 GUAYNABO PR 00969 MENDEZ & COMPANY (Used on label)",
+        "source_of_product": "Imported",
+        "origin": "SCOTLAND",
+        "wine_appellation": null
+      },
+      "label_observed": {
+        "class_type": "Blended Scotch Whisky",
+        "name_address": "Imported by: MENDEZ & COMPANY, SAN JUAN, PUERTO RICO",
+        "origin_statement": "PRODUCT OF SCOTLAND"
+      },
+      "expected": {
+        "brand": "pass",
+        "class_type": "pass",
+        "abv": "pass",
+        "net_contents": "pass",
+        "name_address": "pass",
+        "origin": "pass",
+        "warning_present": true,
+        "warning_exact": true,
+        "warning_heading_caps": true
+      },
+      "notes": [
+        "Words split by hyphens at line ends (SUR-GEON, BEV-ERAGES, OP-ERATE).",
+        "Label city SAN JUAN differs from the application address (KM 2.4 GUAYNABO PR); the name matches the DBA MENDEZ & COMPANY used on label. TTB approved it; a checker that flags the city for review is also acceptable.",
+        "Brand in script-like serif with an ampersand: 'Black & White' against 'BLACK & WHITE'."
+      ],
+      "also_acceptable": {
+        "name_address": [
+          "needs_review"
+        ]
+      }
+    },
+    {
+      "id": "ttb-26231001000333",
+      "kind": "real",
+      "beverage_type": "distilled_spirits",
+      "images": {
+        "front": "26231001000333/front.jpg",
+        "back": "26231001000333/back.jpg"
+      },
+      "warning_image": "back",
+      "registry": {
+        "ttb_id": "26231001000333",
+        "form_url": "https://www.ttbonline.gov/colasonline/viewColaDetails.do?action=publicFormDisplay&ttbid=26231001000333",
+        "detail_url": "https://www.ttbonline.gov/colasonline/viewColaDetails.do?action=publicDisplaySearchBasic&ttbid=26231001000333",
+        "image_urls": {
+          "front": "https://www.ttbonline.gov/colasonline/publicViewAttachment.do?filename=FL.png&filetype=l",
+          "back": "https://www.ttbonline.gov/colasonline/publicViewAttachment.do?filename=BL.png&filetype=l"
+        },
+        "image_types": {
+          "front": "Brand (front) or keg collar",
+          "back": "Back"
+        },
+        "status": "APPROVED",
+        "class_type_code": "153",
+        "origin_code": "5K",
+        "permit_no": "FL-I-15704",
+        "verified_live": "2026-09-15"
+      },
+      "application": {
+        "brand_name": "SALTIRE RARE MALT WHISKY COMPANY",
+        "fanciful_name": null,
+        "class_type": "SINGLE MALT SCOTCH WHISKY",
+        "alcohol_content": {
+          "value": "48.8%Alc./Vol.",
+          "percent": 48.8,
+          "source": "read_from_label",
+          "read_from_image": "front"
+        },
+        "net_contents": {
+          "value": "700ml",
+          "ml": 700,
+          "source": "read_from_label",
+          "read_from_image": "front"
+        },
+        "applicant_name_address": "PARK STREET IMPORTS LLC 1000 BRICKELL AVE STE 215 MIAMI FL 33131",
+        "source_of_product": "Imported",
+        "origin": "SCOTLAND",
+        "wine_appellation": null
+      },
+      "label_observed": {
+        "class_type": "SINGLE MALT SCOTCH WHISKY",
+        "name_address": "IMPORTED BY: Park Street Imports, Miami, FL",
+        "origin_statement": "Bottled by: Saltire Rare Malt Whisky, The Old Town House, Falkland, Fife, Scotland KY15 7BU"
+      },
+      "expected": {
+        "brand": "pass",
+        "class_type": "pass",
+        "abv": "pass",
+        "net_contents": "pass",
+        "name_address": "pass",
+        "origin": "pass",
+        "warning_present": true,
+        "warning_exact": true,
+        "warning_heading_caps": true
+      },
+      "notes": [
+        "Very small type in the lower right; PREG-NANCY split at a line end.",
+        "Application brand SALTIRE RARE MALT WHISKY COMPANY is set on two lines ('SALTIRE' / 'RARE MALT WHISKY COMPANY').",
+        "No 'Product of Scotland' line; Scotland appears in the bottler's address and in 'SCOTCH WHISKY'."
+      ],
+      "also_acceptable": {
+        "origin": [
+          "needs_review"
+        ]
+      }
+    },
+    {
+      "id": "ttb-26212001000085",
+      "kind": "real",
+      "beverage_type": "distilled_spirits",
+      "images": {
+        "front": "26212001000085/front.jpg",
+        "back": "26212001000085/back.jpg"
+      },
+      "warning_image": "front",
+      "registry": {
+        "ttb_id": "26212001000085",
+        "form_url": "https://www.ttbonline.gov/colasonline/viewColaDetails.do?action=publicFormDisplay&ttbid=26212001000085",
+        "detail_url": "https://www.ttbonline.gov/colasonline/viewColaDetails.do?action=publicDisplaySearchBasic&ttbid=26212001000085",
+        "image_urls": {
+          "front": "https://www.ttbonline.gov/colasonline/publicViewAttachment.do?filename=Back%20Label%20XO%20Terre%20et%20bois%20Pradiere.png&filetype=l",
+          "back": "https://www.ttbonline.gov/colasonline/publicViewAttachment.do?filename=Label%20XO%20Terre%20et%20bois%20PRADIERE.png&filetype=l"
+        },
+        "image_types": {
+          "front": "Brand (front) or keg collar",
+          "back": "Back"
+        },
+        "status": "APPROVED",
+        "class_type_code": "551",
+        "origin_code": "51",
+        "permit_no": "CA-I-15732",
+        "verified_live": "2026-09-15"
+      },
+      "application": {
+        "brand_name": "TERRE ET BOIS DE PRADIÈRE",
+        "fanciful_name": null,
+        "class_type": "COGNAC (BRANDY) FB",
+        "alcohol_content": {
+          "value": "40 % ALC. BY VOL",
+          "percent": 40.0,
+          "source": "read_from_label",
+          "read_from_image": "front"
+        },
+        "net_contents": {
+          "value": "700 mL",
+          "ml": 700,
+          "source": "read_from_label",
+          "read_from_image": "front"
+        },
+        "applicant_name_address": "WINE WINE SITUATION, WINE WINE SITUATION LLC 2896 ORANGE AVE STE 220 Signal Hill CA 90755",
+        "source_of_product": "Imported",
+        "origin": "FRANCE",
+        "wine_appellation": null
+      },
+      "label_observed": {
+        "class_type": "Cognac XO / Cognac Petite Champagne",
+        "name_address": "IMPORTED BY WINE WINE SITUATION LLC-SIGNAC HILL, CA",
+        "origin_statement": "PRODUCT OF FRANCE"
+      },
+      "expected": {
+        "brand": "pass",
+        "class_type": "pass",
+        "abv": "pass",
+        "net_contents": "pass",
+        "name_address": "pass",
+        "origin": "pass",
+        "warning_present": true,
+        "warning_exact": false,
+        "warning_heading_caps": true
+      },
+      "notes": [
+        "Warning is set sideways (rotated 90 degrees) on the image TTB tags as the brand label. It reads '(2) CONSUMPTION OF ALCOHOLIC BEVERAGE IMPAIRS YOUR ABILITY' (singular BEVERAGE) where 27 CFR 16.21 says 'alcoholic beverages impairs'; confirmed on a full-resolution crop. A real approved label whose warning is not word-for-word.",
+        "The image TTB tags 'Brand (front)' carries the mandatory text and the warning; the image tagged 'Back' is the decorative label with ABV and net contents set sideways.",
+        "Label spells the importer's city 'SIGNAC HILL'; the application says Signal Hill CA.",
+        "Brand TERRE ET BOIS DE PRADIÈRE is in handwriting script with an accented È."
+      ],
+      "also_acceptable": {
+        "name_address": [
+          "needs_review"
+        ]
+      }
+    },
+    {
+      "id": "ttb-26229001000034",
+      "kind": "real",
+      "beverage_type": "distilled_spirits",
+      "images": {
+        "front": "26229001000034/front.jpg",
+        "back": "26229001000034/back.jpg"
+      },
+      "warning_image": "back",
+      "registry": {
+        "ttb_id": "26229001000034",
+        "form_url": "https://www.ttbonline.gov/colasonline/viewColaDetails.do?action=publicFormDisplay&ttbid=26229001000034",
+        "detail_url": "https://www.ttbonline.gov/colasonline/viewColaDetails.do?action=publicDisplaySearchBasic&ttbid=26229001000034",
+        "image_urls": {
+          "front": "https://www.ttbonline.gov/colasonline/publicViewAttachment.do?filename=Cassis_Front.jpg&filetype=l",
+          "back": "https://www.ttbonline.gov/colasonline/publicViewAttachment.do?filename=Cassis_Back.jpg&filetype=l"
+        },
+        "image_types": {
+          "front": "Brand (front) or keg collar",
+          "back": "Back"
+        },
+        "status": "APPROVED",
+        "class_type_code": "629",
+        "origin_code": "02",
+        "permit_no": "DSP-NY-21235",
+        "verified_live": "2026-09-15"
+      },
+      "application": {
+        "brand_name": "BREVIS",
+        "fanciful_name": "CREME DE CASSIS",
+        "class_type": "OTHER LIQUEUR (CREME OR CREAMS)",
+        "alcohol_content": {
+          "value": "22.4% ALC/VOL",
+          "percent": 22.4,
+          "source": "read_from_label",
+          "read_from_image": "front"
+        },
+        "net_contents": {
+          "value": "375mL",
+          "ml": 375,
+          "source": "read_from_label",
+          "read_from_image": "front"
+        },
+        "applicant_name_address": "Klocke Estate, Klocke Estate Distillery, LLC 2554 COUNTY ROUTE 27 Hudson NY 12534 KLOCKE ESTATE (Used on label)",
+        "source_of_product": "Domestic",
+        "origin": "NEW YORK",
+        "wine_appellation": null
+      },
+      "label_observed": {
+        "class_type": "CRÈME DE CASSIS LIQUEUR",
+        "name_address": "PRODUCED AND BOTTLED BY KLOCKE ESTATE DISTILLERY, HUDSON, NY",
+        "origin_statement": null
+      },
+      "expected": {
+        "brand": "pass",
+        "class_type": "pass",
+        "abv": "pass",
+        "net_contents": "pass",
+        "name_address": "pass",
+        "origin": "not_applicable",
+        "warning_present": true,
+        "warning_exact": false,
+        "warning_heading_caps": true
+      },
+      "notes": [
+        "Reads 'BECAUSE OF THE RISKS OF BIRTH DEFECTS' (plural RISKS) where 27 CFR 16.21 says 'the risk of birth defects'. A real approved label whose warning is not word-for-word.",
+        "Low-contrast gold type on navy; ABV and net contents share one line on a patterned ground.",
+        "Fanciful name CREME DE CASSIS in the application is CRÈME DE CASSIS (accented) on the label."
+      ]
+    },
+    {
+      "id": "ttb-26236001000210",
+      "kind": "real",
+      "beverage_type": "distilled_spirits",
+      "images": {
+        "front": "26236001000210/front.jpg",
+        "back": "26236001000210/back.jpg"
+      },
+      "warning_image": "back",
+      "registry": {
+        "ttb_id": "26236001000210",
+        "form_url": "https://www.ttbonline.gov/colasonline/viewColaDetails.do?action=publicFormDisplay&ttbid=26236001000210",
+        "detail_url": "https://www.ttbonline.gov/colasonline/viewColaDetails.do?action=publicDisplaySearchBasic&ttbid=26236001000210",
+        "image_urls": {
+          "front": "https://www.ttbonline.gov/colasonline/publicViewAttachment.do?filename=McCarthys%20ASM%20Binnys%20Pick%20Front.png&filetype=l",
+          "back": "https://www.ttbonline.gov/colasonline/publicViewAttachment.do?filename=McCarthys%20ASM%20Binnys%20Pick%20Back.png&filetype=l"
+        },
+        "image_types": {
+          "front": "Brand (front) or keg collar",
+          "back": "Back"
+        },
+        "status": "APPROVED",
+        "class_type_code": "166",
+        "origin_code": "38",
+        "permit_no": "DSP-VT-21048",
+        "verified_live": "2026-09-15"
+      },
+      "application": {
+        "brand_name": "LOST LANTERN",
+        "fanciful_name": null,
+        "class_type": "AMERICAN SINGLE MALT WHISKEY",
+        "alcohol_content": {
+          "value": "ALC BY VOL 60.0 %",
+          "percent": 60.0,
+          "source": "read_from_label",
+          "read_from_image": "front"
+        },
+        "net_contents": {
+          "value": "750 ML",
+          "ml": 750,
+          "source": "read_from_label",
+          "read_from_image": "front"
+        },
+        "applicant_name_address": "Lost Lantern Whiskey, Lost Lantern Spirits LLC 11 MAIN ST STE C100 Vergennes VT 05491",
+        "source_of_product": "Domestic",
+        "origin": "OREGON",
+        "wine_appellation": null
+      },
+      "label_observed": {
+        "class_type": "PEATED OREGON AMERICAN SINGLE MALT WHISKEY",
+        "name_address": "SELECTED AND BOTTLED BY LOST LANTERN SPIRITS, VERGENNES, VT.",
+        "origin_statement": null
+      },
+      "expected": {
+        "brand": "pass",
+        "class_type": "pass",
+        "abv": "pass",
+        "net_contents": "pass",
+        "name_address": "pass",
+        "origin": "not_applicable",
+        "warning_present": true,
+        "warning_exact": true,
+        "warning_heading_caps": true
+      },
+      "notes": [
+        "ABV figure is handwritten ('60.0') inside a printed box; net contents are set sideways."
+      ]
+    },
+    {
+      "id": "ttb-26218001000369",
+      "kind": "real",
+      "beverage_type": "distilled_spirits",
+      "images": {
+        "front": "26218001000369/front.jpg",
+        "back": "26218001000369/back.jpg"
+      },
+      "warning_image": "back",
+      "registry": {
+        "ttb_id": "26218001000369",
+        "form_url": "https://www.ttbonline.gov/colasonline/viewColaDetails.do?action=publicFormDisplay&ttbid=26218001000369",
+        "detail_url": "https://www.ttbonline.gov/colasonline/viewColaDetails.do?action=publicDisplaySearchBasic&ttbid=26218001000369",
+        "image_urls": {
+          "front": "https://www.ttbonline.gov/colasonline/publicViewAttachment.do?filename=21f2.jpg&filetype=l",
+          "back": "https://www.ttbonline.gov/colasonline/publicViewAttachment.do?filename=21b2.jpg&filetype=l"
+        },
+        "image_types": {
+          "front": "Brand (front) or keg collar",
+          "back": "Back"
+        },
+        "status": "APPROVED",
+        "class_type_code": "171",
+        "origin_code": "5E",
+        "permit_no": "NY-I-15605",
+        "verified_live": "2026-09-15"
+      },
+      "application": {
+        "brand_name": "AODH",
+        "fanciful_name": null,
+        "class_type": "IRISH WHISKY FB",
+        "alcohol_content": {
+          "value": "Alc. 42.8% by vol. 85.6 US PROOF",
+          "percent": 42.8,
+          "source": "read_from_label",
+          "read_from_image": "front"
+        },
+        "net_contents": {
+          "value": "750ml",
+          "ml": 750,
+          "source": "read_from_label",
+          "read_from_image": "front"
+        },
+        "applicant_name_address": "EASTERN LIQUORS USA, INC. 990 WESTBURY RD 2ND FLOOR, WESTBURY NY 11590",
+        "source_of_product": "Imported",
+        "origin": "IRELAND",
+        "wine_appellation": null
+      },
+      "label_observed": {
+        "class_type": "IRISH WHISKEY",
+        "name_address": "IMPORTED BY: EASTERN LIQUORS USA. INC. 990 WESTBURY ROAD, 2ND FLOOR SUIT 200, A,B,C WESTBURY, NY 11590",
+        "origin_statement": "DISTILLED IN IRELAND"
+      },
+      "expected": {
+        "brand": "pass",
+        "class_type": "pass",
+        "abv": "pass",
+        "net_contents": "pass",
+        "name_address": "pass",
+        "origin": "pass",
+        "warning_present": true,
+        "warning_exact": true,
+        "warning_heading_caps": true
+      },
+      "notes": [
+        "Label says DISTILLED IN IRELAND and names an Indian bottler (Allied Blenders and Distillers, Maharashtra); there is no 'Product of' line. The application origin is IRELAND."
+      ],
+      "also_acceptable": {
+        "origin": [
+          "needs_review"
+        ]
+      }
+    },
+    {
+      "id": "ttb-26233001000569",
+      "kind": "real",
+      "beverage_type": "wine",
+      "images": {
+        "front": "26233001000569/front.jpg",
+        "back": "26233001000569/back.jpg"
+      },
+      "warning_image": "back",
+      "registry": {
+        "ttb_id": "26233001000569",
+        "form_url": "https://www.ttbonline.gov/colasonline/viewColaDetails.do?action=publicFormDisplay&ttbid=26233001000569",
+        "detail_url": "https://www.ttbonline.gov/colasonline/viewColaDetails.do?action=publicDisplaySearchBasic&ttbid=26233001000569",
+        "image_urls": {
+          "front": "https://www.ttbonline.gov/colasonline/publicViewAttachment.do?filename=P25SG-ft.png&filetype=l",
+          "back": "https://www.ttbonline.gov/colasonline/publicViewAttachment.do?filename=P25SB-bk.png&filetype=l"
+        },
+        "image_types": {
+          "front": "Brand (front) or keg collar",
+          "back": "Back"
+        },
+        "status": "APPROVED",
+        "class_type_code": "80",
+        "origin_code": "01",
+        "permit_no": "BWN-CA-21100",
+        "verified_live": "2026-09-15"
+      },
+      "application": {
+        "brand_name": "PORTALUPI",
+        "fanciful_name": "STONE WALL RANCH",
+        "class_type": "TABLE RED WINE",
+        "alcohol_content": {
+          "value": "ALC 14.0% BY VOLUME",
+          "percent": 14.0,
+          "source": "read_from_label",
+          "read_from_image": "back"
+        },
+        "net_contents": {
+          "value": "750ML",
+          "ml": 750,
+          "source": "read_from_label",
+          "read_from_image": "back"
+        },
+        "applicant_name_address": "DRNK, DRNK LLC 3637 FREI RD Sebastopol CA 95472 PORTALUPI WINES (Used on label)",
+        "source_of_product": "Domestic",
+        "origin": "CALIFORNIA",
+        "wine_appellation": "SONOMA VALLEY"
+      },
+      "label_observed": {
+        "class_type": "SANGIOVESE",
+        "name_address": "PRODUCED AND BOTTLED BY PORTALUPI WINES, SEBASTOPOL, CA",
+        "origin_statement": null
+      },
+      "expected": {
+        "brand": "pass",
+        "class_type": "pass",
+        "abv": "pass",
+        "net_contents": "pass",
+        "name_address": "pass",
+        "origin": "not_applicable",
+        "warning_present": true,
+        "warning_exact": true,
+        "warning_heading_caps": true
+      },
+      "notes": [
+        "Light text on black.",
+        "Class/type on the label is the grape varietal SANGIOVESE; the application class is TABLE RED WINE. The application's appellation (SONOMA VALLEY) is on both images.",
+        "Label carries vintage 2025; the application's vintage field is blank."
+      ],
+      "also_acceptable": {
+        "class_type": [
+          "needs_review"
+        ]
+      }
+    },
+    {
+      "id": "ttb-26233001000566",
+      "kind": "real",
+      "beverage_type": "wine",
+      "images": {
+        "front": "26233001000566/front.jpg",
+        "back": "26233001000566/back.jpg"
+      },
+      "warning_image": "front",
+      "registry": {
+        "ttb_id": "26233001000566",
+        "form_url": "https://www.ttbonline.gov/colasonline/viewColaDetails.do?action=publicFormDisplay&ttbid=26233001000566",
+        "detail_url": "https://www.ttbonline.gov/colasonline/viewColaDetails.do?action=publicDisplaySearchBasic&ttbid=26233001000566",
+        "image_urls": {
+          "front": "https://www.ttbonline.gov/colasonline/publicViewAttachment.do?filename=US%20new%20BK%20front%20.png&filetype=l",
+          "back": "https://www.ttbonline.gov/colasonline/publicViewAttachment.do?filename=UGly%20wine%20back.png&filetype=l"
+        },
+        "image_types": {
+          "front": "Brand (front) or keg collar",
+          "back": "Back"
+        },
+        "status": "APPROVED",
+        "class_type_code": "80",
+        "origin_code": "01",
+        "permit_no": "BW-CA-5368",
+        "verified_live": "2026-09-15"
+      },
+      "application": {
+        "brand_name": "UGLY SWEATER",
+        "fanciful_name": null,
+        "class_type": "TABLE RED WINE",
+        "alcohol_content": {
+          "value": "ALC. 14% BY VOLUME",
+          "percent": 14.0,
+          "source": "read_from_label",
+          "read_from_image": "front"
+        },
+        "net_contents": {
+          "value": "750ML",
+          "ml": 750,
+          "source": "read_from_label",
+          "read_from_image": "front"
+        },
+        "applicant_name_address": "CHATEAU DIANA, CHATEAU DIANA, LLC 6195 DRY CREEK RD HEALDSBURG CA 95448 UGLY WINES (Used on label)",
+        "source_of_product": "Domestic",
+        "origin": "CALIFORNIA",
+        "wine_appellation": "CALIFORNIA"
+      },
+      "label_observed": {
+        "class_type": "RED TABLE WINE",
+        "name_address": "CELLARED AND BOTTLED BY UGLY SWEATER HEALDSBURG, CA",
+        "origin_statement": "PRODUCT OF THE U.S.A."
+      },
+      "expected": {
+        "brand": "pass",
+        "class_type": "pass",
+        "abv": "pass",
+        "net_contents": "pass",
+        "name_address": "pass",
+        "origin": "not_applicable",
+        "warning_present": true,
+        "warning_exact": true,
+        "warning_heading_caps": true
+      },
+      "notes": [
+        "Light text on black.",
+        "The image TTB tags 'Brand (front)' carries the mandatory text and the warning; the image tagged 'Back' is artwork ('UGLY', 'Big Red', 'CALIFORNIA').",
+        "Label bottler name UGLY SWEATER is neither the applicant (CHATEAU DIANA, LLC) nor its listed DBA (UGLY WINES); the city HEALDSBURG, CA matches."
+      ],
+      "also_acceptable": {
+        "name_address": [
+          "needs_review"
+        ]
+      }
+    },
+    {
+      "id": "ttb-26236001000716",
+      "kind": "real",
+      "beverage_type": "wine",
+      "images": {
+        "front": "26236001000716/front.jpg",
+        "back": "26236001000716/back.jpg"
+      },
+      "warning_image": "back",
+      "registry": {
+        "ttb_id": "26236001000716",
+        "form_url": "https://www.ttbonline.gov/colasonline/viewColaDetails.do?action=publicFormDisplay&ttbid=26236001000716",
+        "detail_url": "https://www.ttbonline.gov/colasonline/viewColaDetails.do?action=publicDisplaySearchBasic&ttbid=26236001000716",
+        "image_urls": {
+          "front": "https://www.ttbonline.gov/colasonline/publicViewAttachment.do?filename=Bear%20Path%20Gewurz_Front_30INX35IN.jpg&filetype=l",
+          "back": "https://www.ttbonline.gov/colasonline/publicViewAttachment.do?filename=Bear%20Path_Gewurz_Back_4inx35in.jpg&filetype=l"
+        },
+        "image_types": {
+          "front": "Brand (front) or keg collar",
+          "back": "Back"
+        },
+        "status": "APPROVED",
+        "class_type_code": "81",
+        "origin_code": "01",
+        "permit_no": "BWN-CA-15093",
+        "verified_live": "2026-09-15"
+      },
+      "application": {
+        "brand_name": "BEAR PATH",
+        "fanciful_name": null,
+        "class_type": "TABLE WHITE WINE",
+        "alcohol_content": {
+          "value": "ALC. 12.8% BY VOL.",
+          "percent": 12.8,
+          "source": "read_from_label",
+          "read_from_image": "front"
+        },
+        "net_contents": {
+          "value": "750ML",
+          "ml": 750,
+          "source": "read_from_label",
+          "read_from_image": "back"
+        },
+        "applicant_name_address": "MENDOCINO WINE GROUP, MENDOCINO WINE GROUP, LLC 501 PARDUCCI RD UKIAH CA 95482 PROSPECT VINEYARDS (Used on label)",
+        "source_of_product": "Domestic",
+        "origin": "CALIFORNIA",
+        "wine_appellation": "ANDERSON VALLEY"
+      },
+      "label_observed": {
+        "class_type": "GEWURZTRAMINER",
+        "name_address": "VINTED, CELLARED AND BOTTLED BY PROSPECT VINEYARDS UKIAH, CALIFORNIA",
+        "origin_statement": null
+      },
+      "expected": {
+        "brand": "pass",
+        "class_type": "pass",
+        "abv": "pass",
+        "net_contents": "pass",
+        "name_address": "pass",
+        "origin": "not_applicable",
+        "warning_present": true,
+        "warning_exact": true,
+        "warning_heading_caps": true
+      },
+      "notes": [
+        "Body in sentence case. The heading appears in the same regular weight as the body, not bold; 16.22(a)(2) requires bold, which the checks in this set do not score.",
+        "Class/type on the label is the varietal GEWURZTRAMINER; the application class is TABLE WHITE WINE. Appellation ANDERSON VALLEY and vintage 2025 are on the label."
+      ],
+      "also_acceptable": {
+        "class_type": [
+          "needs_review"
+        ]
+      }
+    },
+    {
+      "id": "ttb-26236001000652",
+      "kind": "real",
+      "beverage_type": "wine",
+      "images": {
+        "front": "26236001000652/front.jpg",
+        "back": "26236001000652/back.jpg"
+      },
+      "warning_image": "front",
+      "registry": {
+        "ttb_id": "26236001000652",
+        "form_url": "https://www.ttbonline.gov/colasonline/viewColaDetails.do?action=publicFormDisplay&ttbid=26236001000652",
+        "detail_url": "https://www.ttbonline.gov/colasonline/viewColaDetails.do?action=publicDisplaySearchBasic&ttbid=26236001000652",
+        "image_urls": {
+          "front": "https://www.ttbonline.gov/colasonline/publicViewAttachment.do?filename=2024%20Patria%20Corpuel%20Chard%20Back%20Label%20TTB.jpg&filetype=l",
+          "back": "https://www.ttbonline.gov/colasonline/publicViewAttachment.do?filename=Corpuel%20Front%20Label.jpg&filetype=l"
+        },
+        "image_types": {
+          "front": "Brand (front) or keg collar",
+          "back": "Back"
+        },
+        "status": "APPROVED",
+        "class_type_code": "81",
+        "origin_code": "01",
+        "permit_no": "BWN-CA-22007",
+        "verified_live": "2026-09-15"
+      },
+      "application": {
+        "brand_name": "PATRIA",
+        "fanciful_name": "CORPUEL VINEYARD",
+        "class_type": "TABLE WHITE WINE",
+        "alcohol_content": {
+          "value": "ALC 13.5% BY VOL.",
+          "percent": 13.5,
+          "source": "read_from_label",
+          "read_from_image": "front"
+        },
+        "net_contents": {
+          "value": "750ML",
+          "ml": 750,
+          "source": "read_from_label",
+          "read_from_image": "front"
+        },
+        "applicant_name_address": "Sepia Wines, LLC 817 LOMMEL RD Calistoga CA 94515",
+        "source_of_product": "Domestic",
+        "origin": "CALIFORNIA",
+        "wine_appellation": "RUSSIAN RIVER VALLEY"
+      },
+      "label_observed": {
+        "class_type": "CHARDONNAY",
+        "name_address": "PRODUCED AND BOTTLED BY SEPIA WINES LLC, CALISTOGA, CA",
+        "origin_statement": null
+      },
+      "expected": {
+        "brand": "pass",
+        "class_type": "pass",
+        "abv": "pass",
+        "net_contents": "pass",
+        "name_address": "pass",
+        "origin": "not_applicable",
+        "warning_present": true,
+        "warning_exact": true,
+        "warning_heading_caps": true
+      },
+      "notes": [
+        "White text on orange.",
+        "Brand PATRIA is set in script ('Patria'). Class/type on the label is the varietal CHARDONNAY; the application class is TABLE WHITE WINE. Fanciful name CORPUEL VINEYARD and appellation RUSSIAN RIVER VALLEY are on the label.",
+        "The image TTB tags 'Brand (front)' carries all mandatory text; the image tagged 'Back' is artwork with the vintage only."
+      ],
+      "also_acceptable": {
+        "class_type": [
+          "needs_review"
+        ]
+      }
+    },
+    {
+      "id": "ttb-26239001000132",
+      "kind": "real",
+      "beverage_type": "wine",
+      "images": {
+        "front": "26239001000132/front.jpg",
+        "back": "26239001000132/back.jpg"
+      },
+      "warning_image": "front",
+      "registry": {
+        "ttb_id": "26239001000132",
+        "form_url": "https://www.ttbonline.gov/colasonline/viewColaDetails.do?action=publicFormDisplay&ttbid=26239001000132",
+        "detail_url": "https://www.ttbonline.gov/colasonline/viewColaDetails.do?action=publicDisplaySearchBasic&ttbid=26239001000132",
+        "image_urls": {
+          "front": "https://www.ttbonline.gov/colasonline/publicViewAttachment.do?filename=rossastro%20-%20brand.png&filetype=l",
+          "back": "https://www.ttbonline.gov/colasonline/publicViewAttachment.do?filename=rossastro%20-%20back.png&filetype=l"
+        },
+        "image_types": {
+          "front": "Brand (front) or keg collar",
+          "back": "Back"
+        },
+        "status": "APPROVED",
+        "class_type_code": "80A",
+        "origin_code": "50",
+        "permit_no": "CT-I-21179",
+        "verified_live": "2026-09-15"
+      },
+      "application": {
+        "brand_name": "FABIO SIGNORELLI",
+        "fanciful_name": "ROSSASTRO",
+        "class_type": "ROSE WINE",
+        "alcohol_content": {
+          "value": "12% ALC. BY VOL.",
+          "percent": 12.0,
+          "source": "read_from_label",
+          "read_from_image": "front"
+        },
+        "net_contents": {
+          "value": "750 ML",
+          "ml": 750,
+          "source": "read_from_label",
+          "read_from_image": "front"
+        },
+        "applicant_name_address": "WhitServe LLC 600 SUMMER ST STE 302 Stamford CT 06901",
+        "source_of_product": "Imported",
+        "origin": "ITALY",
+        "wine_appellation": "ITALY"
+      },
+      "label_observed": {
+        "class_type": "ROSE WINE",
+        "name_address": "IMPORTED BY: WHITSERVE LLC STAMFORD, CONNECTICUT",
+        "origin_statement": "PRODUCT OF ITALY"
+      },
+      "expected": {
+        "brand": "pass",
+        "class_type": "pass",
+        "abv": "pass",
+        "net_contents": "pass",
+        "name_address": "pass",
+        "origin": "pass",
+        "warning_present": true,
+        "warning_exact": true,
+        "warning_heading_caps": true
+      },
+      "notes": [
+        "The image TTB tags 'Brand (front)' carries all mandatory text; the image tagged 'Back' is artwork ('Rossastro', 'Quasi Rosso - RST24').",
+        "Fanciful name ROSSASTRO and vintage 2024 are on the label; the foreign producer is named (AZIENDA AGRICOLA SIGNORELLI, Piedimonte Etneo, Italy)."
+      ]
+    },
+    {
+      "id": "ttb-26237001000196",
+      "kind": "real",
+      "beverage_type": "wine",
+      "images": {
+        "front": "26237001000196/front.jpg",
+        "back": "26237001000196/back.jpg"
+      },
+      "warning_image": "back",
+      "registry": {
+        "ttb_id": "26237001000196",
+        "form_url": "https://www.ttbonline.gov/colasonline/viewColaDetails.do?action=publicFormDisplay&ttbid=26237001000196",
+        "detail_url": "https://www.ttbonline.gov/colasonline/viewColaDetails.do?action=publicDisplaySearchBasic&ttbid=26237001000196",
+        "image_urls": {
+          "front": "https://www.ttbonline.gov/colasonline/publicViewAttachment.do?filename=Face_Labell.jpg&filetype=l",
+          "back": "https://www.ttbonline.gov/colasonline/publicViewAttachment.do?filename=Back_Label.jpg&filetype=l"
+        },
+        "image_types": {
+          "front": "Brand (front) or keg collar",
+          "back": "Back"
+        },
+        "status": "APPROVED",
+        "class_type_code": "88",
+        "origin_code": "01",
+        "permit_no": "BW-CA-4213",
+        "verified_live": "2026-09-15"
+      },
+      "application": {
+        "brand_name": "MARK WEST",
+        "fanciful_name": "RESERVE",
+        "class_type": "DESSERT /PORT/SHERRY/(COOKING) WINE",
+        "alcohol_content": {
+          "value": "ALC. 14.5% BY VOLUME",
+          "percent": 14.5,
+          "source": "read_from_label",
+          "read_from_image": "back"
+        },
+        "net_contents": {
+          "value": "750mL",
+          "ml": 750,
+          "source": "read_from_label",
+          "read_from_image": "back"
+        },
+        "applicant_name_address": "GALLO, E. & J. GALLO WINERY 600 YOSEMITE BLVD MODESTO CA 95354 MARK WEST WINERY (Used on label)",
+        "source_of_product": "Domestic",
+        "origin": "CALIFORNIA",
+        "wine_appellation": "CA - SONOMA"
+      },
+      "label_observed": {
+        "class_type": "PINOT NOIR",
+        "name_address": "VINTED & BOTTLED BY MARK WEST WINERY, MODESTO, CA",
+        "origin_statement": null
+      },
+      "expected": {
+        "brand": "pass",
+        "class_type": "pass",
+        "abv": "pass",
+        "net_contents": "pass",
+        "name_address": "pass",
+        "origin": "not_applicable",
+        "warning_present": true,
+        "warning_exact": true,
+        "warning_heading_caps": true
+      },
+      "notes": [
+        "Small type with irregular letter spacing; CON-SUMPTION split at a line end.",
+        "The application class is DESSERT /PORT/SHERRY/(COOKING) WINE (code 88) while the label designates PINOT NOIR at 14.5%; a checker that flags this for review is also acceptable.",
+        "Both images are small (front 285 px wide), so text is only a few pixels high."
+      ],
+      "also_acceptable": {
+        "class_type": [
+          "needs_review"
+        ]
+      }
+    },
+    {
+      "id": "ttb-26230001000420",
+      "kind": "real",
+      "beverage_type": "malt_beverage",
+      "images": {
+        "front": "26230001000420/front.jpg",
+        "back": "26230001000420/back.jpg"
+      },
+      "warning_image": "back",
+      "registry": {
+        "ttb_id": "26230001000420",
+        "form_url": "https://www.ttbonline.gov/colasonline/viewColaDetails.do?action=publicFormDisplay&ttbid=26230001000420",
+        "detail_url": "https://www.ttbonline.gov/colasonline/viewColaDetails.do?action=publicDisplaySearchBasic&ttbid=26230001000420",
+        "image_urls": {
+          "front": "https://www.ttbonline.gov/colasonline/publicViewAttachment.do?filename=PrivateBarrelProgram_375ml_November2026_R1-02.jpg&filetype=l",
+          "back": "https://www.ttbonline.gov/colasonline/publicViewAttachment.do?filename=PrivateBarrelProgram_375ml_November2026_R1_Back.jpg&filetype=l"
+        },
+        "image_types": {
+          "front": "Brand (front) or keg collar",
+          "back": "Back"
+        },
+        "status": "APPROVED",
+        "class_type_code": "904",
+        "origin_code": "01",
+        "permit_no": "BR-CA-BRU-15000",
+        "verified_live": "2026-09-15"
+      },
+      "application": {
+        "brand_name": "THE BRUERY",
+        "fanciful_name": "BLACK TUESDAY PRIVATE BARREL",
+        "class_type": "STOUT",
+        "alcohol_content": {
+          "value": "ALC. 20.3% BY VOL.",
+          "percent": 20.3,
+          "source": "read_from_label",
+          "read_from_image": "front"
+        },
+        "net_contents": {
+          "value": "12.7 FL. OZ.",
+          "ml": 375,
+          "source": "read_from_label",
+          "read_from_image": "front"
+        },
+        "applicant_name_address": "THE BRUERY, THE BRUERY LLC 715 DUNN WAY PLACENTIA CA 92870 THE BRUERY (Used on label)",
+        "source_of_product": "Domestic",
+        "origin": "CALIFORNIA",
+        "wine_appellation": null
+      },
+      "label_observed": {
+        "class_type": "BARREL-AGED IMPERIAL STOUT",
+        "name_address": null,
+        "origin_statement": null
+      },
+      "expected": {
+        "brand": "pass",
+        "class_type": "pass",
+        "abv": "pass",
+        "net_contents": "pass",
+        "name_address": "needs_review",
+        "origin": "not_applicable",
+        "warning_present": true,
+        "warning_exact": true,
+        "warning_heading_caps": true
+      },
+      "notes": [
+        "Light text on black.",
+        "Neither image shows a bottler name and address; 'The Bruery' appears only as a script logo. The application names THE BRUERY LLC, Placentia CA. Expected outcome is to flag it (needs_review; fail also accepted).",
+        "Net contents 12.7 FL. OZ. is about 375 mL; the value compared is the label text."
+      ],
+      "also_acceptable": {
+        "name_address": [
+          "fail"
+        ]
+      }
+    },
+    {
+      "id": "ttb-26242001000088",
+      "kind": "real",
+      "beverage_type": "malt_beverage",
+      "images": {
+        "front": "26242001000088/front.jpg",
+        "back": "26242001000088/back.jpg"
+      },
+      "warning_image": "back",
+      "registry": {
+        "ttb_id": "26242001000088",
+        "form_url": "https://www.ttbonline.gov/colasonline/viewColaDetails.do?action=publicFormDisplay&ttbid=26242001000088",
+        "detail_url": "https://www.ttbonline.gov/colasonline/viewColaDetails.do?action=publicDisplaySearchBasic&ttbid=26242001000088",
+        "image_urls": {
+          "front": "https://www.ttbonline.gov/colasonline/publicViewAttachment.do?filename=ZHIGULEVSKOYE%20ENGLISH%20%20FRONT.jpg&filetype=l",
+          "back": "https://www.ttbonline.gov/colasonline/publicViewAttachment.do?filename=ZHIGULEVSKOYE%20ENGLISH%20Back.jpg&filetype=l"
+        },
+        "image_types": {
+          "front": "Brand (front) or keg collar",
+          "back": "Back"
+        },
+        "status": "APPROVED",
+        "class_type_code": "951",
+        "origin_code": "6C",
+        "permit_no": "FL-I-22422",
+        "verified_live": "2026-09-15"
+      },
+      "application": {
+        "brand_name": "ZHIGULEVSKOYE",
+        "fanciful_name": "PALE LAGER SPECIAL",
+        "class_type": "BEER",
+        "alcohol_content": {
+          "value": "ALC. 5.2% BY VOL.",
+          "percent": 5.2,
+          "source": "read_from_label",
+          "read_from_image": "front"
+        },
+        "net_contents": {
+          "value": "1 PT. 0.9 FL. OZ. (500 mL)",
+          "ml": 500,
+          "source": "read_from_label",
+          "read_from_image": "front"
+        },
+        "applicant_name_address": "Florida Royal Spirits, FRS Group INC 1420 SW 3RD AVE Fort Lauderdale FL 33315",
+        "source_of_product": "Imported",
+        "origin": "BELARUS",
+        "wine_appellation": null
+      },
+      "label_observed": {
+        "class_type": "PALE LAGER / PALE PASTEURIZED BEER",
+        "name_address": "IMPORTED BY FRS GROUP INC., FORT LAUDERDALE, FLORIDA.",
+        "origin_statement": "PRODUCT OF BELARUS"
+      },
+      "expected": {
+        "brand": "pass",
+        "class_type": "pass",
+        "abv": "pass",
+        "net_contents": "pass",
+        "name_address": "pass",
+        "origin": "pass",
+        "warning_present": true,
+        "warning_exact": true,
+        "warning_heading_caps": true
+      },
+      "notes": [
+        "Body in sentence case.",
+        "The back label spells the brand ZHIGUILEVSKOYE; the front and the application spell it ZHIGULEVSKOYE.",
+        "Label names the importer FRS GROUP INC.; the application lists Florida Royal Spirits, FRS Group INC."
+      ]
+    },
+    {
+      "id": "ttb-26239001000217",
+      "kind": "real",
+      "beverage_type": "malt_beverage",
+      "images": {
+        "front": "26239001000217/front.jpg",
+        "back": "26239001000217/back.jpg"
+      },
+      "warning_image": "back",
+      "registry": {
+        "ttb_id": "26239001000217",
+        "form_url": "https://www.ttbonline.gov/colasonline/viewColaDetails.do?action=publicFormDisplay&ttbid=26239001000217",
+        "detail_url": "https://www.ttbonline.gov/colasonline/viewColaDetails.do?action=publicDisplaySearchBasic&ttbid=26239001000217",
+        "image_urls": {
+          "front": "https://www.ttbonline.gov/colasonline/publicViewAttachment.do?filename=FL.jpg&filetype=l",
+          "back": "https://www.ttbonline.gov/colasonline/publicViewAttachment.do?filename=BL.jpg&filetype=l"
+        },
+        "image_types": {
+          "front": "Brand (front) or keg collar",
+          "back": "Back"
+        },
+        "status": "APPROVED",
+        "class_type_code": "951",
+        "origin_code": "53",
+        "permit_no": "FL-I-15704",
+        "verified_live": "2026-09-15"
+      },
+      "application": {
+        "brand_name": "FREISINGER",
+        "fanciful_name": null,
+        "class_type": "BEER",
+        "alcohol_content": {
+          "value": "4.9% ALC. / VOL.",
+          "percent": 4.9,
+          "source": "read_from_label",
+          "read_from_image": "front"
+        },
+        "net_contents": {
+          "value": "11.2 FL. OUNCES",
+          "ml": 331,
+          "source": "read_from_label",
+          "read_from_image": "front"
+        },
+        "applicant_name_address": "PARK STREET IMPORTS LLC 1000 BRICKELL AVE STE 215 MIAMI FL 33131",
+        "source_of_product": "Imported",
+        "origin": "GERMANY",
+        "wine_appellation": null
+      },
+      "label_observed": {
+        "class_type": "LAGER",
+        "name_address": "IMPORTED BY: PARK STREET IMPORTS MIAMI, FL",
+        "origin_statement": "PRODUCT OF GERMANY"
+      },
+      "expected": {
+        "brand": "pass",
+        "class_type": "pass",
+        "abv": "pass",
+        "net_contents": "pass",
+        "name_address": "pass",
+        "origin": "pass",
+        "warning_present": true,
+        "warning_exact": true,
+        "warning_heading_caps": true
+      },
+      "notes": [
+        "Condensed capitals, widely justified.",
+        "Application class is BEER; the label designates LAGER.",
+        "Net contents in US fluid ounces only (11.2 fl oz is about 331 mL)."
+      ]
+    },
+    {
+      "id": "ttb-26239001000279",
+      "kind": "real",
+      "beverage_type": "malt_beverage",
+      "images": {
+        "front": "26239001000279/front.jpg"
+      },
+      "warning_image": "front",
+      "registry": {
+        "ttb_id": "26239001000279",
+        "form_url": "https://www.ttbonline.gov/colasonline/viewColaDetails.do?action=publicFormDisplay&ttbid=26239001000279",
+        "detail_url": "https://www.ttbonline.gov/colasonline/viewColaDetails.do?action=publicDisplaySearchBasic&ttbid=26239001000279",
+        "image_urls": {
+          "front": "https://www.ttbonline.gov/colasonline/publicViewAttachment.do?filename=SATURATIONABOVEREPLACEMENT.jpeg&filetype=l"
+        },
+        "image_types": {
+          "front": "Brand (front) or keg collar"
+        },
+        "status": "APPROVED",
+        "class_type_code": "902",
+        "origin_code": "04",
+        "permit_no": "BR-IL-21378",
+        "verified_live": "2026-09-15"
+      },
+      "application": {
+        "brand_name": "HOP BUTCHER FOR THE WORLD",
+        "fanciful_name": "SATURATION ABOVE REPLACEMENT",
+        "class_type": "ALE",
+        "alcohol_content": {
+          "value": "ALC. 8.0% BY VOL.",
+          "percent": 8.0,
+          "source": "read_from_label",
+          "read_from_image": "front"
+        },
+        "net_contents": {
+          "value": "ONE PINT (16 FL OZ)",
+          "ml": 473,
+          "source": "read_from_label",
+          "read_from_image": "front"
+        },
+        "applicant_name_address": "HOP BUTCHER FOR THE WORLD, LLC 6398 W 74TH ST Bedford Park IL 60638",
+        "source_of_product": "Domestic",
+        "origin": "ILLINOIS",
+        "wine_appellation": null
+      },
+      "label_observed": {
+        "class_type": "DOUBLE INDIA PALE ALE",
+        "name_address": "BREWED AND CANNED BY HOP BUTCHER FOR THE WORLD IN CHICAGO, ILLINOIS AND BEDFORD PARK, ILLINOIS",
+        "origin_statement": null
+      },
+      "expected": {
+        "brand": "pass",
+        "class_type": "pass",
+        "abv": "pass",
+        "net_contents": "pass",
+        "name_address": "pass",
+        "origin": "not_applicable",
+        "warning_present": true,
+        "warning_exact": true,
+        "warning_heading_caps": true
+      },
+      "notes": [
+        "Bold serif capitals throughout, in a narrow left column.",
+        "Single wraparound can image; the registry record has no back image.",
+        "Fanciful name SATURATION ABOVE REPLACEMENT is hand-lettered over artwork."
+      ]
+    },
+    {
+      "id": "ttb-26240001000563",
+      "kind": "real",
+      "beverage_type": "malt_beverage",
+      "images": {
+        "front": "26240001000563/front.jpg"
+      },
+      "warning_image": "front",
+      "registry": {
+        "ttb_id": "26240001000563",
+        "form_url": "https://www.ttbonline.gov/colasonline/viewColaDetails.do?action=publicFormDisplay&ttbid=26240001000563",
+        "detail_url": "https://www.ttbonline.gov/colasonline/viewColaDetails.do?action=publicDisplaySearchBasic&ttbid=26240001000563",
+        "image_urls": {
+          "front": "https://www.ttbonline.gov/colasonline/publicViewAttachment.do?filename=Oktoberfest%20Final%20jpg.jpg&filetype=l"
+        },
+        "image_types": {
+          "front": "Brand (front) or keg collar"
+        },
+        "status": "APPROVED",
+        "class_type_code": "901",
+        "origin_code": "44",
+        "permit_no": "BR-TX-20554",
+        "verified_live": "2026-09-15"
+      },
+      "application": {
+        "brand_name": "OKTOBERFEST",
+        "fanciful_name": null,
+        "class_type": "BEER",
+        "alcohol_content": {
+          "value": "6% ALC/VOL",
+          "percent": 6.0,
+          "source": "read_from_label",
+          "read_from_image": "front"
+        },
+        "net_contents": {
+          "value": "1 PINT (16 FL OZ)",
+          "ml": 473,
+          "source": "read_from_label",
+          "read_from_image": "front"
+        },
+        "applicant_name_address": "KEYWORTH BREWING COMPANY LLC 6428 DAVIS BLVD STE 400 North Richland Hills TX 76182",
+        "source_of_product": "Domestic",
+        "origin": "TEXAS",
+        "wine_appellation": null
+      },
+      "label_observed": {
+        "class_type": "GERMAN STYLE MÄRZEN LAGER",
+        "name_address": "BREWED AND CANNED BY KEYWORTH BREWING COMPANY NORTH RICHLAND HILLS, TX",
+        "origin_statement": null
+      },
+      "expected": {
+        "brand": "pass",
+        "class_type": "pass",
+        "abv": "pass",
+        "net_contents": "pass",
+        "name_address": "pass",
+        "origin": "not_applicable",
+        "warning_present": true,
+        "warning_exact": true,
+        "warning_heading_caps": true
+      },
+      "notes": [
+        "Tiny condensed capitals over patterned artwork in the lower-left corner, not bold; confirmed on a magnified crop.",
+        "Single wraparound can image; the registry record has no back image.",
+        "Application class is BEER; the label designates MÄRZEN LAGER."
+      ]
+    },
+    {
+      "id": "ttb-26240001000454",
+      "kind": "real",
+      "beverage_type": "malt_beverage",
+      "images": {
+        "front": "26240001000454/front.jpg"
+      },
+      "warning_image": "front",
+      "registry": {
+        "ttb_id": "26240001000454",
+        "form_url": "https://www.ttbonline.gov/colasonline/viewColaDetails.do?action=publicFormDisplay&ttbid=26240001000454",
+        "detail_url": "https://www.ttbonline.gov/colasonline/viewColaDetails.do?action=publicDisplaySearchBasic&ttbid=26240001000454",
+        "image_urls": {
+          "front": "https://www.ttbonline.gov/colasonline/publicViewAttachment.do?filename=Casserole.jpeg&filetype=l"
+        },
+        "image_types": {
+          "front": "Brand (front) or keg collar"
+        },
+        "status": "APPROVED",
+        "class_type_code": "902",
+        "origin_code": "22",
+        "permit_no": "BR-KY-20166",
+        "verified_live": "2026-09-15"
+      },
+      "application": {
+        "brand_name": "I HEARD CASSAROLE",
+        "fanciful_name": "DOUBLE INDIA PALE ALE",
+        "class_type": "ALE",
+        "alcohol_content": {
+          "value": "ALC./VOL. 8.0 % (8.0 handwritten)",
+          "percent": 8.0,
+          "source": "read_from_label",
+          "read_from_image": "front"
+        },
+        "net_contents": {
+          "value": "15.5 US GALLONS / 10.8 US GALLONS / 5.16 US GALLONS (7.75 struck through)",
+          "ml": null,
+          "source": "read_from_label",
+          "read_from_image": "front"
+        },
+        "applicant_name_address": "Party Town, Party Town Liquor INC 6823 BURLINGTON PIKE Florence KY 41042 MASH CULT BREWING (Used on label)",
+        "source_of_product": "Domestic",
+        "origin": "KENTUCKY",
+        "wine_appellation": null
+      },
+      "label_observed": {
+        "class_type": "Double India Pale Ale (handwritten)",
+        "name_address": "Mash Cult Brewery, FLORENCE, KY",
+        "origin_statement": "PRODUCT OF THE USA"
+      },
+      "expected": {
+        "brand": "pass",
+        "class_type": "pass",
+        "abv": "pass",
+        "net_contents": "needs_review",
+        "name_address": "pass",
+        "origin": "not_applicable",
+        "warning_present": true,
+        "warning_exact": false,
+        "warning_heading_caps": true
+      },
+      "notes": [
+        "Wording matches, but the statement seems to end 'PROBLEMS\"' with no full stop; the photo is too coarse to be certain.",
+        "A real phone photo of a keg collar on a concrete floor, not flat artwork.",
+        "Brand 'I Heard Cassarole', style and ABV are handwritten on the collar.",
+        "The collar lists several keg sizes with one struck out, so there is no single net-contents value to match; expected outcome is needs_review.",
+        "Label names MASH CULT BREWERY, the DBA the application lists as used on label (applicant Party Town Liquor INC, Florence KY)."
+      ],
+      "also_acceptable": {
+        "warning_exact": [
+          true,
+          "needs_review"
+        ],
+        "brand": [
+          "needs_review"
+        ],
+        "abv": [
+          "needs_review"
+        ]
+      }
+    },
+    {
+      "id": "ttb-26240001000573",
+      "kind": "real",
+      "beverage_type": "malt_beverage",
+      "images": {
+        "front": "26240001000573/front.jpg"
+      },
+      "warning_image": "front",
+      "registry": {
+        "ttb_id": "26240001000573",
+        "form_url": "https://www.ttbonline.gov/colasonline/viewColaDetails.do?action=publicFormDisplay&ttbid=26240001000573",
+        "detail_url": "https://www.ttbonline.gov/colasonline/viewColaDetails.do?action=publicDisplaySearchBasic&ttbid=26240001000573",
+        "image_urls": {
+          "front": "https://www.ttbonline.gov/colasonline/publicViewAttachment.do?filename=Svyturys%20Ekstra%20can.jpg&filetype=l"
+        },
+        "image_types": {
+          "front": "Brand (front) or keg collar"
+        },
+        "status": "APPROVED",
+        "class_type_code": "951",
+        "origin_code": "6I",
+        "permit_no": "CA-I-5385",
+        "verified_live": "2026-09-15"
+      },
+      "application": {
+        "brand_name": "SVYTURYS",
+        "fanciful_name": "EKSTRA",
+        "class_type": "BEER",
+        "alcohol_content": {
+          "value": "5.2% ALC./VOL.",
+          "percent": 5.2,
+          "source": "read_from_label",
+          "read_from_image": "front"
+        },
+        "net_contents": {
+          "value": "1 PT. 3.2 FL.OZ. / 568 mL",
+          "ml": 568,
+          "source": "read_from_label",
+          "read_from_image": "front"
+        },
+        "applicant_name_address": "B & I OVERSEAS TRADING INC. 7712 DENSMORE AVE VAN NUYS CA 91406",
+        "source_of_product": "Imported",
+        "origin": "LITHUANIA",
+        "wine_appellation": null
+      },
+      "label_observed": {
+        "class_type": "PREMIUM LAGER BEER / BEER",
+        "name_address": "Imported by: B&I Overseas Trading, Inc., Van Nuys, California, USA",
+        "origin_statement": "PRODUCT OF LITHUANIA"
+      },
+      "expected": {
+        "brand": "pass",
+        "class_type": "pass",
+        "abv": "pass",
+        "net_contents": "pass",
+        "name_address": "pass",
+        "origin": "pass",
+        "warning_present": true,
+        "warning_exact": true,
+        "warning_heading_caps": true
+      },
+      "notes": [
+        "Tiny sentence-case type in a narrow column at the right of the can wrap.",
+        "Single can-wrap image; the registry record has no back image.",
+        "Label brand ŠVYTURYS carries a diacritic; the application spells it SVYTURYS. Fanciful name EKSTRA is on the label."
+      ]
+    },
+    {
+      "id": "ttb-26238001000795",
+      "kind": "real",
+      "beverage_type": "malt_beverage",
+      "images": {
+        "front": "26238001000795/front.jpg",
+        "back": "26238001000795/back.jpg"
+      },
+      "warning_image": "back",
+      "registry": {
+        "ttb_id": "26238001000795",
+        "form_url": "https://www.ttbonline.gov/colasonline/viewColaDetails.do?action=publicFormDisplay&ttbid=26238001000795",
+        "detail_url": "https://www.ttbonline.gov/colasonline/viewColaDetails.do?action=publicDisplaySearchBasic&ttbid=26238001000795",
+        "image_urls": {
+          "front": "https://www.ttbonline.gov/colasonline/publicViewAttachment.do?filename=front.jpg&filetype=l",
+          "back": "https://www.ttbonline.gov/colasonline/publicViewAttachment.do?filename=reverso.jpg&filetype=l"
+        },
+        "image_types": {
+          "front": "Brand (front) or keg collar",
+          "back": "Back"
+        },
+        "status": "APPROVED",
+        "class_type_code": "951",
+        "origin_code": "5M",
+        "permit_no": "FL-I-22698",
+        "verified_live": "2026-09-15"
+      },
+      "application": {
+        "brand_name": "QALIO",
+        "fanciful_name": null,
+        "class_type": "BEER",
+        "alcohol_content": {
+          "value": "ALC. BY VOL. 5%",
+          "percent": 5.0,
+          "source": "read_from_label",
+          "read_from_image": "front"
+        },
+        "net_contents": {
+          "value": "NET CONT. 350 ML / 12 FL OZ",
+          "ml": 350,
+          "source": "read_from_label",
+          "read_from_image": "front"
+        },
+        "applicant_name_address": "Latin American Traders LLC 8859 NW 102ND CT CT NW APT 1 Doral FL 33178",
+        "source_of_product": "Imported",
+        "origin": "GUATEMALA",
+        "wine_appellation": null
+      },
+      "label_observed": {
+        "class_type": "LAYER PREMIUM BEER / CERVEZA LAGER, LAGER BEER",
+        "name_address": "Imported by Latin American Traders LLC 8859 NW 102nd Ct, Doral, FL 33178",
+        "origin_statement": "Product of Guatemala"
+      },
+      "expected": {
+        "brand": "pass",
+        "class_type": "pass",
+        "abv": "pass",
+        "net_contents": "pass",
+        "name_address": "pass",
+        "origin": "pass",
+        "warning_present": true,
+        "warning_exact": true,
+        "warning_heading_caps": true
+      },
+      "notes": [
+        "Whole statement in bold.",
+        "The application brand is QALIO, but the label's script logo reads as 'Gallo' (its first letter looks like a Q). A checker that flags the brand for review is also acceptable.",
+        "The front misprints 'LAYER PREMIUM BEER' for lager; the back says 'CERVEZA LAGER / LAGER BEER'."
+      ],
+      "also_acceptable": {
+        "brand": [
+          "needs_review"
+        ]
+      }
+    },
+    {
+      "id": "ttb-26239001000239",
+      "kind": "real",
+      "beverage_type": "wine",
+      "images": {
+        "front": "26239001000239/front.jpg",
+        "back": "26239001000239/back.jpg"
+      },
+      "warning_image": "front",
+      "registry": {
+        "ttb_id": "26239001000239",
+        "form_url": "https://www.ttbonline.gov/colasonline/viewColaDetails.do?action=publicFormDisplay&ttbid=26239001000239",
+        "detail_url": "https://www.ttbonline.gov/colasonline/viewColaDetails.do?action=publicDisplaySearchBasic&ttbid=26239001000239",
+        "image_urls": {
+          "front": "https://www.ttbonline.gov/colasonline/publicViewAttachment.do?filename=GRAND%20TINEL%20CNP%20White%20BACK.jpg&filetype=l",
+          "back": "https://www.ttbonline.gov/colasonline/publicViewAttachment.do?filename=GRAND%20TINEL%20CNP%20White%20FRONT.jpg&filetype=l"
+        },
+        "image_types": {
+          "front": "Brand (front) or keg collar",
+          "back": "Back"
+        },
+        "status": "APPROVED",
+        "class_type_code": "81",
+        "origin_code": "51",
+        "permit_no": "TX-I-22215",
+        "verified_live": "2026-09-15"
+      },
+      "application": {
+        "brand_name": "DOMAINE DU GRAND TINEL",
+        "fanciful_name": null,
+        "class_type": "TABLE WHITE WINE",
+        "alcohol_content": {
+          "value": "ALC. 14 % BY VOL.",
+          "percent": 14.0,
+          "source": "read_from_label",
+          "read_from_image": "front"
+        },
+        "net_contents": {
+          "value": "NET CONTENTS 750 ML",
+          "ml": 750,
+          "source": "read_from_label",
+          "read_from_image": "front"
+        },
+        "applicant_name_address": "Burke Selections LLC 1517 BINGLE RD Houston TX 77055",
+        "source_of_product": "Imported",
+        "origin": "FRANCE",
+        "wine_appellation": "CHATEAUNEUF-DU-PAPE"
+      },
+      "label_observed": {
+        "class_type": "WHITE RHONE WINE / CHATEAUNEUF-DU-PAPE",
+        "name_address": "IMPORTED BY BURKE SELECTIONS LLC, HOUSTON, TX",
+        "origin_statement": "PRODUCT OF FRANCE"
+      },
+      "expected": {
+        "brand": "pass",
+        "class_type": "pass",
+        "abv": "pass",
+        "net_contents": "pass",
+        "name_address": "pass",
+        "origin": "pass",
+        "warning_present": true,
+        "warning_exact": true,
+        "warning_heading_caps": true
+      },
+      "notes": [
+        "Space before the heading's colon ('GOVERNMENT WARNING :').",
+        "The image TTB tags 'Brand (front)' carries all mandatory text; the image tagged 'Back' is the decorative label.",
+        "Brand DOMAINE DU GRAND TINEL; appellation Châteauneuf-du-Pape and vintage 2025 on both images."
+      ]
+    },
+    {
+      "id": "ttb-26239001000331",
+      "kind": "real",
+      "beverage_type": "wine",
+      "images": {
+        "front": "26239001000331/front.jpg",
+        "back": "26239001000331/back.jpg"
+      },
+      "warning_image": "front",
+      "registry": {
+        "ttb_id": "26239001000331",
+        "form_url": "https://www.ttbonline.gov/colasonline/viewColaDetails.do?action=publicFormDisplay&ttbid=26239001000331",
+        "detail_url": "https://www.ttbonline.gov/colasonline/viewColaDetails.do?action=publicDisplaySearchBasic&ttbid=26239001000331",
+        "image_urls": {
+          "front": "https://www.ttbonline.gov/colasonline/publicViewAttachment.do?filename=page04.jpg&filetype=l",
+          "back": "https://www.ttbonline.gov/colasonline/publicViewAttachment.do?filename=page04fr.png&filetype=l"
+        },
+        "image_types": {
+          "front": "Brand (front) or keg collar",
+          "back": "Back"
+        },
+        "status": "APPROVED",
+        "class_type_code": "84",
+        "origin_code": "51",
+        "permit_no": "CA-I-15220",
+        "verified_live": "2026-09-15"
+      },
+      "application": {
+        "brand_name": "GAIFFE-BRUN",
+        "fanciful_name": "EMOTION",
+        "class_type": "SPARKLING WINE/CHAMPAGNE",
+        "alcohol_content": {
+          "value": "ALC. 12,5% BY VOL.",
+          "percent": 12.5,
+          "source": "read_from_label",
+          "read_from_image": "front"
+        },
+        "net_contents": {
+          "value": "750 ml",
+          "ml": 750,
+          "source": "read_from_label",
+          "read_from_image": "front"
+        },
+        "applicant_name_address": "Accolade Brands, ACCOLADE BRANDS, INC. 4741 LAUREL CANYON BLVD STE 103 STUDIO CITY CA 91607 WINERY DIRECT (Used on label)",
+        "source_of_product": "Imported",
+        "origin": "FRANCE",
+        "wine_appellation": "CHAMPAGNE PREMIER CRU"
+      },
+      "label_observed": {
+        "class_type": "Sparkling Wine / Champagne Premier Cru",
+        "name_address": "IMPORTED BY: WINERY DIRECT, STUDIO CITY, CA",
+        "origin_statement": "PRODUCT OF France"
+      },
+      "expected": {
+        "brand": "pass",
+        "class_type": "pass",
+        "abv": "pass",
+        "net_contents": "pass",
+        "name_address": "pass",
+        "origin": "pass",
+        "warning_present": true,
+        "warning_exact": true,
+        "warning_heading_caps": true
+      },
+      "notes": [
+        "Body in sentence case, boxed.",
+        "Alcohol content uses a decimal comma (12,5%).",
+        "Label names WINERY DIRECT, the DBA the application lists as used on label (applicant ACCOLADE BRANDS, INC., Studio City CA).",
+        "The image TTB tags 'Brand (front)' carries the mandatory text; the image tagged 'Back' shows CHAMPAGNE GAIFFE-BRUN ÉMOTION."
+      ]
+    },
+    {
+      "id": "var-heading-title-case",
+      "kind": "variant",
+      "beverage_type": "wine",
+      "images": {
+        "front": "variants/var-heading-title-case-front.jpg",
+        "back": "26239001000132/back.jpg"
+      },
+      "warning_image": "front",
+      "registry": {
+        "ttb_id": "26239001000132",
+        "form_url": "https://www.ttbonline.gov/colasonline/viewColaDetails.do?action=publicFormDisplay&ttbid=26239001000132",
+        "detail_url": "https://www.ttbonline.gov/colasonline/viewColaDetails.do?action=publicDisplaySearchBasic&ttbid=26239001000132",
+        "image_urls": {
+          "front": "https://www.ttbonline.gov/colasonline/publicViewAttachment.do?filename=rossastro%20-%20brand.png&filetype=l",
+          "back": "https://www.ttbonline.gov/colasonline/publicViewAttachment.do?filename=rossastro%20-%20back.png&filetype=l"
+        },
+        "image_types": {
+          "front": "Brand (front) or keg collar",
+          "back": "Back"
+        },
+        "status": "APPROVED",
+        "class_type_code": "80A",
+        "origin_code": "50",
+        "permit_no": "CT-I-21179",
+        "verified_live": "2026-09-15"
+      },
+      "application": {
+        "brand_name": "FABIO SIGNORELLI",
+        "fanciful_name": "ROSSASTRO",
+        "class_type": "ROSE WINE",
+        "alcohol_content": {
+          "value": "12% ALC. BY VOL.",
+          "percent": 12.0,
+          "source": "read_from_label",
+          "read_from_image": "front"
+        },
+        "net_contents": {
+          "value": "750 ML",
+          "ml": 750,
+          "source": "read_from_label",
+          "read_from_image": "front"
+        },
+        "applicant_name_address": "WhitServe LLC 600 SUMMER ST STE 302 Stamford CT 06901",
+        "source_of_product": "Imported",
+        "origin": "ITALY",
+        "wine_appellation": "ITALY"
+      },
+      "label_observed": {
+        "class_type": "ROSE WINE",
+        "name_address": "IMPORTED BY: WHITSERVE LLC STAMFORD, CONNECTICUT",
+        "origin_statement": "PRODUCT OF ITALY"
+      },
+      "expected": {
+        "brand": "pass",
+        "class_type": "pass",
+        "abv": "pass",
+        "net_contents": "pass",
+        "name_address": "pass",
+        "origin": "pass",
+        "warning_present": true,
+        "warning_exact": true,
+        "warning_heading_caps": false
+      },
+      "notes": [
+        "Warning block repainted with the heading in title case ('Government Warning:'); body wording unchanged."
+      ],
+      "variant": {
+        "derives_from": "ttb-26239001000132",
+        "kind": "warning_heading_title_case",
+        "change": "Warning block repainted with the heading in title case ('Government Warning:'); body wording unchanged.",
+        "params": {
+          "image": "front",
+          "box": [
+            200,
+            708,
+            1765,
+            1224
+          ],
+          "heading": "Government Warning:",
+          "body": "(1) ACCORDING TO THE SURGEON GENERAL, WOMEN SHOULD NOT DRINK ALCOHOLIC BEVERAGES DURING PREGNANCY BECAUSE OF THE RISK OF BIRTH DEFECTS. (2) CONSUMPTION OF ALCOHOLIC BEVERAGES IMPAIRS YOUR ABILITY TO DRIVE A CAR OR OPERATE MACHINERY, AND MAY CAUSE HEALTH PROBLEMS."
+        }
+      }
+    },
+    {
+      "id": "var-warning-wording",
+      "kind": "variant",
+      "beverage_type": "wine",
+      "images": {
+        "front": "variants/var-warning-wording-front.jpg",
+        "back": "26239001000132/back.jpg"
+      },
+      "warning_image": "front",
+      "registry": {
+        "ttb_id": "26239001000132",
+        "form_url": "https://www.ttbonline.gov/colasonline/viewColaDetails.do?action=publicFormDisplay&ttbid=26239001000132",
+        "detail_url": "https://www.ttbonline.gov/colasonline/viewColaDetails.do?action=publicDisplaySearchBasic&ttbid=26239001000132",
+        "image_urls": {
+          "front": "https://www.ttbonline.gov/colasonline/publicViewAttachment.do?filename=rossastro%20-%20brand.png&filetype=l",
+          "back": "https://www.ttbonline.gov/colasonline/publicViewAttachment.do?filename=rossastro%20-%20back.png&filetype=l"
+        },
+        "image_types": {
+          "front": "Brand (front) or keg collar",
+          "back": "Back"
+        },
+        "status": "APPROVED",
+        "class_type_code": "80A",
+        "origin_code": "50",
+        "permit_no": "CT-I-21179",
+        "verified_live": "2026-09-15"
+      },
+      "application": {
+        "brand_name": "FABIO SIGNORELLI",
+        "fanciful_name": "ROSSASTRO",
+        "class_type": "ROSE WINE",
+        "alcohol_content": {
+          "value": "12% ALC. BY VOL.",
+          "percent": 12.0,
+          "source": "read_from_label",
+          "read_from_image": "front"
+        },
+        "net_contents": {
+          "value": "750 ML",
+          "ml": 750,
+          "source": "read_from_label",
+          "read_from_image": "front"
+        },
+        "applicant_name_address": "WhitServe LLC 600 SUMMER ST STE 302 Stamford CT 06901",
+        "source_of_product": "Imported",
+        "origin": "ITALY",
+        "wine_appellation": "ITALY"
+      },
+      "label_observed": {
+        "class_type": "ROSE WINE",
+        "name_address": "IMPORTED BY: WHITSERVE LLC STAMFORD, CONNECTICUT",
+        "origin_statement": "PRODUCT OF ITALY"
+      },
+      "expected": {
+        "brand": "pass",
+        "class_type": "pass",
+        "abv": "pass",
+        "net_contents": "pass",
+        "name_address": "pass",
+        "origin": "pass",
+        "warning_present": true,
+        "warning_exact": false,
+        "warning_heading_caps": true
+      },
+      "notes": [
+        "Warning block repainted with 'IMPAIRS' changed to 'MAY IMPAIR'; heading unchanged."
+      ],
+      "variant": {
+        "derives_from": "ttb-26239001000132",
+        "kind": "warning_wording_altered",
+        "change": "Warning block repainted with 'IMPAIRS' changed to 'MAY IMPAIR'; heading unchanged.",
+        "params": {
+          "image": "front",
+          "box": [
+            200,
+            708,
+            1765,
+            1224
+          ],
+          "heading": "GOVERNMENT WARNING:",
+          "body": "(1) ACCORDING TO THE SURGEON GENERAL, WOMEN SHOULD NOT DRINK ALCOHOLIC BEVERAGES DURING PREGNANCY BECAUSE OF THE RISK OF BIRTH DEFECTS. (2) CONSUMPTION OF ALCOHOLIC BEVERAGES MAY IMPAIR YOUR ABILITY TO DRIVE A CAR OR OPERATE MACHINERY, AND MAY CAUSE HEALTH PROBLEMS."
+        }
+      }
+    },
+    {
+      "id": "var-abv-mismatch",
+      "kind": "variant",
+      "beverage_type": "distilled_spirits",
+      "images": {
+        "front": "26237001000107/front.jpg",
+        "back": "26237001000107/back.jpg"
+      },
+      "warning_image": "back",
+      "registry": {
+        "ttb_id": "26237001000107",
+        "form_url": "https://www.ttbonline.gov/colasonline/viewColaDetails.do?action=publicFormDisplay&ttbid=26237001000107",
+        "detail_url": "https://www.ttbonline.gov/colasonline/viewColaDetails.do?action=publicDisplaySearchBasic&ttbid=26237001000107",
+        "image_urls": {
+          "front": "https://www.ttbonline.gov/colasonline/publicViewAttachment.do?filename=Reposado-front.jpg&filetype=l",
+          "back": "https://www.ttbonline.gov/colasonline/publicViewAttachment.do?filename=Reposado-back.jpg&filetype=l"
+        },
+        "image_types": {
+          "front": "Brand (front) or keg collar",
+          "back": "Back"
+        },
+        "status": "APPROVED",
+        "class_type_code": "977",
+        "origin_code": "81",
+        "permit_no": "TX-I-21390",
+        "verified_live": "2026-09-15"
+      },
+      "application": {
+        "brand_name": "JUAN LOBO",
+        "fanciful_name": "REPOSADO",
+        "class_type": "TEQUILA FB",
+        "alcohol_content": {
+          "value": "45% ALC./VOL.",
+          "percent": 45.0,
+          "source": "altered_for_test"
+        },
+        "net_contents": {
+          "value": "750mL",
+          "ml": 750,
+          "source": "read_from_label",
+          "read_from_image": "front"
+        },
+        "applicant_name_address": "Juan Lobo Tequila, LLC 994 HOT SPRING VALLEY Buda TX 78610",
+        "source_of_product": "Imported",
+        "origin": "MEXICO",
+        "wine_appellation": null
+      },
+      "label_observed": {
+        "class_type": "TEQUILA / 100% BLUE AGAVE / REPOSADO",
+        "name_address": "IMPORTED BY JUAN LOBO TEQUILA, LLC BUDA, TEXAS",
+        "origin_statement": "HECHO EN MEXICO"
+      },
+      "expected": {
+        "brand": "pass",
+        "class_type": "pass",
+        "abv": "fail",
+        "net_contents": "pass",
+        "name_address": "pass",
+        "origin": "pass",
+        "warning_present": true,
+        "warning_exact": true,
+        "warning_heading_caps": true
+      },
+      "notes": [
+        "Image unchanged; application alcohol content set to 45% where the label says 40%."
+      ],
+      "variant": {
+        "derives_from": "ttb-26237001000107",
+        "kind": "abv_mismatch",
+        "change": "Image unchanged; application alcohol content set to 45% where the label says 40%."
+      }
+    },
+    {
+      "id": "var-brand-case-punctuation",
+      "kind": "variant",
+      "beverage_type": "distilled_spirits",
+      "images": {
+        "front": "26231001000662/front.jpg",
+        "back": "26231001000662/back.jpg"
+      },
+      "warning_image": "back",
+      "registry": {
+        "ttb_id": "26231001000662",
+        "form_url": "https://www.ttbonline.gov/colasonline/viewColaDetails.do?action=publicFormDisplay&ttbid=26231001000662",
+        "detail_url": "https://www.ttbonline.gov/colasonline/viewColaDetails.do?action=publicDisplaySearchBasic&ttbid=26231001000662",
+        "image_urls": {
+          "front": "https://www.ttbonline.gov/colasonline/publicViewAttachment.do?filename=Lucy%20B%20Sub%20Front%202.jpg&filetype=l",
+          "back": "https://www.ttbonline.gov/colasonline/publicViewAttachment.do?filename=Lucy%20B%20Sub%20Back%202.jpg&filetype=l"
+        },
+        "image_types": {
+          "front": "Brand (front) or keg collar",
+          "back": "Back"
+        },
+        "status": "APPROVED",
+        "class_type_code": "141",
+        "origin_code": "04",
+        "permit_no": "DSP-IL-15026",
+        "verified_live": "2026-09-15"
+      },
+      "application": {
+        "brand_name": "Lucky Lucys",
+        "fanciful_name": null,
+        "class_type": "BOURBON WHISKY",
+        "alcohol_content": {
+          "value": "40%ALC/VOL/80 PROOF",
+          "percent": 40.0,
+          "source": "read_from_label",
+          "read_from_image": "front"
+        },
+        "net_contents": {
+          "value": "1 LITER",
+          "ml": 1000,
+          "source": "read_from_label",
+          "read_from_image": "front"
+        },
+        "applicant_name_address": "Asbury Spirits, CELLO VIA, INC 45 GORDON ST Elk Grove Village IL 60007 CHICAGOLAND SPIRITS, INC. (Used on label)",
+        "source_of_product": "Domestic",
+        "origin": "ILLINOIS",
+        "wine_appellation": null
+      },
+      "label_observed": {
+        "class_type": "BOURBON WHISKEY",
+        "name_address": "AGED AND BOTTLED BY CHICAGOLAND SPIRITS, ELK GROVE VILLAGE, IL.",
+        "origin_statement": "MADE IN THE USA"
+      },
+      "expected": {
+        "brand": "pass",
+        "class_type": "pass",
+        "abv": "pass",
+        "net_contents": "pass",
+        "name_address": "pass",
+        "origin": "not_applicable",
+        "warning_present": true,
+        "warning_exact": true,
+        "warning_heading_caps": true
+      },
+      "notes": [
+        "Image unchanged; application brand set to 'Lucky Lucys' (mixed case, apostrophe dropped) against label 'Lucky Lucy's'."
+      ],
+      "variant": {
+        "derives_from": "ttb-26231001000662",
+        "kind": "brand_case_punctuation",
+        "change": "Image unchanged; application brand set to 'Lucky Lucys' (mixed case, apostrophe dropped) against label 'Lucky Lucy's'."
+      }
+    },
+    {
+      "id": "var-glare",
+      "kind": "variant",
+      "beverage_type": "wine",
+      "images": {
+        "front": "variants/var-glare-front.jpg",
+        "back": "26236001000652/back.jpg"
+      },
+      "warning_image": "front",
+      "registry": {
+        "ttb_id": "26236001000652",
+        "form_url": "https://www.ttbonline.gov/colasonline/viewColaDetails.do?action=publicFormDisplay&ttbid=26236001000652",
+        "detail_url": "https://www.ttbonline.gov/colasonline/viewColaDetails.do?action=publicDisplaySearchBasic&ttbid=26236001000652",
+        "image_urls": {
+          "front": "https://www.ttbonline.gov/colasonline/publicViewAttachment.do?filename=2024%20Patria%20Corpuel%20Chard%20Back%20Label%20TTB.jpg&filetype=l",
+          "back": "https://www.ttbonline.gov/colasonline/publicViewAttachment.do?filename=Corpuel%20Front%20Label.jpg&filetype=l"
+        },
+        "image_types": {
+          "front": "Brand (front) or keg collar",
+          "back": "Back"
+        },
+        "status": "APPROVED",
+        "class_type_code": "81",
+        "origin_code": "01",
+        "permit_no": "BWN-CA-22007",
+        "verified_live": "2026-09-15"
+      },
+      "application": {
+        "brand_name": "PATRIA",
+        "fanciful_name": "CORPUEL VINEYARD",
+        "class_type": "TABLE WHITE WINE",
+        "alcohol_content": {
+          "value": "ALC 13.5% BY VOL.",
+          "percent": 13.5,
+          "source": "read_from_label",
+          "read_from_image": "front"
+        },
+        "net_contents": {
+          "value": "750ML",
+          "ml": 750,
+          "source": "read_from_label",
+          "read_from_image": "front"
+        },
+        "applicant_name_address": "Sepia Wines, LLC 817 LOMMEL RD Calistoga CA 94515",
+        "source_of_product": "Domestic",
+        "origin": "CALIFORNIA",
+        "wine_appellation": "RUSSIAN RIVER VALLEY"
+      },
+      "label_observed": {
+        "class_type": "CHARDONNAY",
+        "name_address": "PRODUCED AND BOTTLED BY SEPIA WINES LLC, CALISTOGA, CA",
+        "origin_statement": null
+      },
+      "expected": {
+        "brand": "pass",
+        "class_type": "pass",
+        "abv": "pass",
+        "net_contents": "pass",
+        "name_address": "pass",
+        "origin": "not_applicable",
+        "warning_present": true,
+        "warning_exact": true,
+        "warning_heading_caps": true
+      },
+      "notes": [
+        "Soft white hotspot over the lower third of the label, covering part of the warning."
+      ],
+      "also_acceptable": {
+        "class_type": [
+          "needs_review"
+        ],
+        "brand": [
+          "needs_review"
+        ],
+        "abv": [
+          "needs_review"
+        ],
+        "net_contents": [
+          "needs_review"
+        ],
+        "name_address": [
+          "needs_review"
+        ],
+        "warning_present": [
+          "needs_review"
+        ],
+        "warning_exact": [
+          "needs_review"
+        ],
+        "warning_heading_caps": [
+          "needs_review"
+        ]
+      },
+      "variant": {
+        "derives_from": "ttb-26236001000652",
+        "kind": "glare",
+        "change": "Soft white hotspot over the lower third of the label, covering part of the warning.",
+        "params": {
+          "image": "front",
+          "cx": 0.55,
+          "cy": 0.78,
+          "radius": 0.22,
+          "strength": 0.85
+        }
+      }
+    },
+    {
+      "id": "var-skew",
+      "kind": "variant",
+      "beverage_type": "distilled_spirits",
+      "images": {
+        "front": "variants/var-skew-front.jpg",
+        "back": "26218001000369/back.jpg"
+      },
+      "warning_image": "back",
+      "registry": {
+        "ttb_id": "26218001000369",
+        "form_url": "https://www.ttbonline.gov/colasonline/viewColaDetails.do?action=publicFormDisplay&ttbid=26218001000369",
+        "detail_url": "https://www.ttbonline.gov/colasonline/viewColaDetails.do?action=publicDisplaySearchBasic&ttbid=26218001000369",
+        "image_urls": {
+          "front": "https://www.ttbonline.gov/colasonline/publicViewAttachment.do?filename=21f2.jpg&filetype=l",
+          "back": "https://www.ttbonline.gov/colasonline/publicViewAttachment.do?filename=21b2.jpg&filetype=l"
+        },
+        "image_types": {
+          "front": "Brand (front) or keg collar",
+          "back": "Back"
+        },
+        "status": "APPROVED",
+        "class_type_code": "171",
+        "origin_code": "5E",
+        "permit_no": "NY-I-15605",
+        "verified_live": "2026-09-15"
+      },
+      "application": {
+        "brand_name": "AODH",
+        "fanciful_name": null,
+        "class_type": "IRISH WHISKY FB",
+        "alcohol_content": {
+          "value": "Alc. 42.8% by vol. 85.6 US PROOF",
+          "percent": 42.8,
+          "source": "read_from_label",
+          "read_from_image": "front"
+        },
+        "net_contents": {
+          "value": "750ml",
+          "ml": 750,
+          "source": "read_from_label",
+          "read_from_image": "front"
+        },
+        "applicant_name_address": "EASTERN LIQUORS USA, INC. 990 WESTBURY RD 2ND FLOOR, WESTBURY NY 11590",
+        "source_of_product": "Imported",
+        "origin": "IRELAND",
+        "wine_appellation": null
+      },
+      "label_observed": {
+        "class_type": "IRISH WHISKEY",
+        "name_address": "IMPORTED BY: EASTERN LIQUORS USA. INC. 990 WESTBURY ROAD, 2ND FLOOR SUIT 200, A,B,C WESTBURY, NY 11590",
+        "origin_statement": "DISTILLED IN IRELAND"
+      },
+      "expected": {
+        "brand": "pass",
+        "class_type": "pass",
+        "abv": "pass",
+        "net_contents": "pass",
+        "name_address": "pass",
+        "origin": "pass",
+        "warning_present": true,
+        "warning_exact": true,
+        "warning_heading_caps": true
+      },
+      "notes": [
+        "Front rotated 12 degrees and sheared 0.15, as from a hand-held photo at an angle."
+      ],
+      "also_acceptable": {
+        "origin": [
+          "needs_review"
+        ],
+        "brand": [
+          "needs_review"
+        ],
+        "class_type": [
+          "needs_review"
+        ],
+        "abv": [
+          "needs_review"
+        ],
+        "net_contents": [
+          "needs_review"
+        ],
+        "name_address": [
+          "needs_review"
+        ],
+        "warning_present": [
+          "needs_review"
+        ],
+        "warning_exact": [
+          "needs_review"
+        ],
+        "warning_heading_caps": [
+          "needs_review"
+        ]
+      },
+      "variant": {
+        "derives_from": "ttb-26218001000369",
+        "kind": "skew",
+        "change": "Front rotated 12 degrees and sheared 0.15, as from a hand-held photo at an angle.",
+        "params": {
+          "image": "front",
+          "angle": 12,
+          "shear": 0.15
+        }
+      }
+    },
+    {
+      "id": "var-low-light",
+      "kind": "variant",
+      "beverage_type": "wine",
+      "images": {
+        "front": "26236001000716/front.jpg",
+        "back": "variants/var-low-light-back.jpg"
+      },
+      "warning_image": "back",
+      "registry": {
+        "ttb_id": "26236001000716",
+        "form_url": "https://www.ttbonline.gov/colasonline/viewColaDetails.do?action=publicFormDisplay&ttbid=26236001000716",
+        "detail_url": "https://www.ttbonline.gov/colasonline/viewColaDetails.do?action=publicDisplaySearchBasic&ttbid=26236001000716",
+        "image_urls": {
+          "front": "https://www.ttbonline.gov/colasonline/publicViewAttachment.do?filename=Bear%20Path%20Gewurz_Front_30INX35IN.jpg&filetype=l",
+          "back": "https://www.ttbonline.gov/colasonline/publicViewAttachment.do?filename=Bear%20Path_Gewurz_Back_4inx35in.jpg&filetype=l"
+        },
+        "image_types": {
+          "front": "Brand (front) or keg collar",
+          "back": "Back"
+        },
+        "status": "APPROVED",
+        "class_type_code": "81",
+        "origin_code": "01",
+        "permit_no": "BWN-CA-15093",
+        "verified_live": "2026-09-15"
+      },
+      "application": {
+        "brand_name": "BEAR PATH",
+        "fanciful_name": null,
+        "class_type": "TABLE WHITE WINE",
+        "alcohol_content": {
+          "value": "ALC. 12.8% BY VOL.",
+          "percent": 12.8,
+          "source": "read_from_label",
+          "read_from_image": "front"
+        },
+        "net_contents": {
+          "value": "750ML",
+          "ml": 750,
+          "source": "read_from_label",
+          "read_from_image": "back"
+        },
+        "applicant_name_address": "MENDOCINO WINE GROUP, MENDOCINO WINE GROUP, LLC 501 PARDUCCI RD UKIAH CA 95482 PROSPECT VINEYARDS (Used on label)",
+        "source_of_product": "Domestic",
+        "origin": "CALIFORNIA",
+        "wine_appellation": "ANDERSON VALLEY"
+      },
+      "label_observed": {
+        "class_type": "GEWURZTRAMINER",
+        "name_address": "VINTED, CELLARED AND BOTTLED BY PROSPECT VINEYARDS UKIAH, CALIFORNIA",
+        "origin_statement": null
+      },
+      "expected": {
+        "brand": "pass",
+        "class_type": "pass",
+        "abv": "pass",
+        "net_contents": "pass",
+        "name_address": "pass",
+        "origin": "not_applicable",
+        "warning_present": true,
+        "warning_exact": true,
+        "warning_heading_caps": true
+      },
+      "notes": [
+        "Back darkened to 35% brightness, contrast lowered, sensor-like noise added."
+      ],
+      "also_acceptable": {
+        "class_type": [
+          "needs_review"
+        ],
+        "brand": [
+          "needs_review"
+        ],
+        "abv": [
+          "needs_review"
+        ],
+        "net_contents": [
+          "needs_review"
+        ],
+        "name_address": [
+          "needs_review"
+        ],
+        "warning_present": [
+          "needs_review"
+        ],
+        "warning_exact": [
+          "needs_review"
+        ],
+        "warning_heading_caps": [
+          "needs_review"
+        ]
+      },
+      "variant": {
+        "derives_from": "ttb-26236001000716",
+        "kind": "low_light",
+        "change": "Back darkened to 35% brightness, contrast lowered, sensor-like noise added.",
+        "params": {
+          "image": "back",
+          "brightness": 0.35,
+          "noise": 40,
+          "seed": 7
+        }
+      }
+    },
+    {
+      "id": "var-blur",
+      "kind": "variant",
+      "beverage_type": "distilled_spirits",
+      "images": {
+        "front": "26232001000404/front.jpg",
+        "back": "variants/var-blur-back.jpg"
+      },
+      "warning_image": "back",
+      "registry": {
+        "ttb_id": "26232001000404",
+        "form_url": "https://www.ttbonline.gov/colasonline/viewColaDetails.do?action=publicFormDisplay&ttbid=26232001000404",
+        "detail_url": "https://www.ttbonline.gov/colasonline/viewColaDetails.do?action=publicDisplaySearchBasic&ttbid=26232001000404",
+        "image_urls": {
+          "front": "https://www.ttbonline.gov/colasonline/publicViewAttachment.do?filename=Black%20and%20White%20Blended%20Scotch%20Whisky%20Front%202026.jpg&filetype=l",
+          "back": "https://www.ttbonline.gov/colasonline/publicViewAttachment.do?filename=Black%20and%20White%20Blended%20Scotch%20Whisky%20Back%202026.jpg&filetype=l"
+        },
+        "image_types": {
+          "front": "Brand (front) or keg collar",
+          "back": "Back"
+        },
+        "status": "APPROVED",
+        "class_type_code": "151",
+        "origin_code": "5K",
+        "permit_no": "PR-I-765",
+        "verified_live": "2026-09-15"
+      },
+      "application": {
+        "brand_name": "BLACK & WHITE",
+        "fanciful_name": null,
+        "class_type": "SCOTCH WHISKY FB",
+        "alcohol_content": {
+          "value": "40% alc./vol.",
+          "percent": 40.0,
+          "source": "read_from_label",
+          "read_from_image": "front"
+        },
+        "net_contents": {
+          "value": "700 mL",
+          "ml": 700,
+          "source": "read_from_label",
+          "read_from_image": "front"
+        },
+        "applicant_name_address": "MENDEZ & CO. INC. KM 2.4 GUAYNABO PR 00969 MENDEZ & COMPANY (Used on label)",
+        "source_of_product": "Imported",
+        "origin": "SCOTLAND",
+        "wine_appellation": null
+      },
+      "label_observed": {
+        "class_type": "Blended Scotch Whisky",
+        "name_address": "Imported by: MENDEZ & COMPANY, SAN JUAN, PUERTO RICO",
+        "origin_statement": "PRODUCT OF SCOTLAND"
+      },
+      "expected": {
+        "brand": "pass",
+        "class_type": "pass",
+        "abv": "pass",
+        "net_contents": "pass",
+        "name_address": "pass",
+        "origin": "pass",
+        "warning_present": true,
+        "warning_exact": true,
+        "warning_heading_caps": true
+      },
+      "notes": [
+        "Back blurred with a Gaussian radius of 2.5 px, as from an out-of-focus photo."
+      ],
+      "also_acceptable": {
+        "name_address": [
+          "needs_review"
+        ],
+        "brand": [
+          "needs_review"
+        ],
+        "class_type": [
+          "needs_review"
+        ],
+        "abv": [
+          "needs_review"
+        ],
+        "net_contents": [
+          "needs_review"
+        ],
+        "origin": [
+          "needs_review"
+        ],
+        "warning_present": [
+          "needs_review"
+        ],
+        "warning_exact": [
+          "needs_review"
+        ],
+        "warning_heading_caps": [
+          "needs_review"
+        ]
+      },
+      "variant": {
+        "derives_from": "ttb-26232001000404",
+        "kind": "blur",
+        "change": "Back blurred with a Gaussian radius of 2.5 px, as from an out-of-focus photo.",
+        "params": {
+          "image": "back",
+          "radius": 2.5
+        }
+      }
+    }
+  ]
+}
