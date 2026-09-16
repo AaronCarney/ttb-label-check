@@ -1,0 +1,15 @@
+# docker-compose.yml
+services:
+  demo:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      LLM_MODEL_SNAPSHOT: ${LLM_MODEL_SNAPSHOT:-gpt-4o-2024-08-06}
+      ORCHESTRATOR_BACKEND: ${ORCHESTRATOR_BACKEND:-openai}
+      LOOKAHEAD_K: ${LOOKAHEAD_K:-3}
+      VISION_MODE: ${VISION_MODE:-cloud}
+      DEMO_CACHE: ${DEMO_CACHE:-1}
