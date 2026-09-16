@@ -1418,3 +1418,113 @@ the reader. Splitting on that line is what lets each module say truthfully what 
   environment is built is now one import hop rather than a scroll.
 - **Two names are importable from two places.** `app.api.ui` re-exports the two dependency-override
   seams so existing imports keep working, and they also live in the modules that define them.
+
+<a id="0020"></a>
+## 0020. A batch item with no image is refused by name, and one bad label does not end the batch
+
+**Decided:** 2026-09-16.
+
+**Chosen.** Two halves of one mechanism in `app/batch/worker.py`. An item the worker holds no image
+for is refused: `_resolve_label` returns nothing, and the item gets a `needs_review` envelope with no
+fields whose single audit-trail row names `ENGINE.INPUT.LABEL_IMAGE_MISSING`. An item whose
+evaluation raises is refused the same way, naming `ENGINE.WORKER.UNHANDLED`. Either way the consumer
+records the result, broadcasts it, and goes on to the next item. `InFlightBatch.failures` holds the
+sentence a person reads, and the snapshot renders that item as `failed` with the sentence on
+`failed_reason`. The `stream-end` event carries a `failed_count`.
+
+**Rejected.** *Standing in eight bytes of PNG header, which is what the code did.* `_resolve_label`
+returned a `Label` whose `image_bytes` was the literal `b"\x89PNG\r\n\x1a\n"` for any item the lookup
+did not hold. Only the bulk-upload route fills that lookup, so every caller of the JSON
+`POST /batches` got it: the reader, the rule engine and the disposition all ran over eight bytes that
+are not an image, and the envelope reported a verdict about it. A verdict about a label nobody
+supplied is a fabricated measurement, and it is worse than no answer because it looks like one.
+
+*Re-raising, which is what the code did for a failing evaluation.* `_consume` logged and re-raised, so
+`run()` cancelled the producer and the batch ended at the first bad label. A 300-label batch that
+tripped on label 4 left 296 labels unchecked and told the reviewer only an error class.
+`docs/PRD.md` FR-13 requires the product to name the file at fault and check the rest of the batch.
+
+*Rejecting the whole submission at `POST /batches` with a 422.* Honest about the JSON route, and
+still wrong: the upload route can carry four good files and one unreadable one, and that batch has to
+run. The refusal has to live per item, and once it does, the route-level rejection is a second
+mechanism saying a worse version of the same thing.
+
+*A new SSE event type for a refusal.* A new event type is invisible to the reader that exists:
+`frontend/src/sse/useBatchStream.ts` listens for `label-result` and `stream-end` and nothing else. A
+`needs_review` envelope puts the refused item in the reviewer's table today with no frontend change,
+and it is the same shape `app/services/evaluator.py` already emits for an image too poor to read, so
+one problem gets one answer on both paths.
+
+**Because** the product's claim is that a reviewer can trust what it says about a label. Inventing an
+image breaks that claim directly, and ending the batch breaks the reviewer's ability to act on the
+rest of it. Both are answered by naming the item, recording a refusal as that item's result, and
+carrying on.
+
+**Cost, stated.**
+
+- **Every item of a JSON `POST /batches` batch is now refused.** That endpoint takes references to
+  labels the caller says the server holds, and there is no store to resolve a reference to an image,
+  so the honest answer to all of them is the refusal. The batch path that works is
+  `POST /batches/upload`, which carries the files. This is a limitation to state in the README, not
+  a regression to hide: the endpoint never checked a real label, it only appeared to.
+- **The reason code's own description is now slightly wrong.**
+  `rules/reason_codes.yaml` says of `ENGINE.WORKER.UNHANDLED` that "SSE stream-end carries the error
+  class". It still does, but only for a failure that is not per-label; a per-label failure now
+  carries the code on the item's own envelope. One line of that registry needs editing.
+- **A refusal envelope carries a reason code and no sentence.** A no-fields envelope has nowhere to
+  put plain words — `plain_language_explanation` exists only inside a field finding — so the sentence
+  lives on the snapshot's `failed_reason` and an SSE-only client does not see it. The single-label
+  path has the same gap for an unreadable image. Closing it means a schema change and a frontend
+  change together.
+- **A test that subscribes to the bus now sees refusals unless it supplies images.** Several worker
+  tests constructed items with no lookup and were, before this, exercising the fabricated-image path
+  without saying so. They now pass a `label_lookup`, which is what the bulk-upload route does.
+
+<a id="0021"></a>
+## 0021. The batch consumer paces on the reviewer's pull, not on the queue
+
+**Decided:** 2026-09-16.
+
+**Chosen.** After an item's events are broadcast, `_consume` holds the next evaluation while the
+slowest attached SSE subscriber is more than `lookahead_k` events behind. With no subscriber
+attached the gate is inert. It polls the subscriber queues every 10 ms and has no timeout.
+
+**Rejected.** *Leaving the bounded queue as the demand signal, which is what the code claimed.* The
+module docstring called the worker "pull-based, reactive-streams-style" and called
+`BoundedQueue(maxsize=k+1)` "the single structural enforcement of pull-based demand". The producer
+that queue throttles iterates a tuple already in memory, so it throttles nothing that costs anything.
+All the cost is in `evaluator.evaluate`, on the other side of the queue, and it ran flat out whether
+or not anyone was reading. The claim was not true of the code.
+
+*Driving the gate off the `ItemState.PRESENTED` and `REVIEWED` transitions.* Those are the
+reviewer-driven states the schema already names, and they are the right long-run answer. Nothing sets
+them: no endpoint accepts them and no client sends them. Building that protocol is a feature with no
+client at either end.
+
+*Waiting on a drain signal instead of polling.* Cleaner, and it means changing `app/api/_sse_bus.py`,
+which is shared by every SSE consumer in the app. A 10 ms poll on a path that is idle whenever anyone
+is actually reading is not worth that blast radius.
+
+*A timeout on the gate.* A subscriber that stops reading is meant to hold the batch — that is what
+pull-based demand means, and a timeout would quietly restore the flat-out behaviour for the exact
+reader the gate exists for.
+
+**Because** the reviewer's pull is the only demand signal that exists today, and the SSE subscriber
+queue draining is what that pull looks like from here. Putting the window at the seam where the work
+costs something is what makes `LOOKAHEAD_K` govern anything at all.
+
+**Cost, stated.**
+
+- **A test that subscribes and never reads now hangs instead of failing.** That is the gate working,
+  and it is a bad failure mode to debug. Two of this lane's own tests had to be reworked to read
+  concurrently, and a third passed only because its item count sat exactly on the boundary.
+- **The gate cannot wedge, but the argument is indirect.** A reader that goes away is unsubscribed by
+  the `finally` in `app/api/batches.py` when the response generator closes, and `sse_starlette`'s
+  periodic ping forces that within its ping interval. If either of those changes, a departed reader
+  could hold a batch open.
+- **A 10 ms poll runs while the gate holds.** It is a sleep, not work, and it only runs when the
+  batch is already stopped — but it is a poll, and a drain signal would be better if the bus is ever
+  opened up for other reasons.
+- **The slowest subscriber governs everyone.** Two reviewers watching one batch means the batch runs
+  at the pace of whichever one is behind. For this product's one-reviewer-per-batch shape that is the
+  intended behaviour rather than a compromise.

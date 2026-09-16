@@ -10,7 +10,20 @@ Two coroutines collaborate via the per-batch ``BoundedQueue``:
 2. ``_consume`` — ``await queue.get()`` → ``evaluator.evaluate(app, label)`` →
    ``in_flight.record_result(label_id, envelope)`` → broadcast ``label-result``
    SSE event → ``anomaly.observe(headline_reason_code)`` → broadcast
-   ``anomaly-advisory`` if one fires. Emits ``stream-end`` after the last item.
+   ``anomaly-advisory`` if one fires → hold until the reviewer has caught up to
+   within ``lookahead_k`` events. Emits ``stream-end`` after the last item.
+
+**No one label ends the batch.** An item with no image, and an item whose
+evaluation raises, each get a refusal result that names the reason code, and the
+consumer carries on to the next item (``docs/PRD.md`` FR-13,
+``docs/decisions.md#0020``). Nothing is invented for a label that was never
+supplied.
+
+**The demand that paces the work is the reviewer's, not the queue's.** The
+producer above iterates a tuple already in memory, so the bounded queue throttles
+something that costs nothing. The cost is in ``evaluator.evaluate``, and what
+holds it back is how far the slowest attached SSE reader has fallen behind
+(``docs/decisions.md#0021``). With nobody reading, nothing is held back.
 
 A mid-batch override is handled outside this module: the override endpoint
 mutates ``in_flight.results[label_id]`` directly. The worker never inspects
@@ -19,18 +32,31 @@ mutates ``in_flight.results[label_id]`` directly. The worker never inspects
 from __future__ import annotations
 
 import asyncio
+import hashlib
 import logging
 import time
+from datetime import datetime, timezone
 
 from app.api._sse_bus import SSEBus
 from app.batch.anomaly import AnomalyDetector
 from app.batch.state import InFlightBatch
 from app.schemas.application import Application
+from app.schemas.audit import AuditRecord, PerRuleTraceEntry
 from app.schemas.batch import BatchItem
 from app.schemas.label import Label
-from app.schemas.wire.disposition import DispositionEnvelope
+from app.schemas.metrics import Metrics
+from app.schemas.wire.disposition import ConfidenceBand, DispositionEnvelope
+# The one canonicalisation every audit hash in the tree is computed over. A
+# second copy here would let two audit trails disagree about what the same
+# input hashes to.
+from app.services.audit import _canonical_json
 
 _logger = logging.getLogger("app.batch.worker")
+
+# The two ways a batch item can fail to be checked. Both are declared in
+# `rules/reason_codes.yaml`; neither is a verdict about the label.
+_NO_IMAGE = "ENGINE.INPUT.LABEL_IMAGE_MISSING"
+_EVALUATION_RAISED = "ENGINE.WORKER.UNHANDLED"
 
 
 def _headline_reason_code(envelope: DispositionEnvelope) -> str | None:
@@ -54,6 +80,9 @@ def _headline_reason_code(envelope: DispositionEnvelope) -> str | None:
 class BatchWorker:
     """Pull-based batch consumer."""
 
+    # How often `_await_demand` re-reads the reviewer's backlog while holding.
+    _DEMAND_POLL_SECONDS = 0.01
+
     def __init__(
         self,
         *,
@@ -61,15 +90,22 @@ class BatchWorker:
         evaluator,
         anomaly: AnomalyDetector,
         bus: SSEBus,
+        app_lookup: dict[str, Application] | None = None,
+        label_lookup: dict[str, Label] | None = None,
     ) -> None:
         self._in_flight = in_flight
         self._evaluator = evaluator
         self._anomaly = anomaly
         self._bus = bus
-        # Lookup registries. The bulk-upload route and tests populate these;
-        # anything missing is synthesized by the _resolve_* helpers below.
-        self._app_lookup: dict[str, Application] = {}
-        self._label_lookup: dict[str, Label] = {}
+        # What the caller already holds for each queued item, keyed by
+        # `application_ref` and `label_id`. A missing application is
+        # synthesized — a batch of refs still names an application. A missing
+        # label is **not**: there is nothing to stand in for image bytes, and
+        # the item is refused by name instead (`docs/decisions.md#0020`). Both
+        # stay assignable after construction, which is how
+        # `app/api/ui/bulk_upload.py` has always filled them.
+        self._app_lookup: dict[str, Application] = app_lookup or {}
+        self._label_lookup: dict[str, Label] = label_lookup or {}
 
     def _resolve_application(self, item: BatchItem) -> Application:
         """Resolve the Application for a queued BatchItem.
@@ -84,22 +120,108 @@ class BatchWorker:
             evaluation_id=item.label_id,
         )
 
-    def _resolve_label(self, item: BatchItem) -> Label:
-        """Resolve the Label payload for a queued BatchItem.
+    def _resolve_label(self, item: BatchItem) -> Label | None:
+        """The Label payload for a queued BatchItem, or None if there is none.
 
-        Uses `self._label_lookup` when the caller has populated it — the bulk
-        upload route does, so each item carries the exact bytes uploaded.
-        Otherwise synthesizes a minimal schema-valid `Label` from the
-        `label_id`."""
-        if item.label_id in self._label_lookup:
-            return self._label_lookup[item.label_id]
-        return Label(
-            label_id=item.label_id,
-            batch_id=self._in_flight.batch_id,
-            image_bytes=b"\x89PNG\r\n\x1a\n",
-            content_type="image/png",
-            face_tag="front",
+        `self._label_lookup` is populated by the bulk upload route, so each item
+        there carries the exact bytes uploaded. A batch submitted as refs alone
+        carries no image, and **None is the answer** — an item with no bytes is
+        not a label, and a stand-in for one would have the reader, the rules and
+        the disposition all run over something that is not a label and report a
+        verdict about it. The caller refuses the item by name instead
+        (`docs/decisions.md#0020`)."""
+        return self._label_lookup.get(item.label_id)
+
+    def _refusal_envelope(
+        self,
+        application: Application,
+        *,
+        label: Label | None,
+        label_id: str,
+        reason_code: str,
+        started_at: datetime,
+        duration_ms: int,
+    ) -> DispositionEnvelope:
+        """The result for a label the app could not check.
+
+        `needs_review` with no fields, carrying the reason code as its one
+        audit-trail row. This is the shape `app/services/evaluator.py` already
+        produces when an image is too poor to read, so a label that cannot be
+        checked is answered the same way whichever path it arrived on, and the
+        reviewer's table shows the item rather than silently dropping it.
+
+        The sentence a reviewer reads is not here — a no-fields envelope has
+        nowhere to carry one — it is on the snapshot item's `failed_reason`,
+        recorded by `InFlightBatch.record_failure`.
+        """
+        app_dict = application.model_dump(mode="json")
+        # Excluded for the same reason `app/services/audit.py` excludes it: the
+        # input hash is a fingerprint of the content, not of the call.
+        app_dict.pop("evaluation_id", None)
+        image_bytes = label.image_bytes if label is not None else b""
+        envelope_for_hash = {
+            "evaluation_id": application.evaluation_id,
+            "label_ref": label_id,
+            "disposition": "needs_review",
+            "reason_code": reason_code,
+        }
+        audit = AuditRecord(
+            evaluation_id=application.evaluation_id,
+            # No rule pack was selected, because nothing was checked. This is
+            # the same value `EvaluationTimeline` carries for an evaluation
+            # that never reached the rules.
+            rule_set_version="unknown",
+            input_hash=hashlib.sha256(_canonical_json(app_dict) + image_bytes).hexdigest(),
+            output_hash=hashlib.sha256(_canonical_json(envelope_for_hash)).hexdigest(),
+            started_at=started_at,
+            completed_at=datetime.now(timezone.utc),
+            per_rule_trace=(
+                PerRuleTraceEntry(
+                    rule_id=reason_code,
+                    disposition="needs_review",
+                    evidence_ref=f"engine_failure/{reason_code}",
+                ),
+            ),
         )
+        return DispositionEnvelope(
+            evaluation_id=application.evaluation_id,
+            label_ref=label_id,
+            disposition="needs_review",
+            disposition_confidence=ConfidenceBand(band="low", numeric=0.0),
+            fields=(),
+            audit_trail=audit,
+            metrics=Metrics(
+                total_duration_ms=duration_ms,
+                per_rule_durations_ms=(),
+                vision_duration_ms=0,
+            ),
+        )
+
+    def _reviewer_backlog(self) -> int:
+        """Events broadcast but not yet taken by the slowest attached reader."""
+        return max((q.qsize() for q in self._bus.subscribers), default=0)
+
+    async def _await_demand(self) -> None:
+        """Hold the next evaluation until the reviewer has caught up.
+
+        The reviewer's pull is the SSE subscriber queue draining, and the window
+        is `lookahead_k`: the consumer may run that many results ahead of the
+        slowest attached reader and no further, so a 300-label batch does not
+        spend its way to the end for a reviewer who is still on label one.
+
+        With no subscriber attached this is inert, which is what the JSON API
+        caller who polls `GET /batches/{batch_id}` gets. There is no timeout: a
+        reader that stops reading is meant to hold the batch. It cannot wedge,
+        because the stream route unsubscribes in its `finally` when the response
+        generator closes, and `sse_starlette`'s ping forces that on a reader
+        that has gone away.
+
+        It polls rather than waiting on a signal because a drain signal would
+        mean changing `app/api/_sse_bus.py`, which is not worth widening this
+        change for on a path that is idle whenever anyone is actually reading.
+        """
+        while self._bus.subscribers and self._reviewer_backlog() > self._in_flight.lookahead_k:
+            await asyncio.sleep(self._DEMAND_POLL_SECONDS)
 
     async def _producer(self) -> None:
         for item in self._in_flight.items:
@@ -113,25 +235,70 @@ class BatchWorker:
             f"batch_consume_started batch_id={batch_id} items={total} lookahead_k={self._in_flight.lookahead_k}",
             extra={"batch_id": batch_id, "reason_code": "ENGINE.OK.NONE"},
         )
+        failed = 0
         for queue_position in range(total):
             item: BatchItem = await self._in_flight.queue.get()
             application = self._resolve_application(item)
             label = self._resolve_label(item)
             t_label = time.monotonic()
-            try:
-                envelope = await self._evaluator.evaluate(application, label)
-            except Exception:
-                _logger.exception(
-                    f"label_evaluation_failed batch_id={batch_id} label_id={item.label_id} pos={queue_position}",
+            started_at = datetime.now(timezone.utc)
+            envelope: DispositionEnvelope | None = None
+            refusal: tuple[str, str] | None = None  # (reason_code, plain words)
+
+            if label is None:
+                refusal = (
+                    _NO_IMAGE,
+                    f"No image was supplied for {item.label_id}, so it was not checked. "
+                    "Send the label files themselves — the batch upload page carries each "
+                    "file with its item.",
+                )
+            else:
+                try:
+                    envelope = await self._evaluator.evaluate(application, label)
+                except Exception as error:  # noqa: BLE001 — one label, not the batch
+                    # Caught rather than re-raised: the rest of the batch is
+                    # still checked (docs/PRD.md FR-13). `Exception` and not
+                    # `BaseException`, so cancelling the worker still cancels it.
+                    _logger.exception(
+                        f"label_evaluation_failed batch_id={batch_id} label_id={item.label_id} pos={queue_position}",
+                        extra={
+                            "batch_id": batch_id,
+                            "label_id": item.label_id,
+                            "evaluation_id": application.evaluation_id,
+                            "reason_code": _EVALUATION_RAISED,
+                        },
+                    )
+                    refusal = (
+                        _EVALUATION_RAISED,
+                        f"{item.label_id} could not be checked: the check stopped with "
+                        f"{type(error).__name__}. The rest of the batch was checked. Submit "
+                        "this label on its own to see what went wrong with it.",
+                    )
+
+            duration_ms = int((time.monotonic() - t_label) * 1000)
+            if refusal is not None:
+                reason_code, message = refusal
+                failed += 1
+                envelope = self._refusal_envelope(
+                    application,
+                    label=label,
+                    label_id=item.label_id,
+                    reason_code=reason_code,
+                    started_at=started_at,
+                    duration_ms=duration_ms,
+                )
+                self._in_flight.record_failure(item.label_id, message)
+                _logger.warning(
+                    f"label_not_checked batch_id={batch_id} label_id={item.label_id} "
+                    f"pos={queue_position} message={message}",
                     extra={
                         "batch_id": batch_id,
                         "label_id": item.label_id,
                         "evaluation_id": application.evaluation_id,
-                        "reason_code": "ENGINE.WORKER.UNHANDLED",
+                        "reason_code": reason_code,
                     },
                 )
-                raise
-            duration_ms = int((time.monotonic() - t_label) * 1000)
+            assert envelope is not None  # one of the two branches always sets it
             self._in_flight.record_result(item.label_id, envelope)
 
             headline_code = _headline_reason_code(envelope)
@@ -178,9 +345,14 @@ class BatchWorker:
                     },
                 })
 
+            # Pull-based demand, at the seam where the work actually costs
+            # something. Held after this item's events are out, so the first
+            # verdict is never delayed and the rest of the batch runs behind it.
+            await self._await_demand()
+
         batch_duration_ms = int((time.monotonic() - t_batch) * 1000)
         _logger.info(
-            f"batch_consume_finished batch_id={batch_id} items={total} duration_ms={batch_duration_ms}",
+            f"batch_consume_finished batch_id={batch_id} items={total} failed={failed} duration_ms={batch_duration_ms}",
             extra={
                 "batch_id": batch_id,
                 "duration_ms": batch_duration_ms,
@@ -192,6 +364,10 @@ class BatchWorker:
             "data": {
                 "batch_id": batch_id,
                 "total_count": total,
+                # How many of them the app could not check. Every one of those
+                # is in the stream as a needs_review result naming its reason
+                # code, and on the snapshot with the sentence to show a person.
+                "failed_count": failed,
             },
         })
 

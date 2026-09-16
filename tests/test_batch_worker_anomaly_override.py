@@ -11,9 +11,20 @@ from app.batch.state import InFlightBatch
 from app.batch.worker import BatchWorker
 from app.schemas.audit import AuditRecord, OverrideEntry, PerRuleTraceEntry
 from app.schemas.batch import BatchItem, ItemState
+from app.schemas.label import Label
 from app.schemas.metrics import Metrics
 from app.schemas.wire.disposition import ConfidenceBand, DispositionEnvelope
 from tests.conftest import _fake_evaluator
+
+# A tiny valid PNG. The fake evaluators here never read the bytes, but the
+# worker refuses any item it has no image for (`docs/decisions.md#0020`), and a
+# refused item never reaches the evaluator — so without this the planned
+# reason codes below would never be observed at all.
+_PNG_1x1 = bytes.fromhex(
+    "89504e470d0a1a0a0000000d49484452000000010000000108060000001f15c4"
+    "89000000017352474200aece1ce90000000d4944415478da636060606000000005"
+    "0001a5f645400000000049454e44ae426082"
+)
 
 
 def _stub_item(idx: int) -> BatchItem:
@@ -24,6 +35,35 @@ def _stub_item(idx: int) -> BatchItem:
         result=None,
         enqueued_at=datetime(2026, 5, 4, 12, 0, idx, tzinfo=timezone.utc),
     )
+
+
+def _label_lookup_for(items, batch_id: str) -> dict[str, Label]:
+    """An image for every queued item, as the bulk-upload route supplies."""
+    return {
+        item.label_id: Label(
+            label_id=item.label_id,
+            batch_id=batch_id,
+            image_bytes=_PNG_1x1,
+            content_type="image/png",
+            face_tag="front",
+        )
+        for item in items
+    }
+
+
+async def _drain_until_stream_end(sub: asyncio.Queue, *, timeout: float = 5.0) -> list[dict]:
+    """Read events as they are broadcast, stopping at `stream-end`.
+
+    Reading concurrently with the worker is required, not tidier: the consumer
+    holds the next evaluation while the slowest attached subscriber is more
+    than `lookahead_k` events behind (`docs/decisions.md#0021`), so a test that
+    subscribes and then waits for `run()` to finish deadlocks by design."""
+    events: list[dict] = []
+    while True:
+        evt = await asyncio.wait_for(sub.get(), timeout=timeout)
+        events.append(evt)
+        if evt["event"] == "stream-end":
+            return events
 
 
 def _envelope_with_reason_code(idx: int, code: str) -> DispositionEnvelope:
@@ -138,14 +178,15 @@ async def test_worker_emits_anomaly_advisory_on_5_of_10_same_reason_code():
         evaluator=fake_eval,
         anomaly=AnomalyDetector(window_n=10, threshold_m=5),
         bus=bus,
+        label_lookup=_label_lookup_for(items, "B-AN1"),
     )
 
-    await worker.run()
-
-    # Drain all events from the subscriber
-    events = []
-    while not sub.empty():
-        events.append(sub.get_nowait())
+    # Read while the worker runs. Ten items and k=3 means an attached
+    # subscriber that does not read stops the batch at the fourth event, which
+    # is the demand gate doing its job rather than a fault.
+    run_task = asyncio.create_task(worker.run())
+    events = await _drain_until_stream_end(sub)
+    await asyncio.wait_for(run_task, timeout=1.0)
 
     # Expected event types: 10 label-result + 1 anomaly-advisory + 1 stream-end
     types = [e["event"] for e in events]
@@ -189,6 +230,7 @@ async def test_worker_continues_after_in_flight_results_mutation_simulating_over
         evaluator=fake_eval,
         anomaly=AnomalyDetector(),
         bus=bus,
+        label_lookup=_label_lookup_for(items, "B-OV1"),
     )
 
     run_task = asyncio.create_task(worker.run())
@@ -241,13 +283,15 @@ async def test_worker_emits_stream_end_exactly_once_after_last_label_result():
         evaluator=fake_eval,
         anomaly=AnomalyDetector(),
         bus=bus,
+        label_lookup=_label_lookup_for(items, "B-CC1"),
     )
 
-    await worker.run()
-
-    events = []
-    while not sub.empty():
-        events.append(sub.get_nowait())
+    # Three items and k=3 sits exactly on the demand gate's boundary, so this
+    # would pass without draining concurrently — until someone adds a fourth
+    # item and the test hangs instead of failing. Read as it runs.
+    run_task = asyncio.create_task(worker.run())
+    events = await _drain_until_stream_end(sub)
+    await asyncio.wait_for(run_task, timeout=1.0)
 
     types = [e["event"] for e in events]
     assert types == ["label-result", "label-result", "label-result", "stream-end"]

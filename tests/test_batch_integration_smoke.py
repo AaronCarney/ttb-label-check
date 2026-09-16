@@ -1,40 +1,52 @@
 """End-to-end canary: a 5-item batch with a fake evaluator over a real SSE
 response. Drains the events and asserts five per-label events, a stream-end,
-no advisories, and that the connection closes."""
+no advisories, and that the connection closes.
+
+The batch is started through `POST /batches/upload`, not the JSON
+`POST /batches`. That is the whole point of the canary: the upload route is the
+one that carries the label images, and since `docs/decisions.md#0020` an item
+with no image is refused by name without ever reaching the evaluator. Run over
+the JSON route these tests would still be green and would be checking nothing —
+five refusals in place of five evaluations. The JSON route's own behaviour is
+covered in `tests/test_batch_endpoint_post.py`.
+"""
 import asyncio
-from datetime import datetime, timezone
 
 import httpx
 import pytest
 
+# A tiny valid PNG. The upload route reads an upload's own first bytes to
+# decide its media type, so the file has to really be a PNG; the evaluator is
+# a fake and never looks at it.
+_PNG_1x1 = bytes.fromhex(
+    "89504e470d0a1a0a0000000d49484452000000010000000108060000001f15c4"
+    "89000000017352474200aece1ce90000000d4944415478da636060606000000005"
+    "0001a5f645400000000049454e44ae426082"
+)
+
+
+def _five_png_files() -> list[tuple[str, tuple[str, bytes, str]]]:
+    return [("labels", (f"label-{i}.png", _PNG_1x1, "image/png")) for i in range(5)]
+
 
 @pytest.mark.asyncio
-async def test_5_item_batch_end_to_end_via_real_sse_response(monkeypatch):
+async def test_5_item_batch_end_to_end_via_real_sse_response():
+    from app.api.ui import _get_upload_evaluator
     from app.main import create_app
-    from app.schemas.wire.batch import BatchEnvelope, BatchItemRef
     from tests.conftest import _fake_evaluator
 
-    monkeypatch.setattr(
-        "app.deps.build_evaluator",
-        lambda settings: _fake_evaluator(n_items=5, latency_s=0.3),
-    )
     app = create_app()
+    app.dependency_overrides[_get_upload_evaluator] = lambda: _fake_evaluator(
+        n_items=5, latency_s=0.3
+    )
     transport = httpx.ASGITransport(app=app)
     async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
-        envelope = BatchEnvelope(
-            batch_id="B-canary-001",
-            agent_id="a",
-            submitted_at=datetime(2026, 5, 4, 12, 0, 0, tzinfo=timezone.utc),
-            items=tuple(
-                BatchItemRef(label_ref=f"lbl-{i}", application_ref=f"app-{i:04d}")
-                for i in range(5)
-            ),
-        ).model_dump(mode="json")
-        post_resp = await client.post("/batches", json=envelope)
-        assert post_resp.status_code == 202
+        upload_resp = await client.post("/batches/upload", files=_five_png_files())
+        assert upload_resp.status_code == 303, upload_resp.text
+        batch_id = upload_resp.headers["location"].removeprefix("/batch/")
 
         events: list[str] = []
-        async with client.stream("GET", "/batches/B-canary-001/stream") as resp:
+        async with client.stream("GET", f"/batches/{batch_id}/stream") as resp:
             assert resp.status_code == 200
             async for line in resp.aiter_lines():
                 if line.startswith("event:"):
@@ -47,37 +59,32 @@ async def test_5_item_batch_end_to_end_via_real_sse_response(monkeypatch):
         assert events.count("stream-end") == 1
         assert events[-1] == "stream-end"
 
+    # The evaluator really ran: nothing was refused for want of an image.
+    in_flight = app.state.batches[batch_id]
+    assert in_flight.failures == {}
+    assert len(in_flight.results) == 5
+
 
 @pytest.mark.asyncio
-async def test_5_item_batch_with_mid_batch_override_continues_to_completion(monkeypatch):
+async def test_5_item_batch_with_mid_batch_override_continues_to_completion():
     """An override applied mid-batch does not stop the worker."""
+    from app.api.ui import _get_upload_evaluator
     from app.main import create_app
-    from app.schemas.wire.batch import BatchEnvelope, BatchItemRef
     from tests.conftest import _fake_evaluator, _stub_disposition_envelope
 
     plan = [(0.1, _stub_disposition_envelope(i, disposition="needs_review")) for i in range(5)]
-    monkeypatch.setattr(
-        "app.deps.build_evaluator",
-        lambda settings: _fake_evaluator(plan=plan),
-    )
     app = create_app()
+    app.dependency_overrides[_get_upload_evaluator] = lambda: _fake_evaluator(plan=plan)
     transport = httpx.ASGITransport(app=app)
     async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
-        envelope = BatchEnvelope(
-            batch_id="B-canary-002",
-            agent_id="a",
-            submitted_at=datetime(2026, 5, 4, 12, 0, 0, tzinfo=timezone.utc),
-            items=tuple(
-                BatchItemRef(label_ref=f"lbl-{i}", application_ref=f"app-{i:04d}")
-                for i in range(5)
-            ),
-        ).model_dump(mode="json")
-        await client.post("/batches", json=envelope)
+        upload_resp = await client.post("/batches/upload", files=_five_png_files())
+        assert upload_resp.status_code == 303, upload_resp.text
+        batch_id = upload_resp.headers["location"].removeprefix("/batch/")
 
         events: list[dict] = []
 
         async def _drain():
-            async with client.stream("GET", "/batches/B-canary-002/stream") as resp:
+            async with client.stream("GET", f"/batches/{batch_id}/stream") as resp:
                 async for line in resp.aiter_lines():
                     if line.startswith("event:"):
                         events.append({"event": line.split(":", 1)[1].strip()})
@@ -96,7 +103,7 @@ async def test_5_item_batch_with_mid_batch_override_continues_to_completion(monk
                 "justification_text": "Mid-batch override",
             },
         )
-        assert override_resp.status_code == 200
+        assert override_resp.status_code == 200, override_resp.text
 
         await asyncio.wait_for(drain_task, timeout=5.0)
 
