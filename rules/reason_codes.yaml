@@ -1,7 +1,13 @@
-# Reason-code registry. Every code a rule can emit is declared here, with the
-# grammar BIN.SUB.SPECIFIC[.QUALIFIER]. Loader cross-check 7 refuses startup if
-# any rule references a code not present here. Adding a new code is a one-line registry edit; removing
-# one when a rule still references it fails the loader.
+# Reason-code registry. Every code a rule or the application can emit is declared
+# here, with the grammar BIN.SUB.SPECIFIC[.QUALIFIER], and BIN is one of the keys
+# under `bins:`. Loader cross-check 7 refuses startup if any rule references a code
+# not present here. Adding a new code is a one-line registry edit; removing one
+# when a rule still references it fails the loader.
+#
+# A code that nothing emits goes in the `reviewer_vocabulary:` block at the foot of
+# this file, with the reason it stays. tests/rules/test_reason_code_registry.py
+# fails on a registered code that is neither emitted nor listed there, and on a
+# listed code that something does emit.
 version: "0.1.0"
 
 bins:
@@ -64,18 +70,17 @@ codes:
     cfr_anchors: ["27 CFR §4.32(b)(1)", "27 CFR §4.36(a)", "27 CFR §5.63(a)", "27 CFR §5.65(a)", "27 CFR §7.63(a)(3)"]
     severity: reject
   ALCOHOL_CONTENT.FORMAT.INVALID:
-    # Reviewer vocabulary only: no enabled rule emits this. The three
-    # `alcohol.format` rules that reference it are switched off, because no
-    # reader returns the label's own alcohol wording and the check cannot be
-    # made without it. See docs/decisions.md#0011.
+    # Not in `reviewer_vocabulary:` below, and that is correct: the three
+    # `alcohol.format` rules do name this code, so something emits it as far as
+    # the registry is concerned. Those rules are switched off, because no reader
+    # returns the label's own alcohol wording and the check cannot be made
+    # without it. See docs/decisions.md#0011.
     description: "Alcohol-content statement format does not satisfy regulation pattern."
     cfr_anchors: ["27 CFR §4.36(b)(1)", "27 CFR §5.65(b)", "27 CFR §7.65(b)"]
     severity: reject
   ALCOHOL_CONTENT.TOLERANCE.OUT_OF_BAND:
-    # Reviewer vocabulary only: no rule emits this. A reviewer who has a
-    # laboratory figure the application does not carry can still override a
-    # label with it, and app/api/overrides.py refuses any code absent here.
-    # See docs/decisions.md#0008.
+    # Nothing emits this; the reason it stays is in `reviewer_vocabulary:` at
+    # the foot of this file, which is checked. See docs/decisions.md#0008.
     description: "Reviewer judged the stated alcohol content to disagree with the product."
     cfr_anchors: ["27 CFR §4.36(b)(1)", "27 CFR §5.65(c)", "27 CFR §7.65(c)"]
     severity: reject
@@ -275,6 +280,10 @@ codes:
     description: "Snapshot or stream requested for an unknown batch_id."
     cfr_anchors: []
     severity: warn
+  ENGINE.OVERRIDE.NOT_FOUND:
+    description: "A reviewer's override named an evaluation that carries no result: either no such evaluation, or the label is still queued."
+    cfr_anchors: []
+    severity: warn
   ENGINE.RULE_PACK.SELECTED:
     description: "Names the rules this evaluation ran: the beverage the application declared, plus the rules that apply to every beverage."
     cfr_anchors: []
@@ -287,3 +296,70 @@ codes:
     description: "Sentinel for happy-path log lines that carry the structured reason_code field by convention."
     cfr_anchors: []
     severity: warn
+
+# Codes nothing emits, and why each one stays.
+#
+# `codes:` above is the vocabulary; this block is the part of it that no rule
+# and no line of application code produces. It is here so that "nothing emits
+# this" is a statement the file makes rather than an absence a reader has to
+# notice, and tests/rules/test_reason_code_registry.py holds the two halves
+# together: a registered code that nothing emits and that is not listed here
+# fails, and a code listed here that something does emit fails too.
+#
+# None of these is dead. app/api/overrides.py accepts any code in `codes:`, so
+# every one of them is a sentence a reviewer can put on a label by hand. What
+# they are not is something the engine will ever say on its own.
+reviewer_vocabulary:
+  ALCOHOL_CONTENT.TOLERANCE.OUT_OF_BAND:
+    "A reviewer holding a laboratory figure the application does not carry can
+     still override the label with it. The engine compares two declared values
+     and has no third number to compare against. See docs/decisions.md#0008."
+  CLASS_TYPE.INPUT.UNKNOWN:
+    "The engine reports an application that names no beverage as
+     ENGINE.RULE_PACK.NOT_SELECTED, which says the same thing from the rule
+     side. This code stays as the reviewer's way of putting it on the
+     application."
+  ENGINE.INPUT.APPLICATION_MISSING:
+    "An evaluation with no application never starts, so no finding carries
+     this. Kept as the reviewer's term for an application that arrived empty.
+     Its sibling ENGINE.INPUT.LABEL_IMAGE_MISSING is emitted, by
+     app/batch/worker.py, and is not listed here."
+  ENGINE.MEASUREMENT.MISSING_DPI:
+    "The rules that would have needed the image's physical scale are the four
+     switched-off measurement rules in rules/common/health_warning.yaml, and
+     they now answer WARNING.*_NOT_MEASURED instead. Nothing reaches a DPI
+     check. See docs/decisions.md#0013."
+  ENGINE.MODEL.UNAVAILABLE:
+    "A reader that fails reaches a finding as ENGINE.EXTRACTION.UNAVAILABLE
+     (app/services/evaluator.py:110), which does not distinguish an
+     unreachable endpoint from any other extraction failure. This code stays
+     for the reviewer who knows which it was."
+  ENGINE.OBSERVATION.AMBIGUOUS:
+    "No reader returns more than one candidate for a field, so nothing can
+     raise it. It describes a reading a reviewer can see in an image the
+     product read once."
+  ENGINE.REFERENCE_DATA.UNAVAILABLE:
+    "Reference data that fails to load stops the loader at startup with a
+     named violation rather than producing a finding, so no evaluation ever
+     carries this."
+  ENGINE.RULE.CONFLICT:
+    "Nothing detects conflicting dispositions between rules. A reviewer who
+     spots one has a term for it."
+  ENGINE.RULESET.VERSION_NOT_FOUND:
+    "One rule-set version ships, and the loader takes its version from this
+     file, so there is no version to fail to find."
+  WARNING.LEGIBILITY.NO_CONTRAST:
+    "This product does not read colour, so the rule answers
+     WARNING.LEGIBILITY.CONTRAST_NOT_MEASURED instead
+     (rules/common/health_warning.yaml:75). The code stays because a reviewer
+     looking at the label can see the contrast the product cannot measure.
+     See docs/decisions.md#0013."
+  WARNING.PLACEMENT.NOT_SEPARATE:
+    "As above: the rule answers WARNING.PLACEMENT.ISOLATION_NOT_MEASURED
+     (rules/common/health_warning.yaml:114)."
+  WARNING.TYPE_SIZE.CPI_EXCEEDED:
+    "As above: the rule answers WARNING.TYPE_SIZE.CPI_NOT_MEASURED
+     (rules/common/health_warning.yaml:94)."
+  WARNING.TYPE_SIZE.UNDER_MIN:
+    "As above: the rule answers WARNING.TYPE_SIZE.HEIGHT_NOT_MEASURED
+     (rules/common/health_warning.yaml:132)."
