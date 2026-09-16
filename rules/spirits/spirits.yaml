@@ -87,20 +87,6 @@ rules:
     effective_date: "2022-02-09"
     test_fixtures: [F-SPIRITS-ALC-FORMAT-PASS-01, F-SPIRITS-ALC-FORMAT-FAIL-01]
 
-  - rule_id: spirits.alcohol.tolerance_band
-    cfr_citation: "27 CFR §5.65(c)"
-    applies_to_classes: [spirits]
-    reason_code: ALCOHOL_CONTENT.TOLERANCE.OUT_OF_BAND
-    severity: reject
-    match_policy: tolerance
-    validator: abv_band
-    tolerance:
-      plus_pp: 0.3
-      minus_pp: 0.3
-    evidence_required: [abv]
-    effective_date: "2022-02-09"
-    test_fixtures: [F-SPIRITS-ALC-PASS-01, F-SPIRITS-ALC-FAIL-LOW-01]
-
   - rule_id: spirits.same_field_of_vision
     cfr_citation: "27 CFR §5.63(a)"
     applies_to_classes: [spirits]

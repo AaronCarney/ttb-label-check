@@ -7,7 +7,6 @@ from pathlib import Path
 
 import pytest
 
-import app.rules._validators.abv_band  # noqa: F401
 import app.rules._validators.contrast_ratio_check  # noqa: F401
 import app.rules._validators.cpi_lookup  # noqa: F401
 import app.rules._validators.equality_match  # noqa: F401
@@ -84,36 +83,6 @@ def test_format_neg(ruleset) -> None:
     rule = _r(ruleset, "malt.alcohol.format")
     obs = make_obs(field_id="alc_text", value="strong", beverage_class=BeverageClass.MALT)
     assert VALIDATOR_REGISTRY[rule.validator](obs, make_expected(field_id="alc_text"), rule, _ctx(ruleset)).outcome is Outcome.FAIL
-
-
-def test_tolerance_pos(ruleset) -> None:
-    rule = _r(ruleset, "malt.alcohol.tolerance_band")
-    obs = make_obs(field_id="abv", value=None, beverage_class=BeverageClass.MALT)
-    exp = make_expected(field_id="abv", abv_labeled_pct=Decimal("5.0"), abv_actual_pct=Decimal("5.3"))
-    assert VALIDATOR_REGISTRY[rule.validator](obs, exp, rule, _ctx(ruleset)).outcome is Outcome.PASS
-
-
-def test_tolerance_neg(ruleset) -> None:
-    rule = _r(ruleset, "malt.alcohol.tolerance_band")
-    obs = make_obs(field_id="abv", value=None, beverage_class=BeverageClass.MALT)
-    exp = make_expected(field_id="abv", abv_labeled_pct=Decimal("5.0"), abv_actual_pct=Decimal("5.5"))
-    assert VALIDATOR_REGISTRY[rule.validator](obs, exp, rule, _ctx(ruleset)).outcome is Outcome.FAIL
-
-
-def test_hard_floor_neg(ruleset) -> None:
-    rule = _r(ruleset, "malt.alcohol.floor_05")
-    obs = make_obs(field_id="abv", value=None, beverage_class=BeverageClass.MALT)
-    exp = make_expected(field_id="abv", abv_labeled_pct=Decimal("0.4"), abv_actual_pct=Decimal("0.4"))
-    res = VALIDATOR_REGISTRY[rule.validator](obs, exp, rule, _ctx(ruleset))
-    assert res.outcome is Outcome.FAIL
-    assert res.reason_code == "ALCOHOL_CONTENT.TOLERANCE.BELOW_HARD_FLOOR"
-
-
-def test_hard_floor_pos(ruleset) -> None:
-    rule = _r(ruleset, "malt.alcohol.floor_05")
-    obs = make_obs(field_id="abv", value=None, beverage_class=BeverageClass.MALT)
-    exp = make_expected(field_id="abv", abv_labeled_pct=Decimal("0.5"), abv_actual_pct=Decimal("0.5"))
-    assert VALIDATOR_REGISTRY[rule.validator](obs, exp, rule, _ctx(ruleset)).outcome is Outcome.PASS
 
 
 def test_name_address_pos(ruleset) -> None:

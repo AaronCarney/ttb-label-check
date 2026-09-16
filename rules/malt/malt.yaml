@@ -76,33 +76,6 @@ rules:
     effective_date: "2022-02-09"
     test_fixtures: [F-MALT-ALC-FORMAT-PASS-01, F-MALT-ALC-FORMAT-FAIL-01]
 
-  - rule_id: malt.alcohol.tolerance_band
-    cfr_citation: "27 CFR §7.65(c)"
-    applies_to_classes: [malt]
-    reason_code: ALCOHOL_CONTENT.TOLERANCE.OUT_OF_BAND
-    severity: reject
-    match_policy: tolerance
-    validator: abv_band
-    tolerance:
-      plus_pp: 0.3
-      minus_pp: 0.3
-    evidence_required: [abv]
-    effective_date: "2022-02-09"
-    test_fixtures: [F-MALT-ALC-PASS-01, F-MALT-ALC-FAIL-LOW-01]
-
-  - rule_id: malt.alcohol.floor_05
-    cfr_citation: "27 CFR §7.65(c)"
-    applies_to_classes: [malt]
-    reason_code: ALCOHOL_CONTENT.TOLERANCE.BELOW_HARD_FLOOR
-    severity: reject
-    match_policy: tolerance
-    validator: abv_hard_floor
-    parameters:
-      floor_pct: 0.5
-    evidence_required: [abv]
-    effective_date: "2022-02-09"
-    test_fixtures: [F-MALT-ALC-FLOOR-FAIL-01, F-MALT-ALC-FLOOR-PASS-01]
-
   - rule_id: malt.name_address.present
     cfr_citation: "27 CFR §7.63(a)(4)"
     applies_to_classes: [malt]

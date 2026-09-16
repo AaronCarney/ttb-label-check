@@ -7,7 +7,6 @@ from pathlib import Path
 
 import pytest
 
-import app.rules._validators.abv_band  # noqa: F401
 import app.rules._validators.contrast_ratio_check  # noqa: F401
 import app.rules._validators.cpi_lookup  # noqa: F401
 import app.rules._validators.equality_match  # noqa: F401
@@ -96,59 +95,6 @@ def test_wine_alcohol_format_neg(ruleset) -> None:
     obs = make_obs(field_id="alc_text", value="12.5", beverage_class=BeverageClass.WINE)
     res = VALIDATOR_REGISTRY[rule.validator](obs, make_expected(field_id="alc_text"), rule, _ctx(ruleset))
     assert res.outcome is Outcome.FAIL
-
-
-def test_wine_alcohol_tolerance_under14_pos(ruleset) -> None:
-    """≤14% bucket: 12.0% labeled, 12.5% actual — inside ±1.5 pp."""
-    rule = _r(ruleset, "wine.alcohol.tolerance_band")
-    obs = make_obs(field_id="abv", value=None, beverage_class=BeverageClass.WINE)
-    exp = make_expected(field_id="abv", abv_labeled_pct=Decimal("12.0"), abv_actual_pct=Decimal("12.5"))
-    res = VALIDATOR_REGISTRY[rule.validator](obs, exp, rule, _ctx(ruleset))
-    assert res.outcome is Outcome.PASS
-
-
-def test_wine_alcohol_tolerance_under14_neg(ruleset) -> None:
-    """≤14% bucket: 12.0% labeled, 14.0% actual — outside ±1.5 pp."""
-    rule = _r(ruleset, "wine.alcohol.tolerance_band")
-    obs = make_obs(field_id="abv", value=None, beverage_class=BeverageClass.WINE)
-    exp = make_expected(field_id="abv", abv_labeled_pct=Decimal("12.0"), abv_actual_pct=Decimal("14.0"))
-    res = VALIDATOR_REGISTRY[rule.validator](obs, exp, rule, _ctx(ruleset))
-    assert res.outcome is Outcome.FAIL
-
-
-def test_wine_alcohol_tolerance_over14_pos(ruleset) -> None:
-    """>14% bucket: 16.0% labeled, 16.8% actual — inside the tighter ±1.0 pp band."""
-    rule = _r(ruleset, "wine.alcohol.tolerance_band")
-    obs = make_obs(field_id="abv", value=None, beverage_class=BeverageClass.WINE)
-    exp = make_expected(field_id="abv", abv_labeled_pct=Decimal("16.0"), abv_actual_pct=Decimal("16.8"))
-    res = VALIDATOR_REGISTRY[rule.validator](obs, exp, rule, _ctx(ruleset))
-    assert res.outcome is Outcome.PASS
-
-
-def test_wine_alcohol_tolerance_over14_neg(ruleset) -> None:
-    """>14% bucket: 16.0% labeled, 17.2% actual — outside the tighter ±1.0 pp band."""
-    rule = _r(ruleset, "wine.alcohol.tolerance_band")
-    obs = make_obs(field_id="abv", value=None, beverage_class=BeverageClass.WINE)
-    exp = make_expected(field_id="abv", abv_labeled_pct=Decimal("16.0"), abv_actual_pct=Decimal("17.2"))
-    res = VALIDATOR_REGISTRY[rule.validator](obs, exp, rule, _ctx(ruleset))
-    assert res.outcome is Outcome.FAIL
-
-
-def test_class_boundary_anti_overlap_neg(ruleset) -> None:
-    rule = _r(ruleset, "wine.alcohol.no_class_boundary_cross")
-    obs = make_obs(field_id="abv", value=None, beverage_class=BeverageClass.WINE)
-    exp = make_expected(field_id="abv", abv_labeled_pct=Decimal("13.5"), abv_actual_pct=Decimal("14.5"))
-    res = VALIDATOR_REGISTRY[rule.validator](obs, exp, rule, _ctx(ruleset))
-    assert res.outcome is Outcome.FAIL
-    assert res.reason_code == "ALCOHOL_CONTENT.TOLERANCE.CROSSES_CLASS_BOUNDARY"
-
-
-def test_class_boundary_anti_overlap_pos(ruleset) -> None:
-    rule = _r(ruleset, "wine.alcohol.no_class_boundary_cross")
-    obs = make_obs(field_id="abv", value=None, beverage_class=BeverageClass.WINE)
-    exp = make_expected(field_id="abv", abv_labeled_pct=Decimal("12.0"), abv_actual_pct=Decimal("13.5"))
-    res = VALIDATOR_REGISTRY[rule.validator](obs, exp, rule, _ctx(ruleset))
-    assert res.outcome is Outcome.PASS
 
 
 def test_wine_name_address_pos(ruleset) -> None:

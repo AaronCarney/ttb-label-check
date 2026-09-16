@@ -12,7 +12,6 @@ def test_expected_value_round_trip() -> None:
         value=None,
         aliases=(),
         abv_labeled_pct=Decimal("36.0"),
-        abv_actual_pct=Decimal("35.9"),
         container_volume_ml=Decimal("750"),
         parameters={"is_import": False},
         source_cola="cola-001",

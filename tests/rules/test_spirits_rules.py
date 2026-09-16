@@ -7,7 +7,6 @@ from pathlib import Path
 
 import pytest
 
-import app.rules._validators.abv_band  # noqa: F401
 import app.rules._validators.contrast_ratio_check  # noqa: F401
 import app.rules._validators.cpi_lookup  # noqa: F401
 import app.rules._validators.equality_match  # noqa: F401
@@ -82,20 +81,6 @@ def test_format_neg(ruleset) -> None:
     rule = _r(ruleset, "spirits.alcohol.format")
     obs = make_obs(field_id="alc_text", value="40 proof", beverage_class=BeverageClass.SPIRITS)
     assert VALIDATOR_REGISTRY[rule.validator](obs, make_expected(field_id="alc_text"), rule, _ctx(ruleset)).outcome is Outcome.FAIL
-
-
-def test_tolerance_at_boundary_pass(ruleset) -> None:
-    rule = _r(ruleset, "spirits.alcohol.tolerance_band")
-    obs = make_obs(field_id="abv", value=None, beverage_class=BeverageClass.SPIRITS)
-    exp = make_expected(field_id="abv", abv_labeled_pct=Decimal("40.0"), abv_actual_pct=Decimal("40.3"))
-    assert VALIDATOR_REGISTRY[rule.validator](obs, exp, rule, _ctx(ruleset)).outcome is Outcome.PASS
-
-
-def test_tolerance_just_outside_fail(ruleset) -> None:
-    rule = _r(ruleset, "spirits.alcohol.tolerance_band")
-    obs = make_obs(field_id="abv", value=None, beverage_class=BeverageClass.SPIRITS)
-    exp = make_expected(field_id="abv", abv_labeled_pct=Decimal("40.0"), abv_actual_pct=Decimal("40.31"))
-    assert VALIDATOR_REGISTRY[rule.validator](obs, exp, rule, _ctx(ruleset)).outcome is Outcome.FAIL
 
 
 def test_same_field_of_vision_pos(ruleset) -> None:

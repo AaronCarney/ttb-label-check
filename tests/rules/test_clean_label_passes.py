@@ -72,7 +72,7 @@ def _matching_application():
     return (
         make_expected(field_id="brand_name", value="Stone's Throw"),
         make_expected(field_id="class_type", value="Kentucky Straight Bourbon Whiskey"),
-        make_expected(field_id="alcohol_content", value="45.0", abv_labeled_pct=Decimal("45.0"), abv_actual_pct=Decimal("45.0")),
+        make_expected(field_id="alcohol_content", value="45.0", abv_labeled_pct=Decimal("45.0")),
         make_expected(field_id="net_contents", value="750 mL", container_volume_ml=Decimal("750")),
         make_expected(field_id="government_warning", value=WARNING_TEXT),
         make_expected(field_id="name_and_address", value="Stone's Throw Distillery, Louisville, KY"),

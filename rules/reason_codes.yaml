@@ -63,16 +63,12 @@ codes:
     cfr_anchors: ["27 CFR §4.36(b)(1)", "27 CFR §5.65(b)", "27 CFR §7.65(b)"]
     severity: reject
   ALCOHOL_CONTENT.TOLERANCE.OUT_OF_BAND:
-    description: "Labeled vs. actual alcohol content exceeds the regulation tolerance."
+    # Reviewer vocabulary only: no rule emits this. A reviewer who has a
+    # laboratory figure the application does not carry can still override a
+    # label with it, and app/api/overrides.py refuses any code absent here.
+    # See docs/decisions/0008.
+    description: "Reviewer judged the stated alcohol content to disagree with the product."
     cfr_anchors: ["27 CFR §4.36(b)(1)", "27 CFR §5.65(c)", "27 CFR §7.65(c)"]
-    severity: reject
-  ALCOHOL_CONTENT.TOLERANCE.CROSSES_CLASS_BOUNDARY:
-    description: "Alcohol-content tolerance, even if numerically valid, crosses a §4.36(c) class boundary."
-    cfr_anchors: ["27 CFR §4.36(c)"]
-    severity: reject
-  ALCOHOL_CONTENT.TOLERANCE.BELOW_HARD_FLOOR:
-    description: "Malt beverage labeled below the §7.65(c) 0.5% hard floor; tolerance does not relax this."
-    cfr_anchors: ["27 CFR §7.65(c)"]
     severity: reject
   ALCOHOL_CONTENT.MATCH.APPLICATION_LABEL_DISAGREE:
     description: "Label alcohol content is not the alcohol content the application declared."

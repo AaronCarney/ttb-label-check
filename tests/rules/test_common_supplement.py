@@ -8,7 +8,6 @@ from pathlib import Path
 
 import pytest
 
-import app.rules._validators.abv_band  # noqa: F401
 import app.rules._validators.contrast_ratio_check  # noqa: F401
 import app.rules._validators.cpi_lookup  # noqa: F401
 import app.rules._validators.equality_match  # noqa: F401

@@ -77,43 +77,6 @@ rules:
     effective_date: "1936-12-15"
     test_fixtures: [F-WINE-ALC-FORMAT-PASS-01, F-WINE-ALC-FORMAT-FAIL-01]
 
-  - rule_id: wine.alcohol.tolerance_band
-    cfr_citation: "27 CFR §4.36(b)(1)"
-    applies_to_classes: [wine]
-    reason_code: ALCOHOL_CONTENT.TOLERANCE.OUT_OF_BAND
-    severity: reject
-    match_policy: tolerance
-    validator: abv_band
-    parameters:
-      # The tolerance is class-aware: a label stating 14% or less carries a
-      # ±1.5 percentage-point band, and one stating more than 14% the tighter
-      # ±1.0 pp band. Both values live in the rule pack rather than in Python,
-      # so changing a tolerance is a rule-pack change.
-      class_boundary_pct: 14.0
-      tolerance_by_class_boundary:
-        "<=": {plus_pp: 1.5, minus_pp: 1.5}
-        ">":  {plus_pp: 1.0, minus_pp: 1.0}
-    evidence_required: [abv]
-    effective_date: "1988-07-18"
-    test_fixtures:
-      - F-WINE-ALC-12-PASS-01
-      - F-WINE-ALC-12-FAIL-LOW-01
-      - F-WINE-ALC-16-PASS-01
-      - F-WINE-ALC-16-FAIL-OVER-01
-
-  - rule_id: wine.alcohol.no_class_boundary_cross
-    cfr_citation: "27 CFR §4.36(c)"
-    applies_to_classes: [wine]
-    reason_code: ALCOHOL_CONTENT.TOLERANCE.CROSSES_CLASS_BOUNDARY
-    severity: reject
-    match_policy: tolerance
-    validator: abv_class_boundary_check
-    parameters:
-      class_boundary_pct: 14.0
-    evidence_required: [abv]
-    effective_date: "1988-07-18"
-    test_fixtures: [F-WINE-ALC-13-5-LABEL-14-5-ACTUAL-FAIL-01]
-
   - rule_id: wine.name_address.present
     cfr_citation: "27 CFR §4.32(a)(3), §4.35"
     applies_to_classes: [wine]

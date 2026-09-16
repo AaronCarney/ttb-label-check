@@ -1,10 +1,8 @@
 """Cross-cutting registry invariants:
 
   1. Importing app.rules._validators populates VALIDATOR_REGISTRY with every
-     name the rule pack can ask for: 16 functions across 11 files, registered
-     under 16 names. Some validators register more than once — abv_band under
-     three names and layout_check under two — because one function serves
-     several rules.
+     name the rule pack can ask for. layout_check registers under two names,
+     because one function serves several rules.
   2. Every *.py file under app/rules/_validators/ (excluding __init__) registers
      at least one name: orphan detection in the file→registry direction. The
      companion check, registry→YAML, lives in
@@ -27,7 +25,6 @@ EXPECTED_NAMES = {
     "presence_check", "conditional_presence",
     "regex_match",
     "verbatim_hash",
-    "abv_band", "abv_class_boundary_check", "abv_hard_floor",
     "cpi_lookup",
     "heading_style_check",
     "contrast_ratio_check",

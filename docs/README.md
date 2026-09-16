@@ -14,6 +14,7 @@ One settled build decision per record, numbered, written the day it settled.
 - [0005 Two readers behind one interface, local by default](decisions/0005-two-readers-behind-one-interface-local-by-default.md) — reading a label with no outbound call.
 - [0006 The health warning's typography rules are out of scope](decisions/0006-typography-rules-are-out-of-scope.md) — what a photograph cannot measure, and what is reported instead.
 - [0007 A class-and-type designation includes its standard of identity](decisions/0007-a-designation-includes-its-standard-of-identity.md) — when a designation counts as matching.
+- [0008 The alcohol-content tolerance rules are out of scope](decisions/0008-alcohol-tolerance-rules-are-out-of-scope.md) — why a label checker cannot compare the label against the liquid.
 
 ## Reference
 

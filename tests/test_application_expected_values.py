@@ -20,8 +20,7 @@ def test_application_accepts_expected_values_tuple():
 
 def test_application_expected_values_round_trips_via_model_dump():
     ev = ExpectedValue(field_id="alcohol_content",
-                       abv_labeled_pct=Decimal("40.0"),
-                       abv_actual_pct=Decimal("40.1"))
+                       abv_labeled_pct=Decimal("40.0"))
     app = Application(application_id="A-001", evaluation_id="EV-001",
                       expected_values=(ev,))
     dumped = app.model_dump(mode="json")

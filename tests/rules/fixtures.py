@@ -60,7 +60,6 @@ def make_expected(
     value: Any = None,
     aliases: tuple[str, ...] = (),
     abv_labeled_pct: Decimal | None = None,
-    abv_actual_pct: Decimal | None = None,
     container_volume_ml: Decimal | None = None,
     parameters: dict[str, Any] | None = None,
 ) -> ExpectedValue:
@@ -69,7 +68,6 @@ def make_expected(
         value=value,
         aliases=aliases,
         abv_labeled_pct=abv_labeled_pct,
-        abv_actual_pct=abv_actual_pct,
         container_volume_ml=container_volume_ml,
         parameters=parameters or {},
     )
