@@ -6,6 +6,7 @@ references ``os.environ`` directly.
 """
 from __future__ import annotations
 
+from importlib import metadata
 from pathlib import Path
 from typing import Literal
 
@@ -90,4 +91,19 @@ class Settings(BaseSettings):
 
     @property
     def app_version(self) -> str:
-        return "0.1.0"
+        """The version actually running, read from the installed package.
+
+        It was a hardcoded "0.1.0" here, which `/api/health` reports and which
+        is the only thing telling anyone which build is live. A constant cannot
+        be that: it went on saying 0.1.0 after the release that cut 0.2.0, so
+        the one field a reviewer would trust to identify the deploy was wrong.
+        Read from the package metadata the image installs, so it is the running
+        build's own number and not a claim about it.
+
+        Where the metadata is missing the answer is "unknown", not a guess: a
+        version this cannot establish is one it must not state.
+        """
+        try:
+            return metadata.version("ttb-label-prototype")
+        except metadata.PackageNotFoundError:
+            return "unknown"
