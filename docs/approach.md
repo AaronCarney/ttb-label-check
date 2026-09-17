@@ -126,12 +126,12 @@ account, and name them rather than leave the list looking complete.
 federal application is bound by Section 508 regardless, and that standard is binding regulation
 rather than agency policy. We built to the level it makes binding, WCAG 2.0 A and AA, and the check
 page and the result page are scanned against it automatically on each run; the batch-list page is
-not yet in that scan. **The scan does not currently pass.** On six of the result-page cases it
-reports text whose colour contrast is below the AA threshold, and the test that holds the layout to
-a 320-pixel viewport fails on a 27-pixel overflow. Both are ours, and neither is deep — one is a
-palette and one is a width — but until they are fixed the honest claim is that we built the
-mechanism and have not met the standard, not that we met it. A disposition is still never carried by
-colour alone, which has its own passing test. We stopped short of claiming a newer conformance level
+not yet in that scan. **The scan passes.** Six result-page cases once reported text whose colour
+contrast sat below the AA threshold, and the test that holds the layout to a 320-pixel viewport once
+failed on a 27-pixel overflow. Both were ours, one a palette and one a width, and both are fixed. So
+the claim we can make is that we built the mechanism and, on the two pages the scan covers, met the
+standard. A disposition is never carried by colour alone, which has its own passing test. We stopped
+short of claiming a newer conformance level
 for a different reason: the two criteria that would have justified one are criteria no automated
 check here can reach. A claim the product cannot test is the kind of promise this build refuses to
 make anywhere else.
@@ -352,15 +352,14 @@ processor cores, is untried.
 looking, so each is named:
 
 - The ten-minute target for a 300-label batch has no instrument at all — no test and no figure.
-- Accessibility. The automated scan covers two of the three screens — the single-label page and a
-  batch's results, not the bulk-upload page — and on those two it is currently failing, on colour
-  contrast and on the 320-pixel layout. The manual review the requirement really asks for has not
-  been run either, and an automated pass is the floor of an accessibility claim rather than the
-  whole of one.
+- Accessibility past what a machine can check. The automated scan covers two of the three screens —
+  the single-label page and a batch's results, not the bulk-upload page — and passes on both. The
+  manual review the requirement really asks for has not been run, and an automated pass is the floor
+  of an accessibility claim rather than the whole of one.
 
-The first is a missing measurement. The second is the pattern we would rather name than hide: the
-requirement was written, the mechanism was built, and the proof stopped at the half a machine can
-do. That is what a week-long build produces when the deadline arrives before the test does.
+The first is a missing measurement. The second is a limit on the proof rather than a gap in the
+build: the requirement was written, the mechanism was built, the half a machine can check is met,
+and the half that needs a person is the half a week-long build ran out of time for.
 
 ## What changed, and what would change next
 
@@ -397,11 +396,10 @@ from the code — so what bounds the bill is that the service refuses every call
 door, and a refused request is never billed. Those are prerequisites before this ran inside the
 agency, not improvements: a compliance service nobody is watching is one nobody can vouch for.
 
-**What we would do next, in order.** Clear the accessibility failures the scan already reports — the
-contrast and the 320-pixel overflow — then scan the bulk-upload page so all three screens are
-covered, then run a real accessibility review rather than an automated one; instrument the batch timing,
-which is the one requirement with no measurement at all; then widen the corpus, which is the work
-that makes every figure above more trustworthy.
+**What we would do next, in order.** Scan the bulk-upload page so all three screens are covered,
+then run a real accessibility review rather than an automated one; instrument the batch timing, which
+is the one requirement with no measurement at all; then widen the corpus, which is the work that
+makes every figure above more trustworthy.
 
 ## How the work was run
 

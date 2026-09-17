@@ -123,10 +123,10 @@ the suite still reports green — so a run on a machine without it proves nothin
 interface. The deploy measurement skips the same way without `TTB_DEPLOY_URL`, as the section above
 says. Everything else runs from a clone with nothing but `uv sync`.
 
-**Seven of those browser tests currently fail, and they are telling the truth.** With pnpm and
-Playwright installed, six result-page cases fail the accessibility scan on colour contrast below the
-AA threshold, and the layout test fails at a 320-pixel viewport on a 27-pixel overflow. They are
-real and they are not yet fixed; `docs/approach.md` says what that means for the Section 508 claim.
+**With pnpm and Playwright installed, those browser tests pass.** Six result-page cases once failed
+the accessibility scan on colour contrast below the AA threshold, and the layout test once failed at
+a 320-pixel viewport on a 27-pixel overflow; both are fixed. `docs/approach.md` says what the scan
+does and does not settle for the Section 508 claim.
 
 ### The container path
 
