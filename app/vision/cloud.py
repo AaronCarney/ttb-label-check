@@ -207,6 +207,18 @@ class CloudVisionExtractor:
         self._prompt_version = settings.prompt_version
         self._semaphore = asyncio.Semaphore(4)
 
+    @property
+    def reader_version(self) -> str:
+        """`cloud:<pinned model snapshot>`, for the audit trail.
+
+        The snapshot is what `LLM_MODEL_SNAPSHOT` pins, so this names the
+        reading model exactly. `prompt_version` travels beside it on the same
+        record and is not repeated here: between them a record says which model
+        read the label and which prompt it was asked with, which is what it
+        takes to reproduce a reading.
+        """
+        return f"cloud:{self._model}"
+
     async def ensure_loaded(self) -> None:
         return None
 

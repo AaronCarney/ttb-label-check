@@ -185,7 +185,9 @@ class BatchWorker:
             # No rule pack was selected, because nothing was checked — this
             # path never reached an engine, so there is no version to name.
             # An evaluation that did reach one names it: the Evaluator reads
-            # `RuleEngine.rule_set_version` onto the timeline.
+            # `RuleEngine.rule_set_version` onto the timeline. `model_version`
+            # is left unset here for the same reason and is honest that way —
+            # no reader ran on this path either, so there is nothing to name.
             rule_set_version="unknown",
             input_hash=hashlib.sha256(_canonical_json(app_dict) + image_bytes).hexdigest(),
             output_hash=hashlib.sha256(_canonical_json(envelope_for_hash)).hexdigest(),

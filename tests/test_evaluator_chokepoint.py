@@ -26,6 +26,10 @@ async def test_vision_exception_routes_to_needs_review(caplog):
     caplog.set_level(logging.INFO, logger="app.services.evaluator")
 
     class FailingVision:
+        # Still names itself: a reader that fails is a reader that ran, and the
+        # audit trail should say which one could not read the label.
+        reader_version = "fake:failing-reader@0"
+
         async def extract(self, label):
             raise RuntimeError("vision boom")
 

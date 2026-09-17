@@ -151,7 +151,9 @@ source = ["app"]
 branch = true
 # The browser group runs the app in a live server thread, so its work is
 # measured in the same process as the rest.
-concurrency = ["thread"]
+concurrency = ["thread", "multiprocessing"]
+parallel = true
+sigterm = true
 
 [tool.coverage.report]
 # No `fail_under` yet, deliberately. Setting a gate at a number nobody has

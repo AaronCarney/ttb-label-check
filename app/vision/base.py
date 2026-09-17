@@ -16,6 +16,27 @@ from app.schemas.label import Label
 class VisionExtractor(Protocol):
     """The reader seam. Two concrete impls: cloud + local (docs/decisions.md#0005)."""
 
+    @property
+    def reader_version(self) -> str:
+        """What read the label, in a form the audit trail can record.
+
+        `AuditRecord.model_version` is the half of the compliance record that
+        names the reader, and until 2026-09-17 nothing in `app/` ever set it,
+        so every envelope the service served said the reader was unknown. A
+        producer contesting a rejection is contesting a reading, and a record
+        that cannot name the reader cannot answer them.
+
+        It belongs on the seam rather than on one reader, because the point of
+        the seam is that either implementation can be behind it: a version only
+        the local reader could report would go quiet the moment the hosted one
+        was selected, which is exactly when knowing would matter most.
+
+        The shape is `<seam>:<what>` — `local:rapidocr@3.9.2`,
+        `cloud:gpt-4o-2024-08-06` — so a record says which of the two read it
+        as well as which version did.
+        """
+        ...
+
     async def extract(self, label: Label) -> list[FieldObservation]: ...
 
     async def ensure_loaded(self) -> None:

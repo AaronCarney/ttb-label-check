@@ -180,13 +180,17 @@ Coverage comes with the suite:
 uv run pytest --cov            # branch coverage over app/
 ```
 
-**The measured figure is 92% branch coverage over `app/`**, from a run of the whole suite bar the
-browser group. It is reported, not gated: no `fail_under` is set, because a threshold chosen before
-anyone had measured the real number is how a suite gets shaped to the threshold rather than to the
-product. Two modules are at 0% and neither is untested: `app/rules/__main__.py` and `app/vision/__main__.py`
-are command-line entry points, and the suite drives both in a subprocess, which the coverage harness
-does not follow. The 0% is a limit of the measurement rather than a gap in the suite. The lowest-covered module that actually serves
-a request is the rule-pack loader at 80%.
+**The measured figure is 93% branch coverage over `app/`**, measured 2026-09-17 from a run of the
+whole suite bar the two slow performance tests. It is reported, not gated: no `fail_under` is set,
+because a threshold chosen before anyone had measured the real number is how a suite gets shaped to
+the threshold rather than to the product. The lowest-covered module is the rule-pack loader at 82%.
+
+Two modules used to report 0% and neither was untested: `app/rules/__main__.py` and
+`app/vision/__main__.py` are command-line entry points, the suite drives both in a subprocess, and
+coverage measures only the process it starts in. That made the figure wrong in the direction that
+does harm — a 0% reads as "nobody tests this" and points effort at the one place that does not need
+it. The suite now turns on coverage's subprocess measurement for whoever runs it, so the two report
+82% and 87% from the tests that were always exercising them.
 
 Each tool's configuration lives in `pyproject.toml` with the reasoning next to it: which lint rules
 are switched on beyond ruff's default and what each one has already caught here, why the line length

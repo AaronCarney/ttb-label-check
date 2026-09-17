@@ -9,17 +9,6 @@ from __future__ import annotations
 
 from pathlib import Path
 
-REQUIRED_KEYS = {
-    "VISION_MODE",
-    "OPENAI_API_KEY",
-    "LLM_MODEL_SNAPSHOT",
-    "PROMPT_VERSION",
-    "LOOKAHEAD_K",
-    "DEV_MODE",
-    "OTEL_EXPORTER_OTLP_ENDPOINT",
-    "RULES_ROOT",
-}
-
 ENV_EXAMPLE = Path(__file__).parents[1] / ".env.example"
 
 
@@ -41,10 +30,21 @@ def _settings_aliases() -> set[str]:
     return {(field.alias or name).upper() for name, field in Settings.model_fields.items()}
 
 
-def test_env_example_documents_all_required_keys() -> None:
+def test_env_example_documents_every_setting_the_app_reads() -> None:
+    """Every field on `Settings` is documented, derived rather than listed.
+
+    This held a hand-written `REQUIRED_KEYS` until 2026-09-17, which made the
+    test catch only the variables somebody had remembered to add to it. It was
+    not a hypothetical weakness: `RULES_ROOT` was read from the environment
+    from the first commit, was absent from `.env.example` the whole time, and
+    this test passed throughout because the list did not mention it. Deriving
+    the set from the `Settings` field aliases means the next setting added
+    without a `.env.example` entry fails here, and nobody has to edit this file
+    for that to happen.
+    """
     assert ENV_EXAMPLE.exists(), ".env.example must exist at repo root"
-    missing = REQUIRED_KEYS - _parse_env_example(ENV_EXAMPLE)
-    assert not missing, f"missing env-var entries in .env.example: {sorted(missing)}"
+    missing = sorted(_settings_aliases() - _parse_env_example(ENV_EXAMPLE))
+    assert not missing, f"missing env-var entries in .env.example: {missing}"
 
 
 def test_env_example_documents_nothing_the_app_does_not_read() -> None:

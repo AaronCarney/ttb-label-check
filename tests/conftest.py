@@ -20,6 +20,50 @@ from app.main import create_app
 from app.schemas.label import Label
 from app.schemas.wire.disposition import DispositionEnvelope
 
+_REPO_ROOT = Path(__file__).resolve().parent.parent
+
+
+@pytest.fixture(scope="session", autouse=True)
+def _measure_coverage_in_subprocesses() -> Iterator[None]:
+    """Let coverage follow the CLI tests into the subprocesses they spawn.
+
+    `app/rules/__main__.py` and `app/vision/__main__.py` are command-line
+    entry points, and the only honest way to test one is to run it the way a
+    person does — `subprocess.run([sys.executable, "-m", ...])`. Four tests do
+    exactly that. Coverage measures the process it was started in, so it saw
+    none of that work and reported both modules at 0%, which read as "nobody
+    tests these" when the truth was "coverage cannot see these being tested".
+    A wrong 0% is worse than a missing figure: it points effort at the one
+    place that does not need it.
+
+    `coverage` ships a `.pth` file that starts measurement in any Python
+    process where `COVERAGE_PROCESS_START` names a configuration file. Setting
+    it here rather than in a developer's shell means the figure is right for
+    whoever runs the suite, including CI, instead of right only for whoever
+    remembered. `parallel = true` in `pyproject.toml` is the other half: each
+    subprocess writes its own data file, and the parent combines them.
+
+    Only when the parent is itself measuring. Set unconditionally, every
+    subprocess any test spawns would write a stray data file into the working
+    tree during an ordinary run.
+    """
+    import os
+
+    import coverage
+
+    if coverage.Coverage.current() is None:
+        yield
+        return
+    prior = os.environ.get("COVERAGE_PROCESS_START")
+    os.environ["COVERAGE_PROCESS_START"] = str(_REPO_ROOT / "pyproject.toml")
+    try:
+        yield
+    finally:
+        if prior is None:
+            os.environ.pop("COVERAGE_PROCESS_START", None)
+        else:
+            os.environ["COVERAGE_PROCESS_START"] = prior
+
 
 @pytest.fixture
 def wire_fixtures_dir() -> Path:

@@ -38,6 +38,7 @@ from collections.abc import Sequence
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from functools import lru_cache
+from importlib import metadata
 from io import BytesIO
 from itertools import pairwise
 from typing import Any, Protocol, cast
@@ -323,6 +324,25 @@ class _OcrEngine(Protocol):
 
 class LocalVisionExtractor:
     """Reads one label image with a CPU OCR engine and reports seven fields."""
+
+    @property
+    def reader_version(self) -> str:
+        """`local:rapidocr@<installed version>`, for the audit trail.
+
+        Read from the installed package rather than written here, the way
+        `Settings.app_version` is, so upgrading the engine changes what the
+        record says without anyone remembering to edit a constant. A constant
+        would go stale silently, and a stale reader version in a compliance
+        record is worse than none: it names the wrong reader with confidence.
+
+        `"unknown"` where the metadata is missing, which is the same answer
+        `app_version` gives — a version this cannot establish is one it must
+        not state.
+        """
+        try:
+            return f"local:rapidocr@{metadata.version('rapidocr')}"
+        except metadata.PackageNotFoundError:
+            return "local:rapidocr@unknown"
 
     def __init__(self, *, settings: Settings, ring_buffer: deque) -> None:
         self._settings = settings

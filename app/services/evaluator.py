@@ -313,12 +313,19 @@ class Evaluator:
         the compliance record of which rules produced a verdict, and it is the
         one fact about an evaluation nobody can reconstruct from the answer
         afterwards.
+
+        `model_version` was the other half of the same gap and was fixed the
+        same way on 2026-09-17: it defaulted to `None`, nothing assigned it,
+        and so no record said what read the label. Between the two, a record
+        now names both the rules that judged a label and the reader that gave
+        them the text to judge. `tests/test_audit_names_the_reader.py` holds it.
         """
         from app.services.engine_meta import EvaluationTimeline
 
         return EvaluationTimeline(
             evaluation_id=application.evaluation_id,
             rule_set_version=self._rules.rule_set_version,
+            model_version=self._vision.reader_version,
         )
 
     # The two audit-trail rows that name the rules a label was checked

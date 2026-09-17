@@ -14,6 +14,12 @@ class FakeVisionExtractor:
     def __init__(self, *, observations: Sequence[FieldObservation] = ()) -> None:
         self._obs = list(observations)
 
+    @property
+    def reader_version(self) -> str:
+        """Named like a real reader so a test asserting the audit trail carries
+        one is asserting the shape the product produces, not a sentinel."""
+        return "fake:test-reader@0"
+
     async def extract(self, label: Label) -> list[FieldObservation]:
         return list(self._obs)
 
