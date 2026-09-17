@@ -56,13 +56,24 @@ def test_low_resolution_triggers_warning():
     assert report.reason_code == "WARNING.LEGIBILITY.LOW_RESOLUTION"
 
 
-def test_glare_triggers_warning():
+def test_a_bright_label_is_not_turned_away():
+    """A label printed on white stock passes.
+
+    This is the image the old glare gate turned away: most of its pixels are
+    near-white because the paper is, and a dark design element pulls the median
+    below the gate's own guard. Seven faces of five real labels in
+    `tests/fixtures/labels` look like this, and they are sharp and readable.
+    """
     rng = np.random.default_rng(1)
-    arr = (rng.random((200, 200)) * 100 + 50).astype(np.uint8)
-    arr[:100, :100] = 255  # 25% overexposed (>15%)
+    arr = np.full((200, 200), 253, dtype=np.uint8)
+    arr[:, :40] = 20                                    # a dark band down one side
+    arr[60:70, 50:190] = 0                              # a line of print
+    arr[100:110, 50:190] = 0
+    noise = (rng.random((200, 200)) * 12).astype(np.uint8)
+    arr = np.clip(arr.astype(np.int16) - noise, 0, 255).astype(np.uint8)
     report = assess(_label(_png_bytes(arr)))
-    assert report.disposition == "needs_better_photo"
-    assert report.reason_code == "WARNING.LEGIBILITY.GLARE"
+    assert report.disposition == "ok"
+    assert report.reason_code is None
 
 
 def test_motion_blur_triggers_warning():

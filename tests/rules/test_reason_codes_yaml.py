@@ -60,13 +60,18 @@ def test_brand_needs_review_code_present() -> None:
 
 
 EXPECTED_LEGIBILITY_WARN_CODES = {
-    "WARNING.LEGIBILITY.GLARE",
+    "WARNING.LEGIBILITY.LOW_RESOLUTION",
     "WARNING.LEGIBILITY.MOTION_BLUR",
 }
 
 
 def test_legibility_warn_codes_present() -> None:
-    """The GLARE and MOTION_BLUR warn codes the reader emits must be in the registry."""
+    """The legibility warn codes the reader emits must be in the registry.
+
+    GLARE is not among them. Nothing measures glare: the gate that did counted
+    bright pixels, which counts light label stock, and it is gone. The code is
+    still registered, as a reviewer's term, and `reviewer_vocabulary` says so.
+    """
     data = yaml.safe_load(REGISTRY.read_text(encoding="utf-8"))
     missing = EXPECTED_LEGIBILITY_WARN_CODES - set(data["codes"])
     assert missing == set(), f"missing legibility warn codes: {missing}"

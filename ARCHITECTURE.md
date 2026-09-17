@@ -39,8 +39,11 @@ One evaluation, from `POST /labels` or the page form, runs in this order
 3. **Tag the beverage type.** The application says whether this is wine, spirits or a malt beverage;
    a reader cannot, because nothing on a bottle reliably distinguishes them. Tagging here keeps the
    reader reporting only what it saw while still selecting the rule pack the application implies.
-4. **Image-quality gate.** An image too small, too glared or too blurred to judge returns a
-   needs-better-photo result rather than a verdict computed from an unreadable image.
+4. **Image-quality gate.** An image too small or too blurred to judge returns a needs-better-photo
+   result rather than a verdict computed from an unreadable image, and so does an image the reader
+   finds no text on at all. Glare is not measured: a count of bright pixels counts light label
+   stock, and an unprinted white area and a blown-out one are the same pixel values
+   (`app/vision/quality.py`).
 5. **Run the rule pack.** Each rule selects the observations its `evidence_required` names, and runs
    its validator against the application's declared value for that element.
 6. **Optional model refinement,** off by default. Every check on the requirements list is

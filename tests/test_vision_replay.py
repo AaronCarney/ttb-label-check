@@ -22,10 +22,13 @@ suite that passes over sixty-two print the same green line, so the count and the
 image list are asserted outright. When the corpus grows, this file fails until
 somebody looks at what grew.
 
-Why eleven and not the slice's twelve: `26237001000107/front.jpg` never reaches
-the reader at all. `app/vision/quality.py` turns it away as glare, so `extract`
-returns one `quality` observation and there is no reading to record. Asserting
-twelve would be asserting behaviour the application does not have.
+Why eleven and not the slice's twelve: `26237001000107/front.jpg` has no
+recording. It was recorded when `app/vision/quality.py` turned it away as
+glare, which produced no reading to record. That gate is gone - it counted
+bright pixels, which counts light label stock, and this sharp, readable face
+was one of seven it wrongly refused - so the image reads now, and a recording
+for it is one this suite could carry. Until one is frozen, eleven is what is on
+disk, and the count asserted is the count on disk.
 """
 from __future__ import annotations
 
@@ -113,7 +116,7 @@ KNOWN_MISSES: dict[tuple[str, str], str] = {
     ("ttb-26230001000420", "brand"): "B — returned the fragment 'TE OLLECTION' for 'The Bruery'",
     ("ttb-26230001000420", "class_type"): "C — returned the retailer 'Total Wine & More' for 'BARREL-AGED IMPERIAL STOUT'",
     ("ttb-26230001000420", "warning_exact"): "the reader's warning text is not word for word and the answer key says this label's is",
-    ("ttb-26237001000107", "abv"): "the front is refused by the quality gate and the back prints no ABV",
+    ("ttb-26237001000107", "abv"): "only the back is recorded here, and it prints no ABV",
     ("ttb-26237001000107", "net_contents"): "same as above",
     ("ttb-26237001000107", "warning_exact"): "the back's warning is not read word for word",
     ("ttb-26240001000454", "brand"): "B — returned 'NOV' for 'I Heard Cassarole'",

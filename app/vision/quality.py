@@ -1,8 +1,20 @@
 """Vision quality gates — assess label image and emit warnings or pass-through.
 
-Gates: low-resolution (Laplacian variance), glare (overexposed-pixel ratio),
-motion blur (FFT high-frequency energy ratio), DPI extraction (EXIF/pHYs/JFIF/
-applicant).
+Gates: low-resolution (Laplacian variance), motion blur (FFT high-frequency
+energy ratio), DPI extraction (EXIF/pHYs/JFIF/applicant).
+
+There is no glare gate. One stood here and counted the pixels brighter than
+240: over 15% of them, on an image whose median was not itself that bright,
+returned WARNING.LEGIBILITY.GLARE. That statistic measures how light the label
+stock is, not whether glare destroyed any text, because an unprinted white area
+and a blown-out one are the same pixel values. On the 30 real labels it turned
+away seven faces of five labels that are sharp and perfectly readable — two of
+them on both faces, so those labels were scored against no reading at all —
+while passing `var-glare`, the fixture built with a hotspot over its warning,
+and turning away `var-skew`, which has no glare on it. No threshold fixes that:
+what a hotspot covered is not knowable before the label is read. Legibility is
+now judged by what the reader returned, in `app/vision/local.py`: an image that
+yields no text at all is the image nobody can check.
 """
 from __future__ import annotations
 
@@ -17,9 +29,6 @@ from pydantic import BaseModel, ConfigDict
 from app.schemas.label import Dimensions, Label
 
 LOW_RES_VARIANCE_MIN = 50.0
-GLARE_PIXEL_RATIO_MAX = 0.15
-GLARE_LUMINANCE_THRESHOLD = 240
-GLARE_BACKGROUND_MEDIAN_MAX = 240
 MOTION_BLUR_HIGHFREQ_MIN = 0.30
 
 _EXIF_X_RESOLUTION = 282
@@ -106,18 +115,6 @@ def assess(label: Label) -> QualityReport:
         return QualityReport(
             disposition="needs_better_photo",
             reason_code="WARNING.LEGIBILITY.LOW_RESOLUTION",
-            dpi=dpi,
-        )
-
-    overexposed_ratio = float((gray > GLARE_LUMINANCE_THRESHOLD).sum()) / gray.size
-    background_median = float(np.median(gray))
-    if (
-        overexposed_ratio > GLARE_PIXEL_RATIO_MAX
-        and background_median < GLARE_BACKGROUND_MEDIAN_MAX
-    ):
-        return QualityReport(
-            disposition="needs_better_photo",
-            reason_code="WARNING.LEGIBILITY.GLARE",
             dpi=dpi,
         )
 

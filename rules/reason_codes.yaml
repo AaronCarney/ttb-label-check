@@ -348,6 +348,16 @@ reviewer_vocabulary:
   ENGINE.RULESET.VERSION_NOT_FOUND:
     "One rule-set version ships, and the loader takes its version from this
      file, so there is no version to fail to find."
+  WARNING.LEGIBILITY.GLARE:
+    "Nothing measures glare. The gate that did counted bright pixels, which
+     counts light label stock: it turned away seven faces of five sharp,
+     readable labels and passed the fixture built with a hotspot over its
+     warning. An unprinted white area and a blown-out one are the same pixel
+     values, so what a hotspot covered is not knowable before the label is
+     read, and the reader now answers WARNING.LEGIBILITY.LOW_RESOLUTION for an
+     image it finds no text on at all (app/vision/local.py). The code stays
+     because a reviewer looking at the label can see the glare the product
+     cannot measure."
   WARNING.LEGIBILITY.NO_CONTRAST:
     "This product does not read colour, so the rule answers
      WARNING.LEGIBILITY.CONTRAST_NOT_MEASURED instead
