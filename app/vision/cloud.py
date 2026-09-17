@@ -21,8 +21,9 @@ from app.config import Settings
 from app.schemas.calls import CallRecord
 from app.schemas.expected import BeverageClass
 from app.schemas.extracted import Evidence, EvidenceSource, FieldObservation, MatchKind
-from app.schemas.label import Label
+from app.schemas.label import Face, Label
 from app.vision import quality
+from app.vision.faces import QUALITY_FIELD_ID, is_unreadable, merge_readings
 from app.vision.heading_measure import measure_heading_bold
 
 # Keys emitted on the cloud extractor's observed_value dict that are audit-only —
@@ -310,23 +311,35 @@ class CloudVisionExtractor:
             return await self._call_per_field(field_name=field_name, crop=crop, label=label)
 
     async def extract(self, label: Label) -> list[FieldObservation]:
-        # One face is read here, the first one. The loop over every face, and
-        # the face tag on each observation it returns, land with the per-face
-        # reader; until then a label reaching this point carries exactly one.
-        face = label.faces[0]
+        """Read every face of the label and return one reading of it.
+
+        A face the quality gate refuses stops the label: it is a photograph
+        nobody can check, and on a two-face label it is as likely to be the
+        one carrying the government warning as the one carrying the brand.
+        """
+        readings: list[list[FieldObservation]] = []
+        for face in label.faces:
+            reading = await self._extract_face(label, face)
+            if is_unreadable(reading):
+                return reading
+            readings.append(reading)
+        return merge_readings(readings)
+
+    async def _extract_face(self, label: Label, face: Face) -> list[FieldObservation]:
         report = quality.assess(face)
         if report.disposition != "ok":
             return [
                 FieldObservation(
-                    field_id="quality",
+                    field_id=QUALITY_FIELD_ID,
                     beverage_class=BeverageClass.SPIRITS,
                     observed_value=None,
                     evidence=(
                         Evidence(
-                            field_id="quality",
+                            field_id=QUALITY_FIELD_ID,
                             # No model was called: the gate turned the image away.
                             # The local reader says the same thing here.
                             source=EvidenceSource.DERIVED,
+                            panel=face.face_tag,
                             bbox=None,
                             extracted_text=report.reason_code,
                             match_kind=MatchKind.NONE,
@@ -336,6 +349,7 @@ class CloudVisionExtractor:
                     upstream_meta={
                         "disposition": report.disposition,
                         "reason_code": report.reason_code,
+                        "face_tag": face.face_tag,
                     },
                 )
             ]
@@ -400,9 +414,10 @@ class CloudVisionExtractor:
                             bbox=bbox_by_id.get(fname),
                             text=text,
                             confidence=_extract_confidence(content),
+                            panel=face.face_tag,
                         ),
                     ),
-                    upstream_meta={"bbox": bbox_by_id.get(fname)},
+                    upstream_meta={"bbox": bbox_by_id.get(fname), "face_tag": face.face_tag},
                 )
             )
         return observations
@@ -454,6 +469,7 @@ def _make_evidence(
     bbox: tuple[int, int, int, int] | None,
     text: str | None,
     confidence: float = _FALLBACK_CONFIDENCE,
+    panel: str | None = None,
 ) -> Evidence:
     """Synthesize a single Evidence from the LLM's per-field payload + the
     bbox surfaced by the layout call.
@@ -468,6 +484,7 @@ def _make_evidence(
     return Evidence(
         field_id=field_id,
         source=EvidenceSource.CLASSIFIER,
+        panel=panel,
         bbox=bbox,
         extracted_text=text,
         match_kind=MatchKind.NONE,

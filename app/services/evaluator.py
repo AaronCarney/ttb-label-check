@@ -277,13 +277,21 @@ class Evaluator:
 
         # Step 2: image-quality short-circuit. Name the image problem rather
         # than guess at an unreadable label (docs/PRD.md FR-10).
-        # The first face only. The gate runs per face, and an unusable face
-        # short-circuits the label naming which face, with the per-face reader.
-        quality = assess_quality(label.faces[0])
-        if quality.disposition == "needs_better_photo":
+        #
+        # Every face, and the first unusable one stops the label: on a two-face
+        # label the blurred photograph is as likely to be the one carrying the
+        # government warning as the one carrying the brand, so there is nothing
+        # to be gained by judging the label on the faces that did come out. The
+        # message names the face so the applicant knows which one to retake.
+        for face in label.faces:
+            quality = assess_quality(face)
+            if quality.disposition != "needs_better_photo":
+                continue
             timeline.record_failure(
                 reason_code=quality.reason_code,
-                message=f"image quality insufficient: {quality.reason_code}",
+                message=(
+                    f"image quality insufficient on the {face.face_tag} face: {quality.reason_code}"
+                ),
                 exception_class="N/A",
             )
             _logger.info(
@@ -291,6 +299,7 @@ class Evaluator:
                 extra={
                     "reason_code": quality.reason_code,
                     "evaluation_id": application.evaluation_id,
+                    "face_tag": face.face_tag,
                     "error_class": "N/A",
                 },
             )

@@ -54,6 +54,7 @@ from app.schemas.expected import BeverageClass
 from app.schemas.extracted import Evidence, EvidenceSource, FieldObservation, MatchKind
 from app.schemas.label import Face, Label
 from app.vision import quality
+from app.vision.faces import QUALITY_FIELD_ID, is_unreadable, merge_readings
 from app.vision.heading_measure import HeadingMeasurement, measure_heading_bold_image
 
 _logger = logging.getLogger("app.vision.local")
@@ -569,21 +570,33 @@ class LocalVisionExtractor:
         return False
 
     async def extract(self, label: Label) -> list[FieldObservation]:
-        # One face is read here, the first one. The loop over every face, and
-        # the face tag on each observation it returns, land with the per-face
-        # reader; until then a label reaching this point carries exactly one.
-        face = label.faces[0]
+        """Read every face of the label and return one reading of it.
+
+        A face the quality gate refuses stops the label: it is a photograph
+        nobody can check, and on a two-face label it is as likely to be the
+        one carrying the government warning as the one carrying the brand.
+        """
+        readings: list[list[FieldObservation]] = []
+        for face in label.faces:
+            reading = await self._extract_face(label, face)
+            if is_unreadable(reading):
+                return reading
+            readings.append(reading)
+        return merge_readings(readings)
+
+    async def _extract_face(self, label: Label, face: Face) -> list[FieldObservation]:
         report = quality.assess(face)
         if report.disposition != "ok":
             return [
                 FieldObservation(
-                    field_id="quality",
+                    field_id=QUALITY_FIELD_ID,
                     beverage_class=BeverageClass.SPIRITS,
                     observed_value=None,
                     evidence=(
                         Evidence(
-                            field_id="quality",
+                            field_id=QUALITY_FIELD_ID,
                             source=EvidenceSource.DERIVED,
+                            panel=face.face_tag,
                             bbox=None,
                             extracted_text=report.reason_code,
                             match_kind=MatchKind.NONE,
@@ -593,6 +606,7 @@ class LocalVisionExtractor:
                     upstream_meta={
                         "disposition": report.disposition,
                         "reason_code": report.reason_code,
+                        "face_tag": face.face_tag,
                     },
                 )
             ]
@@ -613,13 +627,14 @@ class LocalVisionExtractor:
         if not meta.get("boxes_found"):
             return [
                 FieldObservation(
-                    field_id="quality",
+                    field_id=QUALITY_FIELD_ID,
                     beverage_class=BeverageClass.SPIRITS,
                     observed_value=None,
                     evidence=(
                         Evidence(
-                            field_id="quality",
+                            field_id=QUALITY_FIELD_ID,
                             source=EvidenceSource.DERIVED,
+                            panel=face.face_tag,
                             bbox=None,
                             extracted_text="WARNING.LEGIBILITY.LOW_RESOLUTION",
                             match_kind=MatchKind.NONE,
@@ -629,6 +644,7 @@ class LocalVisionExtractor:
                     upstream_meta={
                         "disposition": "needs_better_photo",
                         "reason_code": "WARNING.LEGIBILITY.LOW_RESOLUTION",
+                        "face_tag": face.face_tag,
                         **meta,
                     },
                 )
@@ -646,13 +662,14 @@ class LocalVisionExtractor:
                         Evidence(
                             field_id=field_name,
                             source=EvidenceSource.OCR,
+                            panel=face.face_tag,
                             bbox=bbox,
                             extracted_text=text,
                             match_kind=MatchKind.NONE,
                             confidence=float(payload.get("confidence", 0.0)),
                         ),
                     ),
-                    upstream_meta={"bbox": bbox, **meta},
+                    upstream_meta={"bbox": bbox, "face_tag": face.face_tag, **meta},
                 )
             )
         return observations
