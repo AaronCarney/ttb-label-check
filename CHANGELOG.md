@@ -6,6 +6,8 @@ All notable changes to this project are recorded here. The format follows
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-09-17
+
 ### Added
 
 - A label is now checked as a whole label rather than as one photograph of it. A COLA is filed with
@@ -36,6 +38,15 @@ All notable changes to this project are recorded here. The format follows
 
 ### Changed
 
+- The four sample labels on the landing page are described by what checking them actually does, and
+  two of the four are different labels. Every description was false: the one offered as "a bourbon
+  where everything matches" comes back with five points for a reviewer, and the one offered to show
+  that a brand typed without its apostrophe still matches is the same two photographs as the bourbon
+  and returns the same findings. No label in the set passes outright, so none is offered as one. The
+  four now offered are a wine with a single review point, an imported wine whose country-of-origin
+  check passes, a beer that prints no bottler name and address and is flagged for it, and a warning
+  reworded to be rejected.
+
 - A GOVERNMENT WARNING heading whose boldness the app measured is no longer rejected for it. The
   heading's boldness is a stroke-width measurement on a photograph, and a sweep of all 38 corpus
   labels found the number moves with the photograph rather than with the type: the labels are all
@@ -65,6 +76,17 @@ All notable changes to this project are recorded here. The format follows
   `docs/decisions.md#0034`.
 
 ### Fixed
+
+- A government warning printed beside something else is no longer rejected for what its neighbour
+  says. The reader assembled the statement from every line at the heading's height — a band across
+  the whole label — so a keg's tapping instructions, a state deposit line, an importer's web address
+  and a Mexican producer number were each read into the warning, and the word-for-word comparison
+  then rejected a statement the label prints correctly. The warning is now read as the column of
+  text under its own heading. Measured over the 38 shipped labels, rejections for a warning that is
+  in fact correct fell by six, and fields the band used to swallow — net contents, class and type —
+  are readable again on three more. A label that really prints the wrong words still fails: one in
+  the set prints "the RISKS of birth defects" where the regulation fixes "the risk". See
+  `docs/decisions.md#0038` for the one reading this traded away.
 
 - A label whose reading reported no heading weight at all was rejected as though the app had
   measured the heading and found it not bold. Both readers drop the weight from the reading when
