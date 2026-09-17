@@ -10,6 +10,14 @@ evaluation, under the machine's temporary directory, swept on the same window.
 The reasoning in `docs/decisions.md#0018` for the images applies unchanged: a
 page opened now is still whole when it is looked at again, every worker on the
 host reads what every other one wrote, and a restart loses nothing.
+
+**What is kept is not the whole envelope.** An override amends the audit trail
+and needs the evaluation id and the disposition to do it; it never reads a
+field's values. So every part of the envelope that carries what the applicant
+wrote or what the label said is blanked before the file is written — see
+`_forget_applicant_material`. C-2 asks the product to keep none of it, and
+keeping the whole envelope for seven days was a wider bargain than the override
+needed (`docs/decisions.md#0033`).
 """
 
 from __future__ import annotations
@@ -47,7 +55,9 @@ class SingleResultStore:
         return self._root
 
     def put(self, envelope: DispositionEnvelope) -> None:
-        """Keep one result under the id an override will ask for."""
+        """Keep one result under the id an override will ask for, carrying
+        nothing of the applicant's into the file."""
+        envelope = _forget_applicant_material(envelope)
         evaluation_id = envelope.evaluation_id
         if not _EVALUATION_ID.match(evaluation_id):
             raise ValueError(f"refusing to store under evaluation id {evaluation_id!r}")
@@ -99,6 +109,35 @@ class SingleResultStore:
                 path.unlink()
             except OSError:
                 continue
+
+
+def _forget_applicant_material(envelope: DispositionEnvelope) -> DispositionEnvelope:
+    """A copy of `envelope` with every value-bearing string emptied.
+
+    What survives is what an override needs and what a later reader could not
+    misuse: the evaluation id, the dispositions and confidences, the rule ids,
+    the CFR citations, the reason codes, the evidence geometry, the audit trail
+    and the metrics. What goes is everything that could name a person or quote
+    a label: the value read off the artwork, the value the application
+    declared, the sentence explaining a finding, any model-written prose, and
+    the label reference, which is built from the name of the uploaded file.
+
+    Returns a new object. The caller's envelope is the one rendered to the
+    page, and it must keep its values.
+    """
+    fields = tuple(
+        field.model_copy(update={
+            "extracted_value": "",
+            "expected_value": "",
+            "rule_findings": tuple(
+                rf.model_copy(update={"plain_language_explanation": ""})
+                for rf in field.rule_findings
+            ),
+            "ai_suggestion": field.ai_suggestion.model_copy(update={"text": None}),
+        })
+        for field in envelope.fields
+    )
+    return envelope.model_copy(update={"fields": fields, "label_ref": ""})
 
 
 def _default_store_root() -> Path:
