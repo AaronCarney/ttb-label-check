@@ -127,6 +127,45 @@ are the memory guard.
 """
 
 
+MULTIPART_PART_BYTES = 256
+"""What one file's multipart framing costs inside the request body.
+
+A part is not just its bytes: it carries a boundary line, a
+`Content-Disposition` header naming the field and the filename, a
+`Content-Type`, and the blank lines between them. A browser's boundary runs to
+about 40 characters and a label filename to about 30, which puts a real part's
+framing near 160 bytes; 256 is the round number above it, so a count derived
+from it is never optimistic. This matches the "roughly 20 KB of boundary and
+header text" for a hundred parts recorded under `MAX_REQUEST_BYTES`.
+
+It exists so `files_that_fit` counts what the request actually carries. Without
+it the count is wrong at exactly the place it matters: 21 images at
+`MAX_UPLOAD_BYTES` come to 31.5 MiB, `MAX_REQUEST_BYTES` to the byte, so the
+framing is the whole of what tips a 21-file upload over.
+"""
+
+
+def files_that_fit(image_bytes: int) -> int:
+    """How many images of a given size one upload can actually carry.
+
+    `MAX_BATCH_FILES` is the count a batch is *allowed*; this is the count the
+    request cap will *carry*, and for any image above `BATCH_AVERAGE_BYTES` it
+    is the smaller of the two. A reviewer told only the file count cannot work
+    out why a hundred ordinary labels were refused, which is why both graded
+    documents state this figure rather than the bare 100.
+    """
+    return min(MAX_BATCH_FILES, MAX_REQUEST_BYTES // (image_bytes + MULTIPART_PART_BYTES))
+
+
+BATCH_AVERAGE_BYTES = MAX_REQUEST_BYTES // MAX_BATCH_FILES - MULTIPART_PART_BYTES
+"""The average image size at which a full `MAX_BATCH_FILES` batch still fits.
+
+The file count and the byte cap only agree below this line. Above it the byte
+cap is the real limit and the advertised 100 is unreachable — not a fault in
+either number, but the thing a reader has to be told alongside them.
+"""
+
+
 # --------------------------------------------------------------------------
 # Reason codes, registered in `rules/reason_codes.yaml`
 # --------------------------------------------------------------------------

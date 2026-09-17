@@ -360,7 +360,7 @@ back later can only be asked for by a restricted set of characters, so no reques
 outside the store. One bad file in a batch is refused by name and every other file still runs —
 ending a 300-label submission because one was a spreadsheet would punish the reviewer for the
 uploader's mistake. Size and count are bounded as well, and every bound is checked before the bytes
-behind it are read: 28 MB in one request, 1.5 MB for any single image, 100 images in a batch, and a
+behind it are read: 31.5 MB in one request, 1.5 MB for any single image, 100 images in a batch, and a
 refusal for any image whose header declares more than fifty million pixels — the decompression bomb
 that no byte cap catches, since a few kilobytes of PNG can declare a canvas of fifty thousand pixels
 square. Each number is derived rather than picked, and the file that defines them states the
@@ -369,6 +369,13 @@ from this service naming the file that was too big rather than from the platform
 the per-image cap is TTB's own, since COLAs Online refuses a label image over 1.5 MB and nothing
 larger can ever have been filed. A batch refused for size names every file that caused it, not the
 first alone.
+The hundred-image count is worth reading next to the request cap rather than on its own, because the
+two only agree while the images are small: a hundred files fit one request only if they average under
+322.3 KB. At the 1.5 MB per-image cap 20 fit, at the largest label in our own corpus — 547 KB — 59,
+and at the corpus median of about 184 KB all hundred. So the count is a fairness limit and the bytes
+are the real one, and a reviewer sending a hundred large files is refused by the request cap with
+every offending file named. `files_that_fit()` in `app/api/limits.py` derives those numbers from the
+caps; this paragraph does not carry its own arithmetic.
 What is still unbounded is memory. A batch is read whole before any of it is queued, so a hundred
 files inside the caps are a hundred files held at once, and the results table has no pagination. On
 a laptop that does not show. On a service anyone can reach it is the next thing we would close.

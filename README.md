@@ -276,7 +276,17 @@ limits](https://docs.cloud.google.com/run/quotas)) so the refusal comes from thi
 message naming the file, rather than from Google with a message naming nothing; the per-image cap is TTB's own, since COLAs Online
 refuses a label image over 1.5 MB and nothing larger can ever have been filed; 100 images of label
 size is about 18 MB, inside the request cap, and the PRD's 300 submissions in ten minutes is three
-such batches. The pixel ceiling is the guard against a decompression bomb — a few kilobytes of PNG
+such batches.
+
+**What 100 images per batch is worth in practice.** The file count and the request cap only agree
+while the images are small. A hundred files fit one request only if they average under **322.3 KB**;
+above that the request cap is the real limit and the hundred is unreachable. At the 1.5 MB per-image
+cap **20** fit one request — 21 of them come to 31.5 MB exactly, and the multipart framing around
+each file is what tips it over. At the largest label in this project's own corpus, 547 KB, **59**
+fit. The corpus median of about 184 KB is why a batch of ordinary labels does fit, and is where the
+18 MB above comes from. A reviewer sending a hundred large files is refused by the request cap, by
+name, and should send fewer. The arithmetic is `files_that_fit()` in `app/api/limits.py`; this
+paragraph is held to it by `tests/test_readme_content.py`, not written out by hand. The pixel ceiling is the guard against a decompression bomb — a few kilobytes of PNG
 can declare a 50,000 × 50,000 canvas, which no byte cap catches — and it is checked against the
 file's header before anything is decoded. A refusal carries a reason code and a sentence saying
 which file was refused and what the limit is.

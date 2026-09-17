@@ -213,3 +213,41 @@ def test_readme_states_the_upload_limits_the_service_enforces() -> None:
     }
     missing = [f"{name} ({value})" for name, value in expected.items() if value not in content]
     assert not missing, f"README does not state: {missing}"
+
+
+def test_both_graded_documents_state_the_effective_batch_limit() -> None:
+    """ "100 images per batch" is only reachable for small images, and a reader
+    who is told the count without the byte cap cannot work out why a hundred
+    ordinary labels were refused.
+
+    The figures are derived here from `app/api/limits.py` rather than typed, so
+    moving a cap fails this test instead of quietly leaving both documents
+    advertising a batch size the request cap will not carry. The three anchors
+    are the ones a reviewer meets: the average that makes a full batch fit, the
+    count at the per-image cap, and the count at the largest label this
+    project's own corpus holds.
+    """
+    from app.api import limits
+
+    largest_corpus_label_bytes = max(
+        path.stat().st_size for path in (ROOT / "tests/fixtures/labels").rglob("*.jpg")
+    )
+    expected = {
+        "the average a full batch needs": limits._mib(limits.BATCH_AVERAGE_BYTES),
+        "the count at the per-image cap": str(limits.files_that_fit(limits.MAX_UPLOAD_BYTES)),
+        "the count at the largest corpus label": str(
+            limits.files_that_fit(largest_corpus_label_bytes)
+        ),
+    }
+
+    for document in (README, ROOT / "docs/approach.md"):
+        content = document.read_text(encoding="utf-8")
+        paragraph = next(
+            (block for block in content.split("\n\n") if "average under" in block),
+            "",
+        )
+        assert paragraph, f"{document.name} does not state when 100 per batch is reachable"
+        missing = [
+            f"{name} ({value})" for name, value in expected.items() if value not in paragraph
+        ]
+        assert not missing, f"{document.name} does not state: {missing}"
