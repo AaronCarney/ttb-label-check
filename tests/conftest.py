@@ -3,12 +3,22 @@
 from __future__ import annotations
 
 import io
+import shutil
+import socket
+import subprocess
+import threading
+import time
+from collections.abc import Iterable, Iterator
+from datetime import UTC
 from pathlib import Path
 
 import pytest
+import uvicorn
 from PIL import Image
 
+from app.main import create_app
 from app.schemas.label import Label
+from app.schemas.wire.disposition import DispositionEnvelope
 
 
 @pytest.fixture
@@ -58,12 +68,6 @@ def _stub_label(
 
 
 # === Batch-test helpers ===
-from collections.abc import Iterable
-from datetime import UTC
-
-from app.schemas.wire.disposition import DispositionEnvelope
-
-
 def _stub_disposition_envelope(idx: int = 0, *, disposition: str = "pass") -> DispositionEnvelope:
     """Minimal `DispositionEnvelope` for batch tests.
 
@@ -135,18 +139,6 @@ def _reset_reason_code_cache():
 # ---------------------------------------------------------------------------
 # live_server and pnpm_built_island fixtures
 # ---------------------------------------------------------------------------
-import shutil
-import socket
-import subprocess
-import threading
-import time
-from collections.abc import Iterator
-
-import uvicorn
-
-from app.main import create_app
-
-
 def _free_port() -> int:
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.bind(("127.0.0.1", 0))
