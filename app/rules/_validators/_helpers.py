@@ -104,6 +104,10 @@ def project_reading(obs: FieldObservation) -> str:
     keys = _READING_KEYS.get(obs.field_id)
     if keys is None:
         keys = tuple(k for k in value if k not in _METADATA_KEYS)
+    # The "" in the guard is redundant today - the join below drops an empty
+    # part anyway - and it is kept as the local statement of the rule, so that
+    # removing the filter does not quietly change what an empty key projects to.
+    # Mutating it away therefore survives the suite; that mutant is equivalent.
     parts = [str(value[k]).strip() for k in keys if value.get(k) not in (None, "")]
     return ", ".join(p for p in parts if p)
 
@@ -127,6 +131,9 @@ def normalize_words(text: str) -> tuple[str, ...]:
     folded = unicodedata.normalize("NFKD", text)
     folded = "".join(ch for ch in folded if not unicodedata.combining(ch))
     folded = folded.replace("&", " and ")
+    # A-Z cannot match, because .lower() has already run. It is kept so the class
+    # reads as "not a letter or a digit" on its own terms rather than only in
+    # company with the call beside it. Mutating it away is an equivalent mutant.
     words = re.split(r"[^0-9a-zA-Z]+", folded.lower())
     return tuple(_SPELLING_VARIANTS.get(w, w) for w in words if w)
 
