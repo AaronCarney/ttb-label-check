@@ -14,9 +14,8 @@ that governs — never an entry itself as the reason something must be done. Whe
 governing document disagree, the governing document wins and the entry is a stale record to date and
 correct.
 
-Standard: `olorin/standards/workflow/decision-document.md`. Consolidated 2026-09-16 out of
-sixteen separate files under `docs/decisions/`, which was a departure from the workspace's practice
-of one decision document per project. The entry numbers are the numbers those files carried, so an
+Consolidated 2026-09-16 out of sixteen separate files under `docs/decisions/`. The entry numbers
+are the numbers those files carried, so an
 existing citation to `docs/decisions/0011` is entry 0011 here and links resolve as
 `docs/decisions.md#0011`.
 
@@ -723,10 +722,10 @@ the capitals — is still decided, so a title-case heading is rejected whether o
 weight.
 
 **Rejected.** *Keep the four implementations, switched off* — unreachable code against a reader that
-does not exist, each carrying a wrong verdict for whoever switches it on; `meta-plan-decisions/0009`
-decided this shape directly, with the four rules staying and pointing at one shared `unmeasurable`
-validator, the three implementation bodies going and the fifth rule going outright, because the rule
-entry with its citation and its notes is the durable record and the body was not. *One shared "not measured"
+does not exist, each carrying a wrong verdict for whoever switches it on. The four rules stay and
+point at one shared `unmeasurable` validator, the three implementation bodies go and the fifth rule
+goes outright, because the rule entry with its citation and its notes is the durable record and the
+body was not. *One shared "not measured"
 reason code* — four rules ask four different questions, and a reviewer reads the code's description as a
 sentence, where "a measurement was not taken" does not say which. *Delete the §16.22(a)(4) decision table with `cpi_lookup`* — the table is the regulation's
 three normative rows as data; it costs nothing, the loader resolves the reference, and it is what a characters-per-inch check reads the day a
@@ -1382,7 +1381,7 @@ form collects, exists for the life of the request and is never stored or written
   is accountable.
 
 The README currently states the opposite — that nothing is stored — which was true before this
-entry. Correcting it is handed to lane D under "For the close" in `plans/wave3-s1.md`.
+entry and is not true now. Correcting it is outstanding.
 
 <a id="0019"></a>
 ## 0019. The browser-facing surface is one module per job, behind one router
