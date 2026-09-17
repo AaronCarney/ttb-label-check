@@ -244,20 +244,83 @@ def test_bulk_upload_redirects_to_batch_view() -> None:
     assert batch_id in app.state.batches
 
 
-def test_bulk_upload_rejects_non_image() -> None:
-    """A non-PNG/JPEG in the upload set should fail loudly with 400 rather
-    than silently scheduling a batch that will explode mid-stream."""
+def test_bulk_upload_names_a_non_image_and_checks_the_rest() -> None:
+    """A non-PNG/JPEG in the upload set is named as its own failed item and
+    every other file is still checked.
+
+    This asserted a 400 for the whole submission until 2026-09-16, defended on
+    the grounds that scheduling the batch meant a batch that would "explode
+    mid-stream". `docs/decisions.md#0020` removed that premise: the worker
+    refuses an item it cannot check by name and carries on to the next one, so
+    rejecting four good files because a fifth is a `.txt` now throws away work
+    the product can do. Requirement R13 asks for the file to be named *and* the
+    rest to run, and is a P0.
+    """
+    import time
+
+    from app.api.ui import _get_upload_evaluator
+    from tests._fakes.evaluator import FakeEvaluator
+    from tests.conftest import _stub_disposition_envelope
+
+    app = create_app()
+    # One envelope: only the image is evaluated. The `.txt` never reaches the
+    # evaluator, which is the point — nothing reports a verdict about it.
+    fake = FakeEvaluator([(0.0, _stub_disposition_envelope(0, disposition="pass"))])
+    app.dependency_overrides[_get_upload_evaluator] = lambda: fake
+
+    with TestClient(app) as client:
+        response = client.post(
+            "/batches/upload",
+            files=[
+                ("labels", ("ok.png", _PNG_1x1, "image/png")),
+                ("labels", ("oops.txt", b"not an image", "text/plain")),
+            ],
+            follow_redirects=False,
+        )
+        assert response.status_code == 303, response.text
+        batch_id = response.headers["location"].removeprefix("/batch/")
+
+        # The worker runs as a task on the app's loop; poll its snapshot rather
+        # than sleeping a fixed interval.
+        deadline = time.monotonic() + 10.0
+        while time.monotonic() < deadline:
+            snapshot = client.get(f"/batches/{batch_id}").json()
+            if all(item["state"] in ("ready", "failed") for item in snapshot["items"]):
+                break
+            time.sleep(0.02)
+
+    items = {item["label_id"].split("-", 3)[-1]: item for item in snapshot["items"]}
+    assert set(items) == {"ok.png", "oops.txt"}, snapshot
+
+    # The bad file is named, with an instruction.
+    bad = items["oops.txt"]
+    assert bad["state"] == "failed", bad
+    assert "oops.txt" in bad["failed_reason"]
+    assert "PNG or JPEG" in bad["failed_reason"]
+    assert bad["result"]["disposition"] == "needs_review"
+    assert (
+        bad["result"]["audit_trail"]["per_rule_trace"][0]["rule_id"]
+        == "ENGINE.INPUT.LABEL_IMAGE_UNSUPPORTED"
+    )
+
+    # The rest of the batch has results.
+    good = items["ok.png"]
+    assert good["state"] == "ready", good
+    assert good["result"]["disposition"] == "pass"
+    assert good["failed_reason"] is None
+
+
+def test_bulk_upload_rejects_a_submission_with_no_image_at_all() -> None:
+    """When no file in the set is an image there is no batch to show a refusal
+    in, so the submission is refused at the form, as an empty one is."""
     app = create_app()
     client = TestClient(app)
     response = client.post(
         "/batches/upload",
-        files=[
-            ("labels", ("ok.png", _PNG_1x1, "image/png")),
-            ("labels", ("oops.txt", b"not an image", "text/plain")),
-        ],
+        files=[("labels", ("oops.txt", b"not an image", "text/plain"))],
     )
     assert response.status_code == 400
-    assert "oops.txt" in response.text or "unsupported" in response.text.lower()
+    assert "PNG or JPEG" in response.text
 
 
 def test_bulk_upload_requires_at_least_one_file() -> None:

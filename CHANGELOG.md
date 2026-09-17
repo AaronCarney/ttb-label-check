@@ -13,6 +13,12 @@ All notable changes to this project are recorded here. The format follows
   single-label page uses. A label the app could not check says so and names the code recorded
   against it, rather than showing an empty panel. See `docs/PRD.md` FR-12.
 
+### Fixed
+
+- A browser batch upload containing a file that is not a PNG or JPEG now names that file, says what
+  to do with it, and checks every other file in the set. It previously refused the whole submission
+  and checked none of them. See `docs/decisions.md#0030`.
+
 ## [0.2.0] - 2026-09-16
 
 ### Added

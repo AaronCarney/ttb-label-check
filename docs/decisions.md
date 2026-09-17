@@ -1832,3 +1832,66 @@ one reviewer's traffic that is immaterial, and against a flood the Cloud Run inv
 ([0028](#0028)) is what actually holds. A Free Worker also allows 50 subrequests per invocation,
 which a one-request proxy does not approach.
 
+<a id="0030"></a>
+## 0030. A file that is not an image is refused by name inside the batch, not by rejecting the batch
+
+**Decided:** 2026-09-16. **Evidence:** `app/api/ui/bulk_upload.py` as it stood; requirement R13;
+[0020](#0020), which removed the premise the old behaviour rested on.
+
+**What was wrong.** `POST /batches/upload` read every uploaded file, and the first one whose bytes
+were not a PNG or JPEG ended the whole submission with a 400 and an error page. Four good label
+images submitted alongside one `.txt` were all discarded, unchecked, and the reviewer's only route
+back was to find the bad file themselves and upload everything again. Requirement R13 is a P0 and
+asks for both halves: *"that file is named with an instruction and every other submission has
+results."* The route delivered the first half and destroyed the second.
+
+`tests/test_ui_routes.py::test_bulk_upload_rejects_non_image` held that behaviour in place and
+defended it in its own docstring — a 400 was better than "silently scheduling a batch that will
+explode mid-stream." That was true when it was written. [0020](#0020) made it false: the worker now
+refuses an item it cannot check by name, records the refusal as that item's own result, and goes on
+to the next one. There is no mid-stream explosion left to avoid, so the test was defending a cost
+that no longer exists against a requirement that does. Changing it was the fix, not working around
+it.
+
+**Chosen.** The bad file is queued like every other file and refused as its own item.
+
+| Where | What happens |
+|---|---|
+| The route | Reads every file, detects the type of each, and rejects nothing on that basis |
+| A file that is not PNG or JPEG | Gets a `BatchItem` and an application like any other, is left out of `label_lookup`, and gets an entry in a new `refusals` map: the reason code `ENGINE.INPUT.LABEL_IMAGE_UNSUPPORTED` and the sentence naming the file |
+| The worker | Checks `self._refusals` before it looks for an image, and where the caller has named a reason, uses it — the same refusal envelope, `record_failure` and `failed_count` path [0020](#0020) built |
+| The reviewer | Sees the file in the batch table as `failed`, with `failed_reason` naming it and saying what to do, while every other file has results |
+| No file in the set is an image | Still a 400 at the form, because there is no batch to show a refusal in — this is the empty-submission case wearing different clothes |
+
+`ENGINE.INPUT.LABEL_IMAGE_UNSUPPORTED` is a new registry entry rather than a reuse of
+`ENGINE.INPUT.LABEL_IMAGE_MISSING`. The two name different facts: the file arrived and was read and
+is simply not an image, against nothing having arrived at all. The existing code's sentence tells the
+reviewer to *send the label files themselves*, which is the wrong instruction for someone who did.
+
+**Rejected.** *Letting the worker discover it, by leaving the file out of `label_lookup` and saying
+nothing* — the worker would answer "no image was supplied for this item", which is false: the file
+was supplied. The route is the only place that knows why, so the route is where the reason is
+written. *Pre-recording the sentence with `InFlightBatch.record_failure` before the worker starts* —
+the worker overwrites `failures[label_id]` when it refuses the item, so the specific sentence would
+be silently replaced by the generic one; making the worker prefer an existing entry would hide the
+contract in an ordering rule. *Dropping the bad file from the batch entirely and running the rest* —
+it satisfies "every other submission has results" and fails "that file is named": the reviewer gets a
+batch of four from a submission of five and nothing says which one went missing, which is the failure
+mode this product refuses everywhere else. *A 422 listing every bad file, with the good ones
+discarded* — a better error page for the same lost work.
+
+**Because** a reviewer's batch is the unit of their attention and one unreadable file in it is not a
+reason to throw away the work the product can do on the rest. That is what [0020](#0020) settled for
+the worker; the upload route was the last place still deciding it the other way.
+
+**Cost, stated.**
+
+- **A refused item consumes a queue position and a result slot**, so a set of fifty `.txt` files
+  builds a fifty-item batch that checks nothing. That is the honest rendering — each file is named —
+  but it is slower and noisier than one error page would be.
+- **The type check is still the first eight bytes, not a decode.** A file with a PNG header and a
+  corrupt body is not caught here; it reaches the reader and is refused further down, by a different
+  code. The route's guarantee is about the type a file declares itself to be, not about whether the
+  image opens.
+- **The refusal carries no `plain_language_explanation`.** Same gap [0020](#0020) named: the sentence
+  lives on the snapshot's `failed_reason` and a client reading only the SSE stream does not see it.

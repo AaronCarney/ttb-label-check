@@ -226,6 +226,10 @@ codes:
     description: "Label image missing at evaluation time."
     cfr_anchors: []
     severity: reject
+  ENGINE.INPUT.LABEL_IMAGE_UNSUPPORTED:
+    description: "Uploaded file is not a PNG or JPEG image, so it was not read."
+    cfr_anchors: []
+    severity: reject
   ENGINE.RULE.CONFLICT:
     description: "Two or more rules emit conflicting dispositions for the same field."
     cfr_anchors: []

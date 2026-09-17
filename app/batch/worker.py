@@ -92,6 +92,7 @@ class BatchWorker:
         bus: SSEBus,
         app_lookup: dict[str, Application] | None = None,
         label_lookup: dict[str, Label] | None = None,
+        refusals: dict[str, tuple[str, str]] | None = None,
     ) -> None:
         self._in_flight = in_flight
         self._evaluator = evaluator
@@ -106,6 +107,13 @@ class BatchWorker:
         # `app/api/ui/bulk_upload.py` has always filled them.
         self._app_lookup: dict[str, Application] = app_lookup or {}
         self._label_lookup: dict[str, Label] = label_lookup or {}
+        # Items the caller already knows cannot be checked, keyed by `label_id`,
+        # each carrying its own reason code and the sentence a reviewer reads.
+        # The upload route fills this for a file that is not an image: it knows
+        # why, and "no image was supplied" would be a worse answer than the one
+        # it can give. Refusing per item rather than rejecting the submission is
+        # what lets the rest of the batch run (`docs/decisions.md#0020`).
+        self._refusals: dict[str, tuple[str, str]] = refusals or {}
 
     def _resolve_application(self, item: BatchItem) -> Application:
         """Resolve the Application for a queued BatchItem.
@@ -245,7 +253,11 @@ class BatchWorker:
             envelope: DispositionEnvelope | None = None
             refusal: tuple[str, str] | None = None  # (reason_code, plain words)
 
-            if label is None:
+            declared = self._refusals.get(item.label_id)
+            if declared is not None:
+                # The caller named the reason when it queued the item.
+                refusal = declared
+            elif label is None:
                 refusal = (
                     _NO_IMAGE,
                     f"No image was supplied for {item.label_id}, so it was not checked. "

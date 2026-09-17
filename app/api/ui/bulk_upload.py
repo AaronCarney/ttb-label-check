@@ -31,6 +31,11 @@ from app.config import Settings
 
 router = APIRouter()
 
+# Registered in `rules/reason_codes.yaml`. The file reached the server and was
+# read; it is simply not an image, which is a different fact from
+# ENGINE.INPUT.LABEL_IMAGE_MISSING, where nothing arrived at all.
+UNSUPPORTED_IMAGE = "ENGINE.INPUT.LABEL_IMAGE_UNSUPPORTED"
+
 
 @router.post("/batches/upload")
 async def batches_upload_submit(
@@ -61,31 +66,38 @@ async def batches_upload_submit(
             status_code=400,
         )
 
-    # Read every file up front so we can validate MIME before scheduling work.
-    raw: list[tuple[str, bytes, str]] = []
+    # Read every file up front. A file that is not a PNG or JPEG does not end
+    # the submission: it is queued like the rest and refused by name as its own
+    # result, so the reviewer is told which file was not read and every other
+    # file still has an answer (requirement R13; `docs/decisions.md#0020`).
+    raw: list[tuple[str, bytes, str | None]] = []
     for upload in labels:
         body = await upload.read()
-        mime = _detect_image_mime(body)
-        if mime is None:
-            return templates.TemplateResponse(
-                request=request,
-                name="batches_upload.html",
-                context={
-                    "dev_mode": settings.dev_mode,
-                    "upload_error": (
-                        f"Unsupported file: {upload.filename or 'upload'} — "
-                        "every upload must be PNG or JPEG."
-                    ),
-                },
-                status_code=400,
-            )
-        raw.append((upload.filename or f"label-{len(raw)}", body, mime))
+        raw.append((upload.filename or f"label-{len(raw)}", body, _detect_image_mime(body)))
+
+    if all(mime is None for _, _, mime in raw):
+        # Nothing to check and so no batch to show a refusal in. This is the
+        # empty-submission case wearing different clothes, and it is answered
+        # the same way.
+        return templates.TemplateResponse(
+            request=request,
+            name="batches_upload.html",
+            context={
+                "dev_mode": settings.dev_mode,
+                "upload_error": (
+                    "None of those files is a PNG or JPEG image, so there was nothing "
+                    "to check. Save them as PNG or JPEG and upload them again."
+                ),
+            },
+            status_code=400,
+        )
 
     batch_id = f"B-{uuid.uuid4().hex[:10]}"
     now = datetime.now(timezone.utc)
     items: list[BatchItem] = []
     label_lookup: dict[str, LabelModel] = {}
     app_lookup: dict[str, Application] = {}
+    refusals: dict[str, tuple[str, str]] = {}
     for idx, (filename, body, mime) in enumerate(raw):
         label_id = f"{batch_id}-{idx:03d}-{filename}"
         application_ref = f"{batch_id}-app-{idx:03d}"
@@ -98,14 +110,22 @@ async def batches_upload_submit(
                 enqueued_at=now,
             )
         )
-        label_lookup[label_id] = LabelModel(
-            label_id=label_id,
-            batch_id=batch_id,
-            image_bytes=body,
-            content_type=mime,
-            face_tag="front",
-            dimensions=None,
-        )
+        if mime is None:
+            refusals[label_id] = (
+                UNSUPPORTED_IMAGE,
+                f"{filename} is not a PNG or JPEG image, so it was not read. Save it "
+                "as a PNG or JPEG and upload it again \u2014 every other file in this "
+                "batch was checked.",
+            )
+        else:
+            label_lookup[label_id] = LabelModel(
+                label_id=label_id,
+                batch_id=batch_id,
+                image_bytes=body,
+                content_type=mime,
+                face_tag="front",
+                dimensions=None,
+            )
         try:
             app_lookup[application_ref] = _build_application(
                 {"beverage_type": beverage_type},
@@ -141,6 +161,7 @@ async def batches_upload_submit(
     )
     worker._label_lookup = label_lookup
     worker._app_lookup = app_lookup
+    worker._refusals = refusals
     asyncio.create_task(worker.run())
 
     return RedirectResponse(url=f"/batch/{batch_id}", status_code=303)
