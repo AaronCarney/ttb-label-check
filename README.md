@@ -150,18 +150,41 @@ runs of the same label agree. `.env.example` names the snapshot in force.
 
 ## Reading accuracy
 
-**Not published yet, on purpose.** This project puts no number in front of a reviewer that a run on
-this machine did not produce, and the reading-accuracy run has not happened.
-
-The harness is written and committed. It scores the reader against the real labels in
-`tests/fixtures/labels`, using the transcription in that corpus's manifest as the answer key:
+Measured on 2026-09-16 over the whole real corpus — all 30 labels in
+`tests/fixtures/labels` and their 56 face images — with the default on-machine reader (`local`).
+Every figure below came from that run. Reproduce it with:
 
 ```bash
 uv run python -m eval.read_accuracy
 ```
 
-It reports each check separately rather than one blended figure, because the checks fail in
-different ways and an average hides that. The figures go here when the run lands.
+The harness scores the reader against the transcription in that corpus's manifest, which records
+what each label prints, and reports each check separately rather than one blended figure, because
+the checks fail in different ways and an average hides that.
+
+| Check | What it asks | Correct of scoreable |
+| --- | --- | --- |
+| `brand` | the brand name the label carries | 16 of 30 |
+| `class_type` | the class and type designation | 19 of 30 |
+| `abv` | the stated alcohol content | 25 of 30 |
+| `net_contents` | the stated net contents | 22 of 29 |
+| `name_address` | the bottler's or importer's name and address | 22 of 30 |
+| `origin` | the country of origin | 24 of 30 |
+| `warning_present` | that the health warning is on the label at all | 30 of 30 |
+| `warning_exact` | that the warning reads word for word as the regulation sets it | 14 of 30 |
+| `warning_heading_caps` | that `GOVERNMENT WARNING:` is capitalised as required | 30 of 30 |
+
+The figures are counts, not percentages, and the denominator differs between checks. One label
+prints no net contents on any face, so `net_contents` is scoreable on 29 rather than 30: a check
+the label itself cannot settle is left out rather than counted against the reader. Thirty labels
+is a small denominator, and a percentage drawn from it would read as a precision this corpus does
+not carry. See `docs/decisions.md#0027`.
+
+None of this is a verdict. The reader's output goes to a human grader who approves or rejects
+every finding, so a reading the reader is unsure of is returned as unsure rather than guessed at.
+The largest remaining gaps are recognition limits on display type — handwritten script brands and
+stylised capitals — and elements the detector splits across several text boxes, which truncates a
+designation like `BOURBON WHISKEY` to `BOURBON`.
 
 ## Assumptions
 

@@ -7,8 +7,9 @@ having:
 
 * every document path the README names is resolved on disk, so a reorganisation
   that leaves a dead link fails here instead of in front of a reviewer;
-* the accuracy section may not carry a number, because the project publishes
-  only figures a run on this machine produced and no such run has happened yet.
+* the accuracy section publishes only what a run on this machine measured, in
+  the form decision 0027 settled: counts rather than percentages, every check
+  named, and the corpus the figures came from stated.
 """
 from __future__ import annotations
 
@@ -29,6 +30,21 @@ BRIEF_ELEMENTS = (
     "Name and address",
     "Country of origin",
     "Government Health Warning",
+)
+
+
+# The nine checks ``eval/read_accuracy.py`` scores, named as it names them, so a
+# reader can match a figure in the README to a line of the run's own output.
+ACCURACY_CHECKS = (
+    "brand",
+    "class_type",
+    "abv",
+    "net_contents",
+    "name_address",
+    "origin",
+    "warning_present",
+    "warning_exact",
+    "warning_heading_caps",
 )
 
 
@@ -101,13 +117,19 @@ def test_readme_carries_a_deployed_url_section() -> None:
 def test_readme_publishes_no_unmeasured_accuracy() -> None:
     """The README states only what a run on this machine measured.
 
-    No reading-accuracy run has happened yet, so the section holds a marked hole.
-    A percentage appearing here before that run is an estimate, and an estimate
-    presented as a measurement is the one thing this section may not contain.
+    The run has happened, so the section carries its figures instead of the
+    marked hole it held before (decision 0027). The failure guarded against is
+    the same one: a number in front of a reviewer that no run produced. A
+    percentage is that number here — none was measured, thirty labels is too
+    small a denominator to express as one, and the denominator differs between
+    checks — so the form is counts, every check named, and the corpus stated.
     """
     accuracy = _section(_readme(), "## Reading accuracy")
     assert "%" not in accuracy, "accuracy section carries a figure no run produced"
-    assert "not published" in accuracy.lower()
+    for check in ACCURACY_CHECKS:
+        assert f"`{check}`" in accuracy, f"accuracy section does not report {check!r}"
+    for corpus in ("30", "56", "tests/fixtures/labels", "local"):
+        assert corpus in accuracy, f"accuracy section does not state {corpus!r}"
 
 
 def test_readme_coverage_table_answers_every_brief_element() -> None:

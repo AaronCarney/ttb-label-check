@@ -14,6 +14,11 @@ All notable changes to this project are recorded here. The format follows
   contents, name and address, country of origin, and the health warning — is compared against what
   the label says, and each comparison states what counts as the same value.
 - A grader can enter an application's details on the page and check a label against them.
+- The README publishes what the on-machine reader actually reads, measured over all 30 real labels
+  and their 56 face images: each of the nine checks separately, as a count of correct out of the
+  labels that check is scoreable on. They are counts rather than percentages, because thirty labels
+  is too small a denominator to state as one and because the denominator differs between checks.
+  See `docs/decisions.md#0027`.
 
 ### Fixed
 
@@ -32,6 +37,21 @@ All notable changes to this project are recorded here. The format follows
   writing. The comparison also folds accents, as every other check already did, and a brand whose
   first letter disagrees goes to a reviewer instead of being rejected outright, because a stylised
   first letter is the most likely reading error. See `docs/decisions.md#0015`.
+- A sharp, readable label photograph is no longer turned away as glare. The check counted bright
+  pixels, which measures how light the label stock is rather than whether a hotspot destroyed any
+  text, and it refused seven faces of five readable labels while passing the one fixture built with
+  glare over its warning. Legibility is now judged by what the reader returned: an image no text is
+  found on, at any rotation tried, is reported as unreadable. `GLARE` remains a term a reviewer can
+  use, because a reviewer can see what the product cannot measure. See `docs/decisions.md#0026`.
+- A brand printed over several lines — "Hop" over "Butcher" over "FOR THE WORLD" — is read as the
+  one name it is, instead of as whichever line was largest. Type size is now measured across a line
+  of text rather than along it, so a health warning set sideways up the edge of a label is no longer
+  taken for the biggest type on it and handed back as the brand.
+- A drink's ingredients are no longer reported as its country of origin. `DISTILLED FROM CORN` was
+  read as a country named `corn`, because the word "from" was treated as introducing a place after
+  any verb. It introduces a place only after "product" or "imported"; after a verb describing what
+  was done to the drink, it introduces the material. A wrong country beside a field costs a reviewer
+  more than an empty one, which sends them to look at the label.
 
 ### Changed
 
