@@ -64,7 +64,8 @@ function SingleApp({ envelope }: { envelope: DispositionEnvelope | null }): Reac
   if (!envelope) {
     return (
       <div className="p-4">
-        <p>No envelope. Submit a label via <code>POST /labels</code>.</p>
+        <p>No label checked yet. Upload a label image above, fill in the application it was filed
+        with, and choose Evaluate. The results appear here.</p>
       </div>
     );
   }

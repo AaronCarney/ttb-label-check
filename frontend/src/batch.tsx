@@ -7,19 +7,22 @@ import { QueuePosition } from "./components/QueuePosition";
 import { useBatchStream } from "./sse/useBatchStream";
 
 function BatchApp({ batchId }: { batchId: string }): React.JSX.Element {
-  const { events, error } = useBatchStream(batchId);
-  const total = Math.max(events.length, 1);
+  const { events, error, total, done } = useBatchStream(batchId);
   const latest = events[events.length - 1];
+  // Until the worker reports the batch size, the count of results received is
+  // the only honest number there is; a denominator taken from that same count
+  // would tell the reviewer the batch had finished from the first result on.
+  const progress = done
+    ? `Finished — ${events.length} of ${total ?? events.length} labels checked`
+    : `Checking labels — ${events.length} finished so far`;
   return (
     <main className="mx-auto max-w-5xl space-y-4 p-4">
       <header className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 className="text-xl font-semibold">Batch {batchId}</h2>
-          <p className="text-sm text-muted-foreground">
-            Streaming results — {events.length} of {total}
-          </p>
+          <p className="text-sm text-muted-foreground">{progress}</p>
         </div>
-        {latest && <QueuePosition current={latest.queue_position} total={total} />}
+        {latest && total !== null && <QueuePosition current={latest.queue_position} total={total} />}
       </header>
       {error && (
         <p role="alert" className="rounded-md border border-destructive bg-destructive/10 p-3 text-sm text-[hsl(var(--uswds-error-dark))]">

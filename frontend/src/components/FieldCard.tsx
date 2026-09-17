@@ -13,11 +13,22 @@ export interface FieldCardProps {
   className?: string;
 }
 
-function _fieldDisposition(field: FieldFindingWire): "pass" | "fail" | "needs_review" {
+// Null means no rule ran against this field — the application did not state a
+// value for it, or no rule covers it for this beverage. That is not a pass, and
+// showing one would tell the reviewer a check succeeded that never happened.
+function _fieldDisposition(field: FieldFindingWire): "pass" | "fail" | "needs_review" | null {
   const dispositions = field.rule_findings.map((r) => r.disposition);
+  if (dispositions.length === 0) return null;
   if (dispositions.includes("fail")) return "fail";
   if (dispositions.includes("needs_review")) return "needs_review";
   return "pass";
+}
+
+// "brand_name" reads as "Brand name" on the card. The accessible name keeps the
+// field's own identifier, which is what the tests and the audit trail use.
+function _fieldLabel(fieldName: string): string {
+  const words = fieldName.replace(/_/g, " ");
+  return words.charAt(0).toUpperCase() + words.slice(1);
 }
 
 export function FieldCard({ field, verdict, aiSuggestion, onCitationOpen, className }: FieldCardProps): React.JSX.Element {
@@ -29,8 +40,14 @@ export function FieldCard({ field, verdict, aiSuggestion, onCitationOpen, classN
       className={cn("rounded-lg border border-border bg-background p-4 space-y-3", className)}
     >
       <header className="flex items-center justify-between gap-3">
-        <h3 className="text-base font-semibold">{field.field_name.replace(/_/g, " ")}</h3>
-        <DispositionPill disposition={fieldDisp} />
+        <h3 className="text-base font-semibold">{_fieldLabel(field.field_name)}</h3>
+        {fieldDisp === null ? (
+          <span className="inline-flex items-center rounded-md border border-border bg-muted px-3 py-1 text-sm font-semibold text-muted-foreground">
+            Not checked
+          </span>
+        ) : (
+          <DispositionPill disposition={fieldDisp} />
+        )}
       </header>
       <dl className="grid grid-cols-1 gap-2 text-sm sm:grid-cols-2">
         <div>
