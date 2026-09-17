@@ -64,7 +64,7 @@ class BodySizeLimitMiddleware:
             await _refuse(scope, send, cap)
             return
 
-        await self.app(scope, _replay(body, disconnected), send)
+        await self.app(scope, _replay(body, disconnected, receive), send)
 
 
 def _declared_length(scope) -> int | None:
@@ -102,8 +102,17 @@ async def _read_capped(receive, cap: int) -> tuple[bytearray | None, bool]:
             return body, False
 
 
-def _replay(body: bytearray, disconnected: bool):
-    """Hand the buffered body to the application as if it were arriving now."""
+def _replay(body: bytearray, disconnected: bool, receive):
+    """Hand the buffered body to the application as if it were arriving now.
+
+    After the body, the two cases part. If the client disconnected while the
+    body was being read, `receive` has already said so and is drained, so the
+    answer comes from here. If the client is still connected there is no more
+    body but also nothing known about the connection, and saying
+    `http.disconnect` would tell the application the client had gone when it
+    had not — so the real transport is awaited, which is what the application
+    would have been awaiting without this middleware in front of it.
+    """
     sent = False
 
     async def _receive():
@@ -111,7 +120,9 @@ def _replay(body: bytearray, disconnected: bool):
         if not sent:
             sent = True
             return {"type": "http.request", "body": bytes(body), "more_body": False}
-        return {"type": "http.disconnect"} if disconnected else {"type": "http.disconnect"}
+        if disconnected:
+            return {"type": "http.disconnect"}
+        return await receive()
 
     return _receive
 
