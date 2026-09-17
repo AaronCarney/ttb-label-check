@@ -27,6 +27,11 @@ Thumbs.db
 __pycache__/
 *.pyc
 
+# Tool caches. Each writes an ignore file inside itself, so a tree that has run
+# pytest or ruff looks clean only until one of those is deleted.
+.pytest_cache/
+.ruff_cache/
+
 # Frontend dependencies: installed with `pnpm install`, never committed
 frontend/node_modules/
 
