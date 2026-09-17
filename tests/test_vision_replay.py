@@ -115,16 +115,13 @@ KNOWN_MISSES: dict[tuple[str, str], str] = {
     ("ttb-26230001000420", "warning_exact"): "the reader's warning text is not word for word and the answer key says this label's is",
     ("ttb-26237001000107", "abv"): "the front is refused by the quality gate and the back prints no ABV",
     ("ttb-26237001000107", "net_contents"): "same as above",
-    ("ttb-26237001000107", "origin"): "`_ORIGIN_RE` matched `distilled in copper pot stills. Our` in a marketing sentence; the label's origin is `Mexico`",
     ("ttb-26237001000107", "warning_exact"): "the back's warning is not read word for word",
     ("ttb-26240001000454", "brand"): "B — returned 'NOV' for 'I Heard Cassarole'",
     ("ttb-26240001000454", "class_type"): "C — returned nothing; 'Double India Pale Ale' is handwritten on a keg collar",
     ("ttb-26240001000454", "abv"): "the keg collar's '8%' is not matched",
     ("var-heading-title-case", "brand"): "B — returned the fanciful name 'ROSSASTRO' for the brand 'FABIO SIGNORELLI'",
-    ("var-heading-title-case", "name_address"): "returned the lead-in `PRODUCED BY:` itself, with no name and no city after it",
     ("var-heading-title-case", "warning_exact"): "the answer key says this variant's wording is exact; the reader's reading of it is not",
     ("var-warning-wording", "brand"): "B — as the other variant; same image but for the warning",
-    ("var-warning-wording", "name_address"): "as the other variant — same image, different warning",
 }
 
 _FACE_ORDER = ("front", "back", "neck", "side")
@@ -628,3 +625,129 @@ def test_the_cognac_label_now_reads_its_own_designation() -> None:
     assert "COGNAC" in read
     assert "CHAMPAGNE" in read
     assert "PEFITECHAMPAGNE" not in read
+
+
+# ---------------------------------------------------------------------------
+# Rows 1.5-1.7 — the origin statement and the name-and-address block
+# ---------------------------------------------------------------------------
+
+def _origin_of(*lines: str) -> dict:
+    """What the reader reads as the country of origin off these lines.
+
+    One box per line, stacked down a column the way a label prints them, so
+    `_parse` walks them in the order a person would read them.
+    """
+    boxes = [
+        _Box(x0=0.0, y0=float(n * 50), x1=600.0, y1=float(n * 50 + 40),
+             text=line, score=0.99)
+        for n, line in enumerate(lines)
+    ]
+    return _parse(boxes=boxes, warning_boxes=[], rotation=0)["country_origin"][0]
+
+
+def test_an_origin_lead_in_inside_a_sentence_is_not_an_origin_statement() -> None:
+    """Row 1.5, on the line that produced the miss.
+
+    `26237001000107/back.jpg` prints a paragraph of marketing copy, and
+    "distilled in" inside it read exactly as it reads on a line of its own. The
+    reader returned `copper pot stills. Our` as the label's country of origin —
+    a phrase, four words long, running past a full stop.
+
+    An origin statement is a statement, so its lead-in opens a segment of the
+    line: the start of it, or whatever follows a separator. That is the whole
+    test; no country is named anywhere in the reader.
+    """
+    marketing = (
+        "slow cooked in brick ovens, fermented to classical music,",
+        "and distilled in copper pot stills. Our careful process delivers a",
+    )
+    assert _origin_of(*marketing)["country"] == ""
+
+    # The same lead-in, opening a segment, is read — both at the start of a line
+    # and after the separator a label sets between its elements.
+    assert _origin_of("PRODUCT OF FRANCE")["country"] == "FRANCE"
+    assert _origin_of(
+        "ROSE WINE|ITALY| PRODUCT OF ITALY| 750 ML"
+    )["country"] == "ITALY"
+
+
+def test_the_origin_capture_stops_where_the_sentence_does() -> None:
+    """The other half of the same miss: the capture ran four words on past the
+    full stop. A sentence that has ended has ended."""
+    assert _origin_of("PRODUCT OF FRANCE. Our careful process delivers a")[
+        "country"
+    ] == "FRANCE"
+
+
+def test_the_origin_statement_in_spanish_is_read_off_the_real_label() -> None:
+    """`26237001000107/back.jpg` states its origin as `HECHO EN MEXICO`, on its
+    own line, and the manifest transcribes it that way.
+
+    `HECHO EN` is a lead-in, not a country: what follows it is still read off
+    the label. `app/rules/_validators/origin_match.py` names "HECHO EN MEXICO"
+    as an origin statement in the same docstring that settles that no country
+    list is built anywhere in this product, so spotting the lead-in invents
+    nothing. A lead-in the reader does not know yields no statement, which the
+    origin rule treats as unsettled rather than as a rejection.
+    """
+    payloads = parse_reading(
+        thaw_reading(json.loads(_recording("26237001000107/back.jpg").read_text()))
+    )
+    assert payloads["country_origin"]["country"].upper() == "MEXICO"
+
+
+def test_a_state_written_out_is_the_same_state_as_its_postal_code() -> None:
+    """Row 1.6. `STAMFORD, CONNECTICUT` is an address and `STAMFORD, CT` is the
+    same address; the reader used to see only the second and report no city at
+    all for the first.
+
+    `app/rules/_validators/name_address_match.py` already folds a State's name
+    into its postal code before it compares, "because the label and the registry
+    routinely differ on which they write". The names come from `_US_STATES`,
+    which `local.py` already carries for the origin statement.
+    """
+    from app.vision.local import _CITY_STATE_RE
+
+    for line, city, state in (
+        ("STAMFORD, CONNECTICUT", "STAMFORD", "CONNECTICUT"),
+        ("STAMFORD, CT", "STAMFORD", "CT"),
+        ("HUDSON, NY", "HUDSON", "NY"),
+        ("Charleston, West Virginia", "Charleston", "West Virginia"),
+    ):
+        found = _CITY_STATE_RE.search(line)
+        assert found is not None, line
+        assert (found.group(1), found.group(2)) == (city, state), line
+
+    # A word that is not a State does not make the line an address.
+    assert _CITY_STATE_RE.search("KLOCKE ESTATE DISTILLERY, LLC") is None
+
+
+def test_a_lead_in_on_its_own_line_is_not_a_business_name() -> None:
+    """Row 1.7, on both variant fronts, which is where the miss was read.
+
+    That label prints two blocks side by side — "PRODUCED BY:" on the left,
+    "IMPORTED BY:" on the right — each lead-in a box of its own with its
+    business on the line below. `_reading_order` interleaves columns row by row,
+    so the box after "IMPORTED BY:" was the *other* block's lead-in, and the
+    reader reported `PRODUCED BY:` as the applicant's name with no city at all.
+
+    A block continues down its own column, and a box that is nothing but a
+    lead-in is not a name.
+    """
+    for label_id in ("var-heading-title-case", "var-warning-wording"):
+        payload = _replay(_entries()[label_id])["name_address"]
+        assert payload["name"] == "WHITSERVELLC", label_id
+        assert payload["city"] == "STAMFORD", label_id
+        assert payload["state"] == "CONNECTICUT", label_id
+
+
+def test_a_box_carrying_the_name_and_the_place_gives_up_both() -> None:
+    """`26237001000107/back.jpg` prints its whole block on one line —
+    `IMPORTED BY JUAN LOBO TEQUILA, LLC BUDA, TEXAS`. Recognising the State
+    written out would otherwise have cost the name, because the name used to be
+    the first part of the block that carried no place in it."""
+    payload = parse_reading(
+        thaw_reading(json.loads(_recording("26237001000107/back.jpg").read_text()))
+    )["name_address"]
+    assert payload["name"] == "JUAN LOBO TEQUILA"
+    assert payload["state"] == "TEXAS"

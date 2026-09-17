@@ -817,10 +817,32 @@ def _net_contents(boxes: list[_Box]) -> tuple[_Box, re.Match, float] | None:
     return None
 
 
+# An origin statement is a statement, so its lead-in opens a segment of the
+# line: the start of it, or whatever follows a separator. Reading the lead-in
+# anywhere let it match inside a marketing sentence — "…fermented to classical
+# music, and distilled in copper pot stills. Our careful process…" returned
+# `copper pot stills. Our` as the country of origin — because "distilled in"
+# reads the same mid-sentence as it does on a line of its own. The capture
+# stops at a full stop followed by a space for the same reason: the run-on
+# past the end of the sentence was the other half of that one reading.
+#
+# The lead-ins are a lexicon for *spotting* the statement and not a list of
+# countries, and that distinction is settled outside this module.
+# `app/rules/_validators/origin_match.py` records that no country list is
+# built anywhere in this product: customs marking accepts the country's name
+# in its own language, an abbreviation that unmistakably indicates it, and the
+# adjectival form, given "by example rather than as a list", so rejecting on
+# their account would reject compliant labels. `HECHO EN` is here because that
+# same docstring names "HECHO EN MEXICO" as an origin statement — it is a
+# lead-in in another language, and the country it leads to is still read off
+# the label rather than looked up. The list of lead-ins is open by nature: a
+# statement it does not know is read as no statement at all, which the origin
+# rule treats as unsettled rather than as a rejection.
 _ORIGIN_RE = re.compile(
-    r"(?:PRODUCT|PRODUCE|PRODUCED|MADE|BREWED|DISTILLED|BOTTLED|IMPORTED)\s+"
-    r"(?:OF|IN|FROM)\s+(?:THE\s+)?"
-    r"([A-Za-z][\w.]*(?:\s+(?:AND\s+|OF\s+)?[A-Za-z][\w.]*){0,3})",
+    r"(?:^|(?<=[^\w\s])|(?<=[^\w\s]\s))"
+    r"(?:(?:PRODUCT|PRODUCE|PRODUCED|MADE|BREWED|DISTILLED|BOTTLED|IMPORTED)"
+    r"\s+(?:OF|IN|FROM)|HECHO\s+EN)\s+(?:THE\s+)?"
+    r"([A-Za-z][\w.]*(?:(?<!\.)\s+(?:AND\s+|OF\s+)?[A-Za-z][\w.]*){0,3})",
     re.I,
 )
 
@@ -843,7 +865,23 @@ _NAME_LEAD_IN_RE = re.compile(
     r"MANUFACTURED|CANNED)(?:\s+AND\s+\w+)?\s+(?:BY|FOR)\b[:\s]*",
     re.I,
 )
-_CITY_STATE_RE = re.compile(r"([A-Z][A-Za-z.\- ]{2,}),\s*([A-Z]{2})\b")
+# A city and the State after it, as the label prints them. The State may be
+# its postal code or its name written out, and the two are the same State:
+# `app/rules/_validators/name_address_match.py` folds one into the other
+# before it compares, because "the label and the registry routinely differ on
+# which they write". Reading only the code left a label printing "STAMFORD,
+# CONNECTICUT" with no city at all. The names are `_US_STATES` above, which
+# this module already carries for the origin statement; nothing new is listed.
+_STATE_NAMES = "|".join(
+    re.escape(name).replace(r"\ ", r"\s+")
+    # Longest first, so "WEST VIRGINIA" is not read as "VIRGINIA".
+    for name in sorted(_US_STATES, key=len, reverse=True)
+)
+_CITY_STATE_RE = re.compile(
+    # The names are matched whatever case the label sets them in; the
+    # postal code stays upper case, which is the only way it is printed.
+    rf"([A-Z][A-Za-z.\- ]{{2,}}),\s*((?i:{_STATE_NAMES})|[A-Z]{{2}})\b"
+)
 
 # Plain OCR returns lines, not labelled fields, so the class/type line is
 # found by the designations that can appear on it. This is a lexicon for
@@ -1134,6 +1172,39 @@ def _largest_matching(boxes: list[_Box], predicate) -> _Box | None:
     return max(candidates, key=lambda b: b.height)
 
 
+def _only_a_lead_in(text: str) -> bool:
+    """Is this box nothing but the lead-in — "PRODUCED BY:" and no name?
+
+    A label that sets the lead-in on its own line gives the engine a box with
+    no business in it. Taken as a name it reported the label's own boilerplate
+    as the applicant.
+    """
+    if not _NAME_LEAD_IN_RE.search(text):
+        return False
+    return not _NAME_LEAD_IN_RE.sub("", text, count=1).strip(" ,.:;-")
+
+
+def _beneath(box: _Box, boxes: list[_Box], *, limit: int) -> list[_Box]:
+    """The boxes that continue `box` down its own column, nearest first.
+
+    A name-and-address block runs down the label, and `_reading_order`
+    interleaves columns row by row. On a label printing two blocks side by
+    side — "PRODUCED BY:" on the left, "IMPORTED BY:" on the right — the next
+    box in reading order therefore belongs to the *other* block, and the
+    importer's block was read as ending at the producer's lead-in. A
+    continuation sits below the lead-in and overlaps it across the label.
+    """
+    x0, _, x1, _ = box.as_bbox()
+    below = [
+        other for other in boxes
+        if other is not box
+        and other.y0 >= box.y0
+        and min(x1, other.as_bbox()[2]) > max(x0, other.as_bbox()[0])
+    ]
+    below.sort(key=lambda other: other.y0)
+    return below[:limit]
+
+
 def _name_address(boxes: list[_Box], joined: str):
     """The applicant's name and address, found by the words in front of it.
 
@@ -1143,21 +1214,32 @@ def _name_address(boxes: list[_Box], joined: str):
     """
     empty = ({"name": "", "city": "", "state": "", "confidence": 0.0}, None, None)
     ordered = _reading_order(boxes)
-    for index, box in enumerate(ordered):
+    for box in ordered:
         lead_in = _NAME_LEAD_IN_RE.search(box.text)
         if not lead_in:
             continue
         # The name may finish the lead-in's own line or begin the next.
         tail = box.text[lead_in.end():].strip(" ,.:;")
-        following = ordered[index + 1: index + 4]
+        following = _beneath(box, boxes, limit=3)
         parts = [tail] + [b.text.strip() for b in following]
         used = [box] + following
-        name = next((p for p in parts if p and not _CITY_STATE_RE.search(p)), "")
-        city, state = "", ""
+        name, city, state = "", "", ""
         for part in parts:
+            if not part:
+                continue
             place = _CITY_STATE_RE.search(part)
-            if place:
+            if place and not city:
                 city, state = place.group(1).strip(), place.group(2)
+                # One box often carries the name and then the place —
+                # "JUAN LOBO TEQUILA, LLC BUDA, TEXAS". What comes before the
+                # place is the name, so it is cut out rather than discarded
+                # along with the part that held it.
+                head = part[:place.start()].strip(" ,.:;")
+                if head and not name and not _only_a_lead_in(head):
+                    name = head
+            elif not name and not _only_a_lead_in(part):
+                name = part
+            if name and city:
                 break
         if not (name or city):
             continue
