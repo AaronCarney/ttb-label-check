@@ -78,14 +78,21 @@ def _contains_designation(observed: str, allowed: str) -> bool:
 
     Whole words, not substrings: "gin" must not match inside "Virginia". A
     word break is punctuation as well as space - see `_words`.
+
+    Both sides are rejoined with single spaces and wrapped in one more, so a
+    plain substring test carries the whole-word guarantee: " gin " is not
+    inside " virginia ", and a word produced by `_words` can hold no space of
+    its own for the padding to be confused by. Walking the word list by index
+    instead needs an end bound that nothing can observe - a slice running off
+    the end returns a short list that never equals the needle - which is a
+    detail with no behaviour attached to it.
     """
-    haystack = _words(observed)
     needle = _words(allowed)
-    if not needle or len(needle) > len(haystack):
+    # An empty allow-list entry would otherwise be " ", which is inside every
+    # padded haystack, and every designation would match it.
+    if not needle:
         return False
-    return any(
-        haystack[i : i + len(needle)] == needle for i in range(len(haystack) - len(needle) + 1)
-    )
+    return f" {' '.join(needle)} " in f" {' '.join(_words(observed))} "
 
 
 @register("enumerated_match")

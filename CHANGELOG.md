@@ -51,6 +51,15 @@ All notable changes to this project are recorded here. The format follows
   check now returns the readings and rule results it completed, says in the audit trail why the rest
   is missing, and reports the time it actually spent. The guard is 30 seconds and is a runaway guard,
   not a latency target. See `docs/decisions.md#0035`.
+- A label whose class or type is followed by punctuation is no longer reported as not carrying that
+  class. The check that looks for a standard of identity inside a longer designation split the text
+  on spaces alone, so `STRAIGHT BOURBON WHISKEY, 40% ALC/VOL` yielded `whiskey,` and
+  `BLENDED WHISKEY.` yielded `whiskey.`, neither of which equals `whiskey`. A word now ends at
+  punctuation as well as at a space. The effect a reviewer saw was a spurious note on a label that
+  plainly states its class; the rule is `spirits.class_type.matches_soi` at warn severity, so no
+  label was refused over it. The whole-word guarantee is unchanged and now has tests: `Gin` still
+  does not match inside `VIRGINIA`, and a multi-word standard of identity must still appear in its
+  own order.
 
 ### Performance
 

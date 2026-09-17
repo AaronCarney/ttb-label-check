@@ -127,6 +127,33 @@ def test_a_designation_is_matched_by_whole_words_only(designation: str, allowed:
     assert result.outcome is Outcome.FAIL
 
 
+@pytest.mark.parametrize(
+    ("designation", "allowed", "why"),
+    [
+        ("CALIFORNIA NEUTRAL SPIRITS", "Neutral Spirits", "qualifier in front of both words"),
+        ("NEUTRAL SPIRITS, 40% ALC/VOL", "Neutral Spirits", "punctuation after the second word"),
+        ("100% BLUE WEBER AGAVE SPIRITS", "Agave Spirits", "another shipped two-word standard"),
+    ],
+)
+def test_a_multi_word_standard_of_identity_matches_in_its_own_order(
+    designation: str, allowed: str, why: str
+) -> None:
+    """The allow-list in `rules/spirits-deep.yaml` ships three two-word
+    standards - "Neutral Spirits", "Grain Spirits" and "Agave Spirits" - and
+    every other multi-word case here asserts a FAIL. Without a passing one,
+    nothing holds the join between the words of the needle: a mutant that
+    joins them with anything at all survives, because a one-word needle never
+    reaches the separator."""
+    obs = make_obs(field_id="class_type", value=designation)
+    result = enumerated_match(
+        obs,
+        make_expected(field_id="class_type", value=None),
+        _designation_rule([allowed]),
+        make_context(),
+    )
+    assert result.outcome is Outcome.PASS, f"{why}: {designation!r} should carry {allowed!r}"
+
+
 def test_an_accented_allow_value_stays_one_word() -> None:
     """`Cachaça` is in the shipped allow-list. Treating a non-ASCII letter as a
     word break would split it into "cacha" and "a" and stop it matching
