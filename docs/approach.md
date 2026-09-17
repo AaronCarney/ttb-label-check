@@ -43,6 +43,34 @@ because it is the most impressive-looking of the three — and it is a different
 we were asked to solve. The brief prefers a working core to ambitious incompleteness, and these are
 the cuts that preference bought.
 
+## What we looked up before we chose
+
+**We took each fact from the document that owns it.** The regulations came from the official
+electronic code, the hosting limits and prices from each vendor's own documentation rather than a
+summary of it, each recorded with the page and the day it was read, so a change in a vendor's terms
+shows up as a difference rather than a surprise. What we could not confirm that way we wrote down as
+unconfirmed rather than filling it in from general knowledge, and a marketing claim is marked as the
+vendor's claim, not as a fact. Where a study rests on general knowledge instead of a live source, it
+says so at the top. The rule cost us answers: the hosting study ends with a list of the questions it
+could not settle.
+
+**The reading corrected us before the code could.** The spirits alcohol tolerance we started from
+was half the real one, and we had taken the 2022 rewrite of the labelling rules to cover all three
+beverage types when it had left wine behind — wine still runs on text written in 1960. Either would
+have shipped as a check that was confidently wrong about genuine labels, and neither would have
+failed a test we wrote ourselves.
+
+**The gaps we could not close, we designed around.** Most hosts, the one we deployed to among them,
+do not publish how long it takes to wake a sleeping service, so the speed figures here come from
+measuring the running deployment and not from a page. TTB puts every approved label on the public
+record but serves them one at a time, with nothing to download in bulk, so each test label was found
+and transcribed by hand. Widening the corpus, the work that would firm up every accuracy figure
+here, is bounded by that hand work and not by permission.
+
+**What we inferred about the four people is marked as inferred.** Their words and their roles are on
+the record; what they want, and what would make them refuse to adopt this, is our reading, labelled
+as ours wherever the design leans on it.
+
 ## The constraints nobody chose
 
 Federal work has rules that outrank engineering preference. These shaped more of the product than any
