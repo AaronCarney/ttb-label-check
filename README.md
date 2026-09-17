@@ -4,6 +4,10 @@ Checks a photograph of an alcohol beverage label against the application filed f
 element, and tells the reviewing agent which fields match, which do not, and which need a person to
 look. The decision to approve or reject stays with the agent.
 
+**The approach, the tools and the assumptions are in [docs/approach.md](docs/approach.md).**
+How the requirements were derived from a brief that supplied none, the constraints nobody chose,
+what is proven and what is not, and what changed while it was being built.
+
 ## Deployed URL
 
 **https://ttb.aaroncarney.me**
@@ -265,13 +269,14 @@ Both deliverables:
 
 | Deliverable | Status |
 |---|---|
-| Source code repository — all source, a README with setup and run instructions, and documentation of approach, tools and assumptions | This repository and this file |
+| Source code repository — all source, a README with setup and run instructions, and documentation of approach, tools and assumptions | This repository, this file, and [docs/approach.md](docs/approach.md) |
 | Deployed application URL — a working prototype Treasury can access and test | Live at https://ttb.aaroncarney.me. See "Deployed URL" above |
 
 ## Where to look next
 
 | Question | Document |
 |---|---|
+| How was this approached, and what was assumed? | [docs/approach.md](docs/approach.md) |
 | What is this supposed to do, and for whom? | [docs/PRD.md](docs/PRD.md) |
 | How is it put together? | [ARCHITECTURE.md](ARCHITECTURE.md) |
 | Why was it done this way and not another? | [docs/decisions.md](docs/decisions.md) |
