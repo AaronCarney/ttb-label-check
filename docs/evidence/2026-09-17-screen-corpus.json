@@ -1,0 +1,466 @@
+[
+  {
+    "image": "26212001000085/front",
+    "upright_ms": 413,
+    "heading_upright": false,
+    "gate": true,
+    "n_tall": 5,
+    "screen_ms": 53,
+    "strips": [
+      [
+        "THE SURGEON",
+        0.999
+      ],
+      [
+        "BEVERAGES",
+        1.0
+      ],
+      [
+        "IOENOUR",
+        0.576
+      ],
+      [
+        "DRIVE ACAR OROPERATEMACHINERY,ANDM",
+        0.935
+      ],
+      [
+        "LTH PROBLE",
+        0.953
+      ]
+    ],
+    "reread": {
+      "90": {
+        "ms": 397,
+        "found": true
+      }
+    }
+  },
+  {
+    "image": "26212001000085/back",
+    "upright_ms": 207,
+    "heading_upright": false,
+    "gate": false
+  },
+  {
+    "image": "26218001000369/front",
+    "upright_ms": 429,
+    "heading_upright": false,
+    "gate": false
+  },
+  {
+    "image": "26218001000369/back",
+    "upright_ms": 754,
+    "heading_upright": true,
+    "gate": false
+  },
+  {
+    "image": "26229001000034/front",
+    "upright_ms": 193,
+    "heading_upright": false,
+    "gate": false
+  },
+  {
+    "image": "26229001000034/back",
+    "upright_ms": 404,
+    "heading_upright": true,
+    "gate": true
+  },
+  {
+    "image": "26229001000513/front",
+    "upright_ms": 248,
+    "heading_upright": false,
+    "gate": false
+  },
+  {
+    "image": "26229001000513/back",
+    "upright_ms": 487,
+    "heading_upright": true,
+    "gate": false
+  },
+  {
+    "image": "26230001000420/front",
+    "upright_ms": 452,
+    "heading_upright": false,
+    "gate": false
+  },
+  {
+    "image": "26230001000420/back",
+    "upright_ms": 718,
+    "heading_upright": true,
+    "gate": false
+  },
+  {
+    "image": "26230001000540/front",
+    "upright_ms": 355,
+    "heading_upright": false,
+    "gate": false
+  },
+  {
+    "image": "26230001000540/back",
+    "upright_ms": 727,
+    "heading_upright": true,
+    "gate": false
+  },
+  {
+    "image": "26231001000333/front",
+    "upright_ms": 313,
+    "heading_upright": false,
+    "gate": false
+  },
+  {
+    "image": "26231001000333/back",
+    "upright_ms": 717,
+    "heading_upright": true,
+    "gate": false
+  },
+  {
+    "image": "26231001000662/front",
+    "upright_ms": 512,
+    "heading_upright": false,
+    "gate": false
+  },
+  {
+    "image": "26231001000662/back",
+    "upright_ms": 674,
+    "heading_upright": true,
+    "gate": false
+  },
+  {
+    "image": "26232001000404/front",
+    "upright_ms": 470,
+    "heading_upright": false,
+    "gate": true,
+    "n_tall": 1,
+    "screen_ms": 9,
+    "strips": [
+      [
+        "3105540651",
+        1.0
+      ]
+    ],
+    "reread": {
+      "90": {
+        "ms": 447,
+        "found": false
+      },
+      "270": {
+        "ms": 428,
+        "found": false
+      }
+    }
+  },
+  {
+    "image": "26232001000404/back",
+    "upright_ms": 376,
+    "heading_upright": true,
+    "gate": true
+  },
+  {
+    "image": "26233001000189/front",
+    "upright_ms": 286,
+    "heading_upright": false,
+    "gate": false
+  },
+  {
+    "image": "26233001000189/back",
+    "upright_ms": 381,
+    "heading_upright": true,
+    "gate": true
+  },
+  {
+    "image": "26233001000566/front",
+    "upright_ms": 657,
+    "heading_upright": true,
+    "gate": false
+  },
+  {
+    "image": "26233001000566/back",
+    "upright_ms": 240,
+    "heading_upright": false,
+    "gate": false
+  },
+  {
+    "image": "26233001000569/front",
+    "upright_ms": 281,
+    "heading_upright": false,
+    "gate": false
+  },
+  {
+    "image": "26233001000569/back",
+    "upright_ms": 287,
+    "heading_upright": true,
+    "gate": false
+  },
+  {
+    "image": "26236001000210/front",
+    "upright_ms": 492,
+    "heading_upright": false,
+    "gate": true,
+    "n_tall": 1,
+    "screen_ms": 9,
+    "strips": [
+      [
+        "750 ML",
+        0.999
+      ]
+    ],
+    "reread": {
+      "90": {
+        "ms": 484,
+        "found": false
+      },
+      "270": {
+        "ms": 430,
+        "found": false
+      }
+    }
+  },
+  {
+    "image": "26236001000210/back",
+    "upright_ms": 926,
+    "heading_upright": true,
+    "gate": false
+  },
+  {
+    "image": "26236001000448/front",
+    "upright_ms": 302,
+    "heading_upright": false,
+    "gate": false
+  },
+  {
+    "image": "26236001000448/back",
+    "upright_ms": 519,
+    "heading_upright": true,
+    "gate": true
+  },
+  {
+    "image": "26236001000652/front",
+    "upright_ms": 476,
+    "heading_upright": true,
+    "gate": false
+  },
+  {
+    "image": "26236001000652/back",
+    "upright_ms": 369,
+    "heading_upright": false,
+    "gate": false
+  },
+  {
+    "image": "26236001000716/front",
+    "upright_ms": 371,
+    "heading_upright": false,
+    "gate": false
+  },
+  {
+    "image": "26236001000716/back",
+    "upright_ms": 684,
+    "heading_upright": true,
+    "gate": false
+  },
+  {
+    "image": "26237001000107/front",
+    "upright_ms": 406,
+    "heading_upright": false,
+    "gate": false
+  },
+  {
+    "image": "26237001000107/back",
+    "upright_ms": 592,
+    "heading_upright": true,
+    "gate": false
+  },
+  {
+    "image": "26237001000196/front",
+    "upright_ms": 157,
+    "heading_upright": false,
+    "gate": false
+  },
+  {
+    "image": "26237001000196/back",
+    "upright_ms": 496,
+    "heading_upright": true,
+    "gate": false
+  },
+  {
+    "image": "26238001000795/front",
+    "upright_ms": 256,
+    "heading_upright": false,
+    "gate": false
+  },
+  {
+    "image": "26238001000795/back",
+    "upright_ms": 568,
+    "heading_upright": true,
+    "gate": false
+  },
+  {
+    "image": "26239001000079/front",
+    "upright_ms": 375,
+    "heading_upright": false,
+    "gate": false
+  },
+  {
+    "image": "26239001000079/back",
+    "upright_ms": 506,
+    "heading_upright": true,
+    "gate": false
+  },
+  {
+    "image": "26239001000081/front",
+    "upright_ms": 356,
+    "heading_upright": false,
+    "gate": false
+  },
+  {
+    "image": "26239001000081/back",
+    "upright_ms": 512,
+    "heading_upright": true,
+    "gate": false
+  },
+  {
+    "image": "26239001000132/front",
+    "upright_ms": 603,
+    "heading_upright": true,
+    "gate": false
+  },
+  {
+    "image": "26239001000132/back",
+    "upright_ms": 155,
+    "heading_upright": false,
+    "gate": true,
+    "n_tall": 3,
+    "screen_ms": 30,
+    "strips": [
+      [
+        "Quasi Rosso - RST24",
+        0.961
+      ],
+      [
+        "Rossastro",
+        1.0
+      ],
+      [
+        "FABIO SIGNORELLI",
+        0.989
+      ]
+    ],
+    "reread": {
+      "90": {
+        "ms": 144,
+        "found": false
+      },
+      "270": {
+        "ms": 148,
+        "found": false
+      }
+    }
+  },
+  {
+    "image": "26239001000217/front",
+    "upright_ms": 374,
+    "heading_upright": false,
+    "gate": false
+  },
+  {
+    "image": "26239001000217/back",
+    "upright_ms": 703,
+    "heading_upright": true,
+    "gate": false
+  },
+  {
+    "image": "26239001000239/front",
+    "upright_ms": 417,
+    "heading_upright": true,
+    "gate": false
+  },
+  {
+    "image": "26239001000239/back",
+    "upright_ms": 191,
+    "heading_upright": false,
+    "gate": false
+  },
+  {
+    "image": "26239001000279/front",
+    "upright_ms": 586,
+    "heading_upright": true,
+    "gate": false
+  },
+  {
+    "image": "26239001000331/front",
+    "upright_ms": 471,
+    "heading_upright": true,
+    "gate": false
+  },
+  {
+    "image": "26239001000331/back",
+    "upright_ms": 173,
+    "heading_upright": false,
+    "gate": false
+  },
+  {
+    "image": "26240001000454/front",
+    "upright_ms": 739,
+    "heading_upright": true,
+    "gate": false
+  },
+  {
+    "image": "26240001000563/front",
+    "upright_ms": 535,
+    "heading_upright": true,
+    "gate": true
+  },
+  {
+    "image": "26240001000573/front",
+    "upright_ms": 852,
+    "heading_upright": true,
+    "gate": true
+  },
+  {
+    "image": "26242001000088/front",
+    "upright_ms": 417,
+    "heading_upright": false,
+    "gate": false
+  },
+  {
+    "image": "26242001000088/back",
+    "upright_ms": 994,
+    "heading_upright": true,
+    "gate": false
+  },
+  {
+    "image": "variants/var-blur-back",
+    "upright_ms": 361,
+    "heading_upright": true,
+    "gate": true
+  },
+  {
+    "image": "variants/var-glare-front",
+    "upright_ms": 550,
+    "heading_upright": true,
+    "gate": false
+  },
+  {
+    "image": "variants/var-heading-title-case-front",
+    "upright_ms": 636,
+    "heading_upright": true,
+    "gate": false
+  },
+  {
+    "image": "variants/var-low-light-back",
+    "upright_ms": 726,
+    "heading_upright": true,
+    "gate": false
+  },
+  {
+    "image": "variants/var-skew-front",
+    "upright_ms": 521,
+    "heading_upright": false,
+    "gate": false
+  },
+  {
+    "image": "variants/var-warning-wording-front",
+    "upright_ms": 822,
+    "heading_upright": true,
+    "gate": false
+  }
+]

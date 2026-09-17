@@ -85,3 +85,56 @@ def test_every_citation_in_the_repository_names_a_real_entry() -> None:
             if number not in entries:
                 unresolved.setdefault(number, []).append(str(path))
     assert not unresolved, f"citations naming no entry: {unresolved}"
+
+
+# The Evidence line of a record: "**Evidence:** ..." to the end of its paragraph.
+EVIDENCE = re.compile(r"\*\*Evidence:\*\*(.+?)\n\n", re.DOTALL)
+
+# A backticked repo-relative path: `app/vision/local.py`, `docs/evidence/x.json`,
+# `app/orchestrator/`. A line number or a test name may follow it. Excluded are
+# absolute routes (`/batches/upload`), which are not files, and host names
+# (`cloud.google.com/run/pricing`), which carry a dot in the first segment.
+REPO_PATH = re.compile(
+    r"`([a-z_][A-Za-z0-9_-]*"  # first segment, no dot, so no host name
+    r"(?:/[A-Za-z0-9_.-]+)*"
+    r"(?:/|\.(?:py|md|json|ya?ml|txt|toml|sh|ts|tsx|html|css|js))"
+    r")(?::\d+|::\w+)?`"
+)
+
+
+def test_every_path_an_evidence_line_cites_is_one_a_reviewer_can_open() -> None:
+    """A record's Evidence line has to be checkable, not just readable.
+
+    Three records once cited files under `plans/`, which `.git/info/exclude`
+    keeps out of the repository. The paths read like evidence and resolved on
+    the machine that wrote them, so nothing caught it; a reviewer who cloned the
+    repository got records resting on five files that were not there. The
+    measurements moved to `docs/evidence/` and the planning documents stopped
+    being cited at all, which is what this pins.
+
+    Only Evidence lines are checked. Elsewhere a record names files that are
+    gone on purpose - the layer a decision deleted, the module a split replaced,
+    the documents one entry exists to say were never in this tree - and naming
+    them is the record doing its job. An Evidence line makes a different claim:
+    that the reader can go and look.
+
+    A directory citation passes when anything is tracked beneath it.
+    """
+    tracked = set(
+        subprocess.run(
+            ["git", "ls-files"], capture_output=True, text=True, check=True
+        ).stdout.splitlines()
+    )
+    cited: set[str] = set()
+    for block in EVIDENCE.finditer(_doc_text()):
+        cited |= {m.group(1) for m in REPO_PATH.finditer(block.group(1))}
+
+    missing = sorted(
+        path
+        for path in cited
+        if not (any(t.startswith(path) for t in tracked) if path.endswith("/") else path in tracked)
+    )
+    assert not missing, (
+        "docs/decisions.md rests a decision on paths that are not in the "
+        "repository, so a reviewer cannot open them: " + ", ".join(missing)
+    )

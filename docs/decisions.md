@@ -2154,10 +2154,9 @@ reviewer a control that does nothing, which is the one thing a reviewer cannot c
 <a id="0035"></a>
 ## 0035. A check that runs long returns what it finished, and the guard that stops it is not the requirement's own number
 
-**Decided:** 2026-09-17. **Evidence:** `plans/live-timing-2026-09-17.json` and
-`plans/2026-09-17-A1-five-second-requirement.md`, both measured against the deployed service
-(commit `8cb5e70`) on 2026-09-17; `app/services/evaluator.py`;
-`docs/research/2026-09-15-rule-engine-architecture.md:772`.
+**Decided:** 2026-09-17. **Evidence:** `docs/evidence/2026-09-17-live-timing.json` — twelve
+submissions against the deployed service (commit `8cb5e70`) on 2026-09-17;
+`app/services/evaluator.py`; `docs/research/2026-09-15-rule-engine-architecture.md:772`.
 
 **What was wrong.** `Evaluator._DEFAULT_SLA_SECONDS = 5.0` wrapped the whole evaluation in
 `asyncio.wait_for` at exactly the five seconds R15/NFR-1 measures. When it fired, the caller got
@@ -2217,11 +2216,10 @@ answers completely is strictly better than one truncated at 5.0, and both miss R
 <a id="0036"></a>
 ## 0036. The sideways re-read is screened by reading the strips, not by their shape alone
 
-**Decided:** 2026-09-17. **Evidence:** `plans/screen-corpus-probe.json` — all 62 corpus images,
-measured on the development box on 2026-09-17 under the six-thread OCR budget; the probes that
-produced it, `plans/probe_sideways_reread.py`, `plans/probe_det_rec_split.py`,
-`plans/probe_strip_rec.py` and `plans/probe_screen_corpus.py`; `app/vision/local.py`;
-act 4 of `plans/2026-09-17-A1-five-second-requirement.md`.
+**Decided:** 2026-09-17. **Evidence:** `docs/evidence/2026-09-17-screen-corpus.json` — all 62
+corpus images, measured on the development box on 2026-09-17 under the six-thread OCR budget,
+recording for each image what a recognition-only strip screen decides against what the full
+two-angle re-read finds; `app/vision/local.py`.
 
 **What was wrong.** `_has_sideways_text` (decision behind commit `7a9acab`) decides from box shapes
 whether to read a label again at 90° and 270°. Shapes say that a label carries sideways text; they
@@ -2362,8 +2360,7 @@ headings nobody checked.
 frozen recording `tests/recordings/reader/26212001000085/front.json` at that commit and at its
 parent on 2026-09-17; `app/vision/local.py` (`_warning_block`, `_largest_matching`);
 `tests/fixtures/labels/manifest.json`, the `ttb-26212001000085` entry;
-`tests/test_vision_replay.py::test_the_cognac_label_now_reads_its_own_designation`;
-`plans/probes/item6_all_samples_before_item7.json` and the sweep that replaced it.
+`tests/test_vision_replay.py::test_the_cognac_label_now_reads_its_own_designation`.
 
 **Why there is an entry at all.** `tests/test_vision_replay.py` says what a lost reading costs:
 *"It was correct when this suite was written. Either the change that did this is wrong, or this is a
