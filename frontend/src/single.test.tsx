@@ -92,7 +92,7 @@ const _brandField: DispositionEnvelope["fields"][number] = {
   field_name: "brand_name",
   extracted_value: "Old Mill Rye",
   expected_value: "Olde Mill Rye",
-  evidence: { bbox: [0, 0, 1, 1], crop_ref: "c", extraction_confidence: 0.9 },
+  evidence: { bbox: [0, 0, 1, 1], crop_ref: "c", extraction_confidence: 0.9, face_tag: "front" },
   rule_findings: [],
   ai_suggestion: { present: false, task: null, text: null, model_disposition: null },
   field_confidence: { band: "high", numeric: 0.9 },

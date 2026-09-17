@@ -127,6 +127,11 @@ def build_field_findings(
             bbox=ev.bbox if ev.bbox is not None else (0, 0, 0, 0),
             crop_ref=ev.image_uri or "",
             extraction_confidence=ev.confidence,
+            # `Evidence.panel` is the face the reader took this from. The merge
+            # in `app/vision/faces.py` already picked one observation per field
+            # from the face that actually found it, so one tag per card is the
+            # whole answer.
+            face_tag=ev.panel or "",
         )
         # What the card says a rule found comes from `rule_disposition`, the
         # one mapping the audit trail and the overall result also use. Reading

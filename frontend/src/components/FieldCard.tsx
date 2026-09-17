@@ -30,6 +30,14 @@ function _fieldLabel(fieldName: string): string {
   return words.charAt(0).toUpperCase() + words.slice(1);
 }
 
+// "back" reads as "Back" on the card, matching the caption under the
+// photograph itself on the result page. Empty means the reading did not record
+// a face, and the card then says nothing rather than pointing at the wrong
+// picture.
+function _faceLabel(faceTag: string): string {
+  return faceTag.charAt(0).toUpperCase() + faceTag.slice(1);
+}
+
 export function FieldCard({ field, verdict, aiSuggestion, className }: FieldCardProps): React.JSX.Element {
   const fieldDisp = _fieldDisposition(field);
   return (
@@ -57,6 +65,12 @@ export function FieldCard({ field, verdict, aiSuggestion, className }: FieldCard
           <dt className="font-medium text-muted-foreground">Expected</dt>
           <dd className="break-words">{field.expected_value || <em>(empty)</em>}</dd>
         </div>
+        {field.evidence.face_tag ? (
+          <div>
+            <dt className="font-medium text-muted-foreground">Read from</dt>
+            <dd className="break-words">{_faceLabel(field.evidence.face_tag)}</dd>
+          </div>
+        ) : null}
       </dl>
       {verdict ?? null}
       {aiSuggestion ?? null}

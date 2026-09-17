@@ -77,7 +77,7 @@ describe("needsBetterPhotoFrom", () => {
         field_name: "warning",
         extracted_value: "",
         expected_value: "",
-        evidence: { bbox: [0, 0, 0, 0], crop_ref: "", extraction_confidence: 0.1 },
+        evidence: { bbox: [0, 0, 0, 0], crop_ref: "", extraction_confidence: 0.1, face_tag: "" },
         rule_findings: [
           {
             rule_id: "r",

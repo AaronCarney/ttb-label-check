@@ -14,6 +14,9 @@ export interface FieldEvidenceWire {
   bbox: [number, number, number, number];
   crop_ref: string;
   extraction_confidence: number;
+  // Which photograph the value was read from ("front", "back", …); empty when
+  // the reading did not record one.
+  face_tag: string;
 }
 
 export interface RuleFindingWire {

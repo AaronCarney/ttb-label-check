@@ -34,6 +34,14 @@ class FieldEvidenceWire(BaseModel):
     bbox: tuple[int, int, int, int]
     crop_ref: str
     extraction_confidence: float = Field(ge=0.0, le=1.0)
+    # Which photograph of the label this was read from ("front", "back", …),
+    # or empty when the reading did not record one. A label is filed as
+    # several photographs and its mandatory elements are spread across them,
+    # so a finding that cannot name its face is a finding the reviewer cannot
+    # check. Empty rather than a default of "front": a warning finding is
+    # precisely the one that is usually not on the front, and a wrong face is
+    # worse than no face.
+    face_tag: str = ""
 
 
 class RuleFindingWire(BaseModel):
