@@ -139,12 +139,22 @@ account, and name them rather than leave the list looking complete.
 federal application is bound by Section 508 regardless, and that standard is binding regulation
 rather than agency policy. We built to the level it makes binding, WCAG 2.0 A and AA, and the check
 page, the result page and the batch-list page are all scanned against it automatically on each run,
-which is every screen the product serves. **The scan passes.** Six result-page cases once reported
-text whose colour contrast sat below the AA threshold, and the test that holds the layout to a
-320-pixel viewport once failed on a 27-pixel overflow. Both were ours, one a palette and one a
-width, and both are fixed. So the claim we can make is that we built the mechanism and, on every
-page the product serves, met the part of the standard a machine can judge. A disposition is never
-carried by colour alone, which has its own passing test. We stopped
+which is every screen the product serves. **The scan is built not to flatter us:** a check the
+scanner cannot decide fails it rather than passing, so an undecidable result cannot read as a clean
+one. One check stands as reviewed rather than decided — the empty batch table renders column headers
+with no rows beneath them — and the reasoning sits beside the test.
+
+Sharpening that scan kept turning up real defects. Six result-page cases once reported text whose
+colour contrast sat below the AA threshold; the test that holds the layout to a 320-pixel viewport
+once failed on a 27-pixel overflow; and widening the scan to measure every visible button, hovered
+as well as at rest, caught three painting white text on a white or near-white background. Tracing
+their cause found two more the scan cannot reach, both behind a development-only flag. All were
+ours and all are fixed. The last five shared one cause: a base stylesheet set a button's background
+and its text colour in the same rule, so a component that overrode only the background kept a white
+label it never asked for. So the claim we can make is that we built the mechanism and, on every
+page the product serves, met the part of the standard a machine can judge. Section 508 asks for a
+conformance review as well as an automated scan, and that review has not been run. A disposition is
+never carried by colour alone, which has its own passing test. We stopped
 short of claiming a newer conformance level
 for a different reason: the two criteria that would have justified one are criteria no automated
 check here can reach. A claim the product cannot test is the kind of promise this build refuses to
