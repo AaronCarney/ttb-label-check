@@ -1,4 +1,4 @@
-"""Lint the container build and the Space card without invoking docker.
+"""Lint the container build and the deploy script without invoking docker.
 
 `docker build` is not run here — it is minutes of CPU and this machine has a
 thermal fault — so everything provable by reading the build inputs is proved by
@@ -8,8 +8,8 @@ visible at deploy time, when the reviewer is already looking at the URL:
 * a `COPY` whose source is not in the tree, which fails the build;
 * a `COPY` whose source `.dockerignore` excludes, which succeeds and ships an
   image missing a file the app opens on its first request;
-* a Space `app_port` that disagrees with the port the container listens on,
-  which serves a blank page.
+* a deploy that routes traffic to a port the container does not bind, which
+  starts, reports itself healthy, and answers nothing.
 """
 from __future__ import annotations
 
@@ -24,7 +24,6 @@ ROOT = Path(__file__).parents[1]
 DOCKERFILE = ROOT / "Dockerfile"
 COMPOSE = ROOT / "docker-compose.yml"
 DOCKERIGNORE = ROOT / ".dockerignore"
-README = ROOT / "README.md"
 DEPLOY = ROOT / "scripts" / "deploy.sh"
 
 
@@ -141,17 +140,20 @@ def test_dockerignore_excludes_frontend_source() -> None:
     assert any("node_modules" in ln for ln in lines)
 
 
-def test_space_app_port_matches_the_port_the_container_listens_on() -> None:
-    """The one number the Space card and the Dockerfile must agree on.
+def test_service_port_matches_the_port_the_container_listens_on() -> None:
+    """The one number the deploy and the Dockerfile must agree on.
 
-    The platform routes to `app_port` and defaults it to 7860; uvicorn binds the
-    port in `CMD`. If they differ the deploy comes up healthy and serves nothing.
+    Cloud Run routes to the port the deploy names — `SERVICE_PORT` in
+    `scripts/deploy.sh` — and uvicorn binds the port in `CMD`. If they differ
+    the service starts, reports itself healthy, and no request reaches the app.
     """
-    card_port = re.search(r"^app_port:\s*(\d+)", README.read_text(encoding="utf-8"), re.MULTILINE)
-    assert card_port, "README Space card does not declare app_port"
+    service_port = re.search(
+        r"^SERVICE_PORT=(\d+)", DEPLOY.read_text(encoding="utf-8"), re.MULTILINE
+    )
+    assert service_port, "scripts/deploy.sh does not declare SERVICE_PORT"
     cmd_port = re.search(r'"--port",\s*"(\d+)"', DOCKERFILE.read_text(encoding="utf-8"))
     assert cmd_port, "Dockerfile CMD does not pin a port"
-    assert card_port.group(1) == cmd_port.group(1)
+    assert service_port.group(1) == cmd_port.group(1)
 
 
 def test_deploy_preflight_passes() -> None:
@@ -159,9 +161,9 @@ def test_deploy_preflight_passes() -> None:
 
     This is as far as the deploy can be proved without making the app publicly
     reachable, which is the owner's call. `--check` runs every check that needs
-    no network: the Dockerfile is present, the Space card declares a Docker
-    Space, its `app_port` matches the container's port, the built island bundle
-    is tracked, and every path the build copies exists.
+    no network: the Dockerfile is present, the port the service routes to
+    matches the port the container binds, the built island bundle is tracked,
+    and every path the build copies exists.
     """
     assert DEPLOY.exists(), "scripts/deploy.sh is the one-command deploy"
 
@@ -177,7 +179,7 @@ def test_deploy_preflight_passes() -> None:
 
 
 def test_deploy_script_does_not_push_without_a_target() -> None:
-    """Running it with no `TTB_SPACE` must stop, not guess at a destination."""
+    """Running it with no `TTB_GCP_PROJECT` must stop, not guess at a project."""
     run = subprocess.run(
         ["bash", str(DEPLOY)],
         capture_output=True,
@@ -186,4 +188,4 @@ def test_deploy_script_does_not_push_without_a_target() -> None:
         env={"PATH": "/usr/bin:/bin:/usr/local/bin", "HOME": str(ROOT)},
     )
     assert run.returncode == 2, f"expected a usage exit, got {run.returncode}"
-    assert "TTB_SPACE" in run.stderr
+    assert "TTB_GCP_PROJECT" in run.stderr

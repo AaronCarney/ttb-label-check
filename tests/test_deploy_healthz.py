@@ -41,7 +41,7 @@ def test_deployed_static_island_bundle_200(deploy_url):
 
 
 def test_deployed_tls_chain_valid(deploy_url):
-    """HF-issued cert; no insecure flag."""
+    """The platform's own certificate; no insecure flag."""
     r = httpx.get(f"{deploy_url}/healthz", verify=True, timeout=10.0)
     assert r.status_code == 200
 
@@ -50,9 +50,11 @@ def test_deployed_tls_chain_valid(deploy_url):
 #
 # The owner ruled on 2026-09-16 that speed is a property of the deployed system:
 # "since we're not actually processing it on our own processor, the speed tests
-# should probably only happen on the actual hugging face system." So the check
-# lives here, behind the same TTB_DEPLOY_URL gate as its neighbours, and never
-# runs on a developer machine.
+# should probably only happen on the actual hugging face system." The host he
+# named there has since moved to Cloud Run (decision 0025), and the ruling is
+# about the deployed machine rather than about the vendor, so it carries over
+# unchanged. The check lives here, behind the same TTB_DEPLOY_URL gate as its
+# neighbours, and never runs on a developer machine.
 
 _LABELS_DIR = Path(__file__).resolve().parent / "fixtures" / "labels"
 _LATENCY_BUDGET_SECONDS = 5.0
@@ -135,11 +137,14 @@ def test_deployed_single_check_meets_the_five_second_budget(deploy_url):
 
     Two things this deliberately does not do.
 
-    It does not count the first request. Free Spaces hardware sleeps after 48
-    hours idle, so the first check after a quiet period pays a container
-    restart. That number describes the sleep, not the product, so one warm-up
-    submission runs first and its time is thrown away. The figure this test
-    holds is a warm one, and anything published from it says so.
+    It does not count the first request. The service scales to zero and the
+    platform holds an idle instance no longer than 15 minutes, so the first
+    check after a quiet period pays a container start and a model load. That
+    number describes the start, not the product, so one warm-up submission runs
+    first and its time is thrown away. The figure this test holds is a warm one,
+    and anything published from it says so. The cold start has never been timed
+    on the service and no figure for it belongs here until it has been
+    (decision 0025).
 
     It does not require every check to be inside the budget. R15 is a 95th
     percentile: one check in twenty may run over. Asserting a hard maximum

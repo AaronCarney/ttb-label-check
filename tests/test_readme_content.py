@@ -45,18 +45,18 @@ def _section(content: str, heading: str) -> str:
     return rest[: nxt.start()] if nxt else rest
 
 
-def test_readme_declares_the_space_card() -> None:
-    """The deploy host reads its configuration from this block (decision 0023).
+def test_readme_deploy_section_names_the_host_and_the_command() -> None:
+    """A reviewer has to be able to stand this up from the README alone.
 
-    ``app_port`` is not optional: the platform defaults to 7860 and this app
-    listens on 8000, so a missing line serves a reviewer a blank page.
-    ``suggested_hardware`` is the documented key name — ``hardware`` is not one.
+    The host reads no configuration out of this file — Cloud Run takes its
+    settings from the arguments ``scripts/deploy.sh`` passes it (decision 0025)
+    — so what the README owes is the host, the command, and the one variable the
+    command refuses to guess at. The port those settings share with the
+    container is held together in ``tests/test_dockerfile_lint.py``.
     """
-    content = _readme()
-    assert content.startswith("---\n"), "README must open with the Space card block"
-    card = content.split("---\n", 2)[1]
-    for marker in ("sdk: docker", "app_port: 8000", "suggested_hardware: cpu-basic"):
-        assert marker in card, f"Space card missing {marker!r}"
+    deployed = _section(_readme(), "## Deployed URL")
+    for marker in ("Cloud Run", "scripts/deploy.sh --check", "TTB_GCP_PROJECT"):
+        assert marker in deployed, f"Deployed URL section missing {marker!r}"
 
 
 def test_readme_getting_started_runs_the_app() -> None:
@@ -131,7 +131,7 @@ def test_readme_records_the_latency_requirement_as_unverified() -> None:
     run has confirmed it. A README that simply stays quiet about it reads
     exactly like one whose product met it, so the silence is the failure this
     guard catches. The section also names the test that takes the number, so
-    whoever stands the Space up knows what to run.
+    whoever stands the service up knows what to run.
     """
     deployed = _section(_readme(), "## Deployed URL")
     assert "not verified" in deployed.lower(), (

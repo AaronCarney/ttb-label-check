@@ -1,15 +1,3 @@
----
-title: TTB Label Check
-emoji: 🏷️
-colorFrom: blue
-colorTo: indigo
-sdk: docker
-app_port: 8000
-suggested_hardware: cpu-basic
-pinned: false
-short_description: Checks an alcohol beverage label against the application filed for it.
----
-
 # TTB Label Check
 
 Checks a photograph of an alcohol beverage label against the application filed for it, element by
@@ -20,20 +8,20 @@ look. The decision to approve or reject stays with the agent.
 
 Not up yet; the URL goes here when it is published.
 
-The host is settled — Hugging Face Spaces on its Docker path, argued in
-[decision 0023](docs/decisions.md#0023) — and the deploy is a single push. The Space builds the
-`Dockerfile` at the root of this repository and configures itself from the block at the top of this
-file, so there is no build pipeline in between:
+The host is settled — Google Cloud Run, argued in [decision 0025](docs/decisions.md#0025) — and the
+deploy is one command. Cloud Build builds the `Dockerfile` at the root of this repository from an
+export of the current commit, and Cloud Run serves the image it produces, so nothing is built on a
+developer's machine and an untracked file cannot reach the build:
 
 ```bash
-scripts/deploy.sh --check    # every check that needs no network; pushes nothing
-TTB_SPACE=owner/name scripts/deploy.sh
+scripts/deploy.sh --check                   # every check that needs no network; deploys nothing
+TTB_GCP_PROJECT=your-project scripts/deploy.sh
 ```
 
 `--check` is what proves the repository is deployable without making it public: it confirms the
-image has something to build, that the Space card and the container agree on a port, that the built
-frontend is committed, and that every path the build copies is in the tree. It runs as part of the
-test suite.
+image has something to build, that the port the service routes to and the port the container binds
+are the same number, that the built frontend is committed, and that every path the build copies is
+in the tree. It runs as part of the test suite.
 
 ### The five-second requirement is not verified
 
@@ -42,8 +30,8 @@ R15 in [the requirements](specs/0001-label-verification/requirements.md) and NFR
 results within five seconds. **No run has confirmed it, and this file publishes no figure for it.**
 
 Speed belongs to the machine doing the reading, and this prototype is built to read on the deployed
-Space rather than on a developer's computer, so a number measured here would describe the wrong
-hardware. The Space is not up, so the measurement has not been taken.
+service rather than on a developer's computer, so a number measured here would describe the wrong
+hardware. The service is not up, so the measurement has not been taken.
 
 The check itself is written and waiting. `tests/test_deploy_healthz.py` posts every test submission
 to the deployed single-check route one at a time, throws away the first as a cold start, and asserts
@@ -51,7 +39,7 @@ the share that came back inside five seconds. It skips while there is no URL and
 there is one:
 
 ```bash
-TTB_DEPLOY_URL=https://owner-name.hf.space uv run pytest tests/test_deploy_healthz.py
+TTB_DEPLOY_URL=<the URL the deploy printed> uv run pytest tests/test_deploy_healthz.py
 ```
 
 Everything below runs today from a clone, which is the other half of the same deliverable.
@@ -230,7 +218,7 @@ Both deliverables:
 | Deliverable | Status |
 |---|---|
 | Source code repository — all source, a README with setup and run instructions, and documentation of approach, tools and assumptions | This repository and this file |
-| Deployed application URL — a working prototype Treasury can access and test | Host settled and the build is one command; the push is the owner's to authorise. See "Deployed URL" above |
+| Deployed application URL — a working prototype Treasury can access and test | Host settled and the deploy is one command; standing the service up is the owner's to authorise. See "Deployed URL" above |
 
 ## Where to look next
 
