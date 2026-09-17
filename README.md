@@ -194,6 +194,18 @@ application give the same answer every time, with a citation attached. An earlie
 finished results to a language model for a second opinion was removed for exactly this reason
 ([decision 0009](docs/decisions.md#0009)).
 
+**What an upload may be.** The service accepts **28 MB** in one request, **10 MB** for any single
+image, **100** images in one batch, and refuses any image whose header declares more than
+**50,000,000** pixels. Each number is derived from a constraint rather than picked, and
+`app/api/limits.py` states the derivation beside it: the request cap sits under Cloud Run's 32 MiB
+HTTP/1 body limit so the refusal comes from this service with a message naming the file, rather
+than from Google with a message naming nothing; the per-image cap is above a current phone's
+full-resolution photograph; 100 images of label size is about 18 MB, inside the request cap, and
+the PRD's 300 submissions in ten minutes is three such batches. The pixel ceiling is the guard
+against a decompression bomb — a few kilobytes of PNG can declare a 50,000 × 50,000 canvas, which no
+byte cap catches — and it is checked against the file's header before anything is decoded. A refusal
+carries a reason code and a sentence saying which file was refused and what the limit is.
+
 **Almost nothing is kept, and what is kept is named.** There is no database and no COLA
 integration. Batch state lives in the process and is dropped when the response is returned or the
 server stops, and nothing the form collects reaches a log. Two things are written to a directory on
@@ -262,6 +274,17 @@ prints no net contents on any face, so `net_contents` is scoreable on 29 rather 
 the label itself cannot settle is left out rather than counted against the reader. Thirty labels
 is a small denominator, and a percentage drawn from it would read as a precision this corpus does
 not carry. See `docs/decisions.md#0027`.
+
+**These figures are in-sample, and there is no held-out set.** The reader's heuristics — the
+box-merge ratios, the gate that decides when to re-read a label rotated, the field patterns — were
+tuned against these same 30 labels, and the table above scores them on the same 30. So each figure
+is an upper bound on what the reader does with a label it has never seen, not an estimate of it.
+Reserving a held-out split from 30 labels was judged worse than not having one: a ten-label test set
+would leave both halves too small to measure anything, and the corpus is the whole of what this
+project could source. The figure this matters most for is `warning_present`, 30 of 30, because that
+is what licenses the one rule in the pack allowed to reject a label on the reader finding nothing —
+`rules/common/health_warning.yaml` says so where the licence is granted. A reviewer weighing these
+numbers should read them as what the reader does on labels like the ones it was built against.
 
 None of this is a verdict. The reader's output goes to a human reviewer who approves or rejects
 every finding, so a reading the reader is unsure of is returned as unsure rather than guessed at.

@@ -171,3 +171,48 @@ def test_readme_records_the_measured_latency_and_the_shortfall() -> None:
     assert "tests/test_deploy_healthz.py" in deployed, (
         "Deployed URL section does not name the test that measures it"
     )
+
+
+def test_readme_says_there_is_no_held_out_set() -> None:
+    """The accuracy figures were measured on the labels the reader was tuned on.
+
+    Every heuristic in `app/vision/local.py` — the box-merge ratios, the
+    sideways-text gate, the field regexes — was tuned against this same
+    30-label corpus, and the table above is scored on it. That makes the
+    figures in-sample: an upper bound on what the reader does with a label it
+    has never seen, not an estimate of it.
+
+    Publishing them without that reads as a measurement of general
+    performance, which is the claim this project cannot support and does not
+    need to make. It matters most for `warning_present`, whose 30 of 30 is
+    what licenses the one rule in any pack allowed to reject a label because
+    the reader found nothing — see `tests/rules/test_rule_pack_citations.py`.
+    """
+    accuracy = _section(_readme(), "## Reading accuracy")
+    assert "held-out" in accuracy, (
+        "accuracy section does not say there is no held-out set"
+    )
+    assert "in-sample" in accuracy, (
+        "accuracy section does not say the figures are in-sample"
+    )
+
+
+def test_readme_states_the_upload_limits_the_service_enforces() -> None:
+    """A reviewer who hits a limit has to be able to find it written down.
+
+    The numbers come from `app/api/limits.py`, formatted as the refusal
+    messages format them, so moving a limit without moving the README fails
+    here rather than in front of someone whose upload was refused for a
+    reason the documentation does not mention.
+    """
+    from app.api import limits
+
+    content = _readme()
+    expected = {
+        "request cap": limits._mib(limits.MAX_REQUEST_BYTES),
+        "per-image cap": limits._mib(limits.MAX_UPLOAD_BYTES),
+        "files per batch": str(limits.MAX_BATCH_FILES),
+        "pixel ceiling": f"{limits.MAX_IMAGE_PIXELS:,}",
+    }
+    missing = [f"{name} ({value})" for name, value in expected.items() if value not in content]
+    assert not missing, f"README does not state: {missing}"

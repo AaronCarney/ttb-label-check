@@ -13,8 +13,18 @@ rules:
       # "the label does not carry it". Everywhere else that reading goes to a
       # reviewer, because the reader is not reliable enough at finding the
       # element for its silence to be evidence. Here it is: over the 30-label
-      # corpus the reader finds the warning on 30 of 30 (`plans/wave3-R.md`,
-      # `warning_present`), and §16.21 makes its absence the finding itself.
+      # corpus the reader finds the warning on 30 of 30 (README.md, "Reading
+      # accuracy", `warning_present`), and §16.21 makes its absence the finding
+      # itself.
+      #
+      # That 30 of 30 is in-sample. There is no held-out set: the reader's
+      # heuristics were tuned against the same 30 labels the figure is scored
+      # on, so it is an upper bound on what the reader does with a label it
+      # has never seen rather than an estimate of it. This rule rejects, so
+      # the limit is stated where the licence is granted. A label the reader
+      # misses for a reason the corpus does not contain — an upside-down
+      # photograph is the known one — is rejected under §16.21 for carrying no
+      # warning it may in fact carry.
       unlocated_is_absent: true
     evidence_required: [warning_block]
     confidence_floor: 0.50
