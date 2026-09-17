@@ -1138,7 +1138,9 @@ worked for the same failure in the decision document was a check rather than a c
 <a id="0023"></a>
 ## 0023. The deploy runs on Hugging Face Spaces, Docker SDK, CPU Basic hardware
 
-**Decided:** 2026-09-16. **Evidence:** `app/config.py:37`, `docs/research/2026-09-15-hosting.md`,
+**Decided:** 2026-09-16. **Superseded by** [0025](#0025), which moves the host to Google Cloud Run;
+the reasoning below is left standing because what changed is not any fact it states.
+**Evidence:** `app/config.py:37`, `docs/research/2026-09-15-hosting.md`,
 `huggingface.co/docs/hub/spaces-overview` and `/spaces-config-reference`, both read 2026-09-16.
 
 **What was unsettled.** Two of this project's own documents disagreed. One research record picked

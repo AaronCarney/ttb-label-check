@@ -122,16 +122,40 @@ this product cannot have, and switching a rule off produces no finding at all ra
 ### The regulation that governs the product
 
 Nothing in the brief asks for accessibility. A federal application is bound by Section 508 anyway,
-which is why NFR-3 sets WCAG 2.2 level AA — 508 incorporates WCAG 2.0 AA as its floor, and 2.2 is
-the current recommendation, so building to the floor would ship a product already behind. That number
+whose standards are binding text at 36 CFR 1194 rather than agency policy, which is why NFR-3 sets
+WCAG 2.2 level AA — 508 incorporates WCAG 2.0 AA as its floor, and 2.2 is the current
+recommendation, so building to the floor would ship a product already behind. That number
 is marked as inferred in §1 for the same reason as the others: a reviewer who knows Treasury's real
 standard can change one line.
 
-The heavier federal constraints are real and deliberately out of the prototype: FedRAMP authorization,
-an authority to operate, and a privacy review of anything holding applicant material. Those are
-production gates, and the record says so rather than pretending the prototype cleared them — it is
-also why the stakeholder ranking in §1 inverts for production, where IT and the authorizing officials
-decide and the reviewing agents do not.
+The heavier federal constraints are real, and none of them is met here. Listing them would be cheap,
+so each is given with what it would actually require and what it changed in this build:
+
+- **An authority to operate.** No system runs on an agency network without one, and the assessment
+  behind it is where a prototype's shortcuts surface. Its effect here was to rule out anything
+  built to be hard to assess: the rules are data carrying their own CFR citations, the decision
+  record states what was rejected and why, and the reason-code registry enumerates every verdict the
+  engine is capable of emitting. An assessor's questions have answers that do not depend on asking
+  the author.
+- **FedRAMP.** It governs which hosted services a federal system may call at all, and it is the
+  reason the default reader runs in-process rather than the reverse. A vision model that is not
+  authorized cannot be on the path that runs when someone clones this, so the hosted reader is the
+  option and the local one is the default ([0005](decisions.md#0005)).
+- **Federal AI use governance.** Agencies must account for their AI use cases, and a system that
+  decides against a member of the public draws the heaviest version of that review. The answer here
+  is structural rather than procedural: **the model never decides.** It reads, and rules with CFR
+  citations decide what the reading means — so what a use-case account would have to describe is a
+  reader whose output is evidence, with a bounded failure mode, rather than a judgement that has to
+  be defended on its own authority. §3 sets out where that line sits and what would break if it
+  moved.
+- **A privacy review, and a records schedule.** Anything holding applicant material needs both. The
+  seven-day sweep described below is a prototype convenience and explicitly not a records schedule —
+  a real deployment needs a retention period set by the agency's own schedule, not by a constant in
+  the code.
+
+Those are production gates, and the record says so rather than pretending the prototype cleared them
+— it is also why the stakeholder ranking in §1 inverts for production, where IT and the authorizing
+officials decide and the reviewing agents do not.
 
 One place this bites today: PRD constraint C-2 says the product retains no label image once it has
 returned a result. It does not meet that. The uploaded image is written to disk so a result page
@@ -164,19 +188,26 @@ buy back a failure on any of the six above it. Government readers are not weighi
 investment here, so what follows is the cost of running the thing and what each free choice gave up.
 
 **Reading a label costs CPU, not money.** The default reader has no per-call cost. The hosted reader
-was measured at about $0.0011 per application at paid rates, and the prototype's own measurements ran
-on a free tier. At TTB's stated volume of roughly 150,000 applications a year, the hosted reader
-would be a few hundred dollars a year of inference — which is not the reason it is off by default.
-It is off because a reviewer must be able to clone this and run it with no account.
+would cost about $0.0011 per application. That figure is computed from the vendor's published rates
+(`docs/research/2026-09-15-extraction.md`, read 2026-09-15), not measured here; every number this
+project measured for itself ran on a free tier. At TTB's stated volume of roughly 150,000
+applications a year, the hosted reader would be a few hundred dollars a year of inference — which is
+not the reason it is off by default. It is off because a reviewer must be able to clone this and run
+it with no account.
 
-**The deployment is the only line item, and it moved from $9 a month to nothing.** That reversal is
-in §5, because what drove it is not what it looks like.
+**The deployment is the only line item, and it moved from a $9 monthly plan fee to nothing inside a
+free tier.** Nothing is the right word only while the service stays inside that tier's allowance,
+which the next paragraph bounds. That reversal is in §5, because what drove it is not what it looks
+like.
 
 **What free costs.** A scale-to-zero service has a cold start, and Sarah Chen's five seconds is the
-requirement most at risk from it — the mitigation is a keep-warm ping and startup CPU boost, and the
-figure is unmeasured until the service is up. The free allowance is CPU-bound: about 45,000
-instance-seconds a month at the size this runs, roughly twelve hours of request handling, which is
-ample for a demo and would not survive a real agency's traffic for a week. Image storage is not free
+requirement most at risk from it. The deploy runs at `--min-instances 0` with `--cpu-boost`
+(`../scripts/deploy.sh:180,182`), so the boost shortens the start but nothing prevents it: **no
+keep-warm ping is deployed.** That is why the first check of a session is the slowest one, and why
+the measured runs above discard it. The free allowance is CPU-bound: about 45,000 instance-seconds a
+month at the size this runs — roughly twelve and a half hours of request handling
+([0025](decisions.md#0025)) — which is ample for a demo and would not survive a real agency's traffic
+for a week. Image storage is not free
 beyond half a gigabyte. Every one of those is a number a reviewer can check rather than a claim that
 the choice was costless.
 
@@ -277,9 +308,20 @@ is a review while the capitals — which were read — are still decided.
 
 ### The order the work runs in
 
-One label is checked on its own first, and the rest run as a batch behind it. The reviewer sees a real
-result in seconds instead of watching a progress bar, and the batch then paces itself against how fast
-they are actually working through the results.
+One label is checked on its own first, and the rest run as a batch behind it. What that ordering buys
+is time to first result: the reviewer has a real verdict to work from in seconds rather than a
+progress bar, and starts reviewing while the remainder is still running.
+
+The pacing behind it is the part with a reason worth stating. The batch holds the next evaluation
+while the reviewer's own event stream is more than three labels behind ([0021](decisions.md#0021)).
+The alternative was already in the code and described itself as pull-based demand — a bounded queue
+between producer and consumer — and it was not: the producer that queue throttled iterates a list
+already in memory, so it throttled nothing that costs anything, while the evaluation on the other
+side of it ran flat out whether or not anyone was reading. The reviewer's pull is the only demand
+signal this product actually has, and moving the window to the seam where the work costs something is
+what makes the lookahead govern anything at all. It costs a real failure mode: a client that
+subscribes and never reads holds the batch open. That is what pull-based demand means, and a timeout
+would quietly restore the flat-out behaviour for the exact reader the gate exists for.
 
 ## 4. What is proven, and what is not
 
@@ -307,11 +349,21 @@ brand. A percentage drawn from thirty labels reads as a precision this corpus do
 ([0027](decisions.md#0027)). The figures are not flattering and they are the honest state of a CPU
 reader on display type.
 
-**What is not proven.** The five-second requirement has no figure: it belongs to the deployed
-hardware, the service is not up, and a number measured on a developer's machine would describe the
-wrong computer — the test is written and runs the moment there is a URL. The ten-minute figure for a
-300-label batch has no instrument at all. Neither of those is presented anywhere in this repository as
-met.
+**The five-second requirement is measured, and it is missed.** It belongs to the deployed hardware,
+so it was measured there rather than on a developer's machine, where the number would describe the
+wrong computer. On 2026-09-16 three runs posted all 38 test submissions one at a time, discarding the
+first as a cold start: 33 of 38 inside five seconds against the Cloud Run URL directly, 34 of 38
+through the edge Worker a reviewer actually meets, and 27 of 38 through a local authenticated proxy
+that adds a hop. The requirement is 95 percent and none of those reaches it. The misses are narrow
+and they cluster — every one landed between 5.00 and 5.21 seconds, and a fourth run earlier the same
+evening passed the assertion outright — so the honest statement is that the rate sits near the line,
+not that it is comfortably below it. Nothing was tuned for speed.
+[The README](../README.md#the-five-second-requirement-is-measured-and-it-is-not-met) carries the
+table; `tests/test_deploy_healthz.py` produced every figure in it.
+
+**What is not proven.** The ten-minute figure for a 300-label batch has no instrument at all — no
+test, no number, and no way for a reader to check it. It is the one performance requirement this
+repository neither meets nor measures.
 
 ## 5. What changed while it was being built
 
@@ -341,7 +393,7 @@ the other was merely unbuilt; the two entries argue with each other on the recor
 ## 6. How the work was run
 
 **Every fork is recorded where it was decided, with what was rejected and what decided it.**
-[docs/decisions.md](decisions.md) is 27 entries and it governs nothing on purpose: it records why, and
+[docs/decisions.md](decisions.md) is 29 entries and it governs nothing on purpose: it records why, and
 a rule that binds future work goes to the requirements or the rule pack instead. A superseded entry is
 marked and left standing rather than edited away, which is why the host reversal above can be read as
 it happened rather than as it was later rationalised.
@@ -356,8 +408,9 @@ is the failure that costs a day. Where a fix belonged to a file another session 
 down and handed over rather than reached into — three of the entries above are handovers of exactly
 that kind.
 
-**What was cut for time, named as cut.** The evaluation corpus was right-sized from 250 labels to
-about 50, and the record says plainly that this was a calendar-driven cut rather than a principled
+**What was cut for time, named as cut.** The evaluation corpus was right-sized from a planned 250
+labels to the 38 that shipped — 30 real labels and 8 deliberately flawed variants, the same set §4
+scores — and the record says plainly that this was a calendar-driven cut rather than a principled
 one. Wine depth beyond the seven elements, malt formula matching, and the 41-item allowable-revisions
 audit were all ruled out before any code was written. The brief prefers a working core to ambitious
 incompleteness; the cuts are on the record so that preference can be checked rather than claimed.
