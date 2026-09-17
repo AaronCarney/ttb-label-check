@@ -8,6 +8,20 @@ All notable changes to this project are recorded here. The format follows
 
 ### Added
 
+- A label is now checked as a whole label rather than as one photograph of it. A COLA is filed with
+  every face of a label, and a label's mandatory elements are spread across its panels — the
+  government warning is most often printed on the back. Every face supplied is read, the readings are
+  merged into one verdict, and each finding keeps the face it was read from. On a real approved
+  bourbon this is the difference between a government warning nobody looked for and one that is found
+  and passes all three of its checks.
+
+- A browser batch upload can now say that two files are two faces of one label, by naming them
+  `anything-front.jpg` and `anything-back.jpg`. The two are checked together as one label instead of
+  as two labels that each fail what the other carries. Any other filename is one label on its own, so
+  nothing changes for a reviewer who names their files differently, and the batch upload page states
+  the convention. The downloadable sample set now ships both faces of every sample label that has
+  two, named the way the upload reads them back.
+
 - Every result now shows how long the check took, on both the single-label page and the batch
   detail panel. The number has been on the envelope since `metrics` was added and was reachable
   only through the raw-JSON drawer, which is off unless `DEV_MODE` is set. Two cases get their own

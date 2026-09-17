@@ -37,27 +37,32 @@ def test_sample_zip_default_returns_zip(client: TestClient) -> None:
     assert "sample.zip" in response.headers["content-disposition"]
 
 
-def test_sample_zip_default_count_is_ten(client: TestClient) -> None:
-    response = client.get("/batches/sample.zip")
+def _labels_in(response) -> set[str]:
+    """The TTB IDs a zip carries, counted as labels rather than as files.
+
+    `n` asks for N sample *labels*, and a label with a front and a back is two
+    files. Counting entries would make a reviewer who asked for ten get five.
+    """
     z = zipfile.ZipFile(io.BytesIO(response.content))
     names = [n for n in z.namelist() if n.lower().endswith((".jpg", ".jpeg", ".png"))]
-    assert len(names) == 10
+    return {name.rsplit("-", 1)[0] for name in names}
+
+
+def test_sample_zip_default_count_is_ten(client: TestClient) -> None:
+    response = client.get("/batches/sample.zip")
+    assert len(_labels_in(response)) == 10
 
 
 def test_sample_zip_n_param_controls_count(client: TestClient) -> None:
     response = client.get("/batches/sample.zip?n=5")
-    z = zipfile.ZipFile(io.BytesIO(response.content))
-    names = [n for n in z.namelist() if n.lower().endswith((".jpg", ".jpeg", ".png"))]
-    assert len(names) == 5
+    assert len(_labels_in(response)) == 5
 
 
 def test_sample_zip_n_capped_at_sample_size(client: TestClient, sample_ids: list[str]) -> None:
     """Asking for more than we have caps cleanly rather than 4xx."""
     response = client.get(f"/batches/sample.zip?n={len(sample_ids) + 100}")
     assert response.status_code == 200
-    z = zipfile.ZipFile(io.BytesIO(response.content))
-    names = [n for n in z.namelist() if n.lower().endswith((".jpg", ".jpeg", ".png"))]
-    assert len(names) == len(sample_ids)
+    assert len(_labels_in(response)) == len(sample_ids)
 
 
 def test_sample_zip_n_zero_is_400(client: TestClient) -> None:
@@ -114,8 +119,7 @@ def test_sample_zip_makes_no_outbound_request(
 
     response = client.get("/batches/sample.zip?n=3")
     assert response.status_code == 200
-    z = zipfile.ZipFile(io.BytesIO(response.content))
-    assert len(z.namelist()) == 3
+    assert len(_labels_in(response)) == 3
 
 
 def test_sample_zip_500_when_no_labels_installed(

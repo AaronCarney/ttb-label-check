@@ -61,6 +61,22 @@ def _read_label_bytes(ttbid: str) -> bytes | None:
     return None
 
 
+def _installed_faces(ttbid: str) -> list[tuple[FaceTag, bytes]]:
+    """Every face installed for one TTB ID, front first.
+
+    Most of these labels carry their government warning on the back, so a zip
+    of fronts sends a reviewer into the batch with images that cannot pass the
+    warning check. Both faces go, named the way the batch upload reads them
+    back — see `app/api/ui/_faces.py`.
+    """
+    faces: list[tuple[FaceTag, bytes]] = []
+    for face_tag in ("front", "back"):
+        path = _SAMPLE_LABELS_DIR / ttbid / f"{face_tag}.jpg"
+        if path.is_file():
+            faces.append((face_tag, path.read_bytes()))
+    return faces
+
+
 @router.get("/batches/sample.zip")
 async def batches_sample_zip(n: int = 10) -> Response:
     """Stream a zip of N sample labels, drawn at random from those installed.
@@ -89,10 +105,8 @@ async def batches_sample_zip(n: int = 10) -> Response:
     buf = io.BytesIO()
     with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
         for ttbid in chosen:
-            body = _read_label_bytes(ttbid)
-            if body is None:
-                continue
-            zf.writestr(f"{ttbid}-front.jpg", body)
+            for face_tag, body in _installed_faces(ttbid):
+                zf.writestr(f"{ttbid}-{face_tag}.jpg", body)
     buf.seek(0)
     return Response(
         content=buf.getvalue(),

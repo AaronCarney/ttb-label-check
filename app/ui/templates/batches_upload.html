@@ -6,11 +6,21 @@
     <h2 id="bulk-heading">Bulk label upload</h2>
     <p>Pick multiple PNG or JPEG files. Each becomes one label in a single
     batch; the streaming results page opens once the worker spawns.</p>
+    <p class="face-pairing-hint">
+      <strong>Two photographs of one label?</strong> Name them
+      <code>anything-front.jpg</code> and <code>anything-back.jpg</code> and
+      they are checked together as one label. That matters because the
+      government warning is usually printed on the back, so a front on its own
+      fails the warning check and a back on its own has no brand or class on
+      it. Any other filename is one label on its own.
+    </p>
     <p class="sample-batch-hint">
       Don&rsquo;t have label images?
       <a href="/batches/sample.zip" download>Download a 10-label sample</a>
       pulled from the TTB Public COLA Registry (CC0). Unzip and drop into
-      the file picker below to exercise the full pipeline.
+      the file picker below to exercise the full pipeline. Its files are
+      already named that way, so the labels that have two faces arrive as two
+      faces.
     </p>
     <form action="/batches/upload" method="post" enctype="multipart/form-data" class="upload-form">
       <label for="bulk-labels">Label images (multi-select)</label>

@@ -22,6 +22,7 @@ from fastapi import APIRouter, Depends, File, Form, Request, UploadFile
 from fastapi.responses import RedirectResponse
 
 from app.api import _background, limits
+from app.api.ui._faces import plan_labels
 from app.api.ui._page import _get_settings, templates
 from app.api.ui._submission import (
     _build_application,
@@ -154,8 +155,12 @@ async def batches_upload_submit(
     label_lookup: dict[str, LabelModel] = {}
     app_lookup: dict[str, Application] = {}
     refusals: dict[str, tuple[str, str]] = {}
-    for idx, (filename, body, mime) in enumerate(raw):
-        label_id = f"{batch_id}-{idx:03d}-{filename}"
+    # Two files that are two faces of one label are one row, not two: a label's
+    # mandatory elements are spread across its panels, and a bourbon's front
+    # alone fails the warning check while its back alone has no brand. Which
+    # files those are is read off their names \u2014 see `app/api/ui/_faces.py`.
+    for idx, planned in enumerate(plan_labels(raw)):
+        label_id = f"{batch_id}-{idx:03d}-{planned.name}"
         application_ref = f"{batch_id}-app-{idx:03d}"
         items.append(
             BatchItem(
@@ -166,24 +171,25 @@ async def batches_upload_submit(
                 enqueued_at=now,
             )
         )
-        if mime is None:
+        if planned.refused_filename is not None:
             refusals[label_id] = (
                 UNSUPPORTED_IMAGE,
-                f"{filename} is not a PNG or JPEG image, so it was not read. Save it "
-                "as a PNG or JPEG and upload it again \u2014 every other file in this "
-                "batch was checked.",
+                f"{planned.refused_filename} is not a PNG or JPEG image, so it was not "
+                "read. Save it as a PNG or JPEG and upload it again \u2014 every other "
+                "file in this batch was checked.",
             )
         else:
             label_lookup[label_id] = LabelModel(
                 label_id=label_id,
                 batch_id=batch_id,
-                faces=(
+                faces=tuple(
                     Face(
-                        image_bytes=body,
-                        content_type=mime,
-                        face_tag="front",
+                        image_bytes=face.body,
+                        content_type=face.content_type,
+                        face_tag=face.face_tag,
                         dimensions=None,
-                    ),
+                    )
+                    for face in planned.faces
                 ),
             )
         try:
