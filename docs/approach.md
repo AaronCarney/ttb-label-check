@@ -177,6 +177,16 @@ snapshot, so moving to a new model leaves the tests with nothing to replay and s
 upgrade is then a change someone makes deliberately and re-proves, rather than a day when the same
 label starts giving a different verdict.
 
+**Every seam is there because something outside the code forced it.** The reader sits behind an
+interface with two implementations because the agency's outbound traffic is blocked: the one that
+ships has to run with no key and no network call, and the one that reads harder images has to be
+replaceable by something inside the agency's own boundary without a rewrite. The uploaded image is a
+file on disk rather than something held in the process because the clone a reviewer runs and the
+deployed container are the same application, and a directory of files is the only store that needs no
+account, no service and no configuration. We added no seam for elegance, and the seam we have not
+built is named as missing: no rule can yet say "this applies whatever the beverage is", which is why a
+label filed with no application is read and not checked.
+
 **Rules are data, not code.** Every check is an entry naming the regulation section it enforces, and
 the build fails if a check tries to carry that citation in code instead. A compliance officer can
 read what the app checks without reading a programming language, and a regulation change is an edit
@@ -204,9 +214,12 @@ Plain Python for the service, because the reading and rules libraries live there
 priority is a working core rather than a novel stack. A conventional server-rendered interface with
 one interactive area, rather than a full client-side application, because only the evidence panel
 needs real interactivity and requiring a build step on the reviewer's machine is a barrier to running
-this at all. No database, because nothing outlives a request that a file cannot hold. A processor-only
-reader that ships with the code, because the firewall constraint makes any cloud-first design
-unrunnable inside the agency. A container as the unit of deployment, so the clone and the deployed
+this at all. No database: a directory of files beat both an embedded database, which
+answers no question the files do not, and object storage, which needs an account, a key and an
+outbound call the clone cannot make. A processor-only reader that ships with the code, over a
+design that only calls a hosted model — which cannot run where this product is for — and over
+picking a reader per image at run time, which adds moving parts for an accuracy gain nobody has
+measured. A container as the unit of deployment, so the clone and the deployed
 service are the same thing.
 
 ## What we can prove, and what we cannot
