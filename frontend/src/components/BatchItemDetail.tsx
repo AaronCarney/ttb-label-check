@@ -5,7 +5,9 @@ import { AISuggestionBlock } from "./AISuggestionBlock";
 import { ConfidenceIndicator } from "./ConfidenceIndicator";
 import { DispositionPill } from "./DispositionPill";
 import { FieldCard } from "./FieldCard";
+import { IncompleteCheckCard } from "./IncompleteCheckCard";
 import { RuleVerdict } from "./RuleVerdict";
+import { engineFailureCode, wasStoppedEarly } from "../lib/incompleteCheck";
 
 export interface BatchItemDetailProps {
   /** The opened row, or null when the reviewer has not opened one yet. */
@@ -17,13 +19,6 @@ export interface BatchItemDetailProps {
 // render and not a fetch: the batch page holds the same envelope the
 // single-label page is given, and builds it out of the same cards so the two
 // surfaces cannot report the same label differently (docs/PRD.md FR-12).
-
-// An item the app could not check carries no fields at all, and the code
-// naming why is its one audit-trail row. Reading it here is the only way the
-// panel can say what happened (docs/PRD.md FR-13, docs/decisions.md#0020).
-function _notCheckedReasonCode(row: BatchSSEEvent): string | null {
-  return row.audit_trail.per_rule_trace[0]?.rule_id ?? null;
-}
 
 export function BatchItemDetail({ row, className }: BatchItemDetailProps): React.JSX.Element {
   const headingRef = React.useRef<HTMLHeadingElement>(null);
@@ -49,7 +44,14 @@ export function BatchItemDetail({ row, className }: BatchItemDetailProps): React
     );
   }
 
-  const notCheckedCode = row.fields.length === 0 ? _notCheckedReasonCode(row) : null;
+  // An item the app could not finish checking carries the code naming why in
+  // its audit trail, and nowhere else — an engine failure happens before or
+  // instead of a rule, so it has no field to hang off (docs/PRD.md FR-13,
+  // docs/decisions.md#0020). Two ways a check can be incomplete: it came back
+  // with nothing, or the evaluation guard stopped it partway and it came back
+  // with what it had.
+  const trace = row.audit_trail.per_rule_trace;
+  const incomplete = row.fields.length === 0 || wasStoppedEarly(trace);
 
   return (
     <section
@@ -77,22 +79,14 @@ export function BatchItemDetail({ row, className }: BatchItemDetailProps): React
         </div>
       </header>
 
-      {row.fields.length === 0 ? (
-        // Not a verdict about the label. An empty panel here would read as a
-        // label with nothing wrong with it, which is the opposite of what
-        // happened: nothing about it was checked.
-        <p className="rounded-md border border-border bg-muted/30 p-3 text-sm">
-          No field on this label was checked.
-          {notCheckedCode !== null && (
-            <>
-              {" "}The batch recorded{" "}
-              <span className="font-mono text-xs">{notCheckedCode}</span> against it.
-            </>
-          )}{" "}
-          The rest of the batch was checked. Submit this label on its own to see what went wrong
-          with it.
-        </p>
-      ) : (
+      {incomplete && (
+        <IncompleteCheckCard
+          reasonCode={engineFailureCode(trace)}
+          fieldCount={row.fields.length}
+        />
+      )}
+
+      {row.fields.length > 0 && (
         <div className="grid grid-cols-1 gap-4">
           {row.fields.map((field) => (
             <FieldCard

@@ -2,7 +2,10 @@
 
 import json
 import os
+import re
+import statistics
 import time
+from datetime import UTC, datetime
 from pathlib import Path
 
 import httpx
@@ -110,11 +113,119 @@ def _submissions() -> list[tuple[str, Path, dict[str, str]]]:
     return submissions
 
 
-def _check_once(deploy_url: str, front: Path, form: dict[str, str]) -> tuple[int | None, float]:
+# --- Recording what came back, not only how long it took ---
+#
+# Until 2026-09-17 this harness kept a status code and a wall clock and threw
+# both away on a pass. Two checks that look identical to it are not the same
+# thing at all: one that ran five seconds and returned seven fields, and one
+# that ran five seconds, was stopped by the evaluation guard, and returned
+# none. Four consecutive runs against production yielded the same two facts and
+# no way to tell those apart. Every run now leaves a file behind saying what
+# each check answered.
+
+# The result page embeds the envelope it rendered — `app/ui/templates/single.html`,
+# `<script id="envelope" type="application/json">`. It is the same envelope the
+# API returns, so reading it here measures what the reviewer was actually shown.
+_ENVELOPE_TAG = re.compile(r'<script id="envelope" type="application/json">(.*?)</script>', re.S)
+
+# The evaluation guard stopping a check before it finished
+# (`app/services/evaluator.py`). Such a check returns HTTP 200 and an incomplete
+# answer, so nothing but the audit trail distinguishes it from a slow one.
+_STOPPED_EARLY_CODE = "ENGINE.SLA.TIMEOUT"
+
+# Where a run leaves its rows. One file per run, named for when it ran, so two
+# runs can be compared instead of the second overwriting the first.
+_RECORD_DIR = Path(os.environ.get("TTB_LATENCY_RECORD_DIR", "artifacts/deploy-latency"))
+
+
+def _envelope_from_page(html: str) -> dict | None:
+    """The envelope the result page carries, or None if it carries none."""
+    match = _ENVELOPE_TAG.search(html)
+    if match is None:
+        return None
+    try:
+        return json.loads(match.group(1))
+    except json.JSONDecodeError:
+        return None
+
+
+def _row_from_page(label_id: str, status: int | None, wall_seconds: float, html: str) -> dict:
+    """One check, as the record keeps it."""
+    row: dict = {
+        "label_id": label_id,
+        "status": status,
+        "wall_seconds": wall_seconds,
+        "disposition": None,
+        "field_count": None,
+        "total_duration_ms": None,
+        "vision_duration_ms": None,
+        "cache_hit": None,
+        "stopped_early": None,
+        "trace": None,
+    }
+    envelope = _envelope_from_page(html)
+    if envelope is None:
+        return row
+    metrics = envelope.get("metrics") or {}
+    trace = [
+        entry.get("rule_id")
+        for entry in (envelope.get("audit_trail") or {}).get("per_rule_trace") or []
+    ]
+    row.update(
+        disposition=envelope.get("disposition"),
+        field_count=len(envelope.get("fields") or []),
+        total_duration_ms=metrics.get("total_duration_ms"),
+        vision_duration_ms=metrics.get("vision_duration_ms"),
+        cache_hit=metrics.get("cache_hit"),
+        stopped_early=_STOPPED_EARLY_CODE in trace,
+        trace=trace,
+    )
+    return row
+
+
+def _summarise(rows: list[dict]) -> dict:
+    """The figures a run is quoted for, worked out once and written down."""
+    walls = [row["wall_seconds"] for row in rows]
+    inside = [w for w in walls if w <= _LATENCY_BUDGET_SECONDS]
+    return {
+        "checked": len(rows),
+        "inside_budget": len(inside),
+        "share_inside_budget": len(inside) / len(rows) if rows else 0.0,
+        "budget_seconds": _LATENCY_BUDGET_SECONDS,
+        "median_wall_seconds": statistics.median(walls) if walls else None,
+        "max_wall_seconds": max(walls) if walls else None,
+        "stopped_early": sum(1 for row in rows if row.get("stopped_early")),
+        "cache_hits": sum(1 for row in rows if row.get("cache_hit")),
+        "no_result": sum(1 for row in rows if row["status"] != 200),
+    }
+
+
+def _write_record(deploy_url: str, rows: list[dict]) -> Path:
+    _RECORD_DIR.mkdir(parents=True, exist_ok=True)
+    stamp = datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")
+    path = _RECORD_DIR / f"{stamp}.json"
+    path.write_text(
+        json.dumps(
+            {
+                "url": deploy_url,
+                "measured_at": datetime.now(UTC).isoformat(),
+                "summary": _summarise(rows),
+                "rows": rows,
+            },
+            indent=2,
+        )
+    )
+    return path
+
+
+def _check_once(
+    deploy_url: str, front: Path, form: dict[str, str]
+) -> tuple[int | None, float, str]:
     """Post one submission the way the page does, and time the round trip.
 
-    Returns the status code and the seconds the reviewer waited. A timeout comes
-    back as no status and the full timeout, because that is what it cost.
+    Returns the status code, the seconds the reviewer waited, and the page they
+    were shown. A timeout comes back as no status and the full timeout, because
+    that is what it cost.
     """
     files = {"label": (front.name, front.read_bytes(), "image/jpeg")}
     started = time.monotonic()
@@ -123,8 +234,8 @@ def _check_once(deploy_url: str, front: Path, form: dict[str, str]) -> tuple[int
             f"{deploy_url}/", files=files, data=form, timeout=_REQUEST_TIMEOUT_SECONDS
         )
     except httpx.TimeoutException:
-        return None, _REQUEST_TIMEOUT_SECONDS
-    return response.status_code, time.monotonic() - started
+        return None, _REQUEST_TIMEOUT_SECONDS, ""
+    return response.status_code, time.monotonic() - started, response.text
 
 
 def test_deployed_single_check_meets_the_five_second_budget(deploy_url):
@@ -136,45 +247,85 @@ def test_deployed_single_check_meets_the_five_second_budget(deploy_url):
     is checked once in sequence, which is what R15's acceptance criterion asks
     for.
 
-    Two things this deliberately does not do.
+    Three things this deliberately does.
 
-    It does not count the first request. The service scales to zero and the
-    platform holds an idle instance no longer than 15 minutes, so the first
-    check after a quiet period pays a container start and a model load. That
-    number describes the start, not the product, so one warm-up submission runs
-    first and its time is thrown away. The figure this test holds is a warm one,
-    and anything published from it says so. The cold start has never been timed
-    on the service and no figure for it belongs here until it has been
-    (decision 0025).
+    It warms the service and then leaves that submission out of the measured
+    set. The service scales to zero and the platform holds an idle instance no
+    longer than 15 minutes, so the first check after a quiet period pays a
+    container start and a model load, and that number describes the start
+    rather than the product. Until 2026-09-17 the warm-up submission was also
+    measured, as sample 0 — and by then the service had it cached, so a
+    guaranteed cache hit counted as a check, worth 2.6 points of the reported
+    share on 38 samples. A cached answer is not a check; the figure this test
+    holds is a warm one, and anything published from it says so. The cold start
+    has never been timed on the service and no figure for it belongs here until
+    it has been (decision 0025).
 
     It does not require every check to be inside the budget. R15 is a 95th
     percentile: one check in twenty may run over. Asserting a hard maximum
     would fail a deploy for something the requirement permits.
+
+    It writes every row to a file, and fails on a check the evaluation guard
+    stopped. A stopped check returns HTTP 200 with an incomplete answer, so a
+    harness that keeps only the status and the clock cannot see it at all —
+    which is how a defect that blanked one check in twelve survived four runs
+    against production.
     """
     submissions = _submissions()
-    assert submissions, f"no test submissions found under {_LABELS_DIR}"
+    assert len(submissions) > 1, f"need more than one test submission under {_LABELS_DIR}"
 
+    # The warm-up, thrown away: it pays for the container start and the model
+    # load, and it leaves the service holding this submission's answer.
     _warm_id, warm_front, warm_form = submissions[0]
     _check_once(deploy_url, warm_front, warm_form)
 
-    measured: list[tuple[str, int | None, float]] = []
-    for label_id, front, form in submissions:
-        status, elapsed = _check_once(deploy_url, front, form)
-        measured.append((label_id, status, elapsed))
+    measured: list[dict] = []
+    for label_id, front, form in submissions[1:]:
+        status, elapsed, page = _check_once(deploy_url, front, form)
+        measured.append(_row_from_page(label_id, status, elapsed, page))
 
-    no_result = [(i, s) for i, s, _ in measured if s != 200]
+    record = _write_record(deploy_url, measured)
+    summary = _summarise(measured)
+    slowest = sorted(measured, key=lambda row: row["wall_seconds"], reverse=True)[:5]
+    where = f"Rows for this run are in {record}."
+
+    no_result = [(row["label_id"], row["status"]) for row in measured if row["status"] != 200]
     assert not no_result, (
         "checks that showed no result at all (id, status; None means the "
-        f"request never finished inside {_REQUEST_TIMEOUT_SECONDS:.0f}s): {no_result}"
+        f"request never finished inside {_REQUEST_TIMEOUT_SECONDS:.0f}s): "
+        f"{no_result}. {where}"
     )
 
-    inside = [t for _, _, t in measured if t <= _LATENCY_BUDGET_SECONDS]
-    share = len(inside) / len(measured)
-    slowest = sorted(measured, key=lambda row: row[2], reverse=True)[:5]
-    assert share >= _REQUIRED_SHARE_INSIDE_BUDGET, (
-        f"R15/NFR-1 not met: {len(inside)} of {len(measured)} checks "
-        f"({share:.0%}) finished within {_LATENCY_BUDGET_SECONDS:.0f}s, "
-        f"and the requirement is {_REQUIRED_SHARE_INSIDE_BUDGET:.0%}. "
-        "Slowest five (id, status, seconds): "
-        + ", ".join(f"{i} {s} {t:.2f}s" for i, s, t in slowest)
+    # A check the guard stopped comes back incomplete. Whether it was inside the
+    # budget is beside the point: it did not answer the question it was asked.
+    stopped = [
+        (row["label_id"], row["wall_seconds"], row["field_count"])
+        for row in measured
+        if row["stopped_early"]
+    ]
+    assert not stopped, (
+        "checks the evaluation guard stopped before they finished, so their "
+        "results are incomplete (id, seconds, fields returned): "
+        + ", ".join(f"{i} {t:.2f}s {n}" for i, t, n in stopped)
+        + f". {where}"
+    )
+
+    # A cached answer is the service handing back an earlier check. It costs
+    # almost nothing and measures nothing, so its presence means the sample is
+    # not what it claims to be.
+    cached = [row["label_id"] for row in measured if row["cache_hit"]]
+    assert not cached, f"checks answered out of the cache rather than measured: {cached}. {where}"
+
+    assert summary["share_inside_budget"] >= _REQUIRED_SHARE_INSIDE_BUDGET, (
+        f"R15/NFR-1 not met: {summary['inside_budget']} of {summary['checked']} "
+        f"checks ({summary['share_inside_budget']:.0%}) finished within "
+        f"{_LATENCY_BUDGET_SECONDS:.0f}s, and the requirement is "
+        f"{_REQUIRED_SHARE_INSIDE_BUDGET:.0%}. Slowest five "
+        "(id, seconds, fields, read ms): "
+        + ", ".join(
+            f"{row['label_id']} {row['wall_seconds']:.2f}s {row['field_count']} "
+            f"{row['vision_duration_ms']}ms"
+            for row in slowest
+        )
+        + f". {where}"
     )

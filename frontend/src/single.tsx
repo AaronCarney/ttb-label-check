@@ -5,6 +5,7 @@ import { AISuggestionBlock } from "./components/AISuggestionBlock";
 import { ConfidenceIndicator } from "./components/ConfidenceIndicator";
 import { DispositionPill } from "./components/DispositionPill";
 import { FieldCard } from "./components/FieldCard";
+import { IncompleteCheckCard } from "./components/IncompleteCheckCard";
 import { LiveRegion } from "./components/LiveRegion";
 import { NeedsBetterPhotoCard } from "./components/NeedsBetterPhotoCard";
 import { OverrideDrawer } from "./components/OverrideDrawer";
@@ -12,6 +13,7 @@ import { RawJSONDrawer } from "./components/RawJSONDrawer";
 import { RuleVerdict } from "./components/RuleVerdict";
 import { Toast } from "./components/Toast";
 import { useKeyboardShortcuts } from "./hooks/useKeyboardShortcuts";
+import { engineFailureCode, wasStoppedEarly } from "./lib/incompleteCheck";
 import { needsBetterPhotoFrom } from "./lib/needsBetterPhoto";
 import type { DispositionEnvelope } from "./types/envelopes";
 import type { ReasonCodeEntry } from "./components/ReasonCodePicker";
@@ -52,7 +54,7 @@ function _disposition_for(code: string): "fail" | "needs_review" {
   return entry?.disposition ?? "needs_review";
 }
 
-function SingleApp({ envelope }: { envelope: DispositionEnvelope | null }): React.JSX.Element {
+export function SingleApp({ envelope }: { envelope: DispositionEnvelope | null }): React.JSX.Element {
   const [overrideOpen, setOverrideOpen] = React.useState(false);
   const [announcement, setAnnouncement] = React.useState("");
   const [toast, setToast] = React.useState<{kind: "error" | "success"; message: string} | null>(null);
@@ -71,6 +73,19 @@ function SingleApp({ envelope }: { envelope: DispositionEnvelope | null }): Reac
   }
 
   const needsBetterPhoto = needsBetterPhotoFrom(envelope);
+  // A check that came back with no fields, or one the evaluation guard stopped
+  // partway. Without this the page mapped `envelope.fields` with no empty-state
+  // branch, so a check that produced nothing rendered a results page with no
+  // cards on it and nothing saying why — a blank result rather than an error,
+  // on the path a reviewer actually takes. The batch panel has said this since
+  // it was written; both now say it with the same component, so the two
+  // surfaces cannot describe one envelope differently (docs/PRD.md FR-12).
+  //
+  // The image-quality gate gets its own card just below, which says what to ask
+  // the applicant for, so it is not doubled up here.
+  const trace = envelope.audit_trail?.per_rule_trace ?? [];
+  const incomplete =
+    needsBetterPhoto === null && (envelope.fields.length === 0 || wasStoppedEarly(trace));
 
   return (
     <div className="mx-auto max-w-5xl space-y-4 p-4">
@@ -93,6 +108,13 @@ function SingleApp({ envelope }: { envelope: DispositionEnvelope | null }): Reac
         <NeedsBetterPhotoCard
           reasonCode={needsBetterPhoto.reasonCode}
           applicantMessage={needsBetterPhoto.applicantMessage}
+        />
+      )}
+
+      {incomplete && (
+        <IncompleteCheckCard
+          reasonCode={engineFailureCode(trace)}
+          fieldCount={envelope.fields.length}
         />
       )}
 

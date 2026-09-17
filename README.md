@@ -53,28 +53,28 @@ unreachable, and prints on the terminal that nothing has tested what is being sh
 
 R15 in [the requirements](specs/0001-label-verification/requirements.md) and NFR-1 in
 [the PRD](docs/PRD.md) are one promise, and both mark it P0: 95 percent of single checks show
-results within five seconds. **Measured on the deployed service on 2026-09-16, it comes in under
-that.** Three runs, each posting a warm-up submission whose time is thrown away and then all 38 test
-submissions one at a time:
+results within five seconds. **No current figure for that share exists, and the ones published here
+before 2026-09-17 should not be quoted.** They were taken on superseded code, and they were counting
+the wrong thing.
 
-| Address the run used | Inside five seconds |
-| --- | --- |
-| The Cloud Run URL, directly | 33 of 38 — 87% |
-| `ttb.aaroncarney.me`, through the Worker | 34 of 38 — 89% |
-| A local authenticated proxy, which adds a hop and inflates the figure | 27 of 38 — 71% |
-| `ttb.aaroncarney.me`, with the service given eight cores instead of four | 35 of 38 — 92% |
+**What is measured.** Twelve test submissions posted once each through the address a reviewer uses,
+on 2026-09-17, against the deployed service: median wall clock **2.03 seconds**, median read
+**1.22 seconds**, eleven of the twelve between 1.1 and 3.1 seconds. The service is fast. One label
+took 5.04 seconds, and it does so for a known reason — it is one of seven in the corpus whose
+government warning is not found upright, so the reader reads the whole label twice more at 90 and
+270 degrees.
 
-The requirement is 95%. **The misses are narrow and they cluster:** on the two runs that describe
-what a reviewer actually meets, every check that missed landed between 5.00 and 5.21 seconds, and
-the fastest of them missed by two hundredths of a second. A fourth run earlier the same evening
-passed this assertion outright, so the true share sits near the line rather than below it, and a
-single figure would misrepresent it.
+**Why the old figures do not stand.** Four runs on 2026-09-16 returned 87%, 89%, 71% and 92% of 38
+submissions inside five seconds. Two things were wrong with them. They predate the change that made
+that sideways re-read conditional, which cut it from 35 corpus labels to 7. And at the time, a check
+that crossed five seconds was *stopped* and returned an empty result rather than a slow one — so a
+run counted a blank page as a check that took too long, which is not the same thing and is worse.
+That defect is fixed ([decision 0035](docs/decisions.md#0035)); the share has to be measured again
+after the next deploy, and until then this section claims nothing about it.
 
-**Cores are not the lever.** Doubling the service to eight moved one check of thirty-eight, which is
-smaller than the spread between two runs at the same size, so the figure above is not evidence that
-more hardware fixes this. The service is back at the four cores
-[decision 0025](docs/decisions.md#0025) argued from the free tier's limits, and the reading path
-itself has never been tuned for speed.
+**Cores are not the lever.** Doubling the service to eight cores moved one check of thirty-eight,
+which is smaller than the spread between two runs at the same size. The service is back at the four
+cores [decision 0025](docs/decisions.md#0025) argued from the free tier's limits.
 
 The measurement runs against whatever URL it is given, and skips when there is none:
 
@@ -82,7 +82,8 @@ The measurement runs against whatever URL it is given, and skips when there is n
 TTB_DEPLOY_URL=https://ttb.aaroncarney.me uv run pytest tests/test_deploy_healthz.py
 ```
 
-`tests/test_deploy_healthz.py` is what produced every figure above.
+`tests/test_deploy_healthz.py` is what produced every figure above. Each run writes its rows to
+`artifacts/deploy-latency/`, naming for every check what came back as well as how long it took.
 
 Everything below runs today from a clone, which is the other half of the same deliverable.
 

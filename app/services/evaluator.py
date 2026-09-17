@@ -14,13 +14,15 @@ from __future__ import annotations
 import asyncio
 import logging
 import time
+from dataclasses import dataclass, field
 from datetime import UTC, datetime
 
 from app.config import Settings
 from app.rules.engine import RuleEngine
 from app.schemas.application import Application
+from app.schemas.extracted import FieldObservation
 from app.schemas.label import Label
-from app.schemas.rejection import Outcome
+from app.schemas.rejection import Outcome, ValidationResult
 from app.schemas.wire.disposition import DispositionEnvelope
 from app.services.cache import SessionCache
 from app.vision.base import VisionExtractor
@@ -29,8 +31,37 @@ from app.vision.quality import assess as assess_quality
 _logger = logging.getLogger("app.services.evaluator")
 
 
+@dataclass
+class _PartialEvaluation:
+    """What one evaluation had finished at the moment it was cut off.
+
+    ``asyncio.wait_for`` cancels ``_evaluate_inner``, and every local the
+    cancelled frame held goes with it — including a read that had already
+    completed. This is the handle the timeout branch keeps on that work: each
+    step fills it in as it finishes, so the envelope built after the
+    cancellation can carry what was done instead of nothing.
+
+    It is created per call and passed down, rather than stashed on the
+    Evaluator. A batch reuses one Evaluator across every item in the batch
+    (``app/api/batches.py``), so instance state is the wrong place for
+    per-evaluation work: the failure mode is an item reporting the readings of
+    a different label, which is worse than reporting none.
+    """
+
+    timeline: object | None = None
+    t_total: float | None = None
+    observations: tuple[FieldObservation, ...] = ()
+    results: tuple[ValidationResult, ...] = field(default_factory=tuple)
+
+
 class Evaluator:
-    _DEFAULT_SLA_SECONDS = 5.0
+    """Runs one evaluation end to end, and stops one that has gone wrong.
+
+    The stop is a runaway guard, not a latency target — see
+    `Settings.evaluation_guard_seconds` for the number and why it is not the
+    five seconds R15/NFR-1 measures. When it fires, the evaluation returns what
+    it had finished rather than nothing (`_timeout_envelope`).
+    """
 
     def __init__(
         self,
@@ -72,14 +103,19 @@ class Evaluator:
             if cached is not None:
                 return self._replay(cached, application, started_at, t_hit)
 
-        sla = getattr(self, "_sla_seconds", self._DEFAULT_SLA_SECONDS)
+        # `_sla_seconds` is the per-instance override tests set to make the
+        # guard fire in milliseconds; the setting is what ships.
+        guard = getattr(self, "_sla_seconds", self._settings.evaluation_guard_seconds)
+        partial = _PartialEvaluation()
         try:
-            envelope = await asyncio.wait_for(self._evaluate_inner(application, label), timeout=sla)
+            envelope = await asyncio.wait_for(
+                self._evaluate_inner(application, label, partial), timeout=guard
+            )
             # Cache-write: success branch only (NEVER on TimeoutError).
             if self._cache is not None and cache_key is not None:
                 self._cache.put(cache_key, envelope)
         except TimeoutError:
-            envelope = self._timeout_envelope(application, label)
+            envelope = self._timeout_envelope(application, label, partial)
         return envelope
 
     def _replay(
@@ -133,16 +169,19 @@ class Evaluator:
             }
         )
 
-    async def _evaluate_inner(self, application: Application, label: Label) -> DispositionEnvelope:
+    async def _evaluate_inner(
+        self, application: Application, label: Label, partial: _PartialEvaluation
+    ) -> DispositionEnvelope:
         from app.services.audit import AuditRecorder
         from app.services.envelope_builder import build_field_findings, build_success_envelope
         from app.services.metrics_builder import MetricsBuilder
 
         t_total = time.monotonic()
         timeline = self._new_timeline(application)
-        # Stash for partial-state surfacing in timeout fallback.
-        self._last_timeline = timeline
-        self._last_t_total = t_total
+        # From here on every step hands its finished work to `partial`, so a
+        # cancellation after it still has something to return.
+        partial.timeline = timeline
+        partial.t_total = t_total
 
         # Which set of rules a label was checked against is the first thing a
         # reviewer needs and the last thing they can reconstruct, so it is
@@ -171,6 +210,7 @@ class Evaluator:
             )
             observations = []
         timeline.record_vision_done(int((time.monotonic() - t0) * 1000))
+        partial.observations = tuple(observations)
 
         # The application declares which beverage the label is for, and the
         # reader cannot: nothing on a bottle reliably distinguishes a wine
@@ -194,6 +234,7 @@ class Evaluator:
                 for obs in observations
             ]
             readings_for_rules = observations
+            partial.observations = tuple(observations)
         else:
             readings_for_rules = []
 
@@ -239,6 +280,7 @@ class Evaluator:
                 },
             )
             results = ()
+        partial.results = tuple(results)
 
         # Surface failures into per_rule_trace so AuditRecorder picks them up.
         for failure in timeline.failures:
@@ -250,28 +292,9 @@ class Evaluator:
             )
 
         # Step 5-6: disposition + per-rule timeline updates
-        from app.services.disposition import compute_disposition, rule_disposition
+        from app.services.disposition import compute_disposition
 
-        for vr in results:
-            # One mapping, shared with the reviewer's field card and with the
-            # overall result, so the audit trail cannot contradict either.
-            disposition_label = rule_disposition(vr)
-            timeline.record_rule_done(
-                rule_id=vr.rule_id,
-                duration_ms=vr.engine_meta.elapsed_ms,
-                disposition=disposition_label,
-                evidence_ref=f"vr/{vr.rule_id}",
-            )
-            # Surface YAML-registry reason_code as a separate trace entry so
-            # the chokepoint contract (FR-90X surfacing) holds: any non-PASS
-            # outcome carrying a reason_code lands in per_rule_trace verbatim.
-            if vr.reason_code and vr.outcome != Outcome.PASS:
-                timeline.record_rule_done(
-                    rule_id=vr.reason_code,
-                    duration_ms=0,
-                    disposition=disposition_label,
-                    evidence_ref=f"reason_code/{vr.rule_id}",
-                )
+        self._record_rule_results(timeline, results)
         disposition = compute_disposition(results)
 
         # Step 7-8: assembly
@@ -303,6 +326,38 @@ class Evaluator:
             audit=audit,
             metrics=metrics,
         )
+
+    @staticmethod
+    def _record_rule_results(timeline, results) -> None:
+        """Write every finished rule onto the timeline.
+
+        Called from the success path and again from the timeout path, because
+        a cut-off evaluation may still have rules that finished, and the
+        reviewer's audit trail should name them. Recording the same rule twice
+        rewrites its row rather than duplicating it.
+        """
+        from app.services.disposition import rule_disposition
+
+        for vr in results:
+            # One mapping, shared with the reviewer's field card and with the
+            # overall result, so the audit trail cannot contradict either.
+            disposition_label = rule_disposition(vr)
+            timeline.record_rule_done(
+                rule_id=vr.rule_id,
+                duration_ms=vr.engine_meta.elapsed_ms,
+                disposition=disposition_label,
+                evidence_ref=f"vr/{vr.rule_id}",
+            )
+            # Surface YAML-registry reason_code as a separate trace entry so
+            # the chokepoint contract (FR-90X surfacing) holds: any non-PASS
+            # outcome carrying a reason_code lands in per_rule_trace verbatim.
+            if vr.reason_code and vr.outcome != Outcome.PASS:
+                timeline.record_rule_done(
+                    rule_id=vr.reason_code,
+                    duration_ms=0,
+                    disposition=disposition_label,
+                    evidence_ref=f"reason_code/{vr.rule_id}",
+                )
 
     def _new_timeline(self, application: Application):
         """A timeline that already knows which rules are answering.
@@ -395,16 +450,37 @@ class Evaluator:
             metrics=metrics,
         )
 
-    def _timeout_envelope(self, application: Application, label: Label) -> DispositionEnvelope:
+    def _timeout_envelope(
+        self, application: Application, label: Label, partial: _PartialEvaluation
+    ) -> DispositionEnvelope:
+        """The envelope for an evaluation the cutoff stopped.
+
+        It carries what the evaluation finished before it was stopped — the
+        readings the reader produced, the rules that completed, and the time
+        actually spent — with ``ENGINE.SLA.TIMEOUT`` in the audit trail saying
+        why the rest is missing. This is what row 10 of the failure taxonomy in
+        ``docs/research/2026-09-15-rule-engine-architecture.md`` specified from
+        the start: "needs_review whole-evaluation; partial results returned".
+
+        Until 2026-09-17 it returned no fields and ``total_duration_ms: 0``. On
+        the live service that made the same label answer completely or not at
+        all on a difference of about fifty milliseconds, and turned a check
+        that was merely slow into one that reported nothing — failing the
+        requirements for showing a result (FR-1, FR-8) in order to serve a
+        latency requirement that a blank page does not satisfy either.
+        """
         from app.services.audit import AuditRecorder
-        from app.services.envelope_builder import build_short_circuit_envelope
+        from app.services.envelope_builder import build_field_findings, build_short_circuit_envelope
         from app.services.metrics_builder import MetricsBuilder
 
-        timeline = getattr(self, "_last_timeline", None) or self._new_timeline(application)
+        timeline = partial.timeline or self._new_timeline(application)
         # A timeout that fired before `_evaluate_inner` recorded anything gets
         # a fresh timeline, and that envelope must still name its rules.
         # Re-recording on an existing timeline rewrites the same row.
         self._record_rule_pack(timeline, application.beverage_class)
+        # Rules that finished but were cancelled before the success path could
+        # write them down still belong in the audit trail.
+        self._record_rule_results(timeline, partial.results)
         timeline.record_failure(
             reason_code="ENGINE.SLA.TIMEOUT",
             message="whole-eval timeout exceeded",
@@ -418,7 +494,13 @@ class Evaluator:
                 disposition="needs_review",
                 evidence_ref=f"engine_failure/{failure.exception_class}",
             )
-        timeline.finish(total_duration_ms=timeline.total_duration_ms or 0)
+        # What the check cost. `timeline.finish` never ran inside the cancelled
+        # frame, so `total_duration_ms` is still 0 here; taking the elapsed time
+        # from the start the inner recorded is the only honest number.
+        elapsed_ms = (
+            int((time.monotonic() - partial.t_total) * 1000) if partial.t_total is not None else 0
+        )
+        timeline.finish(total_duration_ms=elapsed_ms)
         _logger.info(
             "engine_failure_routed",
             extra={
@@ -427,10 +509,16 @@ class Evaluator:
                 "error_class": "TimeoutError",
             },
         )
+        fields = build_field_findings(
+            results=partial.results,
+            observations=partial.observations,
+            expected_values=tuple(application.expected_values),
+        )
         envelope_for_hash = {
             "evaluation_id": application.evaluation_id,
             "disposition": "needs_review",
             "reason_code": "ENGINE.SLA.TIMEOUT",
+            "fields": [f.model_dump() for f in fields],
         }
         audit = AuditRecorder().assemble(
             timeline=timeline,
@@ -446,4 +534,5 @@ class Evaluator:
             reason_code="ENGINE.SLA.TIMEOUT",
             audit=audit,
             metrics=metrics,
+            fields=fields,
         )

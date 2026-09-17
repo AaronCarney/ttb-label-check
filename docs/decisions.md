@@ -2146,3 +2146,65 @@ reviewer a control that does nothing, which is the one thing a reviewer cannot c
   section; looking it up is theirs to do.
 - **The work is deleted rather than shelved.** Both components and their tests are gone from the tree.
   They are in the history, at the commit before this one.
+
+## 0035. A check that runs long returns what it finished, and the guard that stops it is not the requirement's own number
+
+**Decided:** 2026-09-17. **Evidence:** `plans/live-timing-2026-09-17.json` and
+`plans/2026-09-17-A1-five-second-requirement.md`, both measured against the deployed service
+(commit `8cb5e70`) on 2026-09-17; `app/services/evaluator.py`;
+`docs/research/2026-09-15-rule-engine-architecture.md:772`.
+
+**What was wrong.** `Evaluator._DEFAULT_SLA_SECONDS = 5.0` wrapped the whole evaluation in
+`asyncio.wait_for` at exactly the five seconds R15/NFR-1 measures. When it fired, the caller got
+HTTP 200, `needs_review`, **no fields**, and `total_duration_ms: 0` — and `asyncio.wait_for` cancels
+the coroutine, so a read that had already finished was thrown away with it.
+
+Measured live, the same label posted four times returned all seven fields once and none three times,
+on a difference of about fifty milliseconds. On two of the blank runs `vision_duration_ms` read 4911
+and 4900 while `total_duration_ms` read 0: the reader had finished and its work was discarded.
+Eleven of the other twelve test submissions came back in 1.1 to 3.1 seconds, so this was one label
+sitting on the line, not a slow service.
+
+Nothing ever argued for the 5.0. `git log -L 33,33:app/services/evaluator.py` shows the line
+arriving in the initial commit `5222337` with no reasoning, and there is no decision record for it.
+The project's own design said the opposite: row 10 of the failure taxonomy in
+`docs/research/2026-09-15-rule-engine-architecture.md` gives the whole-evaluation timeout as
+"`needs_review` whole-evaluation; **partial results returned**", carrying "partial results, last
+completed rule".
+
+**Chosen.** Two changes.
+
+A stopped evaluation returns what it had finished — the readings the reader produced and the rules
+that completed — with `ENGINE.SLA.TIMEOUT` in the audit trail saying why the rest is missing, and
+the time it actually spent instead of 0. The work is carried out of the cancelled frame in a
+per-call holder (`_PartialEvaluation`) rather than on the Evaluator, because a batch reuses one
+Evaluator across every item in it, and instance state there would let one item report another
+label's readings.
+
+The guard is now `Settings.evaluation_guard_seconds`, default 30 seconds, and it is a runaway guard
+rather than a latency target. Thirty is six times the slowest whole check measured on the live
+service (5.04 s), so no legitimate check can reach it, and far short of Cloud Run's 900-second
+request timeout, which is the outer bound but is far too long for a page a person is waiting at.
+`tests/test_deploy_healthz.py` had independently picked the same 30 seconds as the point past which
+a check has not finished at all.
+
+**Because** a cutoff that discards a valid result is a defect, not a trade-off — and this one could
+not help the requirement it appeared to serve. NFR-1 asks that checks "show their results within 5
+seconds". A cut-off check shows none, so it fails NFR-1 on the requirement's own words while also
+failing FR-1 ("reports a result for each check that applies") and FR-8 ("For every check, the
+product shows the value it read from the label beside the application value"). It converted a
+latency miss into a correctness failure and bought nothing. A check that runs 5.2 seconds and
+answers completely is strictly better than one truncated at 5.0, and both miss R15 equally.
+
+**What this costs.**
+
+- **A slow check now holds a request open longer.** Up to 30 seconds in the worst case, where before
+  it returned a blank at 5. The measured worst case is 5.04 s, so nothing real approaches it, and a
+  reviewer waiting is better served by an answer than by an empty page.
+- **A partial result can be mistaken for a whole one.** It has field cards on it, and a rule that
+  never ran reports nothing — which is not the same as finding nothing wrong. Both surfaces say so
+  above the cards: `frontend/src/components/IncompleteCheckCard.tsx`, used by the single-label page
+  and the batch panel so neither can describe one envelope differently.
+- **R15's share has to be measured again.** Every figure published for it was taken while a marginal
+  check failed as a blank rather than as a slow pass, so the share measured something other than
+  what R15 asks about. The figure is owed after the next deploy.

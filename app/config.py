@@ -48,6 +48,22 @@ class Settings(BaseSettings):
     # Batch lookahead window.
     lookahead_k: int = Field(default=3, ge=1, alias="LOOKAHEAD_K")
 
+    # How long one whole evaluation may run before the engine stops it. This is
+    # a runaway guard — an evaluation that has gone wrong should not hold a
+    # request open — and it is deliberately NOT the five seconds R15/NFR-1
+    # measures. It used to be, and the consequence was that a check running
+    # slightly over the requirement was truncated rather than merely slow,
+    # which fails the requirement's own words ("show their results within 5
+    # seconds") on top of failing FR-1 and FR-8.
+    #
+    # 30 seconds: six times the slowest whole check measured on the live
+    # service (5.04 s on 2026-09-17), so no legitimate check can reach it, and
+    # far short of Cloud Run's 900 s request timeout (`scripts/deploy.sh`),
+    # which is the outer bound but is far too long for a page a person is
+    # waiting at. `tests/test_deploy_healthz.py` independently picked the same
+    # 30 s as the point past which a check has not finished at all.
+    evaluation_guard_seconds: float = Field(default=30.0, gt=0, alias="EVALUATION_GUARD_SECONDS")
+
     # How many CPU threads the local OCR reader is allowed. The default is the
     # deploy target's core count — the Cloud Run service is 4 vCPU (decision
     # 0025) — so a developer's machine reads a label the way the deployed

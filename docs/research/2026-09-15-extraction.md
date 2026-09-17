@@ -68,6 +68,11 @@ three were checked on the image:
 | RapidOCR, CPU | 8 processes | 52 | 4.75 s | 10.02 s | 11.74 s |
 | Hybrid (model and OCR at once, one process) | 1 at a time | 13 | 1.53 s | 5.26 s | 5.28 s |
 
+- **The two RapidOCR rows describe neither the shipped reader nor a comparable machine.** They were
+  taken on 2026-09-15, before the reader was capped to four threads and before the sideways re-read
+  became conditional, and "8 processes" is a configuration the product never runs. Read them as what
+  they were: a comparison between two readers on one afternoon. The shipped reader's own figures,
+  measured on the deployed service, are in `README.md`.
 - **Batch throughput.** Flash-Lite finished 52 applications in 11.5 s and 104 in 14.3 s. At that
   rate, 300 would take about 45 s. RapidOCR in 8 processes finished 52 in 37.7 s, about 0.7 s each,
   but each request waited 5 to 12 s because every process ran ONNX Runtime threads on every core.

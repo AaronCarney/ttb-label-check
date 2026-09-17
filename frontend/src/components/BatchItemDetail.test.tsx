@@ -93,6 +93,53 @@ describe("BatchItemDetail", () => {
     expect(getByText("ENGINE.INPUT.LABEL_IMAGE_MISSING")).toBeTruthy();
   });
 
+  it("names the engine failure, not the rule-pack row that precedes every trace", () => {
+    // per_rule_trace[0] is ENGINE.RULE_PACK.SELECTED on every envelope, because
+    // which rules answered is recorded before anything can go wrong. Reading
+    // that row told the reviewer rule-pack selection was recorded against their
+    // label. The trace below is the one the live service produced for a check
+    // the evaluation guard stopped, on 2026-09-17.
+    const stopped = _row([], [
+      {
+        rule_id: "ENGINE.RULE_PACK.SELECTED",
+        disposition: "needs_review",
+        evidence_ref: "rule_pack/spirits",
+      },
+      {
+        rule_id: "ENGINE.SLA.TIMEOUT",
+        disposition: "needs_review",
+        evidence_ref: "engine_failure/TimeoutError",
+      },
+    ]);
+    const { getByText, queryByText } = renderWithProviders(<BatchItemDetail row={stopped} />);
+    expect(getByText("ENGINE.SLA.TIMEOUT")).toBeTruthy();
+    expect(queryByText("ENGINE.RULE_PACK.SELECTED")).toBeNull();
+  });
+
+  it("marks a stopped check as incomplete even though it came back with fields", () => {
+    // The guard returns what a stopped check had finished rather than nothing,
+    // so a partial result now has field cards on it. Without this, those cards
+    // read as a completed check.
+    const stoppedWithFields = _row(
+      [_field("brand_name", "Old Mill Rye", "Olde Mill Rye", [])],
+      [
+        {
+          rule_id: "ENGINE.RULE_PACK.SELECTED",
+          disposition: "needs_review",
+          evidence_ref: "rule_pack/spirits",
+        },
+        {
+          rule_id: "ENGINE.SLA.TIMEOUT",
+          disposition: "needs_review",
+          evidence_ref: "engine_failure/TimeoutError",
+        },
+      ],
+    );
+    const { getByText } = renderWithProviders(<BatchItemDetail row={stoppedWithFields} />);
+    expect(getByText(/stopped before it finished/i)).toBeTruthy();
+    expect(getByText("Old Mill Rye")).toBeTruthy();
+  });
+
   it("moves focus onto the opened label so a keyboard reviewer lands on it", () => {
     renderWithProviders(<BatchItemDetail row={_checked} />);
     expect(document.activeElement?.textContent).toBe("lbl-1");

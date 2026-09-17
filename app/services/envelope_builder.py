@@ -208,10 +208,23 @@ def build_short_circuit_envelope(
     reason_code: str,
     audit: AuditRecord,
     metrics: Metrics,
+    fields: Iterable[FieldFindingWire] = (),
 ) -> DispositionEnvelope:
     """Assemble a needs_review envelope when an upstream short-circuit fired
     (legibility, whole-eval timeout, total engine failure). Surfaces the
-    reason code as a synthetic per_rule_trace entry so reviewers see why."""
+    reason code as a synthetic per_rule_trace entry so reviewers see why.
+
+    `fields` carries whatever the evaluation finished before it stopped. The
+    whole-evaluation timeout passes the readings the reader produced, because
+    discarding finished work is what made a slow check read as a broken one;
+    the legibility short-circuit passes none, because a photo the reader could
+    not see is not a photo whose readings should be shown.
+
+    `disposition_confidence` stays low whatever the fields say. It describes
+    how much to trust *this disposition*, and the disposition is needs_review
+    precisely because the evaluation did not finish. Each field card still
+    carries the reader's own confidence in what it read.
+    """
     # Augment audit trail with the short-circuit reason if not already present.
     existing_ids = {e.rule_id for e in audit.per_rule_trace}
     if reason_code not in existing_ids:
@@ -228,7 +241,7 @@ def build_short_circuit_envelope(
         label_ref=label.label_id,  # wire-side name <- internal name (Conventions §)
         disposition="needs_review",
         disposition_confidence=ConfidenceBand(band="low", numeric=0.0),
-        fields=(),
+        fields=tuple(fields),
         audit_trail=augmented,
         metrics=metrics,
     )

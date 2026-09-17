@@ -434,13 +434,17 @@ present, fourteen of thirty on it being word for word, sixteen of thirty on bran
 from thirty labels reads as a precision this corpus does not carry. The figures are not flattering
 and they are the honest state of a processor-only reader on display typefaces.
 
-**The five-second requirement is measured, and it is missed.** It belongs to the deployed hardware,
-so we measured it there rather than on a developer's machine. Checking all 38 test submissions one at
-a time returned 34 of 38 inside five seconds through the address a reviewer actually uses. The
-requirement is 95 percent. The misses are narrow and they cluster — every one landed between five and
-5.21 seconds — and an earlier run passed outright, so the honest statement is that the rate sits on
-the line rather than well below it. Nothing has been tuned for speed, and the obvious lever, more
-processor cores, is untried.
+**The five-second requirement has no current figure, and the one this document carried was
+counting the wrong thing.** It belongs to the deployed hardware, so we measure it there rather than
+on a developer's machine, and the 2026-09-16 runs returned 34 of 38 inside five seconds. Two things
+invalidated that number. It predates the change that made the reader's sideways re-read conditional,
+and at the time a check that crossed five seconds was stopped and returned a blank result — so the
+run counted an empty page as a slow check. That defect is fixed
+([decision 0035](decisions.md#0035)) and the share is owed again after the next deploy. What is
+measured, on 2026-09-17 against the live service: a median check of 2.03 seconds and a median read
+of 1.22, with one label of twelve at 5.04. Two levers have been tried and neither is the answer:
+more processor cores moved one check of thirty-eight, and the reading path itself has been tuned
+twice.
 
 **Two things we did not prove.** A reader cannot tell an unmeasured claim from a measured one by
 looking, so each is named:
