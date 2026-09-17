@@ -114,7 +114,10 @@ KNOWN_MISSES: dict[tuple[str, str], str] = {
     (
         "ttb-26212001000085",
         "brand",
-    ): "B — returned 'MPTION OF ALCOHOLIC BEVERAGE IMPAIRS YOUR', a warning fragment, for 'Terre et Bois de Pradière'",
+    ): (
+        "B — returned 'MPTION OF ALCOHOLIC BEVERAGE IMPAIRS YOUR', a warning "
+        "fragment, for 'Terre et Bois de Pradière'"
+    ),
     (
         "ttb-26229001000034",
         "brand",
@@ -126,11 +129,17 @@ KNOWN_MISSES: dict[tuple[str, str], str] = {
     (
         "ttb-26229001000034",
         "abv",
-    ): "D — the front's alcohol statement came back as the three letters `AEV` and the back prints none",
+    ): (
+        "D — the front's alcohol statement came back as the three letters `AEV` "
+        "and the back prints none"
+    ),
     (
         "ttb-26229001000034",
         "net_contents",
-    ): "D — the engine read neither face's `375mL`; the front returned three boxes and none of them is it",
+    ): (
+        "D — the engine read neither face's `375mL`; the front returned three "
+        "boxes and none of them is it"
+    ),
     ("ttb-26230001000420", "brand"): "B — returned the fragment 'TE OLLECTION' for 'The Bruery'",
     (
         "ttb-26230001000420",
@@ -480,7 +489,8 @@ def test_the_statement_is_cut_out_of_a_box_that_carries_other_text() -> None:
     readings = {
         "26212001000085/front.jpg": "40% ALC. BY VOL",  # box: '40% ALC. BY VOL-700 mL'
         "26230001000420/front.jpg": "ALC. 20.3% BY VOL.",  # box: '... 12.7 FL. OZ.'
-        "variants/var-heading-title-case-front.jpg": "12% ALC. BY VOL.",  # box: '... | CONTAINS SULFITES'
+        # box: '... | CONTAINS SULFITES'
+        "variants/var-heading-title-case-front.jpg": "12% ALC. BY VOL.",
     }
     for image, statement in readings.items():
         payload = parse_reading(thaw_reading(json.loads(_recording(image).read_text())))["abv"]

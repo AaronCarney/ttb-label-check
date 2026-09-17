@@ -114,7 +114,9 @@ def replace_warning(img: Image.Image, box: list[int], heading: str, body: str) -
     draw.rectangle(box, fill=bg)
     words = [(w, True) for w in heading.split()] + [(w, False) for w in body.split()]
     width, height = x1 - x0 - 4, y1 - y0 - 4
-    size = 160  # start large and shrink until the block fits, so the text fills the box like the source
+    # Start large and shrink until the block fits, so the text fills the box
+    # the way it does on the source label.
+    size = 160
     while size > 6:
         fonts = {False: _font(FONT_CANDIDATES, size), True: _font(FONT_BOLD_CANDIDATES, size)}
         lines = _wrap(draw, words, fonts, width)

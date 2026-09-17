@@ -1476,8 +1476,9 @@ def _display_block(boxes: list[_Box], anchor: _Box, exclude: set[str]) -> list[_
     A line belongs with the anchor when a reader would see it as the same
     block: set at a size of the same order, and close enough to it in both
     directions relative to that size. Size is `_Box.type_size` throughout, so a
-    line running up the side of the label is not mistaken for large type. The block grows one line at a time, so a
-    mark whose lines step down in size is followed the way a person follows it.
+    line running up the side of the label is not mistaken for large type. The
+    block grows one line at a time, so a mark whose lines step down in size is
+    followed the way a person follows it.
 
     Lines already read as another mandatory element are left out: a label that
     sets its class designation directly under the brand has two elements there,

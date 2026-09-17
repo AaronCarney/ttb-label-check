@@ -57,7 +57,9 @@ def test_axe_zero_aa_violations_single(fixture_name: str, page: Page, live_serve
           const r = await window.axe.run(document, {
             runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa'] },
           });
-          return r.violations.map(v => ({ id: v.id, impact: v.impact, help: v.help, nodes: v.nodes.length }));
+          return r.violations.map(v => ({
+            id: v.id, impact: v.impact, help: v.help, nodes: v.nodes.length,
+          }));
         }"""
     )
     assert result == [], f"axe violations on {fixture_name}: {result}"
@@ -73,7 +75,9 @@ def test_axe_zero_aa_violations_batch(page: Page, live_server_url: str) -> None:
           const r = await window.axe.run(document, {
             runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa'] },
           });
-          return r.violations.map(v => ({ id: v.id, impact: v.impact, help: v.help, nodes: v.nodes.length }));
+          return r.violations.map(v => ({
+            id: v.id, impact: v.impact, help: v.help, nodes: v.nodes.length,
+          }));
         }"""
     )
     assert result == [], f"axe violations on /batch: {result}"

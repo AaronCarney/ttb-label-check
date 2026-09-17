@@ -197,7 +197,8 @@ class YamlRuleLoader:
         lo, hi = self.engine_supported_pack_range
         if not (lo <= pack_ver < hi):
             acc.errors.append(
-                f"{path}: rule_pack_version {pack_ver!r} outside engine-supported range [{lo}, {hi})"
+                f"{path}: rule_pack_version {pack_ver!r} outside engine-supported range [{lo}, "
+                f"{hi})"
             )
             return
         if not isinstance(rules, list):
@@ -240,7 +241,8 @@ class YamlRuleLoader:
                     key = key.rsplit("/", 1)[1].rsplit(".", 1)[0]
                 if key not in acc.decision_tables:
                     acc.errors.append(
-                        f"{path}/{rd.rule_id}: decision_table_ref {rd.decision_table_ref!r} not found"
+                        f"{path}/{rd.rule_id}: decision_table_ref {rd.decision_table_ref!r} not "
+                        f"found"
                     )
             acc.rules.append(rd)
 

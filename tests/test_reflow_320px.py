@@ -34,5 +34,6 @@ def test_no_horizontal_scroll_at_320px(page: Page, live_server_url: str) -> None
     client_width = page.evaluate("() => document.documentElement.clientWidth")
     # Tolerance of 1 px for sub-pixel rounding.
     assert scroll_width <= client_width + 1, (
-        f"320 px viewport shows horizontal scroll: scrollWidth={scroll_width}, clientWidth={client_width}"
+        f"320 px viewport shows horizontal scroll: scrollWidth={scroll_width}, "
+        f"clientWidth={client_width}"
     )

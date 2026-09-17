@@ -136,5 +136,6 @@ def test_single_noise_speck_returns_unconfident():
     m = measure_heading_bold(png, (90, 30, 120, 60))
     assert not m.confident, (
         f"a 3x3 dust speck must not be confidently classified as a heading; "
-        f"got is_bold={m.is_bold} ratio={m.width_height_ratio:.3f} mean_h={m.mean_character_height:.2f}"
+        f"got is_bold={m.is_bold} ratio={m.width_height_ratio:.3f} "
+        f"mean_h={m.mean_character_height:.2f}"
     )

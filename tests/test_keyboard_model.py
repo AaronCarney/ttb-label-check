@@ -139,7 +139,8 @@ def test_override_failure_path_surfaces_toast(page: Page, live_server_url: str) 
             content_type="application/json",
             body=json.dumps(
                 {
-                    "detail": "reason_code 'WARNING.STYLE.HEADING_NOT_BOLD_CAPS' is not in the loaded registry",
+                    "detail": "reason_code 'WARNING.STYLE.HEADING_NOT_BOLD_CAPS' is not in the "
+                    "loaded registry",
                 }
             ),
         )

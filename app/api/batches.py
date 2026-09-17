@@ -76,7 +76,8 @@ async def post_batches(
 
     if envelope.batch_id in request.app.state.batches:
         _logger.warning(
-            f"batch_submit_conflict batch_id={envelope.batch_id} agent_id={envelope.agent_id} items={len(envelope.items)}",
+            f"batch_submit_conflict batch_id={envelope.batch_id} agent_id={envelope.agent_id} "
+            f"items={len(envelope.items)}",
             extra={"batch_id": envelope.batch_id, "reason_code": "ENGINE.BATCH.CONFLICT"},
         )
         raise HTTPException(
@@ -102,7 +103,8 @@ async def post_batches(
     )
     _background.spawn(request.app, worker.run(), name=f"batch-worker:{envelope.batch_id}")
     _logger.info(
-        f"batch_accepted batch_id={envelope.batch_id} agent_id={envelope.agent_id} items={len(envelope.items)} lookahead_k={lookahead_k}",
+        f"batch_accepted batch_id={envelope.batch_id} agent_id={envelope.agent_id} "
+        f"items={len(envelope.items)} lookahead_k={lookahead_k}",
         extra={"batch_id": envelope.batch_id, "reason_code": "ENGINE.OK.NONE"},
     )
     return {"batch_id": envelope.batch_id}
@@ -139,7 +141,8 @@ async def get_batch_stream(batch_id: str, request: Request):
     sub = bus.subscribe()
     replay_count = sub.qsize()
     _logger.info(
-        f"batch_stream_subscribed batch_id={batch_id} replay={replay_count} subscribers={len(bus.subscribers)}",
+        f"batch_stream_subscribed batch_id={batch_id} replay={replay_count} "
+        f"subscribers={len(bus.subscribers)}",
         extra={"batch_id": batch_id, "reason_code": "ENGINE.OK.NONE"},
     )
 
@@ -160,7 +163,8 @@ async def get_batch_stream(batch_id: str, request: Request):
         finally:
             bus.unsubscribe(sub)
             _logger.info(
-                f"batch_stream_closed batch_id={batch_id} events={events_yielded} terminated={terminated}",
+                f"batch_stream_closed batch_id={batch_id} events={events_yielded} "
+                f"terminated={terminated}",
                 extra={"batch_id": batch_id, "reason_code": "ENGINE.OK.NONE"},
             )
 

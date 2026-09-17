@@ -49,7 +49,8 @@ def _accepted_reason_codes() -> frozenset[str]:
     if _ACCEPTED_REASON_CODES_CACHE is None:
         _ACCEPTED_REASON_CODES_CACHE = _load_accepted_reason_codes()
         _logger.info(
-            f"override_registry_loaded codes={len(_ACCEPTED_REASON_CODES_CACHE)} path=rules/reason_codes.yaml",
+            f"override_registry_loaded codes={len(_ACCEPTED_REASON_CODES_CACHE)} "
+            f"path=rules/reason_codes.yaml",
             extra={"reason_code": "ENGINE.OK.NONE"},
         )
     return _ACCEPTED_REASON_CODES_CACHE
@@ -93,7 +94,8 @@ async def post_override(
 ) -> dict:
     if payload.reason_code not in _accepted_reason_codes():
         _logger.warning(
-            f"override_rejected_unknown_code evaluation_id={evaluation_id} reason_code={payload.reason_code} applied={payload.applied_disposition}",
+            f"override_rejected_unknown_code evaluation_id={evaluation_id} "
+            f"reason_code={payload.reason_code} applied={payload.applied_disposition}",
             extra={
                 "evaluation_id": evaluation_id,
                 "reason_code": payload.reason_code,
@@ -119,7 +121,8 @@ async def post_override(
         # contract above, the UI prevents (b) by gating the override button on
         # the SSE label-result event.
         _logger.warning(
-            f"override_rejected_not_found evaluation_id={evaluation_id} reason_code={payload.reason_code}",
+            f"override_rejected_not_found evaluation_id={evaluation_id} "
+            f"reason_code={payload.reason_code}",
             extra={
                 "evaluation_id": evaluation_id,
                 "reason_code": "ENGINE.OVERRIDE.NOT_FOUND",
@@ -176,7 +179,9 @@ async def post_override(
         )
 
     _logger.info(
-        f"override_applied batch_id={batch_id or 'single'} evaluation_id={evaluation_id} field={payload.field_name} {env.disposition}->{payload.applied_disposition} bus={bus_present}",
+        f"override_applied batch_id={batch_id or 'single'} evaluation_id={evaluation_id} "
+        f"field={payload.field_name} {env.disposition}->{payload.applied_disposition} "
+        f"bus={bus_present}",
         extra={
             "batch_id": batch_id or "single",
             "evaluation_id": evaluation_id,

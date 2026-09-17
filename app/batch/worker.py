@@ -248,7 +248,8 @@ class BatchWorker:
         batch_id = self._in_flight.batch_id
         t_batch = time.monotonic()
         _logger.info(
-            f"batch_consume_started batch_id={batch_id} items={total} lookahead_k={self._in_flight.lookahead_k}",
+            f"batch_consume_started batch_id={batch_id} items={total} "
+            f"lookahead_k={self._in_flight.lookahead_k}",
             extra={"batch_id": batch_id, "reason_code": "ENGINE.OK.NONE"},
         )
         failed = 0
@@ -323,7 +324,8 @@ class BatchWorker:
 
             headline_code = _headline_reason_code(envelope)
             _logger.info(
-                f"label_result batch_id={batch_id} pos={queue_position} disposition={envelope.disposition} duration_ms={duration_ms}",
+                f"label_result batch_id={batch_id} pos={queue_position} "
+                f"disposition={envelope.disposition} duration_ms={duration_ms}",
                 extra={
                     "batch_id": batch_id,
                     "evaluation_id": envelope.evaluation_id,
@@ -352,7 +354,8 @@ class BatchWorker:
             advisory = self._anomaly.observe(headline_code)
             if advisory is not None:
                 _logger.info(
-                    f"anomaly_advisory batch_id={batch_id} advisory_id={advisory.advisory_id} count={advisory.count} window={advisory.window}",
+                    f"anomaly_advisory batch_id={batch_id} advisory_id={advisory.advisory_id} "
+                    f"count={advisory.count} window={advisory.window}",
                     extra={"batch_id": batch_id, "reason_code": advisory.reason_code},
                 )
                 self._bus.broadcast(
@@ -375,7 +378,8 @@ class BatchWorker:
 
         batch_duration_ms = int((time.monotonic() - t_batch) * 1000)
         _logger.info(
-            f"batch_consume_finished batch_id={batch_id} items={total} failed={failed} duration_ms={batch_duration_ms}",
+            f"batch_consume_finished batch_id={batch_id} items={total} failed={failed} "
+            f"duration_ms={batch_duration_ms}",
             extra={
                 "batch_id": batch_id,
                 "duration_ms": batch_duration_ms,

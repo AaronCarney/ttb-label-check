@@ -466,7 +466,8 @@ async def main() -> int:
 
     if args.freeze is not None and args.reader != "local":
         raise SystemExit(
-            "--freeze records the local reader's own boxes; it has nothing to record for --reader cloud."
+            "--freeze records the local reader's own boxes; it has nothing to record for --reader "
+            "cloud."
         )
 
     reader = _build_reader(args.reader)

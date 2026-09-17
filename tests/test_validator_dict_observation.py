@@ -69,7 +69,10 @@ def _alcohol_format_rule() -> RuleDefinition:
         match_policy="regex",
         validator="regex_match",
         parameters={
-            "pattern": r"^\s*(?:alcohol|alc\.?)\s*[0-9]{1,2}(?:\.[0-9]+)?\s*%?\s*(?:by\s+volume|/\s*vol\.?|vol\.?)\s*$",
+            # Left on one line: a regex split across literals is a regex a
+            # reader has to reassemble before they can tell what it matches,
+            # and a lost character between the halves would not show.
+            "pattern": r"^\s*(?:alcohol|alc\.?)\s*[0-9]{1,2}(?:\.[0-9]+)?\s*%?\s*(?:by\s+volume|/\s*vol\.?|vol\.?)\s*$",  # noqa: E501
             "ignore_case": True,
         },
         evidence_required=("alc_text",),

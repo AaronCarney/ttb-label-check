@@ -84,6 +84,18 @@ extend-exclude = ["*.md"]
 #   RET  returns that say nothing
 #   PIE  dead scaffolding
 #   RUF  ruff's own, including unused `noqa` directives
+# `E501`, long lines, is kept at the same 100 columns as the formatter, and it
+# is worth saying why, because the two rules can look like they overlap.
+# `ruff format` owns wrapping code, and it took 191 of the 218 long lines on
+# its own. What it cannot break is a string literal or a comment, so `E501` is
+# exactly the rule for the lines only a person can fix. There were 27 of them:
+# structured log lines, assertion messages, one docstring paragraph and two
+# trailing comments, all split by hand. One line carries `# noqa: E501` with
+# its reason -- a regex, which is worse split than long. So this is a one-time
+# cost rather than a standing tax, and the alternatives were worse: dropping
+# `E501` leaves a long string unbounded forever, and a second, higher limit
+# just for it means two line lengths in one file, with the second number
+# chosen to fit the lines that happened to exist.
 select = ["E", "W", "F", "I", "B", "UP", "SIM", "C4", "RET", "PIE", "RUF"]
 
 # `RUF001`/`RUF002` flag characters that look like ASCII, which is how a
