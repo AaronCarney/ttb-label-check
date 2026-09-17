@@ -714,19 +714,36 @@ class LocalVisionExtractor:
         rotation = 0
         warning_image = image
         found = _find_heading(boxes)
-        if (
-            found is None
-            and _has_sideways_text(boxes)
-            and self._sideways_may_be_the_warning(image, boxes)
-        ):
-            for angle in (90, 270):
-                rotated = image.rotate(angle, expand=True)
-                candidate = self._boxes(rotated)
-                candidate_heading = _find_heading(candidate)
-                if candidate_heading is not None:
-                    warning_boxes, rotation, warning_image = candidate, angle, rotated
-                    found = candidate_heading
-                    break
+        if found is None:
+            # A label with no upright heading may still not get a second look:
+            # either its boxes are not sideways at all, or the strips do not
+            # read like the warning. Either way the label is reported as
+            # carrying no warning, and since the confidence-floor fix that is a
+            # §16.21 rejection rather than a reviewer's question - so the
+            # decision not to look again is recorded rather than left silent.
+            #
+            # It goes to the log and not to the envelope on purpose.
+            # `output_hash` is taken over the whole envelope
+            # (`app/services/audit.py`), so a field here would move every stored
+            # hash and every frozen replay recording. The README names this gap
+            # under `## Limitations` for the reader who is not reading logs.
+            sideways = _has_sideways_text(boxes)
+            if sideways and self._sideways_may_be_the_warning(image, boxes):
+                for angle in (90, 270):
+                    rotated = image.rotate(angle, expand=True)
+                    candidate = self._boxes(rotated)
+                    candidate_heading = _find_heading(candidate)
+                    if candidate_heading is not None:
+                        warning_boxes, rotation, warning_image = candidate, angle, rotated
+                        found = candidate_heading
+                        break
+            else:
+                # `has_sideways_text` tells the two apart on its own: false
+                # means the box shapes declined, true means the strips did.
+                _logger.info(
+                    "sideways_reread_declined",
+                    extra={"has_sideways_text": sideways, "box_count": len(boxes)},
+                )
 
         # The heading's boldness is measured here rather than inside `_parse`,
         # for two reasons that pull the same way. It is the one step of the

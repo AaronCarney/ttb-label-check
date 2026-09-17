@@ -145,3 +145,49 @@ def test_every_screen_word_is_in_the_16_21_text() -> None:
     missing = sorted(_WARNING_SCREEN_WORDS - statutory)
 
     assert not missing, f"not in {ASSET}: {missing}"
+
+
+def _declined(caplog: Any) -> list:
+    return [r for r in caplog.records if r.getMessage() == "sideways_reread_declined"]
+
+
+def test_the_strips_declining_the_re_read_is_recorded(caplog: Any) -> None:
+    """A label read upright only is reported as carrying no warning, and since
+    the confidence-floor fix that is a rejection. So the decision not to look
+    again is in the log, with which of the two screens declined."""
+    reader, _, _ = _reader([[_wide(100), _tall(700), _tall(780)]], ["3105540651"])
+
+    with caplog.at_level("INFO", logger="app.vision.local"):
+        reader.look(_blank_label())
+
+    records = _declined(caplog)
+    assert len(records) == 1, f"expected one declined record, got {len(records)}"
+    assert records[0].has_sideways_text is True, "the strips declined, not the box shapes"
+
+
+def test_box_shapes_declining_the_re_read_is_recorded(caplog: Any) -> None:
+    """No sideways boxes at all, so no strip is ever read. The same silence
+    ends in the same rejection and is recorded the same way, told apart from
+    the case above by `has_sideways_text`."""
+    reader, _, read = _reader([[_wide(100), _wide(200)]], [None])
+
+    with caplog.at_level("INFO", logger="app.vision.local"):
+        reader.look(_blank_label())
+
+    records = _declined(caplog)
+    assert read == [], "no strip should be read when nothing is sideways"
+    assert len(records) == 1, f"expected one declined record, got {len(records)}"
+    assert records[0].has_sideways_text is False, "the box shapes declined"
+
+
+def test_a_re_read_that_goes_ahead_is_not_recorded_as_declined(caplog: Any) -> None:
+    """The signal marks a refusal to look, not a look that found nothing."""
+    reader, _, _ = _reader(
+        [[_wide(100), _tall(700), _tall(780)]],
+        ["THE SURGEON"],
+    )
+
+    with caplog.at_level("INFO", logger="app.vision.local"):
+        reader.look(_blank_label())
+
+    assert _declined(caplog) == []
