@@ -116,24 +116,27 @@ def project_reading(obs: FieldObservation) -> str:
 # writing the same thing. Both get reduced to a list of plain words first, so
 # case, punctuation, accents and spacing stop mattering — which is what the
 # brief asks for when it calls "STONE'S THROW" and "Stone's Throw" the same
-# value. One spelling pair is folded together on top of that, because the
-# regulations permit either spelling and the registry and the label routinely
-# differ on it: whisky reads as whiskey.
-_SPELLING_VARIANTS = {"whisky": "whiskey", "whiskies": "whiskey"}
+# value. On top of that, a token is rewritten to the one spelling the
+# comparison uses. Whisky reads as whiskey, because the regulations permit
+# either spelling and the registry and the label routinely differ on it. The
+# ampersand reads as "and", because it is a way of writing that word rather
+# than punctuation, and this table is where "this writing means that word"
+# belongs.
+_SPELLING_VARIANTS = {"whisky": "whiskey", "whiskies": "whiskey", "&": "and"}
 
 
 def normalize_words(text: str) -> tuple[str, ...]:
     """One value reduced to its plain words, in order.
 
-    Accents are folded away, the ampersand is spelled out, everything that is
-    not a letter or a digit becomes a break, and each word is lowercased.
+    Accents are folded away, each word is lowercased, and everything that is
+    not a letter or a digit becomes a break. The ampersand is the exception: it
+    comes through the break as its own token, so `_SPELLING_VARIANTS` spells it
+    out alongside every other word that has two writings.
     """
     folded = unicodedata.normalize("NFKD", text)
     folded = "".join(ch for ch in folded if not unicodedata.combining(ch))
-    folded = folded.lower()
-    folded = folded.replace("&", " and ")
-    words = re.split(r"[^0-9a-z]+", folded)
-    return tuple(_SPELLING_VARIANTS.get(w, w) for w in words if w)
+    words = re.findall(r"[0-9a-z]+|&", folded.lower())
+    return tuple(_SPELLING_VARIANTS.get(w, w) for w in words)
 
 
 def word_run_present(haystack: tuple[str, ...], needle: tuple[str, ...]) -> bool:
