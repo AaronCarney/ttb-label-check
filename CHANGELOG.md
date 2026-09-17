@@ -6,6 +6,8 @@ All notable changes to this project are recorded here. The format follows
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-09-16
+
 ### Added
 
 - A label is read on this machine, with no outbound call, and that reader is the default. A second
