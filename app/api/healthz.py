@@ -20,10 +20,15 @@ def _get_settings() -> Settings:
 
 # Two paths, one handler. Cloud Run's front end answers /healthz itself with
 # its own 404 page and never forwards the request to the container, so the
-# deployed service needs a path the platform does not claim. /healthz stays
-# because every local caller and test uses it.
+# deployed service needs a path the platform does not claim. Google's known
+# issues page states the rule and offers no way to turn it off: "You can't use
+# the following URL paths: Paths starting with /_ah/; Some paths ending with z.
+# To prevent conflicts with reserved paths, we recommend avoiding all paths
+# that end in z" (cloud.google.com/run/docs/known-issues, read 2026-09-16).
+# /api/health therefore ends in no z at all. /healthz stays because every local
+# caller and test uses it, and locally nothing intercepts it.
 @router.get("/healthz")
-@router.get("/api/healthz")
+@router.get("/api/health")
 async def healthz(settings: Settings = Depends(_get_settings)) -> JSONResponse:
     """Report whether the app is ready to evaluate a label.
 

@@ -17,7 +17,7 @@ def deploy_url() -> str:
 
 
 def test_deployed_healthz_200(deploy_url):
-    r = httpx.get(f"{deploy_url}/api/healthz", timeout=10.0)
+    r = httpx.get(f"{deploy_url}/api/health", timeout=10.0)
     assert r.status_code == 200
     body = r.json()
     assert body.get("status") == "ok"
@@ -42,7 +42,7 @@ def test_deployed_static_island_bundle_200(deploy_url):
 
 def test_deployed_tls_chain_valid(deploy_url):
     """The platform's own certificate; no insecure flag."""
-    r = httpx.get(f"{deploy_url}/api/healthz", verify=True, timeout=10.0)
+    r = httpx.get(f"{deploy_url}/api/health", verify=True, timeout=10.0)
     assert r.status_code == 200
 
 
