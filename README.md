@@ -18,10 +18,9 @@ scripts/deploy.sh --check                   # every check that needs no network;
 TTB_GCP_PROJECT=your-project scripts/deploy.sh
 ```
 
-`--check` is what proves the repository is deployable without making it public: it confirms the
-image has something to build, that the port the service routes to and the port the container binds
-are the same number, that the built frontend is committed, and that every path the build copies is
-in the tree. It runs as part of the test suite.
+`--check` is what proves the repository is deployable without making it public: it runs every
+precondition the deploy has that needs no network, and names any that fails. It runs as part of the
+test suite.
 
 ### The five-second requirement is not verified
 
@@ -114,11 +113,11 @@ of origin, and the health warning — each carrying the box on the image it came
 an interface with two implementations behind it, so the local engine and the hosted model are
 swappable without anything downstream knowing which ran.
 
-**2. Compare.** A rule pack decides. The rules are YAML — 46 of them across a common pack and one
-per beverage class — and each names a validator by string from a registry of thirteen. A rule says
-what it checks, which regulation it comes from, and what outcome each result maps to. Adding a check
-is a YAML edit, and the reference tables the rules read (volume units, class/type designations,
-characters-per-inch limits) are data files rather than code.
+**2. Compare.** A rule pack decides. The rules are YAML, across a common pack and one per beverage
+class, and each names a validator by string from a registry. A rule says what it checks, which
+regulation it comes from, and what outcome each result maps to. Adding a check is a YAML edit, and
+the reference tables the rules read (volume units, class/type designations, characters-per-inch
+limits) are data files rather than code.
 
 **3. Report.** Each check returns a verdict, a reason code, and a citation to the regulation it came
 from, so a reviewer can see why and not just what. The result also carries the region of the image
@@ -146,17 +145,16 @@ the server stops. There is no database and no COLA integration.
 | uv | Dependency resolution and the lockfile | One locked environment, reproducible from a single binary |
 | pytest | The suite | — |
 
-The optional hosted reader calls OpenAI's `gpt-4o`, pinned to a dated snapshot so two runs of the
-same label agree.
+The optional hosted reader calls a hosted OpenAI vision model, pinned to a dated snapshot so two
+runs of the same label agree. `.env.example` names the snapshot in force.
 
 ## Reading accuracy
 
 **Not published yet, on purpose.** This project puts no number in front of a reviewer that a run on
 this machine did not produce, and the reading-accuracy run has not happened.
 
-The harness is written and committed. It scores the reader against the 30 real labels in
-`tests/fixtures/labels`, using the transcription in that corpus's manifest as the answer key, over
-nine checks per label:
+The harness is written and committed. It scores the reader against the real labels in
+`tests/fixtures/labels`, using the transcription in that corpus's manifest as the answer key:
 
 ```bash
 uv run python -m eval.read_accuracy
@@ -171,8 +169,9 @@ different ways and an average hides that. The figures go here when the run lands
   app reports a mismatch on the label; it never assumes the application is the error.
 - **The application names the beverage type**, and that is what selects the rule pack. A label
   submitted with no application is read but not checked, because nothing says which rules apply.
-- **A submitted photograph is meant to be legible.** Severe glare, steep angles and motion blur are
-  out of scope; the app says it could not read a field rather than guessing at one.
+- **A submitted photograph is meant to be legible.** Making a poor photograph readable is out of
+  scope; where the app cannot read a field it says so rather than guessing at one. How well it
+  tells a poor photograph from a good one is a separate question, and an open one.
 - **The warning text is fixed.** 27 CFR 16.21's wording is pinned as a committed asset and compared
   against by hash, so a change to the regulation is a deliberate edit and not a silent drift.
 - **Nothing sensitive is stored.** Images and application data live only as long as the request that
@@ -211,7 +210,7 @@ The seven label elements the brief lists, and where each is answered:
 | Net contents | Checked — compared as a quantity, with units converted before comparing | `rules/tables/volume_units.yaml` |
 | Name and address | Checked — applicant or declared trade name, plus city and state | the three class packs |
 | Country of origin | Checked for imports, against the application's English country name. The other forms customs accepts are a named limitation | the three class packs |
-| Government Health Warning | Checked — present, word for word against the pinned 27 CFR 16.21 text, heading in capitals, heading boldness measured where it can be. Four typography rules are switched off, because a photograph does not carry what they measure | `rules/common/health_warning.yaml`, `assets/warnings/govt_warning_16_21.txt` |
+| Government Health Warning | Checked — present, word for word against the pinned 27 CFR 16.21 text, heading in capitals, heading boldness measured where it can be. The typography rules are switched off, because a photograph does not carry what they measure | `rules/common/health_warning.yaml`, `assets/warnings/govt_warning_16_21.txt` |
 
 Both deliverables:
 
@@ -257,8 +256,8 @@ check listed here is switched off in the rule pack rather than reporting a verdi
   check that the warning sits on a contrasting background (27 CFR §16.22(a)(1)), its characters per
   inch (§16.22(a)(4)), its type height (§16.22(b)), or that it stands separate and apart from other
   information (§16.21). The first three need the colour of the ink or the physical scale of the
-  label, and a photograph carries neither; the fourth is visible in a photograph but no reader
-  measures it yet. Each of those four rules stays in the pack with its citation and the reason it is
+  label, and a photograph carries neither; separateness is visible in a photograph but no reader
+  measures it yet. Each of those rules stays in the pack with its citation and the reason it is
   switched off, and a switched-off rule produces no finding at all, so a label is never passed or
   rejected on one. TTB says it does not routinely review
   labels for type size, characters per inch or contrasting background either. See
