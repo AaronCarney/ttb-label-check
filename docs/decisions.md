@@ -1684,3 +1684,125 @@ settle is left out of it rather than counted against the reader, and a bare perc
 `tests/test_readme_content.py` enforced the hole. It now enforces the published form: no percentage
 in the section, every one of the nine checks named, and the corpus the figures came from stated.
 The failure it catches is the same one — a number in front of a reviewer that no run produced.
+
+<a id="0028"></a>
+## 0028. The Cloud Run URL is closed with IAM, not hidden, because the edge cannot be the only door
+
+**Decided:** 2026-09-16. **Evidence:** `docs.cloud.google.com/run/docs/securing/ingress`,
+`/run/docs/authenticating/public`, `/run/docs/authenticating/service-to-service`,
+`/run/docs/configuring/custom-audiences`, `/docs/authentication/token-types` and
+`cloud.google.com/run/pricing`, all read 2026-09-16; `scripts/deploy.sh`; the live service's IAM policy, read the same day.
+
+**What was found.** [0025](#0025) bounds the meter with four settings, one of which is a rate limit
+on a proxy in front of the service. That reasoning holds only if the proxy is the sole way in. It is
+not: Cloud Run issues its own `run.app` URL, that URL is on the public internet, and nothing about
+putting a hostname in front of the service takes it away. A rate limit at the edge that anyone can
+walk around bounds nothing at all, and the service it protects is the one part of this system that
+spends money per request.
+
+**Chosen: the invoker check stays on, and the edge is the only identity that passes it.** The
+service is deployed with `--no-allow-unauthenticated`; `roles/run.invoker` is granted to
+`ttb-edge-invoker@ttb-label-check.iam.gserviceaccount.com` and to nothing else; and the Worker
+holds a key for that account as a Worker secret and signs each forwarded request with a Google ID
+token. The `run.app` URL stays reachable and answers `HTTP 403: The request was not authenticated`
+to everyone else, which is the state `scripts/deploy.sh` already deploys by default.
+
+**Because a denied request is free.** This is what makes IAM the bound rather than merely a lock.
+Google's pricing page states it in one sentence: "Requests are only billed when they reach the
+container after successfully being authenticated, requests denied by IAM policy are not billed." A
+flood aimed straight at the `run.app` URL therefore costs nothing at all, while the edge's rate
+limit ([0029](#0029)) governs the requests that do reach the container. The two are not alternatives; the invoker check is what makes
+the edge limit meaningful.
+
+**The audience is the `run.app` URL, not the hostname a reviewer sees.** "Custom domains are
+currently not supported for the `aud` value", so the token the Worker mints for a request to
+`ttb.aaroncarney.me` must name the Google-issued URL. A custom audience — an arbitrary string
+configured on the service — is the documented way out of that, and is not taken: it adds a second
+name to keep in step across the service and the Worker, to buy nothing, since the Worker is the only
+caller and already knows the origin URL it forwards to.
+
+**Rejected.**
+
+- *Disabling the `run.app` URL* (`--no-default-url`, or the
+  `run.googleapis.com/default-url-disabled` annotation). This is real and documented, and it removes
+  the bypass by removing the address — including the Worker's. A Cloudflare Worker reaches this
+  service over the public internet at exactly that URL, so disabling it leaves the service with no
+  address the edge can use, and restoring one means a Google load balancer this project has no other
+  reason to run.
+- *Ingress `internal-and-cloud-load-balancing`*, for the same reason and more sharply: "Direct
+  requests to the `run.app` URL from the internet are not allowed" under that setting, and the
+  Worker is a public-internet caller, not a VPC client and not a Google external Application Load
+  Balancer. It would lock out the edge and nobody else. Ingress stays `all`.
+- *Leaving the URL open and trusting that nobody finds it.* The URL is printed by the deploy, sits
+  in the Worker's configuration, and is guessable from the project number. Obscurity is not a bound,
+  and the cost of being wrong is metered.
+- *A shared secret header instead of an ID token.* It would keep unwanted traffic out of the app but
+  not off the meter: the request still reaches the container and is still billed, because the check
+  happens in this project's code rather than in IAM.
+
+**What it costs.** An ID token is "valid for one hour, and can't be revoked", and minting one is a
+signed-JWT exchange against Google's token endpoint. The Worker therefore has to hold a private key,
+cache the token it gets back, and refresh it before the hour is out — the whole of that cost falls
+on the edge, and none of it on the app. The key is a Worker secret. It is never committed here, and
+a key that leaks is an invoker for as long as it exists, so it is revoked at the service account
+rather than waited out.
+
+**The deployment does not meet this record yet, as of 2026-09-16.** The service is live, and
+`gcloud run services get-iam-policy` lists **`allUsers`** alongside the edge account under
+`roles/run.invoker`; an unauthenticated `GET https://ttb-label-check-ogfd7k2ixa-uc.a.run.app/`
+returns 200. The Worker in `edge/` forwards without a token and without a rate limit. So both doors
+are open and the two-instance cap is the only thing bounding the meter — which is `TTB_PUBLIC=1`
+territory in `scripts/deploy.sh`, a state that script says is the owner's call every time. Closing
+it is a redeploy without that variable, plus the token in the Worker.
+
+
+<a id="0029"></a>
+## 0029. The rate limit lives in the Worker, because a Free zone's own rate limiting rule cannot see the hostname
+
+**Decided:** 2026-09-16. **Evidence:** `developers.cloudflare.com/waf/rate-limiting-rules/`,
+`developers.cloudflare.com/workers/runtime-apis/bindings/rate-limit/` and
+`developers.cloudflare.com/workers/platform/limits/`, all read 2026-09-16.
+
+**What was found.** [0025](#0025) names "a rate-limiting rule" on this project's zone as one of the
+four settings that bound the meter, and does not say which mechanism carries it. Cloudflare offers
+two, and on the Free plan this zone runs on, the obvious one cannot do the job. The availability
+table for WAF rate limiting rules gives a Free zone **one** rule, whose expression may use only
+**"Path, Verified Bot"** — the `Host` field first appears on Pro — and whose counting period is
+**"10 s"** and nothing else.
+
+`aaroncarney.me` is not this project's zone alone. Every hostname on it shares that single rule, and
+a rule that cannot name a hostname either counts this project's traffic against every other site on
+the zone or exempts nothing. A ten-second window is also the wrong shape for the bound being
+defended: what runs up a Cloud Run bill is sustained traffic over an hour, and a limit that forgets
+everything every ten seconds bounds a burst, not a bill.
+
+**Chosen: the Workers Rate Limiting binding, inside the Worker that already fronts the service.**
+The Worker is the one place that knows the request is for `ttb.aaroncarney.me`, because it is only
+invoked for that hostname, so the scoping the WAF rule cannot express is free here. Its `period`
+"must be either `10` or `60`", so the window is 60 seconds and the per-minute figure is what has to
+be set to bound the meter.
+
+**Rejected.**
+
+- *A WAF rate limiting rule on the zone* — for the reasons above. It is not a threshold that needs
+  tuning; it is a rule that cannot be written for one hostname on this plan.
+- *Upgrading the zone to Pro for the `Host` field* — Pro is a monthly fee for a capability the
+  Worker already has for nothing, and [0025](#0025)'s whole reason for choosing this shape was that
+  the bound costs no plan fee.
+- *No limit, relying on the two-instance cap* — the cap bounds how fast money is spent, not how
+  much. Two instances held busy for a month is the whole free allowance and then some.
+
+**What this record does not settle, and will not invent.** Cloudflare's documentation **does not
+state** whether the rate limiting binding is available on the Workers Free plan. Its own page, the
+Workers pricing page and the GA changelog were all read on 2026-09-16 and none of them says either
+way. So the binding is the chosen mechanism and its availability here is unverified until a deploy
+of the Worker either takes it or refuses it. If it refuses, the fork reopens with the zone upgrade
+and a counter of this project's own as the remaining options.
+
+**Two limits that come with it, neither fatal.** Counts are per Cloudflare location — "for each
+unique key you pass to your rate limiting binding, there is a unique limit per Cloudflare location"
+— so a distributed flood gets one allowance per location it arrives at, not one in total. Against
+one reviewer's traffic that is immaterial, and against a flood the Cloud Run invoker check
+([0028](#0028)) is what actually holds. A Free Worker also allows 50 subrequests per invocation,
+which a one-request proxy does not approach.
+
