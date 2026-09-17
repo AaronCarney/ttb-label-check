@@ -44,14 +44,19 @@ cold start:
 | The Cloud Run URL, directly | 33 of 38 — 87% |
 | `ttb.aaroncarney.me`, through the Worker | 34 of 38 — 89% |
 | A local authenticated proxy, which adds a hop and inflates the figure | 27 of 38 — 71% |
+| `ttb.aaroncarney.me`, with the service given eight cores instead of four | 35 of 38 — 92% |
 
 The requirement is 95%. **The misses are narrow and they cluster:** on the two runs that describe
 what a reviewer actually meets, every check that missed landed between 5.00 and 5.21 seconds, and
 the fastest of them missed by two hundredths of a second. A fourth run earlier the same evening
 passed this assertion outright, so the true share sits near the line rather than below it, and a
-single figure would misrepresent it. Nothing here has been tuned for speed; the service runs at the
-size [decision 0025](docs/decisions.md#0025) argued from the free tier's limits, and raising the
-core count is the untried lever.
+single figure would misrepresent it.
+
+**Cores are not the lever.** Doubling the service to eight moved one check of thirty-eight, which is
+smaller than the spread between two runs at the same size, so the figure above is not evidence that
+more hardware fixes this. The service is back at the four cores
+[decision 0025](docs/decisions.md#0025) argued from the free tier's limits, and the reading path
+itself has never been tuned for speed.
 
 The measurement runs against whatever URL it is given, and skips when there is none:
 
