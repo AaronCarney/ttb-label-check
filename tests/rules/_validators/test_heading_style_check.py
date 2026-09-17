@@ -370,5 +370,38 @@ def test_a_style_report_with_no_heading_text_fails_rather_than_raising() -> None
     assert res.reason_code == "WARNING.STYLE.HEADING_NOT_BOLD_CAPS"
 
 
+def test_a_payload_with_nothing_in_it_is_a_question_for_a_reviewer() -> None:
+    """A payload with no heading text, no style report and none of the reader's
+    own keys is the reader saying it never found the heading. That is not a
+    label defect, so the answer is the not-read result and never a rejection.
+
+    The empty-string default in `_read_payload` is what makes this reachable:
+    any non-empty placeholder would be a heading whose words are wrong, and the
+    label would be rejected for a heading nobody read.
+    """
+    res = _check({})
+    assert res.outcome is Outcome.INSUFFICIENT_EVIDENCE
+    assert res.reason_code != _rule().reason_code
+
+
+def test_a_reader_payload_silent_about_confidence_is_taken_at_its_word() -> None:
+    """A payload using the reader's keys but carrying no
+    `heading_bold_measured_confident` is a fixture stating a bold heading, not a
+    measurement that failed. `_read_payload` defaults the flag to True for
+    exactly that case.
+
+    Default it to False instead and this correct heading stops passing and goes
+    to a reviewer, so the default is part of the behaviour rather than a detail.
+    """
+    res = _check(
+        {
+            "heading_text": "GOVERNMENT WARNING",
+            "heading_all_caps": True,
+            "heading_bold": True,
+        }
+    )
+    assert res.outcome is Outcome.PASS
+
+
 def test_validator_registered() -> None:
     assert "heading_style_check" in VALIDATOR_REGISTRY
