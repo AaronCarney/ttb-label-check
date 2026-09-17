@@ -82,6 +82,16 @@ CHECKS = (
 # words: "Double India Pale Ale (handwritten)" prints four words, not five.
 _ANNOTATION_RE = re.compile(r"\([^)]*\)")
 
+# The words a printed origin statement uses to introduce the place, in the
+# forms these labels print: "PRODUCT OF", "MADE IN THE", "HECHO EN",
+# "DISTILLED IN", "BOTTLED BY". None of them is a place, so a reading made of
+# nothing but these has not read the country. "a" is deliberately absent: it
+# is a letter of "U.S.A." on the two labels that print the country that way.
+_ORIGIN_LEAD_IN = frozenset(
+    {"product", "of", "the", "made", "in", "hecho", "en", "distilled", "bottled",
+     "by", "produced"}
+)
+
 
 @lru_cache(maxsize=1)
 def _units() -> UnitTable:
@@ -311,9 +321,13 @@ def _score(entry: dict, read: dict[str, dict], warning_text: str) -> dict[str, b
         got["name_address"] = not printed
     else:
         block = normalize_words(observed["name_address"])
-        anchors = [w for w in printed if len(w) > 3]
-        got["name_address"] = bool(anchors) and any(
-            word_run_present(block, (w,)) for w in anchors
+        # Two of the reading's words, adjacent in the reading and adjacent in
+        # the printed line. One shared word was enough before, which is not
+        # evidence the reader found the line: these lines carry a city, a State
+        # and words like "COMPANY" and "IMPORTS" that a reading of some other
+        # part of the label lands on by itself.
+        got["name_address"] = any(
+            word_run_present(block, printed[i:i + 2]) for i in range(len(printed) - 1)
         )
 
     # Scored on every label, not only the imported ones. Returning True for
@@ -325,8 +339,13 @@ def _score(entry: dict, read: dict[str, dict], warning_text: str) -> dict[str, b
     if statement is None:
         got["origin"] = not country_read
     else:
-        got["origin"] = bool(country_read) and word_run_present(
-            normalize_words(statement), country_read
+        # The place, not the lead-in. The reading is still looked for inside the
+        # whole statement, because one label names its country in the middle of
+        # a bottler line. But a reading made only of the words that introduce
+        # the place - "PRODUCT OF" - names no place and is not a reading of one.
+        place = tuple(w for w in country_read if w not in _ORIGIN_LEAD_IN)
+        got["origin"] = bool(place) and word_run_present(
+            normalize_words(statement), place
         )
 
     expected = entry["expected"]
