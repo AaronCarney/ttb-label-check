@@ -288,9 +288,9 @@ _CONTRAST_JS = r"""
 def _settle(page: Page, button: Any) -> None:
     """Wait for a background transition to finish before the colour is read.
 
-    `globals.css` gives every button `transition: background-color 120ms`, so
-    the colour painted the instant the pointer arrives is the colour the button
-    is leaving, not the colour it is going to. Reading it immediately recorded
+    `globals.css` gives every `.primary-button` `transition: background-color
+    120ms`, so the colour painted the instant the pointer arrives is the colour
+    the button is leaving, not the colour it is going to. Reading it immediately recorded
     the resting background twice and reported the hover state as clean while two
     close buttons and a cancel button were painting white text on #f4f4f6 —
     1.06:1 — the exact defect the hover pass exists to catch.
