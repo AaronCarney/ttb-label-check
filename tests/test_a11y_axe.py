@@ -48,12 +48,20 @@ def _run_axe(page: Page) -> dict[str, Any]:
     """Run axe against the loaded page and return its violations and its undecided checks."""
     page.add_script_tag(path=str(AXE_PATH))
     return page.evaluate(
-        """async () => {
+        r"""async () => {
           const r = await window.axe.run(document, {
             runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa'] },
           });
           const shape = v => ({
-            id: v.id, impact: v.impact, help: v.help, nodes: v.nodes.length,
+            id: v.id,
+            impact: v.impact,
+            help: v.help,
+            // The node targets, not just a count: a reviewer reading a failure
+            // has to know which element axe meant before they can judge it.
+            nodes: v.nodes.map(n => ({
+              target: n.target,
+              summary: (n.failureSummary || '').replace(/\s+/g, ' ').trim(),
+            })),
           });
           return {
             violations: r.violations.map(shape),
