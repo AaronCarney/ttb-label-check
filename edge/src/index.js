@@ -2,16 +2,26 @@
 //
 // Two jobs beyond forwarding, both argued in docs/decisions.md.
 //
-// It signs every forwarded request (0028). The service runs with the invoker
-// check on and grants roles/run.invoker to this Worker's service account and to
-// nobody else, so the run.app URL answers everyone else with 403 — and a request
-// IAM denies is never billed, which is what actually bounds the meter. The
-// Worker holds a key for that account as a secret and mints a Google ID token
-// from it.
+// It signs every forwarded request (0028). The design is that the service runs
+// with the invoker check on and grants roles/run.invoker to this Worker's
+// service account and to nobody else, so the run.app URL answers everyone else
+// with 403 — and a request IAM denies is never billed. The Worker holds a key
+// for that account as a secret and mints a Google ID token from it.
 //
-// It rate-limits what does get through (0029). A Free zone's own WAF rule cannot
-// match a hostname, so it cannot be scoped to this project alone; the Worker can,
-// because it runs for this hostname only.
+// That design is NOT the state of the deployed service. Measured 2026-09-17:
+// the IAM policy grants roles/run.invoker to allUsers as well as to this
+// Worker's service account, and the run.app URL answers /api/health with 200
+// and no credentials at all. scripts/deploy.sh puts the service in that state
+// on TTB_PUBLIC=1, so that a reviewer can reach it; while it holds, the origin
+// can be reached without passing through this Worker.
+//
+// It rate-limits what does get through (0029) — except that it does not, as the
+// measurement at the limit() call below records. So of the two things this file
+// names as bounding the meter, neither holds today, and each comment used to
+// excuse itself by pointing at the other. What is left is the two-instance cap
+// in scripts/deploy.sh. A Free zone's own WAF rule cannot match a hostname, so
+// it cannot be scoped to this project alone; the Worker can, because it runs
+// for this hostname only.
 
 const TOKEN_ENDPOINT = "https://oauth2.googleapis.com/token";
 const JWT_BEARER_GRANT = "urn:ietf:params:oauth:grant-type:jwt-bearer";
@@ -108,8 +118,11 @@ export default {
     // One key for the whole hostname, not one per client address. What is being
     // bounded is the bill, and a per-address limit multiplies by the number of
     // addresses. The cost is that a flood can crowd out a reviewer here — which
-    // is the lesser failure, because it spends nothing, and because the invoker
-    // check is what stands between a flood and the meter (0028).
+    // is the lesser failure, because it spends nothing. That reasoning used to
+    // rest on the invoker check standing between a flood and the meter (0028);
+    // as of 2026-09-17 that check is not on — see the header. So the argument
+    // for one key over one per address still holds on its own terms, but it is
+    // no longer backed by a second gate.
     //
     // This call does not currently deny anything. Measured on the deployed
     // Worker 2026-09-16: configured at 5 requests per 60 seconds, limit()
