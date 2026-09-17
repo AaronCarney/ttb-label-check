@@ -5,6 +5,7 @@ the same reason code. The advisory carries a UUID4 ``advisory_id`` so the
 dismiss endpoint can validate the dismissal corresponds to the still-outstanding
 advisory (idempotent against double-dismissal; rejects stale tabs).
 """
+
 from __future__ import annotations
 
 import uuid

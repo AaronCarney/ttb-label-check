@@ -17,6 +17,7 @@ The detection test drives the real engine, which costs about a second to load.
 That is the point of it: a stub cannot say whether a real detector finds this
 image's text.
 """
+
 from __future__ import annotations
 
 import pytest
@@ -96,9 +97,9 @@ async def test_a_failed_warm_read_does_not_take_the_process_down(caplog):
     with caplog.at_level("WARNING", logger="app.vision.local"):
         await reader.warm()
 
-    assert any(
-        record.msg == "reader_warm_read_failed" for record in caplog.records
-    ), "a warm read that failed silently is a cost nobody knows is still there"
+    assert any(record.msg == "reader_warm_read_failed" for record in caplog.records), (
+        "a warm read that failed silently is a cost nobody knows is still there"
+    )
 
 
 @pytest.mark.asyncio

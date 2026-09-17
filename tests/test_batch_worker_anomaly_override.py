@@ -1,5 +1,6 @@
 """BatchWorker — anomaly broadcast, staying alive through an override, and
 completion semantics: stream-end fires once, after the last per-label event."""
+
 import asyncio
 from datetime import UTC, datetime
 
@@ -167,7 +168,10 @@ async def test_worker_emits_anomaly_advisory_on_5_of_10_same_reason_code():
     # 10 items, all returning needs_review with same reason_code
     items = tuple(_stub_item(i) for i in range(10))
     in_flight = InFlightBatch(
-        batch_id="B-AN1", agent_id="a", items=items, lookahead_k=3,
+        batch_id="B-AN1",
+        agent_id="a",
+        items=items,
+        lookahead_k=3,
     )
     plan = [(0.0, _envelope_with_reason_code(i, "BRAND.NAME.MISMATCH")) for i in range(10)]
     fake_eval = _fake_evaluator(plan=plan)
@@ -206,11 +210,11 @@ async def test_worker_does_not_inspect_audit_trail_overrides():
     `overrides`, which appears in docstrings and in the conftest helper."""
     import re
     from pathlib import Path
+
     src = Path("app/batch/worker.py").read_text()
     hits = re.findall(r"\.audit_trail\s*\.\s*overrides", src)
     assert hits == [], (
-        f"BatchWorker must not access audit_trail.overrides "
-        f"(found {len(hits)} occurrences)."
+        f"BatchWorker must not access audit_trail.overrides (found {len(hits)} occurrences)."
     )
 
 
@@ -220,7 +224,10 @@ async def test_worker_continues_after_in_flight_results_mutation_simulating_over
     `in_flight.results[label_id]` mid-batch, the worker keeps going."""
     items = tuple(_stub_item(i) for i in range(3))
     in_flight = InFlightBatch(
-        batch_id="B-OV1", agent_id="a", items=items, lookahead_k=3,
+        batch_id="B-OV1",
+        agent_id="a",
+        items=items,
+        lookahead_k=3,
     )
     fake_eval = _fake_evaluator(n_items=3, latency_s=0.05)
     bus = SSEBus()
@@ -243,19 +250,21 @@ async def test_worker_continues_after_in_flight_results_mutation_simulating_over
     from datetime import datetime
 
     original = in_flight.results["lbl-0"]
-    new_audit = original.audit_trail.model_copy(update={
-        "overrides": (
-            OverrideEntry(
-                field_name=None,
-                original_disposition=original.disposition,
-                applied_disposition="pass",
-                reason_code="BRAND.NAME.NEEDS_REVIEW",
-                justification_text="Test override",
-                reviewer_id="session-test1234",
-                timestamp=datetime.now(UTC),
+    new_audit = original.audit_trail.model_copy(
+        update={
+            "overrides": (
+                OverrideEntry(
+                    field_name=None,
+                    original_disposition=original.disposition,
+                    applied_disposition="pass",
+                    reason_code="BRAND.NAME.NEEDS_REVIEW",
+                    justification_text="Test override",
+                    reviewer_id="session-test1234",
+                    timestamp=datetime.now(UTC),
+                ),
             ),
-        ),
-    })
+        }
+    )
     in_flight.results["lbl-0"] = original.model_copy(update={"audit_trail": new_audit})
 
     # Worker must continue and emit events 1, 2, then stream-end
@@ -273,7 +282,10 @@ async def test_worker_continues_after_in_flight_results_mutation_simulating_over
 async def test_worker_emits_stream_end_exactly_once_after_last_label_result():
     items = tuple(_stub_item(i) for i in range(3))
     in_flight = InFlightBatch(
-        batch_id="B-CC1", agent_id="a", items=items, lookahead_k=3,
+        batch_id="B-CC1",
+        agent_id="a",
+        items=items,
+        lookahead_k=3,
     )
     fake_eval = _fake_evaluator(n_items=3, latency_s=0.0)
     bus = SSEBus()

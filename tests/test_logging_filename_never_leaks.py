@@ -7,6 +7,7 @@ filter are not enough on their own: the message string is outside both, and
 is emitted by design. This runs the real worker through both the refusal path
 and the ordinary path and reads everything the real handler emits.
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -114,9 +115,8 @@ async def test_no_log_line_carries_the_uploaders_filename() -> None:
         emitted = cap.text
 
     assert emitted.strip(), "the worker emitted no log lines, so this proves nothing"
-    assert _PERSON not in emitted, (
-        "the uploader's filename reached the logs:\n"
-        + "\n".join(line for line in emitted.splitlines() if _PERSON in line)
+    assert _PERSON not in emitted, "the uploader's filename reached the logs:\n" + "\n".join(
+        line for line in emitted.splitlines() if _PERSON in line
     )
     # The reviewer is still told which file it was — that path is untouched.
     assert _PERSON in in_flight.failures[refused.label_id]

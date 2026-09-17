@@ -14,6 +14,7 @@ PRD FR-1, FR-7 and FR-11: a result per applicable check, matching rules that
 treat equivalent values as equal, and an overall result of match when every
 check matches.
 """
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -70,9 +71,7 @@ async def _verdicts_for(engine, entry) -> dict[str, list[tuple[str, str]]]:
     """Per manifest check, the (rule_id, verdict) pairs the engine produced."""
     record = application_record(entry)
     ctx = engine.build_validator_context(started_at_ms=0)
-    results = await engine.evaluate(
-        label_observations(entry), expected_values_from(record), ctx
-    )
+    results = await engine.evaluate(label_observations(entry), expected_values_from(record), ctx)
     by_check: dict[str, list[tuple[str, str]]] = {check: [] for check in FIELD_CHECKS}
     for result in results:
         parts = result.rule_id.split(".")
@@ -99,14 +98,14 @@ async def test_check_reaches_the_outcome_the_manifest_states(engine, entry, chec
     accepted = accepted_verdicts(entry, check)
     for rule_id, verdict in produced:
         assert verdict in accepted, (
-            f"{entry['id']}: {rule_id} reported {verdict!r}; "
-            f"the manifest accepts {accepted}"
+            f"{entry['id']}: {rule_id} reported {verdict!r}; the manifest accepts {accepted}"
         )
 
 
 # ---------------------------------------------------------------------------
 # What every comparison reports when there is no application to compare with
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.parametrize(
     "beverage_class", [pytest.param(cls, id=cls.value) for cls in BeverageClass]
@@ -117,12 +116,34 @@ async def test_no_application_means_no_comparison_applies(engine, beverage_class
     agrees would tell them a check ran that never had two sides.
     """
     readings = (
-        make_obs(field_id="brand_name", value={"brand_name": "Stone's Throw"}, beverage_class=beverage_class),
-        make_obs(field_id="class_type", value={"class_type": "BOURBON WHISKEY"}, beverage_class=beverage_class),
-        make_obs(field_id="abv", value={"abv_pct": 40.0, "unit": "%"}, beverage_class=beverage_class),
-        make_obs(field_id="net_contents", value={"net_contents_value": 750, "unit": "mL"}, beverage_class=beverage_class),
-        make_obs(field_id="name_address", value={"name": "A Distillery", "city": "", "state": ""}, beverage_class=beverage_class),
-        make_obs(field_id="country_origin", value={"country": "PRODUCT OF FRANCE"}, beverage_class=beverage_class),
+        make_obs(
+            field_id="brand_name",
+            value={"brand_name": "Stone's Throw"},
+            beverage_class=beverage_class,
+        ),
+        make_obs(
+            field_id="class_type",
+            value={"class_type": "BOURBON WHISKEY"},
+            beverage_class=beverage_class,
+        ),
+        make_obs(
+            field_id="abv", value={"abv_pct": 40.0, "unit": "%"}, beverage_class=beverage_class
+        ),
+        make_obs(
+            field_id="net_contents",
+            value={"net_contents_value": 750, "unit": "mL"},
+            beverage_class=beverage_class,
+        ),
+        make_obs(
+            field_id="name_address",
+            value={"name": "A Distillery", "city": "", "state": ""},
+            beverage_class=beverage_class,
+        ),
+        make_obs(
+            field_id="country_origin",
+            value={"country": "PRODUCT OF FRANCE"},
+            beverage_class=beverage_class,
+        ),
     )
     ctx = engine.build_validator_context(started_at_ms=0)
     results = await engine.evaluate(readings, (), ctx)
@@ -133,7 +154,8 @@ async def test_no_application_means_no_comparison_applies(engine, beverage_class
     }
     assert compared, "no comparison rule ran"
     not_applicable = {
-        rule_id: outcome for rule_id, outcome in compared.items()
+        rule_id: outcome
+        for rule_id, outcome in compared.items()
         if outcome is not Outcome.NOT_APPLICABLE
     }
     assert not not_applicable, not_applicable

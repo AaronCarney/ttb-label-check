@@ -2,6 +2,7 @@
 """Inference dependencies stay behind the reader's seam: only app/vision/ may
 import openai, paddleocr, cv2 or torch.
 The reader is the only place a hosted model may be reached from."""
+
 import re
 from pathlib import Path
 

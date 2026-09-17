@@ -11,6 +11,7 @@ having:
   the form decision 0027 settled: counts rather than percentages, every check
   named, and the corpus the figures came from stated.
 """
+
 from __future__ import annotations
 
 import re
@@ -56,7 +57,7 @@ def _section(content: str, heading: str) -> str:
     """The body under ``heading``, up to the next heading of the same level."""
     level = heading.split(" ", 1)[0]
     start = content.index(heading)
-    rest = content[start + len(heading):]
+    rest = content[start + len(heading) :]
     nxt = re.search(rf"^{re.escape(level)} ", rest, re.MULTILINE)
     return rest[: nxt.start()] if nxt else rest
 
@@ -189,12 +190,8 @@ def test_readme_says_there_is_no_held_out_set() -> None:
     the reader found nothing — see `tests/rules/test_rule_pack_citations.py`.
     """
     accuracy = _section(_readme(), "## Reading accuracy")
-    assert "held-out" in accuracy, (
-        "accuracy section does not say there is no held-out set"
-    )
-    assert "in-sample" in accuracy, (
-        "accuracy section does not say the figures are in-sample"
-    )
+    assert "held-out" in accuracy, "accuracy section does not say there is no held-out set"
+    assert "in-sample" in accuracy, "accuracy section does not say the figures are in-sample"
 
 
 def test_readme_states_the_upload_limits_the_service_enforces() -> None:

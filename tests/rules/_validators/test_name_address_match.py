@@ -21,6 +21,7 @@ label is wrong — the block need not list every name an applicant may print —
 so the check reports that it could not settle the question and a reviewer
 reads both.
 """
+
 from __future__ import annotations
 
 from app.rules._validators import VALIDATOR_REGISTRY
@@ -29,9 +30,7 @@ from app.schemas.rejection import Outcome, Severity
 from app.schemas.rules import MatchPolicy
 from tests.rules.fixtures import make_context, make_expected, make_obs, make_rule
 
-CHATEAU_DIANA_BLOCK = (
-    "CHATEAU DIANA, CHATEAU DIANA, LLC 6195 DRY CREEK RD HEALDSBURG CA 95448"
-)
+CHATEAU_DIANA_BLOCK = "CHATEAU DIANA, CHATEAU DIANA, LLC 6195 DRY CREEK RD HEALDSBURG CA 95448"
 
 
 def _rule():
@@ -63,6 +62,7 @@ def _verdict(label_statement: str | None, block: str | None):
 # The State name and its postal code are the same State
 # ---------------------------------------------------------------------------
 
+
 def test_a_state_written_out_corroborates_its_postal_code() -> None:
     """The label writes California; the registry block writes CA. Without the
     fold the State corroborates nothing and the city has to carry the match
@@ -88,7 +88,7 @@ def test_a_two_word_state_name_folds() -> None:
 
 
 def test_the_longest_state_name_wins() -> None:
-    """"West Virginia" is West Virginia, not Virginia with a word in front."""
+    """ "West Virginia" is West Virginia, not Virginia with a word in front."""
     res = _verdict(
         "BOTTLED BY ACME SPIRITS, West Virginia",
         "ACME SPIRITS, ACME SPIRITS LLC 1 MAIN ST CHARLESTON WV 25301",
@@ -108,6 +108,7 @@ def test_a_different_state_does_not_corroborate() -> None:
 # ---------------------------------------------------------------------------
 # What the check does when it cannot line the two sides up
 # ---------------------------------------------------------------------------
+
 
 def test_a_name_the_block_does_not_carry_goes_to_a_reviewer() -> None:
     res = _verdict("BOTTLED BY SOMEONE ELSE, Healdsburg, California", CHATEAU_DIANA_BLOCK)

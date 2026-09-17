@@ -7,6 +7,7 @@ its least confident field. This module ships the type that carries the values;
 the aggregation runs in ``app/services/aggregation.py`` during disposition
 assembly, not at parse time.
 """
+
 from __future__ import annotations
 
 from typing import Literal
@@ -49,11 +50,14 @@ class AISuggestionWire(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     present: bool
-    task: Literal[
-        "brand_borderline",
-        "reasoning_enrichment",
-        "ocr_reconciliation",
-    ] | None = None
+    task: (
+        Literal[
+            "brand_borderline",
+            "reasoning_enrichment",
+            "ocr_reconciliation",
+        ]
+        | None
+    ) = None
     text: str | None = None
     model_disposition: Literal["pass", "needs_review"] | None = None
 

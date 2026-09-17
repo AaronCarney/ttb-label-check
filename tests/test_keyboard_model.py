@@ -1,4 +1,5 @@
 """An override can be completed in three keystrokes, with no mouse."""
+
 from __future__ import annotations
 
 import json
@@ -8,9 +9,7 @@ import pytest
 from playwright.sync_api import Page
 
 ROOT = Path(__file__).resolve().parent.parent
-FIXTURE = (
-    ROOT / "tests" / "fixtures" / "envelopes" / "single" / "03-warning-title-case.json"
-)
+FIXTURE = ROOT / "tests" / "fixtures" / "envelopes" / "single" / "03-warning-title-case.json"
 
 
 @pytest.mark.usefixtures("live_server", "pnpm_built_island")
@@ -18,15 +17,22 @@ def test_three_keystroke_override(page: Page, live_server_url: str) -> None:
     envelope = json.loads(FIXTURE.read_text())
 
     def _route(route, request):
-        route.fulfill(status=200, content_type="application/json", body=json.dumps({
-            "field_name": None,
-            "original_disposition": "pass",
-            "applied_disposition": "needs_review",
-            "reason_code": (request.post_data_json or {}).get("reason_code", ""),
-            "justification_text": (request.post_data_json or {}).get("justification_text"),
-            "reviewer_id": "session-test",
-            "timestamp": "2026-09-15T00:00:00Z",
-        }))
+        route.fulfill(
+            status=200,
+            content_type="application/json",
+            body=json.dumps(
+                {
+                    "field_name": None,
+                    "original_disposition": "pass",
+                    "applied_disposition": "needs_review",
+                    "reason_code": (request.post_data_json or {}).get("reason_code", ""),
+                    "justification_text": (request.post_data_json or {}).get("justification_text"),
+                    "reviewer_id": "session-test",
+                    "timestamp": "2026-09-15T00:00:00Z",
+                }
+            ),
+        )
+
     page.route("**/labels/*/overrides", _route)
 
     page.add_init_script(
@@ -56,7 +62,7 @@ def test_three_keystroke_override(page: Page, live_server_url: str) -> None:
 
     # The LiveRegion announces the saved override; wait for the message.
     page.wait_for_selector(
-        'text=/Override saved: WARNING\\.STYLE\\.HEADING_NOT_BOLD_CAPS/',
+        "text=/Override saved: WARNING\\.STYLE\\.HEADING_NOT_BOLD_CAPS/",
         timeout=2000,
     )
 
@@ -70,18 +76,26 @@ def test_three_keystroke_override_posts_to_endpoint(page: Page, live_server_url:
         captured["url"] = request.url
         captured["method"] = request.method
         captured["body"] = request.post_data_json
-        route.fulfill(status=200, content_type="application/json", body=json.dumps({
-            "field_name": None,
-            "original_disposition": "pass",
-            "applied_disposition": "needs_review",
-            "reason_code": (request.post_data_json or {}).get("reason_code", ""),
-            "justification_text": (request.post_data_json or {}).get("justification_text"),
-            "reviewer_id": "session-test",
-            "timestamp": "2026-09-15T00:00:00Z",
-        }))
+        route.fulfill(
+            status=200,
+            content_type="application/json",
+            body=json.dumps(
+                {
+                    "field_name": None,
+                    "original_disposition": "pass",
+                    "applied_disposition": "needs_review",
+                    "reason_code": (request.post_data_json or {}).get("reason_code", ""),
+                    "justification_text": (request.post_data_json or {}).get("justification_text"),
+                    "reviewer_id": "session-test",
+                    "timestamp": "2026-09-15T00:00:00Z",
+                }
+            ),
+        )
+
     page.route("**/labels/*/overrides", _route)
 
-    page.add_init_script(script=f"""
+    page.add_init_script(
+        script=f"""
       window.addEventListener('DOMContentLoaded', () => {{
         const tag = document.createElement('script');
         tag.id = 'envelope';
@@ -89,7 +103,8 @@ def test_three_keystroke_override_posts_to_endpoint(page: Page, live_server_url:
         tag.textContent = {json.dumps(json.dumps(envelope))};
         document.body.appendChild(tag);
       }});
-    """)
+    """
+    )
     page.goto(f"{live_server_url}/")
     page.wait_for_selector('[data-mounted="true"]', timeout=5000)
 
@@ -98,7 +113,7 @@ def test_three_keystroke_override_posts_to_endpoint(page: Page, live_server_url:
     page.keyboard.type("w")
     page.keyboard.press("Enter")
     page.wait_for_selector(
-        'text=/Override saved: WARNING\\.STYLE\\.HEADING_NOT_BOLD_CAPS/',
+        "text=/Override saved: WARNING\\.STYLE\\.HEADING_NOT_BOLD_CAPS/",
         timeout=2000,
     )
     assert captured["method"] == "POST"
@@ -122,10 +137,13 @@ def test_override_failure_path_surfaces_toast(page: Page, live_server_url: str) 
         route.fulfill(
             status=422,
             content_type="application/json",
-            body=json.dumps({
-                "detail": "reason_code 'WARNING.STYLE.HEADING_NOT_BOLD_CAPS' is not in the loaded registry",
-            }),
+            body=json.dumps(
+                {
+                    "detail": "reason_code 'WARNING.STYLE.HEADING_NOT_BOLD_CAPS' is not in the loaded registry",
+                }
+            ),
         )
+
     page.route("**/labels/*/overrides", _route_422)
 
     page.add_init_script(

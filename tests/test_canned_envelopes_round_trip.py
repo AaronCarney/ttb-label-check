@@ -4,6 +4,7 @@ The UI tests are built on these fixtures. If the engine starts producing
 envelopes whose shape diverges from them, that is a wire-contract break to be
 settled deliberately — not something to paper over by reworking the fixture.
 """
+
 from __future__ import annotations
 
 import json

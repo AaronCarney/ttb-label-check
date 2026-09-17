@@ -14,6 +14,7 @@ Two payload shapes reach the validator. The reader emits
 hand-built fixtures carry a `heading_styles` sub-object that states a weight
 rather than measuring one, and is therefore read as measured.
 """
+
 from __future__ import annotations
 
 from app.rules._validators import VALIDATOR_REGISTRY
@@ -45,24 +46,54 @@ def _rule(*, unmeasured_code: str | None = UNMEASURED_CODE):
 
 def _check(payload: dict, *, rule=None):
     obs = make_obs(field_id="warning_block", value=payload)
-    return heading_style_check(obs, make_expected(field_id="warning_block"), rule or _rule(), make_context())
+    return heading_style_check(
+        obs, make_expected(field_id="warning_block"), rule or _rule(), make_context()
+    )
 
 
 def test_caps_and_bold_passes() -> None:
-    obs = make_obs(field_id="warning_block", value={"heading_text": "GOVERNMENT WARNING", "heading_styles": {"weight": "bold", "case": "upper"}})
-    assert heading_style_check(obs, make_expected(field_id="warning_block"), _rule(), make_context()).outcome is Outcome.PASS
+    obs = make_obs(
+        field_id="warning_block",
+        value={
+            "heading_text": "GOVERNMENT WARNING",
+            "heading_styles": {"weight": "bold", "case": "upper"},
+        },
+    )
+    assert (
+        heading_style_check(
+            obs, make_expected(field_id="warning_block"), _rule(), make_context()
+        ).outcome
+        is Outcome.PASS
+    )
 
 
 def test_title_case_fails() -> None:
-    obs = make_obs(field_id="warning_block", value={"heading_text": "Government Warning", "heading_styles": {"weight": "bold", "case": "title"}})
+    obs = make_obs(
+        field_id="warning_block",
+        value={
+            "heading_text": "Government Warning",
+            "heading_styles": {"weight": "bold", "case": "title"},
+        },
+    )
     res = heading_style_check(obs, make_expected(field_id="warning_block"), _rule(), make_context())
     assert res.outcome is Outcome.FAIL
     assert res.reason_code == "WARNING.STYLE.HEADING_NOT_BOLD_CAPS"
 
 
 def test_not_bold_fails() -> None:
-    obs = make_obs(field_id="warning_block", value={"heading_text": "GOVERNMENT WARNING", "heading_styles": {"weight": "regular", "case": "upper"}})
-    assert heading_style_check(obs, make_expected(field_id="warning_block"), _rule(), make_context()).outcome is Outcome.FAIL
+    obs = make_obs(
+        field_id="warning_block",
+        value={
+            "heading_text": "GOVERNMENT WARNING",
+            "heading_styles": {"weight": "regular", "case": "upper"},
+        },
+    )
+    assert (
+        heading_style_check(
+            obs, make_expected(field_id="warning_block"), _rule(), make_context()
+        ).outcome
+        is Outcome.FAIL
+    )
 
 
 def test_unmeasured_weight_with_correct_capitals_goes_to_a_reviewer() -> None:
@@ -72,12 +103,14 @@ def test_unmeasured_weight_with_correct_capitals_goes_to_a_reviewer() -> None:
     the answer is insufficient evidence at warn severity, under the code the
     rule pack declares for it.
     """
-    res = _check({
-        "heading_text": "GOVERNMENT WARNING:",
-        "heading_all_caps": True,
-        "heading_bold": False,
-        "heading_bold_measured_confident": False,
-    })
+    res = _check(
+        {
+            "heading_text": "GOVERNMENT WARNING:",
+            "heading_all_caps": True,
+            "heading_bold": False,
+            "heading_bold_measured_confident": False,
+        }
+    )
     assert res.outcome is Outcome.INSUFFICIENT_EVIDENCE
     assert res.severity is Severity.WARN
     assert res.reason_code == UNMEASURED_CODE
@@ -89,12 +122,14 @@ def test_unmeasured_weight_does_not_excuse_wrong_capitals() -> None:
     A heading in title case is non-compliant whether or not anyone measured its
     weight, so the unmeasured branch must not swallow it.
     """
-    res = _check({
-        "heading_text": "Government Warning:",
-        "heading_all_caps": False,
-        "heading_bold": True,
-        "heading_bold_measured_confident": False,
-    })
+    res = _check(
+        {
+            "heading_text": "Government Warning:",
+            "heading_all_caps": False,
+            "heading_bold": True,
+            "heading_bold_measured_confident": False,
+        }
+    )
     assert res.outcome is Outcome.FAIL
     assert res.severity is Severity.REJECT
     assert res.reason_code == "WARNING.STYLE.HEADING_NOT_BOLD_CAPS"
@@ -102,12 +137,14 @@ def test_unmeasured_weight_does_not_excuse_wrong_capitals() -> None:
 
 def test_measured_not_bold_still_fails() -> None:
     """A weight that was measured, and came out regular, is the label's fault."""
-    res = _check({
-        "heading_text": "GOVERNMENT WARNING:",
-        "heading_all_caps": True,
-        "heading_bold": False,
-        "heading_bold_measured_confident": True,
-    })
+    res = _check(
+        {
+            "heading_text": "GOVERNMENT WARNING:",
+            "heading_all_caps": True,
+            "heading_bold": False,
+            "heading_bold_measured_confident": True,
+        }
+    )
     assert res.outcome is Outcome.FAIL
     assert res.reason_code == "WARNING.STYLE.HEADING_NOT_BOLD_CAPS"
 
@@ -133,12 +170,14 @@ def test_unmeasured_weight_without_a_declared_code_falls_through() -> None:
 
 def test_spacing_inside_the_heading_is_not_a_difference() -> None:
     """ttb-26231001000662 prints `GOVERNMENT WARNING  :` and was approved."""
-    res = _check({
-        "heading_text": "GOVERNMENT  WARNING  :",
-        "heading_all_caps": True,
-        "heading_bold": True,
-        "heading_bold_measured_confident": True,
-    })
+    res = _check(
+        {
+            "heading_text": "GOVERNMENT  WARNING  :",
+            "heading_all_caps": True,
+            "heading_bold": True,
+            "heading_bold_measured_confident": True,
+        }
+    )
     assert res.outcome is Outcome.PASS
 
 

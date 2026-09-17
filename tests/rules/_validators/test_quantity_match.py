@@ -15,6 +15,7 @@ there. `docs/decisions.md#0014` records where the tolerance comes from, and
 recomputes both of its bounds from the authorized standards of fill, so an edit
 that loosens the number fails here with the reason attached.
 """
+
 from __future__ import annotations
 
 from decimal import Decimal
@@ -43,12 +44,55 @@ _FL_OZ_ML = 29.5735295625
 # from. Malt beverages have no standards of fill at all (§7.70), which is why
 # the tolerance is derived from these two lists and then applied to all three.
 _WINE_SIZES_ML = (
-    50, 100, 187, 200, 250, 300, 330, 355, 360, 375, 473, 500, 550, 568,
-    600, 620, 700, 720, 750, 1000, 1500, 1800, 2250, 3000,
+    50,
+    100,
+    187,
+    200,
+    250,
+    300,
+    330,
+    355,
+    360,
+    375,
+    473,
+    500,
+    550,
+    568,
+    600,
+    620,
+    700,
+    720,
+    750,
+    1000,
+    1500,
+    1800,
+    2250,
+    3000,
 )
 _SPIRITS_SIZES_ML = (
-    50, 100, 200, 250, 331, 350, 355, 375, 475, 500, 570, 700, 710, 720,
-    750, 900, 945, 1000, 1500, 1750, 1800, 2000, 3000,
+    50,
+    100,
+    200,
+    250,
+    331,
+    350,
+    355,
+    375,
+    475,
+    500,
+    570,
+    700,
+    710,
+    720,
+    750,
+    900,
+    945,
+    1000,
+    1500,
+    1750,
+    1800,
+    2000,
+    3000,
 )
 
 
@@ -110,6 +154,7 @@ def _check(
 
 # ---- the conversions a compliant label makes --------------------------------
 
+
 def test_a_tenth_of_an_ounce_agrees_with_the_rounded_metric_size() -> None:
     """375 mL is 12.6803 fluid ounces and the label prints 12.7, which converts
     back to 375.58. Compared exactly, that rejected a compliant label."""
@@ -137,6 +182,7 @@ def test_the_table_lists_the_words_a_label_prints() -> None:
 
 
 # ---- what must still fail ---------------------------------------------------
+
 
 def test_a_genuinely_different_size_still_fails() -> None:
     """12 fluid ounces is 354.88 mL, which is not a rounding of 375."""
@@ -180,6 +226,7 @@ def test_an_unconvertible_unit_goes_to_a_reviewer_not_to_a_failure() -> None:
 
 
 # ---- the number itself ------------------------------------------------------
+
 
 def _printed_fl_oz(millilitres: float) -> float:
     """The customary figure a label prints for a metric size: converted, and

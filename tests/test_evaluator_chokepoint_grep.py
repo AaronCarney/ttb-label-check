@@ -3,6 +3,7 @@
 so a failure anywhere below it comes back as a needs_review result rather than a
 500. Two exceptions are allowed in the source — a NotImplementedError, and a
 raise preceded by a `# programmer error` comment within two lines."""
+
 import re
 from pathlib import Path
 
@@ -20,7 +21,7 @@ def test_evaluator_has_no_bare_raise():
         what = m.group(1)
         if "NotImplementedError" in what:
             continue
-        prior_2 = "\n".join(lines[max(0, i - 3):i - 1]).lower()
+        prior_2 = "\n".join(lines[max(0, i - 3) : i - 1]).lower()
         if "programmer error" in prior_2 or "programmer-error" in prior_2:
             continue
         violations.append(f"L{i}: {line.strip()}")

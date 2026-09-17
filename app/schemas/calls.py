@@ -1,4 +1,5 @@
 """The record a reader writes for each call it makes."""
+
 from __future__ import annotations
 
 from datetime import datetime

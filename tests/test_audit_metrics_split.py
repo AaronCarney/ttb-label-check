@@ -1,5 +1,6 @@
 """Audit and metrics are separate blocks built from one timeline: per-rule
 durations belong to the metrics block, never to the audit trail."""
+
 from app.schemas.application import Application
 from app.services.audit import AuditRecorder
 from app.services.engine_meta import EvaluationTimeline

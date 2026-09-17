@@ -15,6 +15,7 @@ that cites it:
 3. Every `decisions.md#NNNN` citation anywhere in the repository names an
    entry that exists.
 """
+
 from __future__ import annotations
 
 import re
@@ -31,9 +32,7 @@ ANCHOR = re.compile(r'^<a id="(\d{4})"></a>$', re.MULTILINE)
 CITATION = re.compile(r"decisions\.md#(\d{4})|\]\(#(\d{4})\)")
 
 # Built bundles and binaries carry no citations and are slow to read.
-SKIP = re.compile(
-    r"^(app/ui/static/|frontend/dist/)|\.(png|jpg|jpeg|pdf|ico|svg|woff2?|lock)$"
-)
+SKIP = re.compile(r"^(app/ui/static/|frontend/dist/)|\.(png|jpg|jpeg|pdf|ico|svg|woff2?|lock)$")
 
 
 def _doc_text() -> str:
@@ -65,9 +64,7 @@ def test_every_entry_has_an_anchor_and_every_anchor_has_an_entry() -> None:
 def test_the_anchor_sits_immediately_above_its_own_entry() -> None:
     """An anchor that drifts away from its heading lands a reader on the
     entry above or below it, which is worse than a broken link."""
-    pairs = re.findall(
-        r'^<a id="(\d{4})"></a>\n## (\d{4})\. ', _doc_text(), re.MULTILINE
-    )
+    pairs = re.findall(r'^<a id="(\d{4})"></a>\n## (\d{4})\. ', _doc_text(), re.MULTILINE)
     mismatched = [(a, h) for a, h in pairs if a != h]
     assert not mismatched, f"anchor and heading disagree: {mismatched}"
     assert len(pairs) == len(set(ANCHOR.findall(_doc_text()))), (

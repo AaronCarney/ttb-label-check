@@ -23,6 +23,7 @@ environment:
 router and a new page route is added by writing it in the module it belongs
 to rather than by touching the app factory. See `docs/decisions.md#0019`.
 """
+
 from __future__ import annotations
 
 from fastapi import APIRouter

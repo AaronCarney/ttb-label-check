@@ -16,6 +16,7 @@ what a hotspot covered is not knowable before the label is read. Legibility is
 now judged by what the reader returned, in `app/vision/local.py`: an image that
 yields no text at all is the image nobody can check.
 """
+
 from __future__ import annotations
 
 import io

@@ -13,6 +13,7 @@ Whether a registered code is actually used, and whether an unused one is
 declared in `reviewer_vocabulary`, is the other half of the contract and lives
 in tests/rules/test_reason_code_registry.py.
 """
+
 from __future__ import annotations
 
 import re
@@ -25,9 +26,18 @@ GRAMMAR = re.compile(r"^[A-Z][A-Z0-9_]*(?:\.[A-Z][A-Z0-9_]*){2,3}$")
 SEMVER = re.compile(r"^\d+\.\d+\.\d+$")
 # ORIGIN was left out of this set when it was written, though the file has
 # carried an ORIGIN bin and three ORIGIN codes throughout.
-BINS_REQUIRED = {"BRAND", "CLASS_TYPE", "ALCOHOL_CONTENT", "NAME_ADDRESS",
-                 "NET_CONTENTS", "ORIGIN", "WARNING", "LEGIBILITY", "ENGINE",
-                 "AGE_STATEMENT"}
+BINS_REQUIRED = {
+    "BRAND",
+    "CLASS_TYPE",
+    "ALCOHOL_CONTENT",
+    "NAME_ADDRESS",
+    "NET_CONTENTS",
+    "ORIGIN",
+    "WARNING",
+    "LEGIBILITY",
+    "ENGINE",
+    "AGE_STATEMENT",
+}
 
 
 def test_registry_parses() -> None:

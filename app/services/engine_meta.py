@@ -4,6 +4,7 @@ Both ``AuditRecorder.assemble`` and ``MetricsBuilder.build`` consume the same
 ``EvaluationTimeline`` instance constructed and mutated by ``Evaluator.evaluate``.
 This is the ONE source of truth for per-evaluation timing + outcome data.
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -13,6 +14,7 @@ from datetime import UTC, datetime
 @dataclass(frozen=True)
 class EngineFailure:
     """One typed engine-failure event captured during evaluation."""
+
     reason_code: str
     message: str
     exception_class: str
@@ -39,13 +41,17 @@ class EvaluationTimeline:
     def record_vision_done(self, duration_ms: int) -> None:
         self.vision_duration_ms = duration_ms
 
-    def record_rule_done(self, *, rule_id: str, duration_ms: int, disposition: str, evidence_ref: str) -> None:
+    def record_rule_done(
+        self, *, rule_id: str, duration_ms: int, disposition: str, evidence_ref: str
+    ) -> None:
         self.per_rule_durations[rule_id] = duration_ms
         self.per_rule_dispositions[rule_id] = disposition
         self.per_rule_evidence_refs[rule_id] = evidence_ref
 
     def record_failure(self, *, reason_code: str, message: str, exception_class: str) -> None:
-        self.failures.append(EngineFailure(reason_code=reason_code, message=message, exception_class=exception_class))
+        self.failures.append(
+            EngineFailure(reason_code=reason_code, message=message, exception_class=exception_class)
+        )
 
     def finish(self, total_duration_ms: int) -> None:
         self.total_duration_ms = total_duration_ms

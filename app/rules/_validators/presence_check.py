@@ -11,6 +11,7 @@ strings included, so a label carrying no government warning still arrives as a
 `gov_warning` observation. `project_reading` pulls the reading out of that
 payload so an empty one fails, which is what §16.21 requires.
 """
+
 from __future__ import annotations
 
 from app.rules._validators import ValidatorContext, register

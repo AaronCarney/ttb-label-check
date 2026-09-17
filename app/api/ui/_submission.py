@@ -9,6 +9,7 @@ routes cannot drift apart on any of the three.
 This module reaches into ``app.services`` and ``app.deps``, which is why the
 page shells do not: rendering a page needs none of it.
 """
+
 from __future__ import annotations
 
 from app.config import Settings

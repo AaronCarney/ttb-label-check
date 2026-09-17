@@ -10,6 +10,7 @@ The
 'conditional_presence' alias enforces presence only when the precondition in
 rule.parameters['precondition'] is satisfied (a Python expression evaluated
 against expected.parameters and observed_value)."""
+
 from __future__ import annotations
 
 from app.rules._validators import VALIDATOR_REGISTRY

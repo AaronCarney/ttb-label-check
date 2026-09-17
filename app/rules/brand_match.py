@@ -30,6 +30,7 @@ Threshold values do NOT live here — they come from rule-pack data, never from
 constants in Python. What a score above a threshold *means* is the validator's;
 this module only measures.
 """
+
 from __future__ import annotations
 
 import re

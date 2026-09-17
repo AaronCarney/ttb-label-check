@@ -5,6 +5,7 @@ together into one runnable suite, so a break in the scaffolding — packaging,
 the health endpoint, the wire envelopes, secret handling, the dependency
 seams — shows up in one place.
 """
+
 from __future__ import annotations
 
 import json
@@ -113,11 +114,7 @@ def test_healthz_emits_one_json_log_line(capsys) -> None:
     # Filter to the app.healthz logger — third-party libraries (e.g., httpx
     # in TestClient) may emit their own lines through the root handler;
     # those are not what this test asserts.
-    json_lines = [
-        json.loads(ln)
-        for ln in captured.splitlines()
-        if ln.strip().startswith("{")
-    ]
+    json_lines = [json.loads(ln) for ln in captured.splitlines() if ln.strip().startswith("{")]
     healthz_lines = [p for p in json_lines if p.get("logger") == "app.healthz"]
     assert len(healthz_lines) == 1, json_lines
     parsed = healthz_lines[0]

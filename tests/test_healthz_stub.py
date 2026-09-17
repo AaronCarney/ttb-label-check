@@ -3,6 +3,7 @@
 The endpoint answers from process state alone: it does not invoke the reader,
 so a health check can never cost a label read.
 """
+
 from __future__ import annotations
 
 import os

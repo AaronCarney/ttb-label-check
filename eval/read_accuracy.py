@@ -43,6 +43,7 @@ regulation text, because that is what 27 CFR 16.21 requires of it.
 The numbers this prints are the only numbers the README states about reading
 accuracy.
 """
+
 from __future__ import annotations
 
 import argparse
@@ -88,8 +89,7 @@ _ANNOTATION_RE = re.compile(r"\([^)]*\)")
 # nothing but these has not read the country. "a" is deliberately absent: it
 # is a letter of "U.S.A." on the two labels that print the country that way.
 _ORIGIN_LEAD_IN = frozenset(
-    {"product", "of", "the", "made", "in", "hecho", "en", "distilled", "bottled",
-     "by", "produced"}
+    {"product", "of", "the", "made", "in", "hecho", "en", "distilled", "bottled", "by", "produced"}
 )
 
 
@@ -246,15 +246,16 @@ async def _read_faces(
     replayed = 0
     faces = sorted(
         entry["images"].items(),
-        key=lambda kv: ("front", "back", "neck", "side").index(kv[0])
-        if kv[0] in ("front", "back", "neck", "side") else 9,
+        key=lambda kv: (
+            ("front", "back", "neck", "side").index(kv[0])
+            if kv[0] in ("front", "back", "neck", "side")
+            else 9
+        ),
     )
     for face, relative in faces:
         if not (LABELS_ROOT / relative).exists():
             continue
-        payloads, from_recording = await _read_one_face(
-            reader, entry, face, relative, freeze_dir
-        )
+        payloads, from_recording = await _read_one_face(reader, entry, face, relative, freeze_dir)
         replayed += int(from_recording)
         for field_id, payload in payloads.items():
             if _has_reading(merged.get(field_id)):
@@ -286,15 +287,14 @@ def _score(entry: dict, read: dict[str, dict], warning_text: str) -> dict[str, b
     class_read = normalize_words((read.get("class_type") or {}).get("class_type") or "")
     class_truth = _designations(observed["class_type"])
     got["class_type"] = (
-        any(word_run_present(class_read, alt) for alt in class_truth)
-        if class_truth
-        else None
+        any(word_run_present(class_read, alt) for alt in class_truth) if class_truth else None
     )
 
     percent = (observed.get("abv") or {}).get("percent")
     abv_read = (read.get("abv") or {}).get("abv_pct")
     got["abv"] = (
-        None if percent is None
+        None
+        if percent is None
         else abv_read is not None and abs(float(abv_read) - float(percent)) < 0.05
     )
 
@@ -303,9 +303,9 @@ def _score(entry: dict, read: dict[str, dict], warning_text: str) -> dict[str, b
     net = read.get("net_contents") or {}
     converted = _millilitres(net.get("net_contents_value"), net.get("unit"))
     got["net_contents"] = (
-        None if truth_ml is None
-        else converted is not None
-        and abs(converted - truth_ml) <= max(1.0, truth_ml * 0.01)
+        None
+        if truth_ml is None
+        else converted is not None and abs(converted - truth_ml) <= max(1.0, truth_ml * 0.01)
     )
 
     # The printed line carries lead-in words the reader never reports ("AGED
@@ -327,7 +327,7 @@ def _score(entry: dict, read: dict[str, dict], warning_text: str) -> dict[str, b
         # and words like "COMPANY" and "IMPORTS" that a reading of some other
         # part of the label lands on by itself.
         got["name_address"] = any(
-            word_run_present(block, printed[i:i + 2]) for i in range(len(printed) - 1)
+            word_run_present(block, printed[i : i + 2]) for i in range(len(printed) - 1)
         )
 
     # Scored on every label, not only the imported ones. Returning True for
@@ -344,9 +344,7 @@ def _score(entry: dict, read: dict[str, dict], warning_text: str) -> dict[str, b
         # a bottler line. But a reading made only of the words that introduce
         # the place - "PRODUCT OF" - names no place and is not a reading of one.
         place = tuple(w for w in country_read if w not in _ORIGIN_LEAD_IN)
-        got["origin"] = bool(place) and word_run_present(
-            normalize_words(statement), place
-        )
+        got["origin"] = bool(place) and word_run_present(normalize_words(statement), place)
 
     expected = entry["expected"]
     warning = read.get("gov_warning") or {}
@@ -444,7 +442,9 @@ async def main() -> int:
             "neither is the last label."
         ),
     )
-    parser.add_argument("--json", type=Path, default=None, help="also write the per-label results here")
+    parser.add_argument(
+        "--json", type=Path, default=None, help="also write the per-label results here"
+    )
     args = parser.parse_args()
 
     manifest = json.loads((LABELS_ROOT / "manifest.json").read_text())
@@ -455,7 +455,9 @@ async def main() -> int:
         by_id = {e["id"]: e for e in manifest["labels"]}
         missing = [name for name in wanted if name not in by_id]
         if missing:
-            raise SystemExit(f"--only names labels the manifest does not carry: {', '.join(missing)}")
+            raise SystemExit(
+                f"--only names labels the manifest does not carry: {', '.join(missing)}"
+            )
         entries = [by_id[name] for name in wanted]
     else:
         entries = [e for e in manifest["labels"] if e["kind"] == "real"]
@@ -463,7 +465,9 @@ async def main() -> int:
         entries = entries[: args.limit]
 
     if args.freeze is not None and args.reader != "local":
-        raise SystemExit("--freeze records the local reader's own boxes; it has nothing to record for --reader cloud.")
+        raise SystemExit(
+            "--freeze records the local reader's own boxes; it has nothing to record for --reader cloud."
+        )
 
     reader = _build_reader(args.reader)
     await reader.ensure_loaded()
@@ -485,7 +489,9 @@ async def main() -> int:
         if entry["kind"] != "real":
             continue
         seconds.append(elapsed)
-        rows.append({"id": entry["id"], "seconds": round(elapsed, 2), **_score(entry, read, warning_text)})
+        rows.append(
+            {"id": entry["id"], "seconds": round(elapsed, 2), **_score(entry, read, warning_text)}
+        )
 
     _summarize(rows, seconds, args.reader, replayed=faces_replayed, read=faces_read)
     if args.json:

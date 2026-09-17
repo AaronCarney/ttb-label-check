@@ -11,6 +11,7 @@ the derivation is written beside it, because a limit nobody can trace back to a
 constraint gets moved the first time it is inconvenient.
 `tests/test_upload_limits.py` holds the derivations to their constraints.
 """
+
 from __future__ import annotations
 
 import io
@@ -147,9 +148,7 @@ def too_many_pixels_message(filename: str, pixels: int, limit: int) -> str:
     )
 
 
-def rejected_input(
-    reason_code: str, message: str, **details: Any
-) -> ErrorEnvelope:
+def rejected_input(reason_code: str, message: str, **details: Any) -> ErrorEnvelope:
     """The boundary's refusal, in the wire contract the API declares.
 
     `ErrorEnvelope` was defined and fixture-tested but never constructed by any

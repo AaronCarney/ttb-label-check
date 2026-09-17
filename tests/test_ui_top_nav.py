@@ -1,6 +1,7 @@
 """Top-level nav present on every page shell so a reviewer can switch between
 single-label review and bulk-batch upload without typing a URL by hand.
 """
+
 from __future__ import annotations
 
 import re

@@ -1,5 +1,6 @@
 """Malt-pack rules: a positive and a negative case for each, including the
 §7.65(c) 0.5% alcohol hard floor."""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -21,8 +22,12 @@ def ruleset():
     return YamlRuleLoader().load(Path("rules"))
 
 
-def _r(rs, rid): return next(r for r in rs.rules if r.rule_id == rid)
-def _ctx(rs): return make_context(assets=rs.assets, decision_tables=rs.decision_tables)
+def _r(rs, rid):
+    return next(r for r in rs.rules if r.rule_id == rid)
+
+
+def _ctx(rs):
+    return make_context(assets=rs.assets, decision_tables=rs.decision_tables)
 
 
 def test_brand_pos(ruleset) -> None:
@@ -43,7 +48,12 @@ def test_brand_neg(ruleset) -> None:
 def test_class_type_pos(ruleset) -> None:
     rule = _r(ruleset, "malt.class_type.present")
     obs = make_obs(field_id="class_type", value="Lager", beverage_class=BeverageClass.MALT)
-    assert VALIDATOR_REGISTRY[rule.validator](obs, make_expected(field_id="class_type"), rule, _ctx(ruleset)).outcome is Outcome.PASS
+    assert (
+        VALIDATOR_REGISTRY[rule.validator](
+            obs, make_expected(field_id="class_type"), rule, _ctx(ruleset)
+        ).outcome
+        is Outcome.PASS
+    )
 
 
 def test_class_type_accepts_a_style_no_list_carries(ruleset) -> None:
@@ -52,7 +62,12 @@ def test_class_type_accepts_a_style_no_list_carries(ruleset) -> None:
     # style the list did not happen to carry. docs/decisions.md#0012.
     rule = _r(ruleset, "malt.class_type.present")
     obs = make_obs(field_id="class_type", value="MÄRZEN", beverage_class=BeverageClass.MALT)
-    assert VALIDATOR_REGISTRY[rule.validator](obs, make_expected(field_id="class_type"), rule, _ctx(ruleset)).outcome is Outcome.PASS
+    assert (
+        VALIDATOR_REGISTRY[rule.validator](
+            obs, make_expected(field_id="class_type"), rule, _ctx(ruleset)
+        ).outcome
+        is Outcome.PASS
+    )
 
 
 def test_class_type_neg(ruleset) -> None:
@@ -64,7 +79,9 @@ def test_class_type_neg(ruleset) -> None:
     # lacks it. This rule does not set `unlocated_is_absent`, so it goes to a
     # reviewer. `common.warning.present` is the one rule that does set it, and its
     # own test still asserts a rejection.
-    res = VALIDATOR_REGISTRY[rule.validator](obs, make_expected(field_id="class_type"), rule, _ctx(ruleset))
+    res = VALIDATOR_REGISTRY[rule.validator](
+        obs, make_expected(field_id="class_type"), rule, _ctx(ruleset)
+    )
     assert res.outcome is Outcome.INSUFFICIENT_EVIDENCE
     assert res.reason_code == "LEGIBILITY.FIELD.NOT_READ"
 
@@ -82,7 +99,9 @@ def test_class_type_style_matches_a_beer_application(ruleset, designation) -> No
 
 def test_alcohol_conditional_pos(ruleset) -> None:
     rule = _r(ruleset, "malt.alcohol.conditional_required")
-    obs = make_obs(field_id="alc_text", value="Alcohol 5.5% by volume", beverage_class=BeverageClass.MALT)
+    obs = make_obs(
+        field_id="alc_text", value="Alcohol 5.5% by volume", beverage_class=BeverageClass.MALT
+    )
     exp = make_expected(field_id="alc_text", parameters={"abv_required": True})
     assert VALIDATOR_REGISTRY[rule.validator](obs, exp, rule, _ctx(ruleset)).outcome is Outcome.PASS
 
@@ -91,7 +110,10 @@ def test_alcohol_conditional_not_applicable(ruleset) -> None:
     rule = _r(ruleset, "malt.alcohol.conditional_required")
     obs = make_obs(field_id="alc_text", value=None, beverage_class=BeverageClass.MALT)
     exp = make_expected(field_id="alc_text", parameters={"abv_required": False})
-    assert VALIDATOR_REGISTRY[rule.validator](obs, exp, rule, _ctx(ruleset)).outcome is Outcome.NOT_APPLICABLE
+    assert (
+        VALIDATOR_REGISTRY[rule.validator](obs, exp, rule, _ctx(ruleset)).outcome
+        is Outcome.NOT_APPLICABLE
+    )
 
 
 def test_format_is_switched_off(ruleset) -> None:
@@ -108,8 +130,15 @@ def test_format_is_switched_off(ruleset) -> None:
 
 def test_name_address_pos(ruleset) -> None:
     rule = _r(ruleset, "malt.name_address.present")
-    obs = make_obs(field_id="bottler", value="Acme Brewing, Milwaukee, WI", beverage_class=BeverageClass.MALT)
-    assert VALIDATOR_REGISTRY[rule.validator](obs, make_expected(field_id="bottler"), rule, _ctx(ruleset)).outcome is Outcome.PASS
+    obs = make_obs(
+        field_id="bottler", value="Acme Brewing, Milwaukee, WI", beverage_class=BeverageClass.MALT
+    )
+    assert (
+        VALIDATOR_REGISTRY[rule.validator](
+            obs, make_expected(field_id="bottler"), rule, _ctx(ruleset)
+        ).outcome
+        is Outcome.PASS
+    )
 
 
 def test_name_address_neg(ruleset) -> None:
@@ -120,7 +149,9 @@ def test_name_address_neg(ruleset) -> None:
     # lacks it. This rule does not set `unlocated_is_absent`, so it goes to a
     # reviewer. `common.warning.present` is the one rule that does set it, and its
     # own test still asserts a rejection.
-    res = VALIDATOR_REGISTRY[rule.validator](obs, make_expected(field_id="bottler"), rule, _ctx(ruleset))
+    res = VALIDATOR_REGISTRY[rule.validator](
+        obs, make_expected(field_id="bottler"), rule, _ctx(ruleset)
+    )
     assert res.outcome is Outcome.INSUFFICIENT_EVIDENCE
     assert res.reason_code == "LEGIBILITY.FIELD.NOT_READ"
 
@@ -128,7 +159,12 @@ def test_name_address_neg(ruleset) -> None:
 def test_net_contents_pos(ruleset) -> None:
     rule = _r(ruleset, "malt.net_contents.present")
     obs = make_obs(field_id="net_contents", value="12 fl oz", beverage_class=BeverageClass.MALT)
-    assert VALIDATOR_REGISTRY[rule.validator](obs, make_expected(field_id="net_contents"), rule, _ctx(ruleset)).outcome is Outcome.PASS
+    assert (
+        VALIDATOR_REGISTRY[rule.validator](
+            obs, make_expected(field_id="net_contents"), rule, _ctx(ruleset)
+        ).outcome
+        is Outcome.PASS
+    )
 
 
 def test_net_contents_neg(ruleset) -> None:
@@ -139,6 +175,8 @@ def test_net_contents_neg(ruleset) -> None:
     # lacks it. This rule does not set `unlocated_is_absent`, so it goes to a
     # reviewer. `common.warning.present` is the one rule that does set it, and its
     # own test still asserts a rejection.
-    res = VALIDATOR_REGISTRY[rule.validator](obs, make_expected(field_id="net_contents"), rule, _ctx(ruleset))
+    res = VALIDATOR_REGISTRY[rule.validator](
+        obs, make_expected(field_id="net_contents"), rule, _ctx(ruleset)
+    )
     assert res.outcome is Outcome.INSUFFICIENT_EVIDENCE
     assert res.reason_code == "LEGIBILITY.FIELD.NOT_READ"

@@ -21,6 +21,7 @@ finding to every label today. The validator is what the rule answers with the
 moment anyone switches it on, and it is why switching one on can no longer
 produce a wrong verdict.
 """
+
 from __future__ import annotations
 
 from app.rules._validators import ValidatorContext, register

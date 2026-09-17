@@ -6,6 +6,7 @@ each recording file as a route keyed on the OpenAI request body's
 `response_format.json_schema.name` field — which the cloud impl populates
 deterministically for each per-field call.
 """
+
 from __future__ import annotations
 
 import argparse
@@ -21,8 +22,11 @@ from app.config import Settings
 def _build_argparser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(prog="python -m app.vision")
     p.add_argument("--label", required=True, type=Path)
-    p.add_argument("--use-recordings", action="store_true",
-                   help="Mount tests/recordings/openai/<snapshot>/<prompt-version>/<fixture>/* via respx.")
+    p.add_argument(
+        "--use-recordings",
+        action="store_true",
+        help="Mount tests/recordings/openai/<snapshot>/<prompt-version>/<fixture>/* via respx.",
+    )
     return p
 
 
@@ -46,15 +50,20 @@ async def _run(args: argparse.Namespace) -> int:
         dimensions=Dimensions(width_px=200, height_px=200, dpi=300),
     )
 
-    extractor = CloudVisionExtractor(settings=settings, ring_buffer=ring,
-                                     api_key=settings.openai_api_key or "sk-test")
+    extractor = CloudVisionExtractor(
+        settings=settings, ring_buffer=ring, api_key=settings.openai_api_key or "sk-test"
+    )
 
     if args.use_recordings:
         import respx  # dev-only — guarded by flag
         from httpx import Response
 
-        rec_root = Path("tests/recordings/openai") / settings.llm_model_snapshot \
-            / settings.prompt_version / args.label.parent.name
+        rec_root = (
+            Path("tests/recordings/openai")
+            / settings.llm_model_snapshot
+            / settings.prompt_version
+            / args.label.parent.name
+        )
         if not rec_root.exists():
             print(f"recordings not found: {rec_root}", file=sys.stderr)
             return 2
@@ -66,6 +75,7 @@ async def _run(args: argparse.Namespace) -> int:
         recordings = {p.stem: json.loads(p.read_text()) for p in rec_root.glob("*.json")}
 
         with respx.mock(base_url="https://api.openai.com") as router:
+
             def _dispatch(request):
                 body = json.loads(request.content)
                 name = body.get("response_format", {}).get("json_schema", {}).get("name")

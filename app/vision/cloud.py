@@ -4,6 +4,7 @@ One extract pipeline: a per-instance Semaphore bounds concurrency, a per-field
 call helper does the reading, and a quality short-circuit at the top of
 extract() stops on an image too poor to read.
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -29,13 +30,15 @@ from app.vision.heading_measure import measure_heading_bold
 # self-reported confidence. These flow through to the wire envelope's
 # upstream_meta but must be stripped from the user-facing extracted_value
 # projection. Add to this set whenever a new audit key is introduced below.
-OBSERVED_VALUE_AUDIT_KEYS: frozenset[str] = frozenset({
-    "confidence",
-    "heading_bold_llm",
-    "heading_bold_measured",
-    "heading_bold_measured_confident",
-    "heading_bold_width_height_ratio",
-})
+OBSERVED_VALUE_AUDIT_KEYS: frozenset[str] = frozenset(
+    {
+        "confidence",
+        "heading_bold_llm",
+        "heading_bold_measured",
+        "heading_bold_measured_confident",
+        "heading_bold_width_height_ratio",
+    }
+)
 
 # Self-reported per-field confidence. Required on every per-field schema so
 # OpenAI Structured Outputs (strict:true) forces the model to emit a number
@@ -115,8 +118,12 @@ _SCHEMAS = {
             "confidence": _CONFIDENCE_SCHEMA,
         },
         "required": [
-            "text", "heading_text", "heading_all_caps",
-            "heading_bold", "type_size_pt", "confidence",
+            "text",
+            "heading_text",
+            "heading_all_caps",
+            "heading_bold",
+            "type_size_pt",
+            "confidence",
         ],
         "additionalProperties": False,
     },
@@ -208,9 +215,7 @@ class CloudVisionExtractor:
         slow as every other one, and what makes it slow is the network."""
         return
 
-    async def _call_per_field(
-        self, *, field_name: str, crop: bytes, label: Label
-    ) -> dict:
+    async def _call_per_field(self, *, field_name: str, crop: bytes, label: Label) -> dict:
         prompt = (
             f"Extract field: {field_name}.\n"
             "Also return a self-reported `confidence` in [0.0, 1.0]:\n"
@@ -288,13 +293,9 @@ class CloudVisionExtractor:
         )
         return content
 
-    async def _gated_call(
-        self, *, field_name: str, crop: bytes, label: Label
-    ) -> dict:
+    async def _gated_call(self, *, field_name: str, crop: bytes, label: Label) -> dict:
         async with self._semaphore:
-            return await self._call_per_field(
-                field_name=field_name, crop=crop, label=label
-            )
+            return await self._call_per_field(field_name=field_name, crop=crop, label=label)
 
     async def extract(self, label: Label) -> list[FieldObservation]:
         report = quality.assess(label)
@@ -304,16 +305,18 @@ class CloudVisionExtractor:
                     field_id="quality",
                     beverage_class=BeverageClass.SPIRITS,
                     observed_value=None,
-                    evidence=(Evidence(
-                        field_id="quality",
-                        # No model was called: the gate turned the image away.
-                        # The local reader says the same thing here.
-                        source=EvidenceSource.DERIVED,
-                        bbox=None,
-                        extracted_text=report.reason_code,
-                        match_kind=MatchKind.NONE,
-                        confidence=0.0,
-                    ),),
+                    evidence=(
+                        Evidence(
+                            field_id="quality",
+                            # No model was called: the gate turned the image away.
+                            # The local reader says the same thing here.
+                            source=EvidenceSource.DERIVED,
+                            bbox=None,
+                            extracted_text=report.reason_code,
+                            match_kind=MatchKind.NONE,
+                            confidence=0.0,
+                        ),
+                    ),
                     upstream_meta={
                         "disposition": report.disposition,
                         "reason_code": report.reason_code,
@@ -321,9 +324,7 @@ class CloudVisionExtractor:
                 )
             ]
 
-        layout = await self._gated_call(
-            field_name="layout", crop=label.image_bytes, label=label
-        )
+        layout = await self._gated_call(field_name="layout", crop=label.image_bytes, label=label)
         bbox_by_id: dict[str, tuple[int, int, int, int]] = {}
         for entry in layout.get("fields", []):
             bbox = entry.get("bbox")
@@ -372,12 +373,14 @@ class CloudVisionExtractor:
                     field_id=fname,
                     beverage_class=BeverageClass.SPIRITS,
                     observed_value=content,
-                    evidence=(_make_evidence(
-                        field_id=fname,
-                        bbox=bbox_by_id.get(fname),
-                        text=text,
-                        confidence=_extract_confidence(content),
-                    ),),
+                    evidence=(
+                        _make_evidence(
+                            field_id=fname,
+                            bbox=bbox_by_id.get(fname),
+                            text=text,
+                            confidence=_extract_confidence(content),
+                        ),
+                    ),
                     upstream_meta={"bbox": bbox_by_id.get(fname)},
                 )
             )

@@ -1,5 +1,6 @@
 """The layout reflows at 320 CSS px with no two-dimensional scrolling
 (WCAG 1.4.10)."""
+
 from __future__ import annotations
 
 import json
@@ -9,9 +10,7 @@ import pytest
 from playwright.sync_api import Page
 
 ROOT = Path(__file__).resolve().parent.parent
-FIXTURE = (
-    ROOT / "tests" / "fixtures" / "envelopes" / "single" / "01-spirits-clean.json"
-)
+FIXTURE = ROOT / "tests" / "fixtures" / "envelopes" / "single" / "01-spirits-clean.json"
 
 
 @pytest.mark.usefixtures("live_server", "pnpm_built_island")

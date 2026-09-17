@@ -6,6 +6,7 @@ point of `docs/decisions.md#0021`. The queue's window bounds how many items are
 in memory. The demand gate bounds how many are *evaluated* ahead of the
 reviewer who is reading the results, which is where the work actually is.
 """
+
 import asyncio
 from datetime import UTC, datetime
 
@@ -60,7 +61,10 @@ async def test_worker_queue_saturates_at_lookahead_plus_one_when_consumer_holds(
     at maxsize=k+1=4 (lookahead_k=3)."""
     items = tuple(_stub_item(i) for i in range(10))
     in_flight = InFlightBatch(
-        batch_id="B-LA1", agent_id="a", items=items, lookahead_k=3,
+        batch_id="B-LA1",
+        agent_id="a",
+        items=items,
+        lookahead_k=3,
     )
 
     # FakeEvaluator that NEVER returns — we drive saturation by holding the
@@ -96,7 +100,10 @@ async def test_worker_lookahead_k_3_pre_fetches_next_two_items_while_one_process
     `qsize` mid-evaluation)."""
     items = tuple(_stub_item(i) for i in range(5))
     in_flight = InFlightBatch(
-        batch_id="B-LA2", agent_id="a", items=items, lookahead_k=3,
+        batch_id="B-LA2",
+        agent_id="a",
+        items=items,
+        lookahead_k=3,
     )
 
     # Slow evaluator — 0.3s per call. After item 0 finishes, items 1, 2, 3
@@ -147,7 +154,10 @@ async def test_worker_holds_evaluations_while_the_reviewer_is_behind_and_resumes
     k = 3
     items = tuple(_stub_item(i) for i in range(12))
     in_flight = InFlightBatch(
-        batch_id="B-LA3", agent_id="a", items=items, lookahead_k=k,
+        batch_id="B-LA3",
+        agent_id="a",
+        items=items,
+        lookahead_k=k,
     )
 
     from tests.conftest import _stub_disposition_envelope
@@ -206,7 +216,10 @@ async def test_worker_is_not_paced_when_no_reviewer_is_attached():
     """
     items = tuple(_stub_item(i) for i in range(12))
     in_flight = InFlightBatch(
-        batch_id="B-LA4", agent_id="a", items=items, lookahead_k=3,
+        batch_id="B-LA4",
+        agent_id="a",
+        items=items,
+        lookahead_k=3,
     )
     worker = BatchWorker(
         in_flight=in_flight,

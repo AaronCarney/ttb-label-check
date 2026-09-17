@@ -1,6 +1,7 @@
 """Builders for per-rule unit tests. They produce frozen, extra='forbid'
 Pydantic instances so tests can construct typed payloads without verbosity.
 """
+
 from __future__ import annotations
 
 import pytest

@@ -1,5 +1,6 @@
 """BoundedQueue — typed wrapper around asyncio.Queue(maxsize=k+1).
 The producer blocks when the consumer holds, saturating at k+1."""
+
 import asyncio
 from datetime import UTC, datetime
 

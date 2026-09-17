@@ -1,4 +1,5 @@
 """Logging subsystem: formatter + redaction + configure_logging."""
+
 from __future__ import annotations
 
 import json
@@ -33,8 +34,13 @@ def test_otel_genai_formatter_uses_gen_ai_attribute_names() -> None:
 
     formatter = OtelGenAIFormatter()
     record = logging.LogRecord(
-        name="app", level=logging.INFO, pathname=__file__, lineno=1,
-        msg="llm_call", args=None, exc_info=None,
+        name="app",
+        level=logging.INFO,
+        pathname=__file__,
+        lineno=1,
+        msg="llm_call",
+        args=None,
+        exc_info=None,
     )
     setattr(record, "gen_ai.request.model", "gpt-4o-2024-08-06")
     setattr(record, "gen_ai.response.model", "gpt-4o-2024-08-06")
@@ -50,8 +56,13 @@ def test_redaction_filter_strips_application_content_and_label_bytes() -> None:
 
     filter_ = RedactionFilter()
     record = logging.LogRecord(
-        name="app", level=logging.INFO, pathname=__file__, lineno=1,
-        msg="leakage_attempt", args=None, exc_info=None,
+        name="app",
+        level=logging.INFO,
+        pathname=__file__,
+        lineno=1,
+        msg="leakage_attempt",
+        args=None,
+        exc_info=None,
     )
     record.application_content = {"brand_name": "secret"}
     record.label_bytes = b"\xff\xd8\xff..."

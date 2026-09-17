@@ -2,6 +2,7 @@
 written. Nothing may interpolate between them, so the YAML must declare
 interpolation: none.
 """
+
 from __future__ import annotations
 
 from pathlib import Path

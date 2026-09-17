@@ -4,6 +4,7 @@ FieldFindingWire projection.
 No I/O, no clock; takes a pre-built AuditRecord + Metrics so audit/metrics
 ownership stays clean.
 """
+
 from __future__ import annotations
 
 from collections.abc import Iterable
@@ -148,27 +149,31 @@ def build_field_findings(
             verdict = rule_disposition(vr)
             if verdict == "not_applicable":
                 continue
-            rule_findings.append(RuleFindingWire(
-                rule_id=vr.rule_id,
-                cfr_citation=vr.cfr_citation,
-                disposition=verdict,
-                reason_code=vr.reason_code or "",
-                plain_language_explanation=vr.message or "",
-            ))
+            rule_findings.append(
+                RuleFindingWire(
+                    rule_id=vr.rule_id,
+                    cfr_citation=vr.cfr_citation,
+                    disposition=verdict,
+                    reason_code=vr.reason_code or "",
+                    plain_language_explanation=vr.message or "",
+                )
+            )
             confidences.append(vr.aggregated_confidence)
         rule_findings_for_field = tuple(rule_findings)
         # Fall back to the observation's own evidence confidence when no rule
         # fired on this field.
         numeric = min(confidences) if confidences else ev.confidence
-        out.append(FieldFindingWire(
-            field_name=wire_slot,  # type: ignore[arg-type]
-            extracted_value=_coerce_str(_strip_audit_keys(obs.observed_value)),
-            expected_value=_coerce_str(exp.value if exp else None),
-            evidence=evidence_wire,
-            rule_findings=rule_findings_for_field,
-            ai_suggestion=AISuggestionWire(present=False),
-            field_confidence=ConfidenceBand(band=to_band(numeric), numeric=numeric),
-        ))
+        out.append(
+            FieldFindingWire(
+                field_name=wire_slot,  # type: ignore[arg-type]
+                extracted_value=_coerce_str(_strip_audit_keys(obs.observed_value)),
+                expected_value=_coerce_str(exp.value if exp else None),
+                evidence=evidence_wire,
+                rule_findings=rule_findings_for_field,
+                ai_suggestion=AISuggestionWire(present=False),
+                field_confidence=ConfidenceBand(band=to_band(numeric), numeric=numeric),
+            )
+        )
     return tuple(out)
 
 
@@ -211,7 +216,8 @@ def build_short_circuit_envelope(
     existing_ids = {e.rule_id for e in audit.per_rule_trace}
     if reason_code not in existing_ids:
         synthetic = PerRuleTraceEntry(
-            rule_id=reason_code, disposition="needs_review",
+            rule_id=reason_code,
+            disposition="needs_review",
             evidence_ref=f"engine_failure/{reason_code}",
         )
         augmented = audit.model_copy(update={"per_rule_trace": audit.per_rule_trace + (synthetic,)})

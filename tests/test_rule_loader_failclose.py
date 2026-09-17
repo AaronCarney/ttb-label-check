@@ -2,6 +2,7 @@
 RuleLoaderError with a violation-count message. Tests use a tmp_path-built
 rule tree so they do not depend on the real rules/ tree.
 """
+
 from __future__ import annotations
 
 import hashlib
@@ -42,7 +43,11 @@ def _write(p: Path, text: str) -> None:
     p.write_text(textwrap.dedent(text), encoding="utf-8")
 
 
-def _baseline_rule_yaml(rule_id: str = "test.brand.present", validator: str = "presence_check", reason: str = "BRAND.PRESENCE.MISSING") -> str:
+def _baseline_rule_yaml(
+    rule_id: str = "test.brand.present",
+    validator: str = "presence_check",
+    reason: str = "BRAND.PRESENCE.MISSING",
+) -> str:
     return f"""
         rule_pack: test
         rule_pack_version: "0.1.0"
@@ -121,14 +126,16 @@ def test_empty_test_fixtures_fails_closed(tmp_path: Path) -> None:
 
 
 def test_pack_version_outside_range_fails_closed(tmp_path: Path) -> None:
-    body = _baseline_rule_yaml().replace("rule_pack_version: \"0.1.0\"", "rule_pack_version: \"9.9.9\"")
+    body = _baseline_rule_yaml().replace('rule_pack_version: "0.1.0"', 'rule_pack_version: "9.9.9"')
     rules = _setup(tmp_path, body)
     with pytest.raises(RuleLoaderError, match="outside engine-supported"):
         YamlRuleLoader().load(rules)
 
 
 def test_invalid_semver_fails_closed(tmp_path: Path) -> None:
-    body = _baseline_rule_yaml().replace("rule_pack_version: \"0.1.0\"", "rule_pack_version: \"banana\"")
+    body = _baseline_rule_yaml().replace(
+        'rule_pack_version: "0.1.0"', 'rule_pack_version: "banana"'
+    )
     rules = _setup(tmp_path, body)
     with pytest.raises(RuleLoaderError, match="semver"):
         YamlRuleLoader().load(rules)
@@ -144,12 +151,15 @@ def test_asset_hash_drift_fails_closed(tmp_path: Path) -> None:
     asset = tmp_path / "assets/warnings/x.txt"
     _write(asset, "different content here")
     real_sha = hashlib.sha256(b"different content here").hexdigest()
-    body = _baseline_rule_yaml(validator="verbatim_hash", reason="WARNING.VERBATIM.MISMATCH").rstrip() + """
+    body = (
+        _baseline_rule_yaml(validator="verbatim_hash", reason="WARNING.VERBATIM.MISMATCH").rstrip()
+        + """
             asset:
               path: assets/warnings/x.txt
               sha256_pin: deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef
               normalization: []
         """
+    )
     body = body.replace("BRAND.PRESENCE.MISSING", "WARNING.VERBATIM.MISMATCH")
     body = body.replace("test.brand.present", "test.warning.verbatim")
     rules = _setup(tmp_path, body)
@@ -158,12 +168,15 @@ def test_asset_hash_drift_fails_closed(tmp_path: Path) -> None:
 
 
 def test_asset_file_missing_fails_closed(tmp_path: Path) -> None:
-    body = _baseline_rule_yaml(validator="verbatim_hash", reason="WARNING.VERBATIM.MISMATCH").rstrip() + """
+    body = (
+        _baseline_rule_yaml(validator="verbatim_hash", reason="WARNING.VERBATIM.MISMATCH").rstrip()
+        + """
             asset:
               path: assets/warnings/missing.txt
               sha256_pin: deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef
               normalization: []
         """
+    )
     rules = _setup(tmp_path, body)
     with pytest.raises(RuleLoaderError, match="asset file not found"):
         YamlRuleLoader(rules_root_for_assets=tmp_path).load(rules)
@@ -171,9 +184,13 @@ def test_asset_file_missing_fails_closed(tmp_path: Path) -> None:
 
 def test_decision_table_ref_dangling_fails_closed(tmp_path: Path) -> None:
     body = _baseline_rule_yaml(validator="unmeasurable", reason="WARNING.PRESENCE.MISSING")
-    body = body.replace("evidence_required: [brand]", "evidence_required: [brand]\n            decision_table_ref: tables/does_not_exist")
+    body = body.replace(
+        "evidence_required: [brand]",
+        "evidence_required: [brand]\n            decision_table_ref: tables/does_not_exist",
+    )
     rules = _setup(tmp_path, body)
     # unmeasurable must be importable for the registry check; force-import here:
     import app.rules._validators.unmeasurable  # noqa: F401
+
     with pytest.raises(RuleLoaderError, match="decision_table_ref"):
         YamlRuleLoader().load(rules)

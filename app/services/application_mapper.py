@@ -15,6 +15,7 @@ country of origin: a domestic application is a positive statement that no
 country-of-origin check applies, so it produces a reference value that says so
 rather than no value at all.
 """
+
 from __future__ import annotations
 
 from decimal import Decimal
@@ -98,8 +99,6 @@ def expected_values_from(record: ApplicationRecord) -> tuple[ExpectedValue, ...]
         )
 
     if record.wine_appellation:
-        values.append(
-            ExpectedValue(field_id="wine_appellation", value=record.wine_appellation)
-        )
+        values.append(ExpectedValue(field_id="wine_appellation", value=record.wine_appellation))
 
     return tuple(values)

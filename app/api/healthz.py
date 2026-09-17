@@ -1,4 +1,5 @@
 """GET /healthz — readiness: can this process build a reader and load its rules."""
+
 from __future__ import annotations
 
 import logging

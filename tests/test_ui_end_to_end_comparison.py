@@ -17,6 +17,7 @@ Both labels are real ones from the TTB Public COLA Registry, in
     check does not apply to a domestic product and would otherwise go
     untested through the app.
 """
+
 from __future__ import annotations
 
 import json
@@ -72,16 +73,32 @@ def _readings(entry):
     readings = [
         obs("brand_name", {"brand_name": application["brand_name"], "confidence": 0.95}),
         obs("class_type", {"class_type": observed["class_type"], "confidence": 0.95}),
-        obs("abv", {"abv_pct": application["alcohol_content"]["percent"], "unit": "%", "confidence": 0.95}),
-        obs("net_contents", {"net_contents_value": application["net_contents"]["ml"], "unit": "mL", "confidence": 0.95}),
-        obs("name_address", {"name": observed["name_address"], "city": "", "state": "", "confidence": 0.95}),
+        obs(
+            "abv",
+            {"abv_pct": application["alcohol_content"]["percent"], "unit": "%", "confidence": 0.95},
+        ),
+        obs(
+            "net_contents",
+            {
+                "net_contents_value": application["net_contents"]["ml"],
+                "unit": "mL",
+                "confidence": 0.95,
+            },
+        ),
+        obs(
+            "name_address",
+            {"name": observed["name_address"], "city": "", "state": "", "confidence": 0.95},
+        ),
     ]
     # The reader asks for every field on every label and returns an answer
     # for each, so a label carrying no origin statement still produces an
     # empty country_origin reading. Leaving it out instead would silently
     # skip the origin rule, which asks for that evidence by name.
     readings.append(
-        obs("country_origin", {"country": observed.get("origin_statement") or "", "confidence": 0.95})
+        obs(
+            "country_origin",
+            {"country": observed.get("origin_statement") or "", "confidence": 0.95},
+        )
     )
     return readings
 
@@ -154,6 +171,7 @@ def _rule_outcomes(envelope) -> dict[str, str]:
 # The application picks the rule pack
 # ---------------------------------------------------------------------------
 
+
 def test_comparison_rules_run_against_the_posted_application(client):
     outcomes = _rule_outcomes(_submit(client))
     compared = {rule for rule in outcomes if rule.endswith(".matches_application")}
@@ -165,6 +183,7 @@ def test_comparison_rules_run_against_the_posted_application(client):
 # ---------------------------------------------------------------------------
 # A label that agrees, and the same label made to disagree
 # ---------------------------------------------------------------------------
+
 
 def test_a_label_that_agrees_with_its_application_is_reported_as_agreeing(client):
     outcomes = _rule_outcomes(_submit(client))
@@ -230,6 +249,7 @@ def test_a_net_contents_written_in_another_unit_still_agrees(client):
 # Country of origin
 # ---------------------------------------------------------------------------
 
+
 def test_an_imported_labels_origin_is_compared():
     client = _client_for(IMPORTED_WINE)
     outcomes = _rule_outcomes(_submit(client, IMPORTED_WINE))
@@ -262,6 +282,7 @@ def test_a_domestic_application_needs_no_origin_statement(client):
 # No application at all
 # ---------------------------------------------------------------------------
 
+
 def test_without_an_application_the_label_is_read_and_nothing_is_checked(client):
     """A reviewer who uploads only an image gets the reading and no verdict.
 
@@ -271,9 +292,7 @@ def test_without_an_application_the_label_is_read_and_nothing_is_checked(client)
     says so in one audit row rather than leaving the reviewer to notice an
     absence. See `docs/decisions.md#0010`.
     """
-    envelope = _envelope(
-        client.post("/", files={"label": ("label.png", _PNG_1x1, "image/png")})
-    )
+    envelope = _envelope(client.post("/", files={"label": ("label.png", _PNG_1x1, "image/png")}))
     trace = envelope["audit_trail"]["per_rule_trace"]
     assert [row["rule_id"] for row in trace] == ["ENGINE.RULE_PACK.NOT_SELECTED"], trace
     assert trace[0]["evidence_ref"] == "rule_pack/none"

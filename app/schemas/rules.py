@@ -10,6 +10,7 @@ holds.
 ``from app.schemas.rules import RuleSet as RuleSet`` style (re-binding the
 class object) — NOT a redeclaration — or that ``is``-identity breaks.
 """
+
 from __future__ import annotations
 
 from enum import Enum

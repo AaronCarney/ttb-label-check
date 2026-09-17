@@ -19,9 +19,7 @@ def test_cli_smoke_exits_zero_on_real_label(tmp_path: Path) -> None:
     shutil.copyfile(LABEL, staged_label)
 
     result = subprocess.run(
-        [sys.executable, "-m", "app.vision",
-         "--label", str(staged_label),
-         "--use-recordings"],
+        [sys.executable, "-m", "app.vision", "--label", str(staged_label), "--use-recordings"],
         capture_output=True,
         timeout=30,
         env={**os.environ, "OPENAI_API_KEY": "sk-test", "VISION_MODE": "cloud"},

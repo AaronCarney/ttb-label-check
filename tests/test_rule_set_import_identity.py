@@ -4,6 +4,7 @@ Identity (the `is` operator) — not structural equality — so `isinstance` che
 agree across both import paths and downstream code can rely on a single type
 object regardless of which module path it imported through.
 """
+
 from __future__ import annotations
 
 import app.rules.models as via_models

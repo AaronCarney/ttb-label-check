@@ -12,6 +12,7 @@ and a file named after a person names that person. It reaches the app as
 Preserves: evaluation_id, batch_id, reason_code, duration_ms, rule_set_version,
 model_version, prompt_version, error_class.
 """
+
 from __future__ import annotations
 
 import logging

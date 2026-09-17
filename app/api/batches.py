@@ -1,4 +1,5 @@
 """POST /batches, GET /batches/{batch_id}/stream, GET /batches/{batch_id}."""
+
 from __future__ import annotations
 
 import asyncio
@@ -71,9 +72,7 @@ async def post_batches(
         # for.
         raise HTTPException(
             status_code=413,
-            detail=limits.too_many_files_message(
-                len(envelope.items), limits.MAX_BATCH_FILES
-            ),
+            detail=limits.too_many_files_message(len(envelope.items), limits.MAX_BATCH_FILES),
         )
 
     if envelope.batch_id in request.app.state.batches:
@@ -81,7 +80,9 @@ async def post_batches(
             f"batch_submit_conflict batch_id={envelope.batch_id} agent_id={envelope.agent_id} items={len(envelope.items)}",
             extra={"batch_id": envelope.batch_id, "reason_code": "ENGINE.BATCH.CONFLICT"},
         )
-        raise HTTPException(status_code=409, detail=f"batch_id {envelope.batch_id} already in flight")
+        raise HTTPException(
+            status_code=409, detail=f"batch_id {envelope.batch_id} already in flight"
+        )
 
     lookahead_k = _resolve_lookahead_k(settings)
     in_flight = _build_in_flight_from_envelope(envelope, lookahead_k=lookahead_k)
@@ -91,6 +92,7 @@ async def post_batches(
 
     # Build the evaluator via the shared factory; tests monkeypatch this.
     from app.deps import build_evaluator
+
     evaluator = build_evaluator(settings)
 
     worker = BatchWorker(

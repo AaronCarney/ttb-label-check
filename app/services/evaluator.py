@@ -8,6 +8,7 @@ aggregation, envelope_builder, audit, metrics_builder, cache, engine_meta).
 The Evaluator's job is composition, and routing every downstream exception to
 needs_review rather than to a 500.
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -73,9 +74,7 @@ class Evaluator:
 
         sla = getattr(self, "_sla_seconds", self._DEFAULT_SLA_SECONDS)
         try:
-            envelope = await asyncio.wait_for(
-                self._evaluate_inner(application, label), timeout=sla
-            )
+            envelope = await asyncio.wait_for(self._evaluate_inner(application, label), timeout=sla)
             # Cache-write: success branch only (NEVER on TimeoutError).
             if self._cache is not None and cache_key is not None:
                 self._cache.put(cache_key, envelope)
@@ -109,24 +108,30 @@ class Evaluator:
         # Keeping evaluation_id consistent means patching the nested
         # audit_trail too — a top-level model_copy alone leaves
         # audit_trail.evaluation_id pointing at the cold-path UUID.
-        new_audit = cached.audit_trail.model_copy(update={
-            "evaluation_id": application.evaluation_id,
-            "started_at": started_at,
-            "completed_at": datetime.now(UTC),
-        })
-        new_metrics = cached.metrics.model_copy(update={
-            "cache_hit": True,
-            "total_duration_ms": elapsed_ms,
-            "vision_duration_ms": 0,
-            # No rule ran on this request. The rules that produced the verdict
-            # are still named in audit_trail.per_rule_trace.
-            "per_rule_durations_ms": (),
-        })
-        return cached.model_copy(update={
-            "evaluation_id": application.evaluation_id,
-            "audit_trail": new_audit,
-            "metrics": new_metrics,
-        })
+        new_audit = cached.audit_trail.model_copy(
+            update={
+                "evaluation_id": application.evaluation_id,
+                "started_at": started_at,
+                "completed_at": datetime.now(UTC),
+            }
+        )
+        new_metrics = cached.metrics.model_copy(
+            update={
+                "cache_hit": True,
+                "total_duration_ms": elapsed_ms,
+                "vision_duration_ms": 0,
+                # No rule ran on this request. The rules that produced the verdict
+                # are still named in audit_trail.per_rule_trace.
+                "per_rule_durations_ms": (),
+            }
+        )
+        return cached.model_copy(
+            update={
+                "evaluation_id": application.evaluation_id,
+                "audit_trail": new_audit,
+                "metrics": new_metrics,
+            }
+        )
 
     async def _evaluate_inner(self, application: Application, label: Label) -> DispositionEnvelope:
         from app.services.audit import AuditRecorder
@@ -153,7 +158,8 @@ class Evaluator:
         except Exception as e:
             timeline.record_failure(
                 reason_code="ENGINE.EXTRACTION.UNAVAILABLE",
-                message=str(e), exception_class=type(e).__name__,
+                message=str(e),
+                exception_class=type(e).__name__,
             )
             _logger.info(
                 "engine_failure_routed",
@@ -219,7 +225,8 @@ class Evaluator:
         except Exception as e:
             timeline.record_failure(
                 reason_code="ENGINE.RULES.UNAVAILABLE",
-                message=str(e), exception_class=type(e).__name__,
+                message=str(e),
+                exception_class=type(e).__name__,
             )
             _logger.info(
                 "engine_failure_routed",
@@ -233,24 +240,33 @@ class Evaluator:
 
         # Surface failures into per_rule_trace so AuditRecorder picks them up.
         for failure in timeline.failures:
-            timeline.record_rule_done(rule_id=failure.reason_code, duration_ms=0,
-                                      disposition="needs_review",
-                                      evidence_ref=f"engine_failure/{failure.exception_class}")
+            timeline.record_rule_done(
+                rule_id=failure.reason_code,
+                duration_ms=0,
+                disposition="needs_review",
+                evidence_ref=f"engine_failure/{failure.exception_class}",
+            )
 
         # Step 5-6: disposition + per-rule timeline updates
         from app.services.disposition import compute_disposition, rule_disposition
+
         for vr in results:
             # One mapping, shared with the reviewer's field card and with the
             # overall result, so the audit trail cannot contradict either.
             disposition_label = rule_disposition(vr)
-            timeline.record_rule_done(rule_id=vr.rule_id, duration_ms=vr.engine_meta.elapsed_ms,
-                                      disposition=disposition_label, evidence_ref=f"vr/{vr.rule_id}")
+            timeline.record_rule_done(
+                rule_id=vr.rule_id,
+                duration_ms=vr.engine_meta.elapsed_ms,
+                disposition=disposition_label,
+                evidence_ref=f"vr/{vr.rule_id}",
+            )
             # Surface YAML-registry reason_code as a separate trace entry so
             # the chokepoint contract (FR-90X surfacing) holds: any non-PASS
             # outcome carrying a reason_code lands in per_rule_trace verbatim.
             if vr.reason_code and vr.outcome != Outcome.PASS:
                 timeline.record_rule_done(
-                    rule_id=vr.reason_code, duration_ms=0,
+                    rule_id=vr.reason_code,
+                    duration_ms=0,
                     disposition=disposition_label,
                     evidence_ref=f"reason_code/{vr.rule_id}",
                 )
@@ -269,12 +285,21 @@ class Evaluator:
             "disposition": disposition,
             "fields": [f.model_dump() for f in field_findings],
         }
-        audit = AuditRecorder().assemble(timeline=timeline, application=application, label=label,
-                                         envelope_for_hash=envelope_for_hash)
+        audit = AuditRecorder().assemble(
+            timeline=timeline,
+            application=application,
+            label=label,
+            envelope_for_hash=envelope_for_hash,
+        )
         metrics = MetricsBuilder().build(timeline)
         envelope = build_success_envelope(
-            application=application, label=label, timeline=timeline,
-            disposition=disposition, fields=field_findings, audit=audit, metrics=metrics,
+            application=application,
+            label=label,
+            timeline=timeline,
+            disposition=disposition,
+            fields=field_findings,
+            audit=audit,
+            metrics=metrics,
         )
         return envelope
 
@@ -312,12 +337,15 @@ class Evaluator:
         """
         if beverage_class is None:
             timeline.record_rule_done(
-                rule_id=cls._PACK_NOT_SELECTED, duration_ms=0,
-                disposition="needs_review", evidence_ref="rule_pack/none",
+                rule_id=cls._PACK_NOT_SELECTED,
+                duration_ms=0,
+                disposition="needs_review",
+                evidence_ref="rule_pack/none",
             )
             return
         timeline.record_rule_done(
-            rule_id=cls._PACK_SELECTED, duration_ms=0,
+            rule_id=cls._PACK_SELECTED,
+            duration_ms=0,
             disposition="not_applicable",
             evidence_ref=f"rule_pack/{beverage_class.value}",
         )
@@ -331,18 +359,32 @@ class Evaluator:
         # before the legibility gate fired) into per_rule_trace so the audit
         # is complete. Mirrors _timeout_envelope's surfacing loop.
         for failure in timeline.failures:
-            timeline.record_rule_done(rule_id=failure.reason_code, duration_ms=0,
-                                      disposition="needs_review",
-                                      evidence_ref=f"engine_failure/{failure.exception_class}")
+            timeline.record_rule_done(
+                rule_id=failure.reason_code,
+                duration_ms=0,
+                disposition="needs_review",
+                evidence_ref=f"engine_failure/{failure.exception_class}",
+            )
         timeline.finish(total_duration_ms=int((time.monotonic() - t_total) * 1000))
-        envelope_for_hash = {"evaluation_id": application.evaluation_id, "disposition": "needs_review",
-                             "reason_code": reason_code}
-        audit = AuditRecorder().assemble(timeline=timeline, application=application, label=label,
-                                         envelope_for_hash=envelope_for_hash)
+        envelope_for_hash = {
+            "evaluation_id": application.evaluation_id,
+            "disposition": "needs_review",
+            "reason_code": reason_code,
+        }
+        audit = AuditRecorder().assemble(
+            timeline=timeline,
+            application=application,
+            label=label,
+            envelope_for_hash=envelope_for_hash,
+        )
         metrics = MetricsBuilder().build(timeline)
         return build_short_circuit_envelope(
-            application=application, label=label, timeline=timeline,
-            reason_code=reason_code, audit=audit, metrics=metrics,
+            application=application,
+            label=label,
+            timeline=timeline,
+            reason_code=reason_code,
+            audit=audit,
+            metrics=metrics,
         )
 
     def _timeout_envelope(self, application: Application, label: Label) -> DispositionEnvelope:
@@ -362,9 +404,12 @@ class Evaluator:
         )
         # Surface failure into per_rule_trace.
         for failure in timeline.failures:
-            timeline.record_rule_done(rule_id=failure.reason_code, duration_ms=0,
-                                      disposition="needs_review",
-                                      evidence_ref=f"engine_failure/{failure.exception_class}")
+            timeline.record_rule_done(
+                rule_id=failure.reason_code,
+                duration_ms=0,
+                disposition="needs_review",
+                evidence_ref=f"engine_failure/{failure.exception_class}",
+            )
         timeline.finish(total_duration_ms=timeline.total_duration_ms or 0)
         _logger.info(
             "engine_failure_routed",
@@ -374,12 +419,23 @@ class Evaluator:
                 "error_class": "TimeoutError",
             },
         )
-        envelope_for_hash = {"evaluation_id": application.evaluation_id, "disposition": "needs_review",
-                             "reason_code": "ENGINE.SLA.TIMEOUT"}
-        audit = AuditRecorder().assemble(timeline=timeline, application=application, label=label,
-                                         envelope_for_hash=envelope_for_hash)
+        envelope_for_hash = {
+            "evaluation_id": application.evaluation_id,
+            "disposition": "needs_review",
+            "reason_code": "ENGINE.SLA.TIMEOUT",
+        }
+        audit = AuditRecorder().assemble(
+            timeline=timeline,
+            application=application,
+            label=label,
+            envelope_for_hash=envelope_for_hash,
+        )
         metrics = MetricsBuilder().build(timeline)
         return build_short_circuit_envelope(
-            application=application, label=label, timeline=timeline,
-            reason_code="ENGINE.SLA.TIMEOUT", audit=audit, metrics=metrics,
+            application=application,
+            label=label,
+            timeline=timeline,
+            reason_code="ENGINE.SLA.TIMEOUT",
+            audit=audit,
+            metrics=metrics,
         )

@@ -1,4 +1,5 @@
 """Shared pytest fixtures for the TTB Label Verification test suite."""
+
 from __future__ import annotations
 
 import io
@@ -27,6 +28,7 @@ def _redact_authorization_headers(payload: dict) -> dict:
     """Strip Authorization headers from a recording payload before write.
     Prevents an API key leaking into a committed recording."""
     import copy
+
     out = copy.deepcopy(payload)
     headers = out.get("headers")
     if isinstance(headers, dict):
@@ -167,9 +169,7 @@ class _LiveServer:
             loop="asyncio",
         )
         self._server = uvicorn.Server(config)
-        self._thread = threading.Thread(
-            target=self._server.run, daemon=True
-        )
+        self._thread = threading.Thread(target=self._server.run, daemon=True)
         self._thread.start()
         # Poll until the server accepts connections (≤2 s).
         deadline = time.time() + 2.0
@@ -178,9 +178,7 @@ class _LiveServer:
                 if s.connect_ex(("127.0.0.1", self.port)) == 0:
                     return
             time.sleep(0.05)
-        raise RuntimeError(
-            f"uvicorn did not bind to {self.port} within 2 s"
-        )
+        raise RuntimeError(f"uvicorn did not bind to {self.port} within 2 s")
 
     def stop(self) -> None:
         if self._server is not None:

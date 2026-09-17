@@ -1,4 +1,5 @@
 """App factory wires healthz route + startup hook + logging configuration."""
+
 from __future__ import annotations
 
 import os

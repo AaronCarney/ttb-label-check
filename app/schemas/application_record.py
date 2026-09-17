@@ -16,6 +16,7 @@ registry record. Where an application has no value for them, the field is left
 empty and every check against it reports that it does not apply, rather than
 inventing a comparison.
 """
+
 from __future__ import annotations
 
 import re
@@ -110,11 +111,10 @@ class ApplicationRecord(BaseModel):
         anchors = list(_ZIP_RE.finditer(block))
         if not anchors:
             return ()
-        tail = block[anchors[-1].end():]
+        tail = block[anchors[-1].end() :]
         # The text after the final marker is whatever trails the list, not a
         # name, so it is dropped.
         names = [
-            segment.strip().strip(",;").strip()
-            for segment in _USED_ON_LABEL_RE.split(tail)[:-1]
+            segment.strip().strip(",;").strip() for segment in _USED_ON_LABEL_RE.split(tail)[:-1]
         ]
         return tuple(dict.fromkeys(name for name in names if name))

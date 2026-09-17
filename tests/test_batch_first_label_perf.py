@@ -8,6 +8,7 @@ The event count is exact because SSEBus replays on subscribe: a subscriber that
 attaches after the worker has already emitted item 0 still sees it, so the
 assertion ``lr == n_items`` holds rather than coming up one short.
 """
+
 import statistics
 import time
 from datetime import UTC

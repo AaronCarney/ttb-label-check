@@ -1,5 +1,6 @@
 """The Evaluator's constructor signature: every dependency arrives by injection,
 so a test can substitute any of them."""
+
 import inspect
 
 from app.services.evaluator import Evaluator

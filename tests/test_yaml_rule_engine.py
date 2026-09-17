@@ -2,6 +2,7 @@
 observation's beverage class, wraps each call in a 250 ms timeout, and isolates
 exceptions. Output is a tuple of ValidationResult, sorted by rule_id.
 """
+
 from __future__ import annotations
 
 import importlib
@@ -108,6 +109,7 @@ async def test_yaml_engine_unregistered_validator_emits_not_found() -> None:
     bypass the loader and exercise the defensive engine branch directly.
     """
     from app.schemas.rules import RuleSet
+
     rule = make_rule(
         rule_id="x.unregistered",
         cfr_citation="27 CFR §0.0",
@@ -115,8 +117,12 @@ async def test_yaml_engine_unregistered_validator_emits_not_found() -> None:
         reason_code="WARNING.PRESENCE.MISSING",
     )
     rs = RuleSet(
-        version="0.1.0", effective_date="2026-09-09",
-        rules=(rule,), reason_codes={}, assets={}, decision_tables={},
+        version="0.1.0",
+        effective_date="2026-09-09",
+        rules=(rule,),
+        reason_codes={},
+        assets={},
+        decision_tables={},
     )
     engine = YamlRuleEngine(rs)
     obs = [make_obs(field_id="warning_block", value="x", beverage_class=BeverageClass.SPIRITS)]

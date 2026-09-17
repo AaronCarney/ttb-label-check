@@ -1,4 +1,5 @@
 """Playwright harness smoke test: the fixture starts uvicorn and serves /."""
+
 from __future__ import annotations
 
 import pytest

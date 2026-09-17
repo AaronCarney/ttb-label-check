@@ -1,4 +1,5 @@
 """Round-trip tests for app.schemas.expected."""
+
 from __future__ import annotations
 
 

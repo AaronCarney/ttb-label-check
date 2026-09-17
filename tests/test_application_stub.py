@@ -3,6 +3,7 @@
 The richer behaviour is covered with the evaluator and the batch worker; this
 file only pins the constructor surface the services import.
 """
+
 from app.schemas.application import Application
 
 

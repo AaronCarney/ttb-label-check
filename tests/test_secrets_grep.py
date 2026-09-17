@@ -4,6 +4,7 @@ and every setting enters the app through one place.
 The check is the grep ``grep -rn 'os.environ' app/ | grep -v 'config.py'``,
 which must return nothing.
 """
+
 from __future__ import annotations
 
 import re
@@ -27,7 +28,4 @@ def test_os_environ_read_only_in_app_config_py() -> None:
                 continue
             if _OS_ENVIRON_RE.search(line):
                 offenders.append(f"{path.relative_to(repo)}:{lineno}: {stripped}")
-    assert not offenders, (
-        "os.environ accessed outside app/config.py:\n"
-        + "\n".join(offenders)
-    )
+    assert not offenders, "os.environ accessed outside app/config.py:\n" + "\n".join(offenders)

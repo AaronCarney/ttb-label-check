@@ -1,5 +1,6 @@
 """POST /batches and GET /batches/{batch_id} — basic shape, and what a batch
 of bare references actually gets back."""
+
 import json
 from datetime import UTC, datetime
 
@@ -106,7 +107,10 @@ async def test_post_batches_refuses_every_item_by_name_when_no_image_was_supplie
 
     # Every item produced a result event, and the batch ended once.
     assert [name for name, _ in events] == [
-        "label-result", "label-result", "label-result", "stream-end",
+        "label-result",
+        "label-result",
+        "label-result",
+        "stream-end",
     ], events
     label_events = [data for _, data in events[:3]]
     end_event = events[3][1]

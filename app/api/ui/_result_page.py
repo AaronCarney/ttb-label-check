@@ -7,6 +7,7 @@ application, run the evaluator, keep the image where the result page can fetch
 it, render the shell — has to be identical, or a sample would demonstrate a
 path the reviewer's own upload does not take.
 """
+
 from __future__ import annotations
 
 import uuid

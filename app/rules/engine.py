@@ -5,6 +5,7 @@ immutable end to end, matching the frozen RuleSet the loader builds. Do NOT
 relax this signature back to a list without checking every caller that relies on
 not being able to mutate what it is handed.
 """
+
 from __future__ import annotations
 
 from abc import ABC, abstractmethod

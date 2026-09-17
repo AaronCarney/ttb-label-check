@@ -1,4 +1,5 @@
 """AuditRecorder — assembly and canonical hashing, with no side effects."""
+
 import subprocess
 import sys
 
@@ -49,7 +50,9 @@ def test_audit_assemble_returns_record():
     t.record_rule_done(rule_id="R-001", duration_ms=10, disposition="pass", evidence_ref="ev/R-001")
     t.finish(total_duration_ms=100)
     rec = AuditRecorder().assemble(
-        timeline=t, application=_stub_app(), label=_stub_label(),
+        timeline=t,
+        application=_stub_app(),
+        label=_stub_label(),
         envelope_for_hash={"disposition": "pass", "fields": []},
     )
     assert isinstance(rec, AuditRecord)

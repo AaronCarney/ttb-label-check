@@ -1,5 +1,6 @@
 """The two spirits rules with matching logic of their own: the standard-of-identity
 candidate match, and the age-statement floor."""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -21,14 +22,25 @@ def ruleset():
     return YamlRuleLoader().load(Path("rules"))
 
 
-def _r(rs, rid): return next(r for r in rs.rules if r.rule_id == rid)
-def _ctx(rs): return make_context(assets=rs.assets, decision_tables=rs.decision_tables)
+def _r(rs, rid):
+    return next(r for r in rs.rules if r.rule_id == rid)
+
+
+def _ctx(rs):
+    return make_context(assets=rs.assets, decision_tables=rs.decision_tables)
 
 
 def test_soi_match_pos(ruleset) -> None:
     rule = _r(ruleset, "spirits.class_type.matches_soi")
-    obs = make_obs(field_id="class_type", value="Bourbon Whisky", beverage_class=BeverageClass.SPIRITS)
-    assert VALIDATOR_REGISTRY[rule.validator](obs, make_expected(field_id="class_type"), rule, _ctx(ruleset)).outcome is Outcome.PASS
+    obs = make_obs(
+        field_id="class_type", value="Bourbon Whisky", beverage_class=BeverageClass.SPIRITS
+    )
+    assert (
+        VALIDATOR_REGISTRY[rule.validator](
+            obs, make_expected(field_id="class_type"), rule, _ctx(ruleset)
+        ).outcome
+        is Outcome.PASS
+    )
 
 
 @pytest.mark.parametrize("designation", ["Cognac XO", "CRÈME DE CASSIS LIQUEUR"])
@@ -38,7 +50,12 @@ def test_soi_match_accepts_a_class_carried_inside_the_designation(ruleset, desig
     # it (docs/decisions.md#0007), so the qualifiers around it do not matter.
     rule = _r(ruleset, "spirits.class_type.matches_soi")
     obs = make_obs(field_id="class_type", value=designation, beverage_class=BeverageClass.SPIRITS)
-    assert VALIDATOR_REGISTRY[rule.validator](obs, make_expected(field_id="class_type"), rule, _ctx(ruleset)).outcome is Outcome.PASS
+    assert (
+        VALIDATOR_REGISTRY[rule.validator](
+            obs, make_expected(field_id="class_type"), rule, _ctx(ruleset)
+        ).outcome
+        is Outcome.PASS
+    )
 
 
 def test_soi_match_neg(ruleset) -> None:
@@ -48,8 +65,12 @@ def test_soi_match_neg(ruleset) -> None:
     # unrecognised designation is no evidence the label is wrong.
     # docs/decisions.md#0012.
     rule = _r(ruleset, "spirits.class_type.matches_soi")
-    obs = make_obs(field_id="class_type", value="Mystery Hooch", beverage_class=BeverageClass.SPIRITS)
-    res = VALIDATOR_REGISTRY[rule.validator](obs, make_expected(field_id="class_type"), rule, _ctx(ruleset))
+    obs = make_obs(
+        field_id="class_type", value="Mystery Hooch", beverage_class=BeverageClass.SPIRITS
+    )
+    res = VALIDATOR_REGISTRY[rule.validator](
+        obs, make_expected(field_id="class_type"), rule, _ctx(ruleset)
+    )
     assert res.outcome is Outcome.FAIL
     assert res.reason_code == "CLASS_TYPE.SOI.NO_MATCH"
     assert res.severity is Severity.WARN
@@ -57,7 +78,9 @@ def test_soi_match_neg(ruleset) -> None:
 
 def test_age_statement_pos(ruleset) -> None:
     rule = _r(ruleset, "spirits.age_statement.floor")
-    obs = make_obs(field_id="age_statement", value="Aged 4 Years", beverage_class=BeverageClass.SPIRITS)
+    obs = make_obs(
+        field_id="age_statement", value="Aged 4 Years", beverage_class=BeverageClass.SPIRITS
+    )
     exp = make_expected(field_id="age_statement", parameters={"age_required": True})
     assert VALIDATOR_REGISTRY[rule.validator](obs, exp, rule, _ctx(ruleset)).outcome is Outcome.PASS
 

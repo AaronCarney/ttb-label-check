@@ -4,6 +4,7 @@ Loads the Jinja shell against the live uvicorn fixture, injects the canned
 envelope into the DOM before the React island reads it, then runs axe-core
 inside the page and asserts no AA violations.
 """
+
 from __future__ import annotations
 
 import json
@@ -22,9 +23,7 @@ _SINGLE_FIXTURES = sorted(p.name for p in FIXTURES.glob("*.json"))
 
 @pytest.mark.usefixtures("live_server", "pnpm_built_island")
 @pytest.mark.parametrize("fixture_name", _SINGLE_FIXTURES)
-def test_axe_zero_aa_violations_single(
-    fixture_name: str, page: Page, live_server_url: str
-) -> None:
+def test_axe_zero_aa_violations_single(fixture_name: str, page: Page, live_server_url: str) -> None:
     envelope = json.loads((FIXTURES / fixture_name).read_text())
     # Inject the envelope BEFORE the island imports.
     page.add_init_script(

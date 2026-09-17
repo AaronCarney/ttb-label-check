@@ -5,6 +5,7 @@ Measures the API, evaluator and serialization overhead against deterministic
 seams — a fake reader. Reader load time is bypassed deliberately; it is
 measured where it is spent, not here.
 """
+
 import json
 import statistics
 import time
@@ -39,10 +40,13 @@ def test_post_labels_perf_p50_p99(deterministic_seams):
     durations: list[float] = []
     for _ in range(30):
         t0 = time.monotonic()
-        response = client.post("/labels", files={
-            "application": ("a.json", payload, "application/json"),
-            "label": ("l.png", image, "image/png"),
-        })
+        response = client.post(
+            "/labels",
+            files={
+                "application": ("a.json", payload, "application/json"),
+                "label": ("l.png", image, "image/png"),
+            },
+        )
         durations.append(time.monotonic() - t0)
         assert response.status_code == 200
 

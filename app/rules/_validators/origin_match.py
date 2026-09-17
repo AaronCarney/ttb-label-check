@@ -33,6 +33,7 @@ rejected outright. An import whose label carries no origin statement at all is
 a different matter — nothing was stated, so there is nothing to interpret, and
 that branch does reject under the rule's own reason code.
 """
+
 from __future__ import annotations
 
 from app.rules._validators import ValidatorContext, register

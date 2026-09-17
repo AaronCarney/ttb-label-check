@@ -20,6 +20,7 @@ Two layers, because they answer different questions:
     parsing has named the files, are what a person reads. They say which file
     was too big and what the limit is.
 """
+
 from __future__ import annotations
 
 import json
@@ -59,6 +60,7 @@ def _png(size: int) -> bytes:
 # The numbers themselves
 # --------------------------------------------------------------------------
 
+
 def test_the_request_cap_sits_below_the_platform_cap() -> None:
     """Cloud Run refuses an HTTP/1 request body over 32 MiB itself, and
     `scripts/deploy.sh` sets no `--use-http2`. A cap at or above the platform's
@@ -90,6 +92,7 @@ def test_a_full_batch_of_real_labels_fits_inside_the_request_cap() -> None:
 # The request cap, before any body is read
 # --------------------------------------------------------------------------
 
+
 def test_an_oversized_request_is_refused_before_its_body_is_read(client, monkeypatch) -> None:
     """The point of the middleware. `Content-Length` says how big the body is
     before a byte of it arrives, so the refusal costs nothing."""
@@ -97,7 +100,11 @@ def test_an_oversized_request_is_refused_before_its_body_is_read(client, monkeyp
     response = client.post(
         "/labels",
         files={
-            "application": ("a.json", json.dumps({"application_id": "A", "evaluation_id": "E"}), "application/json"),
+            "application": (
+                "a.json",
+                json.dumps({"application_id": "A", "evaluation_id": "E"}),
+                "application/json",
+            ),
             "label": ("l.png", _png(8192), "image/png"),
         },
     )
@@ -119,7 +126,9 @@ def test_a_request_with_no_content_length_is_counted_as_it_streams(client, monke
         for _ in range(8):
             yield b"\x00" * 1024
 
-    response = client.post("/labels", content=_chunks(), headers={"content-type": "application/octet-stream"})
+    response = client.post(
+        "/labels", content=_chunks(), headers={"content-type": "application/octet-stream"}
+    )
     assert response.status_code == 413
     assert response.json()["reason_code"] == "ENGINE.INPUT.REQUEST_TOO_LARGE"
 
@@ -128,7 +137,11 @@ def test_a_request_inside_the_cap_is_untouched(client, deterministic_seams) -> N
     response = client.post(
         "/labels",
         files={
-            "application": ("a.json", json.dumps({"application_id": "A-001", "evaluation_id": "EV-001"}), "application/json"),
+            "application": (
+                "a.json",
+                json.dumps({"application_id": "A-001", "evaluation_id": "EV-001"}),
+                "application/json",
+            ),
             "label": ("l.png", _png(64), "image/png"),
         },
     )
@@ -139,12 +152,19 @@ def test_a_request_inside_the_cap_is_untouched(client, deterministic_seams) -> N
 # The per-file cap, named for the user
 # --------------------------------------------------------------------------
 
-def test_post_labels_refuses_an_oversized_image_by_name(client, monkeypatch, deterministic_seams) -> None:
+
+def test_post_labels_refuses_an_oversized_image_by_name(
+    client, monkeypatch, deterministic_seams
+) -> None:
     monkeypatch.setattr(limits, "MAX_UPLOAD_BYTES", 2048)
     response = client.post(
         "/labels",
         files={
-            "application": ("a.json", json.dumps({"application_id": "A-001", "evaluation_id": "EV-001"}), "application/json"),
+            "application": (
+                "a.json",
+                json.dumps({"application_id": "A-001", "evaluation_id": "EV-001"}),
+                "application/json",
+            ),
             "label": ("big.png", _png(4096), "image/png"),
         },
     )
@@ -154,7 +174,9 @@ def test_post_labels_refuses_an_oversized_image_by_name(client, monkeypatch, det
     assert "big.png" in body["message"] or "big.png" in json.dumps(body["details"])
 
 
-def test_the_single_upload_page_refuses_an_oversized_image(client, monkeypatch, deterministic_seams) -> None:
+def test_the_single_upload_page_refuses_an_oversized_image(
+    client, monkeypatch, deterministic_seams
+) -> None:
     """The browser path answers in the page's own words, not a JSON envelope:
     a reviewer is looking at a form, not an API response."""
     monkeypatch.setattr(limits, "MAX_UPLOAD_BYTES", 2048)
@@ -167,7 +189,9 @@ def test_the_single_upload_page_refuses_an_oversized_image(client, monkeypatch, 
     assert "big.png" in response.text
 
 
-def test_the_bulk_upload_page_refuses_an_oversized_image(client, monkeypatch, deterministic_seams) -> None:
+def test_the_bulk_upload_page_refuses_an_oversized_image(
+    client, monkeypatch, deterministic_seams
+) -> None:
     monkeypatch.setattr(limits, "MAX_UPLOAD_BYTES", 2048)
     response = client.post(
         "/batches/upload",
@@ -184,6 +208,7 @@ def test_the_bulk_upload_page_refuses_an_oversized_image(client, monkeypatch, de
 # --------------------------------------------------------------------------
 # The per-batch file count
 # --------------------------------------------------------------------------
+
 
 def test_a_batch_over_the_file_count_is_refused(client, monkeypatch, deterministic_seams) -> None:
     monkeypatch.setattr(limits, "MAX_BATCH_FILES", 3)

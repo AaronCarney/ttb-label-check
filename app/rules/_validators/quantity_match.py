@@ -40,6 +40,7 @@ Unit conversions come from the rule pack's decision table, read through
 reading-accuracy harness read it with. Adding a unit is an edit to the rule
 pack and not to this file.
 """
+
 from __future__ import annotations
 
 from app.rules._validators import ValidatorContext, register

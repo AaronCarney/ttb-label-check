@@ -10,6 +10,7 @@ the landing page offers it, clicking it checks a real shipped image against the
 application really filed for that label, and it runs the same path a reviewer's
 own upload runs rather than a demonstration path of its own.
 """
+
 from __future__ import annotations
 
 import pytest
@@ -49,6 +50,7 @@ def client(recorder):
 # The landing page offers it
 # ---------------------------------------------------------------------------
 
+
 def test_the_landing_page_offers_at_least_one_sample_to_check():
     response = TestClient(create_app()).get("/")
     assert response.status_code == 200
@@ -78,6 +80,7 @@ def test_the_offered_samples_are_all_installed():
 # ---------------------------------------------------------------------------
 # Clicking it checks the label against the application really filed for it
 # ---------------------------------------------------------------------------
+
 
 def test_clicking_a_sample_returns_a_result_page(client):
     sample_id = offered_samples()[0]["id"]
@@ -129,6 +132,7 @@ def test_the_result_page_shows_the_label_image(client):
 # ---------------------------------------------------------------------------
 # It is the same path a reviewer's own upload takes
 # ---------------------------------------------------------------------------
+
 
 def test_a_domestic_sample_sends_no_country_of_origin(client, recorder):
     """The manifest records a domestic application's `origin` as the producing

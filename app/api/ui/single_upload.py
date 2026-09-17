@@ -5,6 +5,7 @@ the typed application to the shared result path in ``_result_page``. That path
 is shared with ``POST /samples/{sample_id}`` so a shipped sample and a reviewer's
 own upload cannot demonstrate different behaviour.
 """
+
 from __future__ import annotations
 
 from fastapi import APIRouter, Depends, File, Form, Request, UploadFile

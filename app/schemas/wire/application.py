@@ -2,6 +2,7 @@
 
 ``extra='forbid'`` — unknown keys are rejected at the boundary.
 """
+
 from __future__ import annotations
 
 from datetime import date

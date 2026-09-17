@@ -6,6 +6,7 @@ none of them: the React island it mounts fetches its data from the JSON API
 (``app.api.labels``, ``app.api.batches``, ``app.api.overrides``), and the two
 upload routes that do run the engine live beside this module rather than in it.
 """
+
 from __future__ import annotations
 
 from fastapi import APIRouter, Depends, Request

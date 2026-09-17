@@ -8,6 +8,7 @@ does not list, and the reviewer meets a 400 at the point of overriding.
 The picker is a curated shortlist, not the whole registry, so this asserts one
 direction only — every code it offers is a code the endpoint will take.
 """
+
 from __future__ import annotations
 
 import re

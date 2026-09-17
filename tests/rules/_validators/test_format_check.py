@@ -11,6 +11,7 @@ It stays registered because app/rules/loader.py refuses startup when a rule
 names a validator the registry does not carry, and it makes that check for
 disabled rules too.
 """
+
 from __future__ import annotations
 
 import importlib
@@ -26,7 +27,9 @@ from app.schemas.rejection import Outcome
 from app.schemas.rules import MatchPolicy
 from tests.rules.fixtures import make_context, make_expected, make_obs, make_rule
 
-PAT = r"^\s*(?:alcohol|alc\.?)\s*[0-9]{1,2}(?:\.[0-9]+)?\s*%?\s*(?:by\s+volume|/\s*vol\.?|vol\.?)\s*$"
+PAT = (
+    r"^\s*(?:alcohol|alc\.?)\s*[0-9]{1,2}(?:\.[0-9]+)?\s*%?\s*(?:by\s+volume|/\s*vol\.?|vol\.?)\s*$"
+)
 
 DISABLED_RULES = ["spirits.alcohol.format", "wine.alcohol.format", "malt.alcohol.format"]
 

@@ -13,6 +13,7 @@ Locks the contract that:
    not name, say — are dropped silently, so the formatter enforces the schema
    rather than letting drift pass through.
 """
+
 from __future__ import annotations
 
 import json

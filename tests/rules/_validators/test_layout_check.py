@@ -7,6 +7,7 @@
 neighbour distance it compared, so `common.warning.separate_apart` now answers
 `unmeasurable` instead (docs/decisions.md#0013).
 """
+
 from __future__ import annotations
 
 from app.rules._validators import VALIDATOR_REGISTRY
@@ -28,13 +29,29 @@ def _sov_rule():
 
 
 def test_sov_pass_when_all_on_one_panel() -> None:
-    obs = make_obs(field_id="layout", value={"panels": {"front": ["brand", "class_type", "abv", "net_contents"]}})
-    assert same_field_of_vision_check(obs, make_expected(field_id="layout"), _sov_rule(), make_context()).outcome is Outcome.PASS
+    obs = make_obs(
+        field_id="layout",
+        value={"panels": {"front": ["brand", "class_type", "abv", "net_contents"]}},
+    )
+    assert (
+        same_field_of_vision_check(
+            obs, make_expected(field_id="layout"), _sov_rule(), make_context()
+        ).outcome
+        is Outcome.PASS
+    )
 
 
 def test_sov_fail_when_split_across_panels() -> None:
-    obs = make_obs(field_id="layout", value={"panels": {"front": ["brand", "class_type"], "back": ["abv", "net_contents"]}})
-    assert same_field_of_vision_check(obs, make_expected(field_id="layout"), _sov_rule(), make_context()).outcome is Outcome.FAIL
+    obs = make_obs(
+        field_id="layout",
+        value={"panels": {"front": ["brand", "class_type"], "back": ["abv", "net_contents"]}},
+    )
+    assert (
+        same_field_of_vision_check(
+            obs, make_expected(field_id="layout"), _sov_rule(), make_context()
+        ).outcome
+        is Outcome.FAIL
+    )
 
 
 def test_validators_registered() -> None:

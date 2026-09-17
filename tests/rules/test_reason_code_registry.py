@@ -33,6 +33,7 @@ Every check below is a plain function over data, and each has a case underneath
 it that feeds it a planted defect and asserts it is caught. A guard that has only
 ever seen a passing file is not known to work.
 """
+
 from __future__ import annotations
 
 import re
@@ -134,7 +135,9 @@ def undescribed(named: Iterable[str], codes: dict[str, dict]) -> list[str]:
     )
 
 
-def unreachable(registered: Iterable[str], emitted: Iterable[str], declared: Iterable[str]) -> list[str]:
+def unreachable(
+    registered: Iterable[str], emitted: Iterable[str], declared: Iterable[str]
+) -> list[str]:
     """Registered codes nothing emits and `reviewer_vocabulary` does not claim."""
     return sorted(set(registered) - set(emitted) - set(declared))
 
@@ -238,8 +241,7 @@ def test_reviewer_vocabulary_declares_no_emitted_code() -> None:
     )
     redundant = redundant_declarations(data["reviewer_vocabulary"], emitted)
     assert not redundant, (
-        "reviewer_vocabulary claims nothing emits these, but something does: "
-        f"{redundant}"
+        f"reviewer_vocabulary claims nothing emits these, but something does: {redundant}"
     )
 
 
@@ -326,12 +328,13 @@ def test_catches_a_stale_vocabulary_entry() -> None:
 
 
 def test_catches_a_redundant_vocabulary_entry() -> None:
-    assert redundant_declarations(
-        ["BRAND.PRESENCE.MISSING"], ["BRAND.PRESENCE.MISSING"]
-    ) == ["BRAND.PRESENCE.MISSING"]
+    assert redundant_declarations(["BRAND.PRESENCE.MISSING"], ["BRAND.PRESENCE.MISSING"]) == [
+        "BRAND.PRESENCE.MISSING"
+    ]
 
 
 def test_catches_a_vocabulary_entry_with_no_reason() -> None:
-    assert reasonless_declarations(
-        {"A.B.C": "kept because", "D.E.F": "  ", "G.H.I": None}
-    ) == ["D.E.F", "G.H.I"]
+    assert reasonless_declarations({"A.B.C": "kept because", "D.E.F": "  ", "G.H.I": None}) == [
+        "D.E.F",
+        "G.H.I",
+    ]

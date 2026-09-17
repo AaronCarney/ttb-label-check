@@ -1,6 +1,7 @@
 """Test builders for the rule-engine unit tests. The rule set itself is YAML;
 the rule inputs here are Python builders, so the tests stay skim-readable.
 """
+
 from __future__ import annotations
 
 import importlib

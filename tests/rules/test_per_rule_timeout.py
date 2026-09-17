@@ -1,6 +1,7 @@
 """A deliberately slow validator trips the 250 ms per-rule timeout
 and emits ENGINE.VALIDATOR.TIMEOUT. Other rules in the same evaluation continue.
 """
+
 from __future__ import annotations
 
 import time
@@ -29,7 +30,14 @@ async def test_slow_validator_times_out() -> None:
         validator="__slow_validator__",
         reason_code="WARNING.PRESENCE.MISSING",
     )
-    rs = RuleSet(version="0.1.0", effective_date="2026-09-09", rules=(rule,), reason_codes={}, assets={}, decision_tables={})
+    rs = RuleSet(
+        version="0.1.0",
+        effective_date="2026-09-09",
+        rules=(rule,),
+        reason_codes={},
+        assets={},
+        decision_tables={},
+    )
     engine = YamlRuleEngine(rs)
     obs = [make_obs(field_id="warning_block", value="x", beverage_class=BeverageClass.SPIRITS)]
     exp = [make_expected(field_id="warning_block")]

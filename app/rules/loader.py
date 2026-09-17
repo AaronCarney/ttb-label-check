@@ -38,6 +38,7 @@ semver, pinned to the engine-supported range; registry version and pack
 aggregate are not distinguished, and the difference is operationally
 insignificant.
 """
+
 from __future__ import annotations
 
 import hashlib
@@ -77,16 +78,18 @@ class _LoadAccumulator:
 @dataclass
 class YamlRuleLoader:
     engine_supported_pack_range: tuple[str, str] = ("0.1.0", "0.2.0")
-    rules_root_for_assets: Path | None = None  # asset paths resolve relative to this; defaults to rules_root.parent
+    rules_root_for_assets: Path | None = (
+        None  # asset paths resolve relative to this; defaults to rules_root.parent
+    )
 
     def load(self, rules_root: Path) -> RuleSet:
         acc = _LoadAccumulator()
         registry_version, registry = self._load_registry(rules_root, acc)
         self._load_decision_tables(rules_root, acc)
         rule_files = sorted(
-            p for p in rules_root.rglob("*.yaml")
-            if p.name != "reason_codes.yaml"
-            and "tables" not in p.relative_to(rules_root).parts
+            p
+            for p in rules_root.rglob("*.yaml")
+            if p.name != "reason_codes.yaml" and "tables" not in p.relative_to(rules_root).parts
         )
         for path in rule_files:
             self._load_rule_file(path, registry, acc)
@@ -120,7 +123,9 @@ class YamlRuleLoader:
 
     # ------------------------------------------------------------------
 
-    def _load_registry(self, root: Path, acc: _LoadAccumulator) -> tuple[str, dict[str, ReasonCodeEntry]]:
+    def _load_registry(
+        self, root: Path, acc: _LoadAccumulator
+    ) -> tuple[str, dict[str, ReasonCodeEntry]]:
         path = root / "reason_codes.yaml"
         if not path.exists():
             acc.errors.append(f"{path}: reason_codes.yaml not found")
@@ -170,7 +175,9 @@ class YamlRuleLoader:
                 continue
             acc.decision_tables[tpath.stem] = dt
 
-    def _load_rule_file(self, path: Path, registry: dict[str, ReasonCodeEntry], acc: _LoadAccumulator) -> None:
+    def _load_rule_file(
+        self, path: Path, registry: dict[str, ReasonCodeEntry], acc: _LoadAccumulator
+    ) -> None:
         try:
             raw = yaml.safe_load(path.read_text(encoding="utf-8"))
         except yaml.YAMLError as e:
@@ -189,7 +196,9 @@ class YamlRuleLoader:
             return
         lo, hi = self.engine_supported_pack_range
         if not (lo <= pack_ver < hi):
-            acc.errors.append(f"{path}: rule_pack_version {pack_ver!r} outside engine-supported range [{lo}, {hi})")
+            acc.errors.append(
+                f"{path}: rule_pack_version {pack_ver!r} outside engine-supported range [{lo}, {hi})"
+            )
             return
         if not isinstance(rules, list):
             acc.errors.append(f"{path}: rules must be a list")
@@ -202,7 +211,7 @@ class YamlRuleLoader:
             try:
                 rd = RuleDefinition.model_validate(entry)
             except ValidationError as e:
-                acc.errors.append(f"{path}/{entry.get('rule_id','?')}: schema invalid: {e}")
+                acc.errors.append(f"{path}/{entry.get('rule_id', '?')}: schema invalid: {e}")
                 continue
             if rd.rule_id in acc.seen_ids:
                 acc.errors.append(f"{path}: duplicate rule_id {rd.rule_id!r}")
@@ -210,7 +219,9 @@ class YamlRuleLoader:
             if rd.validator not in VALIDATOR_REGISTRY:
                 acc.errors.append(f"{path}/{rd.rule_id}: unknown validator {rd.validator!r}")
             if rd.reason_code not in registry:
-                acc.errors.append(f"{path}/{rd.rule_id}: reason_code {rd.reason_code!r} not in registry")
+                acc.errors.append(
+                    f"{path}/{rd.rule_id}: reason_code {rd.reason_code!r} not in registry"
+                )
             # A rule's parameters name the codes it emits on its other
             # branches — the borderline brand match, the quantity with no
             # number to compare. Those codes carry the sentence the reviewer
@@ -228,7 +239,9 @@ class YamlRuleLoader:
                 if "/" in key:
                     key = key.rsplit("/", 1)[1].rsplit(".", 1)[0]
                 if key not in acc.decision_tables:
-                    acc.errors.append(f"{path}/{rd.rule_id}: decision_table_ref {rd.decision_table_ref!r} not found")
+                    acc.errors.append(
+                        f"{path}/{rd.rule_id}: decision_table_ref {rd.decision_table_ref!r} not found"
+                    )
             acc.rules.append(rd)
 
     def _load_assets(
@@ -247,6 +260,7 @@ class YamlRuleLoader:
             DEFAULT_NORMALIZATION_OPS,
             canonicalize_text,
         )
+
         anchor = self.rules_root_for_assets or rules_root.parent
         out: dict[str, AssetRef] = {}
         for rd in rules:
@@ -291,9 +305,11 @@ class YamlRuleLoader:
 
 def _cli_entry() -> int:
     from app.rules.__main__ import main
+
     return main()
 
 
 if __name__ == "__main__":
     import sys
+
     sys.exit(_cli_entry())

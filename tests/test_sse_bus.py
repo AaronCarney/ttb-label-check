@@ -1,4 +1,5 @@
 """SSEBus — per-batch async event broker."""
+
 import asyncio
 
 import pytest

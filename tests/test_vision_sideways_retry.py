@@ -15,6 +15,7 @@ already shown sideways text — tall narrow boxes where upright text is wide.
 No OCR engine runs here. The box list the engine would return is supplied
 directly, and what is being tested is how many times the reader asks for one.
 """
+
 from __future__ import annotations
 
 from collections import deque

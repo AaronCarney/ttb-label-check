@@ -4,6 +4,7 @@ Two directions, and both have failed elsewhere in this tree: a variable the app
 reads that nobody documents, and a variable documented that nothing reads. The
 second is the quieter failure — it reads as a working switch and is not one.
 """
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -36,10 +37,7 @@ def _parse_env_example(path: Path) -> set[str]:
 def _settings_aliases() -> set[str]:
     from app.config import Settings
 
-    return {
-        (field.alias or name).upper()
-        for name, field in Settings.model_fields.items()
-    }
+    return {(field.alias or name).upper() for name, field in Settings.model_fields.items()}
 
 
 def test_env_example_documents_all_required_keys() -> None:

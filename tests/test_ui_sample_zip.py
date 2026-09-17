@@ -4,6 +4,7 @@ Deployed-app demo affordance: a reviewer can pull a sample of real TTB Public
 COLA Registry labels (CC0) and upload them through POST /batches/upload to
 exercise the real worker pipeline (no simulation).
 """
+
 from __future__ import annotations
 
 import io

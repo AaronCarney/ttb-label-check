@@ -20,6 +20,7 @@ attaches one `Evidence` item to every field it was asked about, including the
 ones it did not find. So the carve-out's condition is satisfied only in a
 fixture, never in production.
 """
+
 from __future__ import annotations
 
 import importlib
@@ -55,9 +56,9 @@ def _unfound_warning_payload() -> dict:
     fixture cannot drift away from production: `_parse` is what `extract` calls,
     and an empty reading is what a label with no warning block produces.
     """
-    payload, bbox, text = _parse(
-        boxes=[], warning_boxes=[], rotation=0, heading_measurement=None
-    )["gov_warning"]
+    payload, bbox, text = _parse(boxes=[], warning_boxes=[], rotation=0, heading_measurement=None)[
+        "gov_warning"
+    ]
     assert payload["text"] == ""
     assert payload["confidence"] == 0.0
     assert bbox is None and text is None

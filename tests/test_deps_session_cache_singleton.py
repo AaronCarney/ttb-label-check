@@ -5,6 +5,7 @@ in production, where the endpoint calls build_evaluator once per request and
 the same submission would be read again every time. The SessionCache is a
 module-level singleton reached through _get_session_cache(); this test anchors
 that."""
+
 from app.config import Settings
 from app.deps import build_evaluator, reset_session_cache
 

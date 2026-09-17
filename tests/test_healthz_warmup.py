@@ -6,6 +6,7 @@ second call must not repeat it: the endpoint has to stay cheap enough to be
 polled. The failure answer, HTTP 503 ``not_ready``, is guarded in
 ``tests/test_healthz_not_ready.py``.
 """
+
 import time
 
 import pytest

@@ -1,4 +1,5 @@
 """Rule Engine outcome models."""
+
 from __future__ import annotations
 
 import re

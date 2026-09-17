@@ -12,6 +12,7 @@ can reach a reviewer and never a match. Folding it into one score and taking
 the maximum would make "Gin" against "Din" a perfect score and a clean pass on
 a three-letter brand whose only distinguishing letter differs.
 """
+
 from __future__ import annotations
 
 import pytest
@@ -51,6 +52,7 @@ def _verdict(label_brand, declared, **parameters):
 # ---------------------------------------------------------------------------
 # The admissible set
 # ---------------------------------------------------------------------------
+
 
 def test_the_declared_brand_matches_plainly_and_says_nothing_more() -> None:
     res = _verdict("STONE'S THROW", "Stone's Throw")
@@ -105,6 +107,7 @@ def test_a_trade_name_does_not_rescue_an_unrelated_mark() -> None:
 # Scores and thresholds
 # ---------------------------------------------------------------------------
 
+
 def test_a_near_spelling_above_the_threshold_matches() -> None:
     res = _verdict("Stones Throw Bourbon", "Stone's Throw Bourbon")
     assert res.outcome is Outcome.PASS
@@ -140,6 +143,7 @@ def test_a_different_name_below_the_floor_fails() -> None:
 # The first-letter route
 # ---------------------------------------------------------------------------
 
+
 def test_a_misread_first_letter_reaches_a_reviewer() -> None:
     """The label's script logo reads Gallo; the registry record spells it
     QALIO. Scored straight, that is 0.7333 and a rejection of a label TTB
@@ -170,6 +174,7 @@ def test_the_first_letter_route_does_not_rescue_a_different_name() -> None:
 # ---------------------------------------------------------------------------
 # Shapes and registration
 # ---------------------------------------------------------------------------
+
 
 def test_the_reader_payload_shape_is_read() -> None:
     """The extractor returns {brand_name, confidence}, not a bare string."""

@@ -1,4 +1,5 @@
 """The whole-evaluation timeout, which emits ENGINE.SLA.TIMEOUT."""
+
 import asyncio
 
 import pytest
@@ -24,9 +25,11 @@ async def test_whole_eval_timeout_routes_to_needs_review(monkeypatch):
             await asyncio.sleep(10)
             return ()
 
-    e = Evaluator(vision=FakeVisionExtractor(observations=[]),
-                  rules=SlowRules(results=()),
-                  settings=Settings())
+    e = Evaluator(
+        vision=FakeVisionExtractor(observations=[]),
+        rules=SlowRules(results=()),
+        settings=Settings(),
+    )
     e._sla_seconds = 0.1
     envelope = await e.evaluate(
         application=Application(application_id="A", evaluation_id="EV-001"),

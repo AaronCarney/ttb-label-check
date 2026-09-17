@@ -1,4 +1,5 @@
 """Smoke: the app.rules package is importable."""
+
 from __future__ import annotations
 
 

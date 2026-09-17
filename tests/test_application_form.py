@@ -6,6 +6,7 @@ This module is the contract for turning those posted strings into an
 means, and how a declared quantity written in words becomes the number the
 comparison rules need.
 """
+
 from __future__ import annotations
 
 import json
@@ -178,7 +179,9 @@ def test_a_metric_figure_beside_a_customary_one_is_the_declaration():
     both, the metric figure is what was declared and the customary one is the
     same quantity rounded — 350, not the 354.88 its twelve fluid ounces
     convert to."""
-    assert _form(net_contents="NET CONT. 350 ML / 12 FL OZ").net_contents.amount == pytest.approx(350)
+    assert _form(net_contents="NET CONT. 350 ML / 12 FL OZ").net_contents.amount == pytest.approx(
+        350
+    )
 
 
 def test_two_customary_figures_naming_one_quantity_are_that_quantity():

@@ -1,19 +1,23 @@
 """One place decides the numeric-to-band mapping, so no caller can invent its
 own thresholds."""
+
 import pytest
 
 from app.services.confidence import to_band
 
 
-@pytest.mark.parametrize("numeric, expected", [
-    (0.0, "low"),
-    (0.49, "low"),
-    (0.5, "medium"),
-    (0.84, "medium"),
-    (0.85, "high"),
-    (0.92, "high"),
-    (1.0, "high"),
-])
+@pytest.mark.parametrize(
+    "numeric, expected",
+    [
+        (0.0, "low"),
+        (0.49, "low"),
+        (0.5, "medium"),
+        (0.84, "medium"),
+        (0.85, "high"),
+        (0.92, "high"),
+        (1.0, "high"),
+    ],
+)
 def test_to_band_edges(numeric, expected):
     assert to_band(numeric) == expected
 

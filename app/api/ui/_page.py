@@ -3,6 +3,7 @@
 Kept apart from the routes so that a module serving one page does not have to
 carry the Jinja wiring for the others.
 """
+
 from __future__ import annotations
 
 from pathlib import Path

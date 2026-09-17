@@ -5,6 +5,7 @@ This module MUST use ``from app.schemas.rules import X as X`` style (rebinding
 the class object) — NOT a redeclaration — so the ``is``-identity assertion
 holds. Any future refactor that redeclares these names here is a regression.
 """
+
 from __future__ import annotations
 
 from app.schemas.rules import (

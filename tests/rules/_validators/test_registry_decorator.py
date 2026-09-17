@@ -1,4 +1,5 @@
 """Validator-registry contract: @register binds a name; duplicates raise; lookup works."""
+
 from __future__ import annotations
 
 import pytest
@@ -25,6 +26,7 @@ def test_register_rejects_duplicate_name() -> None:
         return 1
 
     with pytest.raises(ValueError, match="already registered"):
+
         @register("__test_dup__")
         def second(*args, **kwargs):
             return 2

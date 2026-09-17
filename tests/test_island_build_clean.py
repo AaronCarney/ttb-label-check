@@ -1,5 +1,6 @@
 """The committed island bundle matches the frontend sources it was built from,
 so a source change cannot ship without its rebuilt bundle."""
+
 from __future__ import annotations
 
 import subprocess
@@ -16,7 +17,9 @@ def test_pnpm_build_produces_clean_diff(pnpm_built_island: Path) -> None:
     """
     result = subprocess.run(
         ["git", "diff", "--exit-code", str(pnpm_built_island)],
-        cwd=ROOT, capture_output=True, text=True,
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
     )
     assert result.returncode == 0, (
         f"app/ui/static/island/ diverges from frontend sources after pnpm build:\n{result.stdout}"

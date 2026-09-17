@@ -7,6 +7,7 @@ own, and so does the retry that follows it.
 The evaluator build is stubbed throughout. The real one loads the OCR models off
 disk, which costs about a second and is not what these assertions are about.
 """
+
 from __future__ import annotations
 
 import pytest

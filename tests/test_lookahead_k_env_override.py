@@ -1,4 +1,5 @@
 """AC #10: LOOKAHEAD_K=2 reduces lookahead to 2; LOOKAHEAD_K=4 increases to 4."""
+
 from datetime import UTC, datetime
 
 import httpx
@@ -56,8 +57,7 @@ async def test_lookahead_k_default_is_3_when_env_absent(monkeypatch):
             agent_id="a",
             submitted_at=datetime(2026, 5, 4, 12, 0, 0, tzinfo=UTC),
             items=tuple(
-                BatchItemRef(label_ref=f"lbl-{i}", application_ref=f"app-{i:04d}")
-                for i in range(3)
+                BatchItemRef(label_ref=f"lbl-{i}", application_ref=f"app-{i:04d}") for i in range(3)
             ),
         ).model_dump(mode="json")
         await client.post("/batches", json=envelope)

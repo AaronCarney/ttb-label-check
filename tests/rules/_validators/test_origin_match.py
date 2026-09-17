@@ -16,6 +16,7 @@ in the tests below — a label that genuinely names the wrong country reaches a
 reviewer rather than being rejected outright. A label carrying no origin
 statement at all is a different matter, and that branch does reject.
 """
+
 from __future__ import annotations
 
 from app.rules._validators import VALIDATOR_REGISTRY
@@ -56,6 +57,7 @@ def _verdict(origin_statement: str | None, country: str | None, source: str = "i
 # The check that does settle
 # ---------------------------------------------------------------------------
 
+
 def test_the_label_states_the_declared_country() -> None:
     assert _verdict("PRODUCT OF LITHUANIA", "LITHUANIA").outcome is Outcome.PASS
 
@@ -84,6 +86,7 @@ def test_an_import_with_no_origin_statement_is_rejected() -> None:
 # The check that does not settle, and why it does not reject
 # ---------------------------------------------------------------------------
 
+
 def test_a_statement_in_another_language_goes_to_a_reviewer() -> None:
     """The application declares SPAIN and the label says PRODUCTO DE ESPAÑA.
     19 CFR 134.45(b) allows the country's name in the language of the country;
@@ -96,7 +99,7 @@ def test_a_statement_in_another_language_goes_to_a_reviewer() -> None:
 
 
 def test_an_adjectival_form_goes_to_a_reviewer() -> None:
-    """"Irish Whiskey" against a declared IRELAND. 19 CFR 134.45(c) allows the
+    """ "Irish Whiskey" against a declared IRELAND. 19 CFR 134.45(c) allows the
     adjectival form; the check does not read it."""
     res = _verdict("PRODUCT OF IRISH ORIGIN", "IRELAND")
     assert res.outcome is Outcome.INSUFFICIENT_EVIDENCE

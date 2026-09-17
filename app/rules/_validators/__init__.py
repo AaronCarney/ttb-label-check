@@ -10,6 +10,7 @@ Contract:
     decision tables, engine version, started-at clock) that validators read but
     never mutate. It is a frozen dataclass so validators cannot stash state.
 """
+
 from __future__ import annotations
 
 from collections.abc import Callable

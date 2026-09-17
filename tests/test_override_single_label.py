@@ -5,6 +5,7 @@ single-label check kept no result at all, so every override against one
 answered 404. These drive the real routes end to end: upload, override, and
 read the record back.
 """
+
 from __future__ import annotations
 
 from io import BytesIO
@@ -77,7 +78,9 @@ def test_two_overrides_on_one_label_both_survive(stores) -> None:
     """The second override amends the record the first one left, rather than
     replacing it — an audit trail is the point of keeping it."""
     client, results, evaluation_id = stores
-    assert client.post("/", files={"label": ("label.png", _png_1x1(), "image/png")}).status_code == 200
+    assert (
+        client.post("/", files={"label": ("label.png", _png_1x1(), "image/png")}).status_code == 200
+    )
 
     for disposition in ("fail", "needs_review"):
         response = client.post(

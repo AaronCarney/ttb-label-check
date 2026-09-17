@@ -1,5 +1,6 @@
 """OverrideEntry.field_name accepts None, for an override that applies to the
 whole submission rather than to one named field."""
+
 from datetime import UTC, datetime
 
 import pytest

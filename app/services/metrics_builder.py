@@ -1,4 +1,5 @@
 """MetricsBuilder — pure assembly of the telemetry block from EvaluationTimeline."""
+
 from __future__ import annotations
 
 from app.schemas.metrics import Metrics, PerRuleDurationEntry

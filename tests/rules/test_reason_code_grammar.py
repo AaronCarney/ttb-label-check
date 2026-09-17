@@ -4,6 +4,7 @@ r"""Reason-code grammar enforcement:
 
 Every code in reason_codes.yaml matches; representative malformed strings do not.
 """
+
 from __future__ import annotations
 
 import re

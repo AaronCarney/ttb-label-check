@@ -9,6 +9,7 @@ anchor that, and anchor the serialisation that sharing an engine requires.
 No models are loaded here: constructing ``LocalVisionExtractor`` is cheap, and
 the blocking read is replaced with a stub.
 """
+
 from __future__ import annotations
 
 import asyncio

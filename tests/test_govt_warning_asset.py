@@ -4,6 +4,7 @@ verbatim text the rule pack pins by hash. Mutating either side of that pin
 that the asset exists and contains both required sentences. Hash-drift detection
 lives in tests/test_rule_loader_failclose.py.
 """
+
 from __future__ import annotations
 
 from pathlib import Path

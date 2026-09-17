@@ -14,6 +14,7 @@ second copy of it.
 Lives in ``app.state.batches: dict[str, InFlightBatch]`` — process-local, with
 nothing about a submission persisted. Lifespan teardown evicts.
 """
+
 from __future__ import annotations
 
 from collections import deque
@@ -46,9 +47,7 @@ class InFlightBatch:
     # named on the screen rather than disappearing from the batch
     # (docs/PRD.md FR-13, docs/decisions.md#0020).
     failures: dict[str, str] = field(default_factory=dict)
-    recent_dispositions: deque = field(
-        default_factory=lambda: deque(maxlen=10)
-    )
+    recent_dispositions: deque = field(default_factory=lambda: deque(maxlen=10))
     queue: BoundedQueue[BatchItem] = field(init=False)
 
     def __post_init__(self) -> None:
@@ -113,11 +112,15 @@ class InFlightBatch:
                 # reads actually lives, because a short-circuit envelope has no
                 # field to hold it.
                 new_state = ItemState.FAILED
-            rebuilt.append(item.model_copy(update={
-                "state": new_state,
-                "result": new_result,
-                "failed_reason": failure,
-            }))
+            rebuilt.append(
+                item.model_copy(
+                    update={
+                        "state": new_state,
+                        "result": new_result,
+                        "failed_reason": failure,
+                    }
+                )
+            )
         return BatchInFlightState(
             batch_id=self.batch_id,
             agent_id=self.agent_id,

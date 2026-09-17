@@ -4,6 +4,7 @@ Every secret name is read here and **only** here. The grep
 enforcement test (``tests/test_secrets_grep.py``) asserts no other module
 references ``os.environ`` directly.
 """
+
 from __future__ import annotations
 
 from importlib import metadata

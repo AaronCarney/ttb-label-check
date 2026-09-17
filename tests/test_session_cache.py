@@ -10,18 +10,23 @@ from app.services.cache import SessionCache
 
 def _stub_envelope(eid="EV-001"):
     from datetime import datetime
+
     return DispositionEnvelope(
-        evaluation_id=eid, label_ref="lbl", disposition="pass",
+        evaluation_id=eid,
+        label_ref="lbl",
+        disposition="pass",
         disposition_confidence=ConfidenceBand(band="high", numeric=1.0),
         fields=(),
         audit_trail=AuditRecord(
-            evaluation_id=eid, rule_set_version="rs",
-            input_hash="0" * 64, output_hash="0" * 64,
-            started_at=datetime.now(UTC), completed_at=datetime.now(UTC),
+            evaluation_id=eid,
+            rule_set_version="rs",
+            input_hash="0" * 64,
+            output_hash="0" * 64,
+            started_at=datetime.now(UTC),
+            completed_at=datetime.now(UTC),
             per_rule_trace=(),
         ),
-        metrics=Metrics(total_duration_ms=0, per_rule_durations_ms=(),
-                        vision_duration_ms=0),
+        metrics=Metrics(total_duration_ms=0, per_rule_durations_ms=(), vision_duration_ms=0),
     )
 
 
@@ -57,8 +62,8 @@ def test_cache_get_promotes_to_most_recent():
     e3 = _stub_envelope("EV-3")
     c.put("k1", e1)
     c.put("k2", e2)
-    c.get("k1")            # promote k1
-    c.put("k3", e3)        # should evict k2 now (LRU)
+    c.get("k1")  # promote k1
+    c.put("k3", e3)  # should evict k2 now (LRU)
     assert c.get("k1") == e1
     assert c.get("k2") is None
 

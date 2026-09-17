@@ -21,6 +21,7 @@ The reply is `ErrorEnvelope` JSON for an API caller and the page's own words for
 a browser, because at this point the only thing known about the request is what
 its headers say.
 """
+
 from __future__ import annotations
 
 from app.api import limits
@@ -121,16 +122,20 @@ async def _refuse(scope, send, cap: int) -> None:
         payload = _HTML_PAGE.format(message=message).encode()
         content_type = b"text/html; charset=utf-8"
     else:
-        payload = limits.rejected_input(
-            limits.REQUEST_TOO_LARGE, message, limit_bytes=cap
-        ).model_dump_json().encode()
+        payload = (
+            limits.rejected_input(limits.REQUEST_TOO_LARGE, message, limit_bytes=cap)
+            .model_dump_json()
+            .encode()
+        )
         content_type = b"application/json"
-    await send({
-        "type": "http.response.start",
-        "status": 413,
-        "headers": [
-            (b"content-type", content_type),
-            (b"content-length", str(len(payload)).encode()),
-        ],
-    })
+    await send(
+        {
+            "type": "http.response.start",
+            "status": 413,
+            "headers": [
+                (b"content-type", content_type),
+                (b"content-length", str(len(payload)).encode()),
+            ],
+        }
+    )
     await send({"type": "http.response.body", "body": payload})

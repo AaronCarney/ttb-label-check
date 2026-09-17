@@ -13,6 +13,7 @@ they would cover it call the validator directly
 Every case here goes through `engine.evaluate`, because the floor is the engine's
 and not any validator's.
 """
+
 from __future__ import annotations
 
 import pytest
@@ -95,7 +96,11 @@ def run_one(request):
                 assets={},
                 decision_tables={},
             )
-            obs = [make_obs(field_id="brand_name", value="Old Tom", beverage_class=BeverageClass.SPIRITS)]
+            obs = [
+                make_obs(
+                    field_id="brand_name", value="Old Tom", beverage_class=BeverageClass.SPIRITS
+                )
+            ]
             exp = [make_expected(field_id="brand_name", value="Old Tom")]
             results = await YamlRuleEngine(rs).evaluate(obs, exp, make_context())
             assert len(results) == 1, results

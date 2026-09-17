@@ -10,6 +10,7 @@ the JSON route these tests would still be green and would be checking nothing â€
 five refusals in place of five evaluations. The JSON route's own behaviour is
 covered in `tests/test_batch_endpoint_post.py`.
 """
+
 import asyncio
 
 import httpx

@@ -24,9 +24,11 @@ async def test_cloud_writes_9_call_records():
     ring = deque(maxlen=200)
     extractor = CloudVisionExtractor(settings=settings, ring_buffer=ring, api_key="sk-test")
     label = Label(
-        label_id="L-001", batch_id="B-001",
+        label_id="L-001",
+        batch_id="B-001",
         image_bytes=FIXTURE.read_bytes(),
-        content_type="image/jpeg", face_tag="front",
+        content_type="image/jpeg",
+        face_tag="front",
         dimensions=Dimensions(width_px=1200, height_px=1800, dpi=300),
     )
     # respx 0.23.1 dedupes same-URL/method routes (only the last mount survives),
@@ -35,6 +37,7 @@ async def test_cloud_writes_9_call_records():
     # test_vision_cloud_extraction.py uses.
     recordings = {p.stem: json.loads(p.read_text()) for p in RECORDINGS_DIR.glob("*.json")}
     with respx.mock(base_url="https://api.openai.com") as router:
+
         def _dispatch(request):
             body = json.loads(request.content)
             name = body.get("response_format", {}).get("json_schema", {}).get("name")
@@ -42,6 +45,7 @@ async def test_cloud_writes_9_call_records():
             if payload is None:
                 return Response(404, json={"error": f"no recording for {name!r}"})
             return Response(200, json=payload)
+
         router.post("/v1/chat/completions").mock(side_effect=_dispatch)
         await extractor.extract(label)
     assert len(ring) == 8

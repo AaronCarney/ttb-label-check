@@ -66,8 +66,8 @@ def test_a_bright_label_is_not_turned_away():
     """
     rng = np.random.default_rng(1)
     arr = np.full((200, 200), 253, dtype=np.uint8)
-    arr[:, :40] = 20                                    # a dark band down one side
-    arr[60:70, 50:190] = 0                              # a line of print
+    arr[:, :40] = 20  # a dark band down one side
+    arr[60:70, 50:190] = 0  # a line of print
     arr[100:110, 50:190] = 0
     noise = (rng.random((200, 200)) * 12).astype(np.uint8)
     arr = np.clip(arr.astype(np.int16) - noise, 0, 255).astype(np.uint8)

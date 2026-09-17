@@ -4,6 +4,7 @@ Carries image bytes, the content-type discriminator, optional dimensions
 (applicant-supplied or extracted from EXIF), and the face_tag that distinguishes
 front/back/neck/side panels.
 """
+
 from __future__ import annotations
 
 from typing import Literal

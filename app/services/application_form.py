@@ -23,6 +23,7 @@ cannot drift from the rule that checks what the form declared.
 A blank field is not a value. It means the application declared nothing for
 that element, and the check against it reports that it does not apply.
 """
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -41,6 +42,7 @@ from app.schemas.application_record import (
 
 _BEVERAGE_TYPES: tuple[BeverageType, ...] = ("distilled_spirits", "wine", "malt_beverage")
 _SOURCES: tuple[SourceOfProduct, ...] = ("domestic", "imported")
+
 
 class ApplicationFormError(ValueError):
     """The posted application cannot be read. The message is shown to the user."""

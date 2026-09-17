@@ -1,4 +1,5 @@
 """GET /batches/{batch_id}/stream — SSE per-label events + stream-end."""
+
 import asyncio
 from datetime import UTC
 
@@ -25,13 +26,13 @@ async def test_sse_stream_emits_per_label_events_then_stream_end_for_3_item_batc
         from datetime import datetime
 
         from app.schemas.wire.batch import BatchEnvelope, BatchItemRef
+
         payload = BatchEnvelope(
             batch_id="B-sse-001",
             agent_id="a",
             submitted_at=datetime(2026, 5, 4, 12, 0, 0, tzinfo=UTC),
             items=tuple(
-                BatchItemRef(label_ref=f"lbl-{i}", application_ref=f"app-{i:04d}")
-                for i in range(3)
+                BatchItemRef(label_ref=f"lbl-{i}", application_ref=f"app-{i:04d}") for i in range(3)
             ),
         ).model_dump(mode="json")
         post_resp = await client.post("/batches", json=payload)
@@ -70,6 +71,7 @@ async def test_sse_subscriber_pruned_within_1s_on_client_disconnect(monkeypatch)
         from datetime import datetime
 
         from app.schemas.wire.batch import BatchEnvelope, BatchItemRef
+
         payload = BatchEnvelope(
             batch_id="B-sse-002",
             agent_id="a",

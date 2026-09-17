@@ -1,5 +1,6 @@
 """EvaluationTimeline — the per-evaluation accumulator both the audit trail and
 the metrics block are built from."""
+
 from datetime import UTC
 
 import pytest
@@ -31,7 +32,9 @@ def test_timeline_records_per_rule_outcome():
 
 def test_timeline_records_engine_failure():
     t = EvaluationTimeline(evaluation_id="EV-001")
-    t.record_failure(reason_code="ENGINE.SLA.RULE_TIMEOUT", message="slow", exception_class="TimeoutError")
+    t.record_failure(
+        reason_code="ENGINE.SLA.RULE_TIMEOUT", message="slow", exception_class="TimeoutError"
+    )
     assert len(t.failures) == 1
     f = t.failures[0]
     assert f.reason_code == "ENGINE.SLA.RULE_TIMEOUT"

@@ -1,25 +1,26 @@
 """brand_match.py measures two brand strings. It decides nothing.
 
-  canonicalize(s)
-    The one form two brand values are compared in: NFKC, curly quotes and
-    apostrophes straightened, ™ ® © dropped, accents folded away, runs of
-    whitespace collapsed, trimmed, case-folded. Punctuation is kept — dropping
-    it can change a name, and a difference that is invisible to the comparison
-    cannot be shown to a reviewer.
+canonicalize(s)
+  The one form two brand values are compared in: NFKC, curly quotes and
+  apostrophes straightened, ™ ® © dropped, accents folded away, runs of
+  whitespace collapsed, trimmed, case-folded. Punctuation is kept — dropping
+  it can change a name, and a difference that is invisible to the comparison
+  cannot be shown to a reviewer.
 
-  stage_a_normalized(observed, expected) -> bool
-    True iff the canonical forms are equal.
+stage_a_normalized(observed, expected) -> bool
+  True iff the canonical forms are equal.
 
-  stage_a_word_run(observed, expected) -> bool
-    True iff one value's whole words sit inside the other's as a run.
+stage_a_word_run(observed, expected) -> bool
+  True iff one value's whole words sit inside the other's as a run.
 
-  stage_b_fuzzy(observed, expected) -> float
-    Jaro-Winkler similarity of the canonical forms, in [0, 1].
+stage_b_fuzzy(observed, expected) -> float
+  Jaro-Winkler similarity of the canonical forms, in [0, 1].
 
-  stage_b_first_letter_variant(observed, expected) -> float
-    The similarity the two reach with a disagreeing first character dropped
-    from both, and 0.0 when their first characters already agree.
+stage_b_first_letter_variant(observed, expected) -> float
+  The similarity the two reach with a disagreeing first character dropped
+  from both, and 0.0 when their first characters already agree.
 """
+
 from __future__ import annotations
 
 from app.rules.brand_match import (
@@ -33,6 +34,7 @@ from app.rules.brand_match import (
 # ---------------------------------------------------------------------------
 # What canonicalize folds away, and what it keeps
 # ---------------------------------------------------------------------------
+
 
 def test_case_and_spacing_fold_away() -> None:
     assert stage_a_normalized("STONE'S  THROW", "Stone's Throw") is True
@@ -65,7 +67,7 @@ def test_punctuation_is_kept() -> None:
 
 
 def test_a_legal_suffix_is_part_of_the_name() -> None:
-    """"Distilling Co." is not boilerplate to be discarded: cutting words off
+    """ "Distilling Co." is not boilerplate to be discarded: cutting words off
     a name decides in advance which of them are disposable. The pair still
     lines up, through whole words rather than through a suffix list."""
     assert stage_a_normalized("Stone's Throw", "Stone's Throw Distilling Co.") is False
@@ -83,6 +85,7 @@ def test_unrelated_names_are_not_equal() -> None:
 # ---------------------------------------------------------------------------
 # Whole-word runs
 # ---------------------------------------------------------------------------
+
 
 def test_a_mark_that_drops_a_word_is_a_run_of_the_declared_brand() -> None:
     assert stage_a_word_run("THE UGLY", "UGLY SWEATER") is True
@@ -105,6 +108,7 @@ def test_unrelated_names_share_no_run() -> None:
 # ---------------------------------------------------------------------------
 # Scores
 # ---------------------------------------------------------------------------
+
 
 def test_a_near_spelling_scores_high() -> None:
     score = stage_b_fuzzy("Stone's Throw Bourbon", "Stones Throw Bourbon")

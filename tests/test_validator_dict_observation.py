@@ -1,6 +1,7 @@
 """Validators must read primitives from the cloud extractor's dict-shaped
 observed_value, and must report NOT_APPLICABLE — not FAIL — when the rule
 requires an expected value that was never supplied."""
+
 from __future__ import annotations
 
 from app.rules._validators import ValidatorContext
@@ -18,9 +19,7 @@ from app.schemas.rules import RuleDefinition
 
 
 def _ctx() -> ValidatorContext:
-    return ValidatorContext(
-        assets={}, decision_tables={}, started_at_ms=0, engine_version="t"
-    )
+    return ValidatorContext(assets={}, decision_tables={}, started_at_ms=0, engine_version="t")
 
 
 def _obs(field_id: str, value) -> FieldObservation:
@@ -28,8 +27,14 @@ def _obs(field_id: str, value) -> FieldObservation:
         field_id=field_id,
         beverage_class=BeverageClass.SPIRITS,
         observed_value=value,
-        evidence=(Evidence(field_id=field_id, source=EvidenceSource.LAYOUT,
-                            match_kind=MatchKind.NONE, confidence=0.95),),
+        evidence=(
+            Evidence(
+                field_id=field_id,
+                source=EvidenceSource.LAYOUT,
+                match_kind=MatchKind.NONE,
+                confidence=0.95,
+            ),
+        ),
         upstream_meta={},
     )
 
@@ -75,6 +80,7 @@ def _alcohol_format_rule() -> RuleDefinition:
 
 # ---- fuzzy_brand --------------------------------------------------------
 
+
 def test_fuzzy_brand_projects_dict_via_brand_name_key():
     """Cloud extractor emits {brand_name, confidence}; the validator must
     extract the brand string, not stringify the dict."""
@@ -102,6 +108,7 @@ def test_fuzzy_brand_string_observation_still_works():
 
 
 # ---- regex_match (alcohol.format) --------------------------------------
+
 
 def test_regex_match_synthesizes_alc_text_from_dict():
     """ABV dict {abv_pct, unit, confidence} must project to the string

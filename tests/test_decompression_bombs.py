@@ -16,6 +16,7 @@ memory is spent.
 The guard reads the pixel count out of the file's header and refuses before any
 decode, so a bomb costs the header and nothing else.
 """
+
 from __future__ import annotations
 
 import io
@@ -46,9 +47,9 @@ def _bomb_png(width: int, height: int) -> bytes:
     # 8-byte signature, then the IHDR chunk: 4 length, 4 type, 13 data, 4 CRC.
     ihdr_start = 8 + 4
     data_start = ihdr_start + 4
-    raw[data_start:data_start + 8] = struct.pack(">II", width, height)
-    chunk = bytes(raw[ihdr_start:data_start + 13])
-    raw[data_start + 13:data_start + 17] = struct.pack(">I", zlib.crc32(chunk) & 0xFFFFFFFF)
+    raw[data_start : data_start + 8] = struct.pack(">II", width, height)
+    chunk = bytes(raw[ihdr_start : data_start + 13])
+    raw[data_start + 13 : data_start + 17] = struct.pack(">I", zlib.crc32(chunk) & 0xFFFFFFFF)
     return bytes(raw)
 
 
@@ -96,7 +97,11 @@ def test_post_labels_refuses_a_bomb_with_its_own_reason_code(client, determinist
     response = client.post(
         "/labels",
         files={
-            "application": ("a.json", json.dumps({"application_id": "A-001", "evaluation_id": "EV-001"}), "application/json"),
+            "application": (
+                "a.json",
+                json.dumps({"application_id": "A-001", "evaluation_id": "EV-001"}),
+                "application/json",
+            ),
             "label": ("bomb.png", _bomb_png(30_000, 30_000), "image/png"),
         },
     )

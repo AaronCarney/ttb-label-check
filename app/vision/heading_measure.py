@@ -18,6 +18,7 @@ This is uncalibrated against a labeled corpus: the threshold started at 0.30 and
 works on the demo fixtures. A tighter cut belongs in the same sweep over real
 labels that settles the image-quality and brand-match thresholds.
 """
+
 from __future__ import annotations
 
 import logging
@@ -139,7 +140,11 @@ def _resolve_crop(
     if crop.width < 8 or crop.height < 8:
         _logger.debug(
             "heading_measurement_skipped",
-            extra={"reason": "crop_too_small", "crop_width": crop.width, "crop_height": crop.height},
+            extra={
+                "reason": "crop_too_small",
+                "crop_width": crop.width,
+                "crop_height": crop.height,
+            },
         )
         return None
     return crop
@@ -147,9 +152,7 @@ def _resolve_crop(
 
 def _swt_on_crop(crop: Image.Image) -> HeadingMeasurement:
     gray = np.asarray(crop)
-    _, binary = cv2.threshold(
-        gray, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU
-    )
+    _, binary = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
     n_labels, _, stats, _ = cv2.connectedComponentsWithStats(binary, connectivity=8)
     dist = cv2.distanceTransform(binary, cv2.DIST_L2, 5)
 

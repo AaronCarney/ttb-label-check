@@ -29,6 +29,7 @@ A mid-batch override is handled outside this module: the override endpoint
 mutates ``in_flight.results[label_id]`` directly. The worker never inspects
 ``overrides`` as a stop condition.
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -332,14 +333,16 @@ class BatchWorker:
             )
 
             # Per-label SSE event with queue_position
-            self._bus.broadcast({
-                "event": "label-result",
-                "data": {
-                    "batch_id": batch_id,
-                    "queue_position": queue_position,
-                    "envelope": envelope.model_dump(mode="json"),
-                },
-            })
+            self._bus.broadcast(
+                {
+                    "event": "label-result",
+                    "data": {
+                        "batch_id": batch_id,
+                        "queue_position": queue_position,
+                        "envelope": envelope.model_dump(mode="json"),
+                    },
+                }
+            )
 
             # Anomaly observation. Bind once: the helper is pure today, but
             # binding here pins the contract that ``recent_dispositions`` and
@@ -352,16 +355,18 @@ class BatchWorker:
                     f"anomaly_advisory batch_id={batch_id} advisory_id={advisory.advisory_id} count={advisory.count} window={advisory.window}",
                     extra={"batch_id": batch_id, "reason_code": advisory.reason_code},
                 )
-                self._bus.broadcast({
-                    "event": "anomaly-advisory",
-                    "data": {
-                        "batch_id": batch_id,
-                        "advisory_id": advisory.advisory_id,
-                        "reason_code": advisory.reason_code,
-                        "count": advisory.count,
-                        "window": advisory.window,
-                    },
-                })
+                self._bus.broadcast(
+                    {
+                        "event": "anomaly-advisory",
+                        "data": {
+                            "batch_id": batch_id,
+                            "advisory_id": advisory.advisory_id,
+                            "reason_code": advisory.reason_code,
+                            "count": advisory.count,
+                            "window": advisory.window,
+                        },
+                    }
+                )
 
             # Pull-based demand, at the seam where the work actually costs
             # something. Held after this item's events are out, so the first
@@ -377,17 +382,19 @@ class BatchWorker:
                 "reason_code": "ENGINE.OK.NONE",
             },
         )
-        self._bus.broadcast({
-            "event": "stream-end",
-            "data": {
-                "batch_id": batch_id,
-                "total_count": total,
-                # How many of them the app could not check. Every one of those
-                # is in the stream as a needs_review result naming its reason
-                # code, and on the snapshot with the sentence to show a person.
-                "failed_count": failed,
-            },
-        })
+        self._bus.broadcast(
+            {
+                "event": "stream-end",
+                "data": {
+                    "batch_id": batch_id,
+                    "total_count": total,
+                    # How many of them the app could not check. Every one of those
+                    # is in the stream as a needs_review result naming its reason
+                    # code, and on the snapshot with the sentence to show a person.
+                    "failed_count": failed,
+                },
+            }
+        )
 
     async def run(self) -> None:
         producer_task = asyncio.create_task(self._producer())
@@ -405,7 +412,9 @@ class BatchWorker:
             producer_task.cancel()
             results = await asyncio.gather(producer_task, return_exceptions=True)
             for result in results:
-                if isinstance(result, BaseException) and not isinstance(result, asyncio.CancelledError):
+                if isinstance(result, BaseException) and not isinstance(
+                    result, asyncio.CancelledError
+                ):
                     _logger.error(
                         f"batch_producer_failed batch_id={self._in_flight.batch_id}",
                         exc_info=(type(result), result, result.__traceback__),
@@ -419,12 +428,14 @@ class BatchWorker:
             # client would hang on `terminator_event="stream-end"`. Send a
             # terminator carrying the error so the demo recovers.
             if consume_error is not None:
-                self._bus.broadcast({
-                    "event": "stream-end",
-                    "data": {
-                        "batch_id": self._in_flight.batch_id,
-                        "total_count": len(self._in_flight.items),
-                        "error": "ENGINE.WORKER.UNHANDLED",
-                        "error_class": type(consume_error).__name__,
-                    },
-                })
+                self._bus.broadcast(
+                    {
+                        "event": "stream-end",
+                        "data": {
+                            "batch_id": self._in_flight.batch_id,
+                            "total_count": len(self._in_flight.items),
+                            "error": "ENGINE.WORKER.UNHANDLED",
+                            "error_class": type(consume_error).__name__,
+                        },
+                    }
+                )

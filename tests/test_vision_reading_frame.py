@@ -10,6 +10,7 @@ reviewer as a measured fact.
 No OCR engine runs here: the box list the engine would return is supplied
 directly, which is the only part of the reading these tests are about.
 """
+
 from __future__ import annotations
 
 from collections import deque
@@ -38,7 +39,9 @@ def _label_with_heading_low_on_the_image() -> bytes:
         font = ImageFont.load_default(90)
     except TypeError:  # pragma: no cover — older PIL, fixed size only
         font = ImageFont.load_default()
-    draw.text((120, 1800), _HEADING, fill=(0, 0, 0), font=font, stroke_width=12)  # bold enough to read as bold
+    draw.text(
+        (120, 1800), _HEADING, fill=(0, 0, 0), font=font, stroke_width=12
+    )  # bold enough to read as bold
     buffer = BytesIO()
     image.save(buffer, format="PNG")
     return buffer.getvalue()

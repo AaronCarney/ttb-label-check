@@ -4,6 +4,7 @@ an allow-list provided in `rule.parameters['allowed_values']`.
 The module's other name, 'equality_match', went when the only rule using it was
 deleted (docs/decisions.md#0013); its cases went with it.
 """
+
 from __future__ import annotations
 
 from app.rules._validators import VALIDATOR_REGISTRY
@@ -29,7 +30,11 @@ def _rule(validator: str, params: dict | None = None, policy: MatchPolicy = Matc
 def test_enumerated_match_pass_when_in_allow_list() -> None:
     obs = make_obs(field_id="class_type", value="Bourbon Whisky")
     exp = make_expected(field_id="class_type", value=None)
-    rule = _rule("enumerated_match", params={"allowed_values": ["Bourbon Whisky", "Rye Whisky"]}, policy=MatchPolicy.LOOKUP)
+    rule = _rule(
+        "enumerated_match",
+        params={"allowed_values": ["Bourbon Whisky", "Rye Whisky"]},
+        policy=MatchPolicy.LOOKUP,
+    )
     result = enumerated_match(obs, exp, rule, make_context())
     assert result.outcome is Outcome.PASS
 
@@ -37,7 +42,11 @@ def test_enumerated_match_pass_when_in_allow_list() -> None:
 def test_enumerated_match_fail_when_not_in_allow_list() -> None:
     obs = make_obs(field_id="class_type", value="Mystery Hooch")
     exp = make_expected(field_id="class_type", value=None)
-    rule = _rule("enumerated_match", params={"allowed_values": ["Bourbon Whisky", "Rye Whisky"]}, policy=MatchPolicy.LOOKUP)
+    rule = _rule(
+        "enumerated_match",
+        params={"allowed_values": ["Bourbon Whisky", "Rye Whisky"]},
+        policy=MatchPolicy.LOOKUP,
+    )
     result = enumerated_match(obs, exp, rule, make_context())
     assert result.outcome is Outcome.FAIL
 

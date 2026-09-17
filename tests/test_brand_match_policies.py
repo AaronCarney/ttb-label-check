@@ -22,6 +22,7 @@ a match, but reports it from the score with the number and both spellings in
 the message, rather than by normalising the apostrophe away and claiming an
 exact match it did not make.
 """
+
 from __future__ import annotations
 
 import pytest
@@ -72,8 +73,7 @@ def test_a_dropped_apostrophe_passes_on_score_and_shows_it() -> None:
     res = _verdict("Lucky Lucy's", "Lucky Lucys")
     assert res.outcome is Outcome.PASS
     assert res.message and "0.98" in res.message, (
-        "the reviewer is told this was a scored near match, not an exact one: "
-        f"{res.message!r}"
+        f"the reviewer is told this was a scored near match, not an exact one: {res.message!r}"
     )
 
 

@@ -11,6 +11,7 @@ Two layers:
    same name and the same field set. Catches "field added to class B that
    already exists in class A" drift the global set silently passes.
 """
+
 from __future__ import annotations
 
 import re
@@ -70,8 +71,7 @@ def _ts_interface_fields() -> dict[str, set[str]]:
     """Return {InterfaceName: {field_name, ...}} from envelopes.ts."""
     ts = TS_PATH.read_text()
     return {
-        m.group(1): set(_TS_FIELD_RE.findall(m.group(2)))
-        for m in _TS_INTERFACE_RE.finditer(ts)
+        m.group(1): set(_TS_FIELD_RE.findall(m.group(2))) for m in _TS_INTERFACE_RE.finditer(ts)
     }
 
 
@@ -117,7 +117,5 @@ def test_typescript_interfaces_match_pydantic_classes_per_field() -> None:
         ts_fields = ts_interfaces[ts_name]
         only_in_py = py_fields - ts_fields
         if only_in_py:
-            drift.append(
-                f"{cls}: TS interface {ts_name} missing fields {sorted(only_in_py)}"
-            )
+            drift.append(f"{cls}: TS interface {ts_name} missing fields {sorted(only_in_py)}")
     assert not drift, "wire-type drift:\n  " + "\n  ".join(drift)

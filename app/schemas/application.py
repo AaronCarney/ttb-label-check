@@ -6,6 +6,7 @@ module exposes only the identity surface (`application_id`, `evaluation_id`) the
 the downstream services key off. Keep it minimal, so no test comes to depend
 on a field that is not part of that identity.
 """
+
 from __future__ import annotations
 
 from pydantic import BaseModel, ConfigDict

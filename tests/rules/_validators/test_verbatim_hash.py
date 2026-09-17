@@ -13,6 +13,7 @@ that splits a word are not. The manifest's own `check_rules.warning_exact`
 states exactly that, and each pass case here is a real label from
 tests/fixtures/labels/manifest.json.
 """
+
 from __future__ import annotations
 
 import hashlib
@@ -45,7 +46,11 @@ def _rule():
 
 def _ctx():
     return make_context(
-        assets={"govt_warning_16_21": AssetRef(path="assets/warnings/govt_warning_16_21.txt", sha256=SHA)},
+        assets={
+            "govt_warning_16_21": AssetRef(
+                path="assets/warnings/govt_warning_16_21.txt", sha256=SHA
+            )
+        },
     )
 
 
@@ -88,7 +93,9 @@ def test_line_break_splitting_a_word_passes() -> None:
 
 
 def test_verbatim_hash_fail_when_paraphrase() -> None:
-    obs = make_obs(field_id="warning_block", value=CANONICAL.replace("birth defects", "birth complications"))
+    obs = make_obs(
+        field_id="warning_block", value=CANONICAL.replace("birth defects", "birth complications")
+    )
     res = verbatim_hash(obs, make_expected(field_id="warning_block"), _rule(), _ctx())
     assert res.outcome is Outcome.FAIL
     assert res.reason_code == "WARNING.VERBATIM.MISMATCH"

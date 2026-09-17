@@ -1,4 +1,5 @@
 """InFlightBatch — mutable companion to the frozen BatchInFlightState."""
+
 from collections import deque
 from datetime import UTC, datetime
 

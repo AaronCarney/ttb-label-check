@@ -13,6 +13,7 @@ carries the argument; `tests/rules/test_label_matches_application.py`'s
 `test_no_application_means_no_comparison_applies` states the matching contract
 on the rules side.
 """
+
 from __future__ import annotations
 
 import pytest
@@ -76,9 +77,7 @@ def _reader():
 async def _evaluate(application: Application):
     """One evaluation; the readings the rules were handed, and the envelope."""
     rules = _RecordingRuleEngine()
-    evaluator = Evaluator(
-        vision=_reader(), rules=rules, settings=Settings()
-    )
+    evaluator = Evaluator(vision=_reader(), rules=rules, settings=Settings())
     envelope = await evaluator.evaluate(application=application, label=_stub_label())
     return rules, envelope
 
@@ -91,7 +90,8 @@ async def _classes_seen(application: Application) -> set[BeverageClass]:
 def _pack_row(envelope):
     """The audit-trail row naming the rules this evaluation ran."""
     rows = [
-        entry for entry in envelope.audit_trail.per_rule_trace
+        entry
+        for entry in envelope.audit_trail.per_rule_trace
         if entry.rule_id.startswith("ENGINE.RULE_PACK.")
     ]
     assert len(rows) == 1, [e.rule_id for e in envelope.audit_trail.per_rule_trace]
@@ -101,9 +101,7 @@ def _pack_row(envelope):
 @pytest.mark.asyncio
 async def test_the_declared_class_replaces_the_readers_tag():
     seen = await _classes_seen(
-        Application(
-            application_id="A", evaluation_id="EV-001", beverage_class=BeverageClass.WINE
-        )
+        Application(application_id="A", evaluation_id="EV-001", beverage_class=BeverageClass.WINE)
     )
     assert seen == {BeverageClass.WINE}
 
@@ -126,9 +124,7 @@ async def test_the_envelope_names_the_rules_that_ran():
     """A reviewer cannot tell from a verdict which rules produced it, and
     cannot reconstruct it later, so the audit trail states it."""
     _, envelope = await _evaluate(
-        Application(
-            application_id="A", evaluation_id="EV-001", beverage_class=BeverageClass.WINE
-        )
+        Application(application_id="A", evaluation_id="EV-001", beverage_class=BeverageClass.WINE)
     )
     row = _pack_row(envelope)
     assert row.rule_id == "ENGINE.RULE_PACK.SELECTED"
@@ -157,7 +153,10 @@ async def test_two_classes_do_not_share_a_cached_result():
     for beverage_class in (BeverageClass.WINE, BeverageClass.MALT):
         rules = _RecordingRuleEngine()
         evaluator = Evaluator(
-            vision=_reader(), rules=rules, settings=Settings(), cache=cache,
+            vision=_reader(),
+            rules=rules,
+            settings=Settings(),
+            cache=cache,
         )
         await evaluator.evaluate(
             application=Application(

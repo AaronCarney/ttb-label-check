@@ -11,6 +11,7 @@ The reasoning in `docs/decisions.md#0018` for the images applies unchanged: a
 page opened now is still whole when it is looked at again, every worker on the
 host reads what every other one wrote, and a restart loses nothing.
 """
+
 from __future__ import annotations
 
 import json

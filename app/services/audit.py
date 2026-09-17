@@ -9,6 +9,7 @@ evaluation_id) and keeps tamper detection working on the warm path:
 a verifier recomputing input_hash from a cache-hit envelope's
 returned evaluation_id will get the same hash as the cold-path call.
 """
+
 from __future__ import annotations
 
 import hashlib

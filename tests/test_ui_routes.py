@@ -7,6 +7,7 @@ routes. The test guards: (a) /healthz is unaffected by registering the UI,
     data-batch-id="{batch_id}",
 (d) /static/island/.gitkeep is served (proves the StaticFiles mount works).
 """
+
 from __future__ import annotations
 
 import pytest
@@ -123,6 +124,7 @@ def test_root_no_longer_serves_fixture_query(client: TestClient) -> None:
 # ---------------------------------------------------------------------------
 # Single-label upload widget — POST /
 # ---------------------------------------------------------------------------
+
 
 def test_upload_form_present_on_root(client: TestClient) -> None:
     """The reviewer needs an in-page upload affordance — a multipart POST form

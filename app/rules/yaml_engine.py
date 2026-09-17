@@ -23,6 +23,7 @@ not a hard stop on the validator's CPU time. Implications:
     proportion to the risk, where the rules are YAML data and no validator does
     anything long-running.
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -110,11 +111,7 @@ def _scored_a_reading(rule, result: ValidationResult) -> bool:
     """
     if not result.evidence:
         return False
-    if (
-        result.observed is not None
-        and unlocated_is_absent(rule)
-        and unlocated(result.observed)
-    ):
+    if result.observed is not None and unlocated_is_absent(rule) and unlocated(result.observed):
         return False
     return True
 
@@ -147,7 +144,9 @@ class YamlRuleEngine(RuleEngine):
 
             body = json.dumps(
                 self._ruleset.model_dump(mode="json"),
-                sort_keys=True, ensure_ascii=True, separators=(",", ":"),
+                sort_keys=True,
+                ensure_ascii=True,
+                separators=(",", ":"),
             ).encode("utf-8")
             self._version = f"{self._ruleset.version}+{hashlib.sha256(body).hexdigest()[:12]}"
         return self._version
@@ -179,7 +178,8 @@ class YamlRuleEngine(RuleEngine):
             if rule.disabled:
                 continue
             applicable_obs = [
-                obs for obs in observations
+                obs
+                for obs in observations
                 if obs.beverage_class in rule.applies_to_classes
                 and (
                     not rule.evidence_required
@@ -191,12 +191,12 @@ class YamlRuleEngine(RuleEngine):
             for obs in applicable_obs:
                 exp = self._expected_for(obs.field_id, exp_by_field)
                 results.append(await self._run_one(rule, obs, exp, context))
-        return tuple(sorted(results, key=lambda r: (r.rule_id, r.observed.field_id if r.observed else "")))
+        return tuple(
+            sorted(results, key=lambda r: (r.rule_id, r.observed.field_id if r.observed else ""))
+        )
 
     @staticmethod
-    def _expected_for(
-        field_id: str, exp_by_field: dict[str, ExpectedValue]
-    ) -> ExpectedValue:
+    def _expected_for(field_id: str, exp_by_field: dict[str, ExpectedValue]) -> ExpectedValue:
         """The application's declared value for a reader field, under whichever
         name the application used. An empty value when the application declared
         nothing for that element."""
@@ -213,9 +213,7 @@ class YamlRuleEngine(RuleEngine):
         """Every result leaves the engine through here, carrying its timing,
         the rule's confidence floor and the sentence a reviewer reads."""
         result = self._apply_confidence_floor(rule, result)
-        return result.model_copy(
-            update={"engine_meta": meta, "message": self._explain(result)}
-        )
+        return result.model_copy(update={"engine_meta": meta, "message": self._explain(result)})
 
     @staticmethod
     def _apply_confidence_floor(rule, result: ValidationResult) -> ValidationResult:
@@ -236,11 +234,13 @@ class YamlRuleEngine(RuleEngine):
             return result
         if result.aggregated_confidence >= rule.confidence_floor:
             return result
-        return result.model_copy(update={
-            "outcome": Outcome.INSUFFICIENT_EVIDENCE,
-            "severity": Severity.WARN,
-            "reason_code": BELOW_CONFIDENCE_FLOOR,
-        })
+        return result.model_copy(
+            update={
+                "outcome": Outcome.INSUFFICIENT_EVIDENCE,
+                "severity": Severity.WARN,
+                "reason_code": BELOW_CONFIDENCE_FLOOR,
+            }
+        )
 
     def _explain(self, result: ValidationResult) -> str | None:
         """The finding's explanation, in the rule pack's own words.
@@ -273,13 +273,23 @@ class YamlRuleEngine(RuleEngine):
 
         if validator is None:
             meta = _meta(0)
-            return self._finish(rule, ValidationResult(
-                rule_id=rule.rule_id, cfr_citation=rule.cfr_citation,
-                beverage_class=obs.beverage_class, outcome=Outcome.ERROR,
-                severity=Severity.REJECT, reason_code="ENGINE.VALIDATOR.NOT_FOUND",
-                aggregated_confidence=0.0, evidence=obs.evidence,
-                expected=exp, observed=obs, engine_meta=meta,
-            ), meta)
+            return self._finish(
+                rule,
+                ValidationResult(
+                    rule_id=rule.rule_id,
+                    cfr_citation=rule.cfr_citation,
+                    beverage_class=obs.beverage_class,
+                    outcome=Outcome.ERROR,
+                    severity=Severity.REJECT,
+                    reason_code="ENGINE.VALIDATOR.NOT_FOUND",
+                    aggregated_confidence=0.0,
+                    evidence=obs.evidence,
+                    expected=exp,
+                    observed=obs,
+                    engine_meta=meta,
+                ),
+                meta,
+            )
         try:
             result = await asyncio.wait_for(
                 asyncio.to_thread(validator, obs, exp, rule, ctx),
@@ -287,22 +297,42 @@ class YamlRuleEngine(RuleEngine):
             )
         except TimeoutError:
             meta = _meta(int((time.monotonic() - t0) * 1000))
-            return self._finish(rule, ValidationResult(
-                rule_id=rule.rule_id, cfr_citation=rule.cfr_citation,
-                beverage_class=obs.beverage_class, outcome=Outcome.TIMEOUT,
-                severity=Severity.WARN, reason_code="ENGINE.VALIDATOR.TIMEOUT",
-                aggregated_confidence=0.0, evidence=obs.evidence,
-                expected=exp, observed=obs, engine_meta=meta,
-            ), meta)
+            return self._finish(
+                rule,
+                ValidationResult(
+                    rule_id=rule.rule_id,
+                    cfr_citation=rule.cfr_citation,
+                    beverage_class=obs.beverage_class,
+                    outcome=Outcome.TIMEOUT,
+                    severity=Severity.WARN,
+                    reason_code="ENGINE.VALIDATOR.TIMEOUT",
+                    aggregated_confidence=0.0,
+                    evidence=obs.evidence,
+                    expected=exp,
+                    observed=obs,
+                    engine_meta=meta,
+                ),
+                meta,
+            )
         except Exception:
             meta = _meta(int((time.monotonic() - t0) * 1000))
             _log.exception("validator %r raised", rule.rule_id)
-            return self._finish(rule, ValidationResult(
-                rule_id=rule.rule_id, cfr_citation=rule.cfr_citation,
-                beverage_class=obs.beverage_class, outcome=Outcome.ERROR,
-                severity=Severity.REJECT, reason_code="ENGINE.VALIDATOR.EXCEPTION",
-                aggregated_confidence=0.0, evidence=obs.evidence,
-                expected=exp, observed=obs, engine_meta=meta,
-            ), meta)
+            return self._finish(
+                rule,
+                ValidationResult(
+                    rule_id=rule.rule_id,
+                    cfr_citation=rule.cfr_citation,
+                    beverage_class=obs.beverage_class,
+                    outcome=Outcome.ERROR,
+                    severity=Severity.REJECT,
+                    reason_code="ENGINE.VALIDATOR.EXCEPTION",
+                    aggregated_confidence=0.0,
+                    evidence=obs.evidence,
+                    expected=exp,
+                    observed=obs,
+                    engine_meta=meta,
+                ),
+                meta,
+            )
         elapsed_ms = int((time.monotonic() - t0) * 1000)
         return self._finish(rule, result, _meta(elapsed_ms))

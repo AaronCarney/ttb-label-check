@@ -5,6 +5,7 @@ exists so (1) the worker depends on a stable import shape, (2) tests can
 assert ``saturated`` deterministically, and (3) a future swap to a different
 bounded primitive is a one-file change.
 """
+
 from __future__ import annotations
 
 import asyncio

@@ -3,6 +3,7 @@
 Carries a sequence of ``(latency_seconds, envelope)`` tuples consumed in
 submission order. Used by every batch-worker test that needs deterministic
 per-call latency and canned envelopes."""
+
 from __future__ import annotations
 
 import asyncio
@@ -23,8 +24,7 @@ class FakeEvaluator:
     async def evaluate(self, application: Application, label: Label) -> DispositionEnvelope:
         if self._calls >= len(self._plan):
             raise AssertionError(
-                f"FakeEvaluator depleted after {self._calls} calls "
-                f"(plan length {len(self._plan)})"
+                f"FakeEvaluator depleted after {self._calls} calls (plan length {len(self._plan)})"
             )
         latency_s, envelope = self._plan[self._calls]
         self._calls += 1

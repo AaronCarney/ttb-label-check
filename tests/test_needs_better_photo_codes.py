@@ -11,6 +11,7 @@ Deliberately one-directional: the TypeScript file may carry a code the gate
 does not emit (a code retired from the gate keeps its message until someone
 removes it), but the gate may not emit a code the TypeScript file lacks.
 """
+
 from __future__ import annotations
 
 import re

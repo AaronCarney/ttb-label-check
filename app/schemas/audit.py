@@ -4,6 +4,7 @@ Audit and telemetry are kept apart: per-rule durations live in
 ``app.schemas.metrics``, and ``audit_trail.per_rule_trace[]`` carries only
 audit-relevant fields (rule_id, disposition, evidence_ref).
 """
+
 from __future__ import annotations
 
 from datetime import datetime

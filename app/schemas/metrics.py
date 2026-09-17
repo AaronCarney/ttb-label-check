@@ -1,6 +1,7 @@
 """Per-evaluation telemetry: the ``metrics`` block on the disposition envelope,
 and the sibling of ``audit_trail``, which keeps audit and telemetry apart.
 """
+
 from __future__ import annotations
 
 from pydantic import BaseModel, ConfigDict

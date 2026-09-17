@@ -12,6 +12,7 @@ read a live ``InferenceSession``'s options — so it is skipped unless
 ``TTB_OCR_MODELS`` is set, the shape ``tests/test_deploy_healthz.py`` already
 uses. A default ``pytest`` run, including one from a clean clone, loads nothing.
 """
+
 from __future__ import annotations
 
 import os

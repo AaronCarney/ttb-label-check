@@ -9,6 +9,7 @@ in `tests/test_rules_yaml_round_trip.py::test_no_orphan_validators_in_registry` 
 design. When a reader does emit a neighbour distance, the lane that lands it
 writes the comparison against that real signal.
 """
+
 from __future__ import annotations
 
 from app.rules._validators import ValidatorContext, register

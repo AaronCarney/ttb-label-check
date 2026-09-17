@@ -3,6 +3,7 @@ model_dump → model_validate round-trip without information loss for shapes the
 loader cares about (rule_id, validator, reason_code, match_policy, parameters,
 tolerance, decision_table_ref, asset).
 """
+
 from __future__ import annotations
 
 import json
@@ -42,6 +43,7 @@ def test_no_orphan_validators_in_registry() -> None:
     production surface.
     """
     from app.rules._validators import VALIDATOR_REGISTRY
+
     rs = YamlRuleLoader().load(Path("rules"))
     referenced = {r.validator for r in rs.rules}
     production_names = {n for n in VALIDATOR_REGISTRY if not n.startswith("__")}

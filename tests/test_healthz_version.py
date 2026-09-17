@@ -6,6 +6,7 @@ looking at a live service could tell which build answered them. The number now
 comes from the installed package's own metadata, and this holds it to the
 release the repository declares.
 """
+
 import tomllib
 from pathlib import Path
 

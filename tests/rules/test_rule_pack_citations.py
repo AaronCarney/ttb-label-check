@@ -9,6 +9,7 @@ The evidence licensing it is a measurement, and a reader who wants to judge the
 rule has to be able to find that measurement and see what it does and does not
 show.
 """
+
 from __future__ import annotations
 
 import re
@@ -25,7 +26,11 @@ _MD_PATH = re.compile(r"[A-Za-z0-9_./-]+\.md")
 
 def _tracked_files() -> set[str]:
     out = subprocess.run(
-        ["git", "ls-files"], cwd=ROOT, capture_output=True, text=True, check=True,
+        ["git", "ls-files"],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+        check=True,
     )
     return set(out.stdout.split())
 
@@ -61,7 +66,8 @@ def test_the_one_rule_allowed_to_reject_on_silence_says_its_evidence_is_in_sampl
     """
     text = (RULES / "common" / "health_warning.yaml").read_text(encoding="utf-8")
     granting = [
-        path for path in sorted(RULES.rglob("*.yaml"))
+        path
+        for path in sorted(RULES.rglob("*.yaml"))
         if "unlocated_is_absent: true" in path.read_text(encoding="utf-8")
     ]
     assert [p.name for p in granting] == ["health_warning.yaml"], (
@@ -70,9 +76,7 @@ def test_the_one_rule_allowed_to_reject_on_silence_says_its_evidence_is_in_sampl
     assert "in-sample" in text, (
         "the rule quotes its 30 of 30 without saying the figure is in-sample"
     )
-    assert "held-out" in text, (
-        "the rule does not say there is no held-out set behind that figure"
-    )
+    assert "held-out" in text, "the rule does not say there is no held-out set behind that figure"
 
 
 def test_the_rule_that_rejects_on_silence_is_still_the_only_one() -> None:

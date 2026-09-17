@@ -3,6 +3,7 @@
 Loads the rule pack and prints a one-line manifest. Exits non-zero with the
 violation list on any cross-check failure.
 """
+
 from __future__ import annotations
 
 import sys
@@ -16,6 +17,7 @@ def main() -> int:
     # Force-import every validator so the registry is populated.
     import importlib
     import pkgutil
+
     pkg = importlib.import_module("app.rules._validators")
     for mod in pkgutil.iter_modules(pkg.__path__):
         importlib.import_module(f"app.rules._validators.{mod.name}")
@@ -27,7 +29,9 @@ def main() -> int:
     except RuleLoaderError as e:
         print(str(e), file=sys.stderr)
         return 1
-    print(f"OK: {len(rs.rules)} rules; {len(rs.reason_codes)} reason codes; {len(rs.assets)} assets")
+    print(
+        f"OK: {len(rs.rules)} rules; {len(rs.reason_codes)} reason codes; {len(rs.assets)} assets"
+    )
     return 0
 
 

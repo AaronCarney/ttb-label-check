@@ -15,6 +15,7 @@ walks `app/rules/_validators/*.py` and asserts each file registers ≥ 1 name.
 That check skips any module whose name starts with `_` (including `__init__.py`
 and `_helpers.py`) so private utility modules do not falsely trip the gate.
 """
+
 from __future__ import annotations
 
 import re
@@ -138,8 +139,7 @@ def word_run_present(haystack: tuple[str, ...], needle: tuple[str, ...]) -> bool
     if not needle or len(needle) > len(haystack):
         return False
     return any(
-        haystack[i:i + len(needle)] == needle
-        for i in range(len(haystack) - len(needle) + 1)
+        haystack[i : i + len(needle)] == needle for i in range(len(haystack) - len(needle) + 1)
     )
 
 
@@ -200,9 +200,7 @@ def unlocated(obs: FieldObservation, reading: str | None = None) -> bool:
     """
     if (project_reading(obs) if reading is None else reading).strip():
         return False
-    return not any(
-        ev.bbox is not None or (ev.extracted_text or "").strip() for ev in obs.evidence
-    )
+    return not any(ev.bbox is not None or (ev.extracted_text or "").strip() for ev in obs.evidence)
 
 
 def unlocated_is_absent(rule: RuleDefinition) -> bool:

@@ -11,6 +11,7 @@ visible at deploy time, when the reviewer is already looking at the URL:
 * a deploy that routes traffic to a port the container does not bind, which
   starts, reports itself healthy, and answers nothing.
 """
+
 from __future__ import annotations
 
 import fnmatch
@@ -107,10 +108,7 @@ def test_compose_environment_names_are_all_read_by_the_app() -> None:
     """
     from app.config import Settings
 
-    known = {
-        (field.alias or name).upper()
-        for name, field in Settings.model_fields.items()
-    }
+    known = {(field.alias or name).upper() for name, field in Settings.model_fields.items()}
     compose = yaml.safe_load(COMPOSE.read_text(encoding="utf-8"))
     for service, spec in compose["services"].items():
         set_names = set(spec.get("environment", {}) or {})
@@ -173,9 +171,7 @@ def test_deploy_preflight_passes() -> None:
     check = subprocess.run(
         ["bash", str(DEPLOY), "--check"], capture_output=True, text=True, cwd=ROOT
     )
-    assert check.returncode == 0, (
-        f"deploy preflight failed:\n{check.stdout}\n{check.stderr}"
-    )
+    assert check.returncode == 0, f"deploy preflight failed:\n{check.stdout}\n{check.stderr}"
 
 
 def test_deploy_script_does_not_push_without_a_target() -> None:

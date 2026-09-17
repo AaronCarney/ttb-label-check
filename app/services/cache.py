@@ -4,6 +4,7 @@ Within a session, the same canonicalized input returns the same envelope, with
 a refreshed evaluation_id at the call site, so a repeated check is deterministic
 and costs nothing. Nothing is persisted across process restarts.
 """
+
 from __future__ import annotations
 
 from collections import OrderedDict

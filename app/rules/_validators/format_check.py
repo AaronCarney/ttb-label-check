@@ -1,4 +1,5 @@
 """regex_match validator: tests observed string against rule.parameters['pattern']."""
+
 from __future__ import annotations
 
 import logging

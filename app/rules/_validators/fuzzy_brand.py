@@ -26,6 +26,7 @@ them before the next route starts:
 Thresholds come from the rule pack. What a score above one *means* is decided
 here; the numbers are not.
 """
+
 from __future__ import annotations
 
 from app.rules._validators import ValidatorContext, register
@@ -171,7 +172,8 @@ def fuzzy_brand(
             # does, because the reviewer is looking at a label whose mark is
             # not the brand field's wording.
             message = (
-                None if source == _DECLARED
+                None
+                if source == _DECLARED
                 else f'The label shows "{observed}", which is {source}, "{value}".'
             )
             return result(Outcome.PASS, rule.severity, None, message)

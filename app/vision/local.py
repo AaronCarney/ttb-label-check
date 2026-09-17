@@ -21,6 +21,7 @@ labelled fields, so brand, class/type and the name-and-address block are picked
 out by layout and wording. Each reading carries a confidence that reflects how
 definite that pick was, and a field it could not find carries zero.
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -102,6 +103,7 @@ _FIELD_NAMES = (
 # What the OCR engine gives back
 # ---------------------------------------------------------------------------
 
+
 @dataclass(frozen=True)
 class _Box:
     """One block of text the engine found, and where it sat."""
@@ -170,6 +172,7 @@ FROZEN_SCHEMA_VERSION = 1
 
 def freeze_reading(reading: _Reading) -> dict:
     """One reading as plain JSON-safe data."""
+
     def box(b: _Box) -> dict:
         return {
             "box": [round(b.x0, 2), round(b.y0, 2), round(b.x1, 2), round(b.y1, 2)],
@@ -186,7 +189,9 @@ def freeze_reading(reading: _Reading) -> dict:
         # Written out even when it is the same list as `boxes`, so a reader of
         # the file never has to know the rule that decides when it differs.
         "warning_boxes": [box(b) for b in reading.warning_boxes],
-        "heading_measurement": None if measurement is None else {
+        "heading_measurement": None
+        if measurement is None
+        else {
             "is_bold": measurement.is_bold,
             "mean_stroke_width": round(measurement.mean_stroke_width, 4),
             "mean_character_height": round(measurement.mean_character_height, 4),
@@ -213,7 +218,9 @@ def thaw_reading(data: dict) -> _Reading:
         boxes=[box(b) for b in data["boxes"]],
         warning_boxes=[box(b) for b in data["warning_boxes"]],
         rotation=int(data["rotation_deg"]),
-        heading_measurement=None if measurement is None else HeadingMeasurement(
+        heading_measurement=None
+        if measurement is None
+        else HeadingMeasurement(
             is_bold=measurement["is_bold"],
             mean_stroke_width=measurement["mean_stroke_width"],
             mean_character_height=measurement["mean_character_height"],
@@ -253,12 +260,15 @@ def parse_reading(reading: _Reading) -> dict[str, dict]:
     these payloads. It is what the replay suite drives and what scores a frozen
     recording.
     """
-    return {field: payload for field, (payload, _bbox, _text) in _parse(
-        boxes=reading.boxes,
-        warning_boxes=reading.warning_boxes,
-        rotation=reading.rotation,
-        heading_measurement=reading.heading_measurement,
-    ).items()}
+    return {
+        field: payload
+        for field, (payload, _bbox, _text) in _parse(
+            boxes=reading.boxes,
+            warning_boxes=reading.warning_boxes,
+            rotation=reading.rotation,
+            heading_measurement=reading.heading_measurement,
+        ).items()
+    }
 
 
 def _fold(text: str) -> str:
@@ -285,6 +295,7 @@ _BARCODE_RE = re.compile(r"^[\s\d|\"'.,>\-]{8,}$")
 # ---------------------------------------------------------------------------
 # The engine
 # ---------------------------------------------------------------------------
+
 
 class LocalVisionExtractor:
     """Reads one label image with a CPU OCR engine and reports seven fields."""
@@ -430,8 +441,12 @@ class LocalVisionExtractor:
             ys = [p[1] for p in quad]
             boxes.append(
                 _Box(
-                    x0=min(xs), x1=max(xs), y0=min(ys), y1=max(ys),
-                    text=str(text), score=float(score),
+                    x0=min(xs),
+                    x1=max(xs),
+                    y0=min(ys),
+                    y1=max(ys),
+                    text=str(text),
+                    score=float(score),
                 )
             )
         return boxes
@@ -673,10 +688,7 @@ def _has_sideways_text(boxes: list[_Box]) -> bool:
     time, and a warning missed because no re-read ran is a compliance finding
     the label never got.
     """
-    ratios = [
-        (box.y1 - box.y0) / max(1e-6, box.x1 - box.x0)
-        for box in boxes
-    ]
+    ratios = [(box.y1 - box.y0) / max(1e-6, box.x1 - box.x0) for box in boxes]
     if sum(1 for r in ratios if r >= _SIDEWAYS_RATIO) >= _SIDEWAYS_MIN_BOXES:
         return True
     return any(r >= _SIDEWAYS_LONE_RATIO for r in ratios)
@@ -685,6 +697,7 @@ def _has_sideways_text(boxes: list[_Box]) -> bool:
 # ---------------------------------------------------------------------------
 # Cutting the text into fields
 # ---------------------------------------------------------------------------
+
 
 def _find_heading(boxes: list[_Box]) -> tuple[_Box, list[_Box]] | None:
     """The government-warning heading, and the boxes that spell it.
@@ -726,7 +739,7 @@ def _columns(boxes: list[_Box]) -> list[list[_Box]]:
     # crosses. A gutter under a twelfth of the block's width is word spacing.
     covered = np.zeros(int(span) + 1, dtype=bool)
     for b in boxes:
-        covered[int(b.x0 - left):int(b.x1 - left) + 1] = True
+        covered[int(b.x0 - left) : int(b.x1 - left) + 1] = True
     gutter_min = max(int(span * 0.08), 8)
     gutters: list[tuple[int, int]] = []
     run_start = None
@@ -754,9 +767,7 @@ def _reading_order(boxes: list[_Box]) -> list[_Box]:
     ordered: list[_Box] = []
     for column in _columns(boxes):
         line_height = max((b.height for b in column), default=1.0) or 1.0
-        ordered.extend(
-            sorted(column, key=lambda b: (round(b.y0 / (line_height * 0.7)), b.x0))
-        )
+        ordered.extend(sorted(column, key=lambda b: (round(b.y0 / (line_height * 0.7)), b.x0)))
     return ordered
 
 
@@ -791,9 +802,9 @@ def _warning_block(boxes: list[_Box]) -> tuple[str, str, _Box, list[_Box]] | Non
 
     # Everything at or below the heading, discarding a barcode's digits.
     below = [
-        b for b in boxes
-        if b.y1 >= heading.y0 - line_height * 0.6
-        and not _BARCODE_RE.match(b.text.strip())
+        b
+        for b in boxes
+        if b.y1 >= heading.y0 - line_height * 0.6 and not _BARCODE_RE.match(b.text.strip())
     ]
 
     # Stop where the text stops running on. A gap of more than two and a half
@@ -827,7 +838,7 @@ def _warning_block(boxes: list[_Box]) -> tuple[str, str, _Box, list[_Box]] | Non
     if parts:
         opening = re.search(r"GOVERNMENT\s*WARNING", parts[0], re.I)
         if opening:
-            parts[0] = parts[0][opening.start():]
+            parts[0] = parts[0][opening.start() :]
     text = re.sub(r"\s+", " ", " ".join(parts)).strip()
 
     # The statement ends at its own last words, and the **boxes** end there
@@ -1015,12 +1026,64 @@ _ORIGIN_RE = re.compile(
 # "DISTILLED IN INDIANA" is not declaring a country of origin. A place on this
 # list is not reported as one.
 _US_STATES = frozenset(
-    ["ALABAMA", "ALASKA", "ARIZONA", "ARKANSAS", "CALIFORNIA", "COLORADO", "CONNECTICUT", "DELAWARE", "FLORIDA", "GEORGIA", "HAWAII", "IDAHO", "ILLINOIS", "INDIANA", "IOWA", "KANSAS", "KENTUCKY", "LOUISIANA", "MAINE", "MARYLAND", "MASSACHUSETTS", "MICHIGAN", "MINNESOTA", "MISSISSIPPI", "MISSOURI", "MONTANA", "NEBRASKA", "NEVADA", "OHIO", "OKLAHOMA", "OREGON", "PENNSYLVANIA", "TENNESSEE", "TEXAS", "UTAH", "VERMONT", "VIRGINIA", "WASHINGTON", "WISCONSIN", "WYOMING"]
-) | frozenset({
-    "NEW HAMPSHIRE", "NEW JERSEY", "NEW MEXICO", "NEW YORK", "NORTH CAROLINA",
-    "NORTH DAKOTA", "RHODE ISLAND", "SOUTH CAROLINA", "SOUTH DAKOTA",
-    "WEST VIRGINIA", "DISTRICT OF COLUMBIA", "PUERTO RICO",
-})
+    [
+        "ALABAMA",
+        "ALASKA",
+        "ARIZONA",
+        "ARKANSAS",
+        "CALIFORNIA",
+        "COLORADO",
+        "CONNECTICUT",
+        "DELAWARE",
+        "FLORIDA",
+        "GEORGIA",
+        "HAWAII",
+        "IDAHO",
+        "ILLINOIS",
+        "INDIANA",
+        "IOWA",
+        "KANSAS",
+        "KENTUCKY",
+        "LOUISIANA",
+        "MAINE",
+        "MARYLAND",
+        "MASSACHUSETTS",
+        "MICHIGAN",
+        "MINNESOTA",
+        "MISSISSIPPI",
+        "MISSOURI",
+        "MONTANA",
+        "NEBRASKA",
+        "NEVADA",
+        "OHIO",
+        "OKLAHOMA",
+        "OREGON",
+        "PENNSYLVANIA",
+        "TENNESSEE",
+        "TEXAS",
+        "UTAH",
+        "VERMONT",
+        "VIRGINIA",
+        "WASHINGTON",
+        "WISCONSIN",
+        "WYOMING",
+    ]
+) | frozenset(
+    {
+        "NEW HAMPSHIRE",
+        "NEW JERSEY",
+        "NEW MEXICO",
+        "NEW YORK",
+        "NORTH CAROLINA",
+        "NORTH DAKOTA",
+        "RHODE ISLAND",
+        "SOUTH CAROLINA",
+        "SOUTH DAKOTA",
+        "WEST VIRGINIA",
+        "DISTRICT OF COLUMBIA",
+        "PUERTO RICO",
+    }
+)
 _NAME_LEAD_IN_RE = re.compile(
     r"\b(?:BOTTLED|PRODUCED|DISTILLED|IMPORTED|BREWED|PACKED|VINTED|BLENDED|"
     r"MANUFACTURED|CANNED)(?:\s+AND\s+\w+)?\s+(?:BY|FOR)\b[:\s]*",
@@ -1049,14 +1112,60 @@ _CITY_STATE_RE = re.compile(
 # spotting the line, not a list of what is allowed: which designations the
 # application and the regulations accept is the rule pack's to say.
 _CLASS_WORDS = (
-    "WHISKEY", "WHISKY", "BOURBON", "RYE", "SCOTCH", "VODKA", "GIN", "RUM",
-    "TEQUILA", "MEZCAL", "BRANDY", "COGNAC", "LIQUEUR", "CORDIAL", "SCHNAPPS",
-    "ABSINTHE", "GRAPPA", "AQUAVIT", "SOJU", "SAKE", "WINE", "CHAMPAGNE",
-    "PROSECCO", "SPARKLING", "CHARDONNAY", "MERLOT", "CABERNET", "SAUVIGNON",
-    "PINOT", "RIESLING", "ZINFANDEL", "SANGIOVESE", "SYRAH", "SHIRAZ",
-    "MALBEC", "TEMPRANILLO", "MOSCATO", "ROSE", "PORT", "SHERRY", "VERMOUTH",
-    "CIDER", "MEAD", "BEER", "ALE", "LAGER", "STOUT", "PORTER", "PILSNER",
-    "IPA", "MALT BEVERAGE", "SAISON", "BOCK", "HEFEWEIZEN",
+    "WHISKEY",
+    "WHISKY",
+    "BOURBON",
+    "RYE",
+    "SCOTCH",
+    "VODKA",
+    "GIN",
+    "RUM",
+    "TEQUILA",
+    "MEZCAL",
+    "BRANDY",
+    "COGNAC",
+    "LIQUEUR",
+    "CORDIAL",
+    "SCHNAPPS",
+    "ABSINTHE",
+    "GRAPPA",
+    "AQUAVIT",
+    "SOJU",
+    "SAKE",
+    "WINE",
+    "CHAMPAGNE",
+    "PROSECCO",
+    "SPARKLING",
+    "CHARDONNAY",
+    "MERLOT",
+    "CABERNET",
+    "SAUVIGNON",
+    "PINOT",
+    "RIESLING",
+    "ZINFANDEL",
+    "SANGIOVESE",
+    "SYRAH",
+    "SHIRAZ",
+    "MALBEC",
+    "TEMPRANILLO",
+    "MOSCATO",
+    "ROSE",
+    "PORT",
+    "SHERRY",
+    "VERMOUTH",
+    "CIDER",
+    "MEAD",
+    "BEER",
+    "ALE",
+    "LAGER",
+    "STOUT",
+    "PORTER",
+    "PILSNER",
+    "IPA",
+    "MALT BEVERAGE",
+    "SAISON",
+    "BOCK",
+    "HEFEWEIZEN",
 )
 
 # The lexicon reduced to words once, at import, in the same reduction the rule
@@ -1127,8 +1236,12 @@ def _parse(
     if block is None:
         out["gov_warning"] = (
             {
-                "text": "", "heading_text": "", "heading_all_caps": False,
-                "heading_bold": False, "type_size_pt": 0.0, "confidence": 0.0,
+                "text": "",
+                "heading_text": "",
+                "heading_all_caps": False,
+                "heading_bold": False,
+                "type_size_pt": 0.0,
+                "confidence": 0.0,
             },
             None,
             None,
@@ -1191,9 +1304,7 @@ def _parse(
             alc_text,
         )
     else:
-        out["abv"] = (
-            {"abv_pct": None, "unit": "", "alc_text": "", "confidence": 0.0}, None, None
-        )
+        out["abv"] = ({"abv_pct": None, "unit": "", "alc_text": "", "confidence": 0.0}, None, None)
 
     # -- net contents -----------------------------------------------------
     net = _net_contents(body)
@@ -1218,7 +1329,9 @@ def _parse(
         )
     else:
         out["net_contents"] = (
-            {"net_contents_value": None, "unit": "", "confidence": 0.0}, None, None
+            {"net_contents_value": None, "unit": "", "confidence": 0.0},
+            None,
+            None,
         )
 
     # -- country of origin ------------------------------------------------
@@ -1382,8 +1495,11 @@ def _display_block(boxes: list[_Box], anchor: _Box, exclude: set[str]) -> list[_
     max_dx = anchor.type_size * _BLOCK_MAX_HORIZONTAL_GAP
 
     remaining = [
-        b for b in boxes
-        if b is not anchor and b.text.strip() and b.text.strip() not in exclude
+        b
+        for b in boxes
+        if b is not anchor
+        and b.text.strip()
+        and b.text.strip() not in exclude
         and b.type_size >= floor
     ]
 
@@ -1429,7 +1545,8 @@ def _beneath(box: _Box, boxes: list[_Box], *, limit: int) -> list[_Box]:
     """
     x0, _, x1, _ = box.as_bbox()
     below = [
-        other for other in boxes
+        other
+        for other in boxes
         if other is not box
         and other.y0 >= box.y0
         and min(x1, other.as_bbox()[2]) > max(x0, other.as_bbox()[0])
@@ -1452,7 +1569,7 @@ def _name_address(boxes: list[_Box], joined: str):
         if not lead_in:
             continue
         # The name may finish the lead-in's own line or begin the next.
-        tail = box.text[lead_in.end():].strip(" ,.:;")
+        tail = box.text[lead_in.end() :].strip(" ,.:;")
         following = _beneath(box, boxes, limit=3)
         parts = [tail] + [b.text.strip() for b in following]
         used = [box] + following
@@ -1467,7 +1584,7 @@ def _name_address(boxes: list[_Box], joined: str):
                 # "JUAN LOBO TEQUILA, LLC BUDA, TEXAS". What comes before the
                 # place is the name, so it is cut out rather than discarded
                 # along with the part that held it.
-                head = part[:place.start()].strip(" ,.:;")
+                head = part[: place.start()].strip(" ,.:;")
                 if head and not name and not _only_a_lead_in(head):
                     name = head
             elif not name and not _only_a_lead_in(part):

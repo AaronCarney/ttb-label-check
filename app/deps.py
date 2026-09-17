@@ -1,4 +1,5 @@
 """DI container — selects the VisionExtractor named by the environment."""
+
 from __future__ import annotations
 
 import threading
@@ -81,6 +82,7 @@ def _get_session_cache() -> SessionCache:
     global _session_cache_singleton
     if _session_cache_singleton is None:
         from app.services.cache import SessionCache
+
         _session_cache_singleton = SessionCache(maxsize=128)
     return _session_cache_singleton
 
@@ -96,6 +98,7 @@ def build_evaluator(settings: Settings) -> Evaluator:
     """Construct an Evaluator wired to all three real dependencies."""
     from app.rules import build_rule_engine
     from app.services.evaluator import Evaluator
+
     vision = get_vision_extractor(settings)
     rules = build_rule_engine(settings)
     cache = _get_session_cache()

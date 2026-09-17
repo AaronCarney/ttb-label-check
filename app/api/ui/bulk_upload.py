@@ -12,6 +12,7 @@ beverage the set is, because it decides which rules apply at all. A reviewer who
 skips it gets each label read and nothing checked, and each reply says so
 (`docs/decisions.md#0010`).
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -75,9 +76,7 @@ async def batches_upload_submit(
             name="batches_upload.html",
             context={
                 "dev_mode": settings.dev_mode,
-                "upload_error": limits.too_many_files_message(
-                    len(labels), limits.MAX_BATCH_FILES
-                ),
+                "upload_error": limits.too_many_files_message(len(labels), limits.MAX_BATCH_FILES),
             },
             status_code=413,
         )

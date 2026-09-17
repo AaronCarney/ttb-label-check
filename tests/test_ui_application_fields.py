@@ -10,6 +10,7 @@ A reviewer who fills nothing in still gets a check: the presence rules and the
 health-warning rules need no application, and every comparison reports that it
 does not apply.
 """
+
 from __future__ import annotations
 
 import pytest
@@ -58,6 +59,7 @@ def _expected(application) -> dict[str, object]:
 # The page asks for the application
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.parametrize(
     "field",
     [
@@ -86,6 +88,7 @@ def test_the_form_says_a_blank_field_is_not_checked():
 # ---------------------------------------------------------------------------
 # What is typed reaches the rules
 # ---------------------------------------------------------------------------
+
 
 def test_typed_fields_become_reference_values(client, recorder):
     client.post(
@@ -158,6 +161,7 @@ def test_fields_without_a_beverage_type_are_reported(client, recorder):
 # ---------------------------------------------------------------------------
 # Bulk upload
 # ---------------------------------------------------------------------------
+
 
 def test_the_bulk_page_asks_for_one_beverage_type():
     """A folder of wine labels checked against the spirits pack fires none of

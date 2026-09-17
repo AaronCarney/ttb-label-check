@@ -14,6 +14,7 @@ The wire's per-field `rule_findings` must also exclude rules that returned
 NOT_APPLICABLE — they did not evaluate, so they should not surface to the
 reviewer as "needs_review" (which is what the previous mapping produced).
 """
+
 from __future__ import annotations
 
 from app.schemas.expected import BeverageClass, ExpectedValue

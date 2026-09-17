@@ -10,6 +10,7 @@ Boot sequence:
 Also wired into the app: rule-loader startup, reader wiring, label/batch/
 override routes, SSE.
 """
+
 from __future__ import annotations
 
 import logging
@@ -43,7 +44,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             },
         )
         app.state.batches = {}  # In-flight batches, process-local: nothing is persisted.
-        app.state.buses = {}    # Per-batch SSEBus registry, keyed by batch_id.
+        app.state.buses = {}  # Per-batch SSEBus registry, keyed by batch_id.
         yield
         # Teardown evicts every in-flight batch and its bus subscribers and queues.
         evicted_batches = len(app.state.batches)
@@ -75,12 +76,15 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     )
 
     from app.api import labels as labels_module
+
     application.include_router(labels_module.router)
 
     from app.api import batches as batches_module
+
     application.include_router(batches_module.router)
 
     from app.api import overrides as overrides_module
+
     application.include_router(overrides_module.router)
 
     # Pre-init state so routes work even when lifespan hasn't fired (e.g. httpx tests).

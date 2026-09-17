@@ -11,6 +11,7 @@ These assert the deploy script still configures the probe. Dropping the flag is
 silent - the deploy succeeds and the fault comes back - so it is worth a test
 rather than a comment.
 """
+
 import re
 from pathlib import Path
 
@@ -28,9 +29,7 @@ def _probe_settings(script: str) -> dict[str, str]:
     """The probe's key=value pairs, as the script hands them to gcloud."""
     match = re.search(r"^STARTUP_PROBE=(\S+)", script, re.M)
     assert match, "scripts/deploy.sh no longer defines STARTUP_PROBE"
-    return dict(
-        pair.split("=", 1) for pair in match.group(1).split(",") if "=" in pair
-    )
+    return dict(pair.split("=", 1) for pair in match.group(1).split(",") if "=" in pair)
 
 
 def test_deploy_passes_a_startup_probe(script: str):

@@ -3,6 +3,7 @@
 The Protocol is runtime_checkable so substitutability
 tests can assert isinstance() without instantiating the heavy sub-runners.
 """
+
 from __future__ import annotations
 
 from typing import Protocol, runtime_checkable

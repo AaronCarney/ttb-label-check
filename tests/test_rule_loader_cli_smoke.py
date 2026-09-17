@@ -2,6 +2,7 @@
 on the real tree. Mutating the verbatim asset file (write-then-restore) breaks
 the loader (exit ≠ 0) — the asset hash drift cross-check fires.
 """
+
 from __future__ import annotations
 
 import shutil

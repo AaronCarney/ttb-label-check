@@ -1,17 +1,18 @@
 """Cross-cutting registry invariants:
 
-  1. Importing app.rules._validators populates VALIDATOR_REGISTRY with every
-     name the rule pack can ask for. layout_check registers under two names,
-     because one function serves several rules.
-  2. Every *.py file under app/rules/_validators/ (excluding __init__) registers
-     at least one name: orphan detection in the file→registry direction. The
-     companion check, registry→YAML, lives in
-     tests/test_rules_yaml_round_trip.py, because it needs the loaded RuleSet.
-  3. No file under app/rules/_validators/ contains the literal 'CFR' outside
-     a docstring. Regulation citations belong in the YAML pack.
-  4. No file under app/rules/ imports openai, anthropic, or httpx: applying a
-     rule never reaches the network.
+1. Importing app.rules._validators populates VALIDATOR_REGISTRY with every
+   name the rule pack can ask for. layout_check registers under two names,
+   because one function serves several rules.
+2. Every *.py file under app/rules/_validators/ (excluding __init__) registers
+   at least one name: orphan detection in the file→registry direction. The
+   companion check, registry→YAML, lives in
+   tests/test_rules_yaml_round_trip.py, because it needs the loaded RuleSet.
+3. No file under app/rules/_validators/ contains the literal 'CFR' outside
+   a docstring. Regulation citations belong in the YAML pack.
+4. No file under app/rules/ imports openai, anthropic, or httpx: applying a
+   rule never reaches the network.
 """
+
 from __future__ import annotations
 
 import ast
@@ -22,7 +23,8 @@ from pathlib import Path
 
 EXPECTED_NAMES = {
     "enumerated_match",
-    "presence_check", "conditional_presence",
+    "presence_check",
+    "conditional_presence",
     "regex_match",
     "verbatim_hash",
     "heading_style_check",
@@ -41,6 +43,7 @@ def _import_all_validators() -> None:
 def test_registry_has_expected_names() -> None:
     _import_all_validators()
     from app.rules._validators import VALIDATOR_REGISTRY
+
     missing = EXPECTED_NAMES - set(VALIDATOR_REGISTRY)
     assert not missing, f"missing registrations: {missing}"
 
@@ -50,6 +53,7 @@ def test_every_validator_module_registers_at_least_one_name() -> None:
     pkg_root = Path("app/rules/_validators")
     py_files = [p for p in pkg_root.glob("*.py") if not p.name.startswith("_")]
     from app.rules._validators import VALIDATOR_REGISTRY
+
     by_module: dict[str, int] = {}
     for fn in VALIDATOR_REGISTRY.values():
         by_module[fn.__module__] = by_module.get(fn.__module__, 0) + 1
@@ -81,5 +85,7 @@ def test_no_inference_dependency_imports_under_app_rules() -> None:
     for path in rules_root.rglob("*.py"):
         text = path.read_text(encoding="utf-8")
         for match in banned.finditer(text):
-            bad.append(f"{path}:{text[:match.start()].count(chr(10))+1}: {match.group(0).strip()}")
+            bad.append(
+                f"{path}:{text[: match.start()].count(chr(10)) + 1}: {match.group(0).strip()}"
+            )
     assert not bad, "banned imports under app/rules/: " + "; ".join(bad)

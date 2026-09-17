@@ -1,6 +1,7 @@
 """The dependency container: which VisionExtractor the
 providers hand back for a given set of settings.
 """
+
 from __future__ import annotations
 
 import os
@@ -40,4 +41,3 @@ def test_vision_extractor_provider_returns_cloud() -> None:
 
     s = _settings_with(OPENAI_API_KEY="sk", VISION_MODE="cloud")
     assert isinstance(build_vision_extractor(s), CloudVisionExtractor)
-

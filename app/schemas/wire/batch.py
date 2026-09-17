@@ -1,4 +1,5 @@
 """The batch envelope: what an agent submits for a batch of labels."""
+
 from __future__ import annotations
 
 from datetime import datetime

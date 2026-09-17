@@ -33,6 +33,7 @@ registry happens to expose, and a name that is absent from the block is not
 evidence that the label is wrong. Whether the label carries a name and address
 at all is a separate rule, and that one does reject.
 """
+
 from __future__ import annotations
 
 from app.rules._validators import ValidatorContext, register
@@ -56,28 +57,63 @@ from app.schemas.rules import RuleDefinition
 # the word itself. Both sides are folded, so an over-fold is symmetric — a
 # city named Washington becomes "wa" on the label and "wa" in the application.
 _STATE_POSTAL_CODES: dict[tuple[str, ...], str] = {
-    ("alabama",): "al", ("alaska",): "ak", ("arizona",): "az",
-    ("arkansas",): "ar", ("california",): "ca", ("colorado",): "co",
-    ("connecticut",): "ct", ("delaware",): "de", ("florida",): "fl",
-    ("georgia",): "ga", ("hawaii",): "hi", ("idaho",): "id",
-    ("illinois",): "il", ("indiana",): "in", ("iowa",): "ia",
-    ("kansas",): "ks", ("kentucky",): "ky", ("louisiana",): "la",
-    ("maine",): "me", ("maryland",): "md", ("massachusetts",): "ma",
-    ("michigan",): "mi", ("minnesota",): "mn", ("mississippi",): "ms",
-    ("missouri",): "mo", ("montana",): "mt", ("nebraska",): "ne",
-    ("nevada",): "nv", ("new", "hampshire"): "nh", ("new", "jersey"): "nj",
-    ("new", "mexico"): "nm", ("new", "york"): "ny",
-    ("north", "carolina"): "nc", ("north", "dakota"): "nd",
-    ("ohio",): "oh", ("oklahoma",): "ok", ("oregon",): "or",
-    ("pennsylvania",): "pa", ("rhode", "island"): "ri",
-    ("south", "carolina"): "sc", ("south", "dakota"): "sd",
-    ("tennessee",): "tn", ("texas",): "tx", ("utah",): "ut",
-    ("vermont",): "vt", ("virginia",): "va", ("washington",): "wa",
-    ("west", "virginia"): "wv", ("wisconsin",): "wi", ("wyoming",): "wy",
+    ("alabama",): "al",
+    ("alaska",): "ak",
+    ("arizona",): "az",
+    ("arkansas",): "ar",
+    ("california",): "ca",
+    ("colorado",): "co",
+    ("connecticut",): "ct",
+    ("delaware",): "de",
+    ("florida",): "fl",
+    ("georgia",): "ga",
+    ("hawaii",): "hi",
+    ("idaho",): "id",
+    ("illinois",): "il",
+    ("indiana",): "in",
+    ("iowa",): "ia",
+    ("kansas",): "ks",
+    ("kentucky",): "ky",
+    ("louisiana",): "la",
+    ("maine",): "me",
+    ("maryland",): "md",
+    ("massachusetts",): "ma",
+    ("michigan",): "mi",
+    ("minnesota",): "mn",
+    ("mississippi",): "ms",
+    ("missouri",): "mo",
+    ("montana",): "mt",
+    ("nebraska",): "ne",
+    ("nevada",): "nv",
+    ("new", "hampshire"): "nh",
+    ("new", "jersey"): "nj",
+    ("new", "mexico"): "nm",
+    ("new", "york"): "ny",
+    ("north", "carolina"): "nc",
+    ("north", "dakota"): "nd",
+    ("ohio",): "oh",
+    ("oklahoma",): "ok",
+    ("oregon",): "or",
+    ("pennsylvania",): "pa",
+    ("rhode", "island"): "ri",
+    ("south", "carolina"): "sc",
+    ("south", "dakota"): "sd",
+    ("tennessee",): "tn",
+    ("texas",): "tx",
+    ("utah",): "ut",
+    ("vermont",): "vt",
+    ("virginia",): "va",
+    ("washington",): "wa",
+    ("west", "virginia"): "wv",
+    ("wisconsin",): "wi",
+    ("wyoming",): "wy",
     # The District and the territories that appear on TTB basic permits.
-    ("district", "of", "columbia"): "dc", ("d", "c"): "dc",
-    ("puerto", "rico"): "pr", ("virgin", "islands"): "vi",
-    ("guam",): "gu", ("american", "samoa"): "as",
+    ("district", "of", "columbia"): "dc",
+    ("d", "c"): "dc",
+    ("puerto", "rico"): "pr",
+    ("virgin", "islands"): "vi",
+    ("guam",): "gu",
+    ("american", "samoa"): "as",
     ("northern", "mariana", "islands"): "mp",
 }
 _LONGEST_STATE_NAME = max(len(name) for name in _STATE_POSTAL_CODES)
@@ -94,7 +130,7 @@ def _fold_state_names(words: tuple[str, ...]) -> tuple[str, ...]:
     i = 0
     while i < len(words):
         for length in range(min(_LONGEST_STATE_NAME, len(words) - i), 0, -1):
-            code = _STATE_POSTAL_CODES.get(words[i:i + length])
+            code = _STATE_POSTAL_CODES.get(words[i : i + length])
             if code is not None:
                 folded.append(code)
                 i += length
@@ -115,7 +151,7 @@ def _after_lead_in(words: tuple[str, ...], lead_in_word: str, window: int) -> tu
     head = words[:window]
     for i in range(len(head) - 1, -1, -1):
         if head[i] == lead_in_word:
-            return words[i + 1:]
+            return words[i + 1 :]
     return words
 
 
@@ -162,9 +198,7 @@ def name_address_match(
     window = int(rule.parameters.get("lead_in_window_words", 8))
     anchor_length = int(rule.parameters.get("anchor_words", 2))
 
-    label_words = _fold_state_names(
-        _after_lead_in(normalize_words(observed), lead_in_word, window)
-    )
+    label_words = _fold_state_names(_after_lead_in(normalize_words(observed), lead_in_word, window))
     application_words = _fold_state_names(normalize_words(declared))
 
     anchor = label_words[:anchor_length]

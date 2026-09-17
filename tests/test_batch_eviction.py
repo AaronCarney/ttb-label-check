@@ -1,5 +1,6 @@
 """Nothing about a submission outlives the process: app.state.batches is
 evicted on lifespan teardown."""
+
 from datetime import UTC, datetime
 
 import pytest

@@ -10,6 +10,7 @@ Connection-close detection: when the client disconnects (FastAPI raises
 ``unsubscribe(q)``. The worker continues so a reconnecting consumer can resume
 from ``current_index``.
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -44,7 +45,7 @@ class SSEBus:
     def broadcast(self, event: dict) -> None:
         self._event_log.append(event)
         if len(self._event_log) > self._MAX_BUFFER:
-            self._event_log = self._event_log[-self._MAX_BUFFER:]
+            self._event_log = self._event_log[-self._MAX_BUFFER :]
         # Iterate over a copy so concurrent unsubscribe does not mutate during.
         for q in list(self.subscribers):
             q.put_nowait(event)

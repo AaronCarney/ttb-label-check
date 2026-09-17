@@ -1,6 +1,7 @@
 """BatchWorker basics: a single-item batch consumed end to end, the first label
 of a long batch returned without waiting for the rest, and one failing label
 leaving the rest of the batch checked."""
+
 import asyncio
 import time
 from datetime import UTC, datetime
@@ -131,7 +132,10 @@ async def test_worker_first_label_individual_does_not_wait_for_lookahead_window(
     first item with later items."""
     items = tuple(_stub_item(i) for i in range(50))
     in_flight = InFlightBatch(
-        batch_id="B-003", agent_id="a", items=items, lookahead_k=3,
+        batch_id="B-003",
+        agent_id="a",
+        items=items,
+        lookahead_k=3,
     )
     bus = SSEBus()
     sub = bus.subscribe()
@@ -140,6 +144,7 @@ async def test_worker_first_label_individual_does_not_wait_for_lookahead_window(
     # to fill before responding, we'd see a delay of at least 3 * 0.5 = 1.5s
     # before item 0's event. With first-label-individual, item 0 emits in <0.1s.
     from tests.conftest import _stub_disposition_envelope
+
     plan = [(0.0, _stub_disposition_envelope(0))] + [
         (0.5, _stub_disposition_envelope(i)) for i in range(1, 50)
     ]
@@ -196,7 +201,10 @@ async def test_worker_run_does_not_deadlock_when_consumer_raises():
     # certainly parked on a `put` when the consumer dies.
     items = tuple(_stub_item(i) for i in range(20))
     in_flight = InFlightBatch(
-        batch_id="B-RAISE", agent_id="a", items=items, lookahead_k=3,
+        batch_id="B-RAISE",
+        agent_id="a",
+        items=items,
+        lookahead_k=3,
     )
     bus = _RaisingBus()
     worker = BatchWorker(
@@ -227,7 +235,10 @@ async def test_worker_carries_on_when_one_label_evaluation_raises():
     """
     items = tuple(_stub_item(i) for i in range(5))
     in_flight = InFlightBatch(
-        batch_id="B-CARRY", agent_id="a", items=items, lookahead_k=3,
+        batch_id="B-CARRY",
+        agent_id="a",
+        items=items,
+        lookahead_k=3,
     )
 
     from tests.conftest import _stub_disposition_envelope
@@ -273,9 +284,7 @@ async def test_worker_carries_on_when_one_label_evaluation_raises():
     refused = in_flight.results["lbl-1"]
     assert refused.disposition == "needs_review"
     assert refused.fields == ()
-    assert [t.rule_id for t in refused.audit_trail.per_rule_trace] == [
-        "ENGINE.WORKER.UNHANDLED"
-    ]
+    assert [t.rule_id for t in refused.audit_trail.per_rule_trace] == ["ENGINE.WORKER.UNHANDLED"]
     # ...and a sentence that names the item, for the reviewer to read.
     assert set(in_flight.failures) == {"lbl-1"}
     assert "lbl-1" in in_flight.failures["lbl-1"]

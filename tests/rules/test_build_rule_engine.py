@@ -1,5 +1,6 @@
 """build_rule_engine(settings) — constructs YamlRuleEngine after forcing
 validator-decorator imports (per loader.py:24-29 forward note)."""
+
 from pathlib import Path
 
 import pytest

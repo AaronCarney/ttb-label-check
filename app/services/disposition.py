@@ -1,4 +1,5 @@
 """Pure disposition rule: the overall result for one submission."""
+
 from __future__ import annotations
 
 from collections.abc import Iterable

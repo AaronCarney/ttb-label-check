@@ -1,4 +1,5 @@
 """Pure min-aggregation: disposition confidence is the min over per-field."""
+
 from __future__ import annotations
 
 from collections.abc import Iterable

@@ -38,13 +38,17 @@ async def test_semaphore_caps_at_4(monkeypatch):
 
     settings = Settings()
     extractor = CloudVisionExtractor(
-        settings=settings, ring_buffer=deque(maxlen=200), api_key="sk-test",
+        settings=settings,
+        ring_buffer=deque(maxlen=200),
+        api_key="sk-test",
     )
     monkeypatch.setattr(extractor, "_call_per_field", fake_call)
 
     label = Label(
-        label_id="L-001", batch_id="B-001",
-        image_bytes=b"\x89PNG\r\n\x1a\n", content_type="image/png",
+        label_id="L-001",
+        batch_id="B-001",
+        image_bytes=b"\x89PNG\r\n\x1a\n",
+        content_type="image/png",
         face_tag="front",
         dimensions=Dimensions(width_px=200, height_px=200, dpi=300),
     )

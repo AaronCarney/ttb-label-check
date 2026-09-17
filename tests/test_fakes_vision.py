@@ -1,4 +1,5 @@
 """FakeVisionExtractor — Protocol-compatible (extract + ensure_loaded + warm)."""
+
 import pytest
 
 from app.schemas.extracted import FieldObservation
@@ -8,6 +9,7 @@ from tests.conftest import _stub_label  # the canonical Label factory
 
 def test_fake_vision_satisfies_protocol():
     from app.vision.base import VisionExtractor
+
     fake = FakeVisionExtractor(observations=[])
     assert isinstance(fake, VisionExtractor)
 

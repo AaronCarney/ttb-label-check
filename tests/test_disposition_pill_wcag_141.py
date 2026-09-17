@@ -1,5 +1,6 @@
 """The disposition pill encodes colour, shape and text, so a disposition is
 never carried by colour alone (WCAG 1.4.1)."""
+
 from __future__ import annotations
 
 import json

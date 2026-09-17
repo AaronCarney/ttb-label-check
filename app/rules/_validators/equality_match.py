@@ -22,6 +22,7 @@ Shared helpers (`_build_meta`, `_conf`) live in `_helpers.py` so every
 validator file can import them without depending on this module's load
 order. `_normalize` stays here because it is genuinely equality-internal.
 """
+
 from __future__ import annotations
 
 import unicodedata
@@ -63,8 +64,7 @@ def _contains_designation(observed: str, allowed: str) -> bool:
     if not needle or len(needle) > len(haystack):
         return False
     return any(
-        haystack[i:i + len(needle)] == needle
-        for i in range(len(haystack) - len(needle) + 1)
+        haystack[i : i + len(needle)] == needle for i in range(len(haystack) - len(needle) + 1)
     )
 
 

@@ -5,6 +5,7 @@ Thresholds (inclusive on the higher band):
 - 0.5 ≤ x < 0.85 → "medium"
 - 0.85 ≤ x ≤ 1.0 → "high"
 """
+
 from __future__ import annotations
 
 from typing import Literal

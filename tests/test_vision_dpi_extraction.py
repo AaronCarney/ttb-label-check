@@ -9,6 +9,7 @@ These tests target `_extract_dpi` directly (unit-level over the helper) and roun
 out an integration assertion through `assess()`. Complementary to the gate-focused
 integration coverage in `test_vision_quality_gates.py`.
 """
+
 from __future__ import annotations
 
 import io

@@ -1,4 +1,5 @@
 """POST /labels/{evaluation_id}/overrides — a reviewer's override of a check result."""
+
 from __future__ import annotations
 
 import logging
@@ -142,9 +143,11 @@ async def post_override(
         timestamp=datetime.now(UTC),
     )
 
-    new_audit = env.audit_trail.model_copy(update={
-        "overrides": env.audit_trail.overrides + (entry,),
-    })
+    new_audit = env.audit_trail.model_copy(
+        update={
+            "overrides": env.audit_trail.overrides + (entry,),
+        }
+    )
     new_env = env.model_copy(update={"audit_trail": new_audit})
     if in_flight is not None:
         in_flight.results[label_id] = new_env
@@ -161,14 +164,16 @@ async def post_override(
     bus = request.app.state.buses.get(batch_id) if batch_id is not None else None
     bus_present = bus is not None
     if bus is not None:
-        bus.broadcast({
-            "event": "override-applied",
-            "data": {
-                "batch_id": batch_id,
-                "evaluation_id": evaluation_id,
-                "entry": entry.model_dump(mode="json"),
-            },
-        })
+        bus.broadcast(
+            {
+                "event": "override-applied",
+                "data": {
+                    "batch_id": batch_id,
+                    "evaluation_id": evaluation_id,
+                    "entry": entry.model_dump(mode="json"),
+                },
+            }
+        )
 
     _logger.info(
         f"override_applied batch_id={batch_id or 'single'} evaluation_id={evaluation_id} field={payload.field_name} {env.disposition}->{payload.applied_disposition} bus={bus_present}",

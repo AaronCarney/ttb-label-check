@@ -15,7 +15,8 @@ def test_build_returns_metrics():
     assert m.total_duration_ms == 400
     assert m.vision_duration_ms == 100
     assert {(e.rule_id, e.duration_ms) for e in m.per_rule_durations_ms} == {
-        ("R-001", 10), ("R-002", 20),
+        ("R-001", 10),
+        ("R-002", 20),
     }
 
 

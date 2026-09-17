@@ -60,6 +60,14 @@ packages = ["app"]
 line-length = 100
 target-version = "py312"
 
+# ruff 0.16 formats Python code blocks inside markdown as well as `.py` files.
+# The only markdown here that carries Python is `docs/research/`, whose blocks
+# quote external examples inside dated research notes — reformatting them edits
+# a record rather than this project's source. No markdown in this tree is
+# project source, so markdown is out of scope for both the linter and the
+# formatter.
+extend-exclude = ["*.md"]
+
 [tool.ruff.lint]
 # Deliberately more than ruff's default, which is `E4`, `E7`, `E9` and `F`.
 # Every code here has caught something real in this tree or guards something

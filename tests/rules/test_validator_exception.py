@@ -1,6 +1,7 @@
 """A validator raising ZeroDivisionError is caught and emits
 ENGINE.VALIDATOR.EXCEPTION; other rules continue.
 """
+
 from __future__ import annotations
 
 import pytest
@@ -26,7 +27,14 @@ async def test_validator_exception_caught_into_error_result() -> None:
         validator="__crash_validator__",
         reason_code="WARNING.PRESENCE.MISSING",
     )
-    rs = RuleSet(version="0.1.0", effective_date="2026-09-09", rules=(rule,), reason_codes={}, assets={}, decision_tables={})
+    rs = RuleSet(
+        version="0.1.0",
+        effective_date="2026-09-09",
+        rules=(rule,),
+        reason_codes={},
+        assets={},
+        decision_tables={},
+    )
     engine = YamlRuleEngine(rs)
     obs = [make_obs(field_id="warning_block", value="x", beverage_class=BeverageClass.SPIRITS)]
     exp = [make_expected(field_id="warning_block")]

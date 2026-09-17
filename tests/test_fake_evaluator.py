@@ -1,4 +1,5 @@
 """FakeEvaluator — controllable per-call latency + canned envelopes."""
+
 import time
 
 import pytest
@@ -15,6 +16,7 @@ def _stub_app(idx: int = 0) -> Application:
 
 def _stub_label(idx: int = 0) -> Label:
     from tests.conftest import _stub_label as helper
+
     return helper(label_id=f"lbl-{idx:04d}")
 
 

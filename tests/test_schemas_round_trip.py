@@ -1,4 +1,5 @@
 """Internal & wire schemas round-trip a representative payload byte-identically."""
+
 from __future__ import annotations
 
 import json
@@ -170,8 +171,7 @@ def test_per_rule_trace_entry_has_no_duration_ms() -> None:
 
     fields = PerRuleTraceEntry.model_fields
     assert "duration_ms" not in fields, (
-        "per-rule duration belongs in app.schemas.metrics, "
-        "not in audit_trail.per_rule_trace[]."
+        "per-rule duration belongs in app.schemas.metrics, not in audit_trail.per_rule_trace[]."
     )
     assert set(fields.keys()) == {"rule_id", "disposition", "evidence_ref"}
 
@@ -237,8 +237,7 @@ def test_rule_set_round_trip() -> None:
         reason_codes={
             "ALCOHOL_CONTENT.MATCH.APPLICATION_LABEL_DISAGREE": ReasonCodeEntry(
                 description=(
-                    "Label alcohol content is not the alcohol content the "
-                    "application declared."
+                    "Label alcohol content is not the alcohol content the application declared."
                 ),
                 cfr_anchors=(),
                 severity=Severity.REJECT,
@@ -296,8 +295,12 @@ def test_item_state_transitions_documented() -> None:
     from app.schemas.batch import ItemState
 
     expected = {
-        ItemState.QUEUED, ItemState.PROCESSING, ItemState.READY,
-        ItemState.PRESENTED, ItemState.REVIEWED, ItemState.DISPOSED,
+        ItemState.QUEUED,
+        ItemState.PROCESSING,
+        ItemState.READY,
+        ItemState.PRESENTED,
+        ItemState.REVIEWED,
+        ItemState.DISPOSED,
         ItemState.FAILED,
     }
     assert set(ItemState) == expected

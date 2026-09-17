@@ -11,6 +11,7 @@ after a restart, and on any worker but the one that took the upload. The three
 tests named for those losses are the guard on that; see
 `docs/decisions.md#0018`.
 """
+
 from __future__ import annotations
 
 import os
@@ -60,6 +61,7 @@ def _upload(client: TestClient, body: bytes, name: str = "upload.png"):
 # The round trip, through the store the running app actually uses
 # ---------------------------------------------------------------------------
 
+
 def test_upload_image_round_trips():
     """An upload's bytes are retrievable at the URL the page renders.
 
@@ -99,9 +101,7 @@ def test_a_jpeg_upload_comes_back_as_a_jpeg(tmp_path: Path):
     Image.new("RGB", (2, 2), color=(255, 0, 0)).save(buf, "JPEG")
     jpeg = buf.getvalue()
 
-    assert client.post(
-        "/", files={"label": ("upload.jpg", jpeg, "image/jpeg")}
-    ).status_code == 200
+    assert client.post("/", files={"label": ("upload.jpg", jpeg, "image/jpeg")}).status_code == 200
     img = client.get(f"/labels/{env.evaluation_id}/image")
     assert img.status_code == 200
     assert img.headers["content-type"] == "image/jpeg"
@@ -111,6 +111,7 @@ def test_a_jpeg_upload_comes_back_as_a_jpeg(tmp_path: Path):
 # ---------------------------------------------------------------------------
 # The three losses the old in-memory cache had
 # ---------------------------------------------------------------------------
+
 
 def test_the_image_survives_sixty_four_further_uploads(tmp_path: Path):
     """The cache this replaced held 64 entries and evicted the oldest, so the
@@ -158,6 +159,7 @@ def test_a_second_worker_serves_an_image_the_first_one_received(tmp_path: Path):
 # ---------------------------------------------------------------------------
 # The store's own edges
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.parametrize(
     "eval_id",

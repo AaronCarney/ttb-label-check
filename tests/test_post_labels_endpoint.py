@@ -1,4 +1,5 @@
 """POST /labels — multipart parsing, validation, delegation (deterministic)."""
+
 import json
 
 import pytest

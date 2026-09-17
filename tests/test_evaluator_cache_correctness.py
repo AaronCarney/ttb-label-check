@@ -7,6 +7,7 @@ carry which rules produced the answer, and the audit trail could not name
 them either — `EvaluationTimeline.rule_set_version` defaults to "unknown" and
 nothing in `app/` ever set it.
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -58,8 +59,11 @@ def _rejecting_result() -> ValidationResult:
         reason_code="WARNING.PRESENCE.MISSING",
         aggregated_confidence=1.0,
         engine_meta=EngineMeta(
-            engine_version="test", rule_pack_version="0.1.0", rule_pack="common",
-            started_at_ms=0, elapsed_ms=0,
+            engine_version="test",
+            rule_pack_version="0.1.0",
+            rule_pack="common",
+            started_at_ms=0,
+            elapsed_ms=0,
         ),
     )
 
@@ -69,18 +73,23 @@ async def test_a_cache_hit_reports_its_own_cost_not_the_first_call_s():
     vision = _SlowVision(delay_s=0.05)
     cache = SessionCache(maxsize=8)
     evaluator = Evaluator(
-        vision=vision, rules=FakeRuleEngine(results=()), settings=Settings(), cache=cache,
+        vision=vision,
+        rules=FakeRuleEngine(results=()),
+        settings=Settings(),
+        cache=cache,
     )
     label = _label()
 
     first = await evaluator.evaluate(
-        application=Application(application_id="A", evaluation_id="EV-001"), label=label,
+        application=Application(application_id="A", evaluation_id="EV-001"),
+        label=label,
     )
     assert first.metrics.vision_duration_ms >= 40, "the first call really did read the label"
     assert first.metrics.cache_hit is False
 
     second = await evaluator.evaluate(
-        application=Application(application_id="A", evaluation_id="EV-002"), label=label,
+        application=Application(application_id="A", evaluation_id="EV-002"),
+        label=label,
     )
     assert vision.calls == 1, "the second call was served from the cache"
     assert second.disposition == first.disposition, "it is the same answer"
@@ -99,17 +108,21 @@ async def test_a_cache_hit_dates_itself_to_the_request_it_answered():
     before it."""
     cache = SessionCache(maxsize=8)
     evaluator = Evaluator(
-        vision=FakeVisionExtractor(), rules=FakeRuleEngine(results=()),
-        settings=Settings(), cache=cache,
+        vision=FakeVisionExtractor(),
+        rules=FakeRuleEngine(results=()),
+        settings=Settings(),
+        cache=cache,
     )
     label = _label()
 
     first = await evaluator.evaluate(
-        application=Application(application_id="A", evaluation_id="EV-001"), label=label,
+        application=Application(application_id="A", evaluation_id="EV-001"),
+        label=label,
     )
     await asyncio.sleep(0.01)
     second = await evaluator.evaluate(
-        application=Application(application_id="A", evaluation_id="EV-002"), label=label,
+        application=Application(application_id="A", evaluation_id="EV-002"),
+        label=label,
     )
 
     assert second.audit_trail.evaluation_id == "EV-002"
@@ -124,21 +137,26 @@ async def test_a_rule_pack_change_invalidates_the_cached_answer():
     label = _label()
 
     before = Evaluator(
-        vision=FakeVisionExtractor(), rules=FakeRuleEngine(results=(), rule_set_version="0.1.0"),
-        settings=Settings(), cache=cache,
+        vision=FakeVisionExtractor(),
+        rules=FakeRuleEngine(results=(), rule_set_version="0.1.0"),
+        settings=Settings(),
+        cache=cache,
     )
     first = await before.evaluate(
-        application=Application(application_id="A", evaluation_id="EV-001"), label=label,
+        application=Application(application_id="A", evaluation_id="EV-001"),
+        label=label,
     )
     assert first.disposition == "needs_review"
 
     after = Evaluator(
         vision=FakeVisionExtractor(),
         rules=FakeRuleEngine(results=(_rejecting_result(),), rule_set_version="0.2.0"),
-        settings=Settings(), cache=cache,
+        settings=Settings(),
+        cache=cache,
     )
     second = await after.evaluate(
-        application=Application(application_id="A", evaluation_id="EV-002"), label=label,
+        application=Application(application_id="A", evaluation_id="EV-002"),
+        label=label,
     )
     assert second.disposition == "fail"
 
@@ -146,11 +164,14 @@ async def test_a_rule_pack_change_invalidates_the_cached_answer():
 @pytest.mark.asyncio
 async def test_the_audit_trail_names_the_rule_set_it_used():
     evaluator = Evaluator(
-        vision=FakeVisionExtractor(), rules=FakeRuleEngine(results=(), rule_set_version="0.4.2"),
-        settings=Settings(), cache=None,
+        vision=FakeVisionExtractor(),
+        rules=FakeRuleEngine(results=(), rule_set_version="0.4.2"),
+        settings=Settings(),
+        cache=None,
     )
     envelope = await evaluator.evaluate(
-        application=Application(application_id="A", evaluation_id="EV-001"), label=_label(),
+        application=Application(application_id="A", evaluation_id="EV-001"),
+        label=_label(),
     )
     assert envelope.audit_trail.rule_set_version == "0.4.2"
 
@@ -162,11 +183,14 @@ async def test_the_real_rule_pack_is_named_in_the_audit_trail():
 
     settings = Settings()
     evaluator = Evaluator(
-        vision=FakeVisionExtractor(), rules=build_rule_engine(settings),
-        settings=settings, cache=None,
+        vision=FakeVisionExtractor(),
+        rules=build_rule_engine(settings),
+        settings=settings,
+        cache=None,
     )
     envelope = await evaluator.evaluate(
-        application=Application(application_id="A", evaluation_id="EV-001"), label=_label(),
+        application=Application(application_id="A", evaluation_id="EV-001"),
+        label=_label(),
     )
     assert envelope.audit_trail.rule_set_version != "unknown"
     assert envelope.audit_trail.rule_set_version.startswith("0.")

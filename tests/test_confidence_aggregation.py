@@ -1,5 +1,6 @@
 """Envelope confidence aggregates as the minimum across its fields, so the
 weakest reading sets the overall band."""
+
 from app.schemas.wire.disposition import (
     AISuggestionWire,
     ConfidenceBand,
@@ -12,10 +13,21 @@ from app.services.aggregation import min_aggregate_confidence
 
 def _field(name, numeric, band):
     return FieldFindingWire(
-        field_name=name, extracted_value="x", expected_value="x",
-        evidence=FieldEvidenceWire(bbox=(0, 0, 10, 10), crop_ref="c", extraction_confidence=numeric),
-        rule_findings=(RuleFindingWire(rule_id="R", cfr_citation="27 CFR §x",
-                                       disposition="pass", reason_code="OK", plain_language_explanation="ok"),),
+        field_name=name,
+        extracted_value="x",
+        expected_value="x",
+        evidence=FieldEvidenceWire(
+            bbox=(0, 0, 10, 10), crop_ref="c", extraction_confidence=numeric
+        ),
+        rule_findings=(
+            RuleFindingWire(
+                rule_id="R",
+                cfr_citation="27 CFR §x",
+                disposition="pass",
+                reason_code="OK",
+                plain_language_explanation="ok",
+            ),
+        ),
         ai_suggestion=AISuggestionWire(present=False),
         field_confidence=ConfidenceBand(band=band, numeric=numeric),
     )

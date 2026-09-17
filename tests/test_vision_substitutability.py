@@ -13,8 +13,13 @@ from app.vision.base import VisionExtractor
 from app.vision.cloud import CloudVisionExtractor
 
 EXPECTED_FIELD_IDS = {
-    "brand_name", "class_type", "abv", "net_contents",
-    "gov_warning", "name_address", "country_origin",
+    "brand_name",
+    "class_type",
+    "abv",
+    "net_contents",
+    "gov_warning",
+    "name_address",
+    "country_origin",
 }
 RECORDINGS_DIR = Path("tests/recordings/openai/gpt-4o-2024-08-06/v1/01-spirits-clean")
 # A real CC0 label from the TTB Public COLA Registry, front face: distilled
@@ -25,8 +30,10 @@ FIXTURE = Path("tests/fixtures/labels/26231001000662/front.jpg")
 
 def _label() -> Label:
     return Label(
-        label_id="L-001", batch_id="B-001",
-        image_bytes=FIXTURE.read_bytes(), content_type="image/jpeg",
+        label_id="L-001",
+        batch_id="B-001",
+        image_bytes=FIXTURE.read_bytes(),
+        content_type="image/jpeg",
         face_tag="front",
         dimensions=Dimensions(width_px=1200, height_px=1800, dpi=300),
     )
@@ -35,7 +42,9 @@ def _label() -> Label:
 @pytest.mark.asyncio
 async def test_cloud_satisfies_protocol():
     settings = Settings()
-    cloud = CloudVisionExtractor(settings=settings, ring_buffer=deque(maxlen=200), api_key="sk-test")
+    cloud = CloudVisionExtractor(
+        settings=settings, ring_buffer=deque(maxlen=200), api_key="sk-test"
+    )
     assert isinstance(cloud, VisionExtractor)
 
 
@@ -49,6 +58,7 @@ async def test_cloud_produces_expected_field_id_set():
     # response_format.json_schema.name.
     recordings = {p.stem: json.loads(p.read_text()) for p in RECORDINGS_DIR.glob("*.json")}
     with respx.mock(base_url="https://api.openai.com") as router:
+
         def _dispatch(request):
             body = json.loads(request.content)
             name = body.get("response_format", {}).get("json_schema", {}).get("name")
@@ -56,6 +66,7 @@ async def test_cloud_produces_expected_field_id_set():
             if payload is None:
                 return Response(404, json={"error": f"no recording for {name!r}"})
             return Response(200, json=payload)
+
         router.post("/v1/chat/completions").mock(side_effect=_dispatch)
         cloud_obs = await cloud.extract(_label())
 
@@ -75,12 +86,14 @@ READER_RECORDINGS = Path("tests/recordings/reader")
 # Keys the cloud reader adds that the local reader has no counterpart for, and
 # why each is allowed to be one-sided. `OBSERVED_VALUE_AUDIT_KEYS` in
 # `app/vision/cloud.py` is what strips them from the user-facing projection.
-CLOUD_ONLY_KEYS = frozenset({
-    # What the model claimed about the heading's weight, kept beside the
-    # measurement that overrode it. The local reader has nothing to keep: it
-    # never asks a model.
-    "heading_bold_llm",
-})
+CLOUD_ONLY_KEYS = frozenset(
+    {
+        # What the model claimed about the heading's weight, kept beside the
+        # measurement that overrode it. The local reader has nothing to keep: it
+        # never asks a model.
+        "heading_bold_llm",
+    }
+)
 
 
 def _reader_payloads(relative: str) -> dict[str, dict]:
@@ -112,30 +125,35 @@ def _cloud_payloads(
 
     async def _run() -> list:
         with respx.mock(base_url="https://api.openai.com") as router:
+
             def _dispatch(request):
                 body = json.loads(request.content)
                 sent.append(body)
                 name = body["response_format"]["json_schema"]["name"]
-                return Response(200, json={
-                    "id": "x", "object": "chat.completion", "model": "gpt-4o",
-                    "choices": [{
-                        "index": 0,
-                        "message": {
-                            "role": "assistant",
-                            "content": json.dumps(per_field[name]),
-                        },
-                        "finish_reason": "stop",
-                    }],
-                    "usage": {
-                        "prompt_tokens": 1, "completion_tokens": 1, "total_tokens": 2
+                return Response(
+                    200,
+                    json={
+                        "id": "x",
+                        "object": "chat.completion",
+                        "model": "gpt-4o",
+                        "choices": [
+                            {
+                                "index": 0,
+                                "message": {
+                                    "role": "assistant",
+                                    "content": json.dumps(per_field[name]),
+                                },
+                                "finish_reason": "stop",
+                            }
+                        ],
+                        "usage": {"prompt_tokens": 1, "completion_tokens": 1, "total_tokens": 2},
                     },
-                })
+                )
+
             router.post("/v1/chat/completions").mock(side_effect=_dispatch)
             if measurement is None:
                 return await extractor.extract(_label())
-            with mock.patch.object(
-                cloud_module, "measure_heading_bold", return_value=measurement
-            ):
+            with mock.patch.object(cloud_module, "measure_heading_bold", return_value=measurement):
                 return await extractor.extract(_label())
 
     observations = asyncio.run(_run())
@@ -151,11 +169,15 @@ def _full_response(**overrides) -> dict[str, dict]:
         "brand_name": {"brand_name": "ACME BOURBON", "confidence": 0.9},
         "class_type": {"class_type": "BOURBON", "confidence": 0.9},
         "abv": {
-            "abv_pct": 40.0, "unit": "%", "alc_text": "40% ALC/VOL",
+            "abv_pct": 40.0,
+            "unit": "%",
+            "alc_text": "40% ALC/VOL",
             "confidence": 0.9,
         },
         "net_contents": {
-            "net_contents_value": 750.0, "unit": "ML", "confidence": 0.9,
+            "net_contents_value": 750.0,
+            "unit": "ML",
+            "confidence": 0.9,
         },
         "gov_warning": {
             "text": "GOVERNMENT WARNING: …",
@@ -166,7 +188,10 @@ def _full_response(**overrides) -> dict[str, dict]:
             "confidence": 0.9,
         },
         "name_address": {
-            "name": "ACME", "city": "FRANKFORT", "state": "KY", "confidence": 0.9,
+            "name": "ACME",
+            "city": "FRANKFORT",
+            "state": "KY",
+            "confidence": 0.9,
         },
         "country_origin": {"country": "USA", "confidence": 0.9},
     }
@@ -279,9 +304,7 @@ def test_a_boldness_nobody_measured_is_absent_from_both_readers() -> None:
     from app.vision.heading_measure import HeadingMeasurement
 
     unmeasured = HeadingMeasurement(False, 0.0, 0.0, 0.0, confident=False)
-    cloud, _evidence, _sent = _cloud_payloads(
-        _full_response(), measurement=unmeasured
-    )
+    cloud, _evidence, _sent = _cloud_payloads(_full_response(), measurement=unmeasured)
     warning = cloud["gov_warning"]
     assert warning["heading_bold_measured_confident"] is False
     assert "heading_bold" not in warning

@@ -9,6 +9,7 @@ Run from this folder:
 
 Output is deterministic: fixed seeds, fixed parameters, no dependence on wall-clock time.
 """
+
 from __future__ import annotations
 
 import json
@@ -54,9 +55,11 @@ def skew(img: Image.Image, angle: float, shear: float) -> Image.Image:
     out = img.rotate(angle, resample=Image.BICUBIC, expand=True, fillcolor=(60, 60, 60))
     w2, h2 = out.size
     return out.transform(
-        (w2 + int(abs(shear) * h2), h2), Image.AFFINE,
+        (w2 + int(abs(shear) * h2), h2),
+        Image.AFFINE,
         (1, shear, -abs(shear) * h2 if shear > 0 else 0, 0, 1, 0),
-        resample=Image.BICUBIC, fillcolor=(60, 60, 60),
+        resample=Image.BICUBIC,
+        fillcolor=(60, 60, 60),
     )
 
 
@@ -74,8 +77,12 @@ def blur(img: Image.Image, radius: float) -> Image.Image:
     return img.filter(ImageFilter.GaussianBlur(radius))
 
 
-def _wrap(draw: ImageDraw.ImageDraw, words: list[tuple[str, bool]], fonts: dict[bool, ImageFont.FreeTypeFont],
-          width: int) -> list[list[tuple[str, bool]]]:
+def _wrap(
+    draw: ImageDraw.ImageDraw,
+    words: list[tuple[str, bool]],
+    fonts: dict[bool, ImageFont.FreeTypeFont],
+    width: int,
+) -> list[list[tuple[str, bool]]]:
     lines: list[list[tuple[str, bool]]] = [[]]
     used = 0
     space = draw.textlength(" ", font=fonts[False])
@@ -98,7 +105,9 @@ def replace_warning(img: Image.Image, box: list[int], heading: str, body: str) -
     """
     out = img.copy()
     x0, y0, x1, y1 = box
-    border = [out.getpixel((x, y0)) for x in range(x0, x1)] + [out.getpixel((x, y1 - 1)) for x in range(x0, x1)]
+    border = [out.getpixel((x, y0)) for x in range(x0, x1)] + [
+        out.getpixel((x, y1 - 1)) for x in range(x0, x1)
+    ]
     border.sort(key=sum)
     bg = border[len(border) // 2]
     ink = (0, 0, 0) if sum(bg[:3]) > 384 else (255, 255, 255)

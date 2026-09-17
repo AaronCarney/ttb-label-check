@@ -19,6 +19,7 @@ A variant's block is its source label's, with the variant's own alteration
 applied: an altered application leaves the label's readings untouched, and a
 repainted warning block changes the warning reading alone.
 """
+
 from __future__ import annotations
 
 import json
@@ -55,9 +56,7 @@ def application_record(entry: dict[str, Any]) -> ApplicationRecord:
         brand_name=app.get("brand_name"),
         fanciful_name=app.get("fanciful_name"),
         class_type=app.get("class_type"),
-        alcohol_content=DeclaredQuantity(
-            text=alcohol.get("value"), amount=alcohol.get("percent")
-        ),
+        alcohol_content=DeclaredQuantity(text=alcohol.get("value"), amount=alcohol.get("percent")),
         net_contents=DeclaredQuantity(text=net.get("value"), amount=net.get("ml")),
         applicant_name_address=app.get("applicant_name_address"),
         source_of_product=source.lower() if source else None,
@@ -91,9 +90,17 @@ def label_observations(entry: dict[str, Any]) -> tuple[FieldObservation, ...]:
         ),
         obs(
             "name_address",
-            {"name": observed.get("name_address") or "", "city": "", "state": "", "confidence": 0.95},
+            {
+                "name": observed.get("name_address") or "",
+                "city": "",
+                "state": "",
+                "confidence": 0.95,
+            },
         ),
-        obs("country_origin", {"country": observed.get("origin_statement") or "", "confidence": 0.95}),
+        obs(
+            "country_origin",
+            {"country": observed.get("origin_statement") or "", "confidence": 0.95},
+        ),
     )
 
 

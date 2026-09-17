@@ -1,4 +1,5 @@
 """POST /labels — single-label evaluation endpoint."""
+
 from __future__ import annotations
 
 import json
@@ -74,7 +75,9 @@ async def post_labels(
 
     content_type = _detect_content_type(label_bytes)
     if content_type is None:
-        raise HTTPException(status_code=400, detail="rejected_input: unsupported MIME (only PNG/JPEG)")
+        raise HTTPException(
+            status_code=400, detail="rejected_input: unsupported MIME (only PNG/JPEG)"
+        )
 
     label_obj = Label(
         label_id=label.filename or "label",

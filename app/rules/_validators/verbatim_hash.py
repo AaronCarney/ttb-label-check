@@ -22,6 +22,7 @@ Supported ops: ``nfkc``, ``ascii_quotes``, ``join_line_break_hyphens``,
 ``collapse_whitespace``, ``tighten_punctuation_spacing``, ``casefold``,
 ``strip_outer_ws``.
 """
+
 from __future__ import annotations
 
 import hashlib
@@ -73,8 +74,7 @@ def canonicalize_text(s: str, ops: Sequence[str] = DEFAULT_NORMALIZATION_OPS) ->
         if op == "nfkc":
             s = unicodedata.normalize("NFKC", s)
         elif op == "ascii_quotes":
-            s = (s.replace("“", '"').replace("”", '"')
-                  .replace("‘", "'").replace("’", "'"))
+            s = s.replace("“", '"').replace("”", '"').replace("‘", "'").replace("’", "'")
         elif op == "join_line_break_hyphens":
             s = _LINE_BREAK_HYPHEN.sub("", s)
         elif op == "collapse_whitespace":
@@ -110,8 +110,7 @@ def verbatim_hash(
     # can never equal the hash of the asset text.
     observed = canonicalize_text(project_reading(obs), ops=ops)
     matched = (
-        asset is not None
-        and hashlib.sha256(observed.encode("utf-8")).hexdigest() == asset.sha256
+        asset is not None and hashlib.sha256(observed.encode("utf-8")).hexdigest() == asset.sha256
     )
     return ValidationResult(
         rule_id=rule.rule_id,

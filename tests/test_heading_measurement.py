@@ -1,4 +1,5 @@
 """Tests for app/vision/heading_measure.py — local SWT-style bold detector."""
+
 from io import BytesIO
 
 import numpy as np
@@ -15,6 +16,7 @@ def _png_text(text: str, size: int, weight: str) -> bytes:
     weight using PIL's default bitmap font (regular) or a synthetic bold via
     cv2 morphological dilation. Returns PNG bytes for SWT input."""
     import cv2
+
     img = Image.new("L", (260, 80), color=255)
     draw = ImageDraw.Draw(img)
     try:
@@ -64,6 +66,7 @@ def _lower_half_bold_text_png() -> bytes:
     """A 200x80 label whose top half is blank and whose lower half carries bold
     text — the shape that made the deleted lower-half fallback look plausible."""
     import cv2
+
     img = Image.new("L", (200, 80), color=255)
     draw = ImageDraw.Draw(img)
     try:

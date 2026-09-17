@@ -19,6 +19,7 @@ adding a unit stays an edit to `rules/tables/volume_units.yaml`.
 A unit is matched on its letters and digits alone, because a label and a reader
 each spell it as they find it: "FL. OZ.", "FL OZ" and "fl.oz" are one entry.
 """
+
 from __future__ import annotations
 
 import re
@@ -130,7 +131,7 @@ def _figures(text: str, table: UnitTable) -> tuple[list[tuple[float, str]], bool
     listed: list[tuple[float, str]] = []
     unlisted = False
     for match in _NUMBER_RE.finditer(text):
-        words = normalize_words(text[match.end():])
+        words = normalize_words(text[match.end() :])
         found = ""
         for count in range(min(table.longest_unit_words, len(words)), 0, -1):
             candidate = "".join(words[:count])

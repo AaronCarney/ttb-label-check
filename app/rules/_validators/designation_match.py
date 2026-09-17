@@ -22,6 +22,7 @@ Four ways they can agree, in order:
 The recognised classes and the within-class table are rule-pack data, so
 adding a class is an edit to the rule pack and not to this file.
 """
+
 from __future__ import annotations
 
 from app.rules._validators import ValidatorContext, register

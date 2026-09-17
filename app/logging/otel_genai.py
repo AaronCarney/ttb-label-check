@@ -4,6 +4,7 @@ attribute names.
 Future ``OTEL_EXPORTER_OTLP_ENDPOINT`` env var flips emission to a real OTel
 collector without code changes.
 """
+
 from __future__ import annotations
 
 import json

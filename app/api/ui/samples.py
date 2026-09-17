@@ -17,6 +17,7 @@ The application values come from ``tests/fixtures/labels/manifest.json``, which
 records, for each label, the application actually filed for it in the registry,
 under the same ten key names this form posts.
 """
+
 from __future__ import annotations
 
 import io
@@ -48,9 +49,7 @@ def _load_sample_ttbids() -> list[str]:
     """TTB IDs of the sample labels installed with the app."""
     if not _SAMPLE_LABELS_DIR.is_dir():
         return []
-    return sorted(
-        d.name for d in _SAMPLE_LABELS_DIR.iterdir() if (d / _SAMPLE_FACE).is_file()
-    )
+    return sorted(d.name for d in _SAMPLE_LABELS_DIR.iterdir() if (d / _SAMPLE_FACE).is_file())
 
 
 def _read_label_bytes(ttbid: str) -> bytes | None:
@@ -198,11 +197,13 @@ def offered_samples() -> list[dict[str, str]]:
         front = entry.get("images", {}).get("front")
         if not front or not (_SAMPLE_LABELS_DIR / front).is_file():
             continue
-        out.append({
-            "id": sample_id,
-            "blurb": blurb,
-            "brand": _str(entry.get("application", {}).get("brand_name")),
-        })
+        out.append(
+            {
+                "id": sample_id,
+                "blurb": blurb,
+                "brand": _str(entry.get("application", {}).get("brand_name")),
+            }
+        )
     return out
 
 

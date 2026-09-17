@@ -16,8 +16,13 @@ RECORDINGS_DIR = Path("tests/recordings/openai/gpt-4o-2024-08-06/v1/01-spirits-c
 # using it exercises the path a submitted label takes.
 FIXTURE = Path("tests/fixtures/labels/26231001000662/front.jpg")
 EXPECTED_FIELD_IDS = {
-    "brand_name", "class_type", "abv", "net_contents",
-    "gov_warning", "name_address", "country_origin",
+    "brand_name",
+    "class_type",
+    "abv",
+    "net_contents",
+    "gov_warning",
+    "name_address",
+    "country_origin",
 }
 
 
@@ -42,6 +47,7 @@ async def test_cloud_extracts_fr_001_to_008(monkeypatch):
     recordings = {p.stem: json.loads(p.read_text()) for p in RECORDINGS_DIR.glob("*.json")}
 
     with respx.mock(base_url="https://api.openai.com") as mock_router:
+
         def _dispatch(request):
             body = json.loads(request.content)
             name = body.get("response_format", {}).get("json_schema", {}).get("name")
@@ -55,7 +61,9 @@ async def test_cloud_extracts_fr_001_to_008(monkeypatch):
         observations = await extractor.extract(label)
     field_ids = {obs.field_id for obs in observations}
     assert field_ids == EXPECTED_FIELD_IDS
-    assert len(ring) == 8  # 1 layout + 7 per-field calls (heading_typography folded into gov_warning)
+    assert (
+        len(ring) == 8
+    )  # 1 layout + 7 per-field calls (heading_typography folded into gov_warning)
 
 
 @pytest.mark.asyncio
@@ -88,23 +96,37 @@ async def test_cloud_threads_self_reported_confidence(monkeypatch):
             "confidence": 0.55,
         },
         "name_address": {
-            "name": "ACME", "city": "FRANKFORT", "state": "KY", "confidence": 0.73,
+            "name": "ACME",
+            "city": "FRANKFORT",
+            "state": "KY",
+            "confidence": 0.73,
         },
         "country_origin": {"country": "USA", "confidence": 0.66},
         "layout": {"fields": []},
     }
     with respx.mock(base_url="https://api.openai.com") as mock_router:
+
         def _dispatch(request):
             body = json.loads(request.content)
             name = body.get("response_format", {}).get("json_schema", {}).get("name")
             payload = per_field[name]
-            return Response(200, json={
-                "id": "x", "object": "chat.completion", "model": "gpt-4o",
-                "choices": [{"index": 0, "message": {"role": "assistant",
-                                                       "content": json.dumps(payload)},
-                             "finish_reason": "stop"}],
-                "usage": {"prompt_tokens": 1, "completion_tokens": 1, "total_tokens": 2},
-            })
+            return Response(
+                200,
+                json={
+                    "id": "x",
+                    "object": "chat.completion",
+                    "model": "gpt-4o",
+                    "choices": [
+                        {
+                            "index": 0,
+                            "message": {"role": "assistant", "content": json.dumps(payload)},
+                            "finish_reason": "stop",
+                        }
+                    ],
+                    "usage": {"prompt_tokens": 1, "completion_tokens": 1, "total_tokens": 2},
+                },
+            )
+
         mock_router.post("/v1/chat/completions").mock(side_effect=_dispatch)
         observations = await extractor.extract(label)
     by_field = {obs.field_id: obs for obs in observations}
@@ -132,10 +154,12 @@ async def test_cloud_falls_back_when_confidence_absent(monkeypatch):
     # Old-shape responses missing the confidence key; replays the on-disk recordings.
     recordings = {p.stem: json.loads(p.read_text()) for p in RECORDINGS_DIR.glob("*.json")}
     with respx.mock(base_url="https://api.openai.com") as mock_router:
+
         def _dispatch(request):
             body = json.loads(request.content)
             name = body.get("response_format", {}).get("json_schema", {}).get("name")
             return Response(200, json=recordings[name])
+
         mock_router.post("/v1/chat/completions").mock(side_effect=_dispatch)
         observations = await extractor.extract(label)
     for obs in observations:
@@ -151,6 +175,7 @@ async def test_cloud_short_circuits_on_quality_failure(monkeypatch):
     from io import BytesIO
 
     from PIL import Image
+
     img = Image.new("L", (32, 32), color=128)
     buf = BytesIO()
     img.save(buf, "PNG")

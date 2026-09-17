@@ -29,6 +29,7 @@ Backwards-compatible with the legacy `heading_styles` sub-object used by
 hand-built fixtures, which carries a weight it states rather than one it
 measured, and is therefore read as measured.
 """
+
 from __future__ import annotations
 
 import re

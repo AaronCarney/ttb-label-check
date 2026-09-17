@@ -1,4 +1,5 @@
 """Every field of an override lands on the persisted audit_trail."""
+
 from datetime import UTC, datetime
 
 from fastapi.testclient import TestClient

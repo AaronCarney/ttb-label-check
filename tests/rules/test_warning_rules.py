@@ -10,6 +10,7 @@ a correct check reports for it. 27 CFR 16.21 is the brief's loudest ask, and
 until that test existed nothing in the suite compared a warning reading with
 the answer key at all.
 """
+
 from __future__ import annotations
 
 import importlib
@@ -40,6 +41,7 @@ def ruleset():
     the moment any rule pack gains a validator.
     """
     import app.rules._validators as _validators
+
     for _, modname, _ in pkgutil.iter_modules(_validators.__path__):
         importlib.import_module(f"{_validators.__name__}.{modname}")
     return YamlRuleLoader().load(Path("rules"))
@@ -63,15 +65,21 @@ CANONICAL_WARNING = (
 
 def test_warning_present_pos(ruleset) -> None:
     rule = _by_id(ruleset, "common.warning.present")
-    obs = make_obs(field_id="warning_block", value=CANONICAL_WARNING, beverage_class=BeverageClass.SPIRITS)
-    res = VALIDATOR_REGISTRY[rule.validator](obs, make_expected(field_id="warning_block"), rule, _ctx(ruleset))
+    obs = make_obs(
+        field_id="warning_block", value=CANONICAL_WARNING, beverage_class=BeverageClass.SPIRITS
+    )
+    res = VALIDATOR_REGISTRY[rule.validator](
+        obs, make_expected(field_id="warning_block"), rule, _ctx(ruleset)
+    )
     assert res.outcome is Outcome.PASS
 
 
 def test_warning_present_neg(ruleset) -> None:
     rule = _by_id(ruleset, "common.warning.present")
     obs = make_obs(field_id="warning_block", value=None, beverage_class=BeverageClass.SPIRITS)
-    res = VALIDATOR_REGISTRY[rule.validator](obs, make_expected(field_id="warning_block"), rule, _ctx(ruleset))
+    res = VALIDATOR_REGISTRY[rule.validator](
+        obs, make_expected(field_id="warning_block"), rule, _ctx(ruleset)
+    )
     assert res.outcome is Outcome.FAIL
     assert res.reason_code == "WARNING.PRESENCE.MISSING"
 
@@ -79,29 +87,51 @@ def test_warning_present_neg(ruleset) -> None:
 def test_warning_verbatim_pos(ruleset) -> None:
     rule = _by_id(ruleset, "common.warning.verbatim")
     obs = make_obs(field_id="warning_block", value=CANONICAL_WARNING)
-    res = VALIDATOR_REGISTRY[rule.validator](obs, make_expected(field_id="warning_block"), rule, _ctx(ruleset))
+    res = VALIDATOR_REGISTRY[rule.validator](
+        obs, make_expected(field_id="warning_block"), rule, _ctx(ruleset)
+    )
     assert res.outcome is Outcome.PASS
 
 
 def test_warning_verbatim_neg(ruleset) -> None:
     rule = _by_id(ruleset, "common.warning.verbatim")
-    obs = make_obs(field_id="warning_block", value=CANONICAL_WARNING.replace("birth defects", "complications"))
-    res = VALIDATOR_REGISTRY[rule.validator](obs, make_expected(field_id="warning_block"), rule, _ctx(ruleset))
+    obs = make_obs(
+        field_id="warning_block", value=CANONICAL_WARNING.replace("birth defects", "complications")
+    )
+    res = VALIDATOR_REGISTRY[rule.validator](
+        obs, make_expected(field_id="warning_block"), rule, _ctx(ruleset)
+    )
     assert res.outcome is Outcome.FAIL
     assert res.reason_code == "WARNING.VERBATIM.MISMATCH"
 
 
 def test_heading_style_pos(ruleset) -> None:
     rule = _by_id(ruleset, "common.warning.heading_caps_bold")
-    obs = make_obs(field_id="warning_block", value={"heading_text": "GOVERNMENT WARNING", "heading_styles": {"weight": "bold", "case": "upper"}})
-    res = VALIDATOR_REGISTRY[rule.validator](obs, make_expected(field_id="warning_block"), rule, _ctx(ruleset))
+    obs = make_obs(
+        field_id="warning_block",
+        value={
+            "heading_text": "GOVERNMENT WARNING",
+            "heading_styles": {"weight": "bold", "case": "upper"},
+        },
+    )
+    res = VALIDATOR_REGISTRY[rule.validator](
+        obs, make_expected(field_id="warning_block"), rule, _ctx(ruleset)
+    )
     assert res.outcome is Outcome.PASS
 
 
 def test_heading_style_neg(ruleset) -> None:
     rule = _by_id(ruleset, "common.warning.heading_caps_bold")
-    obs = make_obs(field_id="warning_block", value={"heading_text": "Government Warning", "heading_styles": {"weight": "bold", "case": "title"}})
-    res = VALIDATOR_REGISTRY[rule.validator](obs, make_expected(field_id="warning_block"), rule, _ctx(ruleset))
+    obs = make_obs(
+        field_id="warning_block",
+        value={
+            "heading_text": "Government Warning",
+            "heading_styles": {"weight": "bold", "case": "title"},
+        },
+    )
+    res = VALIDATOR_REGISTRY[rule.validator](
+        obs, make_expected(field_id="warning_block"), rule, _ctx(ruleset)
+    )
     assert res.outcome is Outcome.FAIL
     assert res.reason_code == "WARNING.STYLE.HEADING_NOT_BOLD_CAPS"
 
@@ -145,7 +175,9 @@ def test_unmeasurable_rule_reports_insufficient_evidence(ruleset, rule_id, reaso
         field_id="warning_block",
         value={"contrast_ratio": 7.2, "cpi": 30, "height_mm": 1, "min_neighbor_distance_px": 10},
     )
-    res = VALIDATOR_REGISTRY[rule.validator](obs, make_expected(field_id="warning_block"), rule, _ctx(ruleset))
+    res = VALIDATOR_REGISTRY[rule.validator](
+        obs, make_expected(field_id="warning_block"), rule, _ctx(ruleset)
+    )
     assert res.outcome is Outcome.INSUFFICIENT_EVIDENCE
     assert res.severity is Severity.WARN
     assert res.reason_code == reason_code
@@ -249,13 +281,8 @@ async def test_warning_check_reaches_the_outcome_the_manifest_states(engine, ent
     letter case and the heading rule is what scores it.
     """
     ctx = engine.build_validator_context(started_at_ms=0)
-    results = await engine.evaluate(
-        (_warning_observation(entry),), (), ctx
-    )
-    produced = [
-        (r.rule_id, _verdict(r)) for r in results
-        if _CHECK_BY_RULE.get(r.rule_id) == check
-    ]
+    results = await engine.evaluate((_warning_observation(entry),), (), ctx)
+    produced = [(r.rule_id, _verdict(r)) for r in results if _CHECK_BY_RULE.get(r.rule_id) == check]
     assert produced, (
         f"no rule checked {check} for {entry['id']}; the manifest states an "
         "answer for it and nothing produced one"
@@ -263,8 +290,7 @@ async def test_warning_check_reaches_the_outcome_the_manifest_states(engine, ent
     accepted = accepted_verdicts(entry, check)
     for rule_id, verdict in produced:
         assert verdict in accepted, (
-            f"{entry['id']}: {rule_id} reported {verdict!r}; "
-            f"the manifest accepts {accepted}"
+            f"{entry['id']}: {rule_id} reported {verdict!r}; the manifest accepts {accepted}"
         )
 
 

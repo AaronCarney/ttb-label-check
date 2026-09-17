@@ -1,4 +1,5 @@
 """Bootstrap-level smoke tests: dependencies install, app package importable."""
+
 from __future__ import annotations
 
 
@@ -8,6 +9,7 @@ def test_fastapi_importable() -> None:
 
 def test_pydantic_v2() -> None:
     import pydantic
+
     assert pydantic.VERSION.startswith("2."), pydantic.VERSION
 
 

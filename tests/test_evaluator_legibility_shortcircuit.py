@@ -1,4 +1,5 @@
 """Quality.assess returns needs_better_photo → short-circuit to needs_review."""
+
 import pytest
 
 from app.config import Settings
@@ -20,9 +21,11 @@ async def test_legibility_short_circuit(monkeypatch):
             dpi=72,
         ),
     )
-    evaluator = Evaluator(vision=FakeVisionExtractor(observations=[]),
-                          rules=FakeRuleEngine(results=()),
-                          settings=Settings())
+    evaluator = Evaluator(
+        vision=FakeVisionExtractor(observations=[]),
+        rules=FakeRuleEngine(results=()),
+        settings=Settings(),
+    )
     envelope = await evaluator.evaluate(
         application=Application(application_id="A-001", evaluation_id="EV-001"),
         label=_stub_label(),
@@ -36,9 +39,11 @@ async def test_legibility_short_circuit(monkeypatch):
 async def test_stub_label_bytes_route_to_needs_review_without_raising():
     """An eight-byte PNG header must not crash assess_quality: a truncated or
     unreadable image comes back as needs_review, not as an exception."""
-    evaluator = Evaluator(vision=FakeVisionExtractor(observations=[]),
-                          rules=FakeRuleEngine(results=()),
-                          settings=Settings())
+    evaluator = Evaluator(
+        vision=FakeVisionExtractor(observations=[]),
+        rules=FakeRuleEngine(results=()),
+        settings=Settings(),
+    )
     envelope = await evaluator.evaluate(
         application=Application(application_id="A-001", evaluation_id="EV-001"),
         label=_stub_label(),  # default eight-byte PNG-magic stub bytes

@@ -30,6 +30,7 @@ was one of seven it wrongly refused - so the image reads now, and a recording
 for it is one this suite could carry. Until one is frozen, eleven is what is on
 disk, and the count asserted is the count on disk.
 """
+
 from __future__ import annotations
 
 import json
@@ -57,19 +58,21 @@ RECORDINGS = Path("tests/recordings/reader")
 # Slice 1, named in `plans/worklist.md` → "The ladder" §5, minus the one image
 # the quality gate rejects. Written out rather than globbed so that a recording
 # appearing or disappearing is a failure and not a silent change of subject.
-COVERED_IMAGES = frozenset({
-    "26212001000085/front.jpg",
-    "26212001000085/back.jpg",
-    "26229001000034/front.jpg",
-    "26229001000034/back.jpg",
-    "26230001000420/front.jpg",
-    "26230001000420/back.jpg",
-    "26237001000107/back.jpg",
-    "26239001000132/back.jpg",
-    "26240001000454/front.jpg",
-    "variants/var-heading-title-case-front.jpg",
-    "variants/var-warning-wording-front.jpg",
-})
+COVERED_IMAGES = frozenset(
+    {
+        "26212001000085/front.jpg",
+        "26212001000085/back.jpg",
+        "26229001000034/front.jpg",
+        "26229001000034/back.jpg",
+        "26230001000420/front.jpg",
+        "26230001000420/back.jpg",
+        "26237001000107/back.jpg",
+        "26239001000132/back.jpg",
+        "26240001000454/front.jpg",
+        "variants/var-heading-title-case-front.jpg",
+        "variants/var-warning-wording-front.jpg",
+    }
+)
 
 # The seven manifest entries those eleven images belong to. Two are variants:
 # `eval/read_accuracy.py` records them and does not score them, because they
@@ -108,22 +111,52 @@ ENTRIES = (
 # the engine and then thrown away before any field could match it. Nine lines
 # closed when `_warning_block` began trimming its boxes where it trims its text.
 KNOWN_MISSES: dict[tuple[str, str], str] = {
-    ("ttb-26212001000085", "brand"): "B — returned 'MPTION OF ALCOHOLIC BEVERAGE IMPAIRS YOUR', a warning fragment, for 'Terre et Bois de Pradière'",
-    ("ttb-26229001000034", "brand"): "B — returned the class designation 'CRÈME DE CASSIS' for the brand 'BREVIS'",
-    ("ttb-26229001000034", "class_type"): "C — returned 'LIQUEUR' where the label prints 'CRÈME DE CASSIS LIQUEUR'",
-    ("ttb-26229001000034", "abv"): "D — the front's alcohol statement came back as the three letters `AEV` and the back prints none",
-    ("ttb-26229001000034", "net_contents"): "D — the engine read neither face's `375mL`; the front returned three boxes and none of them is it",
+    (
+        "ttb-26212001000085",
+        "brand",
+    ): "B — returned 'MPTION OF ALCOHOLIC BEVERAGE IMPAIRS YOUR', a warning fragment, for 'Terre et Bois de Pradière'",
+    (
+        "ttb-26229001000034",
+        "brand",
+    ): "B — returned the class designation 'CRÈME DE CASSIS' for the brand 'BREVIS'",
+    (
+        "ttb-26229001000034",
+        "class_type",
+    ): "C — returned 'LIQUEUR' where the label prints 'CRÈME DE CASSIS LIQUEUR'",
+    (
+        "ttb-26229001000034",
+        "abv",
+    ): "D — the front's alcohol statement came back as the three letters `AEV` and the back prints none",
+    (
+        "ttb-26229001000034",
+        "net_contents",
+    ): "D — the engine read neither face's `375mL`; the front returned three boxes and none of them is it",
     ("ttb-26230001000420", "brand"): "B — returned the fragment 'TE OLLECTION' for 'The Bruery'",
-    ("ttb-26230001000420", "class_type"): "C — returned the retailer 'Total Wine & More' for 'BARREL-AGED IMPERIAL STOUT'",
-    ("ttb-26230001000420", "warning_exact"): "the reader's warning text is not word for word and the answer key says this label's is",
+    (
+        "ttb-26230001000420",
+        "class_type",
+    ): "C — returned the retailer 'Total Wine & More' for 'BARREL-AGED IMPERIAL STOUT'",
+    (
+        "ttb-26230001000420",
+        "warning_exact",
+    ): "the reader's warning text is not word for word and the answer key says this label's is",
     ("ttb-26237001000107", "abv"): "only the back is recorded here, and it prints no ABV",
     ("ttb-26237001000107", "net_contents"): "same as above",
     ("ttb-26237001000107", "warning_exact"): "the back's warning is not read word for word",
     ("ttb-26240001000454", "brand"): "B — returned 'NOV' for 'I Heard Cassarole'",
-    ("ttb-26240001000454", "class_type"): "C — returned nothing; 'Double India Pale Ale' is handwritten on a keg collar",
+    (
+        "ttb-26240001000454",
+        "class_type",
+    ): "C — returned nothing; 'Double India Pale Ale' is handwritten on a keg collar",
     ("ttb-26240001000454", "abv"): "the keg collar's '8%' is not matched",
-    ("var-heading-title-case", "brand"): "B — returned the fanciful name 'ROSSASTRO' for the brand 'FABIO SIGNORELLI'",
-    ("var-heading-title-case", "warning_exact"): "the answer key says this variant's wording is exact; the reader's reading of it is not",
+    (
+        "var-heading-title-case",
+        "brand",
+    ): "B — returned the fanciful name 'ROSSASTRO' for the brand 'FABIO SIGNORELLI'",
+    (
+        "var-heading-title-case",
+        "warning_exact",
+    ): "the answer key says this variant's wording is exact; the reader's reading of it is not",
     ("var-warning-wording", "brand"): "B — as the other variant; same image but for the warning",
 }
 
@@ -179,12 +212,10 @@ def _scored(label_id: str) -> dict[str, bool | None]:
 # Coverage — the suite says how much of the corpus it speaks for
 # ---------------------------------------------------------------------------
 
+
 def test_the_suite_covers_exactly_the_recordings_that_exist() -> None:
     """Eleven images, named. A twelfth appearing is a failure until read."""
-    on_disk = {
-        json.loads(p.read_text())["image"]
-        for p in RECORDINGS.rglob("*.json")
-    }
+    on_disk = {json.loads(p.read_text())["image"] for p in RECORDINGS.rglob("*.json")}
     assert on_disk == COVERED_IMAGES
     assert len(on_disk) == 11
 
@@ -196,9 +227,7 @@ def test_the_covered_images_are_the_corpus_slice_they_claim_to_be() -> None:
     named = {rel for e in entries.values() for rel in e["images"].values()}
     assert named >= COVERED_IMAGES
     for label_id in ENTRIES:
-        covered = [
-            rel for rel in entries[label_id]["images"].values() if rel in COVERED_IMAGES
-        ]
+        covered = [rel for rel in entries[label_id]["images"].values() if rel in COVERED_IMAGES]
         assert covered, f"{label_id} has no covered face"
 
 
@@ -214,6 +243,7 @@ def test_the_slice_is_a_fraction_of_the_corpus_and_says_so() -> None:
 # ---------------------------------------------------------------------------
 # The field extraction, against what the labels print
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.parametrize("label_id", ENTRIES)
 @pytest.mark.parametrize("check", CHECKS)
@@ -255,6 +285,7 @@ def test_the_warning_is_found_on_every_label_that_prints_one() -> None:
 # ---------------------------------------------------------------------------
 # R1.1 and R1.2, finished here on real frozen boxes
 # ---------------------------------------------------------------------------
+
 
 def test_no_image_and_no_socket_is_opened(monkeypatch: pytest.MonkeyPatch) -> None:
     """`_parse` is pure, proved by breaking everything it must not reach.
@@ -307,9 +338,7 @@ def test_every_heading_box_lies_inside_its_own_frame() -> None:
         heading = found[0]
         # A 90° or 270° frame has the frame's own edges swapped: the warning
         # boxes were computed on the rotated copy.
-        frame_w, frame_h = (
-            (width, height) if reading.rotation % 180 == 0 else (height, width)
-        )
+        frame_w, frame_h = (width, height) if reading.rotation % 180 == 0 else (height, width)
         assert 0 <= heading.x0 < heading.x1 <= frame_w, data["image"]
         assert 0 <= heading.y0 < heading.y1 <= frame_h, data["image"]
 
@@ -426,6 +455,7 @@ def test_the_alcohol_statement_is_returned_as_the_label_prints_it() -> None:
     reading is of the pixels, and `40 % ALC. BY VOL` against `40% ALC. BY VOL`
     is a difference in kerning rather than in wording.
     """
+
     def spacing_removed(text: str) -> str:
         return "".join(text.split()).upper().rstrip(".")
 
@@ -438,7 +468,9 @@ def test_the_alcohol_statement_is_returned_as_the_label_prints_it() -> None:
             continue
         printed = (entries[label_id]["label_observed"].get("abv") or {}).get("text")
         assert spacing_removed(payload["alc_text"]) == spacing_removed(printed), (
-            label_id, payload["alc_text"], printed
+            label_id,
+            payload["alc_text"],
+            printed,
         )
 
 
@@ -446,20 +478,19 @@ def test_the_statement_is_cut_out_of_a_box_that_carries_other_text() -> None:
     """Three real boxes carry the statement alongside something else, and the
     statement returned is the statement rather than the box."""
     readings = {
-        "26212001000085/front.jpg": "40% ALC. BY VOL",       # box: '40% ALC. BY VOL-700 mL'
-        "26230001000420/front.jpg": "ALC. 20.3% BY VOL.",    # box: '... 12.7 FL. OZ.'
+        "26212001000085/front.jpg": "40% ALC. BY VOL",  # box: '40% ALC. BY VOL-700 mL'
+        "26230001000420/front.jpg": "ALC. 20.3% BY VOL.",  # box: '... 12.7 FL. OZ.'
         "variants/var-heading-title-case-front.jpg": "12% ALC. BY VOL.",  # box: '... | CONTAINS SULFITES'
     }
     for image, statement in readings.items():
-        payload = parse_reading(
-            thaw_reading(json.loads(_recording(image).read_text()))
-        )["abv"]
+        payload = parse_reading(thaw_reading(json.loads(_recording(image).read_text())))["abv"]
         assert payload["alc_text"] == statement, image
 
 
 # ---------------------------------------------------------------------------
 # Row 1.1 — net contents, against every net-contents line the corpus prints
 # ---------------------------------------------------------------------------
+
 
 def _net_contents_of(printed: str) -> dict:
     """What the reader reads off one line of label text.
@@ -492,7 +523,7 @@ def test_every_net_contents_line_in_the_corpus_is_read_as_the_answer_key_reads_i
     """
     checked = 0
     for entry in _manifest()["labels"]:
-        printed = ((entry.get("label_observed") or {}).get("net_contents") or {})
+        printed = (entry.get("label_observed") or {}).get("net_contents") or {}
         if not printed.get("text"):
             continue
         checked += 1
@@ -501,10 +532,14 @@ def test_every_net_contents_line_in_the_corpus_is_read_as_the_answer_key_reads_i
             assert read["net_contents_value"] is None, (entry["id"], printed["text"], read)
             continue
         assert read["net_contents_value"] == pytest.approx(float(printed["amount"])), (
-            entry["id"], printed["text"], read
+            entry["id"],
+            printed["text"],
+            read,
         )
         assert unit_key(read["unit"]) == unit_key(printed["unit"]), (
-            entry["id"], printed["text"], read
+            entry["id"],
+            printed["text"],
+            read,
         )
     assert checked >= 30, f"only {checked} net-contents transcriptions found"
 
@@ -513,8 +548,8 @@ def test_the_spelled_out_units_the_old_list_did_not_know() -> None:
     """The four spellings that produced no reading at all, named one by one so a
     regression says which spelling it lost."""
     for printed, amount, unit in (
-        ("11.2 FL. OUNCES", 11.2, "FL. OUNCES"),      # ttb-26239001000217
-        ("15.5 US GALLONS", 15.5, "US GALLONS"),      # ttb-26240001000454's first size
+        ("11.2 FL. OUNCES", 11.2, "FL. OUNCES"),  # ttb-26239001000217
+        ("15.5 US GALLONS", 15.5, "US GALLONS"),  # ttb-26240001000454's first size
         ("12 FLUID OUNCES", 12.0, "FLUID OUNCES"),
         ("750 MILLILITRES", 750.0, "MILLILITRES"),
     ):
@@ -570,6 +605,7 @@ def test_adding_a_unit_is_an_edit_to_the_shipped_table_and_nothing_else() -> Non
 # Row 1.4 — the class/type lexicon, matched as words rather than as letters
 # ---------------------------------------------------------------------------
 
+
 def test_a_designation_is_matched_as_a_word_and_not_as_letters() -> None:
     """Row 1.4, on the five real box texts it changes.
 
@@ -586,8 +622,8 @@ def test_a_designation_is_matched_as_a_word_and_not_as_letters() -> None:
     """
     for line in (
         "HECHO EN MEXICO - BOTTLED AT ORIGIN - DRINK RESPONSIBLY",  # ORIgiN
-        "WWW.JUANLOBOTEQUILA.COM",                                 # a web address
-        "IMPORTED BY:",                                            # imPORTed
+        "WWW.JUANLOBOTEQUILA.COM",  # a web address
+        "IMPORTED BY:",  # imPORTed
     ):
         assert _names_a_designation(line) is False, line
 
@@ -634,6 +670,7 @@ def test_the_cognac_label_now_reads_its_own_designation() -> None:
 # Rows 1.5-1.7 — the origin statement and the name-and-address block
 # ---------------------------------------------------------------------------
 
+
 def _origin_of(*lines: str) -> dict:
     """What the reader reads as the country of origin off these lines.
 
@@ -641,8 +678,7 @@ def _origin_of(*lines: str) -> dict:
     `_parse` walks them in the order a person would read them.
     """
     boxes = [
-        _Box(x0=0.0, y0=float(n * 50), x1=600.0, y1=float(n * 50 + 40),
-             text=line, score=0.99)
+        _Box(x0=0.0, y0=float(n * 50), x1=600.0, y1=float(n * 50 + 40), text=line, score=0.99)
         for n, line in enumerate(lines)
     ]
     return _parse(boxes=boxes, warning_boxes=[], rotation=0)["country_origin"][0]
@@ -669,17 +705,13 @@ def test_an_origin_lead_in_inside_a_sentence_is_not_an_origin_statement() -> Non
     # The same lead-in, opening a segment, is read — both at the start of a line
     # and after the separator a label sets between its elements.
     assert _origin_of("PRODUCT OF FRANCE")["country"] == "FRANCE"
-    assert _origin_of(
-        "ROSE WINE|ITALY| PRODUCT OF ITALY| 750 ML"
-    )["country"] == "ITALY"
+    assert _origin_of("ROSE WINE|ITALY| PRODUCT OF ITALY| 750 ML")["country"] == "ITALY"
 
 
 def test_the_origin_capture_stops_where_the_sentence_does() -> None:
     """The other half of the same miss: the capture ran four words on past the
     full stop. A sentence that has ended has ended."""
-    assert _origin_of("PRODUCT OF FRANCE. Our careful process delivers a")[
-        "country"
-    ] == "FRANCE"
+    assert _origin_of("PRODUCT OF FRANCE. Our careful process delivers a")["country"] == "FRANCE"
 
 
 def test_the_origin_statement_in_spanish_is_read_off_the_real_label() -> None:
