@@ -6,7 +6,7 @@ mean the same thing in all three:
   - the rule pack's comparison of a label against an application
     (`app.rules._validators.quantity_match`), which is handed the table through
     the loaded rule set;
-  - the application form a grader types (`app.services.application_form`),
+  - the application form a reviewer types (`app.services.application_form`),
     which reads the shipped table off disk;
   - the reading-accuracy harness (`eval.read_accuracy`), which reads the same
     file so a score means what a verdict in the running app means.

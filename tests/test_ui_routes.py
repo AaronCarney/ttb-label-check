@@ -103,7 +103,7 @@ def test_root_renders_empty_inbox(client: TestClient) -> None:
 
 def test_root_links_to_starter_pack(client: TestClient) -> None:
     """The empty-inbox landing must surface the starter-pack download so a
-    grader without their own labels can still try the pipeline."""
+    reviewer without their own labels can still try the pipeline."""
     response = client.get("/")
     assert "/batches/sample.zip" in response.text
     assert "starter pack" in response.text.lower()
@@ -125,7 +125,7 @@ def test_root_no_longer_serves_fixture_query(client: TestClient) -> None:
 # ---------------------------------------------------------------------------
 
 def test_upload_form_present_on_root(client: TestClient) -> None:
-    """The grader needs an in-page upload affordance — a multipart POST form
+    """The reviewer needs an in-page upload affordance — a multipart POST form
     targeting `/` with a file input named `label`."""
     response = client.get("/")
     assert 'enctype="multipart/form-data"' in response.text
@@ -196,7 +196,7 @@ _PNG_1x1 = bytes.fromhex(
 
 
 def test_batches_upload_page_present(client: TestClient) -> None:
-    """A grader needs a top-level entry to bulk submission. `GET /batches`
+    """A reviewer needs a top-level entry to bulk submission. `GET /batches`
     should serve a multipart form whose file input accepts multiple files."""
     response = client.get("/batches")
     assert response.status_code == 200
@@ -206,7 +206,7 @@ def test_batches_upload_page_present(client: TestClient) -> None:
 
 
 def test_root_links_to_bulk_upload(client: TestClient) -> None:
-    """The single-label page surfaces a link to bulk upload so a grader who
+    """The single-label page surfaces a link to bulk upload so a reviewer who
     hits `/` can find the batch flow without reading the README."""
     response = client.get("/")
     assert "/batches" in response.text

@@ -1,4 +1,4 @@
-"""What a grader types into the application form becomes reference values.
+"""What a reviewer types into the application form becomes reference values.
 
 The single-label page asks for the application's own fields beside the image.
 This module is the contract for turning those posted strings into an
@@ -54,7 +54,7 @@ def _form(**overrides):
 
 
 def test_an_untouched_form_declares_nothing():
-    """A grader who only picks an image declares no application. Nothing is
+    """A reviewer who only picks an image declares no application. Nothing is
     compared, and the presence and warning checks still run."""
     assert _form(beverage_type="") is None
 
@@ -137,7 +137,7 @@ def test_alcohol_content_naming_no_number_goes_to_a_reviewer():
     ],
 )
 def test_net_contents_converts_to_millilitres(typed, millilitres):
-    """The application records millilitres; the grader types the unit the
+    """The application records millilitres; the reviewer types the unit the
     application declares. Conversions come from the rule pack's own table."""
     record = _form(net_contents=typed)
     assert record.net_contents.text == typed
@@ -241,6 +241,6 @@ def test_an_unknown_source_of_product_is_refused():
 
 def test_an_undeclared_source_of_product_stays_undeclared():
     """The origin check needs the application to say domestic or imported. A
-    grader who says neither gets no origin comparison, not a wrong one."""
+    reviewer who says neither gets no origin comparison, not a wrong one."""
     record = _form(origin="France")
     assert record.source_of_product is None

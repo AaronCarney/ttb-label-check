@@ -1,7 +1,7 @@
 """Through the running app, a label is compared against its application.
 
 The rule engine has always been able to compare a label with the application
-filed for it. What these tests cover is the path a grader actually takes: the
+filed for it. What these tests cover is the path a reviewer actually takes: the
 page's own form, posted to the app's own route, through the real rule pack, to
 the result the page shows. Everything here is real except the reader, which
 would otherwise call a vision model over the network.
@@ -215,7 +215,7 @@ def test_an_alcohol_content_the_application_does_not_carry_is_reported(client):
 
 def test_a_net_contents_the_application_does_not_carry_is_reported(client):
     """The label reads 750 mL; an application declaring a 1.5 litre bottle
-    disagrees, which also proves the unit the grader typed was converted."""
+    disagrees, which also proves the unit the reviewer typed was converted."""
     envelope = _submit(client, net_contents="1.5 L")
     assert _rule_outcomes(envelope)["wine.net_contents.matches_application"] == "fail"
 
@@ -263,7 +263,7 @@ def test_a_domestic_application_needs_no_origin_statement(client):
 # ---------------------------------------------------------------------------
 
 def test_without_an_application_the_label_is_read_and_nothing_is_checked(client):
-    """A grader who uploads only an image gets the reading and no verdict.
+    """A reviewer who uploads only an image gets the reading and no verdict.
 
     The beverage the application declares is what decides which rules apply, so
     with no application there is no rule to run — not even the ones that need

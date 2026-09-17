@@ -1,14 +1,14 @@
 """``POST /batches/upload`` — start a real batch from N uploaded images.
 
 The JSON ``POST /batches`` endpoint takes references to labels the caller
-already has on the server, which is no use to a grader who wants to drop their
+already has on the server, which is no use to a reviewer who wants to drop their
 own files in a browser. This route reads the files, hands the worker the exact
 bytes that were uploaded, and redirects into the batch shell that streams the
 results back.
 
 A bulk upload carries images and no applications, so there is nothing to
 compare each label against. The one thing the form can ask for is which
-beverage the set is, because it decides which rules apply at all. A grader who
+beverage the set is, because it decides which rules apply at all. A reviewer who
 skips it gets each label read and nothing checked, and each reply says so
 (`docs/decisions.md#0010`).
 """

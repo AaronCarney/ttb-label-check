@@ -7,7 +7,7 @@ so the most likely outcome of a first visit was that nothing was ever checked.
 
 These tests hold the three things that make the one-click path worth having:
 the landing page offers it, clicking it checks a real shipped image against the
-application really filed for that label, and it runs the same path a grader's
+application really filed for that label, and it runs the same path a reviewer's
 own upload runs rather than a demonstration path of its own.
 """
 from __future__ import annotations
@@ -127,7 +127,7 @@ def test_the_result_page_shows_the_label_image(client):
 
 
 # ---------------------------------------------------------------------------
-# It is the same path a grader's own upload takes
+# It is the same path a reviewer's own upload takes
 # ---------------------------------------------------------------------------
 
 def test_a_domestic_sample_sends_no_country_of_origin(client, recorder):
@@ -154,7 +154,7 @@ def test_a_sample_id_cannot_name_a_file_outside_the_samples_directory(client):
 
 
 def test_the_sample_route_and_the_upload_route_render_the_same_shell(client):
-    """One result page, not two. If these diverge, a grader's own upload stops
+    """One result page, not two. If these diverge, a reviewer's own upload stops
     demonstrating what the sample demonstrated."""
     sample_id = offered_samples()[0]["id"]
     sample_page = client.post(f"/samples/{sample_id}")

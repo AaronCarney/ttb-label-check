@@ -66,7 +66,7 @@ _REQUEST_TIMEOUT_SECONDS = 30.0
 
 
 def _form_text(value) -> str:
-    """One application field as the grader's form posts it: a string, or blank.
+    """One application field as the reviewer's form posts it: a string, or blank.
 
     The manifest stores the two quantities as objects carrying the words the
     application filed plus the number read out of them. The form posts words,
@@ -112,7 +112,7 @@ def _submissions() -> list[tuple[str, Path, dict[str, str]]]:
 def _check_once(deploy_url: str, front: Path, form: dict[str, str]) -> tuple[int | None, float]:
     """Post one submission the way the page does, and time the round trip.
 
-    Returns the status code and the seconds the grader waited. A timeout comes
+    Returns the status code and the seconds the reviewer waited. A timeout comes
     back as no status and the full timeout, because that is what it cost.
     """
     files = {"label": (front.name, front.read_bytes(), "image/jpeg")}

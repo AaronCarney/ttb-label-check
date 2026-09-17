@@ -3,10 +3,10 @@
 The brief's subject is whether a label agrees with the application filed for
 it. Through the running app that only happens if the page asks for the
 application's fields and passes them on, so these tests check the page offers
-them and that what a grader types reaches the evaluator as reference values
+them and that what a reviewer types reaches the evaluator as reference values
 and as the beverage class the rules are picked by.
 
-A grader who fills nothing in still gets a check: the presence rules and the
+A reviewer who fills nothing in still gets a check: the presence rules and the
 health-warning rules need no application, and every comparison reports that it
 does not apply.
 """
@@ -77,7 +77,7 @@ def test_the_form_asks_for_each_application_field(field):
 
 
 def test_the_form_says_a_blank_field_is_not_checked():
-    """A grader must be able to tell that leaving a field empty skips its
+    """A reviewer must be able to tell that leaving a field empty skips its
     comparison rather than failing the label."""
     response = TestClient(create_app()).get("/")
     assert "not checked" in response.text.lower()
@@ -132,7 +132,7 @@ def test_an_image_on_its_own_still_evaluates(client, recorder):
 
 
 def test_an_unreadable_application_is_reported_not_ignored(client, recorder):
-    """Dropping a field the grader filled in would show a checked label that
+    """Dropping a field the reviewer filled in would show a checked label that
     was never compared."""
     response = client.post(
         "/",
@@ -182,7 +182,7 @@ def test_the_bulk_beverage_type_reaches_every_label(client, recorder):
 
 
 def test_a_bulk_upload_without_a_beverage_type_still_runs(client, recorder):
-    """The batch form's type is an aid, not a gate: a grader who skips it gets
+    """The batch form's type is an aid, not a gate: a reviewer who skips it gets
     the same check the app gave before it existed."""
     response = client.post(
         "/batches/upload",

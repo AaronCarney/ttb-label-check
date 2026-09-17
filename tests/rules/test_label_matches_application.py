@@ -113,7 +113,7 @@ async def test_check_reaches_the_outcome_the_manifest_states(engine, entry, chec
     "beverage_class", [pytest.param(cls, id=cls.value) for cls in BeverageClass]
 )
 async def test_no_application_means_no_comparison_applies(engine, beverage_class):
-    """A grader who uploads only an image declares no application. Every
+    """A reviewer who uploads only an image declares no application. Every
     comparison must report that it does not apply — reporting that the label
     agrees would tell them a check ran that never had two sides.
     """

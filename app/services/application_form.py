@@ -1,4 +1,4 @@
-"""Turn the application fields a grader types into the record the rules use.
+"""Turn the application fields a reviewer types into the record the rules use.
 
 The single-label page asks for the application's own values beside the label
 image, because without them there is nothing to compare the label against.
@@ -54,7 +54,7 @@ class ApplicationFormError(ValueError):
 
 
 def _clean(value: str | None) -> str | None:
-    """A field's value, or nothing when the grader left it blank."""
+    """A field's value, or nothing when the reviewer left it blank."""
     if value is None:
         return None
     stripped = value.strip()

@@ -33,7 +33,7 @@ def _detect_image_mime(data: bytes) -> str | None:
 
 def _application_record(posted: dict[str, str], settings: Settings):
     """The application one submitted form declares, or nothing if it declares
-    none. Raises `ApplicationFormError` when the grader typed something the
+    none. Raises `ApplicationFormError` when the reviewer typed something the
     form cannot read; the caller shows the message and checks nothing."""
     from app.services.application_form import record_from_form
 
@@ -43,7 +43,7 @@ def _application_record(posted: dict[str, str], settings: Settings):
 def _build_application(
     posted: dict[str, str], settings: Settings, *, application_id: str, evaluation_id: str
 ):
-    """One `Application`, carrying whatever the grader declared.
+    """One `Application`, carrying whatever the reviewer declared.
 
     Without this the running app builds an application with no reference
     values, and every comparison rule reports that it has nothing to compare

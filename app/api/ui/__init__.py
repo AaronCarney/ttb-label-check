@@ -16,7 +16,7 @@ environment:
   above needs: the templates and settings, the pieces that turn a posted form
   into an image and an application the engine can take, and the one path from
   those two things to the result page. ``POST /`` and ``POST /samples/{id}``
-  share that last one, so a sample cannot demonstrate a path a grader's own
+  share that last one, so a sample cannot demonstrate a path a reviewer's own
   upload does not take.
 
 ``router`` here is all of them mounted together, so ``app/main.py`` includes one

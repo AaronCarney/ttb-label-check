@@ -47,7 +47,7 @@ All notable changes to this project are recorded here. The format follows
 - Every declared element of an application — brand name, class and type, alcohol content, net
   contents, name and address, country of origin, and the health warning — is compared against what
   the label says, and each comparison states what counts as the same value.
-- A grader can enter an application's details on the page and check a label against them.
+- A reviewer can enter an application's details on the page and check a label against them.
 - The README publishes what the on-machine reader actually reads, measured over all 30 real labels
   and their 56 face images: each of the nine checks separately, as a count of correct out of the
   labels that check is scoreable on. They are counts rather than percentages, because thirty labels

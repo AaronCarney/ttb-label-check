@@ -256,7 +256,7 @@ the label itself cannot settle is left out rather than counted against the reade
 is a small denominator, and a percentage drawn from it would read as a precision this corpus does
 not carry. See `docs/decisions.md#0027`.
 
-None of this is a verdict. The reader's output goes to a human grader who approves or rejects
+None of this is a verdict. The reader's output goes to a human reviewer who approves or rejects
 every finding, so a reading the reader is unsure of is returned as unsure rather than guessed at.
 The largest remaining gaps are recognition limits on display type — handwritten script brands and
 stylised capitals — and elements the detector splits across several text boxes, which truncates a

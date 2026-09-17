@@ -2,8 +2,8 @@
 serves it.
 
 A result page renders ``<img src="/labels/{evaluation_id}/image">``, so the
-bytes the grader uploaded have to still be somewhere when the browser asks for
-them a moment later — and when the grader opens that page again tomorrow, or
+bytes the reviewer uploaded have to still be somewhere when the browser asks for
+them a moment later — and when the reviewer opens that page again tomorrow, or
 refreshes it after the service restarts, or lands on a different worker.
 
 They are kept as files, one per evaluation, under the machine's temporary

@@ -433,7 +433,7 @@ marks the field required (`app/ui/templates/single.html:35`), and
 field without it; rejected because two tests deliberately accept an image on its own,
 `tests/test_ui_application_fields.py::test_an_image_on_its_own_still_evaluates` and the end-to-end test
 named below, so the product has already decided that an image alone is a
-thing a grader may submit; turning it away is a larger product change than the defect warrants and it
+thing a reviewer may submit; turning it away is a larger product change than the defect warrants and it
 removes the reading as well as the checks. *Run the beverage-independent rules anyway, by tagging the
 reading with a fixed beverage and discarding every beverage-specific result* — this keeps the
 health-warning check on the image-only path, which is the strongest argument for it, but the tag would
@@ -454,7 +454,7 @@ cannot tell the two thirds from the third.
 **Cost, stated.** An image on its own no longer gets the checks that need no application — that the
 label carries a brand, a class, a net-contents statement, and the §16.21 government warning. It gets
 the reading and a statement that nothing was checked. This is a loss on the demonstration path, where
-a grader drops in an image to see the app work, and it is the brief's most prominent single
+a reviewer drops in an image to see the app work, and it is the brief's most prominent single
 requirement that is lost. It is recovered in full by giving the rule model a way to say "applies
 whatever the beverage is", which is recorded for the consolidation pass with the five files it touches.
 
@@ -1315,7 +1315,7 @@ nobody here wrote.
 
 **Decided:** 2026-09-16.
 
-**Chosen.** The image a grader uploads is written to a file — one per evaluation, named for the
+**Chosen.** The image a reviewer uploads is written to a file — one per evaluation, named for the
 evaluation id and suffixed with its media type — in a directory under the machine's temporary
 directory, and `GET /labels/{evaluation_id}/image` reads it back from there. Three properties come
 with it. An id that is not letters, digits, hyphen or underscore is refused, so nothing a caller puts
@@ -1324,7 +1324,7 @@ onto its final name, so a process reading the directory never sees a half-writte
 is dropped once it is seven days old, swept when the next one is written.
 
 **Rejected.** *The 64-entry dictionary of raw bytes held in one process, which this replaces.* It
-failed three ways a grader meets in normal use: the 65th upload evicted the first page's image, a
+failed three ways a reviewer meets in normal use: the 65th upload evicted the first page's image, a
 restart lost every image, and where the service runs more than one worker the page and its image came
 from different processes so the image was missing about half the time. All three are one property —
 the bytes lived in one process's memory — and no bound on the dictionary fixes any of them.

@@ -2,7 +2,7 @@
 
 Reads the upload, refuses it if it is not an image, and hands the bytes and
 the typed application to the shared result path in ``_result_page``. That path
-is shared with ``POST /samples/{sample_id}`` so a shipped sample and a grader's
+is shared with ``POST /samples/{sample_id}`` so a shipped sample and a reviewer's
 own upload cannot demonstrate different behaviour.
 """
 from __future__ import annotations
@@ -46,7 +46,7 @@ async def single_label_upload(
     beverage type: an empty one means the application declared nothing for that
     element, so the check against it reports that it does not apply. The
     beverage type is the exception because it decides which rules apply at all
-    — a grader who skips it gets the reading and no checks, and the reply says
+    — a reviewer who skips it gets the reading and no checks, and the reply says
     so (`docs/decisions.md#0010`).
 
     Returns the same template as `/` so the React island mounts identically;

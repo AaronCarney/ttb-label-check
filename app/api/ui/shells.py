@@ -24,7 +24,7 @@ async def single_page_shell(
     settings: Settings = Depends(_get_settings),
 ) -> HTMLResponse:
     """Render the empty-inbox single-label landing. No pre-loaded results; the
-    grader sees a drop-zone CTA and three ways on: upload their own label, try
+    reviewer sees a drop-zone CTA and three ways on: upload their own label, try
     one of the shipped samples on a click (`POST /samples/{sample_id}`), or
     pull a starter pack from `/batches/sample.zip`. The React island mounts on
     `<div id="root" data-mode="single">` and renders an envelope only after a
