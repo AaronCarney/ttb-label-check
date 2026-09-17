@@ -89,11 +89,16 @@ TIMEOUT=900
 # one object per process (app/deps.py), so what the probe loads is what the
 # next request reads with.
 #
-# 5 x 12 allows a minute, well over the seconds a load takes, so a cold disk
-# does not fail the revision. An attempt cut off at timeoutSeconds is safe:
-# ensure_loaded holds a lock, so the retry waits on the load already running
-# rather than building a second engine.
-STARTUP_PROBE=httpGet.path=/healthz,initialDelaySeconds=0,timeoutSeconds=10,periodSeconds=5,failureThreshold=12
+# 30s per attempt and four attempts allows two minutes, well over the seconds a
+# load takes, so a cold disk does not fail an otherwise healthy revision. An
+# attempt cut off at timeoutSeconds is safe: ensure_loaded holds a lock, so the
+# retry waits on the load already running rather than building a second engine.
+#
+# timeoutSeconds must be SMALLER than periodSeconds - Cloud Run rejects the
+# revision otherwise, and the rejection is the whole deploy, not just the probe
+# (Container#Probe: "Must be smaller than periodSeconds"). Keep the gap when
+# changing either number.
+STARTUP_PROBE=httpGet.path=/healthz,initialDelaySeconds=0,timeoutSeconds=20,periodSeconds=30,failureThreshold=4
 
 FAILED=0
 fail() { echo "  FAIL  $*" >&2; FAILED=1; }

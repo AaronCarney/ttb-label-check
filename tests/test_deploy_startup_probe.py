@@ -49,6 +49,22 @@ def test_the_probe_is_the_endpoint_that_loads_the_models(script: str):
     assert _probe_settings(script).get("httpGet.path") == "/healthz"
 
 
+def test_timeout_is_smaller_than_the_period(script: str):
+    """Cloud Run rejects the revision otherwise, and it rejects the whole
+    deploy, not just the probe. The first version of this probe had
+    timeoutSeconds=10 against periodSeconds=5 and would have failed on contact.
+
+    Container#Probe: "Must be smaller than periodSeconds".
+    """
+    settings = _probe_settings(script)
+    timeout = int(settings["timeoutSeconds"])
+    period = int(settings["periodSeconds"])
+    assert timeout < period, (
+        f"timeoutSeconds={timeout} is not smaller than periodSeconds={period}; "
+        "Cloud Run will reject the revision"
+    )
+
+
 def test_the_probe_allows_longer_than_a_model_load(script: str):
     """A cold container reads three ONNX files off disk. Allow well over that,
     so a slow disk does not fail an otherwise healthy revision."""
