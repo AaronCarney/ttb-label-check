@@ -67,17 +67,32 @@ _SCHEMAS = {
     "abv": {
         "type": "object",
         "properties": {
-            "abv_pct": {"type": "number"},
+            # A number the model could not read is null, not a number. The
+            # schema used to require a bare `number`, so an unreadable
+            # alcohol statement had to come back as a figure the model made
+            # up — and a fabricated figure is compared against the
+            # application and rejects the label, where the local reader's
+            # `None` sends the same image to a reviewer. Same unreadable
+            # label, opposite verdict. Structured Outputs expresses an
+            # optional value as a union with null and still requires the key,
+            # which is why `required` below is unchanged.
+            "abv_pct": {"type": ["number", "null"]},
             "unit": {"type": "string"},
+            # The statement as the label prints it, which is the key the rule
+            # packs name in `evidence_required`. The local reader returns it;
+            # without it here the same rule sees evidence from one reader and
+            # nothing from the other.
+            "alc_text": {"type": "string"},
             "confidence": _CONFIDENCE_SCHEMA,
         },
-        "required": ["abv_pct", "unit", "confidence"],
+        "required": ["abv_pct", "unit", "alc_text", "confidence"],
         "additionalProperties": False,
     },
     "net_contents": {
         "type": "object",
         "properties": {
-            "net_contents_value": {"type": "number"},
+            # Null for the same reason as `abv_pct` above.
+            "net_contents_value": {"type": ["number", "null"]},
             "unit": {"type": "string"},
             "confidence": _CONFIDENCE_SCHEMA,
         },
@@ -146,6 +161,19 @@ _SCHEMAS = {
     },
 }
 
+# The reader samples at the API default of 1.0 unless it is told otherwise, and
+# a sampled boolean can reject a label: the same image read twice could give a
+# reviewer two different answers with nothing to show for the difference. So
+# the temperature is pinned at zero and a seed is sent with every call. The
+# seed's value carries no meaning; what matters is that it never changes. The
+# provider documents the seed as best-effort, so this makes repetition likely
+# rather than guaranteed — the guarantee is in the recordings, which replay a
+# response rather than ask for a new one. `top_p` is deliberately left unset:
+# it is the other half of the same dial, and the provider asks that only one
+# of the two be moved.
+_TEMPERATURE = 0
+_SAMPLING_SEED = 1
+
 _FIELD_NAMES = (
     "brand_name",
     "class_type",
@@ -186,10 +214,17 @@ class CloudVisionExtractor:
             "  ~0.60 — readable with effort; some characters are guesses;\n"
             "  ~0.40 — partial guess; significant occlusion or blur;\n"
             "  ~0.20 — mostly invented; field may not be on the label.\n"
-            "Be honest — downstream code routes <0.6 to human review."
+            "Be honest — downstream code routes <0.6 to human review.\n"
+            "Where a number is not legible on this image, return null for it "
+            "rather than a guess, and leave a text field empty rather than "
+            "filling it: a value you invented is compared against the "
+            "application and rejects the label, while an absence sends it to "
+            "a reviewer."
         )
         body = {
             "model": self._model,
+            "temperature": _TEMPERATURE,
+            "seed": _SAMPLING_SEED,
             "messages": [
                 {
                     "role": "user",
@@ -264,8 +299,15 @@ class CloudVisionExtractor:
                     field_id="quality",
                     beverage_class=BeverageClass.SPIRITS,
                     observed_value=None,
-                    evidence=(_make_evidence(
-                        field_id="quality", bbox=None, text=report.reason_code
+                    evidence=(Evidence(
+                        field_id="quality",
+                        # No model was called: the gate turned the image away.
+                        # The local reader says the same thing here.
+                        source=EvidenceSource.DERIVED,
+                        bbox=None,
+                        extracted_text=report.reason_code,
+                        match_kind=MatchKind.NONE,
+                        confidence=0.0,
                     ),),
                     upstream_meta={
                         "disposition": report.disposition,
@@ -307,6 +349,18 @@ class CloudVisionExtractor:
                 }
                 if measurement.confident:
                     content["heading_bold"] = measurement.is_bold
+                else:
+                    # The measurement failed, so nobody measured the weight.
+                    # Leaving the model's own guess under `heading_bold` was
+                    # the same defect the local reader had in reverse: local
+                    # writes the key only when it was measured, so the same
+                    # heading was a claim from one reader and an absence from
+                    # the other. The model's answer is kept as
+                    # `heading_bold_llm`, which is where the audit trail wants
+                    # it, and `heading_style_check.py` asks
+                    # `heading_bold_measured_confident` before it looks at the
+                    # weight at all.
+                    content.pop("heading_bold", None)
             text = _extract_text(content)
             observations.append(
                 FieldObservation(
@@ -373,10 +427,18 @@ def _make_evidence(
     confidence: float = _FALLBACK_CONFIDENCE,
 ) -> Evidence:
     """Synthesize a single Evidence from the LLM's per-field payload + the
-    bbox surfaced by the layout call."""
+    bbox surfaced by the layout call.
+
+    The source is the model, not the layout call. Every reading this extractor
+    makes used to be recorded as `LAYOUT`, which named where the *box* came
+    from and said nothing about where the *value* came from — and the value is
+    what a rule compares. `CLASSIFIER` is what the reading is: a model's answer
+    about an image. The local reader says `OCR` on the same seam, so a reviewer
+    reading an envelope can now tell the two apart.
+    """
     return Evidence(
         field_id=field_id,
-        source=EvidenceSource.LAYOUT,
+        source=EvidenceSource.CLASSIFIER,
         bbox=bbox,
         extracted_text=text,
         match_kind=MatchKind.NONE,
