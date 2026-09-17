@@ -30,6 +30,7 @@ import json
 import logging
 import os
 import re
+import statistics
 import threading
 import time
 import unicodedata
@@ -287,6 +288,13 @@ def _fold(text: str) -> str:
 
 
 _HEADING_RE = re.compile(r"GOVERNMENT\s*WARNING", re.I)
+
+# How much of the narrower span two boxes must share before they count as the
+# same column of text, and how many heading-heights tall a box may be before it
+# stops being a line of running text. Both are in `_warning_block`, which says
+# what they separate and why.
+_WARNING_COLUMN_OVERLAP_MIN = 0.5
+_WARNING_LINE_HEIGHT_MAX = 2.5
 _HEADING_WORD1_RE = re.compile(r"^\W*GOVERNMENT\W*$", re.I)
 _HEADING_WORD2_RE = re.compile(r"^\W*WARNING\b", re.I)
 _BLOCK_END_RE = re.compile(r"HEALTH\s*PROBLEMS\s*[.,]?", re.I)
@@ -1005,10 +1013,22 @@ def _columns(boxes: list[_Box]) -> list[list[_Box]]:
 
 
 def _reading_order(boxes: list[_Box]) -> list[_Box]:
-    """Boxes in the order a person reads them: column by column, row by row."""
+    """Boxes in the order a person reads them: column by column, row by row.
+
+    Rows are cut at multiples of how tall a line is on this label, and that is
+    the *typical* box, not the tallest one. A label carries boxes that are not
+    lines of text — a stylised brand, a logotype, a word set sideways — and
+    taking the tallest made one of them redefine where every row on the label
+    began. Measured: returning a 92-pixel `WhitServe` logotype to the body of
+    an imported wine, where the lines are around 50 pixels, moved the row
+    boundary far enough that `IMPORTED BY:` and `PRODUCED BY:` swapped places
+    and the reader named the Italian producer as the applicant instead of the
+    Connecticut importer. The median is what "a line on this label" means.
+    """
     ordered: list[_Box] = []
     for column in _columns(boxes):
-        line_height = max((b.height for b in column), default=1.0) or 1.0
+        heights = [b.height for b in column if b.height]
+        line_height = statistics.median(heights) if heights else 1.0
         ordered.extend(sorted(column, key=lambda b: (round(b.y0 / (line_height * 0.7)), b.x0)))
     return ordered
 
@@ -1049,15 +1069,56 @@ def _warning_block(boxes: list[_Box]) -> tuple[str, str, _Box, list[_Box]] | Non
         if b.y1 >= heading.y0 - line_height * 0.6 and not _BARCODE_RE.match(b.text.strip())
     ]
 
-    # Stop where the text stops running on. A gap of more than two and a half
-    # lines is the next thing on the label, not the next line of the warning.
+    # The statement is a block of text, so it occupies a column and its lines
+    # are lines. Taking everything at the heading's height instead took a band
+    # across the whole label, and a back label prints other things in that
+    # band: a keg's tapping instructions in the next column over, a state
+    # deposit line, an importer's web address. `common.warning.verbatim`
+    # compares the whole statement, so one neighbour's box rejected a warning
+    # the label prints correctly — 24 of the 37 labels in the manifest, before
+    # this (`plans/probes/item6_all_samples.json`).
+    #
+    # Two tests, both of them what a person means by "the block of text under
+    # that heading":
+    #
+    # - **Its own column.** The span starts at the heading's and grows with
+    #   each line kept, because a heading is often narrower than the lines
+    #   beneath it. A box from the next column over overlaps that span by
+    #   nothing at all, so half the narrower of the two spans separates them
+    #   with room to spare.
+    # - **Its own line height.** A rotated label reads back as tall vertical
+    #   boxes — a cognac front returns `Cognac XO` 311 pixels tall against a
+    #   47-pixel heading — and a box that tall is not a line of running text.
+    #   That label's OCR merges the heading across the full width, so the
+    #   column test cannot separate them and the height test must.
+    #
+    # A box that fails either test is stepped over rather than ending the
+    # block: the warning continues beneath its neighbour. Only a kept line
+    # moves the running edge, so a neighbour cannot hold the run open across
+    # the gap that ends it.
+    #
+    # A box the sweep picked up from *above* the heading never widens the
+    # column. The statement begins at its own heading, so such a box is
+    # dropped from the text a few lines below whatever happens here — but a
+    # tequila back prints `HECHO EN MEXICO - BOTTLED AT ORIGIN - DRINK
+    # RESPONSIBLY` across the full width just above the warning, and letting
+    # that widen the column re-admitted the producer number printed beside it.
     block: list[_Box] = []
     last_bottom: float | None = None
+    column_x0, column_x1 = heading.x0, heading.x1
     for b in sorted(below, key=lambda b: b.y0):
+        if (b.y1 - b.y0) > line_height * _WARNING_LINE_HEIGHT_MAX:
+            continue
+        overlap = min(b.x1, column_x1) - max(b.x0, column_x0)
+        narrower = min(b.x1 - b.x0, column_x1 - column_x0)
+        if narrower > 0 and overlap / narrower < _WARNING_COLUMN_OVERLAP_MIN:
+            continue
         if last_bottom is not None and b.y0 - last_bottom > line_height * 2.5:
             break
         block.append(b)
         last_bottom = max(last_bottom or 0.0, b.y1)
+        if b.y1 > heading.y0:
+            column_x0, column_x1 = min(column_x0, b.x0), max(column_x1, b.x1)
 
     ordered = _reading_order(block)
 

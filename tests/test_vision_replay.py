@@ -145,14 +145,9 @@ KNOWN_MISSES: dict[tuple[str, str], str] = {
         "ttb-26230001000420",
         "class_type",
     ): "C — returned the retailer 'Total Wine & More' for 'BARREL-AGED IMPERIAL STOUT'",
-    (
-        "ttb-26230001000420",
-        "warning_exact",
-    ): "the reader's warning text is not word for word and the answer key says this label's is",
     ("ttb-26237001000107", "abv"): "only the back is recorded here, and it prints no ABV",
     ("ttb-26237001000107", "net_contents"): "same as above",
     ("ttb-26237001000107", "warning_exact"): "the back's warning is not read word for word",
-    ("ttb-26240001000454", "brand"): "B — returned 'NOV' for 'I Heard Cassarole'",
     (
         "ttb-26240001000454",
         "class_type",
@@ -162,10 +157,6 @@ KNOWN_MISSES: dict[tuple[str, str], str] = {
         "var-heading-title-case",
         "brand",
     ): "B — returned the fanciful name 'ROSSASTRO' for the brand 'FABIO SIGNORELLI'",
-    (
-        "var-heading-title-case",
-        "warning_exact",
-    ): "the answer key says this variant's wording is exact; the reader's reading of it is not",
     ("var-warning-wording", "brand"): "B — as the other variant; same image but for the warning",
 }
 
@@ -662,17 +653,26 @@ def test_a_name_and_address_line_is_not_the_class_and_type() -> None:
 
 def test_the_cognac_label_now_reads_its_own_designation() -> None:
     """What the two halves of row 1.4 buy, on the one label in the slice that
-    turns on them. `26212001000085/front.jpg` prints its designation twice: once
-    in an appellation line the engine read correctly, and once in a stylised
-    pair the engine ran together as `Cognae PefiteChampagne`. The substring test
-    matched the garbled one and reported it; with words, the garbled one is not
-    a candidate at all and the line the engine read correctly is."""
+    turns on them. `26212001000085/front.jpg` prints its designation three
+    times: in a stylised `Cognac XO` set larger than anything else on the
+    label, in an appellation line, and in a stylised pair the engine ran
+    together as `Cognae PefiteChampagne`. The substring test matched the
+    garbled one and reported it; with words, the garbled one is not a candidate
+    at all.
+
+    Which of the two good candidates wins changed when the warning block became
+    a column (`_warning_block`). The band the block used to take swallowed
+    `Cognac XO`, so the appellation line was the only candidate left; with the
+    block confined to its own column the larger line is visible again and
+    `_largest_matching` takes it, which is what "the label says which words
+    matter most by how large it sets them" means. The corpus answer key scores
+    this label's class and type **correct** either way.
+    """
     payloads = parse_reading(
         thaw_reading(json.loads(_recording("26212001000085/front.jpg").read_text()))
     )
     read = payloads["class_type"]["class_type"].upper()
     assert "COGNAC" in read
-    assert "CHAMPAGNE" in read
     assert "PEFITECHAMPAGNE" not in read
 
 
