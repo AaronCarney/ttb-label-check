@@ -123,25 +123,62 @@ _MANIFEST = _SAMPLE_LABELS_DIR / "manifest.json"
 
 # The labels offered on the landing page, in the order they appear there. Four
 # rather than thirty-eight, because the point is to show four different things
-# happening, not to list a catalogue:
+# happening, not to list a catalogue.
 #
-#   - a domestic spirit where every element matches, so a reviewer sees a clean
-#     pass first;
-#   - an imported wine, which is the only way the country-of-origin check runs;
-#   - the same domestic spirit with the brand typed as the applicant typed it,
-#     'Lucky Lucys' against the label's 'Lucky Lucy's', so the reviewer sees
-#     that case and punctuation do not fail a brand;
-#   - a label whose GOVERNMENT WARNING has been reworded, so the reviewer sees
-#     a failure and what it cites.
+# Every description here is what the label actually did, measured on this route
+# with both faces sent on 2026-09-17 — `plans/probes/item6_all_samples.json`,
+# the sweep after `8ca3ecc` and `a47d03c`. Two facts from that sweep decide the
+# list:
+#
+#   - **No label in the corpus passes outright**, so none is offered as one. The
+#     nearest is a wine with a single point for a reviewer.
+#   - **The two samples this list used to lead with described a pass that does
+#     not happen.** `ttb-26231001000662`, offered as "a bourbon where everything
+#     matches", returns five review points, three of them the reader misreading
+#     the label (the brand logo, a two-line class and type, and the
+#     name-and-address line). `var-brand-case-punctuation` is the same two
+#     photographs with the brand typed without its apostrophe, and it returns
+#     findings identical to the bourbon's — including a brand review — so it no
+#     longer demonstrates that case and punctuation do not fail a brand. Both
+#     are dropped rather than described around.
+#
+# No distilled spirit is offered. Every one in the corpus is either rejected on
+# a warning the reader garbled or carries the reader faults above; that is a
+# gap in what the reader can do, not a gap in the catalogue.
 #
 # Each of the four clears the image-quality gate, checked 2026-09-16 by running
 # `app.vision.quality.assess` over every front in the manifest; a sample that
 # short-circuits on its photo would demonstrate nothing about the rules.
+#
+# The button text is carried here rather than taken from the brand, because two
+# of these labels are the same wine and two buttons reading "Check FABIO
+# SIGNORELLI" tell a reviewer nothing about which is which.
 _OFFERED = (
-    ("ttb-26231001000662", "A bourbon where everything matches"),
-    ("ttb-26239001000132", "An imported wine — checks country of origin"),
-    ("var-brand-case-punctuation", "Brand typed without its apostrophe — still a match"),
-    ("var-warning-wording", "A reworded GOVERNMENT WARNING — this one fails"),
+    (
+        "ttb-26236001000652",
+        "PATRIA",
+        "Domestic wine, and the closest thing here to a clean label: one point "
+        "for a reviewer, where the label's CHARDONNAY meets the application's "
+        "TABLE WHITE WINE.",
+    ),
+    (
+        "ttb-26239001000132",
+        "FABIO SIGNORELLI",
+        "Imported, so the country-of-origin check runs — and it passes. Two "
+        "other points go to a reviewer.",
+    ),
+    (
+        "ttb-26230001000420",
+        "THE BRUERY",
+        "Neither photograph of this beer shows a bottler's name and address, "
+        "and the check says so.",
+    ),
+    (
+        "var-warning-wording",
+        "FABIO SIGNORELLI, warning reworded",
+        "The same wine with one word of its GOVERNMENT WARNING repainted — "
+        "“may impair” for “impairs”. Rejected.",
+    ),
 )
 
 
@@ -200,12 +237,12 @@ def _posted_from(entry: dict) -> dict[str, str]:
 
 
 def offered_samples() -> list[dict[str, str]]:
-    """The samples the landing page offers, each with the line shown on its
-    button. A sample whose manifest entry or image is not installed is left
-    out, so a partial build shows fewer buttons rather than a broken one."""
+    """The samples the landing page offers: the text on each button and the
+    line beside it. A sample whose manifest entry or image is not installed is
+    left out, so a partial build shows fewer buttons rather than a broken one."""
     entries = _manifest_entries()
     out: list[dict[str, str]] = []
-    for sample_id, blurb in _OFFERED:
+    for sample_id, button, blurb in _OFFERED:
         entry = entries.get(sample_id)
         if entry is None:
             continue
@@ -215,8 +252,8 @@ def offered_samples() -> list[dict[str, str]]:
         out.append(
             {
                 "id": sample_id,
+                "button": button,
                 "blurb": blurb,
-                "brand": _str(entry.get("application", {}).get("brand_name")),
             }
         )
     return out

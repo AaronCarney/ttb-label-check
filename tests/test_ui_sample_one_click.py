@@ -65,10 +65,18 @@ def test_each_offered_sample_says_what_checking_it_will_show():
     what the check demonstrates, or a reviewer has no reason to pick any."""
     response = TestClient(create_app()).get("/")
     for sample in offered_samples():
-        # Escaped as Jinja renders it — a brand such as LUCKY LUCY'S reaches
-        # the page with its apostrophe as an entity.
-        assert str(escape(sample["brand"])) in response.text
+        # Escaped as Jinja renders it — a name such as LUCKY LUCY'S reaches the
+        # page with its apostrophe as an entity.
+        assert str(escape(sample["button"])) in response.text
         assert str(escape(sample["blurb"])) in response.text
+
+
+def test_no_two_samples_share_a_button():
+    """Two of the shipped labels are the same wine, so taking the button text
+    from the brand put two buttons reading 'Check FABIO SIGNORELLI' side by
+    side — which tells a reviewer nothing about which is which."""
+    buttons = [sample["button"] for sample in offered_samples()]
+    assert len(set(buttons)) == len(buttons), buttons
 
 
 def test_the_offered_samples_are_all_installed():

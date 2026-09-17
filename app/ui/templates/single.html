@@ -35,14 +35,15 @@
   <section class="try-samples" aria-labelledby="try-samples-heading">
     <h2 id="try-samples-heading">Or check one of ours, now</h2>
     <p class="try-samples-lead">
-      Real approved labels from the TTB Public COLA Registry, each checked
-      against the application it was actually filed with.
+      Approved labels from the TTB Public COLA Registry, each checked against
+      the application it was actually filed with. The last one is one of those
+      labels with its GOVERNMENT WARNING repainted, so you can see a rejection.
     </p>
     <ul class="try-samples-list">
       {% for sample in samples %}
       <li>
         <form action="/samples/{{ sample.id }}" method="post">
-          <button type="submit" class="primary-button">Check {{ sample.brand }}</button>
+          <button type="submit" class="primary-button">Check {{ sample.button }}</button>
           <span class="try-samples-blurb">{{ sample.blurb }}</span>
         </form>
       </li>
