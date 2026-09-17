@@ -60,13 +60,16 @@ the wrong thing.
 **What is measured.** Twelve test submissions posted once each through the address a reviewer uses,
 on 2026-09-17, against the deployed service: median wall clock **2.03 seconds**, median read
 **1.22 seconds**, eleven of the twelve between 1.1 and 3.1 seconds. The service is fast. One label
-took 5.04 seconds, and it does so for a known reason — it is one of seven in the corpus whose
-government warning is not found upright, so the reader reads the whole label twice more at 90 and
-270 degrees.
+took 5.04 seconds, and it did so for a known reason — nothing on it looked like a government
+warning upright, so the reader read the whole label twice more at 90 and 270 degrees and found
+nothing either way. Measured over all 62 corpus images on 2026-09-17, that re-read ran on four and
+recovered a warning from one. It now runs only where the sideways text reads as the warning
+([decision 0036](docs/decisions.md#0036)), which is that one image, and this label's read dropped
+from 1345 ms to 463 ms on the development box.
 
 **Why the old figures do not stand.** Four runs on 2026-09-16 returned 87%, 89%, 71% and 92% of 38
 submissions inside five seconds. Two things were wrong with them. They predate the change that made
-that sideways re-read conditional, which cut it from 35 corpus labels to 7. And at the time, a check
+that sideways re-read conditional, and the screen that has since cut it further. And at the time, a check
 that crossed five seconds was *stopped* and returned an empty result rather than a slow one — so a
 run counted a blank page as a check that took too long, which is not the same thing and is worse.
 That defect is fixed ([decision 0035](docs/decisions.md#0035)); the share has to be measured again
@@ -386,7 +389,8 @@ is a small denominator, and a percentage drawn from it would read as a precision
 not carry. See `docs/decisions.md#0027`.
 
 **These figures are in-sample, and there is no held-out set.** The reader's heuristics — the
-box-merge ratios, the gate that decides when to re-read a label rotated, the field patterns — were
+box-merge ratios, the gate and screen that decide when to re-read a label rotated, the field
+patterns — were
 tuned against these same 30 labels, and the table above scores them on the same 30. So each figure
 is an upper bound on what the reader does with a label it has never seen, not an estimate of it.
 Reserving a held-out split from 30 labels was judged worse than not having one: a ten-label test set

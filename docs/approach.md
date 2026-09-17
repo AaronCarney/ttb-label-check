@@ -443,8 +443,10 @@ run counted an empty page as a slow check. That defect is fixed
 ([decision 0035](decisions.md#0035)) and the share is owed again after the next deploy. What is
 measured, on 2026-09-17 against the live service: a median check of 2.03 seconds and a median read
 of 1.22, with one label of twelve at 5.04. Two levers have been tried and neither is the answer:
-more processor cores moved one check of thirty-eight, and the reading path itself has been tuned
-twice.
+more processor cores moved one check of thirty-eight, and the reading path itself has now been tuned
+three times — most recently by reading a label's sideways strips before reading the whole label
+again, which took the slowest corpus read from 1345 ms to 463 ms on the development box
+([decision 0036](decisions.md#0036)).
 
 **Two things we did not prove.** A reader cannot tell an unmeasured claim from a measured one by
 looking, so each is named:

@@ -313,13 +313,25 @@ class _OcrEngine(Protocol):
     """The whole of RapidOCR this module uses.
 
     RapidOCR's own `__call__` is annotated as returning one of four output
-    types, covering detection-only and recognition-only configurations this
-    module never asks for. Under the settings in `_load` it returns the one
-    that carries text, so `_load` casts to this and the cast is where that
-    claim is written down.
+    types, one per combination of the three stage flags. This module asks for
+    two of them: a full pass over an image, and recognition alone over a strip
+    already located (`_read_strip`). Both carry text, so `_load` casts to this
+    and the cast is where that claim is written down.
+
+    The flags are passed on every call, never left to default, because
+    `RapidOCR.__call__` begins with `update_params` and those settings persist
+    on the engine afterwards. One recognition-only call would otherwise leave
+    the shared engine detecting nothing on the next label — and the next label
+    belongs to a different request.
     """
 
-    def __call__(self, image: Any) -> _OcrResult | None: ...
+    def __call__(
+        self,
+        image: Any,
+        use_det: bool | None = None,
+        use_cls: bool | None = None,
+        use_rec: bool | None = None,
+    ) -> _OcrResult | None: ...
 
 
 class LocalVisionExtractor:
@@ -478,7 +490,7 @@ class LocalVisionExtractor:
         engine = self._engine
         if engine is None:
             raise RuntimeError("the reader was asked for boxes before its models were loaded")
-        result = engine(np.array(image))
+        result = engine(np.array(image), use_det=True, use_cls=True, use_rec=True)
         if result is None or result.txts is None:
             return []
         scores = result.scores if result.scores is not None else [1.0] * len(result.txts)
@@ -497,6 +509,64 @@ class LocalVisionExtractor:
                 )
             )
         return boxes
+
+    def _read_strip(self, image: Image.Image, box: _Box) -> str | None:
+        """What one sideways strip says, read without a second detector pass.
+
+        The upright pass has already found this box and reported where it sits.
+        Turning that crop upright and asking the engine for recognition alone
+        skips the expensive half of a pass — `use_det=False` — so a strip costs
+        about 10 ms rather than the 440 ms a rotated frame costs.
+
+        Only 90° is tried, not both ways. rapidocr runs a 0/180 orientation
+        classifier over each crop before recognising it, so a strip printed the
+        other way up comes back the right way round from the same call:
+        measured on ttb-26212001000085, the strips read the same words at 90°
+        and at 270° (`plans/probe_strip_rec.py`).
+
+        `None` means the strip could not be read — no engine loaded, or nothing
+        recognised. Both are "this strip cannot rule the warning out", which is
+        the answer the caller acts on.
+        """
+        engine = self._engine
+        if engine is None:
+            return None
+        crop = image.crop(
+            (
+                max(0, int(box.x0) - _SCREEN_PAD_PX),
+                max(0, int(box.y0) - _SCREEN_PAD_PX),
+                min(image.size[0], int(box.x1) + _SCREEN_PAD_PX),
+                min(image.size[1], int(box.y1) + _SCREEN_PAD_PX),
+            )
+        ).rotate(90, expand=True)
+        result = engine(np.array(crop), use_det=False, use_cls=True, use_rec=True)
+        if result is None or not result.txts:
+            return None
+        return str(result.txts[0])
+
+    def _sideways_may_be_the_warning(self, image: Image.Image, boxes: list[_Box]) -> bool:
+        """Whether the sideways text on this label could be the warning.
+
+        Asked after `_has_sideways_text` has said there is sideways text, and
+        before the two rotated passes that would read the whole label again to
+        find out what it is. The strips are read in place instead, and a strip
+        carrying any of the warning's own words sends the re-read ahead.
+
+        It answers yes wherever it cannot answer no — no strips to read, or a
+        strip that came back empty. The cost of a wrong yes is the two passes
+        that used to run anyway; the cost of a wrong no is a government warning
+        the label never got checked for, so the two are not weighed evenly.
+        """
+        strips = [b for b in boxes if b.height / max(1e-6, b.width) >= _SCREEN_TALL_RATIO]
+        if not strips:
+            return True
+        for box in strips:
+            text = self._read_strip(image, box)
+            if text is None:
+                return True
+            if _WARNING_SCREEN_WORDS.intersection(normalize_words(text)):
+                return True
+        return False
 
     async def extract(self, label: Label) -> list[FieldObservation]:
         report = quality.assess(label)
@@ -635,13 +705,20 @@ class LocalVisionExtractor:
         #
         # Those two extra passes are only ever spent on the warning: the other
         # six fields are read from `boxes`, the upright pass, whatever the
-        # rotated frames turn up. So they are run only where the upright pass
-        # has already shown sideways text to find — `_has_sideways_text` below.
+        # rotated frames turn up. So two questions are asked before paying for
+        # them — is there sideways text here at all (`_has_sideways_text`), and
+        # does it read like the warning (`_sideways_may_be_the_warning`). The
+        # first reads box shapes and costs nothing; the second reads the strips
+        # themselves for about 10 ms each, against 440 ms for one rotated pass.
         warning_boxes = boxes
         rotation = 0
         warning_image = image
         found = _find_heading(boxes)
-        if found is None and _has_sideways_text(boxes):
+        if (
+            found is None
+            and _has_sideways_text(boxes)
+            and self._sideways_may_be_the_warning(image, boxes)
+        ):
             for angle in (90, 270):
                 rotated = image.rotate(angle, expand=True)
                 candidate = self._boxes(rotated)
@@ -733,6 +810,63 @@ class LocalVisionExtractor:
 _SIDEWAYS_RATIO = 2.0
 _SIDEWAYS_MIN_BOXES = 2
 _SIDEWAYS_LONE_RATIO = 3.0
+
+# The screen that stands between the gate above and the two full passes below.
+#
+# The gate reads box shapes, which say that a frame holds sideways text but not
+# what it says, so it fires on any label with a strip of vertical type — a
+# barcode, a net-contents line up an edge, a vertical brand mark. Reading those
+# strips settles it: recognition alone over the boxes the upright pass already
+# found costs about 10 ms a strip, against about 440 ms for one rotated pass,
+# because it skips detection entirely and recognises only text already located.
+#
+# Measured over all 62 corpus images, 2026-09-17
+# (`plans/probe_screen_corpus.py`, `plans/screen-corpus-probe.json`): four
+# images reach this point, and the rotated re-read recovers a warning from one
+# of them, ttb-26212001000085. Its strips read "THE SURGEON" and "DRIVE ACAR
+# OROPERATEMACHINERY,ANDM"; the three the re-read finds nothing on read
+# "3105540651", "750 ML" and an Italian brand line. So the screen keeps the
+# re-read where it pays and drops about 875 ms from each of the other three.
+#
+# `_SCREEN_TALL_RATIO` is looser than `_SIDEWAYS_RATIO` on purpose: every strip
+# the gate could have fired on is read, and some besides. A strip more costs
+# 10 ms; a strip missed is a warning missed.
+_SCREEN_TALL_RATIO = 1.5
+_SCREEN_PAD_PX = 4
+
+# The §16.21 warning's own content words, which is what the screen asks each
+# strip for. Function words are left out — "the" on a label says nothing — and
+# so is anything the warning shares with ordinary label copy.
+#
+# This is the reader deciding where to look, never what the label says: a word
+# here that drifts from the statutory text can cost a re-read, and cannot
+# change a verdict. `assets/warnings/govt_warning_16_21.txt` is the text these
+# come from, and `tests/test_vision_warning_screen.py` holds them to it rather
+# than a comment promising they match.
+_WARNING_SCREEN_WORDS = frozenset(
+    {
+        "government",
+        "warning",
+        "according",
+        "surgeon",
+        "general",
+        "women",
+        "drink",
+        "alcoholic",
+        "beverages",
+        "pregnancy",
+        "birth",
+        "defects",
+        "consumption",
+        "impairs",
+        "ability",
+        "drive",
+        "operate",
+        "machinery",
+        "health",
+        "problems",
+    }
+)
 
 
 def _has_sideways_text(boxes: list[_Box]) -> bool:

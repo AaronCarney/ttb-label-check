@@ -2209,3 +2209,78 @@ answers completely is strictly better than one truncated at 5.0, and both miss R
 - **R15's share has to be measured again.** Every figure published for it was taken while a marginal
   check failed as a blank rather than as a slow pass, so the share measured something other than
   what R15 asks about. The figure is owed after the next deploy.
+
+<a id="0036"></a>
+## 0036. The sideways re-read is screened by reading the strips, not by their shape alone
+
+**Decided:** 2026-09-17. **Evidence:** `plans/screen-corpus-probe.json` — all 62 corpus images,
+measured on the development box on 2026-09-17 under the six-thread OCR budget; the probes that
+produced it, `plans/probe_sideways_reread.py`, `plans/probe_det_rec_split.py`,
+`plans/probe_strip_rec.py` and `plans/probe_screen_corpus.py`; `app/vision/local.py`;
+act 4 of `plans/2026-09-17-A1-five-second-requirement.md`.
+
+**What was wrong.** `_has_sideways_text` (decision behind commit `7a9acab`) decides from box shapes
+whether to read a label again at 90° and 270°. Shapes say that a label carries sideways text; they
+cannot say what it says. Measured over all 62 corpus images, the re-read ran on four of them and
+recovered a government warning from one — ttb-26212001000085, whose warning is printed up the edge
+of its brand label. The other three paid two full detector passes to find nothing: a barcode
+(ttb-26232001000404), a net-contents line (ttb-26236001000210) and an Italian brand line
+(ttb-26239001000132's back). ttb-26232001000404 is the label that took 5.04 seconds on the deployed
+service and was cut off.
+
+Two things about the cost were not known before this work, and both are measured above. A detector
+pass divides roughly in half between detection and recognising every box it found — 225 ms and
+200 ms on a 1029×1300 label, on the development box. And a pass costs nearly the same whatever the
+image's size: cropping the label to the strip that fired the gate cut a pass from 393 ms to 321 ms,
+and lost the heading entirely, so the first option the plan listed — crop rather than re-read whole
+— is rejected on measurement, not on judgement.
+
+**Chosen.** Before the two rotated passes, the strips the upright pass already found are read where
+they lie: each tall box is cropped, turned upright and passed to recognition alone, with detection
+switched off. That costs about 10 ms a strip against about 440 ms for one rotated pass, because
+nothing is detected a second time. The re-read runs only where a strip carries one of the §16.21
+warning's own content words.
+
+The screen answers yes wherever it cannot answer no — a label with no strips to read, or a strip
+that came back empty, re-reads as before. A wrong yes costs what this code cost every time until
+now; a wrong no is a government warning nobody checked, so the two are not weighed evenly.
+
+Only 90° is tried for a strip, not both ways: rapidocr runs a 0/180 orientation classifier over each
+crop before recognising it, so a strip printed the other way up comes back the right way round from
+the same call. Measured on ttb-26212001000085, the strips read the same words at 90° and at 270°.
+
+Alongside it, every call into the engine now names all three stages. `RapidOCR.__call__` begins with
+`update_params` and what it sets stays set, so one recognition-only call would otherwise leave the
+shared reader — one per process, serving every request — detecting nothing on the next label, and
+failing silently by returning an output object of a different shape rather than raising.
+`tests/test_vision_engine_stage_flags.py` holds both call sites to it.
+
+**What it buys, on the development box** (six threads, the deployed service is several times slower,
+and nothing here is measured on it yet):
+
+| image | read before | read after |
+|---|---|---|
+| ttb-26232001000404 front — the live outlier | 1345 ms | 463 ms |
+| ttb-26236001000210 front | 1406 ms | 610 ms |
+| ttb-26239001000132 back | 447 ms | 194 ms |
+| ttb-26212001000085 front — the warning the re-read recovers | 810 ms | 741 ms |
+
+**Because** the re-read is the most expensive thing a read does, it exists for one field, and three
+of the four labels paying for it had nothing for it to find. Reading the strips is the cheapest
+question that separates them, and it asks about the words on the label rather than about the shape
+of a box.
+
+**What this costs.**
+
+- **Every label that reaches the gate pays the screen.** 9 to 53 ms across the four images, against
+  the 875 ms two rotated passes cost. The label that does re-read pays both.
+- **A warning whose strips recognise as nothing recognisable is now the escape's problem.** If a
+  strip returns text that carries none of the warning's words, the screen stops there. On
+  ttb-26212001000085 the strips read "THE SURGEON" and "DRIVE ACAR OROPERATEMACHINERY,ANDM" — clipped
+  by the box the upright detector drew, which is why the screen asks for the warning's words rather
+  than for its heading. One corpus example is not proof that every sideways warning reads that
+  legibly, and the corpus holds exactly one.
+- **The screen's vocabulary is a second copy of the statutory wording.** It is held to
+  `assets/warnings/govt_warning_16_21.txt` by `tests/test_vision_warning_screen.py` rather than by a
+  comment promising they match. The reader still decides only where to look; a word that drifted
+  could cost a re-read and cannot change a verdict.
