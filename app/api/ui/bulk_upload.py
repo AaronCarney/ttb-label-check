@@ -102,9 +102,7 @@ async def batches_upload_submit(
         filename = upload.filename or f"label-{index}"
         refusal: str | None = None
         if len(body) > limits.MAX_UPLOAD_BYTES:
-            refusal = limits.upload_too_large_message(
-                filename, len(body), limits.MAX_UPLOAD_BYTES
-            )
+            refusal = limits.upload_too_large_message(filename, len(body), limits.MAX_UPLOAD_BYTES)
         else:
             bomb = limits.bomb_refusal(filename, body)
             if bomb is not None:
