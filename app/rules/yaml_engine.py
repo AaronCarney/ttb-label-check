@@ -31,6 +31,7 @@ import time
 from typing import Sequence
 
 from app.rules._validators import VALIDATOR_REGISTRY, ValidatorContext
+from app.rules._validators._helpers import unlocated, unlocated_is_absent
 from app.rules.engine import RuleEngine
 from app.schemas.expected import ExpectedValue
 from app.schemas.extracted import FieldObservation
@@ -86,6 +87,37 @@ def _matches_evidence_required(obs_field_id: str, required: tuple[str, ...]) -> 
 
 
 _log = logging.getLogger(__name__)
+
+
+def _scored_a_reading(rule, result: ValidationResult) -> bool:
+    """Was there a reading behind this verdict for the confidence floor to score?
+
+    A verdict carrying no evidence never had one. Neither does a verdict about
+    an element the reader could not find: both readers attach one `Evidence`
+    item to every field they were asked about, found or not
+    (`app/vision/local.py`), so an absent element still arrives carrying a
+    placeholder that names no box and quotes no text. Asking `result.evidence`
+    whether a reading was taken gets "yes" from that placeholder, and its
+    confidence of 0.0 then reads as a reading so poor it cannot be relied on.
+
+    That is what turned "this label carries no government warning" — a 27 CFR
+    §16.21 rejection — into "we could not read it confidently", which routes to
+    a reviewer instead of telling the applicant what is wrong with the label.
+
+    Only a rule the pack has granted `unlocated_is_absent` may read "not found"
+    as "not there", so only such a rule's verdict is carved out here. Every
+    other rule turns an unlocated element into a reviewer's question inside its
+    own validator, long before the floor sees it.
+    """
+    if not result.evidence:
+        return False
+    if (
+        result.observed is not None
+        and unlocated_is_absent(rule)
+        and unlocated(result.observed)
+    ):
+        return False
+    return True
 
 
 class YamlRuleEngine(RuleEngine):
@@ -167,12 +199,12 @@ class YamlRuleEngine(RuleEngine):
         so a reading the reader is unsure of goes to a reviewer rather than
         rejecting the label as a confident one would.
 
-        The floor applies only where there was a reading to score. A result
-        with no evidence — a required statement that is simply absent — scores
+        The floor applies only where there was a reading to score — see
+        `_scored_a_reading`. A required statement that is simply absent scores
         zero because nothing was read, not because the reading was poor, and
         the rule that found it missing is entitled to say so.
         """
-        if result.outcome not in _ASSERTS_A_VERDICT or not result.evidence:
+        if result.outcome not in _ASSERTS_A_VERDICT or not _scored_a_reading(rule, result):
             return result
         if result.aggregated_confidence >= rule.confidence_floor:
             return result
