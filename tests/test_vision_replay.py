@@ -40,6 +40,7 @@ from app.vision.local import (
     MAX_EDGE_PX,
     _Box,
     _find_heading,
+    _names_a_designation,
     _net_re,
     _parse,
     _units,
@@ -87,43 +88,43 @@ ENTRIES = (
 # must still be wrong — so a fix cannot land quietly and a regression cannot hide
 # behind a line that was already red. **When R6 fixes one, delete its line.**
 #
-# Three causes account for all but four of them, and they are not four separate
-# reader defects:
+# It was thirty lines when this suite was written. The causes that remain:
 #
-#   (A) the warning block keeps boxes past its own text. `_warning_block` trims
-#       the statement at `_BLOCK_END_RE` but returns the untrimmed box list, and
-#       `_parse` subtracts that list from the body — so a mandatory element
-#       printed under the warning is read correctly by the engine and then thrown
-#       away before any field can match it. Measured over these recordings: it
-#       swallows `ROSE WINE|ITALY| PRODUCT OF ITALY| 750 ML` and
-#       `12% ALC. BY VOL. | CONTAINS SULFITES` on both variants, and
-#       `IMPORTED BY JUAN LOBO TEQUILA, LLC BUDA, TEXAS` on `26237001000107/back`.
 #   (B) brand is "the largest box that is not another field", which on a label
-#       whose warning is set large returns a fragment of the warning.
-#   (C) class/type is "the largest box containing a designation word", which
-#       returns a retailer's name or a lead-in where one is printed larger.
+#       whose warning is set large returns a fragment of the warning. It is the
+#       single largest cause left, and it is in none of R6's rows.
+#   (C) class/type is "the largest box carrying a designation", which returns a
+#       retailer's name where one is printed larger than the designation.
+#   (D) the engine never read the characters at all, so no parsing change can
+#       reach it. `26229001000034/front.jpg` returned three boxes — `CRÈME DE
+#       CASSIS`, `LIQUEUR`, `AEV` — and the label's `375mL` and its alcohol
+#       statement are in neither face's box list.
+#
+# The cause that is gone: the warning block used to keep boxes past its own
+# text, so a mandatory element printed under the statement was read correctly by
+# the engine and then thrown away before any field could match it. Nine lines
+# closed when `_warning_block` began trimming its boxes where it trims its text.
 KNOWN_MISSES: dict[tuple[str, str], str] = {
     ("ttb-26212001000085", "brand"): "B — returned 'MPTION OF ALCOHOLIC BEVERAGE IMPAIRS YOUR', a warning fragment, for 'Terre et Bois de Pradière'",
-    ("ttb-26212001000085", "class_type"): "C — returned 'Cognae PefiteChampagne'; the printed designation is 'Cognac XO / Cognac Petite Champagne' and the OCR misread two letters",
     ("ttb-26229001000034", "brand"): "B — returned the class designation 'CRÈME DE CASSIS' for the brand 'BREVIS'",
     ("ttb-26229001000034", "class_type"): "C — returned 'LIQUEUR' where the label prints 'CRÈME DE CASSIS LIQUEUR'",
-    ("ttb-26229001000034", "abv"): "the front carries no warning block and the ABV is not on the back; nothing matched",
-    ("ttb-26229001000034", "net_contents"): "same: '375mL' is on a face whose box list carries no match for `_NET_RE`",
+    ("ttb-26229001000034", "abv"): "D — the front's alcohol statement came back as the three letters `AEV` and the back prints none",
+    ("ttb-26229001000034", "net_contents"): "D — the engine read neither face's `375mL`; the front returned three boxes and none of them is it",
     ("ttb-26230001000420", "brand"): "B — returned the fragment 'TE OLLECTION' for 'The Bruery'",
     ("ttb-26230001000420", "class_type"): "C — returned the retailer 'Total Wine & More' for 'BARREL-AGED IMPERIAL STOUT'",
     ("ttb-26230001000420", "warning_exact"): "the reader's warning text is not word for word and the answer key says this label's is",
     ("ttb-26237001000107", "abv"): "the front is refused by the quality gate and the back prints no ABV",
     ("ttb-26237001000107", "net_contents"): "same as above",
-    ("ttb-26237001000107", "origin"): "A — the same swallowed box carries the origin words",
+    ("ttb-26237001000107", "origin"): "`_ORIGIN_RE` matched `distilled in copper pot stills. Our` in a marketing sentence; the label's origin is `Mexico`",
     ("ttb-26237001000107", "warning_exact"): "the back's warning is not read word for word",
     ("ttb-26240001000454", "brand"): "B — returned 'NOV' for 'I Heard Cassarole'",
     ("ttb-26240001000454", "class_type"): "C — returned nothing; 'Double India Pale Ale' is handwritten on a keg collar",
     ("ttb-26240001000454", "abv"): "the keg collar's '8%' is not matched",
     ("var-heading-title-case", "brand"): "B — returned the fanciful name 'ROSSASTRO' for the brand 'FABIO SIGNORELLI'",
-    ("var-heading-title-case", "name_address"): "C/A — returned the lead-in 'PRODUCED BY:' rather than the importer's name and city",
+    ("var-heading-title-case", "name_address"): "returned the lead-in `PRODUCED BY:` itself, with no name and no city after it",
     ("var-heading-title-case", "warning_exact"): "the answer key says this variant's wording is exact; the reader's reading of it is not",
     ("var-warning-wording", "brand"): "B — as the other variant; same image but for the warning",
-    ("var-warning-wording", "name_address"): "C/A — as the other variant",
+    ("var-warning-wording", "name_address"): "as the other variant — same image, different warning",
 }
 
 _FACE_ORDER = ("front", "back", "neck", "side")
@@ -563,3 +564,67 @@ def test_adding_a_unit_is_an_edit_to_the_shipped_table_and_nothing_else() -> Non
     finally:
         _net_re.cache_clear()
         _units.cache_clear()
+
+
+# ---------------------------------------------------------------------------
+# Row 1.4 — the class/type lexicon, matched as words rather than as letters
+# ---------------------------------------------------------------------------
+
+def test_a_designation_is_matched_as_a_word_and_not_as_letters() -> None:
+    """Row 1.4, on the five real box texts it changes.
+
+    The test used to be a substring search over the folded line, so any line
+    whose letters happened to spell a designation was a candidate for the
+    label's class and type. `_largest_matching` then took the tallest candidate,
+    and a lead-in or a web address is often set larger than the designation
+    itself.
+
+    Every line below is one the reader actually read off a label in this corpus,
+    and every one of them was a candidate before. The reduction is the rule
+    pack's own — `app.rules._validators._helpers`, where "gin must not match
+    inside Virginia" is already written down.
+    """
+    for line in (
+        "HECHO EN MEXICO - BOTTLED AT ORIGIN - DRINK RESPONSIBLY",  # ORIgiN
+        "WWW.JUANLOBOTEQUILA.COM",                                 # a web address
+        "IMPORTED BY:",                                            # imPORTed
+    ):
+        assert _names_a_designation(line) is False, line
+
+    # Not a change of subject: the designations the lexicon is for still match,
+    # including the multi-word ones.
+    for line in (
+        "BARREL-AGED IMPERIAL STOUT",
+        "CRÈME DE CASSIS LIQUEUR",
+        "MALT BEVERAGE",
+        "Double India Pale Ale",
+        "APPELLATION COGNAC PETITE CHAMPAGNE CONTRÔLÉE",
+    ):
+        assert _names_a_designation(line) is True, line
+
+
+def test_a_name_and_address_line_is_not_the_class_and_type() -> None:
+    """`IMPORTED BY WINE WINE SITUATION LLC-SIGNAC HILL, CA` is a real line off
+    `26212001000085/front.jpg`. Its importer's trade name carries the word
+    "wine", the line is set larger than the designation, and it opens with the
+    lead-in that says what it is. The words after "imported by" or "bottled by"
+    are a business, and a business may be named anything."""
+    assert _names_a_designation("IMPORTED BY WINE WINE SITUATION LLC-SIGNAC HILL, CA") is False
+    assert _names_a_designation("PRODUCED AND BOTTLED BY STOUT BROTHERS, PORTLAND, OR") is False
+    assert _names_a_designation("STOUT") is True
+
+
+def test_the_cognac_label_now_reads_its_own_designation() -> None:
+    """What the two halves of row 1.4 buy, on the one label in the slice that
+    turns on them. `26212001000085/front.jpg` prints its designation twice: once
+    in an appellation line the engine read correctly, and once in a stylised
+    pair the engine ran together as `Cognae PefiteChampagne`. The substring test
+    matched the garbled one and reported it; with words, the garbled one is not
+    a candidate at all and the line the engine read correctly is."""
+    payloads = parse_reading(
+        thaw_reading(json.loads(_recording("26212001000085/front.jpg").read_text()))
+    )
+    read = payloads["class_type"]["class_type"].upper()
+    assert "COGNAC" in read
+    assert "CHAMPAGNE" in read
+    assert "PEFITECHAMPAGNE" not in read

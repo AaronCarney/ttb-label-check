@@ -42,6 +42,7 @@ import numpy as np
 from PIL import Image
 
 from app.config import Settings
+from app.rules._validators._helpers import normalize_words, word_run_present
 from app.rules.units import UnitTable, millilitres, millilitres_from_text, shipped_table
 from app.schemas.calls import CallRecord
 from app.schemas.expected import BeverageClass
@@ -859,6 +860,41 @@ _CLASS_WORDS = (
     "IPA", "MALT BEVERAGE", "SAISON", "BOCK", "HEFEWEIZEN",
 )
 
+# The lexicon reduced to words once, at import, in the same reduction the rule
+# pack compares designations in.
+_CLASS_PHRASES = tuple(normalize_words(word) for word in _CLASS_WORDS)
+
+
+def _names_a_designation(text: str) -> bool:
+    """Does this line carry a class or type designation?
+
+    **Whole words, not letters.** The test used to be a substring search over
+    the folded line, so `DISTILLED IN VIRGINIA` named a gin, `IMPORTED BY` and
+    `PORTLAND, OR` named a port, `WHOLESALE` named an ale and `MUNICIPAL` named
+    an IPA. `_largest_matching` then took the tallest line that matched, and a
+    lead-in or a city is often set larger than the designation itself — so the
+    reader reported an importer's address as the label's class and type.
+
+    The reduction is `app.rules._validators._helpers`, which is what the rule
+    pack compares designations in and where "gin must not match inside
+    Virginia" is already written down. Multi-word designations keep working:
+    `MALT BEVERAGE` and `INDIA PALE ALE` are matched as consecutive words.
+
+    This is still a lexicon for *spotting* the line, not a list of what is
+    allowed. Which designations the application and the regulations accept is
+    the rule pack's to say, and its `recognised_classes` lists are deliberately
+    narrower than this one: a label printing CHARDONNAY carries a class/type
+    line whether or not any pack recognises the word.
+    """
+    if _NAME_LEAD_IN_RE.search(text):
+        # A name-and-address line names a designation often enough to win on
+        # height and never is one: `IMPORTED BY WINE WINE SITUATION LLC` opens
+        # with the lead-in that says what it is. The words after "bottled by" or
+        # "imported by" are a business, and its trade name may be anything.
+        return False
+    words = normalize_words(text)
+    return any(word_run_present(words, phrase) for phrase in _CLASS_PHRASES)
+
 
 def _mean_score(boxes: list[_Box]) -> float:
     scores = [b.score for b in boxes if b.score > 0]
@@ -1006,9 +1042,7 @@ def _parse(
         out["country_origin"] = ({"country": "", "confidence": 0.0}, None, None)
 
     # -- class and type ---------------------------------------------------
-    class_box = _largest_matching(
-        body, lambda t: any(word in _fold(t) for word in _CLASS_WORDS)
-    )
+    class_box = _largest_matching(body, _names_a_designation)
     if class_box is not None:
         out["class_type"] = (
             {
