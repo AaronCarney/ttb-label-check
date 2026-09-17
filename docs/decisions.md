@@ -1973,6 +1973,10 @@ keeps.
   `/batch/{batch_id}` and `/batches`; `tests/test_a11y_axe.py` visits the first two. Lowering the level
   does not close that hole — NFR-3 says *every* screen at whatever level, and `/batches` rests on
   review alone until a third case is added. Named here so the correction is not mistaken for coverage.
+  **Closed since:** the third case exists —
+  `tests/test_a11y_axe.py::test_axe_zero_aa_violations_batch_list` scans `/batches`, so the gate now
+  covers all three screens and NFR-3 is met on coverage. The cost above is left standing because it
+  was true when this decision was taken; this line records that it no longer is.
 - **Two approved documents changed after approval**, the same cost [0017](#0017) carried: `docs/PRD.md`
   NFR-3 and `specs/0001-label-verification/requirements.md` R17 were amended rather than the code. The
   amendment is logged in `docs/PRD-decisions.md`.

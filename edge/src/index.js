@@ -8,12 +8,15 @@
 // with 403 — and a request IAM denies is never billed. The Worker holds a key
 // for that account as a secret and mints a Google ID token from it.
 //
-// That design is NOT the state of the deployed service. Measured 2026-09-17:
-// the IAM policy grants roles/run.invoker to allUsers as well as to this
-// Worker's service account, and the run.app URL answers /api/health with 200
-// and no credentials at all. scripts/deploy.sh puts the service in that state
-// on TTB_PUBLIC=1, so that a reviewer can reach it; while it holds, the origin
-// can be reached without passing through this Worker.
+// That design IS the state of the deployed service, as of the last measurement.
+// Measured 2026-09-17 at 22:30 UTC: the IAM policy grants roles/run.invoker to
+// this Worker's service account and to nobody else, the run.app URL answers
+// /api/health with 403 and no credentials at all, and ttb.aaroncarney.me
+// answers it with 200. It has not always been so - the service was deployed
+// open with TTB_PUBLIC=1 so that a reviewer could reach it, and while that
+// held, the origin could be reached without passing through this Worker.
+// scripts/deploy.sh sets this either way depending on the access flag it is
+// given, so this is a measurement and not a property of the design.
 //
 // It rate-limits what does get through (0029) — except that it does not, as the
 // measurement at the limit() call below records. So of the two things this file

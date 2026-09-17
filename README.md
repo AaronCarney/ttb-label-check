@@ -28,12 +28,16 @@ because Cloud Run's front end routes on the Host header, and it signs each reque
 token minted from a key held as a Worker secret. [Decision 0028](docs/decisions.md#0028) argues why
 the design closes the Cloud Run URL with IAM rather than hiding it — a request IAM denies is never
 billed — and [0029](docs/decisions.md#0029) records the rate limit that was meant to sit beside it.
-**Neither is the state of the deployed service, and the code says so where it is measured.** The
-service is deployed with `TTB_PUBLIC=1` so that a reviewer can reach it, which grants the invoker
-role to everyone: measured on 2026-09-17, the Cloud Run URL answers an uncredentialed request with
-200, so the hostname above is the front door and not the only way in. The rate limit denies nothing
-either. What actually bounds the meter is the two-instance cap in `scripts/deploy.sh`. The Worker
-comment in `edge/src/index.js` carries both measurements. Deployed with `npx wrangler deploy` from
+**The first is now the state of the deployed service; the second is not, and the code says so where
+each is measured.** Measured 2026-09-17 at 22:30 UTC: the IAM policy grants `roles/run.invoker` to
+`ttb-edge-invoker@ttb-label-check.iam.gserviceaccount.com` and to nobody else, the Cloud Run URL
+answers `/api/health` with **403** and no credentials at all, and the hostname above answers it with
+200. So the hostname is the only way in, which is what 0028 argues for. This has moved during the
+project — the service was deployed open with `TTB_PUBLIC=1` so a reviewer could reach it, and
+`scripts/deploy.sh` will reopen or reclose it depending on the access flag it is given, so treat
+this as a measurement rather than a fixed property. The rate limit still denies nothing. What
+bounds the meter is the two-instance cap in `scripts/deploy.sh`. The Worker comment in
+`edge/src/index.js` carries both measurements. Deployed with `npx wrangler deploy` from
 that directory; the key is never in this repository.
 
 `--check` is what proves the repository is deployable without making it public: it runs every
@@ -522,9 +526,12 @@ them, and each is switched off in the rule pack rather than reporting a verdict 
 The sixth is different: those requirements were never decided on at all, which is the point of the
 entry, so it cites nothing and nothing in the pack switches them off.
 
-The last two are different again. They are not checks the app declines to make, but two places where
+The next two are different again. They are not checks the app declines to make, but two places where
 it stops short of judging a label and the envelope does not fully say so. Both are in the reading,
 before any rule is reached.
+
+The last one is different from all of them: it is not about a check at all, but about an endpoint
+that cannot check anything.
 
 - **An upload with no application is read but not checked.** The beverage the application declares
   is what decides which rules apply, so a label submitted on its own is read and reported, and no
@@ -602,3 +609,13 @@ before any rule is reached.
   silence now decides labels rather than just delaying them. A label photographed fully upside down
   is a known gap of the same kind: no rotation covers 180°, and its boxes are horizontal, so the
   sideways test does not fire for it either.
+
+- **Every item of a JSON `POST /batches` request is refused, so that endpoint checks nothing.** It
+  takes references to labels — a `label_id` and the application's values — and says the server will
+  find the image. There is no image store for it to find one in, so every item comes back as a
+  refusal carrying `ENGINE.INPUT.LABEL_IMAGE_MISSING` and the batch reports zero labels checked. The
+  alternative to refusing was to run the reader and the rules over a stand-in and report a verdict
+  about something that is not the label, which would be worse. The batch path that works is
+  `POST /batches/upload`, which carries the files themselves, and it is what the `/batches` page
+  uses. See `docs/decisions.md#0020`. For an agent this means the JSON endpoint is usable only for
+  its shape — the batch id, the queue, the SSE stream — and never for an answer about a label.

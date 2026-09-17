@@ -72,6 +72,30 @@ All notable changes to this project are recorded here. The format follows
   development machine, and the label whose warning the re-read recovers still reads it. See
   `docs/decisions.md#0036`.
 
+### Documentation
+
+- The limitations list now names the one endpoint that cannot check anything. A batch submitted as
+  JSON to `POST /batches` carries references to labels rather than the images themselves, there is
+  no store to resolve a reference in, and so every item of such a batch comes back refused. The
+  behaviour was decided and recorded; what was missing was the entry telling a reader before they
+  rely on it. The batch path that works is `POST /batches/upload`.
+
+- Three statements that the code had overtaken are corrected. `docs/approach.md` said the pipeline
+  does not gate the deploy — `scripts/deploy.sh` reads GitLab for the pipeline belonging to the
+  exact commit it would ship and refuses anything short of `success`. Decision 0031 said the
+  accessibility scan misses `/batches` — a third case now scans it, and the record says so inline
+  rather than being rewritten. The registry description of `ENGINE.WORKER.UNHANDLED` named only the
+  SSE stream-end path, and a per-label failure has carried the code on that item's own envelope
+  since the refusal work.
+
+- What reaches the Cloud Run URL directly is restated from a fresh measurement. The README and the
+  edge Worker's own comment both said the origin answers an uncredentialed request with 200,
+  measured while the service was deployed open. Measured 2026-09-17 at 22:30 UTC it answers 403:
+  `roles/run.invoker` is granted to the Worker's service account and to nobody else, which is the
+  design decision 0028 argues for, and `ttb.aaroncarney.me` still answers 200. Both places now say
+  so, and both say it is a measurement rather than a fixed property, because the deploy script sets
+  it either way.
+
 ## [0.2.0] - 2026-09-16
 
 ### Added

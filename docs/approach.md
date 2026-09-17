@@ -543,9 +543,14 @@ whole suite on an image that installs pnpm and Playwright, so the browser group 
 instead of skipping itself green. No job may be allowed to fail, and a test reads the pipeline file
 and fails if one is, because a job that cannot fail the pipeline is the same defect as a test that
 cannot fail. Origin is GitLab and that is where it runs; the GitHub remote is a mirror and runs
-nothing. What the pipeline still does not do is gate the deploy. The deploy is a command a person
-types, and the five checks it runs first do not include whether the pipeline passed, so a proven
-commit and a deployed image remain two separate acts of remembering.
+nothing. The pipeline also gates the deploy. `scripts/deploy.sh` reads GitLab for the pipeline
+belonging to the exact commit it is about to ship and refuses unless that pipeline says `success`:
+a commit that
+was never pushed has no pipeline and is refused, one still running is refused, and one that failed
+is refused. `TTB_SKIP_PIPELINE_CHECK=1` is the escape hatch for a deploy that has to go out while
+GitLab is unreachable, and it prints on the terminal that nothing has tested what is being shipped.
+So a proven commit and a deployed image are no longer two separate acts of remembering; what is
+still a person's own act is typing the deploy command at all.
 
 ## Assumptions we made
 

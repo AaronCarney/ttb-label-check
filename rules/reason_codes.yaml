@@ -299,7 +299,7 @@ codes:
     cfr_anchors: []
     severity: warn
   ENGINE.WORKER.UNHANDLED:
-    description: "Batch worker caught an unhandled exception during per-label evaluation; SSE stream-end carries the error class."
+    description: "Batch worker caught an unhandled exception. A per-label failure carries this code on that item's own envelope and the rest of the batch is still checked; a failure that is not per-label (the producer, or the consume loop) carries it on SSE stream-end with the error class."
     cfr_anchors: []
     severity: warn
   ENGINE.BATCH.CONFLICT:
