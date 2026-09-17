@@ -91,7 +91,7 @@ account, and no outbound network call.** The reader that turns a photograph into
 process, and its models are installed with the dependencies.
 
 ```bash
-git clone https://gitlab.com/aaroncarney1/ttb-label-check.git
+git clone https://github.com/AaronCarney/ttb-label-check.git
 cd ttb-label-check
 uv sync
 uv run task demo
