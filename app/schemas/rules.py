@@ -13,7 +13,7 @@ class object) — NOT a redeclaration — or that ``is``-identity breaks.
 
 from __future__ import annotations
 
-from enum import Enum
+from enum import StrEnum
 from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -22,7 +22,7 @@ from app.schemas.expected import BeverageClass
 from app.schemas.rejection import Severity
 
 
-class MatchPolicy(str, Enum):
+class MatchPolicy(StrEnum):
     EXACT = "exact"
     NORMALIZED = "normalized"
     FUZZY = "fuzzy"

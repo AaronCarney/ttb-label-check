@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import re
-from enum import Enum
+from enum import StrEnum
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -13,7 +13,7 @@ from app.schemas.extracted import Evidence, FieldObservation
 REASON_CODE_GRAMMAR = re.compile(r"^[A-Z][A-Z0-9_]*(?:\.[A-Z][A-Z0-9_]*){2,3}$")
 
 
-class Outcome(str, Enum):
+class Outcome(StrEnum):
     PASS = "pass"
     FAIL = "fail"
     INSUFFICIENT_EVIDENCE = "insufficient_evidence"
@@ -22,7 +22,7 @@ class Outcome(str, Enum):
     ERROR = "error"
 
 
-class Severity(str, Enum):
+class Severity(StrEnum):
     REJECT = "reject"
     WARN = "warn"
     INFO = "info"

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -12,7 +12,7 @@ from app.schemas.expected import BeverageClass
 BBox = tuple[int, int, int, int]
 
 
-class EvidenceSource(str, Enum):
+class EvidenceSource(StrEnum):
     OCR = "ocr"
     LAYOUT = "layout"
     CLASSIFIER = "classifier"
@@ -20,7 +20,7 @@ class EvidenceSource(str, Enum):
     METADATA = "metadata"
 
 
-class MatchKind(str, Enum):
+class MatchKind(StrEnum):
     EXACT = "exact"
     NORMALIZED = "normalized"
     FUZZY = "fuzzy"
