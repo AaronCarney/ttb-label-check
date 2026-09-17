@@ -37,6 +37,11 @@ def _run_deploy(tmp_path: Path, env: dict[str, str]) -> list[list[str]]:
     child = dict(os.environ)
     child["PATH"] = f"{bin_dir}:{child['PATH']}"
     child["TTB_GCP_PROJECT"] = "fake-project"
+    # These tests are about the access flag, not about the pipeline gate that
+    # sits above it, and the gate would otherwise ask GitLab for a verdict on
+    # whatever commit the suite happens to be running at. The gate has its own
+    # tests in `tests/test_deploy_pipeline_gate.py`.
+    child["TTB_SKIP_PIPELINE_CHECK"] = "1"
     child.pop("TTB_PUBLIC", None)
     child.pop("TTB_ACCESS", None)
     child.update(env)

@@ -40,6 +40,15 @@ that directory; the key is never in this repository.
 precondition the deploy has that needs no network, and names any that fails. It runs as part of the
 test suite.
 
+**A deploy refuses a commit the pipeline has not passed.** The preflights answer whether the
+repository is shippable — a `Dockerfile`, a service port matching the container's, a tracked
+interface bundle — and none of them runs a test. `.gitlab-ci.yml` runs the lint, the formatter, the
+type check and the whole suite, and its verdict belongs to one commit, so the deploy reads that
+verdict for the exact commit it is about to upload and stops if it is anything but a pass. A commit
+nobody has pushed has no verdict at all, and the refusal says to push it. This needs `glab` and `jq`
+on the path; `TTB_SKIP_PIPELINE_CHECK=1` deploys without the verdict, for when GitLab is
+unreachable, and prints on the terminal that nothing has tested what is being shipped.
+
 ### The five-second requirement is measured, and it is not met
 
 R15 in [the requirements](specs/0001-label-verification/requirements.md) and NFR-1 in
