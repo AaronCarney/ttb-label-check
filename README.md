@@ -135,10 +135,14 @@ the suite still reports green — so a run on a machine without it proves nothin
 interface. The deploy measurement skips the same way without `TTB_DEPLOY_URL`, as the section above
 says. Everything else runs from a clone with nothing but `uv sync`.
 
-**With pnpm and Playwright installed, those browser tests pass.** Six result-page cases once failed
-the accessibility scan on colour contrast below the AA threshold, and the layout test once failed at
-a 320-pixel viewport on a 27-pixel overflow; both are fixed. `docs/approach.md` says what the scan
-does and does not settle for the Section 508 claim.
+**With pnpm and Playwright installed, that group runs and holds the accessibility scan.** It covers
+every screen the product serves, and it treats a check the scanner could not decide as a failure
+rather than a pass, so an undecidable result cannot read as a clean one. Six result-page cases once
+failed it on colour contrast below the AA threshold, and the layout test once failed at a 320-pixel
+viewport on a 27-pixel overflow; both were ours and both are fixed. What a machine cannot settle it
+does not settle: Section 508 asks for a conformance review as well as an automated scan, and that
+review has not been run. `docs/approach.md` says what the scan does and does not settle for the
+Section 508 claim.
 
 ### Linting, formatting and type checking
 
