@@ -42,3 +42,6 @@ frontend/*.config.js
 frontend/*.config.d.ts
 frontend/*.tsbuildinfo
 !frontend/postcss.config.js
+
+# Wrangler's local build cache for the edge Worker.
+edge/.wrangler/
