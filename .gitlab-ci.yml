@@ -66,7 +66,10 @@ tests:
     # load; nodejs and pnpm build the front-end island the browser tests drive.
     - apt-get update
     - apt-get install -y --no-install-recommends libgl1 libglib2.0-0 nodejs npm
-    - npm install --global --no-fund --no-audit pnpm
+    # Pinned to the version `frontend/package.json` declares as its packageManager.
+    # Unpinned, this job took whatever npm called latest, which is how a pnpm major
+    # that moved where settings live arrived without anyone choosing it.
+    - npm install --global --no-fund --no-audit pnpm@10.33.0
     - pip install --no-cache-dir uv
     - uv sync --frozen
     # `--with-deps` installs the browser's own OS packages, so the version

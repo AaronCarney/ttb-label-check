@@ -1,0 +1,12 @@
+# pnpm 10 refuses to run a dependency's install script unless this file names
+# the dependency, and in CI that refusal is an error rather than a warning. Vite
+# needs esbuild's platform binary, which that script fetches, so without this
+# line a clean checkout cannot build the island and every browser test errors at
+# setup.
+#
+# This lives here rather than in package.json's `pnpm` field because pnpm 11
+# does not read that field at all — it warns that the keys were ignored and
+# fails the install anyway. pnpm 10.19 and later read the setting here, so this
+# one file works on both.
+onlyBuiltDependencies:
+  - esbuild

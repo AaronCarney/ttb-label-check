@@ -1,5 +1,6 @@
 {
   "name": "ttb-label-island",
+  "packageManager": "pnpm@10.33.0",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -37,10 +38,5 @@
     "vite": "^5.4.10",
     "vitest": "^2.1.4",
     "vitest-axe": "^0.1.0"
-  },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "esbuild"
-    ]
   }
 }
