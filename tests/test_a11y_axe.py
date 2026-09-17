@@ -81,3 +81,29 @@ def test_axe_zero_aa_violations_batch(page: Page, live_server_url: str) -> None:
         }"""
     )
     assert result == [], f"axe violations on /batch: {result}"
+
+
+@pytest.mark.usefixtures("live_server", "pnpm_built_island")
+def test_axe_zero_aa_violations_batch_list(page: Page, live_server_url: str) -> None:
+    """The third screen. `app/api/ui/shells.py` serves three GET routes and this
+    scan visited two of them, while NFR-3 in `docs/PRD.md` asks for "an
+    automated scan on every screen" — so the requirement was unmet on coverage
+    even with every existing case green.
+
+    This page renders server-side without the island, so there is no
+    `[data-mounted]` to wait for; the shell being loaded is the whole page.
+    """
+    page.goto(f"{live_server_url}/batches")
+    page.wait_for_load_state("domcontentloaded")
+    page.add_script_tag(path=str(AXE_PATH))
+    result = page.evaluate(
+        """async () => {
+          const r = await window.axe.run(document, {
+            runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa'] },
+          });
+          return r.violations.map(v => ({
+            id: v.id, impact: v.impact, help: v.help, nodes: v.nodes.length,
+          }));
+        }"""
+    )
+    assert result == [], f"axe violations on /batches: {result}"
