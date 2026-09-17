@@ -9,7 +9,9 @@ export interface LiveRegionProps {
   className?: string;
 }
 
-// Visually hidden but exposed to AT (NFR-A11Y-002 / NFR-A11Y-003).
+// Visually hidden but exposed to assistive technology. WCAG 4.1.3 Status
+// Messages — a WCAG 2.1 criterion the UI is built to above the WCAG 2.0 AA
+// level docs/PRD.md NFR-3 commits to. See docs/decisions.md#0031.
 const _SR_ONLY =
   "absolute -m-px h-px w-px overflow-hidden whitespace-nowrap border-0 p-0 [clip:rect(0,0,0,0)]";
 

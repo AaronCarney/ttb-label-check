@@ -80,8 +80,8 @@ def test_dev_mode_on_when_settings_enabled(dev_client: TestClient) -> None:
 
 
 def test_uswds_skip_link_present(client: TestClient) -> None:
-    """NFR-A11Y-002 keyboard-operable end-to-end: the 'Skip to main content'
-    link must be the first focusable element on every page."""
+    """NFR-3 keyboard-operable end-to-end (WCAG 2.1.1): the 'Skip to main
+    content' link must be the first focusable element on every page."""
     response = client.get("/")
     assert 'class="skip-link"' in response.text
     assert "Skip to main content" in response.text
