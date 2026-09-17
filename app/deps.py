@@ -6,6 +6,8 @@ import threading
 
 from app.config import Settings
 from app.logging.ring_buffer import new_call_ring_buffer
+from app.services.cache import SessionCache
+from app.services.evaluator import Evaluator
 from app.vision.base import VisionExtractor
 from app.vision.cloud import CloudVisionExtractor
 from app.vision.local import LocalVisionExtractor
@@ -81,8 +83,6 @@ def _get_session_cache() -> SessionCache:
     must hit the same SessionCache instance to be deduplicated."""
     global _session_cache_singleton
     if _session_cache_singleton is None:
-        from app.services.cache import SessionCache
-
         _session_cache_singleton = SessionCache(maxsize=128)
     return _session_cache_singleton
 
@@ -96,8 +96,8 @@ def reset_session_cache() -> None:
 
 def build_evaluator(settings: Settings) -> Evaluator:
     """Construct an Evaluator wired to all three real dependencies."""
+    # `app.rules` imports this module, so this one import stays deferred.
     from app.rules import build_rule_engine
-    from app.services.evaluator import Evaluator
 
     vision = get_vision_extractor(settings)
     rules = build_rule_engine(settings)
