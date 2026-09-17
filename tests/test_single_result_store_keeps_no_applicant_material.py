@@ -77,9 +77,7 @@ def _envelope_with_applicant_material() -> DispositionEnvelope:
             completed_at=now,
             per_rule_trace=(),
         ),
-        metrics=Metrics(
-            total_duration_ms=10, per_rule_durations_ms=(), vision_duration_ms=5
-        ),
+        metrics=Metrics(total_duration_ms=10, per_rule_durations_ms=(), vision_duration_ms=5),
     )
 
 

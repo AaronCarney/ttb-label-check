@@ -126,15 +126,17 @@ def _forget_applicant_material(envelope: DispositionEnvelope) -> DispositionEnve
     page, and it must keep its values.
     """
     fields = tuple(
-        field.model_copy(update={
-            "extracted_value": "",
-            "expected_value": "",
-            "rule_findings": tuple(
-                rf.model_copy(update={"plain_language_explanation": ""})
-                for rf in field.rule_findings
-            ),
-            "ai_suggestion": field.ai_suggestion.model_copy(update={"text": None}),
-        })
+        field.model_copy(
+            update={
+                "extracted_value": "",
+                "expected_value": "",
+                "rule_findings": tuple(
+                    rf.model_copy(update={"plain_language_explanation": ""})
+                    for rf in field.rule_findings
+                ),
+                "ai_suggestion": field.ai_suggestion.model_copy(update={"text": None}),
+            }
+        )
         for field in envelope.fields
     )
     return envelope.model_copy(update={"fields": fields, "label_ref": ""})
