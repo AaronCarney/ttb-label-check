@@ -37,6 +37,24 @@ All notable changes to this project are recorded here. The format follows
 - A browser batch upload containing a file that is not a PNG or JPEG now names that file, says what
   to do with it, and checks every other file in the set. It previously refused the whole submission
   and checked none of them. See `docs/decisions.md#0030`.
+- A check that runs long now shows what it finished instead of an empty page. The guard that stops a
+  runaway evaluation used to sit at exactly the five seconds the latency requirement measures, and
+  firing it threw away work already done — including a label the reader had finished reading — so the
+  same label could answer completely or blankly on a difference of fifty milliseconds. A stopped
+  check now returns the readings and rule results it completed, says in the audit trail why the rest
+  is missing, and reports the time it actually spent. The guard is 30 seconds and is a runaway guard,
+  not a latency target. See `docs/decisions.md#0035`.
+
+### Performance
+
+- A label is read again sideways only where its sideways text reads as the government warning. The
+  reader used to decide that from the shape of the text it found, which fires on a barcode or a
+  net-contents line printed up an edge as readily as on a warning: over the project's 62 corpus
+  images, four were read twice more at 90 and 270 degrees and one of those four carried a warning.
+  The strips are now read where they lie first, which costs about 10 ms against about 440 ms for
+  reading the whole label again. The slowest corpus read fell from 1345 ms to 463 ms on a
+  development machine, and the label whose warning the re-read recovers still reads it. See
+  `docs/decisions.md#0036`.
 
 ## [0.2.0] - 2026-09-16
 
