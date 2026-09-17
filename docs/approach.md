@@ -226,11 +226,10 @@ processor cores, is untried.
 looking, so each is named:
 
 - The ten-minute target for a 300-label batch has no instrument at all — no test and no figure.
-- Accessibility is checked automatically, but at the older standard, so the two criteria that were
-  our stated reason for targeting the newer one are never scanned. Two screens are scanned, the
-  single-label page and a batch's results; the bulk-upload page is not. And the manual review the
-  requirement really asks for has not been run — an automated pass is the floor of an
-  accessibility claim, not the whole of one.
+- Accessibility is checked automatically at the level we commit to, but on two of the three screens:
+  the single-label page and a batch's results are scanned, the bulk-upload page is not. And the
+  manual review the requirement really asks for has not been run — an automated pass is the floor of
+  an accessibility claim, not the whole of one.
 
 The first is a missing measurement. The second is the pattern we would rather name than hide: the
 requirement was written, the mechanism was built, and the proof stopped at the half a machine can
@@ -258,10 +257,10 @@ image-quality gate that turned out to be measuring how light the label stock is.
 never pass, deleted — while a different rule in a similar state was switched off instead, because one
 was unbuildable and the other merely unbuilt.
 
-**What we would do next, in order.** Scan the bulk-upload page and raise the automated accessibility
-check to the standard we committed to, then run a real accessibility review rather than an automated
-one; instrument the batch timing, which is the one requirement with no measurement at all; then widen
-the corpus, which is the work that makes every figure above more trustworthy.
+**What we would do next, in order.** Scan the bulk-upload page, so all three screens are covered,
+then run a real accessibility review rather than an automated one; instrument the batch timing,
+which is the one requirement with no measurement at all; then widen the corpus, which is the work
+that makes every figure above more trustworthy.
 
 ## How the work was run
 

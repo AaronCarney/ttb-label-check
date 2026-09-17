@@ -24,17 +24,19 @@ exists for 2.4.11 at any tag** — so a green run at 2.2 would have asserted a c
 examined. [Decision 0031](../decisions.md#0031) records the choice, what it gives up, and the two
 alternatives rejected.
 
-The five criteria below that arrived after WCAG 2.0 are still built to. They are design guidance here,
-not a conformance claim: three of them ship (1.4.10 has its own test, `tests/test_reflow_320px.py`) and
-two are unmeasured. Nothing in the product's promise rests on them.
+Five criteria below arrived after WCAG 2.0, and they are design guidance here, not a conformance
+claim. The three from WCAG 2.1 are built — 1.4.10 Reflow has its own test,
+`tests/test_reflow_320px.py`. The two from WCAG 2.2 are **not verified**: nothing here has measured
+2.5.8 Target Size, and no automated rule exists for 2.4.11 at all. Nothing the product promises
+rests on any of the five.
 
 WCAG 2.2 marks 4.1.1 Parsing "Obsolete and removed"; Section 508 still names WCAG 2.0, which includes
 it.
 
 ## The criteria that bear on this app
 
-"From" is the WCAG version the criterion first appeared in. The 2.0 rows are the promise; the 2.1 and
-2.2 rows are built above it and not claimed.
+"From" is the WCAG version the criterion first appeared in. The 2.0 rows are the promise. The 2.1
+rows are built above it and not claimed; the 2.2 rows are guidance only and neither is verified.
 
 | Criterion | From | Text | Where it bites here |
 |---|---|---|---|
