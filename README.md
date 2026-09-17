@@ -192,21 +192,26 @@ application give the same answer every time, with a citation attached. An earlie
 finished results to a language model for a second opinion was removed for exactly this reason
 ([decision 0009](docs/decisions.md#0009)).
 
-**Almost nothing is kept.** There is no database and no COLA integration. Batch state lives in the
-process and is dropped when the response is returned or the server stops, and application data —
-including the applicant name and address the form collects — is never written to disk or to a log.
-The one exception is the uploaded label image, which is written to a directory so the result page
-can still show it after a restart or on a second worker, and swept after seven days. The PRD's C-2
-asks for no retention at all; this prototype deliberately does not meet it, and
-[decision 0018](docs/decisions.md#0018) says why and what a real deployment would do instead.
+**Almost nothing is kept, and what is kept is named.** There is no database and no COLA
+integration. Batch state lives in the process and is dropped when the response is returned or the
+server stops, and nothing the form collects reaches a log. Two things are written to a directory on
+disk and swept after seven days. The uploaded label image, so the result page can still show it
+after a restart or on a second worker. And, on a check run against a single label, the result
+itself — because an override has to have something to amend, and a single label is in no batch to
+hold it. That second file carries what the application declared, the applicant name and address
+among them, beside the text read off the label. The PRD's C-2 asks for no retention at all; this
+prototype deliberately does not meet it, and [decision 0018](docs/decisions.md#0018) says why and
+what a real deployment would do instead.
 
 **What a log may contain.** Log lines are an allow-list: only named fields are written, anything
 else attached to a line is dropped, and the fields that could carry applicant material — the
 application's contents, the image bytes, the text read off the label — are blanked by a second
-pass. Both have tests. One gap is known and not yet closed: the message text of a line is not put
-through that filter, and a label's identifier is built from the uploader's filename, so a filename
-reaches the logs both as its own field, deliberately, and inside the message, where nothing checks
-it.
+pass. Both have tests. The name of the uploaded file counts as applicant material too, because it
+is whatever the uploader typed and a file named after a person names that person. It reaches the
+page as display text under its own name, and the identifier a log line correlates on is minted by
+the app rather than built from it, so the two are never the same string. A test runs a person-named
+file through both the refusal path and the ordinary path and reads what the real log handler
+emits.
 
 ## Tools, and why each one
 
@@ -273,11 +278,13 @@ designation like `BOURBON WHISKEY` to `BOURBON`.
   tells a poor photograph from a good one is a separate question, and an open one.
 - **The warning text is fixed.** 27 CFR 16.21's wording is pinned as a committed asset and compared
   against by hash, so a change to the regulation is a deliberate edit and not a silent drift.
-- **Nothing sensitive is stored.** Application data lives only as long as the request that carried
-  it. The uploaded label image is written to disk and kept for up to seven days so the result page
-  survives a restart, which is a demo's bargain rather than a production one: the labels this ships
-  are public TTB COLA Registry images, and a real deployment would hold an applicant's image inside
-  the agency's boundary, encrypted, and drop it the moment the result had been read
+- **What is kept is kept for seven days and no longer.** Application data lives only as long as the
+  request that carried it, except on a single-label check, where the result — which restates the
+  declared values beside the readings — is written to disk so a reviewer can overrule a finding on
+  it. The uploaded label image is written the same way, so the result page survives a restart. Both
+  are a demo's bargain rather than a production one: the labels this ships are public TTB COLA
+  Registry images, and a real deployment would hold an applicant's material inside the agency's
+  boundary, encrypted, and drop it the moment the result had been read
   ([decision 0018](docs/decisions.md#0018)).
 - **No integration with COLA or any other TTB system**, which was an explicit constraint from the
   systems administrator in the brief.
@@ -293,10 +300,11 @@ designation like `BOURBON WHISKEY` to `BOURBON`.
   judgement beyond a scored comparison goes to a person rather than being resolved automatically.
 - **Local CPU reading by default, accuracy second.** The hosted reader is better on hard images. It
   is not the default, because a reviewer should be able to clone and run this with no account.
-- **State in memory, except the label image.** A server restart loses an in-flight batch and the
-  reviewer re-uploads. The label image is the one thing written down, because a result page that
-  cannot show the label it is describing is not a result page; it is kept for seven days and no
-  longer ([decision 0018](docs/decisions.md#0018)).
+- **State in memory, except what a result page and an override need.** A server restart loses an
+  in-flight batch and the reviewer re-uploads. Two things are written down: the label image, because
+  a result page that cannot show the label it is describing is not a result page, and a single
+  label's result, because an override has to have something to amend. Both are kept for seven days
+  and no longer ([decision 0018](docs/decisions.md#0018)).
 - **Scored brand matching rather than exact matching.** A punctuation difference scores just below
   identical and passes, with the score shown, rather than sending every dropped apostrophe to a
   person. What it buys and what it costs are argued in

@@ -2075,6 +2075,13 @@ nothing, but it withdraws a capability the requirements ask for to avoid keeping
 - **Nothing serves a kept single-label result back.** The store exists for the override path. Opening
   the result page again re-renders from the template, not from the store, so an override applied a
   moment ago is in the record but not on the page until the page is reloaded from a fresh check.
+- **It puts applicant material on disk, which the image alone did not.** The envelope carries each
+  field's `expected_value` — what the application declared, the applicant's name and address among
+  them — beside the `extracted_value` read off the label. [0018](#0018) weighed a photograph of a
+  public label; this weighs the form's own contents, and C-2 asks the product to keep neither. The
+  narrower store this argues for is one holding only what an override needs to amend: the evaluation
+  id, the per-field dispositions, and the audit trail. That was not built, and the whole envelope is
+  what is written.
 
 <a id="0034"></a>
 ## 0034. The bbox overlay and the evidence panel are removed, because neither can be fed truthfully

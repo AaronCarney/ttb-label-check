@@ -152,7 +152,9 @@ actually require:
   AI use-case account would have to describe here is a reader whose output is evidence, not a
   judgement that has to be defended on its own authority.
 - **A privacy review and a records schedule.** Anything holding applicant material needs both. This
-  prototype keeps an uploaded image for seven days so a result page survives a restart. That is a
+  prototype keeps two things for seven days: an uploaded image, so a result page survives a restart,
+  and a single label's result, so a reviewer can overrule a finding on it — and that second one
+  restates what the application declared, the applicant's name and address included. Seven days is a
   convenience, not a retention policy, and a real deployment needs a period set by the agency's
   records schedule rather than by a constant in the code. Our own requirements say the product should
   keep nothing; it does not meet that, and we left the requirement standing and the failure on the
@@ -210,7 +212,9 @@ ships has to run with no key and no network call, and the one that reads harder 
 replaceable by something inside the agency's own boundary without a rewrite. The uploaded image is a
 file on disk rather than something held in the process because the clone a reviewer runs and the
 deployed container are the same application, and a directory of files is the only store that needs no
-account, no service and no configuration. We added no seam for elegance, and the seam we have not
+account, no service and no configuration. A single label's result sits beside it for the same reason
+and on the same sweep, because an override arriving after the page was rendered needs something to
+amend. We added no seam for elegance, and the seam we have not
 built is named as missing: no rule can yet say "this applies whatever the beverage is", which is why a
 label filed with no application is read and not checked.
 
@@ -297,12 +301,16 @@ first thing we would close.
 **What a log is allowed to contain.** Logging is an allow-list rather than a filter: a line carries
 only the fields named in advance, anything else attached is dropped without comment, and the fields
 that could hold applicant material — the application's contents, the image bytes, the text read off
-the label — are blanked by a second pass. Both halves have tests. The hole is in the part the
-allow-list does not govern: the message text of a line is not filtered, and a label's identifier is
-built from the name of the file the uploader sent, so a filename reaches the logs both as its own
-field, deliberately, and inside the message, where nothing checks it. An uploader who names a file
-after a person has put that person in the log. That is a real defect and it is ours — the allow-list
-was built to make exactly this impossible, and the message string walked around it.
+the label — are blanked by a second pass. Both halves have tests. What the allow-list does not
+govern is a line's message text, which the formatter writes before the allow-list runs, so the
+discipline it enforces is that nothing carrying applicant material may reach a message at all. One
+thing did. The name of the file the uploader sent was also the identifier every line correlated on,
+so an uploader who named a file after a person put that person in the log — the allow-list had been
+built to make exactly that impossible, and a string that was on it by design walked around it. The
+two are now separated by what they are for: the filename is display text that reaches the page and
+the refusal sentence, and the identifier a line correlates on is minted by the app. The test that
+holds it runs a person-named file through both the refusal path and the ordinary path and reads
+what the real handler emits.
 
 ## Tools, and why each
 
