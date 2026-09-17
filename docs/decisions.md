@@ -1749,13 +1749,19 @@ on the edge, and none of it on the app. The key is a Worker secret. It is never 
 a key that leaks is an invoker for as long as it exists, so it is revoked at the service account
 rather than waited out.
 
-**The deployment does not meet this record yet, as of 2026-09-16.** The service is live, and
-`gcloud run services get-iam-policy` lists **`allUsers`** alongside the edge account under
-`roles/run.invoker`; an unauthenticated `GET https://ttb-label-check-ogfd7k2ixa-uc.a.run.app/`
-returns 200. The Worker in `edge/` forwards without a token and without a rate limit. So both doors
-are open and the two-instance cap is the only thing bounding the meter — which is `TTB_PUBLIC=1`
-territory in `scripts/deploy.sh`, a state that script says is the owner's call every time. Closing
-it is a redeploy without that variable, plus the token in the Worker.
+**The deployment met this record at 20:44 on 2026-09-16, and the state it describes is verified
+rather than asserted.** It did not before: the service had been deployed with `TTB_PUBLIC=1`, the
+IAM policy listed `allUsers` beside the edge account, and the Worker forwarded anonymously, so both
+doors stood open. What closed it was removing the `allUsers` binding and redeploying without that
+variable, plus the token minting in `edge/src/index.js`. Measured after the redeploy, and the pair
+is what makes the claim:
+
+- `GET https://ttb-label-check-196798689841.us-central1.run.app/` with no credentials answers **403**.
+- `GET https://ttb.aaroncarney.me/api/health` answers **200** with the app's own body.
+
+The second is what proves the first is a closed door rather than a broken service: the only
+difference between the two requests is the ID token the Worker attaches. All 38 test submissions
+also completed through it, so the signing survives a multipart upload.
 
 
 <a id="0029"></a>
@@ -1794,12 +1800,30 @@ be set to bound the meter.
 - *No limit, relying on the two-instance cap* — the cap bounds how fast money is spent, not how
   much. Two instances held busy for a month is the whole free allowance and then some.
 
-**What this record does not settle, and will not invent.** Cloudflare's documentation **does not
-state** whether the rate limiting binding is available on the Workers Free plan. Its own page, the
-Workers pricing page and the GA changelog were all read on 2026-09-16 and none of them says either
-way. So the binding is the chosen mechanism and its availability here is unverified until a deploy
-of the Worker either takes it or refuses it. If it refuses, the fork reopens with the zone upgrade
-and a counter of this project's own as the remaining options.
+**Settled by measurement on 2026-09-16, and not in either direction this record expected.**
+Cloudflare's documentation does not state whether the rate limiting binding is available on the
+Workers Free plan — its own page, the Workers pricing page and the GA changelog were all read that
+day and none says either way. This record supposed a deploy would either take the binding or refuse
+it. It does neither: **it takes the binding and then never denies anything.**
+
+The evidence, all against the deployed Worker on `ttb.aaroncarney.me`:
+
+- `wrangler deploy` accepted the binding and reported it: `env.PROXY_RATE_LIMIT (120 requests/60s)`.
+- 310 requests inside one 60-second window, 150 concurrent and 160 sequential, were **all forwarded**.
+- Reconfigured to **5** requests per 60 seconds and redeployed, twelve sequential requests were all
+  forwarded.
+- A build that returned `limit()`'s own answer in a response header reported `success: true` on the
+  tenth request of ten under that limit of five — so the call is reached, the binding is bound, and
+  the verdict itself is the thing that is wrong.
+
+**So the limit fails open, and silently**, which is worse than a refusal would have been: a
+refusal at deploy time is visible, while this looks exactly like a working rate limit from every
+angle except a test that exceeds it. The call stays in the Worker, because it is this record's
+chosen mechanism and it begins holding the moment the platform honours it, and because removing it
+would leave nothing to re-enable. But **nothing in this deployment rate-limits anything today**, and
+what bounds the meter is [0028](#0028) alone: a request the invoker check denies is never billed.
+The fork this record left open therefore reopens on its own terms — the zone upgrade, or a counter
+of this project's own — with the added knowledge that the free binding cannot be trusted to hold.
 
 **Two limits that come with it, neither fatal.** Counts are per Cloudflare location — "for each
 unique key you pass to your rate limiting binding, there is a unique limit per Cloudflare location"

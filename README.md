@@ -22,10 +22,15 @@ scripts/deploy.sh --check                   # every check that needs no network;
 TTB_GCP_PROJECT=your-project scripts/deploy.sh
 ```
 
-That address is this project's own hostname rather than the one Cloud Run issues. A small Cloudflare
-Worker in `edge/` answers it and forwards to the service, because Cloud Run's front end routes on the
-Host header and answers anything it does not recognise with a 404 of its own. It is deployed with
-`npx wrangler deploy` from that directory.
+That address is this project's own hostname rather than the one Cloud Run issues, and it is the only
+way in. A small Cloudflare Worker in `edge/` answers it and forwards to the service, addressing the
+origin by its own hostname because Cloud Run's front end routes on the Host header. The service
+itself runs with its invoker check on and admits one service account, so the Cloud Run URL answers
+an uncredentialed request with 403 while the Worker, which signs each request with a Google ID token
+minted from a key held as a Worker secret, gets through. [Decision 0028](docs/decisions.md#0028)
+argues why the URL is closed with IAM rather than hidden — a request IAM denies is never billed — and
+[0029](docs/decisions.md#0029) records what happened to the rate limit that was meant to sit beside
+it. Deployed with `npx wrangler deploy` from that directory; the key is never in this repository.
 
 `--check` is what proves the repository is deployable without making it public: it runs every
 precondition the deploy has that needs no network, and names any that fails. It runs as part of the

@@ -110,6 +110,14 @@ export default {
     // addresses. The cost is that a flood can crowd out a reviewer here — which
     // is the lesser failure, because it spends nothing, and because the invoker
     // check is what stands between a flood and the meter (0028).
+    //
+    // This call does not currently deny anything. Measured on the deployed
+    // Worker 2026-09-16: configured at 5 requests per 60 seconds, limit()
+    // returned success: true on the tenth request of ten, and 310 requests
+    // inside one minute were all forwarded. The binding deploys, the call runs,
+    // and it fails open on this plan — see decision 0029. It is kept because it
+    // is the mechanism that record chose and it starts holding the moment the
+    // platform honours it; it is not what bounds the meter today.
     if (env.PROXY_RATE_LIMIT) {
       const { success } = await env.PROXY_RATE_LIMIT.limit({ key: "ttb.aaroncarney.me" });
       if (!success) {
