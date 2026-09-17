@@ -19,6 +19,7 @@ from playwright.sync_api import Page
 
 ROOT = Path(__file__).resolve().parent.parent
 FIXTURES = ROOT / "tests" / "fixtures" / "envelopes" / "single"
+BATCH_EVENTS = ROOT / "tests" / "fixtures" / "envelopes" / "batch" / "05-batch-of-50-events.jsonl"
 AXE_PATH = ROOT / "frontend" / "node_modules" / "axe-core" / "axe.min.js"
 
 
@@ -137,3 +138,81 @@ def test_axe_zero_aa_violations_batch_list(page: Page, live_server_url: str) -> 
     page.goto(f"{live_server_url}/batches")
     page.wait_for_load_state("domcontentloaded")
     _assert_accessible(_run_axe(page), "/batches")
+
+
+def _wrapped_batch_events() -> list[dict[str, Any]]:
+    """The recorded batch events, in the shape the SSE handler actually parses.
+
+    `useBatchStream.ts` reads `{batch_id, queue_position, envelope}` and flattens
+    it; the fixture stores the already-flattened form, so it is re-wrapped here
+    rather than being fed in a shape the real handler would reject.
+    """
+    events = [json.loads(line) for line in BATCH_EVENTS.read_text().splitlines() if line.strip()]
+    return [
+        {
+            "batch_id": e["batch_id"],
+            "queue_position": e["queue_position"],
+            "envelope": {k: v for k, v in e.items() if k not in ("batch_id", "queue_position")},
+        }
+        for e in events
+    ]
+
+
+@pytest.mark.usefixtures("live_server", "pnpm_built_island")
+def test_axe_zero_aa_violations_batch_populated(page: Page, live_server_url: str) -> None:
+    """The batch table with rows in it, which is the state a reviewer actually sees.
+
+    The other batch case loads a batch that streams nothing, so the table renders
+    its headers over an empty body. That is a real state and worth scanning, but
+    it is the state in which axe cannot decide `th-has-data-cells` — there are no
+    data cells for the headers to refer to. Scanning only that page left the
+    populated table, the one with fifty rows of real dispositions in it,
+    unscanned.
+
+    The stream is stubbed rather than driven, because what is under test here is
+    the rendered table's accessibility, not the transport.
+    """
+    payloads = _wrapped_batch_events()
+    page.add_init_script(
+        script=f"""
+          (() => {{
+            const payloads = {json.dumps(payloads)};
+            class FakeEventSource {{
+              constructor(url) {{
+                this.url = url;
+                this.readyState = 1;
+                this._listeners = new Map();
+                this.onerror = null;
+                // Defer past the effect that registers the listeners.
+                setTimeout(() => {{
+                  for (const p of payloads) {{
+                    this._fire('label-result', JSON.stringify(p));
+                  }}
+                  this._fire('stream-end', JSON.stringify({{ total_count: payloads.length }}));
+                }}, 0);
+              }}
+              addEventListener(name, handler) {{
+                if (!this._listeners.has(name)) this._listeners.set(name, []);
+                this._listeners.get(name).push(handler);
+              }}
+              removeEventListener(name, handler) {{
+                const hs = this._listeners.get(name) || [];
+                const i = hs.indexOf(handler);
+                if (i >= 0) hs.splice(i, 1);
+              }}
+              close() {{ this.readyState = 2; }}
+              _fire(name, data) {{
+                if (this.readyState === 2) return;
+                for (const h of this._listeners.get(name) || []) h({{ data }});
+              }}
+            }}
+            window.EventSource = FakeEventSource;
+          }})();
+        """
+    )
+    page.goto(f"{live_server_url}/batch/abc-123")
+    page.wait_for_selector('[data-mounted="true"]', timeout=5000)
+    page.wait_for_selector("tbody tr", timeout=5000)
+    rows = page.eval_on_selector_all("tbody tr", "els => els.length")
+    assert rows == len(payloads), f"expected {len(payloads)} rows, rendered {rows}"
+    _assert_accessible(_run_axe(page), "/batch (populated)")
