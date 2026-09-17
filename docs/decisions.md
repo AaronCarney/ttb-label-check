@@ -1622,3 +1622,65 @@ warm path is what the keep-warm ping exists to make the one a reviewer meets.
   against the same allowance.
 - **Nothing is deployed by this decision.** Making the app publicly reachable is the owner's call.
   [0004](#0004) settles that a deployed URL is required, not when it goes up.
+
+<a id="0026"></a>
+## 0026. Glare is not measured before the read; legibility is judged by what the reader returned
+
+**Decided:** 2026-09-16. **Evidence:** the gate run over all 56 face images of the 30 real labels
+and all 6 damaged variants, and the reading-accuracy run before and after.
+
+**What was wrong.** `app/vision/quality.py` refused an image as
+`WARNING.LEGIBILITY.GLARE` when over 15% of its pixels were brighter than 240 and the image's own
+median was not that bright. Run over the corpus, that gate was wrong in both directions at once:
+
+- it refused **seven faces of five real labels** that are sharp and readable — Laplacian variance
+  from 643 to 2797 against a low-resolution floor of 50. Two of the five lost both faces, so those
+  labels were scored against no reading at all;
+- it passed `var-glare`, the variant built with a hotspot over its warning, and refused `var-skew`,
+  which has no glare on it. The manifest expects `var-glare` to pass every check, so the gate had
+  no case anywhere in the corpus that it was right about;
+- its unit test passed because it fed synthetic noise with a 25% pure-white square, which is the
+  shape of a white label background rather than the shape of glare.
+
+**Rejected: move the threshold.** The statistic measures how light the label stock is. An unprinted
+white area and a blown-out one are the same pixel values, so no count of bright pixels separates
+them, and what a hotspot covered is not knowable before the label is read. Any threshold that fits
+these 30 labels is fitted to them, and the labels this is judged on are not these.
+
+**Chosen: no glare gate, and a legibility test after the read.** An image the detector finds no
+text on, at any of the three rotations it tries, is an image nobody can check, and it answers
+`WARNING.LEGIBILITY.LOW_RESOLUTION`. That holds whatever made the image unreadable and does not
+depend on guessing the cause from the pixels. The gates that remain — low resolution by Laplacian
+variance, motion blur by high-frequency energy — measure sharpness, which a global statistic can
+honestly measure.
+
+`WARNING.LEGIBILITY.GLARE` stays registered and moves to `reviewer_vocabulary` in
+`rules/reason_codes.yaml`: nothing emits it, and a reviewer looking at the label can see the glare
+the product cannot measure. The same file's [0013](#0013) settles that pattern for
+`WARNING.LEGIBILITY.NO_CONTRAST`.
+
+**What it cost.** A label is read before it can be refused, so an unreadable image now costs one
+OCR pass — about 1.5 seconds — instead of being turned away for nothing. That is the price of not
+refusing readable labels, and it is paid only on images that produce no text.
+
+<a id="0027"></a>
+## 0027. The reading-accuracy figures are published as counts, and the section no longer holds a hole
+
+**Decided:** 2026-09-16. **Evidence:** the run recorded in the section itself.
+
+**What changed.** [0024](#0024) settled that the reading-accuracy section may hold no percentage,
+because no run on this machine had produced one and an estimate presented as a measurement is the
+one thing that section may not contain. The constraint it recorded has not changed; the fact it
+rested on has. The run has happened, over all 30 real labels and their 56 face images, so the
+marked hole is filled with what it measured.
+
+**Chosen: counts, not percentages.** Each check is published as correct of scoreable — `16 of 30` —
+and not as a percentage. Thirty labels is a small denominator, and a percentage of it reads as a
+precision the corpus does not carry: `53.3%` from 16 of 30 invites a comparison with a figure drawn
+from thousands. The denominator differs between checks, too, because a check the label cannot
+settle is left out of it rather than counted against the reader, and a bare percentage hides that.
+
+**The guard changes rather than goes.** `test_readme_publishes_no_unmeasured_accuracy` in
+`tests/test_readme_content.py` enforced the hole. It now enforces the published form: no percentage
+in the section, every one of the nine checks named, and the corpus the figures came from stated.
+The failure it catches is the same one — a number in front of a reviewer that no run produced.
