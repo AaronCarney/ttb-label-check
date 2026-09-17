@@ -51,16 +51,28 @@ the headers and the application form fields that travel beside the images.
 # One image
 # --------------------------------------------------------------------------
 
-MAX_UPLOAD_BYTES = 10 * _MIB
-"""The largest single image this service will accept.
+MAX_UPLOAD_BYTES = 3 * _MIB // 2
+"""The largest single image this service will accept: TTB's own number.
 
-Sized for what a person actually uploads, not for what the reader needs: a
-full-resolution photograph from a current phone is a few megabytes, and this
-leaves room above that. The reader gains nothing from the extra pixels — it
-downscales to `MAX_EDGE_PX = 1600` on the long edge before reading
-(`app/vision/local.py`) — and the project's own 62 corpus images run from 13 KB
-to 560 KB. The cap is generous on purpose: refusing a real submission is a worse
-failure than reading a larger file than we needed.
+COLAs Online refuses a label image over **1.5 MB**
+(`docs/research/2026-09-15-cola-operational-context.md`), so no image that
+reached TTB through the system of record is larger than this. Matching that
+number means this service accepts exactly what the registry accepts and nothing
+beyond it. A file above the line is not a submission we are turning away — it is
+a file that could never have been filed in the first place.
+
+Held as 1.5 MiB rather than 1,500,000 bytes so that whichever unit TTB means,
+ours is never the stricter one, and we never refuse an image the registry took.
+
+The corpus agrees: 124 label images in `tests/fixtures/labels/` run from 13 KB
+to 547 KB, so the cap sits about 2.7x above the largest real label we hold. The
+reader would not use the extra bytes anyway — it downscales to
+`MAX_EDGE_PX = 1600` on the long edge before reading (`app/vision/local.py`).
+
+The earlier cap was 10 MB, sized for a phone photograph rather than for a
+filing. That was the wrong constraint to derive from: a bound should be as tight
+as the real input allows, because every byte admitted above it is memory this
+service agreed to hold for an input it can never usefully receive.
 
 Well under `MAX_REQUEST_BYTES`, so one image can never fill a request on its own
 and the two caps cannot contradict each other about which fired.
@@ -111,11 +123,20 @@ IMAGE_TOO_MANY_PIXELS = "ENGINE.INPUT.IMAGE_TOO_MANY_PIXELS"
 
 
 def _mib(value: int) -> str:
-    """A byte count as a person reads it, so a message can name the limit."""
+    """A byte count as a person reads it, so a message can name the limit.
+
+    One decimal place, trailing `.0` dropped. Whole-number rounding would print
+    the 1.5 MiB `MAX_UPLOAD_BYTES` as "2 MB" and tell the user a limit this
+    service does not enforce.
+    """
+
+    def _trim(number: float) -> str:
+        return f"{number:.1f}".removesuffix(".0")
+
     if value >= _MIB:
-        return f"{value / _MIB:.0f} MB"
+        return f"{_trim(value / _MIB)} MB"
     if value >= 1024:
-        return f"{value / 1024:.0f} KB"
+        return f"{_trim(value / 1024)} KB"
     return f"{value} bytes"
 
 
@@ -137,6 +158,20 @@ def too_many_files_message(count: int, limit: int) -> str:
     return (
         f"That batch has {count} files, more than the {limit} this service checks in "
         f"one upload. Split it into batches of {limit} or fewer."
+    )
+
+
+def oversized_batch_message(refused: int, total: int) -> str:
+    """The lead line when a batch is refused for size, above the per-file list.
+
+    Every file over a cap is named in one reply rather than the first alone.
+    Stopping at the first made a set with four bad files four round trips, each
+    one hiding the next, and the reviewer could not tell whether they were
+    halfway through or at the start.
+    """
+    return (
+        f"The batch was not started: {refused} of the {total} files cannot be checked. "
+        "Fix the files listed below and upload the set again."
     )
 
 

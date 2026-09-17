@@ -34,7 +34,14 @@
       <button type="submit">Submit batch</button>
     </form>
     {% if upload_error %}
-    <div role="alert" class="upload-error">{{ upload_error }}</div>
+    <div role="alert" class="upload-error">
+      {{ upload_error }}
+      {% if upload_error_items %}
+      <ul>
+        {% for item in upload_error_items %}<li>{{ item }}</li>{% endfor %}
+      </ul>
+      {% endif %}
+    </div>
     {% endif %}
     <p><a href="/">← Back to single-label review</a></p>
   </section>

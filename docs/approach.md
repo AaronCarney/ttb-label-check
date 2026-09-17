@@ -361,12 +361,15 @@ back later can only be asked for by a restricted set of characters, so no reques
 outside the store. One bad file in a batch is refused by name and every other file still runs —
 ending a 300-label submission because one was a spreadsheet would punish the reviewer for the
 uploader's mistake. Size and count are bounded as well, and every bound is checked before the bytes
-behind it are read: 28 MB in one request, 10 MB for any single image, 100 images in a batch, and a
+behind it are read: 28 MB in one request, 1.5 MB for any single image, 100 images in a batch, and a
 refusal for any image whose header declares more than fifty million pixels — the decompression bomb
 that no byte cap catches, since a few kilobytes of PNG can declare a canvas of fifty thousand pixels
 square. Each number is derived rather than picked, and the file that defines them states the
 derivation beside each one: the request cap sits under the host's own body limit, so a refusal comes
-from this service naming the file that was too big rather than from the platform naming nothing.
+from this service naming the file that was too big rather than from the platform naming nothing, and
+the per-image cap is TTB's own, since COLAs Online refuses a label image over 1.5 MB and nothing
+larger can ever have been filed. A batch refused for size names every file that caused it, not the
+first alone.
 What is still unbounded is memory. A batch is read whole before any of it is queued, so a hundred
 files inside the caps are a hundred files held at once, and the results table has no pagination. On
 a laptop that does not show. On a service anyone can reach it is the next thing we would close.

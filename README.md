@@ -244,13 +244,14 @@ application give the same answer every time, with a citation attached. An earlie
 finished results to a language model for a second opinion was removed for exactly this reason
 ([decision 0009](docs/decisions.md#0009)).
 
-**What an upload may be.** The service accepts **28 MB** in one request, **10 MB** for any single
+**What an upload may be.** The service accepts **28 MB** in one request, **1.5 MB** for any single
 image, **100** images in one batch, and refuses any image whose header declares more than
 **50,000,000** pixels. Each number is derived from a constraint rather than picked, and
 `app/api/limits.py` states the derivation beside it: the request cap sits under Cloud Run's 32 MiB
 HTTP/1 body limit so the refusal comes from this service with a message naming the file, rather
-than from Google with a message naming nothing; the per-image cap is above a current phone's
-full-resolution photograph; 100 images of label size is about 18 MB, inside the request cap, and
+than from Google with a message naming nothing; the per-image cap is TTB's own, since COLAs Online
+refuses a label image over 1.5 MB and nothing larger can ever have been filed; 100 images of label
+size is about 18 MB, inside the request cap, and
 the PRD's 300 submissions in ten minutes is three such batches. The pixel ceiling is the guard
 against a decompression bomb — a few kilobytes of PNG can declare a 50,000 × 50,000 canvas, which no
 byte cap catches — and it is checked against the file's header before anything is decoded. A refusal

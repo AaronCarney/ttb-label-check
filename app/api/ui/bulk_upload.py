@@ -90,31 +90,47 @@ async def batches_upload_submit(
     # fact about that one file, but a file over the cap is a request this
     # service declined to hold in memory, and queueing the rest would mean
     # holding them anyway.
+    #
+    # It ends the submission, but it does not end the scan. Every file is
+    # checked so that every offender is named in one reply. Returning on the
+    # first one meant a set with four bad files took four uploads to discover,
+    # each refusal hiding the next.
     raw: list[tuple[str, bytes, ImageMediaType | None]] = []
-    for upload in labels:
+    too_large: list[str] = []
+    for index, upload in enumerate(labels):
         body = await upload.read()
-        filename = upload.filename or f"label-{len(raw)}"
+        filename = upload.filename or f"label-{index}"
+        refusal: str | None = None
         if len(body) > limits.MAX_UPLOAD_BYTES:
-            return templates.TemplateResponse(
-                request=request,
-                name="batches_upload.html",
-                context={
-                    "dev_mode": settings.dev_mode,
-                    "upload_error": limits.upload_too_large_message(
-                        filename, len(body), limits.MAX_UPLOAD_BYTES
-                    ),
-                },
-                status_code=413,
+            refusal = limits.upload_too_large_message(
+                filename, len(body), limits.MAX_UPLOAD_BYTES
             )
-        bomb = limits.bomb_refusal(filename, body)
-        if bomb is not None:
-            return templates.TemplateResponse(
-                request=request,
-                name="batches_upload.html",
-                context={"dev_mode": settings.dev_mode, "upload_error": bomb[0]},
-                status_code=413,
-            )
+        else:
+            bomb = limits.bomb_refusal(filename, body)
+            if bomb is not None:
+                refusal = bomb[0]
+        if refusal is not None:
+            too_large.append(refusal)
+            # The whole upload is going back, so nothing read so far is worth
+            # keeping. Dropping it here is what lets the scan run to the end
+            # without holding a batch it has already decided to refuse.
+            raw.clear()
+            continue
+        if too_large:
+            continue
         raw.append((filename, body, _detect_image_mime(body)))
+
+    if too_large:
+        return templates.TemplateResponse(
+            request=request,
+            name="batches_upload.html",
+            context={
+                "dev_mode": settings.dev_mode,
+                "upload_error": limits.oversized_batch_message(len(too_large), len(labels)),
+                "upload_error_items": too_large,
+            },
+            status_code=413,
+        )
 
     if all(mime is None for _, _, mime in raw):
         # Nothing to check and so no batch to show a refusal in. This is the
