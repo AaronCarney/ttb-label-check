@@ -379,9 +379,14 @@ def _summarize(
             f"seconds per label: median {statistics.median(ordered):.2f}, "
             f"slowest {ordered[-1]:.2f}, whole run {sum(ordered):.1f}"
         )
+    # Naming what the False actually means. `warning_exact` scores the reader's
+    # verdict against the label's, so a False is the reader disagreeing with the
+    # label - which happens both on a label whose warning is word for word and
+    # on one whose warning is not. Reporting these as labels whose warning is
+    # not word for word stated the opposite of the truth for the second kind.
     misses = [r["id"] for r in rows if r["warning_exact"] is False]
     if misses:
-        print(f"\nwarning not word for word on {len(misses)}: {', '.join(misses)}")
+        print(f"\nword-for-word verdict wrong on {len(misses)}: {', '.join(misses)}")
 
 
 async def main() -> int:
@@ -407,6 +412,17 @@ async def main() -> int:
             "record each image's reading here as JSON, and replay an image whose "
             "recording already exists instead of reading it again. Makes a corpus "
             "pass restartable and gives the replay suite its fixtures."
+        ),
+    )
+    parser.add_argument(
+        "--sleep",
+        type=float,
+        default=0.0,
+        help=(
+            "wait this many seconds after each label that was actually read, to "
+            "let the CPU cool between labels. A label served entirely from "
+            "recordings spent no CPU, so it is not followed by a wait, and "
+            "neither is the last label."
         ),
     )
     parser.add_argument("--json", type=Path, default=None, help="also write the per-label results here")
@@ -435,10 +451,16 @@ async def main() -> int:
 
     rows, seconds = [], []
     faces_replayed = faces_read = 0
-    for entry in entries:
+    for position, entry in enumerate(entries):
         read, elapsed, replayed = await _read_faces(reader, entry, args.freeze)
         faces_replayed += replayed
-        faces_read += len(entry["images"]) - replayed
+        read_now = len(entry["images"]) - replayed
+        faces_read += read_now
+        # The cooling gap belongs after work, so it is skipped for a label whose
+        # faces all came off disk and after the last label, where waiting delays
+        # the scoreboard and cools nothing.
+        if args.sleep > 0 and read_now > 0 and position + 1 < len(entries):
+            await asyncio.sleep(args.sleep)
         # A variant is a damaged copy of a real label: it exercises the rules,
         # not the reader, so it is recorded but never scored.
         if entry["kind"] != "real":
