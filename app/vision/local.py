@@ -77,6 +77,16 @@ _PICK_CERTAINTY = {
 # weaker result than reading it as it lay, so it is reported as one.
 _ROTATED_FRAME_PENALTY = 0.90
 
+# A brand mark is routinely set over several lines, and the engine returns one
+# box per line. These say which neighbouring lines are part of the same mark:
+# a line set below a third of the tallest line's height is subordinate text
+# rather than part of the name, and a line further away than these fractions of
+# that height is a different block of the label. They are ratios rather than
+# pixel counts because they are read off a thumbnail whose scale varies.
+_BLOCK_MIN_HEIGHT_RATIO = 0.30
+_BLOCK_MAX_VERTICAL_GAP = 0.40
+_BLOCK_MAX_HORIZONTAL_GAP = 0.50
+
 _FIELD_NAMES = (
     "brand_name",
     "class_type",
@@ -110,6 +120,19 @@ class _Box:
     @property
     def width(self) -> float:
         return self.x1 - self.x0
+
+    @property
+    def type_size(self) -> float:
+        """How large this line's type is set, whichever way the line runs.
+
+        A line of text is long in the direction it reads and short across it,
+        so the shorter side is the type's size and the longer one is how much
+        of it there is. Height alone says the same thing only while the line is
+        horizontal: a warning printed up the side of a label comes back as a
+        497x55 box, and read as height it is the largest type on the label by a
+        factor of five. It is not — it is 55pt type in a tall thin box.
+        """
+        return min(self.height, self.width)
 
     @property
     def cy(self) -> float:
@@ -387,6 +410,37 @@ class LocalVisionExtractor:
         payloads, meta = await asyncio.to_thread(self._read_serialised, label.image_bytes)
         elapsed_ms = int((time.monotonic() - t0) * 1000)
         self._record(label=label, payloads=payloads, meta=meta, elapsed_ms=elapsed_ms)
+
+        # The legibility gate that means anything, and the only one that can be
+        # applied honestly: the detector found no text on this image, at any of
+        # the three rotations it tries, so there is nothing on it for any rule
+        # to check. Whatever made it unreadable - glare, a thumb over the lens,
+        # a blank page - the answer to the person who sent it is the same, and
+        # it does not depend on guessing the cause from the pixels. The gates in
+        # `app/vision/quality.py` run before the read and cannot see this.
+        if not meta.get("boxes_found"):
+            return [
+                FieldObservation(
+                    field_id="quality",
+                    beverage_class=BeverageClass.SPIRITS,
+                    observed_value=None,
+                    evidence=(
+                        Evidence(
+                            field_id="quality",
+                            source=EvidenceSource.DERIVED,
+                            bbox=None,
+                            extracted_text="WARNING.LEGIBILITY.LOW_RESOLUTION",
+                            match_kind=MatchKind.NONE,
+                            confidence=0.0,
+                        ),
+                    ),
+                    upstream_meta={
+                        "disposition": "needs_better_photo",
+                        "reason_code": "WARNING.LEGIBILITY.LOW_RESOLUTION",
+                        **meta,
+                    },
+                )
+            ]
 
         observations: list[FieldObservation] = []
         for field_name in _FIELD_NAMES:
@@ -1111,13 +1165,15 @@ def _parse(
         ),
     )
     if brand_box is not None:
+        block = _display_block(body, brand_box, taken)
+        text = " ".join(b.text.strip() for b in block if b.text.strip())
         out["brand_name"] = (
             {
-                "brand_name": brand_box.text.strip(),
-                "confidence": _confidence("brand_name", [brand_box]),
+                "brand_name": text,
+                "confidence": _confidence("brand_name", block),
             },
-            brand_box.as_bbox(),
-            brand_box.text.strip(),
+            _block_bbox(block),
+            text,
         )
     else:
         out["brand_name"] = ({"brand_name": "", "confidence": 0.0}, None, None)
@@ -1161,15 +1217,85 @@ def _first_match(boxes: list[_Box], pattern: re.Pattern, *, reject=None):
 
 
 def _largest_matching(boxes: list[_Box], predicate) -> _Box | None:
-    """The tallest box whose text satisfies `predicate`.
+    """The box set in the largest type whose text satisfies `predicate`.
 
     Type size is what a label uses to say which words matter most, so the
-    tallest line is the best reading of a field plain OCR does not label.
+    largest line is the best reading of a field plain OCR does not label. Size
+    is `_Box.type_size` and not height, because a line running up the side of a
+    label is tall without being large — and the one line most often printed
+    that way is the health warning, which is then the tallest thing on the
+    label and was read as its brand.
     """
     candidates = [b for b in boxes if b.text.strip() and predicate(b.text)]
     if not candidates:
         return None
-    return max(candidates, key=lambda b: b.height)
+    return max(candidates, key=lambda b: b.type_size)
+
+
+def _block_bbox(block: list[_Box]) -> tuple[int, int, int, int]:
+    """One box around every line of a block, for the region a reviewer is shown."""
+    return (
+        int(min(b.x0 for b in block)),
+        int(min(b.y0 for b in block)),
+        int(max(b.x1 for b in block)),
+        int(max(b.y1 for b in block)),
+    )
+
+
+def _display_block(boxes: list[_Box], anchor: _Box, exclude: set[str]) -> list[_Box]:
+    """The lines set as one display block with `anchor`, in reading order.
+
+    The brand is the one mandatory element with no lead-in words, no unit and
+    no fixed wording, so it is found by how it is set rather than by what it
+    says — and the tallest line is only ever part of it. Labels set a mark over
+    several lines ("Hop" over "Butcher" over "FOR THE WORLD") or across one
+    ("LOST" beside "LANTERN"), and the engine returns a box for each, so the
+    tallest box alone reports a fragment of the name.
+
+    A line belongs with the anchor when a reader would see it as the same
+    block: set at a size of the same order, and close enough to it in both
+    directions relative to that size. Size is `_Box.type_size` throughout, so a
+    line running up the side of the label is not mistaken for large type. The block grows one line at a time, so a
+    mark whose lines step down in size is followed the way a person follows it.
+
+    Lines already read as another mandatory element are left out: a label that
+    sets its class designation directly under the brand has two elements there,
+    not one long name.
+
+    A line carrying no letters can still join. "BENT 301" and "No. 66" are
+    marks, and nothing structural separates the number in a brand from an age
+    statement set in the same block — so the reading may carry a word the name
+    does not. That is a reviewer seeing more of the label than the brand field,
+    which is the safe direction: the reading is evidence, and a name reported
+    short is a name the reviewer cannot find.
+    """
+    block = [anchor]
+    floor = anchor.type_size * _BLOCK_MIN_HEIGHT_RATIO
+    max_dy = anchor.type_size * _BLOCK_MAX_VERTICAL_GAP
+    max_dx = anchor.type_size * _BLOCK_MAX_HORIZONTAL_GAP
+
+    remaining = [
+        b for b in boxes
+        if b is not anchor and b.text.strip() and b.text.strip() not in exclude
+        and b.type_size >= floor
+    ]
+
+    grew = True
+    while grew:
+        grew = False
+        x0 = min(b.x0 for b in block)
+        x1 = max(b.x1 for b in block)
+        y0 = min(b.y0 for b in block)
+        y1 = max(b.y1 for b in block)
+        for box in list(remaining):
+            dx = max(0.0, x0 - box.x1, box.x0 - x1)
+            dy = max(0.0, y0 - box.y1, box.y0 - y1)
+            if dx <= max_dx and dy <= max_dy:
+                block.append(box)
+                remaining.remove(box)
+                grew = True
+
+    return _reading_order(block)
 
 
 def _only_a_lead_in(text: str) -> bool:
