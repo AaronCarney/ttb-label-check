@@ -31,6 +31,12 @@
 #   TTB_SERVICE       Cloud Run service name. Defaults to ttb-label-check.
 #   TTB_INVOKER_SA    The service account permitted to invoke the service.
 #                     Defaults to ttb-edge-invoker in TTB_GCP_PROJECT.
+#   TTB_PUBLIC        Set to 1 to deploy the service with its Cloud Run URL open
+#                     to anyone, instead of behind the invoker check. The edge
+#                     proxy decision 0025 describes does not exist yet, so this
+#                     is what makes the URL answer a reviewer who clicks it. The
+#                     instance cap below is then the only thing bounding the
+#                     meter. Deploying open is the owner's call every time.
 
 set -euo pipefail
 
@@ -155,6 +161,12 @@ STAGING="$(mktemp -d)"
 trap 'rm -rf "$STAGING"' EXIT
 git archive --format=tar HEAD | tar -x -C "$STAGING"
 
+if [ "${TTB_PUBLIC:-0}" = "1" ]; then
+    ACCESS_FLAG=--allow-unauthenticated
+else
+    ACCESS_FLAG=--no-allow-unauthenticated
+fi
+
 echo "Deploying ${SERVICE} to ${REGION} in ${TTB_GCP_PROJECT}. Cloud Build builds the image."
 gcloud run deploy "$SERVICE" \
     --project "$TTB_GCP_PROJECT" \
@@ -169,7 +181,13 @@ gcloud run deploy "$SERVICE" \
     --timeout "$TIMEOUT" \
     --cpu-boost \
     --set-env-vars VISION_MODE=local \
-    --no-allow-unauthenticated
+    "$ACCESS_FLAG"
+
+if [ "${TTB_PUBLIC:-0}" = "1" ]; then
+    echo "Deployed open: the service URL answers anyone. The two-instance cap is"
+    echo "the only bound on the meter. Delete the service when the review is done."
+    exit 0
+fi
 
 # The one identity allowed to call the service. Without this the deploy is
 # reachable by nobody at all, including the edge, which is the safe direction to
