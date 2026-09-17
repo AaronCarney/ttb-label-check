@@ -125,6 +125,18 @@ it is built from real label images shipped in this repository.
 The first label is slower than the rest: the OCR models are read off disk once, on first use, and
 kept for the life of the process.
 
+**What an upload may be, and why the request cap is the size it is.** One request may carry
+**31.5 MB** in total, any single image up to **1.5 MB**, and a batch up to **100** images. The request
+total is the host's constraint rather than this service's choice: Cloud Run refuses an HTTP/1
+request larger than 32 MiB before the application is reached, and when Google refuses it the reply
+is Google's own error page, which names neither the limit nor the file that broke it. This
+service's cap therefore sits just under the platform's, so the refusal you get is ours and it tells
+you which file to fix. Google's published quota is *"Maximum HTTP/1 request size: 32 MiB per
+request. Limit applies if using HTTP/1 server. No limit if using HTTP/2 server"* — [Cloud Run
+quotas and limits](https://docs.cloud.google.com/run/quotas), under *Request limits for Cloud Run*,
+read 2026-09-17. Running locally there is no Cloud Run in the way, but the caps are enforced by the
+application in both places, so a local run refuses exactly what the deployed one refuses.
+
 ### Running the tests
 
 ```bash
@@ -251,12 +263,13 @@ application give the same answer every time, with a citation attached. An earlie
 finished results to a language model for a second opinion was removed for exactly this reason
 ([decision 0009](docs/decisions.md#0009)).
 
-**What an upload may be.** The service accepts **28 MB** in one request, **1.5 MB** for any single
+**What an upload may be.** The service accepts **31.5 MB** in one request, **1.5 MB** for any single
 image, **100** images in one batch, and refuses any image whose header declares more than
 **50,000,000** pixels. Each number is derived from a constraint rather than picked, and
-`app/api/limits.py` states the derivation beside it: the request cap sits under Cloud Run's 32 MiB
-HTTP/1 body limit so the refusal comes from this service with a message naming the file, rather than
-from Google with a message naming nothing; the per-image cap is TTB's own, since COLAs Online
+`app/api/limits.py` states the derivation beside it: the request cap sits just under Cloud Run's 32
+MiB HTTP/1 request limit ([Cloud Run quotas and
+limits](https://docs.cloud.google.com/run/quotas)) so the refusal comes from this service with a
+message naming the file, rather than from Google with a message naming nothing; the per-image cap is TTB's own, since COLAs Online
 refuses a label image over 1.5 MB and nothing larger can ever have been filed; 100 images of label
 size is about 18 MB, inside the request cap, and the PRD's 300 submissions in ten minutes is three
 such batches. The pixel ceiling is the guard against a decompression bomb — a few kilobytes of PNG

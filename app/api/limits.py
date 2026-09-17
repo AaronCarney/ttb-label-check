@@ -40,11 +40,25 @@ page, and the user is never told what the limit is or which file broke it. Our
 cap therefore sits below it, so our message is the one they read.
 """
 
-MAX_REQUEST_BYTES = 28 * _MIB
-"""The largest request body this service will read, across every route.
+MAX_REQUEST_BYTES = 63 * _MIB // 2
+"""The largest request body this service will read, across every route: 31.5 MiB.
 
-4 MiB under the platform's cap, which is headroom for the multipart boundaries,
-the headers and the application form fields that travel beside the images.
+The owner's number, set 2026-09-17: as close to the platform ceiling as is safe,
+so a batch upload gets every byte the platform will carry. He asked for a cap
+that fits a hundred files at once; 50 MB and 75 MB were both put to him and both
+are unreachable, because `CLOUD_RUN_HTTP1_REQUEST_BYTES` above is refused by
+Google before this process is reached. 31.5 MiB is the largest round number
+under it.
+
+The half-MiB of headroom is for the request headers, which count towards the
+platform's limit and sit outside the body this service measures. The multipart
+boundaries and the form fields travel *inside* the body, so they are already
+counted here and need no reservation. A hundred parts cost roughly 20 KB of
+boundary and header text, and the HTTP request headers a few more; half a
+mebibyte covers both many times over.
+
+Held as MiB rather than as 31,500,000 bytes so it is in the same unit as the
+limit it sits under, and the comparison between them is exact.
 """
 
 # --------------------------------------------------------------------------

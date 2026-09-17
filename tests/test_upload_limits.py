@@ -67,9 +67,14 @@ def test_the_request_cap_sits_below_the_platform_cap() -> None:
     would mean Google's error page answers the user instead of ours, so the
     user is never told what the limit is or which file broke it."""
     assert limits.MAX_REQUEST_BYTES < limits.CLOUD_RUN_HTTP1_REQUEST_BYTES
-    # Enough headroom for multipart boundaries, headers and the form fields
-    # that travel beside the images.
-    assert limits.CLOUD_RUN_HTTP1_REQUEST_BYTES - limits.MAX_REQUEST_BYTES >= 2 * 1024 * 1024
+    # Enough headroom for the HTTP request headers, which count towards the
+    # platform's limit and sit outside the body `body_limit.py` measures. The
+    # multipart boundaries and the form fields travel inside the body, so
+    # `MAX_REQUEST_BYTES` already counts them and they need no reservation
+    # here — the earlier 2 MiB floor reserved for them twice. A hundred parts
+    # cost roughly 20 KB of boundary and header text; 256 KiB is an order of
+    # magnitude above what the headers outside the body can be.
+    assert limits.CLOUD_RUN_HTTP1_REQUEST_BYTES - limits.MAX_REQUEST_BYTES >= 256 * 1024
 
 
 def test_one_file_can_never_fill_the_request_on_its_own() -> None:
