@@ -251,3 +251,50 @@ def test_both_graded_documents_state_the_effective_batch_limit() -> None:
             f"{name} ({value})" for name, value in expected.items() if value not in paragraph
         ]
         assert not missing, f"{document.name} does not state: {missing}"
+
+
+def test_readme_names_the_photo_the_app_refuses_to_read() -> None:
+    """A photo turned away for quality gets no compliance check at all.
+
+    `app/vision/quality.py` refuses a reading before any rule runs (step 2 of
+    `app/services/evaluator.py`), so the envelope comes back `needs_review`
+    with a legibility reason code and no field findings. The refusal itself is
+    not hidden - the reason code reaches the audit trail as a synthetic
+    per-rule entry. What a reviewer cannot see from the envelope is that the
+    line was drawn by two thresholds this project picked, or where they sit.
+    "Needs a better photo" reads as a statement about the photograph; it is
+    also a statement about the limit of what this app will judge.
+
+    The numbers are read from the module, so moving a threshold without moving
+    the README fails here rather than in front of someone whose label was
+    refused.
+    """
+    from app.vision import quality
+
+    limitations = _section(_readme(), "## Limitations")
+    expected = {
+        "low-detail threshold": str(quality.LOW_RES_VARIANCE_MIN),
+        "motion-blur threshold": str(quality.MOTION_BLUR_HIGHFREQ_MIN),
+    }
+    missing = [f"{name} ({value})" for name, value in expected.items() if value not in limitations]
+    assert not missing, f"Limitations does not state: {missing}"
+    assert "no compliance rule runs" in limitations, (
+        "Limitations does not say that a refused photo is checked against nothing"
+    )
+
+
+def test_readme_names_the_re_read_that_can_decline_to_fire() -> None:
+    """The one gate here that really does leave no trace.
+
+    The rotated re-read that finds a sideways government warning runs only
+    when three things are true at once (`app/vision/local.py`): no heading was
+    found upright, the box shapes look sideways, and the sideways strips read
+    like the warning. When either of the last two says no, the label is read
+    upright only and reported as carrying no warning - and nothing in the
+    envelope records that a re-read was considered and declined. Since a
+    missing warning became a rejection, that silence decides labels.
+    """
+    limitations = _section(_readme(), "## Limitations")
+    assert "declined" in limitations or "decline" in limitations, (
+        "Limitations does not say the rotated re-read can decline to fire silently"
+    )

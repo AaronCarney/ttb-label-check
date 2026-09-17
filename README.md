@@ -522,6 +522,10 @@ them, and each is switched off in the rule pack rather than reporting a verdict 
 The sixth is different: those requirements were never decided on at all, which is the point of the
 entry, so it cites nothing and nothing in the pack switches them off.
 
+The last two are different again. They are not checks the app declines to make, but two places where
+it stops short of judging a label and the envelope does not fully say so. Both are in the reading,
+before any rule is reached.
+
 - **An upload with no application is read but not checked.** The beverage the application declares
   is what decides which rules apply, so a label submitted on its own is read and reported, and no
   check runs against it — including the government-warning checks, which every beverage shares but
@@ -576,3 +580,25 @@ entry, so it cites nothing and nothing in the pack switches them off.
   For an agent the consequence is the same as for the typography above, and it is silent: a label
   can come back with every check passed and none of these five looked at, so the agent's own eye is
   the only thing standing between a badly set label and an approval.
+
+- **A photo the app refuses to read is checked against nothing.** Before any rule runs, the app
+  measures the image and can turn it away: detail below a Laplacian variance of **50.0** reads as too
+  low a resolution, and a high-frequency ratio below **0.3** reads as motion blur. Either one ends
+  the evaluation there — **no compliance rule runs** against that label, and the result comes back
+  as a review item carrying the legibility reason code and no field readings at all. The refusal
+  itself is on the record: the reason code reaches the audit trail as its own entry. What is not on
+  the record is that both numbers are this project's own line, set against this corpus, derived from
+  nothing TTB publishes. So for an agent, *needs a better photo* is as much a statement about where
+  this app stops as about the photograph — a label just the wrong side of either number has not been
+  judged by anything, and the only way to find out whether it is compliant is to look at it.
+
+- **A rotated re-read can decline to fire, and nothing records that it did.** A government warning
+  printed sideways is found by reading the label again at 90° and 270°. That second read is the
+  expensive part of a reading, so it runs only when three things are true at once: no heading was
+  found in the upright pass, the box shapes look sideways, and the sideways strips themselves read
+  like the warning. When either of the last two declines, the label is read upright only and reported
+  as carrying no government warning — and no part of the result says a re-read was considered and
+  turned down. Since a missing warning became a §16.21 rejection rather than a review item, that
+  silence now decides labels rather than just delaying them. A label photographed fully upside down
+  is a known gap of the same kind: no rotation covers 180°, and its boxes are horizontal, so the
+  sideways test does not fire for it either.
