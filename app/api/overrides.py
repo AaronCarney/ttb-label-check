@@ -6,9 +6,10 @@ import uuid
 from datetime import datetime, timezone
 from typing import Literal
 
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, ConfigDict
 
+from app.api.ui.results import SingleResultStore, _get_result_store
 from app.schemas.audit import OverrideEntry
 
 router = APIRouter()
@@ -86,6 +87,7 @@ async def post_override(
     evaluation_id: str,
     payload: OverrideRequest,
     request: Request,
+    results: SingleResultStore = Depends(_get_result_store),
 ) -> dict:
     if payload.reason_code not in _accepted_reason_codes():
         _logger.warning(
@@ -104,10 +106,16 @@ async def post_override(
         request.app.state.batches, evaluation_id
     )
     if env is None:
-        # Two-of-three cases collapse to 404: (a) evaluation_id never existed
-        # in any batch; (b) label is queued but evaluator has not yet emitted
-        # a result. Per the contract above, the UI prevents (b) by gating the
-        # override button on the SSE label-result event.
+        # Not in a batch, so it may be a single label. Those are kept by
+        # `app/api/ui/results.py` precisely so this call has something to
+        # amend (`docs/decisions.md#0033`).
+        env = results.get(evaluation_id)
+    if env is None:
+        # Three cases collapse to 404: (a) evaluation_id never existed;
+        # (b) the label is queued but the evaluator has not emitted a result;
+        # (c) the single-label result has passed its retention window. Per the
+        # contract above, the UI prevents (b) by gating the override button on
+        # the SSE label-result event.
         _logger.warning(
             f"override_rejected_not_found evaluation_id={evaluation_id} reason_code={payload.reason_code}",
             extra={
@@ -117,7 +125,10 @@ async def post_override(
         )
         raise HTTPException(
             status_code=404,
-            detail=f"evaluation_id {evaluation_id} not found in any in-flight batch result",
+            detail=(
+                f"evaluation_id {evaluation_id} has no result to override: it is in "
+                "no in-flight batch and no single-label result is kept for it"
+            ),
         )
 
     entry = OverrideEntry(
@@ -134,13 +145,19 @@ async def post_override(
         "overrides": env.audit_trail.overrides + (entry,),
     })
     new_env = env.model_copy(update={"audit_trail": new_audit})
-    in_flight.results[label_id] = new_env
+    if in_flight is not None:
+        in_flight.results[label_id] = new_env
+    else:
+        # A single label: the store is where its record lives, so the amended
+        # envelope is written back there.
+        results.put(new_env)
 
     # Surface on the SSE stream so the UI updates the timeline. Bus may be
     # absent if the lifespan registry has been torn down concurrently; treat
     # the broadcast as best-effort — the audit-trail mutation is the
     # source-of-truth contract.
-    bus = request.app.state.buses.get(batch_id)
+    # A single label has no batch and so no stream to announce on.
+    bus = request.app.state.buses.get(batch_id) if batch_id is not None else None
     bus_present = bus is not None
     if bus is not None:
         bus.broadcast({
@@ -153,9 +170,9 @@ async def post_override(
         })
 
     _logger.info(
-        f"override_applied batch_id={batch_id} evaluation_id={evaluation_id} field={payload.field_name} {env.disposition}->{payload.applied_disposition} bus={bus_present}",
+        f"override_applied batch_id={batch_id or 'single'} evaluation_id={evaluation_id} field={payload.field_name} {env.disposition}->{payload.applied_disposition} bus={bus_present}",
         extra={
-            "batch_id": batch_id,
+            "batch_id": batch_id or "single",
             "evaluation_id": evaluation_id,
             "reason_code": payload.reason_code,
         },

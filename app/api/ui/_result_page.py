@@ -17,6 +17,7 @@ from fastapi.responses import HTMLResponse
 from app.api.ui._page import templates
 from app.api.ui._submission import _build_application
 from app.api.ui.images import UploadImageStore
+from app.api.ui.results import SingleResultStore
 from app.config import Settings
 
 
@@ -55,6 +56,7 @@ async def render_single_result(
     settings: Settings,
     evaluator,
     images: UploadImageStore,
+    results: SingleResultStore,
     posted: dict[str, str],
     image_bytes: bytes,
     mime: str,
@@ -91,6 +93,10 @@ async def render_single_result(
     # generated above, so the image route and the URL this template renders
     # agree even where the two differ.
     images.put(envelope.evaluation_id, mime, image_bytes)
+    # The result is kept too, and under the same id. Without it a reviewer's
+    # override of a single label has nothing to amend, because only a batch
+    # holds its results (`docs/decisions.md#0033`).
+    results.put(envelope)
     return templates.TemplateResponse(
         request=request,
         name="single.html",

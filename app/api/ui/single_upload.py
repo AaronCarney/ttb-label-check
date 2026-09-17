@@ -14,6 +14,7 @@ from app.api.ui._page import _get_settings
 from app.api.ui._result_page import refuse, render_single_result
 from app.api.ui._submission import _detect_image_mime, _get_upload_evaluator
 from app.api.ui.images import UploadImageStore, _get_image_store
+from app.api.ui.results import SingleResultStore, _get_result_store
 from app.config import Settings
 
 router = APIRouter()
@@ -36,6 +37,7 @@ async def single_label_upload(
     settings: Settings = Depends(_get_settings),
     evaluator=Depends(_get_upload_evaluator),
     images: UploadImageStore = Depends(_get_image_store),
+    results: SingleResultStore = Depends(_get_result_store),
 ) -> HTMLResponse:
     """Check one uploaded label against the application filed for it.
 
@@ -79,6 +81,7 @@ async def single_label_upload(
         settings=settings,
         evaluator=evaluator,
         images=images,
+        results=results,
         posted=posted,
         image_bytes=image_bytes,
         mime=mime,

@@ -112,9 +112,9 @@ function SingleApp({ envelope }: { envelope: DispositionEnvelope | null }): Reac
         open={overrideOpen}
         onOpenChange={setOverrideOpen}
         codes={_REASON_CODES}
-        // In the single-label flow this POST returns 404 against the real
-        // override endpoint, because the label is not in any in-flight batch's
-        // results map. Tests intercept it with page.route().
+        // The single-label flow reaches the same endpoint a batch does. Its
+        // result is kept by `app/api/ui/results.py`, so the override has a
+        // record to amend rather than answering 404.
         onSubmit={async (p) => {
           const body = {
             field_name: null,

@@ -2028,3 +2028,50 @@ of telemetry by a list of field names.
   question that has not been asked.
 - **`evaluation_id` for a synthesised application is now random.** Two runs of the same ref batch no
   longer produce the same id, so a test that pinned one would have to be rewritten. None did.
+
+<a id="0033"></a>
+## 0033. A single label's result is kept, so a reviewer can overrule it
+
+**Decided:** 2026-09-16. **Evidence:** `app/api/overrides.py` as it stood, which searched
+`app.state.batches` and nothing else; `app/api/ui/_result_page.py`, which evaluated and kept only the
+image; [0018](#0018), which settled where an uploaded image is kept and why.
+
+**What was wrong.** The override endpoint answered 404 for every single-label check, always. It looks
+an evaluation up by walking the in-flight batches, and a single label is in no batch: the result page
+rendered the envelope into the template and let it go. The interface offered the override drawer on
+that page regardless, so a reviewer could fill it in, submit it, and be told the label did not exist.
+The front-end source said so in a comment rather than the product doing anything about it.
+
+The capability was not missing by decision. FR-9 asks for a reviewer override with a reason code on a
+checked label, and nothing in it distinguishes a label checked on its own from one checked in a batch.
+
+**Chosen.** Single-label results are kept where the single-label images are kept — one JSON file per
+evaluation under the machine's temporary directory, swept on the same seven-day window, in
+`app/api/ui/results.py`. The override endpoint tries the in-flight batches first and this store
+second, writes the amended envelope back to whichever held it, and announces on the batch's stream
+only when there is a batch.
+
+**Because** the reasoning in [0018](#0018) for the image applies unchanged to the result beside it: a
+page opened now must still be whole when it is looked at again, every worker on the host must read
+what the others wrote, and a restart must not lose it. Two stores with one rule between them is
+cheaper to hold in the head than one store with an exception in it.
+
+**Rejected.** *Keep single-label results in memory alongside the batches* — smaller, and it is what
+the batch path already does, but it fails in the three ways [0018](#0018) already rejected for the
+image: a restart loses it, a second worker does not see it, and nothing bounds what one process
+accumulates. It would also put the result and the image it belongs to in two different kinds of place.
+*Leave it, and take the override drawer off the single-label page* — honest, and it would have cost
+nothing, but it withdraws a capability the requirements ask for to avoid keeping one file.
+
+**Cost, stated.**
+
+- **An override is possible for seven days and then is not.** After the sweep the record is gone and
+  the endpoint answers 404 again, with a message that now says so. The window is the image's window,
+  chosen there for how long a page stays worth reopening, not for how long a reviewer has to change
+  their mind.
+- **The same result now exists in two places while a batch is in flight.** A label checked in a batch
+  is in `app.state.batches`; one checked on its own is on disk. The endpoint tries them in that order,
+  and an evaluation id that somehow appeared in both would be amended in memory only.
+- **Nothing serves a kept single-label result back.** The store exists for the override path. Opening
+  the result page again re-renders from the template, not from the store, so an override applied a
+  moment ago is in the record but not on the page until the page is reloaded from a fresh check.
