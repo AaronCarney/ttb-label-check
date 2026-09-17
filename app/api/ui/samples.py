@@ -126,9 +126,8 @@ _MANIFEST = _SAMPLE_LABELS_DIR / "manifest.json"
 # happening, not to list a catalogue.
 #
 # Every description here is what the label actually did, measured on this route
-# with both faces sent on 2026-09-17 — `plans/probes/item6_all_samples.json`,
-# the sweep after `8ca3ecc` and `a47d03c`. Two facts from that sweep decide the
-# list:
+# with both faces sent on 2026-09-17, in a sweep of the manifest taken after
+# `8ca3ecc` and `a47d03c`. Two facts from that sweep decide the list:
 #
 #   - **No label in the corpus passes outright**, so none is offered as one. The
 #     nearest is a wine with a single point for a reviewer.
