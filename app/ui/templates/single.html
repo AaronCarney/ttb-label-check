@@ -17,6 +17,28 @@
       <p class="empty-inbox-lead">Drop new labels here to begin reviewing.</p>
     </section>
   {% endif %}
+  {% if samples %}
+  {# One click from arriving to a checked label. Each button posts a label that
+     ships with the product, with the application really filed for it already
+     filled in, so nothing has to be downloaded, unzipped or typed first. #}
+  <section class="try-samples" aria-labelledby="try-samples-heading">
+    <h2 id="try-samples-heading">Or check one of ours, now</h2>
+    <p class="try-samples-lead">
+      Real approved labels from the TTB Public COLA Registry, each checked
+      against the application it was actually filed with.
+    </p>
+    <ul class="try-samples-list">
+      {% for sample in samples %}
+      <li>
+        <form action="/samples/{{ sample.id }}" method="post">
+          <button type="submit" class="primary-button">Check {{ sample.brand }}</button>
+          <span class="try-samples-blurb">{{ sample.blurb }}</span>
+        </form>
+      </li>
+      {% endfor %}
+    </ul>
+  </section>
+  {% endif %}
   <form action="/" method="post" enctype="multipart/form-data" class="upload-form" aria-label="Upload a label for evaluation">
     <label for="label-upload" class="upload-form-label">Upload a label (PNG or JPEG)</label>
     <div class="dropzone">

@@ -13,6 +13,7 @@ import { RawJSONDrawer } from "./components/RawJSONDrawer";
 import { RuleVerdict } from "./components/RuleVerdict";
 import { Toast } from "./components/Toast";
 import { useKeyboardShortcuts } from "./hooks/useKeyboardShortcuts";
+import { needsBetterPhotoFrom } from "./lib/needsBetterPhoto";
 import type { DispositionEnvelope } from "./types/envelopes";
 import type { ReasonCodeEntry } from "./components/ReasonCodePicker";
 
@@ -70,9 +71,7 @@ function SingleApp({ envelope }: { envelope: DispositionEnvelope | null }): Reac
     );
   }
 
-  const isNeedsBetterPhoto = envelope.fields.some((f) =>
-    f.rule_findings.some((rf) => rf.reason_code.startsWith("WARNING.LEGIBILITY.")),
-  );
+  const needsBetterPhoto = needsBetterPhotoFrom(envelope);
 
   return (
     <div className="mx-auto max-w-5xl space-y-4 p-4">
@@ -91,10 +90,10 @@ function SingleApp({ envelope }: { envelope: DispositionEnvelope | null }): Reac
         </div>
       </header>
 
-      {isNeedsBetterPhoto && (
+      {needsBetterPhoto && (
         <NeedsBetterPhotoCard
-          reasonCode={envelope.fields[0]!.rule_findings[0]!.reason_code}
-          applicantMessage="Please re-submit a higher-resolution photo (≥300 DPI) of the front label."
+          reasonCode={needsBetterPhoto.reasonCode}
+          applicantMessage={needsBetterPhoto.applicantMessage}
         />
       )}
 

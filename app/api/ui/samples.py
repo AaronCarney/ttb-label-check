@@ -1,22 +1,39 @@
-"""``GET /batches/sample.zip`` — a starter pack of real labels to try.
+"""The shipped labels a reviewer can try without having any of their own.
 
-A reviewer with no labels of their own can download a handful of real TTB
-Public COLA Registry images (CC0) and drop them straight into the bulk-upload
-form, so the first thing they see is the real pipeline rather than a fixture.
+Two ways in, because a reviewer arrives with two different amounts of patience:
 
-The images ship inside the application, one directory per TTB ID, so a
-download fetches nothing over the network: the product works with outbound
-traffic blocked (PRD C-4) and a clone needs no extra step.
+- ``GET /batches/sample.zip`` downloads a handful of real TTB Public COLA
+  Registry images (CC0) to drop into the bulk-upload form.
+- ``POST /samples/{sample_id}`` checks one shipped label straight away, with
+  the application it was really filed with already filled in. Without it, the
+  first thing the product asks of a reviewer with no labels is a download, an
+  unzip, a file picker and ten typed fields before anything happens at all.
+
+Both read the same shipped images, one directory per TTB ID, so neither
+fetches anything over the network: the product works with outbound traffic
+blocked (PRD C-4) and a clone needs no extra step.
+
+The application values come from ``tests/fixtures/labels/manifest.json``, which
+records, for each label, the application actually filed for it in the registry,
+under the same ten key names this form posts.
 """
 from __future__ import annotations
 
 import io
+import json
 import random
 import zipfile
+from functools import lru_cache
 from pathlib import Path
 
-from fastapi import APIRouter
-from fastapi.responses import Response
+from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi.responses import HTMLResponse, Response
+
+from app.api.ui._page import _get_settings
+from app.api.ui._result_page import render_single_result
+from app.api.ui._submission import _detect_image_mime, _get_upload_evaluator
+from app.api.ui.images import UploadImageStore, _get_image_store
+from app.config import Settings
 
 router = APIRouter()
 
@@ -81,3 +98,166 @@ async def batches_sample_zip(n: int = 10) -> Response:
         media_type="application/zip",
         headers={"content-disposition": 'attachment; filename="sample.zip"'},
     )
+
+
+# ---------------------------------------------------------------------------
+# One shipped label, checked on a click.
+# ---------------------------------------------------------------------------
+
+_MANIFEST = _SAMPLE_LABELS_DIR / "manifest.json"
+
+# The labels offered on the landing page, in the order they appear there. Four
+# rather than thirty-eight, because the point is to show four different things
+# happening, not to list a catalogue:
+#
+#   - a domestic spirit where every element matches, so a reviewer sees a clean
+#     pass first;
+#   - an imported wine, which is the only way the country-of-origin check runs;
+#   - the same domestic spirit with the brand typed as the applicant typed it,
+#     'Lucky Lucys' against the label's 'Lucky Lucy's', so the reviewer sees
+#     that case and punctuation do not fail a brand;
+#   - a label whose GOVERNMENT WARNING has been reworded, so the reviewer sees
+#     a failure and what it cites.
+#
+# Each of the four clears the image-quality gate, checked 2026-09-16 by running
+# `app.vision.quality.assess` over every front in the manifest; a sample that
+# short-circuits on its photo would demonstrate nothing about the rules.
+_OFFERED = (
+    ("ttb-26231001000662", "A bourbon where everything matches"),
+    ("ttb-26239001000132", "An imported wine — checks country of origin"),
+    ("var-brand-case-punctuation", "Brand typed without its apostrophe — still a match"),
+    ("var-warning-wording", "A reworded GOVERNMENT WARNING — this one fails"),
+)
+
+
+@lru_cache(maxsize=1)
+def _manifest_entries() -> dict[str, dict]:
+    """Every manifest label, keyed by its id, read once per process.
+
+    An absent or unreadable manifest yields nothing rather than raising: the
+    samples are a convenience, and a build without them must still serve the
+    page and accept a reviewer's own upload.
+    """
+    try:
+        raw = json.loads(_MANIFEST.read_text())
+    except (OSError, ValueError):
+        return {}
+    return {entry["id"]: entry for entry in raw.get("labels", []) if "id" in entry}
+
+
+def _str(value: object) -> str:
+    """A manifest value as the form would carry it; absent becomes blank, and a
+    blank field means the application declared nothing for that element."""
+    return "" if value is None else str(value)
+
+
+def _posted_from(entry: dict) -> dict[str, str]:
+    """The ten application fields the form posts, taken from one manifest entry.
+
+    Alcohol content and net contents are read from their `value` — the words
+    the application itself used — because that is what the form asks for and
+    what the rules compare against.
+
+    Country of origin is passed only for an imported product. The manifest
+    records a domestic application's `origin` as the producing state, which is
+    not what the form's country-of-origin field means; the rules ignore it for
+    a domestic product either way (`app/services/application_mapper.py`), so
+    sending it would only mislead the reviewer reading the filled-in form.
+    """
+    application = entry.get("application", {})
+    source = _str(application.get("source_of_product"))
+    quantities = {
+        key: _str((application.get(key) or {}).get("value"))
+        for key in ("alcohol_content", "net_contents")
+    }
+    return {
+        "beverage_type": _str(entry.get("beverage_type")),
+        "brand_name": _str(application.get("brand_name")),
+        "fanciful_name": _str(application.get("fanciful_name")),
+        "class_type": _str(application.get("class_type")),
+        "alcohol_content": quantities["alcohol_content"],
+        "net_contents": quantities["net_contents"],
+        "applicant_name_address": _str(application.get("applicant_name_address")),
+        "source_of_product": source,
+        "origin": _str(application.get("origin")) if source.lower() == "imported" else "",
+        "wine_appellation": _str(application.get("wine_appellation")),
+    }
+
+
+def offered_samples() -> list[dict[str, str]]:
+    """The samples the landing page offers, each with the line shown on its
+    button. A sample whose manifest entry or image is not installed is left
+    out, so a partial build shows fewer buttons rather than a broken one."""
+    entries = _manifest_entries()
+    out: list[dict[str, str]] = []
+    for sample_id, blurb in _OFFERED:
+        entry = entries.get(sample_id)
+        if entry is None:
+            continue
+        front = entry.get("images", {}).get("front")
+        if not front or not (_SAMPLE_LABELS_DIR / front).is_file():
+            continue
+        out.append({
+            "id": sample_id,
+            "blurb": blurb,
+            "brand": _str(entry.get("application", {}).get("brand_name")),
+        })
+    return out
+
+
+@router.post("/samples/{sample_id}", response_class=HTMLResponse)
+async def check_shipped_sample(
+    request: Request,
+    sample_id: str,
+    settings: Settings = Depends(_get_settings),
+    evaluator=Depends(_get_upload_evaluator),
+    images: UploadImageStore = Depends(_get_image_store),
+) -> HTMLResponse:
+    """Check one shipped label against the application it was really filed with.
+
+    Runs exactly the path `POST /` runs — same application parsing, same
+    evaluator, same result page — with the image and the ten application fields
+    supplied from the manifest instead of typed. A reviewer clicking this and a
+    reviewer uploading their own label therefore see the same product.
+    """
+    entry = _manifest_entries().get(sample_id)
+    if entry is None:
+        raise HTTPException(status_code=404, detail=f"no sample label {sample_id!r}")
+
+    front = entry.get("images", {}).get("front")
+    path = (_SAMPLE_LABELS_DIR / front) if front else None
+    # The manifest ships inside the repository and names its own images, so a
+    # path here is not attacker-controlled; it is still resolved against the
+    # samples directory rather than trusted, because a manifest edit should not
+    # be able to read a file outside it.
+    if path is None or not _is_inside(path, _SAMPLE_LABELS_DIR) or not path.is_file():
+        raise HTTPException(
+            status_code=404, detail=f"sample label {sample_id!r} is not installed in this build"
+        )
+
+    image_bytes = path.read_bytes()
+    mime = _detect_image_mime(image_bytes)
+    if mime is None:
+        raise HTTPException(
+            status_code=500, detail=f"sample label {sample_id!r} is not a PNG or JPEG"
+        )
+
+    return await render_single_result(
+        request=request,
+        settings=settings,
+        evaluator=evaluator,
+        images=images,
+        posted=_posted_from(entry),
+        image_bytes=image_bytes,
+        mime=mime,
+        label_id=f"{sample_id}-front.jpg",
+    )
+
+
+def _is_inside(path: Path, root: Path) -> bool:
+    """Whether `path` resolves to somewhere under `root`."""
+    try:
+        path.resolve().relative_to(root.resolve())
+    except (OSError, ValueError):
+        return False
+    return True
