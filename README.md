@@ -109,6 +109,20 @@ it is built from real label images shipped in this repository.
 The first label is slower than the rest: the OCR models are read off disk once, on first use, and
 kept for the life of the process.
 
+### Running the tests
+
+```bash
+uv run pytest
+```
+
+**Two groups skip themselves rather than fail, and a clean run does not mean they ran.** The
+accessibility, keyboard and reflow tests drive a real browser: they need
+[pnpm](https://pnpm.io/) on `PATH` to build the front-end island and Playwright's browsers
+installed (`uv run playwright install chromium`). Without pnpm the whole group skips, silently, and
+the suite still reports green — so a run on a machine without it proves nothing about the
+interface. The deploy measurement skips the same way without `TTB_DEPLOY_URL`, as the section above
+says. Everything else runs from a clone with nothing but `uv sync`.
+
 ### The container path
 
 Same app, one command, if you would rather not install anything:
