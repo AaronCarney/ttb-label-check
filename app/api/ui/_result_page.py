@@ -104,7 +104,39 @@ async def render_single_result(
         context={
             "envelope_json": envelope.model_dump_json(),
             "dev_mode": settings.dev_mode,
-            "image_url": f"/labels/{envelope.evaluation_id}/image",
+            # Every face that reached the store, not just the front. A finding
+            # read off the back shown against the front photograph is a page
+            # that reads as broken to the reviewer it is meant to convince,
+            # and the store has held every face since `2853765` without
+            # anything ever asking it which it had.
+            "label_faces": _faces_on_show(images, envelope.evaluation_id),
             "application_form": posted,
         },
     )
+
+
+# What each face is called on the page. The tag is the engine's word; this is
+# the reviewer's.
+_FACE_CAPTIONS = {
+    "front": "Front",
+    "back": "Back",
+    "neck": "Neck",
+    "side": "Side",
+}
+
+
+def _faces_on_show(images: UploadImageStore, evaluation_id: str) -> list[dict[str, str]]:
+    """The photographs this result page can show, front first.
+
+    Read back from the store rather than from what was submitted, because the
+    store is what the browser will be fetching from: a face that failed to
+    write is one the page must not offer a broken image for.
+    """
+    return [
+        {
+            "tag": tag,
+            "caption": _FACE_CAPTIONS.get(tag, tag.title()),
+            "url": f"/labels/{evaluation_id}/image?face={tag}",
+        }
+        for tag in images.faces(evaluation_id)
+    ]

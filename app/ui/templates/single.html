@@ -3,11 +3,22 @@
 {% block bundle_name_script %}single{% endblock %}
 {% block content %}
   {% if envelope_json %}
-    {% if image_url %}
-    <figure class="label-preview">
-      <img src="{{ image_url }}" alt="The label image being reviewed" />
-      <figcaption>Source label image — what the extractor saw.</figcaption>
-    </figure>
+    {% if label_faces %}
+    {# Every face submitted, not just the front. A label's mandatory elements
+       are spread across its panels — the government warning is usually on the
+       back — so a reviewer checking a finding has to be able to look at the
+       photograph it was read from. Each card below names its face. #}
+    <section class="label-preview-set" aria-label="Photographs of this label">
+      {% for face in label_faces %}
+      <figure class="label-preview" data-face="{{ face.tag }}">
+        <img src="{{ face.url }}" alt="The {{ face.caption|lower }} of the label being reviewed" />
+        <figcaption>
+          {% if label_faces|length > 1 %}{{ face.caption }} — what{% else %}Source label image — what{% endif %}
+          the extractor saw.
+        </figcaption>
+      </figure>
+      {% endfor %}
+    </section>
     {% endif %}
   {% else %}
     {# Demo metaphor: a reviewer arrives at the start of a shift; the inbox
