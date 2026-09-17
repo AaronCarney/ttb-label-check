@@ -123,6 +123,11 @@ the suite still reports green — so a run on a machine without it proves nothin
 interface. The deploy measurement skips the same way without `TTB_DEPLOY_URL`, as the section above
 says. Everything else runs from a clone with nothing but `uv sync`.
 
+**Seven of those browser tests currently fail, and they are telling the truth.** With pnpm and
+Playwright installed, six result-page cases fail the accessibility scan on colour contrast below the
+AA threshold, and the layout test fails at a 320-pixel viewport on a 27-pixel overflow. They are
+real and they are not yet fixed; `docs/approach.md` says what that means for the Section 508 claim.
+
 ### The container path
 
 Same app, one command, if you would rather not install anything:
@@ -132,6 +137,20 @@ docker compose up demo
 ```
 
 It serves the same <http://localhost:8000> and needs no secrets either.
+
+### What is pinned, and what is not
+
+Every Python dependency resolves from `uv.lock`, which carries 802 hashes, and the container
+installs from it frozen — nothing is re-resolved at build time, so the image gets the versions this
+repository was tested against. The built front-end bundle is committed, and
+`tests/test_island_build_clean.py` rebuilds it and fails if the result differs from the committed
+copy, so the bundle in the repository cannot drift from its source. The OCR models ship inside the
+installed package; nothing is downloaded when the app runs.
+
+Two things are **not** pinned, and you should see them named rather than find them: the container's
+base image is a moving tag rather than a digest, and the system packages it installs — along with
+the `uv` that installs everything else — carry no versions. The Python layer is reproducible; the
+layer underneath it is not.
 
 ### Using a hosted reader instead
 
@@ -181,13 +200,21 @@ can still show it after a restart or on a second worker, and swept after seven d
 asks for no retention at all; this prototype deliberately does not meet it, and
 [decision 0018](docs/decisions.md#0018) says why and what a real deployment would do instead.
 
+**What a log may contain.** Log lines are an allow-list: only named fields are written, anything
+else attached to a line is dropped, and the fields that could carry applicant material — the
+application's contents, the image bytes, the text read off the label — are blanked by a second
+pass. Both have tests. One gap is known and not yet closed: the message text of a line is not put
+through that filter, and a label's identifier is built from the uploader's filename, so a filename
+reaches the logs both as its own field, deliberately, and inside the message, where nothing checks
+it.
+
 ## Tools, and why each one
 
 | Tool | What it does here | Why this one |
 |---|---|---|
 | FastAPI + Uvicorn | HTTP, the server-side page shells, and the batch event stream | Async server-sent events for batch progress, and Pydantic request and response models for free |
 | Pydantic v2 | Every envelope, rule definition and settings object | One schema layer for the YAML loader, the API and the config, so a malformed rule pack fails at load rather than mid-review |
-| Jinja2 + a React island | Pages are server-rendered; one bundled component tree handles the image-and-evidence area | The interactive part needs real keyboard semantics over bounding boxes; the rest does not need a client framework, and the built bundle ships in the repository so no Node is needed to run this |
+| Jinja2 + a React island | Pages are server-rendered; one bundled component tree handles the result page's interactive parts and the live batch table | The keyboard path for overruling a finding and a batch page that fills in as results stream back need real client state; the rest does not, and the built bundle ships in the repository so no Node is needed to run this |
 | RapidOCR on ONNX Runtime | The default reader, on CPU | Ships its own models in the wheel, so a clone needs no download, no key and no GPU |
 | RapidFuzz | Brand-name similarity scoring | The brand check needs a graded score, not a yes or no, because a dropped apostrophe is not a different product |
 | PyYAML | Loads the rule packs and reference tables | The rules are data a compliance reader should be able to read |
@@ -298,6 +325,20 @@ Both deliverables:
 
 ## Where to look next
 
+**To see it work,** follow Getting started above and check one label against an application with a
+field deliberately wrong. The three outcomes, the citation under each finding and the label image
+beside the readings are the whole product in one screen.
+
+**To read the code,** open `rules/` first. Verdicts are decided there, in YAML, and every check
+names the regulation behind it — so you can see everything this app enforces without reading any
+Python. `ARCHITECTURE.md` maps every directory in one table, and `app/services/evaluator.py` is the
+eight steps one check runs through, in order.
+
+**To judge whether it works,** `tests/fixtures/labels/` is the answer key: 30 real approved labels
+with a transcription of what each one prints and the verdict each check should return.
+`uv run python -m eval.read_accuracy` scores the reader against it and reproduces every figure in
+Reading accuracy above.
+
 | Question | Document |
 |---|---|
 | How was this approached, and what was assumed? | [docs/approach.md](docs/approach.md) |
@@ -315,19 +356,24 @@ check listed here is switched off in the rule pack rather than reporting a verdi
 - **An upload with no application is read but not checked.** The beverage the application declares
   is what decides which rules apply, so a label submitted on its own is read and reported, and no
   check runs against it — including the government-warning checks, which every beverage shares but
-  which are still written per beverage class. See `docs/decisions.md#0010`.
+  which are still written per beverage class. See `docs/decisions.md#0010`. For an agent this means
+  the app is no use for a quick look at a label on its own: the application's values have to be
+  entered before anything is checked.
 
 - **The wording of an alcohol-content statement is not checked.** The app checks that a label states
   its alcohol content where the regulations require one, and that the figure on the label is the
   figure the application declared. It does not check that the statement is phrased as 27 CFR
   §4.36(b)(1), §5.65(b) and §7.65(b) require, because the reader returns the percentage it found and
-  not the words the label printed. See `docs/decisions.md#0011`.
+  not the words the label printed. See `docs/decisions.md#0011`. A label stating the right figure
+  in the wrong words passes this check, so the phrasing is still the agent's own read.
 
 - **A country of origin is read only as the application's English name.** Customs marking rules also
   accept the country's name in the language of the country, an abbreviation that unmistakably
   indicates it, and the adjectival form — "HECHO EN MEXICO", "U.K.", "Irish" (19 CFR §134.45(b),
   (c)). The app does not read those, so an import that writes its origin one of those ways is sent
-  to a reviewer rather than being matched or rejected. See `docs/decisions.md#0016`.
+  to a reviewer rather than being matched or rejected. See `docs/decisions.md#0016`. On a batch of
+  imports this is the main source of extra manual work — a compliant label lands in the review pile
+  because the app cannot read the form it used, not because anything is wrong with it.
 
 - **The health warning's typography and placement are not checked.** The app checks the warning's
   words, that "GOVERNMENT WARNING" is present, and that those two words are in capitals. It does not
@@ -338,11 +384,23 @@ check listed here is switched off in the rule pack rather than reporting a verdi
   measures it yet. Each of those rules stays in the pack with its citation and the reason it is
   switched off, and a switched-off rule produces no finding at all, so a label is never passed or
   rejected on one. TTB says it does not routinely review
-  labels for type size, characters per inch or contrasting background either. See
-  `docs/decisions.md#0006` and `docs/decisions.md#0013`.
+  labels for type size, characters per inch or contrasting background either. So the agent's eye is
+  the only check on warning typography, exactly as it is today — the app neither helps here nor
+  claims to. See `docs/decisions.md#0006` and `docs/decisions.md#0013`.
 
 - **Bold type in the warning's heading is reported, not decided.** §16.22(a)(2) requires the heading
   in bold as well as in capitals. Bold weight is a stroke-width measurement on the heading's own
   region of the image, and the reader cannot always take it. Where it could not, the label goes to a
   reviewer on that point rather than being rejected for a boldness nobody measured. The capitals are
-  read from the heading's text and are still decided. See `docs/decisions.md#0013`.
+  read from the heading's text and are still decided. The cost is a steady trickle of review items
+  on labels that are very likely fine. See `docs/decisions.md#0013`.
+
+- **Five more requirements have no check at all, disabled or otherwise.** A label's mandatory
+  wording must be readily legible on a contrasting background, must stand separate and apart from
+  other information, must be similarly conspicuous across the words of a designation, and must meet
+  a minimum type height (27 CFR §§4.38, 5.52, 5.53, 5.141(d), 7.52, 7.53); and the health
+  warning's letters must not be compressed so far that it stops being readily legible
+  (§16.22(a)(3)). None of those appears in any rule pack. Most would have ended up switched off
+  like the typography above — legibility and conspicuousness are judgements rather than
+  measurements, and type height needs the label's physical scale, which a photograph does not carry
+  — but they were absent rather than decided, and this entry is where that is put on the record.

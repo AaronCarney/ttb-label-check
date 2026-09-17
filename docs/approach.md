@@ -99,15 +99,42 @@ confirmed the judgement: the agency does not routinely review labels for those e
 reports a verdict it has not earned is the one failure this product cannot have, so a switched-off
 rule produces no finding at all rather than a quiet pass.
 
+**Part of the regulation is a standard, not a measurement.** Several requirements are written as a
+test a person applies rather than a figure a machine can compare: an import's origin marking counts
+if an abbreviation unmistakably indicates the country, the warning has to stand separate and apart
+from the rest of the label, mandatory wording has to be readily legible, and the words of a spirits
+designation have to be similarly conspicuous. Nothing lists which abbreviations qualify, or how far
+apart is apart. We could have picked a number for each and shipped it as the rule — the version that
+demonstrates as complete — and did not, because a threshold we invented would be applied to a real
+producer as though the regulation said it. So each goes to a person: the origin check reads the
+country's plain English name, passes on a match, and sends every other form to review rather than
+rejecting it. That costs coverage, not correctness — a compliant Spanish-marked import lands in the
+reviewer's pile, which is work rather than a wrong answer. The check still rejects a label carrying
+no origin statement at all, because an absence is a fact rather than a judgement.
+
+**Two sets of requirements are not covered at all, and were not on the record as choices.** The rule
+that the warning's letters must not be so compressed that it stops being legible has no entry
+anywhere. Neither do the legibility, separateness, conspicuousness and minimum-type-height
+requirements the wine, spirits and malt parts place on a label's mandatory wording — the regulation
+texts we pulled carry all of them, and no check and no limitation names one. Most would have ended
+where the rules above did, with a person or switched off, so no verdict is wrong because of this.
+What is wrong is the record: a requirement we decided not to check and one we never noticed look
+identical from outside, and only the first was written down. We found these while writing this
+account, and name them rather than leave the list looking complete.
+
 **The regulation that governs the product itself.** Nothing in the brief asks for accessibility, but a
 federal application is bound by Section 508 regardless, and that standard is binding regulation
-rather than agency policy. We built to the level it makes binding, WCAG 2.0 A and AA, and the
-check page and the result page are scanned against it automatically on each run; the batch-list page
-is not yet in that scan. We went past that floor where we could prove
-it — the layout reflows at 320 pixels and a disposition is never carried by colour alone, each held
-by its own test — and we stopped short of claiming a newer conformance level, because the two
-criteria that would have justified one are criteria no automated check here can reach. A claim the
-product cannot test is the kind of promise this build refuses to make anywhere else.
+rather than agency policy. We built to the level it makes binding, WCAG 2.0 A and AA, and the check
+page and the result page are scanned against it automatically on each run; the batch-list page is
+not yet in that scan. **The scan does not currently pass.** On six of the result-page cases it
+reports text whose colour contrast is below the AA threshold, and the test that holds the layout to
+a 320-pixel viewport fails on a 27-pixel overflow. Both are ours, and neither is deep — one is a
+palette and one is a width — but until they are fixed the honest claim is that we built the
+mechanism and have not met the standard, not that we met it. A disposition is still never carried by
+colour alone, which has its own passing test. We stopped short of claiming a newer conformance level
+for a different reason: the two criteria that would have justified one are criteria no automated
+check here can reach. A claim the product cannot test is the kind of promise this build refuses to
+make anywhere else.
 
 The heavier federal gates are real and none of them is met here. Each is named with what it would
 actually require:
@@ -195,26 +222,96 @@ to data rather than a release.
 **Three outcomes, and the third is a real answer.** Pass, fail, and needs review. Needs review is
 used wherever the app can see an element but cannot honestly settle it, and it is the destination for
 every uncertainty rather than a fallback. Each result carries what was read, the application's value
-beside it, the rules that ran with their citations, a confidence level, and the part of the image the
-reading came from — so a reviewer can check the answer instead of trusting it.
+beside it, the rules that ran with their citations, and a confidence level, laid out next to the
+label image itself, so a reviewer checks the answer against the label rather than trusting it. The
+reading also records which part of the image it came from, but the interface does not draw that
+region yet — finding the spot on the label is still the reviewer's own work.
+
+**Whether the record would answer a producer who contests a rejection.** It would not, and that is
+worth saying because everything above makes it sound as though it would. Nothing is kept: once the
+response is sent the record is gone, and only the label image survives, for seven days. The trail
+attached to each verdict names the rule set that produced it as "unknown" on every evaluation, and
+names the reader not at all, so even a saved copy could not say which rules judged that label. The
+pointer back to the part of the image is empty in every result. An agent in the interface has no
+save, no print and no download — the full record comes only from calling the service directly, which
+a developer does and a reviewing agent does not. The interface shows the first rule that fired on
+each element, though the response carries all of them. And an override carries a made-up session
+number rather than a name, because nothing signs anyone in; on the single-label path it cannot be
+recorded at all, because only a batch holds its results long enough to be amended.
+
+**That gap is the cost of keeping nothing, and closing it is not a coding problem.** The same
+constraint that makes this safe to run — no database, nothing written down, nothing for a privacy
+reviewer to ask about — is what leaves a contested rejection with no record to answer it. A
+deployment that must stand behind its verdicts needs three things we did not build: a retention
+period set by the agency's records schedule, a sign-in so an override names a person, and real
+versions on the trail. We would rather name the gap than fit a cheap version of it: a record that
+says "unknown" where its version belongs is worse than no record, because it looks like evidence.
 
 **We designed around the error that costs more.** A false rejection sends a compliant applicant back
 round a process that takes weeks, and it is the error that would end a pilot. A false pass is caught
 downstream by the agent, who rules on every finding anyway. That asymmetry is why anything
 unmeasurable goes to review rather than to rejection.
 
+**The numbers, and which of them we can defend.** Three thresholds carry real evidence. The
+tolerance that lets a net contents figure in millilitres match one in fluid ounces is one percent,
+derived rather than picked: above the 0.633 percent that rounding needs across every container size
+the regulations authorise, below the 1.216 percent at which an authorised size stops being
+distinguishable from the customary figure printed for the size next to it — and a test recomputes
+both bounds on every run, so the number cannot drift from its reason. One label at a time per
+running copy comes from a measurement: eight readings at once pushed the slowest five percent from
+2.26 seconds to just over ten, because the reader's threads compete for the same processor cores.
+The brand-matching thresholds — 0.92 to pass, 0.85 to send to a person — rest on published
+record-matching work and on an argument about which error costs more, not on this project's own
+labels. That is the weaker evidence, and we would rather say so than present all three as equally
+settled.
+
+**A larger set of numbers has no recorded reason at all.** The bands that turn a confidence score
+into low, medium or high. The confidence floor each rule demands before returning a verdict. The
+per-field multipliers for how sure the reader is it picked the right text — a note explains why a
+field found by a text pattern keeps more confidence than one found by type size, but nothing
+explains why the figure is 0.75 rather than 0.8. Both surviving image-quality gates. And the
+stroke-width ratio deciding whether the warning's heading is bold, which matters most, because the
+code says it is uncalibrated and it still drives a rule that can reject a label. Being wrong here is
+not symmetrical — too strict sends compliant labels to a person, too loose lets a doubtful one reach
+the agent who is reading it anyway — which is why they were safe to ship unargued, and is no reason
+to leave them so. Re-tuning every one needs the same thing: a wider corpus of real labels with a
+human verdict on each, swept against the thresholds. That has not been done.
+
 **One label is checked first, then the rest run behind it.** The reviewer gets a real result in
 seconds instead of a progress bar, and starts working while the remainder runs. The batch then paces
 itself against how fast they are actually reading, rather than racing ahead to compute results nobody
 has asked for.
 
+**What it refuses to take.** An upload is identified by its own first bytes, and anything that is
+not a PNG or a JPEG is turned away before the reader sees it; what the browser declares the file to
+be is never consulted, because that is whatever the client chose to send. An image the app hands
+back later can only be asked for by a restricted set of characters, so no request can name a path
+outside the store. One bad file in a batch is refused by name and every other file still runs —
+ending a 300-label submission because one was a spreadsheet would punish the reviewer for the
+uploader's mistake. What we did not build is any limit on size: nothing caps how large an upload may
+be, how many files a batch may carry, or how many pixels an image may decode to, and a batch is read
+into memory whole. There is no pagination either. On a laptop none of that shows. On a service
+anyone can reach, the first two are how someone brings it down without meaning to, and they are the
+first thing we would close.
+
+**What a log is allowed to contain.** Logging is an allow-list rather than a filter: a line carries
+only the fields named in advance, anything else attached is dropped without comment, and the fields
+that could hold applicant material — the application's contents, the image bytes, the text read off
+the label — are blanked by a second pass. Both halves have tests. The hole is in the part the
+allow-list does not govern: the message text of a line is not filtered, and a label's identifier is
+built from the name of the file the uploader sent, so a filename reaches the logs both as its own
+field, deliberately, and inside the message, where nothing checks it. An uploader who names a file
+after a person has put that person in the log. That is a real defect and it is ours — the allow-list
+was built to make exactly this impossible, and the message string walked around it.
+
 ## Tools, and why each
 
 Plain Python for the service, because the reading and rules libraries live there and the brief's
 priority is a working core rather than a novel stack. A conventional server-rendered interface with
-one interactive area, rather than a full client-side application, because only the evidence panel
-needs real interactivity and requiring a build step on the reviewer's machine is a barrier to running
-this at all. No database: a directory of files beat both an embedded database, which
+a small interactive layer, rather than a full client-side application, because the parts that need
+real interactivity are few — the keyboard path an agent uses to overrule a finding, and the batch
+page that fills in as each result streams back — and requiring a build step on the reviewer's
+machine is a barrier to running this at all. No database: a directory of files beat both an embedded database, which
 answers no question the files do not, and object storage, which needs an account, a key and an
 outbound call the clone cannot make. A processor-only reader that ships with the code, over a
 design that only calls a hosted model — which cannot run where this product is for — and over
@@ -255,16 +352,17 @@ processor cores, is untried.
 looking, so each is named:
 
 - The ten-minute target for a 300-label batch has no instrument at all — no test and no figure.
-- Accessibility is checked automatically at the level we commit to, but on two of the three screens:
-  the single-label page and a batch's results are scanned, the bulk-upload page is not. And the
-  manual review the requirement really asks for has not been run — an automated pass is the floor of
-  an accessibility claim, not the whole of one.
+- Accessibility. The automated scan covers two of the three screens — the single-label page and a
+  batch's results, not the bulk-upload page — and on those two it is currently failing, on colour
+  contrast and on the 320-pixel layout. The manual review the requirement really asks for has not
+  been run either, and an automated pass is the floor of an accessibility claim rather than the
+  whole of one.
 
 The first is a missing measurement. The second is the pattern we would rather name than hide: the
 requirement was written, the mechanism was built, and the proof stopped at the half a machine can
 do. That is what a week-long build produces when the deadline arrives before the test does.
 
-## What we changed our minds about
+## What changed, and what would change next
 
 **The deploy host moved, and not for the reason it looks like.** We first put the service on a
 fixed-price host at nine dollars a month, on one argument: a public demo URL is open to anyone, so the
@@ -286,8 +384,22 @@ image-quality gate that turned out to be measuring how light the label stock is.
 never pass, deleted — while a different rule in a similar state was switched off instead, because one
 was unbuildable and the other merely unbuilt.
 
-**What we would do next, in order.** Scan the bulk-upload page, so all three screens are covered,
-then run a real accessibility review rather than an automated one; instrument the batch timing,
+**Who would run it, and what they would watch.** The agency's own IT would, and their interview was
+explicit that they take on nothing new to operate — so the product had to be operable by someone who
+did not write it. One readiness check answers whether the service is up and doubles as the warm-up
+that loads the reading models, so a copy that cannot load them announces itself as not ready rather
+than failing the first real label. Logs carry the identifiers needed to follow one submission
+through, with applicant material kept out. That is where the operability stops: no metrics endpoint,
+no alerting, no dashboard, no stored record of what the service did, so an operator can tell whether
+it is running and cannot tell whether it is right. Even the guard on cost is not the one we
+designed. The rate limit at the edge denies nothing — measured on the deployed service, not inferred
+from the code — so what bounds the bill is that the service refuses every caller but our own front
+door, and a refused request is never billed. Those are prerequisites before this ran inside the
+agency, not improvements: a compliance service nobody is watching is one nobody can vouch for.
+
+**What we would do next, in order.** Clear the accessibility failures the scan already reports — the
+contrast and the 320-pixel overflow — then scan the bulk-upload page so all three screens are
+covered, then run a real accessibility review rather than an automated one; instrument the batch timing,
 which is the one requirement with no measurement at all; then widen the corpus, which is the work
 that makes every figure above more trustworthy.
 
@@ -303,6 +415,18 @@ Where a convention could be replaced by a check, we replaced it. The README's ow
 every document path it names must resolve, and its accuracy section is forbidden from containing a
 percentage. The rule set fails the build if a rule has no implementation. Each of those started as a
 convention somebody broke.
+
+**How a change gets released.** Versions follow the usual three-part convention, and the running
+service reads its own from the installed package rather than a constant in the source — the constant
+went stale, still saying 0.1.0 after the release that cut 0.2.0, which made the one field
+identifying a running build the one field that lied. A changelog records each release, and there is
+one tagged release so far. The deploy builds from an export of the committed revision rather than
+the working tree, so nothing uncommitted on a developer's machine can reach the image, and it runs
+five checks first: the container file is present, the port the service is told to use is the one the
+container opens, the built interface bundle is committed, every path the build copies exists, and
+the working tree is clean. What is missing is the obvious thing: there is no continuous integration
+of any kind. No push runs the tests, so every gate above is a gate only while somebody remembers to
+pull it. On a team of one that held; it would not survive a second person.
 
 ## Assumptions we made
 
