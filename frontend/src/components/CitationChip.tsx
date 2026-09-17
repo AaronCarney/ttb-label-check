@@ -14,7 +14,11 @@ export function CitationChip({ citation, onOpen, className }: CitationChipProps)
       type="button"
       onClick={onOpen}
       className={cn(
-        "inline-flex items-center gap-1 rounded-md border border-border bg-muted px-2 py-1 text-xs font-medium hover:bg-[hsl(var(--uswds-primary-lighter))] focus-visible:ring-2 focus-visible:ring-ring",
+        // `bg-muted` needs its paired foreground stated: the global `button` rule in
+// tokens/globals.css paints every button white-on-blue, and overriding only the
+// background left white text on a near-white chip (1.09:1). The hover variant is
+// named too, because `button:hover` sets the colour back to white.
+        "inline-flex items-center gap-1 rounded-md border border-border bg-muted px-2 py-1 text-xs font-medium text-muted-foreground hover:bg-[hsl(var(--uswds-primary-lighter))] hover:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring",
         className,
       )}
     >

@@ -66,7 +66,7 @@ export function BatchItemDetail({ row, className }: BatchItemDetailProps): React
           >
             {row.label_ref}
           </h3>
-          <p className="font-mono text-xs text-muted-foreground">{row.evaluation_id}</p>
+          <p className="break-words font-mono text-xs text-muted-foreground">{row.evaluation_id}</p>
         </div>
         <div className="flex items-center gap-3">
           <DispositionPill disposition={row.disposition} />

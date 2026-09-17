@@ -78,9 +78,9 @@ function SingleApp({ envelope }: { envelope: DispositionEnvelope | null }): Reac
       <header className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 className="text-xl font-semibold">{envelope.label_ref}</h2>
-          <p className="font-mono text-xs text-muted-foreground">{envelope.evaluation_id}</p>
+          <p className="break-words font-mono text-xs text-muted-foreground">{envelope.evaluation_id}</p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           <DispositionPill disposition={envelope.disposition} />
           <ConfidenceIndicator
             band={envelope.disposition_confidence.band}

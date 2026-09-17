@@ -25,7 +25,7 @@ export function RuleVerdict({ finding, className }: RuleVerdictProps): React.JSX
         <DispositionPill disposition={finding.disposition} />
       </header>
       <p className="text-sm">{finding.plain_language_explanation}</p>
-      <p className="font-mono text-xs text-muted-foreground">{finding.reason_code}</p>
+      <p className="break-words font-mono text-xs text-muted-foreground">{finding.reason_code}</p>
     </section>
   );
 }

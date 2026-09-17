@@ -25,7 +25,7 @@ export function NeedsBetterPhotoCard({ reasonCode, applicantMessage, className }
         <Camera aria-hidden className="h-5 w-5" />
         <h3 className="font-semibold">Needs better photo</h3>
       </header>
-      <p className="font-mono text-xs text-muted-foreground">{reasonCode}</p>
+      <p className="break-words font-mono text-xs text-muted-foreground">{reasonCode}</p>
       <p className="text-sm">{applicantMessage}</p>
       <button
         type="button"
