@@ -43,6 +43,14 @@ because it is the most impressive-looking of the three — and it is a different
 we were asked to solve. The brief prefers a working core to ambitious incompleteness, and these are
 the cuts that preference bought.
 
+**We built the answer key before the thing it grades.** The labels were collected and transcribed the
+day before there was an application to read them — 30 approved labels from the public register, each
+with what it prints and the verdict each check should return — and the rule pack came before the code
+that runs it. Writing the tests after the code is the usual order and it was the live alternative; it
+produces tests that agree with the code, and a transcription of what a bottle actually prints does
+not. The cost is that the key was written blind, and several entries in it had to be corrected once
+real readings arrived — two of them settled by measuring the image rather than by eye.
+
 ## What we looked up before we chose
 
 **We took each fact from the document that owns it.** The regulations came from the official
@@ -160,6 +168,14 @@ model can influence cannot be defended to the person who has to sign it. What th
 the property the product is sold on: the same label and the same application give the same answer
 every time, with a citation attached. What it costs is every capability that needs judgement beyond a
 scored comparison. Those go to a person, which is the same answer the senior agent gave.
+
+**Nothing we depend on can move under us quietly.** The reader that runs by default sits inside the
+application, so there is no vendor who can change it. The optional hosted reader names a dated
+snapshot of the model rather than the name that follows whatever the vendor shipped last, and the
+prompt it sends carries its own version; the recorded answers the tests replay are filed under that
+snapshot, so moving to a new model leaves the tests with nothing to replay and says so. A vendor's
+upgrade is then a change someone makes deliberately and re-proves, rather than a day when the same
+label starts giving a different verdict.
 
 **Rules are data, not code.** Every check is an entry naming the regulation section it enforces, and
 the build fails if a check tries to carry that citation in code instead. A compliance officer can
