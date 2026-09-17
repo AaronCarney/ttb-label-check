@@ -12,13 +12,25 @@
 #                               without making anything public.
 #   scripts/deploy.sh           Run the preflights, then build and deploy.
 #
-# Deploying makes the app publicly reachable, which is the owner's call to make.
+# The service keeps Cloud Run's invoker check enabled, so the URL Cloud Run
+# issues answers nothing without a Google-signed ID token. One service account
+# holds that permission, and its key lives in the Cloudflare Worker that fronts
+# the service. This is what bounds the meter: Google's pricing page states that
+# "requests are only billed when they reach the container after successfully
+# being authenticated, requests denied by IAM policy are not billed", so a flood
+# aimed at the Cloud Run URL costs nothing, and every request that does arrive
+# has passed the edge's rate limit first (decision 0025).
+#
+# Deploying makes the app reachable through that edge, which is the owner's call
+# to make.
 #
 # Environment:
 #   TTB_GCP_PROJECT   The Google Cloud project to deploy into. Required for the
 #                     deploy, not for --check.
 #   TTB_REGION        Cloud Run region. Defaults to us-central1.
 #   TTB_SERVICE       Cloud Run service name. Defaults to ttb-label-check.
+#   TTB_INVOKER_SA    The service account permitted to invoke the service.
+#                     Defaults to ttb-edge-invoker in TTB_GCP_PROJECT.
 
 set -euo pipefail
 
@@ -157,6 +169,18 @@ gcloud run deploy "$SERVICE" \
     --timeout "$TIMEOUT" \
     --cpu-boost \
     --set-env-vars VISION_MODE=local \
-    --allow-unauthenticated
+    --no-allow-unauthenticated
 
-echo "Deployed. The service URL is printed above."
+# The one identity allowed to call the service. Without this the deploy is
+# reachable by nobody at all, including the edge, which is the safe direction to
+# fail but not a working product.
+INVOKER_SA="${TTB_INVOKER_SA:-ttb-edge-invoker@${TTB_GCP_PROJECT}.iam.gserviceaccount.com}"
+echo "Granting ${INVOKER_SA} permission to invoke ${SERVICE}."
+gcloud run services add-iam-policy-binding "$SERVICE" \
+    --project "$TTB_GCP_PROJECT" \
+    --region "$REGION" \
+    --member "serviceAccount:${INVOKER_SA}" \
+    --role roles/run.invoker >/dev/null
+
+echo "Deployed. The service URL is printed above; it answers only a caller"
+echo "bearing an ID token for ${INVOKER_SA}."

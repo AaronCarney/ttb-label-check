@@ -1617,7 +1617,9 @@ warm path is what the keep-warm ping exists to make the one a reviewer meets.
   the overage rate is ten cents per GB per month. The true figure is therefore small change, not
   zero, and it is not known until an image is built and measured.
 - **The reader's 1.5-2 GB working set is still an unverified carried-over figure**, for the reason
-  [0023](#0023) gives. The service is sized at 2 GiB against it. If a real run exceeds that, the
-  instance is killed and the size has to go up, which costs GB-seconds against the same allowance.
+  [0023](#0023) gives. The service is sized at 4 GiB against it, roughly double the top of that
+  range, which the arithmetic above shows costs nothing at this core count. If a real run exceeds
+  even that, the instance is killed and the size has to go up, which begins to cost GB-seconds
+  against the same allowance.
 - **Nothing is deployed by this decision.** Making the app publicly reachable is the owner's call.
   [0004](#0004) settles that a deployed URL is required, not when it goes up.
