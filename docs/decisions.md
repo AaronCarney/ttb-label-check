@@ -2081,7 +2081,7 @@ nothing, but it withdraws a capability the requirements ask for to avoid keeping
 
 **Decided:** 2026-09-16. **Evidence:** `app/vision/local.py`, which reads boxes off a copy downscaled
 to 1600 pixels on its longest edge and reads the warning off a frame it may have rotated;
-`app/api/ui/images.py`, which serves the original uploaded bytes; the 44 distinct `cfr_citation`
+`app/api/ui/images.py`, which serves the original uploaded bytes; the 43 distinct `cfr_citation`
 strings in `rules/`, against the one piece of regulation wording the product keeps
 (`assets/warnings/govt_warning_16_21.txt`, §16.21 only).
 
@@ -2107,11 +2107,11 @@ downscaled on the way in". Making the overlay correct means carrying the reading
 rotation, per field, through the wire schema — a schema change, not the wiring the component was left
 waiting for.
 
-The panel's left column is the regulation's own wording, and nothing here holds it. The rules name 44
+The panel's left column is the regulation's own wording, and nothing here holds it. The rules name 43
 distinct citation strings, many of them compound (`27 CFR §4.32(a)(1), §4.33`, `27 CFR §5 Subpart I`).
 `docs/reference/` summarises the three parts in prose for a reader and is loaded by no code. The one
 verbatim text the product keeps is §16.21, and it is kept because a validator matches a label's
-warning against it character for character. Filling the other 43 means writing regulation text by hand
+warning against it character for character. Filling the other 42 means writing regulation text by hand
 into a compliance tool with no test that can check it against the regulation — the kind of claim this
 build refuses everywhere else. The panel's right column is already on the card: `RuleVerdict` carries
 the plain-language explanation and the reason code, and the card itself carries extracted against
