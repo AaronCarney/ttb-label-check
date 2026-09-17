@@ -129,8 +129,13 @@ application give the same answer every time, with a citation attached. An earlie
 finished results to a language model for a second opinion was removed for exactly this reason
 ([decision 0009](docs/decisions.md#0009)).
 
-**Nothing is kept.** Batch state lives in the process and is dropped when the response is returned or
-the server stops. There is no database and no COLA integration.
+**Almost nothing is kept.** There is no database and no COLA integration. Batch state lives in the
+process and is dropped when the response is returned or the server stops, and application data —
+including the applicant name and address the form collects — is never written to disk or to a log.
+The one exception is the uploaded label image, which is written to a directory so the result page
+can still show it after a restart or on a second worker, and swept after seven days. The PRD's C-2
+asks for no retention at all; this prototype deliberately does not meet it, and
+[decision 0018](docs/decisions.md#0018) says why and what a real deployment would do instead.
 
 ## Tools, and why each one
 
@@ -197,9 +202,12 @@ designation like `BOURBON WHISKEY` to `BOURBON`.
   tells a poor photograph from a good one is a separate question, and an open one.
 - **The warning text is fixed.** 27 CFR 16.21's wording is pinned as a committed asset and compared
   against by hash, so a change to the regulation is a deliberate edit and not a silent drift.
-- **Nothing sensitive is stored.** Images and application data live only as long as the request that
-  carried them, which keeps the prototype clear of retention and PII obligations it is not built to
-  meet.
+- **Nothing sensitive is stored.** Application data lives only as long as the request that carried
+  it. The uploaded label image is written to disk and kept for up to seven days so the result page
+  survives a restart, which is a demo's bargain rather than a production one: the labels this ships
+  are public TTB COLA Registry images, and a real deployment would hold an applicant's image inside
+  the agency's boundary, encrypted, and drop it the moment the result had been read
+  ([decision 0018](docs/decisions.md#0018)).
 - **No integration with COLA or any other TTB system**, which was an explicit constraint from the
   systems administrator in the brief.
 
@@ -214,8 +222,10 @@ designation like `BOURBON WHISKEY` to `BOURBON`.
   judgement beyond a scored comparison goes to a person rather than being resolved automatically.
 - **Local CPU reading by default, accuracy second.** The hosted reader is better on hard images. It
   is not the default, because a reviewer should be able to clone and run this with no account.
-- **State in memory.** A server restart loses an in-flight batch and the reviewer re-uploads. A
-  prototype that stores nothing is easier to trust than one that stores label images.
+- **State in memory, except the label image.** A server restart loses an in-flight batch and the
+  reviewer re-uploads. The label image is the one thing written down, because a result page that
+  cannot show the label it is describing is not a result page; it is kept for seven days and no
+  longer ([decision 0018](docs/decisions.md#0018)).
 - **Scored brand matching rather than exact matching.** A punctuation difference scores just below
   identical and passes, with the score shown, rather than sending every dropped apostrophe to a
   person. What it buys and what it costs are argued in
