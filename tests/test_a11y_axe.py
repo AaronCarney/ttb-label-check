@@ -42,7 +42,17 @@ _SINGLE_FIXTURES = sorted(p.name for p in FIXTURES.glob("*.json"))
 # decide and written down what they found. The reason is the record of that
 # review. An empty mapping means nobody has looked yet, and any undecided check
 # fails the suite until somebody does.
-REVIEWED_INCOMPLETE: dict[str, str] = {}
+REVIEWED_INCOMPLETE: dict[str, str] = {
+    "th-has-data-cells": (
+        "Reviewed 2026-09-17 on /batch. Only the empty batch table raises it: that page "
+        "loads a batch which streams nothing, so the table renders its column headers over "
+        "an empty body and there are no data cells for the headers to describe. The markup "
+        "is shown to be sound rather than asserted to be — "
+        "test_axe_zero_aa_violations_batch_populated scans the same table with fifty rows "
+        "in it, and axe decides this check there. So what is undecided is the empty state "
+        "alone, which has no data cells by definition."
+    ),
+}
 
 
 def _run_axe(page: Page) -> dict[str, Any]:
@@ -53,20 +63,30 @@ def _run_axe(page: Page) -> dict[str, Any]:
           const r = await window.axe.run(document, {
             runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa'] },
           });
-          const shape = v => ({
+          // The node targets, not just a count: a reviewer reading a failure
+          // has to know which element axe meant before they can judge it.
+          const node = n => ({
+            target: n.target,
+            summary: (n.failureSummary || '').replace(/\s+/g, ' ').trim(),
+          });
+          // For an undecided check, also carry what axe measured. axe reports a
+          // contrast check as undecided when it computed both colours and they
+          // came out identical, so the two colours are the whole of the
+          // evidence a reviewer needs and the summary text does not carry them.
+          const nodeWithData = n => ({
+            ...node(n),
+            checks: [...(n.any || []), ...(n.all || []), ...(n.none || [])]
+              .map(c => ({ id: c.id, data: c.data })),
+          });
+          const shape = f => v => ({
             id: v.id,
             impact: v.impact,
             help: v.help,
-            // The node targets, not just a count: a reviewer reading a failure
-            // has to know which element axe meant before they can judge it.
-            nodes: v.nodes.map(n => ({
-              target: n.target,
-              summary: (n.failureSummary || '').replace(/\s+/g, ' ').trim(),
-            })),
+            nodes: v.nodes.map(f),
           });
           return {
-            violations: r.violations.map(shape),
-            incomplete: r.incomplete.map(shape),
+            violations: r.violations.map(shape(node)),
+            incomplete: r.incomplete.map(shape(nodeWithData)),
           };
         }"""
     )
@@ -88,6 +108,12 @@ def _assert_accessible(result: dict[str, Any], screen: str) -> None:
 @pytest.mark.usefixtures("live_server", "pnpm_built_island")
 @pytest.mark.parametrize("fixture_name", _SINGLE_FIXTURES)
 def test_axe_zero_aa_violations_single(fixture_name: str, page: Page, live_server_url: str) -> None:
+    _load_single(page, live_server_url, fixture_name)
+    _assert_accessible(_run_axe(page), fixture_name)
+
+
+def _load_single(page: Page, live_server_url: str, fixture_name: str) -> None:
+    """Open the single-result screen with one canned envelope already in the DOM."""
     envelope = json.loads((FIXTURES / fixture_name).read_text())
     # Inject the envelope BEFORE the island imports.
     page.add_init_script(
@@ -115,7 +141,6 @@ def test_axe_zero_aa_violations_single(fixture_name: str, page: Page, live_serve
     page.goto(f"{live_server_url}/")
     # Wait for the island to mount.
     page.wait_for_selector('[data-mounted="true"]', timeout=5000)
-    _assert_accessible(_run_axe(page), fixture_name)
 
 
 @pytest.mark.usefixtures("live_server", "pnpm_built_island")
@@ -216,3 +241,61 @@ def test_axe_zero_aa_violations_batch_populated(page: Page, live_server_url: str
     rows = page.eval_on_selector_all("tbody tr", "els => els.length")
     assert rows == len(payloads), f"expected {len(payloads)} rows, rendered {rows}"
     _assert_accessible(_run_axe(page), "/batch (populated)")
+
+
+# The smallest contrast ratio WCAG 2.0 AA accepts for normal-sized text, from
+# success criterion 1.4.3. docs/PRD.md NFR-3 commits the console to AA.
+_AA_NORMAL_TEXT_MIN_RATIO = 4.5
+
+# WCAG's own relative-luminance and contrast formulas, run inside the page so
+# they read the colours the browser actually painted rather than the colours the
+# stylesheet asks for.
+_CONTRAST_JS = r"""
+  el => {
+    const channel = c => {
+      c /= 255;
+      return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+    };
+    const luminance = ([r, g, b]) =>
+      0.2126 * channel(r) + 0.7152 * channel(g) + 0.0722 * channel(b);
+    const parse = s => (s.match(/[\d.]+/g) || []).map(Number);
+    // An element painted transparent shows whatever its nearest painted
+    // ancestor shows, which is what the reader sees behind the text.
+    const painted = start => {
+      for (let n = start; n; n = n.parentElement) {
+        const c = parse(getComputedStyle(n).backgroundColor);
+        if (c.length >= 3 && (c.length < 4 || c[3] > 0)) return c.slice(0, 3);
+      }
+      return [255, 255, 255];
+    };
+    const style = getComputedStyle(el);
+    const fg = parse(style.color).slice(0, 3);
+    const bg = painted(el);
+    const [hi, lo] = [luminance(fg), luminance(bg)].sort((a, b) => b - a);
+    const hex = c => '#' + c.map(v => Math.round(v).toString(16).padStart(2, '0')).join('');
+    return { color: hex(fg), background: hex(bg), ratio: (hi + 0.05) / (lo + 0.05) };
+  }
+"""
+
+
+@pytest.mark.usefixtures("live_server", "pnpm_built_island")
+def test_copy_message_button_label_is_legible(page: Page, live_server_url: str) -> None:
+    """The "Copy message" button's own label, against its own background.
+
+    axe reports this button's contrast as undecided rather than as a violation:
+    it computed a foreground and a background and they came out identical, and
+    axe declines to judge a 1:1 ratio because 1:1 is also how deliberately
+    invisible text looks (`axe.js`, the `equalRatio` branch of the
+    color-contrast check). Undecided is not a pass, so the ratio is measured
+    here directly against WCAG 1.4.3 and the two colours are reported, which is
+    what tells a reviewer whether the label can be read at all.
+    """
+    _load_single(page, live_server_url, "04-low-res-blurry.json")
+    button = page.get_by_role("button", name="Copy message")
+    button.wait_for(timeout=5000)
+    measured = button.evaluate(_CONTRAST_JS)
+    assert measured["ratio"] >= _AA_NORMAL_TEXT_MIN_RATIO, (
+        f"the Copy message button's label is {measured['color']} on "
+        f"{measured['background']}, a contrast ratio of {measured['ratio']:.2f}:1, "
+        f"below the {_AA_NORMAL_TEXT_MIN_RATIO}:1 WCAG 1.4.3 requires for normal text"
+    )
