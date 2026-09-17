@@ -1,4 +1,4 @@
-"""FakeVisionExtractor — Protocol-compatible (extract + ensure_loaded)."""
+"""FakeVisionExtractor — Protocol-compatible (extract + ensure_loaded + warm)."""
 import pytest
 
 from app.schemas.extracted import FieldObservation
@@ -25,3 +25,10 @@ async def test_fake_vision_ensure_loaded_is_noop():
     fake = FakeVisionExtractor(observations=[])
     # Protocol method must exist and be awaitable.
     await fake.ensure_loaded()
+
+
+@pytest.mark.asyncio
+async def test_fake_vision_warm_is_noop():
+    fake = FakeVisionExtractor(observations=[])
+    # Protocol method must exist and be awaitable.
+    await fake.warm()

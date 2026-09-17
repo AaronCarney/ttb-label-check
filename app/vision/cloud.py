@@ -203,6 +203,11 @@ class CloudVisionExtractor:
     async def ensure_loaded(self) -> None:
         return None
 
+    async def warm(self) -> None:
+        """Nothing to warm: this reader holds no model. Its first call is as
+        slow as every other one, and what makes it slow is the network."""
+        return None
+
     async def _call_per_field(
         self, *, field_name: str, crop: bytes, label: Label
     ) -> dict:

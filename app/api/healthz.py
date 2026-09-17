@@ -42,10 +42,13 @@ async def healthz(settings: Settings = Depends(_get_settings)) -> JSONResponse:
     It also warms the serving path, which it did not always do. The local
     reader is one object for the whole process (``app/deps.py``), so the models
     this call loads are the ones the next submission reads with, and that
-    submission does not pay the load again. The hosted reader loads nothing, so
-    there is nothing to warm.
+    submission does not pay the load again. It goes as far as running one read,
+    because loading a model and running it cost separately and only the second
+    of those was ever paid by the first label — see ``LocalVisionExtractor.warm``.
+    The hosted reader loads nothing, so there is nothing to warm.
 
-    No label is read here.
+    No submitted label is read here: the warm read runs on an image the reader
+    draws for itself, which is never parsed, scored or reported.
     """
     body: dict[str, object] = {
         "status": "ok",
@@ -58,7 +61,12 @@ async def healthz(settings: Settings = Depends(_get_settings)) -> JSONResponse:
             from app.deps import build_evaluator
 
             evaluator = build_evaluator(settings)
-            await evaluator._vision.ensure_loaded()
+            # `warm`, not `ensure_loaded`: loading the models leaves the first
+            # inference still to pay, and this endpoint is what the deployed
+            # startup probe calls, so paying it here is what keeps it off the
+            # first label. `warm` awaits `ensure_loaded` itself, so a reader
+            # that cannot load still fails here and still answers 503.
+            await evaluator._vision.warm()
         except Exception as exc:  # noqa: BLE001 — anything that raises here means not ready
             body["status"] = "not_ready"
             body["warmup_error"] = str(exc)

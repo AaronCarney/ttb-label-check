@@ -32,14 +32,27 @@ def _client() -> TestClient:
 
 
 class _StubEvaluator:
-    """Stands in for the real evaluator; records that the reader was asked to load."""
+    """Stands in for the real evaluator; records how the reader was warmed.
+
+    It counts the two separately because the endpoint has to call the outer
+    one. ``ensure_loaded`` builds the models and stops there, leaving the first
+    inference for whoever submits first; ``warm`` loads *and* runs one read, so
+    nothing is left to pay. Mirroring the real reader, ``warm`` awaits
+    ``ensure_loaded`` itself, so a double that only counted loads could not
+    tell the two apart.
+    """
 
     def __init__(self) -> None:
         self._vision = self
         self.loads = 0
+        self.warms = 0
 
     async def ensure_loaded(self) -> None:
         self.loads += 1
+
+    async def warm(self) -> None:
+        self.warms += 1
+        await self.ensure_loaded()
 
 
 def test_healthz_answers_503_not_ready_when_the_reader_will_not_load(monkeypatch) -> None:
@@ -84,6 +97,10 @@ def test_a_failed_probe_leaves_the_process_free_to_try_again(monkeypatch) -> Non
     assert retry.json()["warmup_ran"] is True
     assert calls["n"] == 2, "the retry has to build the evaluator again, not reuse the failure"
     assert evaluator.loads == 1
+    assert evaluator.warms == 1, (
+        "the probe has to warm the reader, not merely load it: loading builds "
+        "the models and leaves the first inference for the first label"
+    )
 
 
 def test_once_ready_later_calls_answer_from_process_state(monkeypatch) -> None:

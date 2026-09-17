@@ -29,6 +29,8 @@ async def test_vision_exception_routes_to_needs_review(caplog):
             raise RuntimeError("vision boom")
         async def ensure_loaded(self):
             return None
+        async def warm(self):
+            return None
 
     e = Evaluator(vision=FailingVision(), rules=FakeRuleEngine(results=()),  # type: ignore[arg-type]
                   settings=Settings())

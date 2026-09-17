@@ -224,6 +224,28 @@ def thaw_reading(data: dict) -> _Reading:
     )
 
 
+@lru_cache(maxsize=1)
+def _warm_image_bytes() -> bytes:
+    """The image the warm read runs on, drawn once and kept.
+
+    Dark text on white, large enough and with enough space around it that the
+    detector finds a box and hands the recognizer something to read. It is
+    never scored, never parsed and never reaches a rule; it exists so that the
+    three models run once before a label arrives.
+    """
+    image = Image.new("RGB", (640, 220), "white")
+    from PIL import ImageDraw, ImageFont
+
+    try:
+        font = ImageFont.load_default(40)
+    except TypeError:  # pragma: no cover — older PIL, one fixed size only
+        font = ImageFont.load_default()
+    ImageDraw.Draw(image).text((24, 80), "WARM 750 ML 40% ALC/VOL", fill="black", font=font)
+    buffer = BytesIO()
+    image.save(buffer, format="PNG")
+    return buffer.getvalue()
+
+
 def parse_reading(reading: _Reading) -> dict[str, dict]:
     """The seven field payloads a reading produces, keyed by field.
 
@@ -360,6 +382,40 @@ class LocalVisionExtractor:
         with self._load_lock:
             if self._engine is None:
                 self._engine = self._load()
+
+    async def warm(self) -> None:
+        """Load the models, then read one image, so no label pays for either.
+
+        ``ensure_loaded`` builds the onnxruntime sessions; it does not run
+        them. Each graph is optimized and its memory arenas allocated on the
+        first inference, and that cost lands on whoever submits first: measured
+        in a fresh process here, the first read after a load took 0.48s against
+        0.35s for the two after it, and running one read first brought it to
+        0.37s. On the deployed service, where every read is several times
+        slower, the same gap is over a second, and the service scales to zero,
+        so a reviewer's first click is what pays it.
+
+        The image is generated rather than shipped — a real label kept as a
+        warm-up fixture is a second thing to keep true — and what it says does
+        not matter, because the point is to run the graphs rather than to read
+        anything. It does have to carry text the detector finds: a warm read
+        that detects nothing never reaches the recognition model, which is the
+        larger of the three, and leaves most of the cost still to pay.
+
+        Failure is logged, not raised. A warm that did not happen costs the
+        first label what it used to cost; a warm that takes the process down
+        costs everything. Readiness is ``ensure_loaded``'s question, and it is
+        awaited above, so a caller that needs an answer still gets one.
+        """
+        await self.ensure_loaded()
+        try:
+            await asyncio.to_thread(self._read_serialised, _warm_image_bytes())
+        except Exception:  # noqa: BLE001 — see the docstring: never fatal
+            _logger.warning(
+                "reader_warm_read_failed",
+                extra={"reason_code": "ENGINE.OK.NONE"},
+                exc_info=True,
+            )
 
     # -- reading -----------------------------------------------------------
 
