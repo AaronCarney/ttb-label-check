@@ -244,3 +244,28 @@ def test_an_undeclared_source_of_product_stays_undeclared():
     reviewer who says neither gets no origin comparison, not a wrong one."""
     record = _form(origin="France")
     assert record.source_of_product is None
+
+
+def test_the_rejection_message_offers_values_the_form_accepts():
+    """A message that tells a person what to type has to name what is accepted.
+
+    It named the display labels — "distilled spirits", "malt beverage" — while
+    the field accepts `distilled_spirits` and `malt_beverage`. Someone who
+    typed what they were told to type was refused a second time by the same
+    message.
+
+    Read back out of the message rather than written here, so the message and
+    the accepted set cannot drift apart again.
+    """
+    with pytest.raises(ApplicationFormError) as caught:
+        _form(beverage_type="cider")
+    message = str(caught.value)
+
+    offered = message.split("pick one of:", 1)[1].rstrip(".").split(",")
+    offered = [token.strip() for token in offered if token.strip()]
+    assert offered, f"message offers nothing to pick from: {message!r}"
+
+    for value in offered:
+        assert _form(beverage_type=value) is not None, (
+            f"the message offers {value!r}, which the form then refuses"
+        )

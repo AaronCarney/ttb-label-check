@@ -42,13 +42,6 @@ from app.schemas.application_record import (
 _BEVERAGE_TYPES: tuple[BeverageType, ...] = ("distilled_spirits", "wine", "malt_beverage")
 _SOURCES: tuple[SourceOfProduct, ...] = ("domestic", "imported")
 
-_BEVERAGE_TYPE_LABELS = {
-    "distilled_spirits": "distilled spirits",
-    "wine": "wine",
-    "malt_beverage": "malt beverage",
-}
-
-
 class ApplicationFormError(ValueError):
     """The posted application cannot be read. The message is shown to the user."""
 
@@ -105,7 +98,11 @@ def record_from_form(
         return None
 
     if kind not in _BEVERAGE_TYPES:
-        allowed = ", ".join(_BEVERAGE_TYPE_LABELS[t] for t in _BEVERAGE_TYPES)
+        # The values, not their display labels. This offered "distilled
+        # spirits" and "malt beverage" while the field accepts
+        # `distilled_spirits` and `malt_beverage`, so someone who typed what
+        # the message told them to type was refused by the same message again.
+        allowed = ", ".join(_BEVERAGE_TYPES)
         raise ApplicationFormError(f"Unknown beverage type {kind!r} — pick one of: {allowed}.")
 
     if source is not None:
