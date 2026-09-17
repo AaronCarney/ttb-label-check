@@ -73,6 +73,28 @@ CONCURRENCY=1
 MAX_INSTANCES=2
 TIMEOUT=900
 
+# Hold traffic off an instance until its models are loaded.
+#
+# Without this Cloud Run routes a request the moment uvicorn binds the port,
+# and the OCR models load lazily on first use - inside that request. The load
+# pushed the evaluation past the evaluator's five-second SLA, so the first
+# person to click got ENGINE.SLA.TIMEOUT and an empty result: no findings, no
+# explanation of why. Observed on the live service 2026-09-16, and it is not a
+# first-boot-only fault - CONCURRENCY is 1, so every scale-up makes another
+# instance that would do the same.
+#
+# /healthz is the probe because loading the models is already what it does: it
+# builds the same evaluator a submission builds and answers 503 until that
+# succeeds, which is what lets an orchestrator hold traffic back. The reader is
+# one object per process (app/deps.py), so what the probe loads is what the
+# next request reads with.
+#
+# 5 x 12 allows a minute, well over the seconds a load takes, so a cold disk
+# does not fail the revision. An attempt cut off at timeoutSeconds is safe:
+# ensure_loaded holds a lock, so the retry waits on the load already running
+# rather than building a second engine.
+STARTUP_PROBE=httpGet.path=/healthz,initialDelaySeconds=0,timeoutSeconds=10,periodSeconds=5,failureThreshold=12
+
 FAILED=0
 fail() { echo "  FAIL  $*" >&2; FAILED=1; }
 pass() { echo "  ok    $*"; }
@@ -180,6 +202,7 @@ gcloud run deploy "$SERVICE" \
     --min-instances 0 \
     --timeout "$TIMEOUT" \
     --cpu-boost \
+    --startup-probe "$STARTUP_PROBE" \
     --set-env-vars VISION_MODE=local \
     "$ACCESS_FLAG"
 
