@@ -1,6 +1,7 @@
 import * as React from "react";
 import { createRoot } from "react-dom/client";
 import "./tokens/globals.css";
+import { BatchItemDetail } from "./components/BatchItemDetail";
 import { BatchTable } from "./components/BatchTable";
 import { LiveRegion } from "./components/LiveRegion";
 import { QueuePosition } from "./components/QueuePosition";
@@ -9,6 +10,14 @@ import { useBatchStream } from "./sse/useBatchStream";
 function BatchApp({ batchId }: { batchId: string }): React.JSX.Element {
   const { events, error, total, done } = useBatchStream(batchId);
   const latest = events[events.length - 1];
+  // Which label the reviewer has opened, held by label_ref rather than by
+  // index, so a re-sort of the table does not move the selection onto a
+  // different label than the one they opened.
+  const [selectedRef, setSelectedRef] = React.useState<string | null>(null);
+  const selected = React.useMemo(
+    () => events.find((e) => e.label_ref === selectedRef) ?? null,
+    [events, selectedRef],
+  );
   // Until the worker reports the batch size, the count of results received is
   // the only honest number there is; a denominator taken from that same count
   // would tell the reviewer the batch had finished from the first result on.
@@ -29,7 +38,8 @@ function BatchApp({ batchId }: { batchId: string }): React.JSX.Element {
           {error}
         </p>
       )}
-      <BatchTable rows={events} onSelect={() => {}} />
+      <BatchTable rows={events} onSelect={setSelectedRef} selectedRef={selectedRef} />
+      <BatchItemDetail row={selected} />
       <LiveRegion message={latest ? `Label ${latest.label_ref}: ${latest.disposition}` : ""} />
     </main>
   );

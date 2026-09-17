@@ -70,6 +70,16 @@ describe("BatchTable", () => {
     expect(onSelect).toHaveBeenLastCalledWith("lbl-3");
   });
 
+  it("marks the opened row with aria-current and leaves the others unmarked", () => {
+    const { getAllByRole } = renderWithProviders(
+      <BatchTable rows={rows} onSelect={() => {}} selectedRef="lbl-2" />,
+    );
+    const dataRows = getAllByRole("row").slice(1);
+    const marked = dataRows.filter((r) => r.getAttribute("aria-current") === "true");
+    expect(marked).toHaveLength(1);
+    expect(marked[0]!.textContent).toContain("lbl-2");
+  });
+
   it("has no axe violations", async () => {
     const { container } = renderWithProviders(
       <BatchTable rows={rows} onSelect={() => {}} />,

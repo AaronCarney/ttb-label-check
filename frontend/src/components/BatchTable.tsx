@@ -9,6 +9,9 @@ export type SortDir = "asc" | "desc";
 export interface BatchTableProps {
   rows: BatchSSEEvent[];
   onSelect: (labelRef: string) => void;
+  /** The label_ref currently opened below the table, if any. Optional so a
+   *  caller that shows no detail panel needs no selection state. */
+  selectedRef?: string | null;
   className?: string;
 }
 
@@ -18,7 +21,7 @@ const _DISPOSITION_RANK: Record<string, number> = {
   fail: 2,
 };
 
-export function BatchTable({ rows, onSelect, className }: BatchTableProps): React.JSX.Element {
+export function BatchTable({ rows, onSelect, selectedRef = null, className }: BatchTableProps): React.JSX.Element {
   const [sort, setSort] = React.useState<{ key: SortKey; dir: SortDir }>({
     key: "position",
     dir: "asc",
@@ -75,7 +78,15 @@ export function BatchTable({ rows, onSelect, className }: BatchTableProps): Reac
                 onSelect(row.label_ref);
               }
             }}
-            className="cursor-pointer border-b border-border hover:bg-muted/40 focus-visible:[outline:3px_solid_hsl(var(--ring))]"
+            // `aria-current` rather than `aria-selected`: this is a plain
+            // table, not a grid, and `aria-selected` on a row outside a grid
+            // is invalid ARIA. Without it the open row is marked by colour
+            // alone, which a screen-reader user never receives.
+            aria-current={row.label_ref === selectedRef ? "true" : undefined}
+            className={cn(
+              "cursor-pointer border-b border-border hover:bg-muted/40 focus-visible:[outline:3px_solid_hsl(var(--ring))]",
+              row.label_ref === selectedRef && "bg-muted",
+            )}
           >
             <td data-col="position" className="p-2 tabular-nums">{row.queue_position}</td>
             <td className="p-2 font-mono text-xs">{row.label_ref}</td>

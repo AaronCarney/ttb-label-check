@@ -6,6 +6,13 @@ All notable changes to this project are recorded here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- Opening a label in a batch shows its check results — every field, what was read from the label
+  beside the application value, and the rule verdict with its reason code — in the same cards the
+  single-label page uses. A label the app could not check says so and names the code recorded
+  against it, rather than showing an empty panel. See `docs/PRD.md` FR-12.
+
 ## [0.2.0] - 2026-09-16
 
 ### Added
