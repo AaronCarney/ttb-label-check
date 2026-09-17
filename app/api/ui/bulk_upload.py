@@ -131,7 +131,11 @@ async def batches_upload_submit(
                 {"beverage_type": beverage_type},
                 settings,
                 application_id=application_ref,
-                evaluation_id=label_id,
+                # Minted, not borrowed from `label_id`: `label_id` carries the
+                # uploader's own filename so the reviewer can tell which file a
+                # row is, and the evaluation id is a telemetry key that reaches
+                # the logs. The two must not be the same string.
+                evaluation_id=f"ev-{uuid.uuid4().hex[:12]}",
             )
         except ApplicationFormError as error:
             return templates.TemplateResponse(

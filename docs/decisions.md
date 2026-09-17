@@ -1976,3 +1976,55 @@ keeps.
 - **Two approved documents changed after approval**, the same cost [0017](#0017) carried: `docs/PRD.md`
   NFR-3 and `specs/0001-label-verification/requirements.md` R17 were amended rather than the code. The
   amendment is logged in `docs/PRD-decisions.md`.
+
+<a id="0032"></a>
+## 0032. A label's identifier is not its filename: `label_id` is display text and leaves the logs, `evaluation_id` is minted
+
+**Decided:** 2026-09-16. **Evidence:** `app/logging/redaction.py`'s own contract, *"nothing a
+submission contains reaches the logs"*; `app/logging/otel_genai.py` as it stood; the reference
+envelopes in `tests/fixtures/envelopes/batch/`, where `evaluation_id` and `label_ref` are already
+different kinds of string; [0020](#0020), which put the filename in the refusal sentence on purpose.
+
+**What was wrong.** An uploaded file's name became the label's identifier — `app/api/ui/bulk_upload.py`
+built `label_id` as the batch id, the position and the filename, then handed that same string to the
+evaluation as its `evaluation_id`. Both mechanisms that are supposed to keep a submission out of the
+logs were bypassed, in three different ways at once:
+
+- The formatter writes the free-text `msg` before the allow-list runs, so a message that interpolated
+  the label id or the refusal sentence carried the filename out whatever the allow-list said.
+- `evaluation_id` is *on* the allow-list, correctly — it is the correlation key. Deriving it from the
+  filename meant the allow-list emitted the filename by design.
+- Where a batch arrived as refs with no application, `app/batch/worker.py` synthesised one and used
+  `label_id` as its `evaluation_id`, reaching the same place by a fourth route.
+
+An uploader who names a file after a person therefore put that person in the logs, and the redaction
+filter was never involved.
+
+**Chosen.** The two strings are separated by what they are for.
+
+| String | What it is | Where it goes |
+|---|---|---|
+| `label_id` / `label_ref` | Display text. Carries the uploader's filename so a reviewer can tell which file a row is | The page, the SSE stream, the refusal sentence. Never a log line |
+| `evaluation_id` | Correlation key, minted by the app | Every log line, the audit record, the override lookup |
+
+`label_id` came off the allow-list in `app/logging/otel_genai.py`, both upload routes and the worker's
+synthesised application mint their own `evaluation_id`, and the worker's log lines carry the batch id
+and the queue position instead of the label id and the reviewer's sentence.
+`tests/test_logging_filename_never_leaks.py` runs the real worker with a person-named file through
+both the refusal path and the ordinary path and reads what the real handler emits.
+
+**Because** a filename is whatever the uploader typed, which makes it submission content under the
+rule the redaction filter already states, and an identifier that doubles as content cannot be kept out
+of telemetry by a list of field names.
+
+**Cost, stated.**
+
+- **A log line no longer names the file.** An operator reading logs sees `batch_id` and a queue
+  position, and has to go to the batch page to learn which file that was. That is the trade the rule
+  requires: the correlation is complete, the identification is not.
+- **The reviewer's sentence still names the file, and it is still stored.** [0020](#0020) put it there
+  so a refusal says which file was refused, and `failed_reason` on the batch snapshot keeps it. This
+  decision covers the logs only; anything written to the snapshot or the audit record is a separate
+  question that has not been asked.
+- **`evaluation_id` for a synthesised application is now random.** Two runs of the same ref batch no
+  longer produce the same id, so a test that pinned one would have to be rewritten. None did.

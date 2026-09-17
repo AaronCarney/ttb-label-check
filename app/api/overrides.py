@@ -157,7 +157,6 @@ async def post_override(
         extra={
             "batch_id": batch_id,
             "evaluation_id": evaluation_id,
-            "label_id": label_id,
             "reason_code": payload.reason_code,
         },
     )

@@ -5,8 +5,12 @@ Drops at emission time:
 - Label artwork bytes.
 - Extracted field values verbatim.
 
-Preserves: evaluation_id, batch_id, label_id, reason_code, duration_ms,
-rule_set_version, model_version, prompt_version, error_class.
+A submission's filename counts as content: it is whatever the uploader typed,
+and a file named after a person names that person. It reaches the app as
+`label_id`, which is why `label_id` is not a field the formatter emits.
+
+Preserves: evaluation_id, batch_id, reason_code, duration_ms, rule_set_version,
+model_version, prompt_version, error_class.
 """
 from __future__ import annotations
 

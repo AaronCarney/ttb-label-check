@@ -3,8 +3,9 @@ through the OtelGenAIFormatter / RedactionFilter contract.
 
 Locks the contract that:
 
-1. Whitelisted structured fields (`batch_id`, `label_id`, `evaluation_id`,
-   `reason_code`, `duration_ms`, `error_class`) survive emission.
+1. Whitelisted structured fields (`batch_id`, `evaluation_id`, `reason_code`,
+   `duration_ms`, `error_class`) survive emission, and `label_id` does not:
+   it carries the uploader's filename and is submission content.
 2. Redaction-stripped fields (`image_bytes`, `extracted_text`, etc.) do
    not appear in the JSON line — even if a future call site accidentally
    sets them via ``extra=``.
@@ -56,7 +57,7 @@ def test_label_result_emits_whitelisted_fields() -> None:
     parsed = _emit(record)
     assert parsed["msg"].startswith("label_result")
     assert parsed["batch_id"] == "B-1"
-    assert parsed["label_id"] == "L-1"
+    assert "label_id" not in parsed
     assert parsed["evaluation_id"] == "00000000-0000-4000-8000-000000000001"
     assert parsed["duration_ms"] == 42
     assert parsed["reason_code"] == "ENGINE.OK.NONE"
@@ -124,7 +125,7 @@ def test_override_applied_emits_full_correlation_set() -> None:
     )
     parsed = _emit(record)
     assert parsed["batch_id"] == "B-4"
-    assert parsed["label_id"] == "L-Z"
+    assert "label_id" not in parsed
     assert parsed["evaluation_id"] == "00000000-0000-4000-8000-000000000004"
     assert parsed["reason_code"] == "REJ.LABEL.GENERIC"
 
@@ -140,3 +141,18 @@ def test_batch_stream_closed_carries_terminator_in_msg() -> None:
     parsed = _emit(record)
     assert "terminated=true" in parsed["msg"]
     assert parsed["batch_id"] == "B-5"
+
+
+def test_label_id_is_never_emitted_even_when_a_call_site_passes_it() -> None:
+    """The filename arrives as `label_id`. A call site that passes it anyway
+    must not put it in the log line."""
+    record = _record(
+        "label_not_checked batch_id=B-6 pos=0",
+        batch_id="B-6",
+        label_id="B-6-000-Jane-Doe-Medical-Release.png",
+        evaluation_id="ev-0123456789ab",
+        reason_code="ENGINE.INPUT.UNSUPPORTED_IMAGE",
+    )
+    parsed = _emit(record)
+    assert "label_id" not in parsed
+    assert "Jane-Doe" not in json.dumps(parsed)

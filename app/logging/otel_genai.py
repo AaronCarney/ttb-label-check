@@ -12,10 +12,15 @@ from datetime import datetime, timezone
 
 
 # Fields carried on every log line, whatever the event.
+#
+# `label_id` is deliberately absent. It is a display reference and carries the
+# uploader's own filename, so it is submission content and belongs with the
+# fields the redaction filter drops, not with the telemetry keys. A log line
+# locates a label by `evaluation_id`, or by `batch_id` and the queue position
+# in the message.
 CROSS_CUTTING_FIELDS = (
     "evaluation_id",
     "batch_id",
-    "label_id",
     "reason_code",
     "duration_ms",
     "rule_set_version",

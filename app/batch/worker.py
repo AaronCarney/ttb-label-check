@@ -35,6 +35,7 @@ import asyncio
 import hashlib
 import logging
 import time
+import uuid
 from datetime import datetime, timezone
 
 from app.api._sse_bus import SSEBus
@@ -123,9 +124,13 @@ class BatchWorker:
         batch submitted as refs alone carries no application data."""
         if item.application_ref in self._app_lookup:
             return self._app_lookup[item.application_ref]
+        # Minted, not taken from `label_id`. `evaluation_id` is emitted on every
+        # log line, and `label_id` is the uploader's own filename — borrowing it
+        # here put that filename in the logs by way of the allow-list, which is
+        # the one route neither the allow-list nor the redaction filter guards.
         return Application(
             application_id=item.application_ref,
-            evaluation_id=item.label_id,
+            evaluation_id=f"ev-{uuid.uuid4().hex[:12]}",
         )
 
     def _resolve_label(self, item: BatchItem) -> Label | None:
@@ -272,10 +277,9 @@ class BatchWorker:
                     # still checked (docs/PRD.md FR-13). `Exception` and not
                     # `BaseException`, so cancelling the worker still cancels it.
                     _logger.exception(
-                        f"label_evaluation_failed batch_id={batch_id} label_id={item.label_id} pos={queue_position}",
+                        f"label_evaluation_failed batch_id={batch_id} pos={queue_position}",
                         extra={
                             "batch_id": batch_id,
-                            "label_id": item.label_id,
                             "evaluation_id": application.evaluation_id,
                             "reason_code": _EVALUATION_RAISED,
                         },
@@ -300,12 +304,13 @@ class BatchWorker:
                     duration_ms=duration_ms,
                 )
                 self._in_flight.record_failure(item.label_id, message)
+                # `message` is deliberately not logged: it is the sentence the
+                # reviewer reads, and it names the file they uploaded.
+                # `reason_code` says the same thing to an operator.
                 _logger.warning(
-                    f"label_not_checked batch_id={batch_id} label_id={item.label_id} "
-                    f"pos={queue_position} message={message}",
+                    f"label_not_checked batch_id={batch_id} pos={queue_position}",
                     extra={
                         "batch_id": batch_id,
-                        "label_id": item.label_id,
                         "evaluation_id": application.evaluation_id,
                         "reason_code": reason_code,
                     },
@@ -318,7 +323,6 @@ class BatchWorker:
                 f"label_result batch_id={batch_id} pos={queue_position} disposition={envelope.disposition} duration_ms={duration_ms}",
                 extra={
                     "batch_id": batch_id,
-                    "label_id": item.label_id,
                     "evaluation_id": envelope.evaluation_id,
                     "duration_ms": duration_ms,
                     "reason_code": headline_code or "ENGINE.OK.NONE",
