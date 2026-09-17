@@ -18,7 +18,7 @@ export function RawJSONDrawer({ enabled, payload, className }: RawJSONDrawerProp
         <button
           type="button"
           className={cn(
-            "inline-flex items-center gap-2 rounded-md border border-border bg-background px-3 py-1 text-sm hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring",
+            "inline-flex items-center gap-2 rounded-md border border-border bg-background px-3 py-1 text-sm text-foreground hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring",
             className,
           )}
         >
@@ -31,7 +31,7 @@ export function RawJSONDrawer({ enabled, payload, className }: RawJSONDrawerProp
         <Dialog.Content className="fixed right-0 top-0 z-50 h-full w-[min(720px,90vw)] overflow-y-auto bg-background p-6 shadow-lg">
           <header className="flex items-center justify-between">
             <Dialog.Title className="text-lg font-semibold">Raw JSON (DEV_MODE)</Dialog.Title>
-            <Dialog.Close aria-label="Close" className="rounded-md p-1 hover:bg-muted">
+            <Dialog.Close aria-label="Close" className="rounded-md bg-background p-1 text-foreground hover:bg-muted">
               <X aria-hidden className="h-5 w-5" />
             </Dialog.Close>
           </header>

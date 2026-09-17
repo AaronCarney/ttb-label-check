@@ -30,7 +30,7 @@ export function NeedsBetterPhotoCard({ reasonCode, applicantMessage, className }
       <button
         type="button"
         onClick={handleCopy}
-        className="inline-flex items-center gap-1 rounded-md border border-border bg-background px-3 py-1 text-sm hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring"
+        className="inline-flex items-center gap-1 rounded-md border border-border bg-background px-3 py-1 text-sm text-foreground hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring"
       >
         <Copy aria-hidden className="h-4 w-4" />
         {copied ? "Copied" : "Copy message"}

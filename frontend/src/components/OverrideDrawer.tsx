@@ -65,7 +65,7 @@ export function OverrideDrawer({
         >
           <header className="flex items-center justify-between">
             <Dialog.Title className="text-lg font-semibold">Override disposition</Dialog.Title>
-            <Dialog.Close aria-label="Close" className="rounded-md p-1 hover:bg-muted">
+            <Dialog.Close aria-label="Close" className="rounded-md bg-background p-1 text-foreground hover:bg-muted">
               <X aria-hidden className="h-5 w-5" />
             </Dialog.Close>
           </header>
@@ -96,7 +96,7 @@ export function OverrideDrawer({
             <button
               type="button"
               onClick={() => onOpenChange(false)}
-              className="rounded-md border border-border px-3 py-1 text-sm hover:bg-muted"
+              className="rounded-md border border-border bg-background px-3 py-1 text-sm text-foreground hover:bg-muted"
             >
               Cancel
             </button>

@@ -88,6 +88,16 @@ tests:
   artifacts:
     when: always
     expire_in: 2 weeks
+    # The island bundle this job built. `app/ui/static/island/` is committed and
+    # `tests/test_island_build_clean.py` holds it to the frontend sources, so a
+    # source change is not finished until the rebuilt bundle is committed beside
+    # it. This job already runs `pnpm build`, and publishing what it built means
+    # the bundle that was actually tested can be retrieved rather than rebuilt
+    # somewhere else and hoped to match. `when: always` matters here: the run
+    # that proves the committed bundle is stale is a failing run, and that is
+    # exactly the run whose output is needed.
+    paths:
+      - app/ui/static/island/
     reports:
       coverage_report:
         coverage_format: cobertura

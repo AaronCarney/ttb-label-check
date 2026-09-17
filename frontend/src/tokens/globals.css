@@ -130,6 +130,15 @@ a:visited {
 
 /* ---------- Buttons ---------- */
 
+/* This is the USWDS default primary button, and it styles the bare `button`
+   element, so every button in the app starts here whether it asked to or not.
+   A Tailwind class beats an element selector, so a component that sets
+   `bg-background` or `hover:bg-muted` replaces the background below and keeps
+   the white `color` — white text on a white button. That is not hypothetical:
+   it happened to five buttons at once, two of them invisible at rest. A
+   component that overrides the background MUST also set the foreground.
+   Held by tests/test_a11y_axe.py, which measures every visible button in both
+   states. */
 button,
 .button,
 .primary-button,
@@ -151,12 +160,17 @@ input[type="submit"] {
   text-decoration: none;
   transition: background-color 120ms ease, color 120ms ease;
 }
+/* Hover changes the background only. The `color` that used to sit here was
+   redundant for the default button — the rule above already sets white, and a
+   pseudo-class does not drop it — but it outranked every `text-*` utility,
+   because `button:hover` scores above a single class. So a button that set its
+   own foreground kept it at rest and lost it under the pointer, which is how a
+   cancel button ended up painting white on #f4f4f6. */
 button:hover,
 .button:hover,
 .primary-button:hover,
 input[type="submit"]:hover {
   background: hsl(var(--uswds-primary-dark));
-  color: hsl(var(--uswds-white));
 }
 button:disabled,
 .primary-button:disabled,

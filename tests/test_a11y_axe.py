@@ -285,6 +285,29 @@ _CONTRAST_JS = r"""
 """
 
 
+def _settle(page: Page, button: Any) -> None:
+    """Wait for a background transition to finish before the colour is read.
+
+    `globals.css` gives every button `transition: background-color 120ms`, so
+    the colour painted the instant the pointer arrives is the colour the button
+    is leaving, not the colour it is going to. Reading it immediately recorded
+    the resting background twice and reported the hover state as clean while two
+    close buttons and a cancel button were painting white text on #f4f4f6 —
+    1.06:1 — the exact defect the hover pass exists to catch.
+
+    The wait is on the pixel value rather than on a fixed sleep: sample until
+    two reads agree, so a button with no transition costs one extra sample and a
+    slower machine is not a flake.
+    """
+    previous = None
+    for _ in range(40):
+        current = button.evaluate("el => getComputedStyle(el).backgroundColor")
+        if current == previous:
+            return
+        previous = current
+        page.wait_for_timeout(50)
+
+
 def _visible_button_contrasts(page: Page, screen: str) -> list[dict[str, Any]]:
     """Measure every button the screen is currently showing, resting and hovered.
 
@@ -292,6 +315,16 @@ def _visible_button_contrasts(page: Page, screen: str) -> list[dict[str, Any]]:
     hover state alone, and axe never enters that state: it scans the document as
     loaded. A control that becomes unreadable under the pointer is unreadable in
     the only moment the reader is using it.
+
+    A disabled button is measured too, and reported, but it is not held to a
+    floor. SC 1.4.3 carries its own exception and this is it, verbatim:
+    "Incidental: Text or images of text that are part of an inactive user
+    interface component, that are pure decoration, that are not visible to
+    anyone, or that are part of a picture that contains significant other visual
+    content, have no contrast requirement." A disabled control is an inactive
+    user interface component, so the criterion this suite enforces does not
+    reach it. It stays in the measurements because a reviewer doing the
+    conformance review NFR-3 also asks for should see the number and judge it.
     """
     measured: list[dict[str, Any]] = []
     buttons = page.get_by_role("button")
@@ -302,11 +335,19 @@ def _visible_button_contrasts(page: Page, screen: str) -> list[dict[str, Any]]:
         label = (button.inner_text() or "").strip()
         name = label or (button.get_attribute("aria-label") or "").strip() or f"button {index}"
         floor = _AA_NORMAL_TEXT_MIN_RATIO if label else _NON_TEXT_MIN_RATIO
+        inactive = button.is_disabled()
         for state in ("resting", "hovered"):
             if state == "hovered":
                 button.hover()
+                _settle(page, button)
             measured.append(
-                {"screen": screen, "button": name, "state": state, "floor": floor}
+                {
+                    "screen": screen,
+                    "button": name,
+                    "state": state,
+                    "floor": floor,
+                    "exempt": inactive,
+                }
                 | button.evaluate(_CONTRAST_JS)
             )
     return measured
@@ -314,7 +355,9 @@ def _visible_button_contrasts(page: Page, screen: str) -> list[dict[str, Any]]:
 
 def _assert_buttons_legible(measured: list[dict[str, Any]]) -> None:
     assert measured, "no visible buttons were measured, so nothing was actually checked"
-    illegible = [m for m in measured if m["ratio"] < m["floor"]]
+    held = [m for m in measured if not m["exempt"]]
+    assert held, "every measured button was exempt, so no floor was actually applied"
+    illegible = [m for m in held if m["ratio"] < m["floor"]]
     assert not illegible, "buttons below their contrast floor: " + "; ".join(
         f'{m["screen"]} "{m["button"]}" {m["state"]}: {m["color"]} on {m["background"]} '
         f"is {m['ratio']:.2f}:1, below {m['floor']}:1"
