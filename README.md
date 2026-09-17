@@ -184,7 +184,9 @@ limits) are data files rather than code.
 
 **3. Report.** Each check returns a verdict, a reason code, and a citation to the regulation it came
 from, so a reviewer can see why and not just what. The result also carries the region of the image
-the reading was taken from; the interface does not draw that region on the label yet.
+the reading was taken from, and the interface deliberately does not draw it on the label: that box
+is measured in the frame the reader worked in — the photograph shrunk to fit and sometimes turned
+upright — and not in the photograph the page displays.
 
 **No model decides a verdict.** A model may read a label — that is the part no deterministic code
 can do — but the comparison is rules over the text it produced. The same label and the same

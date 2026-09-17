@@ -228,24 +228,30 @@ used wherever the app can see an element but cannot honestly settle it, and it i
 every uncertainty rather than a fallback. Each result carries what was read, the application's value
 beside it, the rules that ran with their citations, and a confidence level, laid out next to the
 label image itself, so a reviewer checks the answer against the label rather than trusting it. The
-reading also records which part of the image it came from, but the interface does not draw that
-region yet — finding the spot on the label is still the reviewer's own work.
+reading also records which part of the image it came from, and the interface deliberately does not
+draw that region on the label: the box is measured in the frame the reader worked in, which is the
+photograph after it has been shrunk to fit and sometimes turned upright, not the photograph the page
+shows. A box drawn from it would point confidently at the wrong place. Finding the spot on the label
+is still the reviewer's own work.
 
 **Whether the record would answer a producer who contests a rejection.** It would not, and that is
-worth saying because everything above makes it sound as though it would. Nothing is kept: once the
-response is sent the record is gone, and only the label image survives, for seven days. The trail
-attached to each verdict names the rule set that produced it as "unknown" on every evaluation, and
-names the reader not at all, so even a saved copy could not say which rules judged that label. The
-pointer back to the part of the image is empty in every result. An agent in the interface has no
-save, no print and no download — the full record comes only from calling the service directly, which
-a developer does and a reviewing agent does not. The interface shows the first rule that fired on
-each element, though the response carries all of them. And an override carries a made-up session
-number rather than a name, because nothing signs anyone in; on the single-label path it cannot be
-recorded at all, because only a batch holds its results long enough to be amended.
+worth saying because everything above makes it sound as though it would. What survives is short —
+a single label's result keeps for seven days so an override has something to amend, and then it is
+gone. What survives is also unlabelled: the trail attached to each verdict names the rule set that
+produced it as "unknown" on every evaluation, and names the reader not at all, so even a kept copy
+could not say which rules judged that label or what read it. The full record is in the result page's
+own source, but the interface offers no save, no print and no download, and the drawer that would
+display it is a developer's switch that is off by default — so getting the record means calling the
+service directly, which a developer does and a reviewing agent does not. Every rule that fired on an
+element is counted into that element's verdict and every citation is shown, but only the first
+finding's explanation is written out, so a label failing the fifth of the warning's seven rules says
+so without saying which one. And an override carries a made-up session number rather than a name,
+because nothing signs anyone in.
 
-**That gap is the cost of keeping nothing, and closing it is not a coding problem.** The same
-constraint that makes this safe to run — no database, nothing written down, nothing for a privacy
-reviewer to ask about — is what leaves a contested rejection with no record to answer it. A
+**That gap is the cost of keeping almost nothing, and closing it is not a coding problem.** The same
+constraint that makes this safe to run — no database, two directories of files that empty themselves
+after a week, almost nothing for a privacy reviewer to ask about — is what leaves a contested
+rejection with no record to answer it. A
 deployment that must stand behind its verdicts needs three things we did not build: a retention
 period set by the agency's records schedule, a sign-in so an override names a person, and real
 versions on the trail. We would rather name the gap than fit a cheap version of it: a record that
