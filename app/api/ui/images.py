@@ -6,9 +6,11 @@ bytes the reviewer uploaded have to still be somewhere when the browser asks for
 them a moment later — and when the reviewer opens that page again tomorrow, or
 refreshes it after the service restarts, or lands on a different worker.
 
-They are kept as files, one per evaluation, under the machine's temporary
-directory. See `docs/decisions.md#0018` for what that choice buys and what it
-does not.
+They are kept as files, one per face of the evaluated label, under the machine's
+temporary directory. See `docs/decisions.md#0018` for what that choice buys and
+what it does not. Every face is kept, not just the front: a finding read off the
+back is shown against the back, and a reviewer who cannot see the photograph a
+rejection came from cannot check it.
 """
 
 from __future__ import annotations
@@ -39,6 +41,12 @@ _EVALUATION_ID = re.compile(r"\A[A-Za-z0-9_-]{1,128}\Z")
 _SUFFIX_FOR_MIME = {"image/png": ".png", "image/jpeg": ".jpg"}
 _MIME_FOR_SUFFIX = {suffix: mime for mime, suffix in _SUFFIX_FOR_MIME.items()}
 
+# Which face of the label a file holds. The four the `Label` schema allows, and
+# nothing else reaches a filename. The separator is a dot because `_EVALUATION_ID`
+# forbids one, so no evaluation id can be mistaken for an id plus a face.
+_FACE_TAGS = ("front", "back", "neck", "side")
+DEFAULT_FACE = "front"
+
 # How long an uploaded image stays readable. Long enough that a page opened
 # now is still whole when it is looked at again, short enough that a
 # long-running deployment does not accumulate uploads for ever.
@@ -61,21 +69,25 @@ class UploadImageStore:
     def root(self) -> Path:
         return self._root
 
-    def put(self, evaluation_id: str, mime: str, body: bytes) -> None:
-        """Keep one image under the id its result page will ask for.
+    def put(self, evaluation_id: str, mime: str, body: bytes, face: str = DEFAULT_FACE) -> None:
+        """Keep one face of one evaluation's label, under the id its result
+        page will ask for.
 
         An unsupported media type is not written: the upload routes refuse
         anything that is not PNG or JPEG before they get here, so reaching
-        this with a third type is a programming error, not a user's.
+        this with a third type is a programming error, not a user's. The same
+        goes for a face the `Label` schema does not allow.
         """
         suffix = _SUFFIX_FOR_MIME.get(mime)
         if suffix is None:
             raise ValueError(f"cannot store an image of type {mime!r}")
         if not _EVALUATION_ID.match(evaluation_id):
             raise ValueError(f"refusing to store under evaluation id {evaluation_id!r}")
+        if face not in _FACE_TAGS:
+            raise ValueError(f"refusing to store under face {face!r}")
 
         self._root.mkdir(parents=True, exist_ok=True)
-        final = self._root / f"{evaluation_id}{suffix}"
+        final = self._root / f"{evaluation_id}.{face}{suffix}"
         # Written beside the final name and then moved onto it, so a second
         # worker reading the directory never sees a half-written image.
         staging = self._root / f".{evaluation_id}.{uuid.uuid4().hex}.part"
@@ -83,25 +95,36 @@ class UploadImageStore:
         os.replace(staging, final)
         self._forget_what_has_expired()
 
-    def get(self, evaluation_id: str) -> tuple[str, bytes] | None:
-        """The image kept for one evaluation, with its media type, or nothing.
+    def get(self, evaluation_id: str, face: str = DEFAULT_FACE) -> tuple[str, bytes] | None:
+        """One face of one evaluation's label, with its media type, or nothing.
 
         Nothing is the honest answer for an id that was never stored, for one
-        that is not an id at all, and for one whose file the sweep has already
-        dropped; the route turns each into a 404. An expired image still reads
-        until that sweep runs, because the sweep runs on a write: the retention
-        window bounds what the directory holds, not what a reader may see. A
-        file that exists but cannot be read is answered the same way.
+        that is not an id at all, for a face that is not a face, and for one
+        whose file the sweep has already dropped; the route turns each into a
+        404. An expired image still reads until that sweep runs, because the
+        sweep runs on a write: the retention window bounds what the directory
+        holds, not what a reader may see. A file that exists but cannot be read
+        is answered the same way.
         """
-        if not _EVALUATION_ID.match(evaluation_id):
+        if not _EVALUATION_ID.match(evaluation_id) or face not in _FACE_TAGS:
             return None
         for suffix, mime in _MIME_FOR_SUFFIX.items():
-            path = self._root / f"{evaluation_id}{suffix}"
+            path = self._root / f"{evaluation_id}.{face}{suffix}"
             try:
                 return mime, path.read_bytes()
             except OSError:
                 continue
         return None
+
+    def faces(self, evaluation_id: str) -> tuple[str, ...]:
+        """Which faces of this evaluation's label are on disk, in face order.
+
+        What the result page asks before it offers a reviewer a second picture
+        to look at.
+        """
+        if not _EVALUATION_ID.match(evaluation_id):
+            return ()
+        return tuple(tag for tag in _FACE_TAGS if self.get(evaluation_id, tag) is not None)
 
     def _forget_what_has_expired(self) -> None:
         """Drop images older than the retention window.
@@ -149,11 +172,16 @@ def _get_image_store() -> UploadImageStore:
 @router.get("/labels/{eval_id}/image")
 async def upload_label_image(
     eval_id: str,
+    face: str = DEFAULT_FACE,
     store: UploadImageStore = Depends(_get_image_store),
 ) -> Response:
-    """Serve the PNG or JPEG bytes uploaded for one evaluation."""
-    entry = store.get(eval_id)
+    """Serve the PNG or JPEG bytes of one face of one evaluation's label.
+
+    `?face=` selects which. It defaults to the front, so every link written
+    before a label could have more than one face still resolves.
+    """
+    entry = store.get(eval_id, face)
     if entry is None:
-        raise HTTPException(status_code=404, detail=f"no image for evaluation {eval_id!r}")
+        raise HTTPException(status_code=404, detail=f"no {face} image for evaluation {eval_id!r}")
     mime, body = entry
     return Response(content=body, media_type=mime)

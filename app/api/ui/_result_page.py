@@ -1,9 +1,9 @@
-"""Turning one image plus one application into the page the reviewer reads.
+"""Turning one label's faces plus one application into the page the reviewer reads.
 
 Two routes arrive here: the reviewer's own upload on ``POST /`` and a shipped
-sample on ``POST /samples/{sample_id}``. They differ only in where the image
+sample on ``POST /samples/{sample_id}``. They differ only in where the images
 and the application values come from; everything after that — build the
-application, run the evaluator, keep the image where the result page can fetch
+application, run the evaluator, keep every face where the result page can fetch
 it, render the shell — has to be identical, or a sample would demonstrate a
 path the reviewer's own upload does not take.
 """
@@ -20,7 +20,7 @@ from app.api.ui._submission import _build_application
 from app.api.ui.images import UploadImageStore
 from app.api.ui.results import SingleResultStore
 from app.config import Settings
-from app.schemas.label import ImageMediaType
+from app.schemas.label import Face
 
 
 def refuse(
@@ -60,17 +60,21 @@ async def render_single_result(
     images: UploadImageStore,
     results: SingleResultStore,
     posted: dict[str, str],
-    image_bytes: bytes,
-    mime: ImageMediaType,
+    faces: tuple[Face, ...],
     label_id: str,
 ) -> HTMLResponse:
     """Check one label against one application and render the result shell.
+
+    `faces` is every photograph of the label, in the order it was submitted, the
+    front first. All of them are checked and all of them are kept, because a
+    label's mandatory elements are spread across its panels — the government
+    warning is most often on the back — and a finding a reviewer cannot see the
+    photograph for is a finding they cannot check.
 
     `posted` is the ten application fields in the form's own key names, whether
     a reviewer typed them or a sample supplied them. An application the form
     cannot read renders the banner and checks nothing.
     """
-    from app.schemas.label import Face
     from app.schemas.label import Label as LabelModel
     from app.services.application_form import ApplicationFormError
 
@@ -83,23 +87,13 @@ async def render_single_result(
     except ApplicationFormError as error:
         return refuse(request=request, settings=settings, message=str(error), posted=posted)
 
-    label_obj = LabelModel(
-        label_id=label_id,
-        batch_id=application_id,
-        faces=(
-            Face(
-                image_bytes=image_bytes,
-                content_type=mime,
-                face_tag="front",
-                dimensions=None,
-            ),
-        ),
-    )
+    label_obj = LabelModel(label_id=label_id, batch_id=application_id, faces=faces)
     envelope = await evaluator.evaluate(application=app_obj, label=label_obj)
     # Kept under the id the returned envelope carries rather than the one
     # generated above, so the image route and the URL this template renders
     # agree even where the two differ.
-    images.put(envelope.evaluation_id, mime, image_bytes)
+    for face in faces:
+        images.put(envelope.evaluation_id, face.content_type, face.image_bytes, face.face_tag)
     # The result is kept too, and under the same id. Without it a reviewer's
     # override of a single label has nothing to amend, because only a batch
     # holds its results (`docs/decisions.md#0033`).

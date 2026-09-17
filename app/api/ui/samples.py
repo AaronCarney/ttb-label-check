@@ -36,6 +36,7 @@ from app.api.ui._submission import _detect_image_mime, _get_upload_evaluator
 from app.api.ui.images import UploadImageStore, _get_image_store
 from app.api.ui.results import SingleResultStore, _get_result_store
 from app.config import Settings
+from app.schemas.label import Face, FaceTag
 
 router = APIRouter()
 
@@ -227,23 +228,7 @@ async def check_shipped_sample(
     if entry is None:
         raise HTTPException(status_code=404, detail=f"no sample label {sample_id!r}")
 
-    front = entry.get("images", {}).get("front")
-    path = (_SAMPLE_LABELS_DIR / front) if front else None
-    # The manifest ships inside the repository and names its own images, so a
-    # path here is not attacker-controlled; it is still resolved against the
-    # samples directory rather than trusted, because a manifest edit should not
-    # be able to read a file outside it.
-    if path is None or not _is_inside(path, _SAMPLE_LABELS_DIR) or not path.is_file():
-        raise HTTPException(
-            status_code=404, detail=f"sample label {sample_id!r} is not installed in this build"
-        )
-
-    image_bytes = path.read_bytes()
-    mime = _detect_image_mime(image_bytes)
-    if mime is None:
-        raise HTTPException(
-            status_code=500, detail=f"sample label {sample_id!r} is not a PNG or JPEG"
-        )
+    faces = _faces_of(sample_id, entry)
 
     return await render_single_result(
         request=request,
@@ -252,10 +237,59 @@ async def check_shipped_sample(
         images=images,
         results=results,
         posted=_posted_from(entry),
-        image_bytes=image_bytes,
-        mime=mime,
-        label_id=f"{sample_id}-front.jpg",
+        faces=faces,
+        label_id=sample_id,
     )
+
+
+def _faces_of(sample_id: str, entry: dict) -> tuple[Face, ...]:
+    """Every face the manifest ships for this sample, front first.
+
+    Every real sample in the manifest carries both a front and a back, and on
+    most of them the government warning is printed on the back. Sending only
+    the front was checking the label against a photograph that was never meant
+    to show most of what the check is about.
+
+    The manifest's own `warning_image` hint is deliberately not read. A real
+    applicant does not annotate which face carries the warning, so an engine
+    that learned to expect the annotation would pass the samples and fail the
+    filings.
+    """
+    images = entry.get("images", {})
+    faces: list[Face] = []
+    wanted: tuple[FaceTag, ...] = ("front", "back")
+    for face_tag in wanted:
+        name = images.get(face_tag)
+        if not name:
+            continue
+        path = _SAMPLE_LABELS_DIR / name
+        # The manifest ships inside the repository and names its own images, so
+        # a path here is not attacker-controlled; it is still resolved against
+        # the samples directory rather than trusted, because a manifest edit
+        # should not be able to read a file outside it.
+        if not _is_inside(path, _SAMPLE_LABELS_DIR) or not path.is_file():
+            continue
+        image_bytes = path.read_bytes()
+        mime = _detect_image_mime(image_bytes)
+        if mime is None:
+            raise HTTPException(
+                status_code=500,
+                detail=f"sample label {sample_id!r} {face_tag} image is not a PNG or JPEG",
+            )
+        faces.append(
+            Face(
+                image_bytes=image_bytes,
+                content_type=mime,
+                face_tag=face_tag,
+                dimensions=None,
+            )
+        )
+
+    if not faces:
+        raise HTTPException(
+            status_code=404, detail=f"sample label {sample_id!r} is not installed in this build"
+        )
+    return tuple(faces)
 
 
 def _is_inside(path: Path, root: Path) -> bool:

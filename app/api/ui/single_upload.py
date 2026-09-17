@@ -1,9 +1,15 @@
 """``POST /`` — check one uploaded label against the application filed for it.
 
-Reads the upload, refuses it if it is not an image, and hands the bytes and
-the typed application to the shared result path in ``_result_page``. That path
-is shared with ``POST /samples/{sample_id}`` so a shipped sample and a reviewer's
-own upload cannot demonstrate different behaviour.
+Reads the uploaded faces, refuses anything that is not an image, and hands them
+and the typed application to the shared result path in ``_result_page``. That
+path is shared with ``POST /samples/{sample_id}`` so a shipped sample and a
+reviewer's own upload cannot demonstrate different behaviour.
+
+A back label is optional and separate from the front, because a COLA is filed
+with every face of the label and the mandatory elements are spread across them
+— the government warning is most often on the back. A reviewer who has only a
+front still submits only a front, and the check is then honestly a check of
+what they showed.
 """
 
 from __future__ import annotations
@@ -18,6 +24,7 @@ from app.api.ui._submission import _detect_image_mime, _get_upload_evaluator
 from app.api.ui.images import UploadImageStore, _get_image_store
 from app.api.ui.results import SingleResultStore, _get_result_store
 from app.config import Settings
+from app.schemas.label import Face, FaceTag
 
 router = APIRouter()
 
@@ -26,6 +33,7 @@ router = APIRouter()
 async def single_label_upload(
     request: Request,
     label: UploadFile = File(...),
+    label_back: UploadFile | None = File(default=None),
     beverage_type: str = Form(default=""),
     brand_name: str = Form(default=""),
     fanciful_name: str = Form(default=""),
@@ -68,36 +76,54 @@ async def single_label_upload(
         "wine_appellation": wine_appellation,
     }
 
-    image_bytes = await label.read()
-    filename = label.filename or "that image"
-    if len(image_bytes) > limits.MAX_UPLOAD_BYTES:
-        return refuse(
-            request=request,
-            settings=settings,
-            message=limits.upload_too_large_message(
-                filename, len(image_bytes), limits.MAX_UPLOAD_BYTES
-            ),
-            posted=posted,
-            status_code=413,
-        )
+    faces: list[Face] = []
+    submitted: tuple[tuple[UploadFile | None, FaceTag], ...] = (
+        (label, "front"),
+        (label_back, "back"),
+    )
+    for upload, face_tag in submitted:
+        if upload is None or not upload.filename:
+            # No back was attached. Every face the reviewer showed is checked,
+            # and one is a whole submission.
+            continue
+        image_bytes = await upload.read()
+        filename = upload.filename or "that image"
+        if len(image_bytes) > limits.MAX_UPLOAD_BYTES:
+            return refuse(
+                request=request,
+                settings=settings,
+                message=limits.upload_too_large_message(
+                    filename, len(image_bytes), limits.MAX_UPLOAD_BYTES
+                ),
+                posted=posted,
+                status_code=413,
+            )
 
-    bomb = limits.bomb_refusal(filename, image_bytes)
-    if bomb is not None:
-        return refuse(
-            request=request,
-            settings=settings,
-            message=bomb[0],
-            posted=posted,
-            status_code=413,
-        )
+        bomb = limits.bomb_refusal(filename, image_bytes)
+        if bomb is not None:
+            return refuse(
+                request=request,
+                settings=settings,
+                message=bomb[0],
+                posted=posted,
+                status_code=413,
+            )
 
-    mime = _detect_image_mime(image_bytes)
-    if mime is None:
-        return refuse(
-            request=request,
-            settings=settings,
-            message="Unsupported file type — upload a PNG or JPEG.",
-            posted=posted,
+        mime = _detect_image_mime(image_bytes)
+        if mime is None:
+            return refuse(
+                request=request,
+                settings=settings,
+                message="Unsupported file type — upload a PNG or JPEG.",
+                posted=posted,
+            )
+        faces.append(
+            Face(
+                image_bytes=image_bytes,
+                content_type=mime,
+                face_tag=face_tag,
+                dimensions=None,
+            )
         )
 
     return await render_single_result(
@@ -107,7 +133,6 @@ async def single_label_upload(
         images=images,
         results=results,
         posted=posted,
-        image_bytes=image_bytes,
-        mime=mime,
+        faces=tuple(faces),
         label_id=label.filename or "uploaded-label",
     )

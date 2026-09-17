@@ -189,7 +189,7 @@ def test_the_route_turns_an_id_it_will_not_store_under_into_a_404(tmp_path: Path
     response = client.get("/labels/..%2E%2E/image")
 
     assert response.status_code == 404
-    assert "no image for evaluation" in response.text
+    assert "no front image for evaluation" in response.text
 
 
 def test_an_image_older_than_the_retention_window_is_dropped(tmp_path: Path):
@@ -200,7 +200,7 @@ def test_an_image_older_than_the_retention_window_is_dropped(tmp_path: Path):
     store = UploadImageStore(tmp_path)
     store.put("ev-old", "image/png", _png_1x1())
     stale = time.time() - images_module._RETENTION_SECONDS - 60
-    os.utime(tmp_path / "ev-old.png", (stale, stale))
+    os.utime(tmp_path / "ev-old.front.png", (stale, stale))
 
     store.put("ev-new", "image/png", _png_1x1())
 
