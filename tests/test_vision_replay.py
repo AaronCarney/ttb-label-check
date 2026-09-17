@@ -31,12 +31,18 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+from unittest import mock
 
 import pytest
 
+from app.rules.units import unit_key
 from app.vision.local import (
     MAX_EDGE_PX,
+    _Box,
     _find_heading,
+    _net_re,
+    _parse,
+    _units,
     parse_reading,
     thaw_reading,
 )
@@ -448,3 +454,112 @@ def test_the_statement_is_cut_out_of_a_box_that_carries_other_text() -> None:
             thaw_reading(json.loads(_recording(image).read_text()))
         )["abv"]
         assert payload["alc_text"] == statement, image
+
+
+# ---------------------------------------------------------------------------
+# Row 1.1 — net contents, against every net-contents line the corpus prints
+# ---------------------------------------------------------------------------
+
+def _net_contents_of(printed: str) -> dict:
+    """What the reader reads off one line of label text.
+
+    `_parse` over a single box. The line is the manifest's own transcription of
+    what the label prints, so this asks the extractor the question the answer
+    key already has an answer to, without spending a second of OCR to re-read
+    pixels that were transcribed by hand.
+    """
+    box = _Box(x0=0.0, y0=0.0, x1=400.0, y1=40.0, text=printed, score=0.99)
+    payloads = _parse(boxes=[box], warning_boxes=[], rotation=0)
+    return payloads["net_contents"][0]
+
+
+def test_every_net_contents_line_in_the_corpus_is_read_as_the_answer_key_reads_it() -> None:
+    """Row 1.1, over all thirty-odd net-contents transcriptions in the manifest.
+
+    The reader's unit list used to be written out in `local.py` and it was the
+    fourth copy in the app. It knew `ML` and `FL. OZ.` and did not know
+    `FL. OUNCES`, `FLUID OUNCES`, `MILLILITRES` or `US GALLONS` — spellings
+    `rules/tables/volume_units.yaml` lists and that real labels in this corpus
+    print. A unit missing from it produced no reading at all, so the rule pack
+    was handed nothing to check on a label that states its contents plainly.
+
+    `amount: null` in the manifest is not a gap: it is the answer key saying the
+    line names no single quantity — `15.5 US GALLONS / 10.8 US GALLONS / …` is a
+    keg collar with three sizes struck through — and a reader that picks one of
+    them is guessing. The reader must report nothing there and let a reviewer
+    read the words.
+    """
+    checked = 0
+    for entry in _manifest()["labels"]:
+        printed = ((entry.get("label_observed") or {}).get("net_contents") or {})
+        if not printed.get("text"):
+            continue
+        checked += 1
+        read = _net_contents_of(printed["text"])
+        if printed.get("amount") is None:
+            assert read["net_contents_value"] is None, (entry["id"], printed["text"], read)
+            continue
+        assert read["net_contents_value"] == pytest.approx(float(printed["amount"])), (
+            entry["id"], printed["text"], read
+        )
+        assert unit_key(read["unit"]) == unit_key(printed["unit"]), (
+            entry["id"], printed["text"], read
+        )
+    assert checked >= 30, f"only {checked} net-contents transcriptions found"
+
+
+def test_the_spelled_out_units_the_old_list_did_not_know() -> None:
+    """The four spellings that produced no reading at all, named one by one so a
+    regression says which spelling it lost."""
+    for printed, amount, unit in (
+        ("11.2 FL. OUNCES", 11.2, "FL. OUNCES"),      # ttb-26239001000217
+        ("15.5 US GALLONS", 15.5, "US GALLONS"),      # ttb-26240001000454's first size
+        ("12 FLUID OUNCES", 12.0, "FLUID OUNCES"),
+        ("750 MILLILITRES", 750.0, "MILLILITRES"),
+    ):
+        read = _net_contents_of(printed)
+        assert read["net_contents_value"] == pytest.approx(amount), printed
+        assert unit_key(read["unit"]) == unit_key(unit), printed
+
+
+def test_the_metric_figure_is_the_declaration_where_a_line_prints_both() -> None:
+    """`NET CONT. 350 ML / 12 FL OZ` is one quantity written twice, and the
+    application declares net contents in millilitres — so the metric figure is
+    the declaration and the customary one is that same quantity rounded. The
+    reader used to return whichever the box order put first."""
+    read = _net_contents_of("NET CONT. 350 ML / 12 FL OZ")
+    assert read["net_contents_value"] == pytest.approx(350.0)
+    assert unit_key(read["unit"]) == "ml"
+
+    reversed_order = _net_contents_of("NET CONT. 12 FL OZ / 350 ML")
+    assert reversed_order["net_contents_value"] == pytest.approx(350.0)
+    assert unit_key(reversed_order["unit"]) == "ml"
+
+
+def test_a_compound_statement_is_not_reported_as_its_first_half() -> None:
+    """`1 PT. 9 FL. OZ.` is a pint and nine fluid ounces — 739 mL. The reader
+    used to report `1 PT`, 473 mL, which against a declared 739 is a compliant
+    bottle failed on the reader's own arithmetic. Nothing here can add the two
+    halves up, so the honest reading is no reading."""
+    read = _net_contents_of("1 PT. 9 FL. OZ.")
+    assert read["net_contents_value"] is None
+    assert read["unit"] == ""
+
+
+def test_adding_a_unit_is_an_edit_to_the_shipped_table_and_nothing_else() -> None:
+    """The point of row 1.1, asserted rather than described: every unit the
+    reader can read comes from `rules/tables/volume_units.yaml`, so a unit the
+    table drops is a unit the reader stops reading."""
+    from app.rules.units import table_from_entries
+
+    with_only_hogsheads = table_from_entries([{"unit": "hogshead", "factor": 238480.9}])
+    _net_re.cache_clear()
+    _units.cache_clear()
+    try:
+        with mock.patch("app.vision.local._units", lambda: with_only_hogsheads):
+            _net_re.cache_clear()
+            assert _net_re().search("1 HOGSHEAD") is not None
+            assert _net_re().search("750 ML") is None
+    finally:
+        _net_re.cache_clear()
+        _units.cache_clear()

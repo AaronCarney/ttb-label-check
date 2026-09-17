@@ -35,12 +35,14 @@ import unicodedata
 from collections import deque
 from dataclasses import dataclass
 from datetime import datetime, timezone
+from functools import lru_cache
 from io import BytesIO
 
 import numpy as np
 from PIL import Image
 
 from app.config import Settings
+from app.rules.units import UnitTable, millilitres, millilitres_from_text, shipped_table
 from app.schemas.calls import CallRecord
 from app.schemas.expected import BeverageClass
 from app.schemas.extracted import Evidence, EvidenceSource, FieldObservation, MatchKind
@@ -708,11 +710,112 @@ _ALC_STATEMENT_RE = re.compile(
     r"(?:\s*(?:ALC(?:OHOL)?\.?)?\s*(?:BY\s*VOL(?:UME)?|/\s*VOL|VOL)\.?)?",
     re.I,
 )
-_NET_RE = re.compile(
-    r"(\d+(?:[.,]\d+)?)\s*(ML|MLS|MILLILITERS?|L|LITERS?|LITRES?|CL|"
-    r"FL\.?\s*OZ\.?|OZ\.?|PINTS?|PT|QUARTS?|QT|GALLONS?|GAL)\b",
-    re.I,
-)
+# The net-contents units, and the one table that lists them.
+#
+# The list used to be written out here, and it was the fourth copy in the app:
+# it knew `ML` and `FL. OZ.` but not `FL. OUNCES`, `FLUID OUNCES`, `MILLILITRES`
+# or `US GALLONS`, all of which `rules/tables/volume_units.yaml` lists and all of
+# which real labels in this corpus print. A unit missing from here produced **no
+# net-contents reading at all**, so `11.2 FL. OUNCES` and a `15.5 US GALLONS` keg
+# collar read as nothing while the rule pack, the application form and the
+# accuracy harness all converted them happily. Adding a unit is now an edit to
+# that one YAML file.
+
+
+@lru_cache(maxsize=1)
+def _units() -> UnitTable:
+    """The unit table the running app converts by, read once.
+
+    `RULES_ROOT` picks the rule tree here exactly as it picks it for the app,
+    which is what `eval/read_accuracy.py` does with the same table. Reading it
+    costs one file read on the first parse and nothing after: it is data, not an
+    image, so `_parse` stays replayable with no picture and no socket.
+    """
+    return shipped_table(Settings().rules_root)
+
+
+@lru_cache(maxsize=1)
+def _net_re() -> re.Pattern[str]:
+    """A number and the unit written next to it, for every unit the table lists.
+
+    The table's own rule is that "a unit is matched on its letters and digits
+    alone, because a label and a reader each spell it as they find it" — so each
+    listed unit becomes its characters joined by "anything that is not a letter
+    or a digit", which is what makes `FL. OZ.`, `FL OZ` and `fl.oz` one entry.
+    That is the same reduction `app.rules.units.unit_key` performs, expressed as
+    a pattern so the reader can find the unit in a line of label text.
+
+    Longest listed unit first, so `15.5 LITERS` is read as litres rather than as
+    a bare `L` with `ITERS` left over, and the match may not run on into another
+    word.
+    """
+    keys = sorted(_units().factors, key=len, reverse=True)
+    if not keys:
+        # No rule tree, so no unit converts. A pattern that matches nothing is
+        # the honest reading: every net contents goes to a reviewer.
+        return re.compile(r"(?!)")
+    separator = r"[^0-9A-Za-z]*"
+    spellings = (separator.join(re.escape(ch) for ch in key) for key in keys)
+    return re.compile(
+        r"(\d+(?:[.,]\d+)?)\s*(" + "|".join(spellings) + r")(?![0-9A-Za-z])",
+        re.I,
+    )
+
+
+def _net_reading(text: str) -> tuple[re.Match, float] | None:
+    """The one net-contents figure a line declares, or None for a reviewer.
+
+    A line often carries the same quantity twice — `NET CONT. 350 ML / 12 FL OZ`
+    — and taking whichever the box order happened to put first took the rounded
+    customary figure as often as the metric one. Which figure is *the*
+    declaration is settled by `app.rules.units.millilitres_from_text`, the same
+    function the application form settles it with, so the two sides of a
+    comparison can no longer disagree about what the label declared.
+
+    Returning None where that function does is the point of it rather than a
+    gap: `1 PT. 9 FL. OZ.` names two figures that are not one quantity and that
+    nothing here can add up, so the reader declares nothing and a reviewer
+    reads the words. It used to report `1 PT` — a pint, against a bottle that
+    holds nearly a pint and a half.
+
+    The figure is returned as the label prints it, with its printed unit, not
+    converted: the rule pack allows a customary size and its rounded metric
+    equivalent to agree within a tolerance it carries itself, and a reader that
+    handed it millilitres would collapse that tolerance to nothing and reject
+    compliant labels.
+    """
+    table = _units()
+    matches = list(_net_re().finditer(text))
+    if not matches:
+        return None
+    declared = millilitres_from_text(text, table)
+    if declared is None:
+        return None
+    for match in matches:
+        amount = float(match.group(1).replace(",", "."))
+        value = millilitres(amount, match.group(2), table)
+        if value is None:
+            continue
+        if abs(value - declared) <= 1e-9 * max(abs(declared), 1.0):
+            return match, amount
+    return None
+
+
+def _net_contents(boxes: list[_Box]) -> tuple[_Box, re.Match, float] | None:
+    """The first line in reading order that declares one net-contents figure.
+
+    A line that names a figure this reader cannot resolve to one quantity is
+    passed over rather than ending the search, the same way `_first_match`
+    carries on past a match its `reject` turns down.
+    """
+    for box in _reading_order(boxes):
+        found = _net_reading(box.text)
+        if found is not None:
+            match, amount = found
+            return box, match, amount
+    return None
+
+
 _ORIGIN_RE = re.compile(
     r"(?:PRODUCT|PRODUCE|PRODUCED|MADE|BREWED|DISTILLED|BOTTLED|IMPORTED)\s+"
     r"(?:OF|IN|FROM)\s+(?:THE\s+)?"
@@ -858,12 +961,21 @@ def _parse(
         )
 
     # -- net contents -----------------------------------------------------
-    net_box, net_match = _first_match(body, _NET_RE)
-    if net_match:
+    net = _net_contents(body)
+    net_box = net[0] if net is not None else None
+    if net is not None:
+        _, net_match, net_amount = net
         out["net_contents"] = (
             {
-                "net_contents_value": float(net_match.group(1).replace(",", ".")),
-                "unit": net_match.group(2).upper().replace(".", "").replace(" ", ""),
+                "net_contents_value": net_amount,
+                # As the label prints it. The reader used to upper-case it and
+                # strip its dots and spaces, which was a fourth spelling of the
+                # same reduction: everything downstream — the rule pack's
+                # `quantity_match`, the application form, the accuracy harness —
+                # already reduces a unit through `app.rules.units.unit_key`
+                # before it converts, and `FL. OUNCES` is what a reviewer reading
+                # the envelope should see the label said.
+                "unit": net_match.group(2).strip(),
                 "confidence": _confidence("net_contents", [net_box]),
             },
             net_box.as_bbox(),
