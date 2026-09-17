@@ -266,6 +266,24 @@ of origin, and the health warning — each carrying the box on the image it came
 an interface with two implementations behind it, so the local engine and the hosted model are
 swappable without anything downstream knowing which ran.
 
+A label is every photograph of it, not one. A COLA is filed with every face of a label, and a
+label's mandatory elements are spread across its panels: the government warning is most often
+printed on the back. So every face supplied is read, and the readings are merged into one set of
+seven fields — for each field, the reading from the face that read it best. Merging rather than
+concatenating is what makes one verdict possible: the rules run over every reading they are handed,
+so two readings of the brand would fail the brand check on the strength of a back label that never
+carried one. Each field keeps the face it was read from, so a finding can be shown against the
+photograph it came from.
+
+**How a batch says two files are one label.** A browser's file picker returns a flat list of names
+and no folders, so the only thing an uploader controls is what the files are called. Two files whose
+names end `-front` and `-back` on the same stem — `lucy-front.jpg` and `lucy-back.jpg` — are checked
+together as one label. Every other filename is one label on its own, so nothing changes for an
+uploader who names their files differently. The downloadable sample set is named that way already.
+Without this, a bourbon sent as two files came back as two answers, neither of them about the
+product: a front that fails the warning check the back satisfies, and a back with no brand and no
+class on it.
+
 **2. Compare.** A rule pack decides. The rules are YAML, across a common pack and one per beverage
 class, and each names a validator by string from a registry. A rule says what it checks, which
 regulation it comes from, and what outcome each result maps to. Adding a check is a YAML edit, and
