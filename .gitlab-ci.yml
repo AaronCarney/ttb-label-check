@@ -1,0 +1,76 @@
+# Continuous integration.
+#
+# Origin is GitLab, so this file is the pipeline that runs; the GitHub remote is
+# a mirror and runs nothing. Until this existed the suite ran only when a person
+# typed the command, which is how seven browser tests failed unnoticed.
+#
+# Two stages, because they answer different questions and the first is cheap.
+# `checks` is the three commands the README documents — lint, formatting, types
+# — on a small image with nothing installed beyond the Python dependencies.
+# `tests` is the suite, and it costs what it costs because the suite is only
+# worth running whole: the browser group skips itself when pnpm or Playwright is
+# missing and the run still reports green, so a pipeline that does not install
+# them would prove nothing about the interface while looking as though it had.
+#
+# No job carries `allow_failure`. A job that cannot fail the pipeline is the
+# same defect as a test that cannot fail, and `tests/test_ci_runs_the_checks.py`
+# holds this file to that.
+
+stages:
+  - check
+  - test
+
+variables:
+  # uv downloads and builds into the job's filesystem; caching that directory is
+  # most of the difference between a pipeline measured in minutes and one
+  # measured in tens of them.
+  UV_CACHE_DIR: "$CI_PROJECT_DIR/.uv-cache"
+  # `requires-python = ">=3.12"`. The runner's own interpreter is not this
+  # project's, so uv fetches the one the project asks for.
+  UV_PYTHON: "3.12"
+  # OpenBLAS reads this when the library loads, which is before any of our code
+  # runs, so it belongs in the environment rather than in the app — the same
+  # reasoning `app/vision/local.py::_load` records for the deployed container. A
+  # shared runner is not the machine's to fill.
+  OPENBLAS_NUM_THREADS: "2"
+  GIT_DEPTH: "50"
+
+default:
+  interruptible: true
+  timeout: 30m
+
+checks:
+  stage: check
+  image: python:3.12-slim
+  cache:
+    key: uv-checks
+    paths:
+      - .uv-cache
+  before_script:
+    - pip install --no-cache-dir uv
+    - uv sync --frozen
+  script:
+    - uv run ruff check
+    - uv run ruff format --check
+    - uv run mypy
+
+tests:
+  stage: test
+  image: python:3.12-bookworm
+  cache:
+    key: uv-tests
+    paths:
+      - .uv-cache
+  before_script:
+    # libgl1 and libglib2.0-0 are OpenCV's, which the reader imports at module
+    # load; nodejs and pnpm build the front-end island the browser tests drive.
+    - apt-get update
+    - apt-get install -y --no-install-recommends libgl1 libglib2.0-0 nodejs npm
+    - npm install --global --no-fund --no-audit pnpm
+    - pip install --no-cache-dir uv
+    - uv sync --frozen
+    # `--with-deps` installs the browser's own OS packages, so the version
+    # installed here always matches the Playwright in `uv.lock`.
+    - uv run playwright install --with-deps chromium
+  script:
+    - uv run pytest
