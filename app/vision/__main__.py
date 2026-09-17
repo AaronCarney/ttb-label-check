@@ -31,7 +31,7 @@ def _build_argparser() -> argparse.ArgumentParser:
 
 
 async def _run(args: argparse.Namespace) -> int:
-    from app.schemas.label import Dimensions, Label
+    from app.schemas.label import Dimensions, Face, Label
     from app.vision.cloud import CloudVisionExtractor
 
     if not args.label.exists():
@@ -44,10 +44,14 @@ async def _run(args: argparse.Namespace) -> int:
     label = Label(
         label_id=args.label.stem,
         batch_id="cli-smoke",
-        image_bytes=args.label.read_bytes(),
-        content_type=("image/png" if args.label.suffix.lower() == ".png" else "image/jpeg"),
-        face_tag="front",
-        dimensions=Dimensions(width_px=200, height_px=200, dpi=300),
+        faces=(
+            Face(
+                image_bytes=args.label.read_bytes(),
+                content_type=("image/png" if args.label.suffix.lower() == ".png" else "image/jpeg"),
+                face_tag="front",
+                dimensions=Dimensions(width_px=200, height_px=200, dpi=300),
+            ),
+        ),
     )
 
     extractor = CloudVisionExtractor(

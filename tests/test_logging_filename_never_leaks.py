@@ -24,7 +24,7 @@ from app.batch.worker import BatchWorker
 from app.logging.otel_genai import OtelGenAIFormatter
 from app.logging.redaction import RedactionFilter
 from app.schemas.batch import BatchItem, ItemState
-from app.schemas.label import Label
+from app.schemas.label import Face, Label
 from tests.conftest import _fake_evaluator
 
 # The name a person would be identified by, as a filename an uploader picked.
@@ -94,9 +94,13 @@ async def test_no_log_line_carries_the_uploaders_filename() -> None:
             checked.label_id: Label(
                 label_id=checked.label_id,
                 batch_id=batch_id,
-                image_bytes=_PNG_1x1,
-                content_type="image/png",
-                face_tag="front",
+                faces=(
+                    Face(
+                        image_bytes=_PNG_1x1,
+                        content_type="image/png",
+                        face_tag="front",
+                    ),
+                ),
             )
         },
         # What the upload route declares for a file that is not an image. The

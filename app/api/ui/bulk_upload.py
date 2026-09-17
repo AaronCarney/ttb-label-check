@@ -54,6 +54,7 @@ async def batches_upload_submit(
     from app.batch.worker import BatchWorker
     from app.schemas.application import Application
     from app.schemas.batch import BatchItem, ItemState
+    from app.schemas.label import Face
     from app.schemas.label import Label as LabelModel
     from app.services.application_form import ApplicationFormError
 
@@ -176,10 +177,14 @@ async def batches_upload_submit(
             label_lookup[label_id] = LabelModel(
                 label_id=label_id,
                 batch_id=batch_id,
-                image_bytes=body,
-                content_type=mime,
-                face_tag="front",
-                dimensions=None,
+                faces=(
+                    Face(
+                        image_bytes=body,
+                        content_type=mime,
+                        face_tag="front",
+                        dimensions=None,
+                    ),
+                ),
             )
         try:
             app_lookup[application_ref] = _build_application(

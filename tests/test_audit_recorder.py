@@ -66,10 +66,11 @@ def test_audit_assemble_returns_record():
 def test_input_hash_byte_stable_across_processes():
     code = """
 from app.schemas.application import Application
-from app.schemas.label import Label
+from app.schemas.label import Face, Label
 app = Application(application_id="A-001", evaluation_id="EV-001")
-label = Label(label_id="lbl-001", batch_id="B-001", image_bytes=b"fake-png",
-              content_type="image/png", face_tag="front")
+label = Label(label_id="lbl-001", batch_id="B-001",
+              faces=(Face(image_bytes=b"fake-png", content_type="image/png",
+                          face_tag="front"),))
 from app.services.audit import _input_hash
 print(_input_hash(app, label))
 """

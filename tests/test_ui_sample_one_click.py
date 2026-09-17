@@ -94,8 +94,8 @@ def test_clicking_a_sample_sends_the_real_image_to_the_evaluator(client, recorde
     client.post(f"/samples/{sample_id}")
     assert len(recorder.calls) == 1
     _, label = recorder.calls[0]
-    assert label.content_type in {"image/jpeg", "image/png"}
-    assert len(label.image_bytes) > 1000, "a real label image, not a placeholder"
+    assert label.faces[0].content_type in {"image/jpeg", "image/png"}
+    assert len(label.faces[0].image_bytes) > 1000, "a real label image, not a placeholder"
 
 
 def test_clicking_a_sample_sends_the_application_filed_for_that_label(client, recorder):

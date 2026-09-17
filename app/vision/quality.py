@@ -27,7 +27,7 @@ import numpy as np
 from PIL import Image, UnidentifiedImageError
 from pydantic import BaseModel, ConfigDict
 
-from app.schemas.label import Dimensions, Label
+from app.schemas.label import Dimensions, Face
 
 LOW_RES_VARIANCE_MIN = 50.0
 MOTION_BLUR_HIGHFREQ_MIN = 0.30
@@ -113,10 +113,13 @@ def _extract_dpi(image_bytes: bytes, dimensions: Dimensions | None) -> int | Non
     return None
 
 
-def assess(label: Label) -> QualityReport:
-    """Run vision quality gates against a Label and return a QualityReport."""
-    gray = _decode_grayscale(label.image_bytes)
-    dpi = _extract_dpi(label.image_bytes, label.dimensions)
+def assess(face: Face) -> QualityReport:
+    """Run the vision quality gates against one face and return a QualityReport.
+
+    One face, not a whole label: these gates read pixels, and each face is its
+    own photograph with its own sharpness and its own DPI."""
+    gray = _decode_grayscale(face.image_bytes)
+    dpi = _extract_dpi(face.image_bytes, face.dimensions)
 
     if gray is None:
         return QualityReport(

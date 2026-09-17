@@ -52,7 +52,7 @@ from app.rules.units import UnitTable, millilitres, millilitres_from_text, shipp
 from app.schemas.calls import CallRecord
 from app.schemas.expected import BeverageClass
 from app.schemas.extracted import Evidence, EvidenceSource, FieldObservation, MatchKind
-from app.schemas.label import Label
+from app.schemas.label import Face, Label
 from app.vision import quality
 from app.vision.heading_measure import HeadingMeasurement, measure_heading_bold_image
 
@@ -569,7 +569,11 @@ class LocalVisionExtractor:
         return False
 
     async def extract(self, label: Label) -> list[FieldObservation]:
-        report = quality.assess(label)
+        # One face is read here, the first one. The loop over every face, and
+        # the face tag on each observation it returns, land with the per-face
+        # reader; until then a label reaching this point carries exactly one.
+        face = label.faces[0]
+        report = quality.assess(face)
         if report.disposition != "ok":
             return [
                 FieldObservation(
@@ -595,9 +599,9 @@ class LocalVisionExtractor:
 
         await self.ensure_loaded()
         t0 = time.monotonic()
-        payloads, meta = await asyncio.to_thread(self._read_serialised, label.image_bytes)
+        payloads, meta = await asyncio.to_thread(self._read_serialised, face.image_bytes)
         elapsed_ms = int((time.monotonic() - t0) * 1000)
-        self._record(label=label, payloads=payloads, meta=meta, elapsed_ms=elapsed_ms)
+        self._record(label=label, face=face, payloads=payloads, meta=meta, elapsed_ms=elapsed_ms)
 
         # The legibility gate that means anything, and the only one that can be
         # applied honestly: the detector found no text on this image, at any of
@@ -653,7 +657,9 @@ class LocalVisionExtractor:
             )
         return observations
 
-    def _record(self, *, label: Label, payloads: dict, meta: dict, elapsed_ms: int) -> None:
+    def _record(
+        self, *, label: Label, face: Face, payloads: dict, meta: dict, elapsed_ms: int
+    ) -> None:
         readable = {k: v[0] for k, v in payloads.items()}
         self._ring.append(
             CallRecord(
@@ -661,7 +667,7 @@ class LocalVisionExtractor:
                 batch_id=label.batch_id,
                 label_id=label.label_id,
                 stage="vision.local_ocr",
-                request={"call_kind": "local_ocr", "image_size": len(label.image_bytes)},
+                request={"call_kind": "local_ocr", "image_size": len(face.image_bytes)},
                 response=readable,
                 latency_ms=elapsed_ms,
                 model="PP-OCRv6-small",

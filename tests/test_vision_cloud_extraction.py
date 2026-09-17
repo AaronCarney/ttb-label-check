@@ -7,7 +7,7 @@ import respx
 from httpx import Response
 
 from app.config import Settings
-from app.schemas.label import Dimensions, Label
+from app.schemas.label import Dimensions, Face, Label
 from app.vision.cloud import CloudVisionExtractor
 
 RECORDINGS_DIR = Path("tests/recordings/openai/gpt-4o-2024-08-06/v1/01-spirits-clean")
@@ -35,10 +35,14 @@ async def test_cloud_extracts_fr_001_to_008(monkeypatch):
     label = Label(
         label_id="L-001",
         batch_id="B-001",
-        image_bytes=FIXTURE.read_bytes(),
-        content_type="image/jpeg",
-        face_tag="front",
-        dimensions=Dimensions(width_px=1200, height_px=1800, dpi=300),
+        faces=(
+            Face(
+                image_bytes=FIXTURE.read_bytes(),
+                content_type="image/jpeg",
+                face_tag="front",
+                dimensions=Dimensions(width_px=1200, height_px=1800, dpi=300),
+            ),
+        ),
     )
     # respx 0.23.1 deduplicates same-URL/method routes (only the last mount
     # survives), so the planned per-recording mount-with-fall-through pattern
@@ -77,10 +81,14 @@ async def test_cloud_threads_self_reported_confidence(monkeypatch):
     label = Label(
         label_id="L-conf",
         batch_id="B-conf",
-        image_bytes=FIXTURE.read_bytes(),
-        content_type="image/jpeg",
-        face_tag="front",
-        dimensions=Dimensions(width_px=1200, height_px=1800, dpi=300),
+        faces=(
+            Face(
+                image_bytes=FIXTURE.read_bytes(),
+                content_type="image/jpeg",
+                face_tag="front",
+                dimensions=Dimensions(width_px=1200, height_px=1800, dpi=300),
+            ),
+        ),
     )
     per_field = {
         "brand_name": {"brand_name": "ACME BOURBON", "confidence": 0.92},
@@ -146,10 +154,14 @@ async def test_cloud_falls_back_when_confidence_absent(monkeypatch):
     label = Label(
         label_id="L-old",
         batch_id="B-old",
-        image_bytes=FIXTURE.read_bytes(),
-        content_type="image/jpeg",
-        face_tag="front",
-        dimensions=Dimensions(width_px=1200, height_px=1800, dpi=300),
+        faces=(
+            Face(
+                image_bytes=FIXTURE.read_bytes(),
+                content_type="image/jpeg",
+                face_tag="front",
+                dimensions=Dimensions(width_px=1200, height_px=1800, dpi=300),
+            ),
+        ),
     )
     # Old-shape responses missing the confidence key; replays the on-disk recordings.
     recordings = {p.stem: json.loads(p.read_text()) for p in RECORDINGS_DIR.glob("*.json")}
@@ -184,10 +196,14 @@ async def test_cloud_short_circuits_on_quality_failure(monkeypatch):
     label = Label(
         label_id="L-002",
         batch_id="B-001",
-        image_bytes=bad_bytes,
-        content_type="image/png",
-        face_tag="front",
-        dimensions=None,
+        faces=(
+            Face(
+                image_bytes=bad_bytes,
+                content_type="image/png",
+                face_tag="front",
+                dimensions=None,
+            ),
+        ),
     )
     # assert_all_called=False because the whole point is that the route is
     # registered but never hit (short-circuit fires before any HTTP call).

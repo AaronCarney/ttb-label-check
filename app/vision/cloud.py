@@ -310,7 +310,11 @@ class CloudVisionExtractor:
             return await self._call_per_field(field_name=field_name, crop=crop, label=label)
 
     async def extract(self, label: Label) -> list[FieldObservation]:
-        report = quality.assess(label)
+        # One face is read here, the first one. The loop over every face, and
+        # the face tag on each observation it returns, land with the per-face
+        # reader; until then a label reaching this point carries exactly one.
+        face = label.faces[0]
+        report = quality.assess(face)
         if report.disposition != "ok":
             return [
                 FieldObservation(
@@ -336,7 +340,7 @@ class CloudVisionExtractor:
                 )
             ]
 
-        layout = await self._gated_call(field_name="layout", crop=label.image_bytes, label=label)
+        layout = await self._gated_call(field_name="layout", crop=face.image_bytes, label=label)
         bbox_by_id: dict[str, tuple[int, int, int, int]] = {}
         for entry in layout.get("fields", []):
             bbox = entry.get("bbox")
@@ -350,7 +354,7 @@ class CloudVisionExtractor:
 
         contents = await asyncio.gather(
             *(
-                self._gated_call(field_name=fname, crop=label.image_bytes, label=label)
+                self._gated_call(field_name=fname, crop=face.image_bytes, label=label)
                 for fname in _FIELD_NAMES
             )
         )
@@ -362,7 +366,7 @@ class CloudVisionExtractor:
                 # value is preserved as `heading_bold_llm` in upstream_meta so
                 # the audit trail captures what each source claimed.
                 bbox = bbox_by_id.get("gov_warning")
-                measurement = measure_heading_bold(label.image_bytes, bbox)
+                measurement = measure_heading_bold(face.image_bytes, bbox)
                 content = {
                     **content,
                     "heading_bold_llm": bool(content.get("heading_bold", False)),

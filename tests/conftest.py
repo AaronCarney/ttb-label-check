@@ -17,7 +17,7 @@ import uvicorn
 from PIL import Image
 
 from app.main import create_app
-from app.schemas.label import Label
+from app.schemas.label import Face, Label
 from app.schemas.wire.disposition import DispositionEnvelope
 
 _REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -104,10 +104,14 @@ def _stub_label(
     return Label(
         label_id=label_id,
         batch_id=batch_id,
-        image_bytes=image_bytes,
-        content_type=content_type,
-        face_tag=face_tag,
-        dimensions=dimensions,
+        faces=(
+            Face(
+                image_bytes=image_bytes,
+                content_type=content_type,
+                face_tag=face_tag,
+                dimensions=dimensions,
+            ),
+        ),
     )
 
 

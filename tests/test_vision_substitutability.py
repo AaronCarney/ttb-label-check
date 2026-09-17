@@ -8,7 +8,7 @@ import respx
 from httpx import Response
 
 from app.config import Settings
-from app.schemas.label import Dimensions, Label
+from app.schemas.label import Dimensions, Face, Label
 from app.vision.base import VisionExtractor
 from app.vision.cloud import CloudVisionExtractor
 
@@ -32,10 +32,14 @@ def _label() -> Label:
     return Label(
         label_id="L-001",
         batch_id="B-001",
-        image_bytes=FIXTURE.read_bytes(),
-        content_type="image/jpeg",
-        face_tag="front",
-        dimensions=Dimensions(width_px=1200, height_px=1800, dpi=300),
+        faces=(
+            Face(
+                image_bytes=FIXTURE.read_bytes(),
+                content_type="image/jpeg",
+                face_tag="front",
+                dimensions=Dimensions(width_px=1200, height_px=1800, dpi=300),
+            ),
+        ),
     )
 
 

@@ -11,7 +11,7 @@ from app.api import limits
 from app.config import Settings
 from app.deps import build_evaluator
 from app.schemas.application import Application
-from app.schemas.label import ImageMediaType, Label
+from app.schemas.label import Face, ImageMediaType, Label
 from app.schemas.wire.disposition import DispositionEnvelope
 
 router = APIRouter(tags=["evaluation"])
@@ -82,10 +82,14 @@ async def post_labels(
     label_obj = Label(
         label_id=label.filename or "label",
         batch_id=app_obj.application_id,
-        image_bytes=label_bytes,
-        content_type=content_type,
-        face_tag="front",
-        dimensions=None,
+        faces=(
+            Face(
+                image_bytes=label_bytes,
+                content_type=content_type,
+                face_tag="front",
+                dimensions=None,
+            ),
+        ),
     )
     evaluator = build_evaluator(settings)
     return await evaluator.evaluate(application=app_obj, label=label_obj)

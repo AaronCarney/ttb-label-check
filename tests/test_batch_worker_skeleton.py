@@ -14,7 +14,7 @@ from app.batch.anomaly import AnomalyDetector
 from app.batch.state import InFlightBatch
 from app.batch.worker import BatchWorker
 from app.schemas.batch import BatchItem, ItemState
-from app.schemas.label import Label
+from app.schemas.label import Face, Label
 from tests.conftest import _fake_evaluator
 
 # A tiny valid PNG. The evaluator in these tests is a fake and never reads the
@@ -43,9 +43,13 @@ def _label_lookup_for(items, batch_id: str) -> dict[str, Label]:
         item.label_id: Label(
             label_id=item.label_id,
             batch_id=batch_id,
-            image_bytes=_PNG_1x1,
-            content_type="image/png",
-            face_tag="front",
+            faces=(
+                Face(
+                    image_bytes=_PNG_1x1,
+                    content_type="image/png",
+                    face_tag="front",
+                ),
+            ),
         )
         for item in items
     }

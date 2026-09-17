@@ -52,7 +52,7 @@ from app.schemas.wire.disposition import ConfidenceBand, DispositionEnvelope
 # The one canonicalisation every audit hash in the tree is computed over. A
 # second copy here would let two audit trails disagree about what the same
 # input hashes to.
-from app.services.audit import _canonical_json
+from app.services.audit import _canonical_json, face_bytes
 
 _logger = logging.getLogger("app.batch.worker")
 
@@ -173,7 +173,7 @@ class BatchWorker:
         # Excluded for the same reason `app/services/audit.py` excludes it: the
         # input hash is a fingerprint of the content, not of the call.
         app_dict.pop("evaluation_id", None)
-        image_bytes = label.image_bytes if label is not None else b""
+        artwork = face_bytes(label) if label is not None else b""
         envelope_for_hash = {
             "evaluation_id": application.evaluation_id,
             "label_ref": label_id,
@@ -189,7 +189,7 @@ class BatchWorker:
             # is left unset here for the same reason and is honest that way —
             # no reader ran on this path either, so there is nothing to name.
             rule_set_version="unknown",
-            input_hash=hashlib.sha256(_canonical_json(app_dict) + image_bytes).hexdigest(),
+            input_hash=hashlib.sha256(_canonical_json(app_dict) + artwork).hexdigest(),
             output_hash=hashlib.sha256(_canonical_json(envelope_for_hash)).hexdigest(),
             started_at=started_at,
             completed_at=datetime.now(UTC),

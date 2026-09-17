@@ -18,7 +18,7 @@ from pathlib import Path
 import numpy as np
 from PIL import Image, TiffImagePlugin
 
-from app.schemas.label import Dimensions, Label
+from app.schemas.label import Dimensions, Face
 from app.vision.quality import _extract_dpi, assess
 
 # A real CC0 label from the TTB Public COLA Registry, front face: distilled
@@ -104,14 +104,12 @@ def test_assess_surfaces_dpi_none_for_downstream_missing_dpi_signal():
     pHYs chunk, no EXIF resolution and no JFIF density marker, and an applicant
     who supplies no dimensions leaves the last source empty too.
     """
-    label = Label(
-        label_id="L-MISSING-DPI",
-        batch_id="B-001",
+    face = Face(
         image_bytes=FIXTURE.read_bytes(),
         content_type="image/jpeg",
         face_tag="front",
         dimensions=None,
     )
-    report = assess(label)
+    report = assess(face)
     assert report.dpi is None
     assert report.disposition == "ok"

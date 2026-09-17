@@ -70,6 +70,7 @@ async def render_single_result(
     a reviewer typed them or a sample supplied them. An application the form
     cannot read renders the banner and checks nothing.
     """
+    from app.schemas.label import Face
     from app.schemas.label import Label as LabelModel
     from app.services.application_form import ApplicationFormError
 
@@ -85,10 +86,14 @@ async def render_single_result(
     label_obj = LabelModel(
         label_id=label_id,
         batch_id=application_id,
-        image_bytes=image_bytes,
-        content_type=mime,
-        face_tag="front",
-        dimensions=None,
+        faces=(
+            Face(
+                image_bytes=image_bytes,
+                content_type=mime,
+                face_tag="front",
+                dimensions=None,
+            ),
+        ),
     )
     envelope = await evaluator.evaluate(application=app_obj, label=label_obj)
     # Kept under the id the returned envelope carries rather than the one

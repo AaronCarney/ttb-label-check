@@ -25,7 +25,7 @@ from app.schemas.extracted import FieldObservation
 from app.schemas.label import Label
 from app.schemas.rejection import Outcome, ValidationResult
 from app.schemas.wire.disposition import DispositionEnvelope
-from app.services.audit import _output_hash
+from app.services.audit import _output_hash, face_bytes
 from app.services.cache import SessionCache
 from app.vision.base import VisionExtractor
 from app.vision.quality import assess as assess_quality
@@ -105,7 +105,7 @@ class Evaluator:
             cache_key = hashlib.sha256(
                 _canonical_json(app_for_key)
                 + self._rules.rule_set_version.encode("utf-8")
-                + label.image_bytes
+                + face_bytes(label)
             ).hexdigest()
             cached = self._cache.get(cache_key)
             if cached is not None:
@@ -277,7 +277,9 @@ class Evaluator:
 
         # Step 2: image-quality short-circuit. Name the image problem rather
         # than guess at an unreadable label (docs/PRD.md FR-10).
-        quality = assess_quality(label)
+        # The first face only. The gate runs per face, and an unusable face
+        # short-circuits the label naming which face, with the per-face reader.
+        quality = assess_quality(label.faces[0])
         if quality.disposition == "needs_better_photo":
             timeline.record_failure(
                 reason_code=quality.reason_code,

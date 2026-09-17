@@ -5,7 +5,7 @@ from collections import deque
 import pytest
 
 from app.config import Settings
-from app.schemas.label import Dimensions, Label
+from app.schemas.label import Dimensions, Face, Label
 from app.vision import cloud as cloud_mod
 from app.vision.cloud import CloudVisionExtractor
 from app.vision.quality import QualityReport
@@ -47,10 +47,14 @@ async def test_semaphore_caps_at_4(monkeypatch):
     label = Label(
         label_id="L-001",
         batch_id="B-001",
-        image_bytes=b"\x89PNG\r\n\x1a\n",
-        content_type="image/png",
-        face_tag="front",
-        dimensions=Dimensions(width_px=200, height_px=200, dpi=300),
+        faces=(
+            Face(
+                image_bytes=b"\x89PNG\r\n\x1a\n",
+                content_type="image/png",
+                face_tag="front",
+                dimensions=Dimensions(width_px=200, height_px=200, dpi=300),
+            ),
+        ),
     )
     # 5 concurrent extract() calls — but each spawns 9 sub-calls under the same semaphore.
     await asyncio.gather(*(extractor.extract(label) for _ in range(5)))

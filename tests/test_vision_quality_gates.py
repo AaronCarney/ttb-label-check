@@ -5,7 +5,7 @@ import numpy as np
 import pytest
 from PIL import Image
 
-from app.schemas.label import Dimensions, Label
+from app.schemas.label import Dimensions, Face
 from app.vision.quality import QualityReport, assess
 
 # A real CC0 label from the TTB Public COLA Registry, front face: distilled
@@ -20,10 +20,8 @@ def _png_bytes(arr: np.ndarray) -> bytes:
     return buf.getvalue()
 
 
-def _label(image_bytes: bytes, dpi: int | None = 300) -> Label:
-    return Label(
-        label_id="L-001",
-        batch_id="B-001",
+def _face(image_bytes: bytes, dpi: int | None = 300) -> Face:
+    return Face(
         image_bytes=image_bytes,
         content_type="image/png",
         face_tag="front",
@@ -31,11 +29,10 @@ def _label(image_bytes: bytes, dpi: int | None = 300) -> Label:
     )
 
 
-def _fixture_label(dpi: int | None = None) -> Label:
-    """The real label, described as the applicant's record describes it."""
-    return Label(
-        label_id="L-FIXTURE",
-        batch_id="B-001",
+def _fixture_face(dpi: int | None = None) -> Face:
+    """The real label's front face, described as the applicant's record
+    describes it."""
+    return Face(
         image_bytes=FIXTURE.read_bytes(),
         content_type="image/jpeg",
         face_tag="front",
@@ -44,7 +41,7 @@ def _fixture_label(dpi: int | None = None) -> Label:
 
 
 def test_clean_fixture_passes():
-    report = assess(_fixture_label())
+    report = assess(_fixture_face())
     assert report.disposition == "ok"
     assert report.reason_code is None
 
@@ -52,7 +49,7 @@ def test_clean_fixture_passes():
 def test_low_resolution_triggers_warning():
     rng = np.random.default_rng(0)
     arr = (rng.random((64, 64)) * 5 + 125).astype(np.uint8)
-    report = assess(_label(_png_bytes(arr)))
+    report = assess(_face(_png_bytes(arr)))
     assert report.disposition == "needs_better_photo"
     assert report.reason_code == "WARNING.LEGIBILITY.LOW_RESOLUTION"
 
@@ -72,7 +69,7 @@ def test_a_bright_label_is_not_turned_away():
     arr[100:110, 50:190] = 0
     noise = (rng.random((200, 200)) * 12).astype(np.uint8)
     arr = np.clip(arr.astype(np.int16) - noise, 0, 255).astype(np.uint8)
-    report = assess(_label(_png_bytes(arr)))
+    report = assess(_face(_png_bytes(arr)))
     assert report.disposition == "ok"
     assert report.reason_code is None
 
@@ -85,7 +82,7 @@ def test_motion_blur_triggers_warning():
     kernel = np.zeros((1, 31))
     kernel[0, :] = 1.0 / 31
     streaked = cv2.filter2D(arr, -1, kernel)
-    report = assess(_label(_png_bytes(streaked)))
+    report = assess(_face(_png_bytes(streaked)))
     assert report.disposition == "needs_better_photo"
     assert report.reason_code == "WARNING.LEGIBILITY.MOTION_BLUR"
 
@@ -106,7 +103,7 @@ def test_dpi_from_png_phys():
     arr = (rng.random((200, 200)) * 200).astype(np.uint8)
     buf = io.BytesIO()
     Image.fromarray(arr).save(buf, format="PNG", dpi=(300, 300))
-    report = assess(_label(buf.getvalue(), dpi=None))
+    report = assess(_face(buf.getvalue(), dpi=None))
     assert report.dpi == 300
 
 
@@ -124,33 +121,29 @@ def test_dpi_from_jpeg_exif():
     exif[296] = 2  # inches
     buf = io.BytesIO()
     img.save(buf, format="JPEG", exif=exif.tobytes(), quality=90)
-    label = Label(
-        label_id="L-002",
-        batch_id="B-001",
+    face = Face(
         image_bytes=buf.getvalue(),
         content_type="image/jpeg",
         face_tag="front",
         dimensions=Dimensions(width_px=200, height_px=200, dpi=None),
     )
-    report = assess(label)
+    report = assess(face)
     assert report.dpi == 300
 
 
 def test_dpi_from_applicant_when_metadata_absent():
-    report = assess(_label(_textured_no_meta_png(), dpi=300))
+    report = assess(_face(_textured_no_meta_png(), dpi=300))
     assert report.dpi == 300
 
 
 def test_dpi_none_when_all_sources_missing():
-    label = Label(
-        label_id="L-003",
-        batch_id="B-001",
+    face = Face(
         image_bytes=_textured_no_meta_png(),
         content_type="image/png",
         face_tag="front",
         dimensions=Dimensions(width_px=200, height_px=200, dpi=None),
     )
-    report = assess(label)
+    report = assess(face)
     assert report.dpi is None
     assert report.disposition == "ok"
 
@@ -180,7 +173,7 @@ def test_failure_reason_code_refuses_a_failing_report_that_names_no_code():
 
 
 def test_failure_reason_code_refuses_a_passing_report():
-    report = assess(_label(_textured_no_meta_png(), dpi=300))
+    report = assess(_face(_textured_no_meta_png(), dpi=300))
     assert report.disposition == "ok"
     with pytest.raises(ValueError, match="no reason code"):
         report.failure_reason_code()
