@@ -8,6 +8,13 @@ All notable changes to this project are recorded here. The format follows
 
 ### Added
 
+- Every result now shows how long the check took, on both the single-label page and the batch
+  detail panel. The number has been on the envelope since `metrics` was added and was reachable
+  only through the raw-JSON drawer, which is off unless `DEV_MODE` is set. Two cases get their own
+  wording rather than a bare number: an answer served from the result cache says so, because those
+  milliseconds are what returning the stored answer cost and not what checking the label cost; and
+  a check the runaway guard stopped says it was stopped, because its time is how far it got.
+
 - Opening a label in a batch shows its check results — every field, what was read from the label
   beside the application value, and the rule verdict with its reason code — in the same cards the
   single-label page uses. A label the app could not check says so and names the code recorded

@@ -6,6 +6,7 @@ import { ConfidenceIndicator } from "./ConfidenceIndicator";
 import { DispositionPill } from "./DispositionPill";
 import { FieldCard } from "./FieldCard";
 import { IncompleteCheckCard } from "./IncompleteCheckCard";
+import { ProcessingTime } from "./ProcessingTime";
 import { RuleVerdict } from "./RuleVerdict";
 import { engineFailureCode, wasStoppedEarly } from "../lib/incompleteCheck";
 
@@ -76,6 +77,7 @@ export function BatchItemDetail({ row, className }: BatchItemDetailProps): React
             band={row.disposition_confidence.band}
             numeric={row.disposition_confidence.numeric}
           />
+          <ProcessingTime metrics={row.metrics} stoppedEarly={wasStoppedEarly(trace)} />
         </div>
       </header>
 

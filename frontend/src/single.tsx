@@ -9,6 +9,7 @@ import { IncompleteCheckCard } from "./components/IncompleteCheckCard";
 import { LiveRegion } from "./components/LiveRegion";
 import { NeedsBetterPhotoCard } from "./components/NeedsBetterPhotoCard";
 import { OverrideDrawer } from "./components/OverrideDrawer";
+import { ProcessingTime } from "./components/ProcessingTime";
 import { RawJSONDrawer } from "./components/RawJSONDrawer";
 import { RuleVerdict } from "./components/RuleVerdict";
 import { Toast } from "./components/Toast";
@@ -100,6 +101,7 @@ export function SingleApp({ envelope }: { envelope: DispositionEnvelope | null }
             band={envelope.disposition_confidence.band}
             numeric={envelope.disposition_confidence.numeric}
           />
+          <ProcessingTime metrics={envelope.metrics} stoppedEarly={wasStoppedEarly(trace)} />
           <RawJSONDrawer enabled={document.body.dataset.devMode === "1"} payload={envelope} />
         </div>
       </header>
