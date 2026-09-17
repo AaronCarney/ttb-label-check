@@ -127,6 +127,6 @@ class Settings(BaseSettings):
         version this cannot establish is one it must not state.
         """
         try:
-            return metadata.version("ttb-label-prototype")
+            return metadata.version("ttb-label-check")
         except metadata.PackageNotFoundError:
             return "unknown"

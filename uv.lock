@@ -1912,7 +1912,7 @@ wheels = [
 ]
 
 [[package]]
-name = "ttb-label-prototype"
+name = "ttb-label-check"
 version = "0.2.0"
 source = { editable = "." }
 dependencies = [

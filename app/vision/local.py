@@ -531,7 +531,7 @@ class LocalVisionExtractor:
         classifier over each crop before recognising it, so a strip printed the
         other way up comes back the right way round from the same call:
         measured on ttb-26212001000085, the strips read the same words at 90°
-        and at 270° (`plans/probe_strip_rec.py`).
+        and at 270° (`docs/decisions.md#0036`).
 
         `None` means the strip could not be read — no engine loaded, or nothing
         recognised. Both are "this strip cannot rule the warning out", which is
@@ -869,7 +869,7 @@ _SIDEWAYS_LONE_RATIO = 3.0
 # because it skips detection entirely and recognises only text already located.
 #
 # Measured over all 62 corpus images, 2026-09-17
-# (`plans/probe_screen_corpus.py`, `plans/screen-corpus-probe.json`): four
+# (`docs/decisions.md#0036`): four
 # images reach this point, and the rotated re-read recovers a warning from one
 # of them, ttb-26212001000085. Its strips read "THE SURGEON" and "DRIVE ACAR
 # OROPERATEMACHINERY,ANDM"; the three the re-read finds nothing on read
@@ -1076,7 +1076,7 @@ def _warning_block(boxes: list[_Box]) -> tuple[str, str, _Box, list[_Box]] | Non
     # deposit line, an importer's web address. `common.warning.verbatim`
     # compares the whole statement, so one neighbour's box rejected a warning
     # the label prints correctly — 24 of the 37 labels in the manifest, before
-    # this (`plans/probes/item6_all_samples.json`).
+    # this, a sweep of the manifest reported in commit `8ca3ecc`.
     #
     # Two tests, both of them what a person means by "the block of text under
     # that heading":

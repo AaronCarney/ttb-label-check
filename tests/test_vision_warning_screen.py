@@ -10,7 +10,7 @@ seconds.
 So the strips the upright pass already found are read in place first, with
 recognition alone and no second detection, and only a strip carrying the
 warning's own words sends the re-read ahead. Measured over all 62 corpus
-images (`plans/probe_screen_corpus.py`): four reach this point, one carries the
+images (`docs/decisions.md#0036`): four reach this point, one carries the
 warning, and the screen keeps the re-read on that one.
 
 The screen answers yes wherever it cannot answer no, and the tests below hold

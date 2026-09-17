@@ -2,6 +2,7 @@
 
 - [Product requirements](PRD.md) — what is being built, for whom, and why.
 - [PRD amendments](PRD-decisions.md) — every change to the PRD's text after approval.
+- [Accessibility exceptions](exceptions/README.md) — the only way a known accessibility failure ships, and how one is filed.
 
 ## Decisions
 
@@ -44,3 +45,4 @@ One dated finding per file.
 - [TTB regulatory framework](research/2026-09-15-ttb-regulatory-framework.md) — the regulations behind label review.
 - [Verification targets](research/2026-09-15-verification-targets-research.md) — what can be verified, and registry access.
 - [Vision stack](research/2026-09-15-vision-stack.md) — vision stack and latency options.
+- [Heading bold ratios](research/2026-09-17-heading-bold-ratios.md) — what the heading stroke-width measurement does to the 38-label corpus.

@@ -5,8 +5,8 @@ parsing against what the labels actually print. It costs no model, no image and
 no network: every reading under `tests/recordings/reader/` was taken once by
 `eval/read_accuracy.py --freeze`, and `thaw_reading` turns one back into the
 boxes `_parse` takes. The proof that a recording is the reader's own output and
-not a stand-in is in `plans/wave3-R.md`: the live run and the replay printed a
-byte-for-byte identical scoreboard.
+not a stand-in is that the live run and the replay printed a byte-for-byte
+identical scoreboard.
 
 Two things this file is for, beyond the scores.
 
@@ -55,9 +55,9 @@ from eval.read_accuracy import CHECKS, LABELS_ROOT, WARNING_ASSET, _has_reading,
 
 RECORDINGS = Path("tests/recordings/reader")
 
-# Slice 1, named in `plans/worklist.md` → "The ladder" §5, minus the one image
-# the quality gate rejects. Written out rather than globbed so that a recording
-# appearing or disappearing is a failure and not a silent change of subject.
+# The first slice of the corpus, minus the one image the quality gate rejects.
+# Written out rather than globbed so that a recording appearing or disappearing
+# is a failure and not a silent change of subject.
 COVERED_IMAGES = frozenset(
     {
         "26212001000085/front.jpg",

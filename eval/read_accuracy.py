@@ -366,9 +366,9 @@ def _summarize(
     """Print the scoreboard for one run.
 
     Its own function so it can be driven without a reader, an image or a model:
-    `plans/step0_score_probe.py` scores every label off the manifest and prints
-    through here, which is the only way this output gets exercised without
-    spending the CPU budget a real run costs.
+    a scoring probe reads every label off the manifest and prints through here,
+    which is the only way this output gets exercised without spending the CPU
+    budget a real run costs.
     """
     total = len(rows)
     print(f"\nreader: {reader}    labels: {total}\n")

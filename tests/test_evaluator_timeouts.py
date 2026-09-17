@@ -144,8 +144,8 @@ async def test_timeout_reports_the_time_it_actually_spent(monkeypatch):
 # complete one does.
 #
 # The slowest whole check measured on the live service on 2026-09-17 was 5.04 s
-# (`plans/live-timing-2026-09-17.json`, deployed commit 8cb5e70). A guard has to
-# sit clear of the slowest legitimate check, not on it.
+# (`docs/decisions.md#0035`, measured against deployed commit `8cb5e70`). A guard
+# has to sit clear of the slowest legitimate check, not on it.
 _SLOWEST_LIVE_CHECK_SECONDS = 5.04
 
 

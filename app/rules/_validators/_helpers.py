@@ -183,9 +183,10 @@ def first_number(value: object) -> float | None:
 # What that distinction means for one rule is the rule pack's to decide, not
 # this module's, and it is decided on how reliably the reader finds that element.
 # For the government warning the reader is measured at 30 of 30 over the corpus
-# (`plans/wave3-R.md`), so not finding it is evidence it is absent and that rule
-# sets `unlocated_is_absent: true`. Everywhere else the default stands and the
-# finding goes to a reviewer, who has the label in front of them.
+# (the reading-accuracy table in `README.md`), so not finding it is evidence it
+# is absent and that rule sets `unlocated_is_absent: true`. Everywhere else the
+# default stands and the finding goes to a reviewer, who has the label in front
+# of them.
 
 NOT_READ_CODE = "LEGIBILITY.FIELD.NOT_READ"
 

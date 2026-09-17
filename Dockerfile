@@ -4,7 +4,16 @@ FROM python:3.12-slim
 
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
-    UV_SYSTEM_PYTHON=1
+    UV_SYSTEM_PYTHON=1 \
+    OPENBLAS_NUM_THREADS=2
+
+# OpenBLAS sits under OpenCV and NumPy and reads OPENBLAS_NUM_THREADS when the
+# library loads, which happens before any of this project's code runs. So it is
+# the one thread cap `LocalVisionEngine` cannot set for itself, and its docstring
+# says so: it belongs in the process environment, and this image is where the
+# deployed product sets it. Left unset, OpenBLAS runs one thread per core and
+# contends with the three onnxruntime sessions a read has already sized. 2 is
+# what `.gitlab-ci.yml` uses for the same reason.
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
         build-essential libgl1 libglib2.0-0 \

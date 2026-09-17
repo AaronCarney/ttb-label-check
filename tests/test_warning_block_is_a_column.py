@@ -7,7 +7,7 @@ label that glued the neighbour onto the statement — a keg's tapping
 instructions, a deposit line, an importer's web address — and
 `common.warning.verbatim` then rejected a warning the label prints correctly.
 Measured over the manifest before the fix: 24 of 37 approved labels failed the
-verbatim rule (`plans/probes/item6_all_samples.json`).
+verbatim rule; the sweep is reported in commit `8ca3ecc`.
 
 Frozen recordings, so this is what the production reader returns on these
 pixels. No model and no OCR.
