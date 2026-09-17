@@ -8,7 +8,8 @@ Run before each release, and before merging a change to the interface.
 2. Verify NVDA announces the page title, then the H1 ("TTB Label Verification").
 3. Tab through the focusable elements; the first should be "Skip to main content".
 4. Activate the skip link; focus lands on `#main`.
-5. Tab to a citation chip; activate it (Enter); the evidence dialog opens with focus on the close button.
+5. Tab through a field card; the CFR citation is read out as part of the card and is not announced as a
+   button — it is text, and nothing here opens the section (`docs/decisions.md#0034`).
 6. Press `O`; the override drawer opens; the reason-code picker is announced.
 7. Type `W`; NVDA announces the picker filter narrowing to the WARNING.* codes; the first highlighted option is `WARNING.STYLE.HEADING_NOT_BOLD_CAPS`.
 8. Press `Enter`; NVDA announces the LiveRegion message "Override saved: WARNING.STYLE.HEADING_NOT_BOLD_CAPS".

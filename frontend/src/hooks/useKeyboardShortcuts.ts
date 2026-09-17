@@ -19,7 +19,7 @@ function _isTypingTarget(target: EventTarget | null): boolean {
 // Inside an open dialog, all top-level shortcuts (O/J/K) must defer to the
 // dialog's own keyboard model — otherwise pressing 'O' in the override
 // drawer's close button would re-open the drawer, and J/K could fire batch
-// navigation while the user is reviewing a citation in EvidencePanel.
+// navigation while the user is reading the raw envelope in RawJSONDrawer.
 function _isInsideDialog(target: EventTarget | null): boolean {
   if (!(target instanceof HTMLElement)) return false;
   return target.closest('[role="dialog"]') !== null;

@@ -2075,3 +2075,67 @@ nothing, but it withdraws a capability the requirements ask for to avoid keeping
 - **Nothing serves a kept single-label result back.** The store exists for the override path. Opening
   the result page again re-renders from the template, not from the store, so an override applied a
   moment ago is in the record but not on the page until the page is reloaded from a fresh check.
+
+<a id="0034"></a>
+## 0034. The bbox overlay and the evidence panel are removed, because neither can be fed truthfully
+
+**Decided:** 2026-09-16. **Evidence:** `app/vision/local.py`, which reads boxes off a copy downscaled
+to 1600 pixels on its longest edge and reads the warning off a frame it may have rotated;
+`app/api/ui/images.py`, which serves the original uploaded bytes; the 44 distinct `cfr_citation`
+strings in `rules/`, against the one piece of regulation wording the product keeps
+(`assets/warnings/govt_warning_16_21.txt`, §16.21 only).
+
+**What was wrong.** Three interface parts were built and wired to nothing. `BboxOverlay` was imported
+by no page and shipped in neither bundle. `EvidencePanel` was mounted on the single-label page only as
+a placeholder — closed, with every content prop an empty string — so that the bundler would still
+carry it. `CitationChip` rendered as a button whose `onOpen` neither call site supplied, so on both
+the single-label page and a batch's detail panel a reviewer could press it and nothing happened.
+
+**Chosen.** `BboxOverlay` and `EvidencePanel` are deleted, with their tests. `CitationChip` keeps the
+citation on the card and stops being a control: it is a span.
+
+**Because** neither component has data behind it that this product can supply honestly.
+
+The boxes in the envelope are in the reader's pixel space, not the uploaded image's. The reader scales
+any label longer than 1600 pixels down before it detects anything, and registry photographs "run to
+several thousand pixels", so for a typical upload the two spaces differ; for the government warning
+the boxes may also come from a frame rotated 90 or 270 degrees. The only image the interface can show
+is the original upload, at `/labels/{evaluation_id}/image`. Drawing one on the other puts the boxes in
+the wrong places, and the code already says so about the one measurement that does use them: handing
+the full-size image to the stroke-width measurement "would crop the wrong part of a label that was
+downscaled on the way in". Making the overlay correct means carrying the reading frame's size and its
+rotation, per field, through the wire schema — a schema change, not the wiring the component was left
+waiting for.
+
+The panel's left column is the regulation's own wording, and nothing here holds it. The rules name 44
+distinct citation strings, many of them compound (`27 CFR §4.32(a)(1), §4.33`, `27 CFR §5 Subpart I`).
+`docs/reference/` summarises the three parts in prose for a reader and is loaded by no code. The one
+verbatim text the product keeps is §16.21, and it is kept because a validator matches a label's
+warning against it character for character. Filling the other 43 means writing regulation text by hand
+into a compliance tool with no test that can check it against the regulation — the kind of claim this
+build refuses everywhere else. The panel's right column is already on the card: `RuleVerdict` carries
+the plain-language explanation and the reason code, and the card itself carries extracted against
+expected.
+
+Neither part is required. `docs/PRD.md` and `specs/0001-label-verification/` ask for no region overlay
+and no regulation-text panel. Both came from the component inventory in
+`docs/research/2026-09-15-federal-ux-for-senior-users.md`, which is dated research and governs nothing.
+
+**Rejected.** *Read the image's size in the browser* — `naturalWidth` and `naturalHeight` off the
+served image would cost no schema change, and they are the wrong numbers: they describe the upload,
+which is the space the boxes are not in. *Carry the reading frame through the envelope* — correct, and
+it is the overlay's real price rather than the wiring it looked like it needed; it is what a later
+version would do. *Link each chip to eCFR instead of opening a panel* — the citation strings are
+heterogeneous enough that parsing them into section URLs would mislink some, and a compliance tool
+showing the wrong regulation is worse than one showing none. *Leave all three in place* — every one of
+their own tests passed, so nothing was failing; what was wrong is that the interface offered a
+reviewer a control that does nothing, which is the one thing a reviewer cannot check for themselves.
+
+**Cost, stated.**
+
+- **A reviewer cannot see where on the label a value was read from.** The envelope still carries
+  `field.evidence.bbox` and the raw-JSON drawer still shows it, but nothing draws it on the image.
+- **A reviewer who wants the regulation's wording leaves the product to get it.** The card names the
+  section; looking it up is theirs to do.
+- **The work is deleted rather than shelved.** Both components and their tests are gone from the tree.
+  They are in the history, at the commit before this one.

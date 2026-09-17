@@ -22,6 +22,16 @@ All notable changes to this project are recorded here. The format follows
   built to, including reflow at 320 pixels, are kept and tested without being claimed as a level. See
   `docs/decisions.md#0031`.
 
+### Removed
+
+- The CFR citation on a field card is text rather than a button. It was a button that did nothing:
+  the handler behind it was never supplied on either surface, and the panel it was meant to open
+  would have had to show the wording of the section, which this product does not hold for 43 of the
+  44 sections its rules cite. The region overlay that would have drawn each reading's box on the
+  label image is removed for the same reason — the boxes are in the reader's downscaled, sometimes
+  rotated pixel space, and the only image the page can show is the original upload. See
+  `docs/decisions.md#0034`.
+
 ### Fixed
 
 - A browser batch upload containing a file that is not a PNG or JPEG now names that file, says what

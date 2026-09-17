@@ -4,7 +4,6 @@ import "./tokens/globals.css";
 import { AISuggestionBlock } from "./components/AISuggestionBlock";
 import { ConfidenceIndicator } from "./components/ConfidenceIndicator";
 import { DispositionPill } from "./components/DispositionPill";
-import { EvidencePanel } from "./components/EvidencePanel";
 import { FieldCard } from "./components/FieldCard";
 import { LiveRegion } from "./components/LiveRegion";
 import { NeedsBetterPhotoCard } from "./components/NeedsBetterPhotoCard";
@@ -149,24 +148,7 @@ function SingleApp({ envelope }: { envelope: DispositionEnvelope | null }): Reac
           onDismiss={() => setToast(null)}
         />
       )}
-      <EvidencePanelStub />
     </div>
-  );
-}
-
-// Small inline placeholder so the module pulls EvidencePanel into the bundle
-// for the production runtime; a future task wires citation chip → evidence panel.
-function EvidencePanelStub(): React.JSX.Element {
-  const [open, setOpen] = React.useState(false);
-  void open;
-  return (
-    <EvidencePanel
-      open={false}
-      onOpenChange={setOpen}
-      citation=""
-      regulationText=""
-      evidenceText=""
-    />
   );
 }
 

@@ -4,26 +4,24 @@ import { cn } from "../lib/cn";
 
 export interface CitationChipProps {
   citation: string;
-  onOpen: () => void;
   className?: string;
 }
 
-export function CitationChip({ citation, onOpen, className }: CitationChipProps): React.JSX.Element {
+// Static text, not a control. The chip names the CFR section a finding rests
+// on, so a reviewer knows what to look up. It does not open it: nothing in this
+// product holds the wording of 43 of the 44 sections the rules cite, and a
+// button that opens nothing tells a reviewer there is more here to see when
+// there is not. See `docs/decisions.md#0034`.
+export function CitationChip({ citation, className }: CitationChipProps): React.JSX.Element {
   return (
-    <button
-      type="button"
-      onClick={onOpen}
+    <span
       className={cn(
-        // `bg-muted` needs its paired foreground stated: the global `button` rule in
-// tokens/globals.css paints every button white-on-blue, and overriding only the
-// background left white text on a near-white chip (1.09:1). The hover variant is
-// named too, because `button:hover` sets the colour back to white.
-        "inline-flex items-center gap-1 rounded-md border border-border bg-muted px-2 py-1 text-xs font-medium text-muted-foreground hover:bg-[hsl(var(--uswds-primary-lighter))] hover:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring",
+        "inline-flex items-center gap-1 rounded-md border border-border bg-muted px-2 py-1 text-xs font-medium text-muted-foreground",
         className,
       )}
     >
       <BookOpen aria-hidden className="h-3 w-3" />
       <span>{citation}</span>
-    </button>
+    </span>
   );
 }

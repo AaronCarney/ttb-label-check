@@ -9,7 +9,6 @@ export interface FieldCardProps {
   field: FieldFindingWire;
   verdict?: React.ReactNode;
   aiSuggestion?: React.ReactNode;
-  onCitationOpen?: (citation: string) => void;
   className?: string;
 }
 
@@ -31,7 +30,7 @@ function _fieldLabel(fieldName: string): string {
   return words.charAt(0).toUpperCase() + words.slice(1);
 }
 
-export function FieldCard({ field, verdict, aiSuggestion, onCitationOpen, className }: FieldCardProps): React.JSX.Element {
+export function FieldCard({ field, verdict, aiSuggestion, className }: FieldCardProps): React.JSX.Element {
   const fieldDisp = _fieldDisposition(field);
   return (
     <section
@@ -65,11 +64,7 @@ export function FieldCard({ field, verdict, aiSuggestion, onCitationOpen, classN
         <ConfidenceIndicator band={field.field_confidence.band} numeric={field.field_confidence.numeric} />
         <div className="flex flex-wrap gap-2">
           {field.rule_findings.map((rf) => (
-            <CitationChip
-              key={rf.rule_id}
-              citation={rf.cfr_citation}
-              onOpen={() => onCitationOpen?.(rf.cfr_citation)}
-            />
+            <CitationChip key={rf.rule_id} citation={rf.cfr_citation} />
           ))}
         </div>
       </footer>
