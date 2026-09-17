@@ -51,6 +51,7 @@ import yaml
 from pydantic import ValidationError
 
 from app.rules._validators import VALIDATOR_REGISTRY
+from app.schemas.rejection import REASON_CODE_GRAMMAR
 from app.schemas.rules import (
     AssetRef,
     DecisionTable,
@@ -59,8 +60,17 @@ from app.schemas.rules import (
     RuleSet,
 )
 
-_REASON_CODE_RE = re.compile(r"^[A-Z][A-Z0-9_]*(?:\.[A-Z][A-Z0-9_]*){2,3}$")
-_SEMVER_RE = re.compile(r"^\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?$")
+# The rule pack's gate and the schema layer's constructor gate are one gate, so
+# they are one pattern. They were two identical copies, and two copies of a rule
+# is one drift away from a code the loader admits and the schema layer refuses.
+_REASON_CODE_RE = REASON_CODE_GRAMMAR
+
+# `\Z` rather than `$`, for the reason given beside REASON_CODE_GRAMMAR. This one
+# guards `rules/reason_codes.yaml`'s `version:`, which becomes
+# `RuleSet.version` and so `audit_trail.rule_set_version` and part of the result
+# cache's key — a version string with an invisible character in it is a second
+# name for one rule set.
+_SEMVER_RE = re.compile(r"\A\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?\Z")
 
 
 class RuleLoaderError(RuntimeError):

@@ -10,7 +10,12 @@ from pydantic import BaseModel, ConfigDict, Field
 from app.schemas.expected import BeverageClass, ExpectedValue
 from app.schemas.extracted import Evidence, FieldObservation
 
-REASON_CODE_GRAMMAR = re.compile(r"^[A-Z][A-Z0-9_]*(?:\.[A-Z][A-Z0-9_]*){2,3}$")
+# `\Z` rather than `$`: in Python `$` also matches immediately before a trailing
+# newline, so `"WARNING.PRESENCE.MISSING\n"` passed this gate. An accepted code is
+# used as a key into `rules/reason_codes.yaml` (`app/rules/yaml_engine.py`) and is
+# written into the envelope and into the audit hash, so a code carrying a
+# character nobody can see is looked up by a name nobody wrote.
+REASON_CODE_GRAMMAR = re.compile(r"\A[A-Z][A-Z0-9_]*(?:\.[A-Z][A-Z0-9_]*){2,3}\Z")
 
 
 class Outcome(StrEnum):
