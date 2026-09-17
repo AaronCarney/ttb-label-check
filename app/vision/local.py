@@ -685,10 +685,31 @@ class LocalVisionExtractor:
 # The shape of a detected box separates text the reader can already read from
 # text lying on its side. Upright text detects as boxes wider than they are
 # tall; sideways text detects as tall narrow strips, either several of them or
-# one long one. Both numbers sit well clear of what upright labels produce —
-# measured over the 72 corpus images, every one whose warning reads upright has
-# a tallest box under 1.0, while the label whose warning is printed sideways up
-# its edge has five boxes over 2.0 and a tallest of 9.0.
+# one long one.
+#
+# Measured over the corpus's 62 images on 2026-09-17 by `eval.box_ratios`,
+# which re-derives every number below. The gate is consulted only where the
+# upright pass found no warning heading, so 34 of those images never reach it
+# and these thresholds answer for the other 28:
+#
+#   * The one label whose warning is printed sideways up its edge
+#     (26212001000085, front) has a tallest box of 9.04 and five boxes at or
+#     past 2.0, so `_SIDEWAYS_RATIO` and `_SIDEWAYS_MIN_BOXES` catch it twice
+#     over.
+#   * Of the 28, four are sent for the re-read and 24 are spared it. The
+#     tallest box among the spared is 2.8, and no spared image has either two
+#     boxes past 2.0 or one past `_SIDEWAYS_LONE_RATIO`. The gap between what
+#     fires and what does not is a clear one here: nothing spared comes within
+#     1.2 of the lowest box that fires.
+#   * `_SIDEWAYS_LONE_RATIO` is what catches the two images whose single tall
+#     strip sits at 5.0 and 4.05. Neither carries a warning, so on this corpus
+#     that rule buys only re-reads that find nothing.
+#
+# What the corpus cannot settle, and the numbers above should not be read as
+# settling: it holds exactly one label with a sideways-printed warning. These
+# thresholds separate that one example cleanly, which is not the same as
+# knowing they generalise, and three of the four images that fire are already
+# false positives. Erring that way is deliberate — see `_has_sideways_text`.
 _SIDEWAYS_RATIO = 2.0
 _SIDEWAYS_MIN_BOXES = 2
 _SIDEWAYS_LONE_RATIO = 3.0
@@ -707,9 +728,9 @@ def _has_sideways_text(boxes: list[_Box]) -> bool:
     splits into several tall strips, so two boxes past `_SIDEWAYS_RATIO` is
     enough; a single line of it comes back as one very tall strip that nothing
     else matches, so one box past `_SIDEWAYS_LONE_RATIO` is enough on its own.
-    Over the corpus this keeps the re-read on every image that has ever
-    produced a warning from it, and on every label turned on its side, while
-    dropping it from 28 of the 35 images that pay for it and gain nothing.
+    Over the corpus this keeps the re-read on the one label whose warning is
+    printed up its edge, and spares it 24 of the 28 images that reach this gate
+    at all — the other 34 find their heading upright and never ask.
 
     Erring toward running it is deliberate: a re-read that finds nothing costs
     time, and a warning missed because no re-read ran is a compliance finding
