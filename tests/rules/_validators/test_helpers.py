@@ -26,6 +26,7 @@ from app.rules._validators._helpers import (
     project_reading,
     unlocated,
     unlocated_is_absent,
+    verdict_result,
     word_run_present,
 )
 from app.schemas.rejection import Outcome, Severity
@@ -383,3 +384,75 @@ def test_not_read_result_carries_the_aggregated_confidence() -> None:
     obs = make_obs(field_id="brand_name", value=None, confidence=0.33)
     res = not_read_result(obs, make_expected(field_id="brand_name"), _rule(), make_context())
     assert res.aggregated_confidence == 0.33
+
+
+# --- verdict_result ----------------------------------------------------------
+
+
+def test_a_failing_verdict_carries_the_rule_s_own_reason_code() -> None:
+    # Five validators built this envelope inline and identically, and two of the
+    # copies drifted out of coverage: nothing pinned that a failing check says
+    # why it failed. A rejection with no reason code tells a reviewer that the
+    # label is wrong and nothing about what is wrong with it.
+    obs = make_obs(field_id="brand_name", value="")
+    exp = make_expected(field_id="brand_name")
+    rule = _rule(severity=Severity.REJECT, rule_pack="spirits", rule_pack_version="2.4.0")
+    res = verdict_result(obs, exp, rule, make_context(engine_version="9.9.9"), ok=False)
+
+    assert res.outcome is Outcome.FAIL
+    assert res.severity is Severity.REJECT
+    assert res.reason_code == "BRAND.PRESENCE.MISSING"
+
+
+def test_a_passing_verdict_carries_no_reason_code() -> None:
+    # There is nothing to report about a label that satisfies the rule, and a
+    # reason code on a PASS would be read as a finding against it.
+    obs = make_obs(field_id="brand_name", value="Old Overholt")
+    res = verdict_result(
+        obs, make_expected(field_id="brand_name"), _rule(), make_context(), ok=True
+    )
+    assert res.outcome is Outcome.PASS
+    assert res.reason_code is None
+
+
+def test_a_verdict_carries_what_it_compared_so_a_reviewer_can_check_it() -> None:
+    # `evidence`, `expected` and `observed` are how a reviewer sees the verdict
+    # against the label instead of taking it on trust. Dropping any of the three
+    # left every validator's tests green.
+    obs = make_obs(
+        field_id="brand_name",
+        value="Old Overholt",
+        extra_evidence=(make_evidence(field_id="brand_name", text="second crop"),),
+    )
+    exp = make_expected(field_id="brand_name")
+    rule = _rule(severity=Severity.REJECT, rule_pack="spirits", rule_pack_version="2.4.0")
+    res = verdict_result(obs, exp, rule, make_context(engine_version="9.9.9"), ok=False)
+
+    assert res.evidence == obs.evidence
+    assert res.expected is exp
+    assert res.observed is obs
+
+    assert res.rule_id == rule.rule_id
+    assert res.cfr_citation == rule.cfr_citation
+    assert res.beverage_class is obs.beverage_class
+    assert res.engine_meta.engine_version == "9.9.9"
+    assert res.engine_meta.rule_pack == "spirits"
+    assert res.engine_meta.rule_pack_version == "2.4.0"
+
+
+def test_a_verdict_carries_the_aggregated_confidence() -> None:
+    obs = make_obs(field_id="brand_name", value="Old Overholt", confidence=0.42)
+    res = verdict_result(
+        obs, make_expected(field_id="brand_name"), _rule(), make_context(), ok=True
+    )
+    assert res.aggregated_confidence == 0.42
+
+
+def test_the_severity_is_the_rule_s_own_on_a_failure() -> None:
+    # Unlike `not_read_result`, which forces WARN so it cannot reject on its
+    # own, a verdict that actually ran reports at the severity the rule sets.
+    obs = make_obs(field_id="brand_name", value="")
+    exp = make_expected(field_id="brand_name")
+    for severity in (Severity.REJECT, Severity.WARN, Severity.INFO):
+        res = verdict_result(obs, exp, _rule(severity=severity), make_context(), ok=False)
+        assert res.severity is severity

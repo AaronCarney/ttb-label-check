@@ -282,3 +282,40 @@ def not_read_result(
             "label against the application yourself."
         ),
     )
+
+
+def verdict_result(
+    obs: FieldObservation,
+    exp: ExpectedValue,
+    rule: RuleDefinition,
+    ctx: ValidatorContext,
+    *,
+    ok: bool,
+) -> ValidationResult:
+    """The finding for a check that ran: PASS when the label satisfies the rule.
+
+    Five validators built this envelope inline and identically, differing only
+    in the name of the boolean local. Two of the five copies drifted out of test
+    coverage while doing so: nothing pinned that a failing
+    `same_field_of_vision_check` carries a reason code, so a rejection could
+    reach a reviewer with no statement of why. A single builder makes the
+    envelope one thing to assert rather than five.
+
+    A failing result carries the rule's own `reason_code`; a passing one carries
+    none, because there is nothing to report. Both carry `evidence`, `expected`
+    and `observed`, which are what let a reviewer check the verdict against the
+    label rather than take it on trust.
+    """
+    return ValidationResult(
+        rule_id=rule.rule_id,
+        cfr_citation=rule.cfr_citation,
+        beverage_class=obs.beverage_class,
+        outcome=Outcome.PASS if ok else Outcome.FAIL,
+        severity=rule.severity,
+        reason_code=None if ok else rule.reason_code,
+        aggregated_confidence=_conf(obs),
+        evidence=obs.evidence,
+        expected=exp,
+        observed=obs,
+        engine_meta=_build_meta(rule, ctx),
+    )

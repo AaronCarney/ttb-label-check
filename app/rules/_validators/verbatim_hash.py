@@ -32,16 +32,15 @@ from collections.abc import Sequence
 
 from app.rules._validators import ValidatorContext, register
 from app.rules._validators._helpers import (
-    _build_meta,
-    _conf,
     not_read_result,
     project_reading,
     unlocated,
     unlocated_is_absent,
+    verdict_result,
 )
 from app.schemas.expected import ExpectedValue
 from app.schemas.extracted import FieldObservation
-from app.schemas.rejection import Outcome, ValidationResult
+from app.schemas.rejection import ValidationResult
 from app.schemas.rules import RuleDefinition
 
 DEFAULT_NORMALIZATION_OPS: tuple[str, ...] = (
@@ -112,16 +111,4 @@ def verbatim_hash(
     matched = (
         asset is not None and hashlib.sha256(observed.encode("utf-8")).hexdigest() == asset.sha256
     )
-    return ValidationResult(
-        rule_id=rule.rule_id,
-        cfr_citation=rule.cfr_citation,
-        beverage_class=obs.beverage_class,
-        outcome=Outcome.PASS if matched else Outcome.FAIL,
-        severity=rule.severity,
-        reason_code=None if matched else rule.reason_code,
-        aggregated_confidence=_conf(obs),
-        evidence=obs.evidence,
-        expected=exp,
-        observed=obs,
-        engine_meta=_build_meta(rule, ctx),
-    )
+    return verdict_result(obs, exp, rule, ctx, ok=matched)

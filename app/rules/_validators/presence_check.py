@@ -22,6 +22,7 @@ from app.rules._validators._helpers import (
     project_reading,
     unlocated,
     unlocated_is_absent,
+    verdict_result,
 )
 from app.schemas.expected import ExpectedValue
 from app.schemas.extracted import FieldObservation
@@ -31,22 +32,6 @@ from app.schemas.rules import RuleDefinition
 
 def _is_present(obs: FieldObservation) -> bool:
     return bool(project_reading(obs).strip())
-
-
-def _result(rule, ctx, obs, exp, present: bool) -> ValidationResult:
-    return ValidationResult(
-        rule_id=rule.rule_id,
-        cfr_citation=rule.cfr_citation,
-        beverage_class=obs.beverage_class,
-        outcome=Outcome.PASS if present else Outcome.FAIL,
-        severity=rule.severity,
-        reason_code=None if present else rule.reason_code,
-        aggregated_confidence=_conf(obs),
-        evidence=obs.evidence,
-        expected=exp,
-        observed=obs,
-        engine_meta=_build_meta(rule, ctx),
-    )
 
 
 @register("presence_check")
@@ -61,7 +46,7 @@ def presence_check(
     if unlocated(obs) and not unlocated_is_absent(rule):
         return not_read_result(obs, exp, rule, ctx)
 
-    return _result(rule, ctx, obs, exp, _is_present(obs))
+    return verdict_result(obs, exp, rule, ctx, ok=_is_present(obs))
 
 
 @register("conditional_presence")
@@ -92,4 +77,4 @@ def conditional_presence(
     if unlocated(obs) and not unlocated_is_absent(rule):
         return not_read_result(obs, exp, rule, ctx)
 
-    return _result(rule, ctx, obs, exp, _is_present(obs))
+    return verdict_result(obs, exp, rule, ctx, ok=_is_present(obs))
