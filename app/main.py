@@ -21,6 +21,7 @@ from pathlib import Path
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
+from app.api import _background
 from app.api.body_limit import BodySizeLimitMiddleware
 from app.api.healthz import router as healthz_router
 from app.api.ui import router as ui_router
@@ -45,14 +46,19 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         )
         app.state.batches = {}  # In-flight batches, process-local: nothing is persisted.
         app.state.buses = {}  # Per-batch SSEBus registry, keyed by batch_id.
+        app.state.batch_tasks = set()  # Running batch workers, held so they survive.
         yield
         # Teardown evicts every in-flight batch and its bus subscribers and queues.
+        # The workers stop first: they write into the batch state being cleared,
+        # so clearing it under them is what "evicted" would otherwise mean.
+        cancelled_workers = await _background.drain(app)
         evicted_batches = len(app.state.batches)
         evicted_buses = len(app.state.buses)
         app.state.batches.clear()
         app.state.buses.clear()
         logging.getLogger("app.main").info(
-            f"app_shutdown evicted_batches={evicted_batches} evicted_buses={evicted_buses}",
+            f"app_shutdown evicted_batches={evicted_batches} "
+            f"evicted_buses={evicted_buses} cancelled_workers={cancelled_workers}",
             extra={"reason_code": "ENGINE.OK.NONE"},
         )
 
@@ -91,6 +97,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     # Lifespan startup will re-assign; shutdown will clear.
     application.state.batches = {}
     application.state.buses = {}
+    application.state.batch_tasks = set()
 
     return application
 

@@ -15,14 +15,13 @@ skips it gets each label read and nothing checked, and each reply says so
 
 from __future__ import annotations
 
-import asyncio
 import uuid
 from datetime import UTC, datetime
 
 from fastapi import APIRouter, Depends, File, Form, Request, UploadFile
 from fastapi.responses import RedirectResponse
 
-from app.api import limits
+from app.api import _background, limits
 from app.api.ui._page import _get_settings, templates
 from app.api.ui._submission import (
     _build_application,
@@ -207,6 +206,6 @@ async def batches_upload_submit(
     worker._label_lookup = label_lookup
     worker._app_lookup = app_lookup
     worker._refusals = refusals
-    asyncio.create_task(worker.run())
+    _background.spawn(request.app, worker.run(), name=f"batch-worker:{batch_id}")
 
     return RedirectResponse(url=f"/batch/{batch_id}", status_code=303)

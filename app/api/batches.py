@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import asyncio
 import json
 import logging
 from datetime import UTC
@@ -11,7 +10,7 @@ from typing import Any
 from fastapi import APIRouter, Depends, HTTPException, Request
 from sse_starlette.sse import EventSourceResponse
 
-from app.api import limits
+from app.api import _background, limits
 from app.api._sse_bus import SSEBus
 from app.batch.anomaly import AnomalyDetector
 from app.batch.state import InFlightBatch
@@ -101,7 +100,7 @@ async def post_batches(
         anomaly=AnomalyDetector(),
         bus=bus,
     )
-    asyncio.create_task(worker.run())
+    _background.spawn(request.app, worker.run(), name=f"batch-worker:{envelope.batch_id}")
     _logger.info(
         f"batch_accepted batch_id={envelope.batch_id} agent_id={envelope.agent_id} items={len(envelope.items)} lookahead_k={lookahead_k}",
         extra={"batch_id": envelope.batch_id, "reason_code": "ENGINE.OK.NONE"},
