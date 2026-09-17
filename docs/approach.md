@@ -17,6 +17,19 @@ The brief's technical requirements are a single sentence: use whatever languages
 prefer, we want to see what decisions you make. There was no requirements list to implement. So the
 first real decision was how to build one.
 
+**What the brief actually asks for is short, and most of what it says is not an ask.** It asks for
+two things: a source repository carrying all the code, a README with setup and run instructions, and
+brief documentation of approach, tools and assumptions; and a deployed URL where a working prototype
+can be accessed and tested. It also asks that the app handle labels carrying information like the
+one worked example it gives. Everything else is context, and reading it as a specification would
+have been the first mistake available. The seven-element list arrives under the words "For
+reference" and "common elements include", with the brief itself noting the exact requirements vary
+by beverage type — which is why the regulations, and not that list, set the checks. The pointer to
+ttb.gov is an encouragement to read. So is the suggestion to generate test labels, which we
+declined for a reason given later. And the one wish about photographs shot at bad angles and in bad
+light is marked out of scope by the person asking for it, in the same sentence. We treated each of
+those as what it was, and the requirements came from elsewhere.
+
 **We took the requirements from the interviews, not from the field list.** The list of seven label
 elements is the only part of the brief that looks like a specification, and it says nothing about
 speed, batches, error handling, or who uses this. The four people in the transcripts say all of it.
@@ -154,12 +167,14 @@ actually require:
   judgement that has to be defended on its own authority.
 - **A privacy review and a records schedule.** Anything holding applicant material needs both. This
   prototype keeps two things for seven days: an uploaded image, so a result page survives a restart,
-  and a single label's result, so a reviewer can overrule a finding on it — and that second one
-  restates what the application declared, the applicant's name and address included. Seven days is a
-  convenience, not a retention policy, and a real deployment needs a period set by the agency's
-  records schedule rather than by a constant in the code. Our own requirements say the product should
-  keep nothing; it does not meet that, and we left the requirement standing and the failure on the
-  record rather than quietly lowering the bar.
+  and a single label's result, so a reviewer can overrule a finding on it. That second one used to
+  restate what the application declared, the applicant's name and address included; it no longer
+  does. Every value it read and every value the application declared is blanked before the file is
+  written, and what stays is what an override amends — the dispositions, the citations, the reason
+  codes and the trail. Seven days is still a convenience rather than a retention policy, and a real
+  deployment needs a period set by the agency's records schedule rather than by a constant in the
+  code. Our own requirements say the product should keep nothing; two files on disk is not nothing,
+  so we left the requirement standing rather than quietly lowering the bar to what we built.
 
 **The agency's own plumbing.** The IT interview sets three constraints and none is negotiable: no
 integration with TTB's existing systems, outbound traffic blocked at the firewall, and nothing new to
@@ -170,14 +185,29 @@ network call. Nothing new to operate is why a clone and the deployed service are
 application, and why the app holds no state a restart cannot rebuild.
 
 **What it costs to run.** Cost was our last criterion on purpose — it cannot buy back a failure on
-any of the others. Reading a label costs processor time, not money: the default reader has no
-per-call charge. The hosted alternative would run a few hundred dollars a year of inference at TTB's
-volume, computed from published rates rather than measured by us, and that is not why it is off by
-default. It is off because a reviewer must be able to clone this and run it without an account. The
-deployment itself moved from a nine-dollar monthly plan to nothing, inside a free tier whose
-allowance is about twelve and a half hours of request handling a month — ample for a demonstration,
-and not enough to survive a real agency's traffic for a week. Every one of those is a figure a
-reviewer can check rather than a claim that the choice was costless.
+any of the others. Two choices here were free, and each gave up something different.
+
+The default reader is free because it costs processor time rather than money: no per-call charge, no
+account, and it runs where outbound traffic is blocked. What it gave up is accuracy on hard images —
+the display-type and split-box limits named under what we can prove are the price of that choice,
+not incidental defects. The hosted alternative would run a few hundred dollars a year of inference
+at TTB's volume, computed from published rates rather than measured by us, and the money is not why
+it is off: it is off because a reviewer must be able to clone this and run it without an account,
+and because the firewall the brief describes would refuse the call anyway.
+
+The deployment is free because it moved from a nine-dollar monthly plan into a free tier, and what
+that gave up is a brake on the bill. The allowance is 180,000 processor-seconds a month, which at
+the service's four cores is twelve and a half hours of request handling, or roughly 38,000 label
+checks at the reader's measured 1.18-second median. TTB's 150,000 applications a year is about
+12,500 a month, so on volume alone the allowance covers the agency about three times over; what it
+does not cover is a peak-season burst, because each running copy reads one label at a time and
+hundreds filed at once queue rather than fan out. The real exposure is not the meter but the
+absence of a stop: the provider's budgets alert rather than cut off, so what actually bounds the
+bill is the instance cap, the request timeout and a rate limit at the edge. Storage is the one
+line that is not zero — the image exceeds the half-gigabyte grant, at ten cents per gigabyte per
+month — and it is small change rather than nothing.
+
+Every one of those is a figure a reviewer can check rather than a claim that the choice was costless.
 
 **The people who would use it.** Four people in the brief, answered individually rather than in
 aggregate. The agent with 28 years in the job said "you need judgment", so nothing auto-rejects,
@@ -238,7 +268,11 @@ is still the reviewer's own work.
 **Whether the record would answer a producer who contests a rejection.** It would not, and that is
 worth saying because everything above makes it sound as though it would. What survives is short —
 a single label's result keeps for seven days so an override has something to amend, and then it is
-gone. What survives is also unlabelled: the trail attached to each verdict names the rule set that
+gone. What survives is also emptied on purpose: to keep no applicant material on disk, the kept copy
+blanks the value read off the artwork and the value the application declared, so it records that a
+field was rejected without recording what it said. That is the right privacy answer and it makes the
+kept copy useless as evidence — the two goals are in real conflict here, and we chose privacy. What
+survives is unlabelled as well: the trail attached to each verdict names the rule set that
 produced it as "unknown" on every evaluation, and names the reader not at all, so even a kept copy
 could not say which rules judged that label or what read it. The full record is in the result page's
 own source, but the interface offers no save, no print and no download, and the drawer that would
@@ -276,6 +310,23 @@ record-matching work and on an argument about which error costs more, not on thi
 labels. That is the weaker evidence, and we would rather say so than present all three as equally
 settled.
 
+Each of the three breaks differently in each direction, and each would be re-tuned differently.
+Tighten the tolerance and a compliant metric label mismatches on rounding alone; loosen it and an
+authorised container size passes as the size next to it — so re-tuning it is not a judgement call
+but a recomputation from the authorised-sizes table, which the test already does. Raise the one
+label at a time and the slowest five percent degrades the way the measurement showed; it cannot go
+below one, so the only direction is worse, and re-tuning means re-measuring on the core count the
+deployment actually has, because the figure is a property of the processor rather than of the code.
+Raise the brand thresholds and punctuation differences start going to a person, which is work
+without a finding; lower them and a genuinely different brand passes, which is the error this
+product cannot have — and re-tuning them needs the corpus sweep the next paragraph describes.
+
+Three more numbers are set and are not thresholds anybody tuned. The four upload caps are derived,
+and the derivation for each sits beside it in the code, as described above. The seven-day retention
+window is a convenience, named as one, and a real deployment takes its period from the agency's
+records schedule instead. The 1600-pixel long edge the reader downscales to before reading is the
+one of the three that could cost accuracy, and nothing here measures what it costs.
+
 **A larger set of numbers has no recorded reason at all.** The bands that turn a confidence score
 into low, medium or high. The confidence floor each rule demands before returning a verdict. The
 per-field multipliers for how sure the reader is it picked the right text — a note explains why a
@@ -299,11 +350,16 @@ be is never consulted, because that is whatever the client chose to send. An ima
 back later can only be asked for by a restricted set of characters, so no request can name a path
 outside the store. One bad file in a batch is refused by name and every other file still runs —
 ending a 300-label submission because one was a spreadsheet would punish the reviewer for the
-uploader's mistake. What we did not build is any limit on size: nothing caps how large an upload may
-be, how many files a batch may carry, or how many pixels an image may decode to, and a batch is read
-into memory whole. There is no pagination either. On a laptop none of that shows. On a service
-anyone can reach, the first two are how someone brings it down without meaning to, and they are the
-first thing we would close.
+uploader's mistake. Size and count are bounded as well, and every bound is checked before the bytes
+behind it are read: 28 MB in one request, 10 MB for any single image, 100 images in a batch, and a
+refusal for any image whose header declares more than fifty million pixels — the decompression bomb
+that no byte cap catches, since a few kilobytes of PNG can declare a canvas of fifty thousand pixels
+square. Each number is derived rather than picked, and the file that defines them states the
+derivation beside each one: the request cap sits under the host's own body limit, so a refusal comes
+from this service naming the file that was too big rather than from the platform naming nothing.
+What is still unbounded is memory. A batch is read whole before any of it is queued, so a hundred
+files inside the caps are a hundred files held at once, and the results table has no pagination. On
+a laptop that does not show. On a service anyone can reach it is the next thing we would close.
 
 **What a log is allowed to contain.** Logging is an allow-list rather than a filter: a line carries
 only the fields named in advance, anything else attached is dropped without comment, and the fields
@@ -321,8 +377,10 @@ what the real handler emits.
 
 ## Tools, and why each
 
-Plain Python for the service, because the reading and rules libraries live there and the brief's
-priority is a working core rather than a novel stack. A conventional server-rendered interface with
+Plain Python for the service. No other language was weighed, and that is the honest account: the
+reading and rules libraries live in Python, so any other choice would have put a foreign-function
+call under the one component whose accuracy the whole product rests on, and the brief's priority is
+a working core rather than a novel stack. A conventional server-rendered interface with
 a small interactive layer, rather than a full client-side application, because the parts that need
 real interactivity are few — the keyboard path an agent uses to overrule a finding, and the batch
 page that fills in as each result streams back — and requiring a build step on the reviewer's
@@ -331,8 +389,10 @@ answers no question the files do not, and object storage, which needs an account
 outbound call the clone cannot make. A processor-only reader that ships with the code, over a
 design that only calls a hosted model — which cannot run where this product is for — and over
 picking a reader per image at run time, which adds moving parts for an accuracy gain nobody has
-measured. A container as the unit of deployment, so the clone and the deployed
-service are the same thing.
+measured. A container as the unit of deployment, over the cheaper runtimes that are not containers:
+the edge-worker tier we costed runs under WebAssembly and caps processor time at ten milliseconds a
+request, which a reader that takes two seconds cannot use at any price. The container also means the
+clone and the deployed service are the same thing.
 
 ## What we can prove, and what we cannot
 
@@ -412,18 +472,28 @@ from the code — so what bounds the bill is that the service refuses every call
 door, and a refused request is never billed. Those are prerequisites before this ran inside the
 agency, not improvements: a compliance service nobody is watching is one nobody can vouch for.
 
-**What we would do next, in order.** Scan the bulk-upload page so all three screens are covered,
-then run a real accessibility review rather than an automated one; instrument the batch timing, which
-is the one requirement with no measurement at all; then widen the corpus, which is the work that
-makes every figure above more trustworthy.
+**What we would do next, in order.** Run a real accessibility review rather than an automated one,
+which is the half of that requirement a machine cannot do for us; bound the memory a batch holds,
+which is the one way a caller can still make this service fall over; instrument the batch timing,
+which is the one requirement with no measurement at all; then widen the corpus, which is the work
+that makes every figure above more trustworthy.
 
 ## How the work was run
 
-Every fork is recorded where it was decided, with what was rejected and what settled it. That record
-governs nothing on purpose — it says why, and anything meant to bind future work goes into the
-requirements or the rules instead. A decision that was later reversed is marked and left standing
-rather than edited away, so the host reversal above can be read as it happened rather than as it was
-later rationalised.
+Every fork is recorded where it was decided, with what was rejected and what settled it. The record
+is `docs/decisions.md`, one numbered entry per fork, and it is how a line of code traces back to its
+reason: a module that exists because of an argument cites that argument's number in a comment beside
+the code it explains, and a check names the regulation section it enforces in the rule file rather
+than in code. Eighteen modules carry such a citation today, naming thirteen decisions, alongside the
+requirement ids the same comments use — so the trace works where somebody wrote it and there is no
+index that guarantees it everywhere. What is guaranteed is the other direction: a test walks every
+`docs/decisions.md#NNNN` reference in the repository and fails if one names an entry that does not
+exist, so a citation cannot rot into a dead link even when the code around it moves.
+
+That record governs nothing on purpose — it says why, and anything meant to bind future work goes
+into the requirements or the rules instead. A decision that was later reversed is marked and left
+standing rather than edited away, so the host reversal above can be read as it happened rather than
+as it was later rationalised.
 
 Where a convention could be replaced by a check, we replaced it. The README's own claims are tested:
 every document path it names must resolve, and its accuracy section is forbidden from containing a

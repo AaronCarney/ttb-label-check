@@ -80,6 +80,14 @@ matching: does the brand name printed on the artwork say what the application sa
 content the declared one, is the Government Health Warning present and word for word. A simple
 application takes five to ten minutes by eye. In peak season importers file hundreds at once.
 
+The requirements came from the four people in the brief, answered one at a time rather than
+averaged. The agent with 28 years in the job said "you need judgment", so nothing auto-rejects and
+anything the app cannot settle comes back labelled unsettled. The reviewer eight months in said it
+has to be exact, so the warning is compared word for word and a check that cannot be measured is
+visibly switched off rather than silently skipped. The deputy director wanted speed and batches, so
+results stream back as each one finishes. IT said don't do anything crazy, and the answer was to
+build nothing they have to operate.
+
 This app does the matching. You give it an application's declared values and the label images filed
 with it; it reads the label, compares the two, and returns one verdict per element with the rule and
 the regulation behind it. Three outcomes only — **match**, **mismatch**, or **needs review**, which
@@ -87,7 +95,11 @@ the interface labels Pass, Fail and Needs review — and the third is a real ans
 app can see the element but cannot honestly decide it.
 
 It handles one label at a time through a web page, or a batch of them through an upload that streams
-results back as each finishes.
+results back as each finishes. In a batch the first label is checked on its own and the rest run
+behind it, which is the ordering rather than an accident of it: the reviewer gets a real result in
+seconds instead of a progress bar, and starts working while the remainder runs. The batch then paces
+itself against how fast they are actually reading, rather than racing ahead to compute results
+nobody has asked for yet.
 
 ## Getting started
 
@@ -185,9 +197,12 @@ layer underneath it is not.
 
 ### Using a hosted reader instead
 
-There is a second reader that sends label crops to a hosted vision model. It reads harder images
-more accurately and costs money per label. It is off by default and is not needed for anything in
-this README:
+There is a second reader that sends label crops to a hosted vision model. It is expected to read
+harder images more accurately, and that expectation is the vendor's rather than ours — every
+accuracy figure in this README came from a run of the on-machine reader, and the hosted one has
+never been scored against the corpus, though `eval.read_accuracy --reader cloud` would do it. Its
+cost is a few hundred dollars a year of inference at TTB's volume, computed from published rates
+rather than measured here. It is off by default and is not needed for anything in this README:
 
 ```bash
 export VISION_MODE=cloud
@@ -243,10 +258,14 @@ server stops, and nothing the form collects reaches a log. Two things are writte
 disk and swept after seven days. The uploaded label image, so the result page can still show it
 after a restart or on a second worker. And, on a check run against a single label, the result
 itself — because an override has to have something to amend, and a single label is in no batch to
-hold it. That second file carries what the application declared, the applicant name and address
-among them, beside the text read off the label. The PRD's C-2 asks for no retention at all; this
-prototype deliberately does not meet it, and [decision 0018](docs/decisions.md#0018) says why and
-what a real deployment would do instead.
+hold it. That second file is stripped before it is written: the value read off the artwork, the
+value the application declared, each finding's explanation, any model prose and the uploaded file's
+name are blanked, leaving what an override actually amends — the dispositions, the confidences, the
+rule ids, the CFR citations, the reason codes, the evidence boxes and the audit trail. One piece of
+free text survives, a reviewer's own justification for an override, which is the agency's record of
+its decision rather than the applicant's material. The PRD's C-2 asks for no retention at all; two
+files on disk is still not that, and [decision 0018](docs/decisions.md#0018) says why and what a
+real deployment would do instead.
 
 **What a log may contain.** Log lines are an allow-list: only named fields are written, anything
 else attached to a line is dropped, and the fields that could carry applicant material — the
@@ -269,7 +288,18 @@ emits.
 | RapidFuzz | Brand-name similarity scoring | The brand check needs a graded score, not a yes or no, because a dropped apostrophe is not a different product |
 | PyYAML | Loads the rule packs and reference tables | The rules are data a compliance reader should be able to read |
 | uv | Dependency resolution and the lockfile | One locked environment, reproducible from a single binary |
-| pytest | The suite | — |
+| pytest | The suite | The default in this ecosystem, and no alternative was weighed |
+
+Those are conventional picks, and the column above gives the criterion that settled each. The
+choices that had a real alternative are architectural, and each was decided against a named one: a
+server-rendered page with a small interactive island **over a full client-side application**,
+because only two parts need real client state and a build step on the reviewer's machine is a
+barrier to running this at all; a directory of files **over both an embedded database**, which
+answers no question the files do not, **and object storage**, which needs an account, a key and an
+outbound call the clone cannot make; a processor-only reader shipped with the code **over a design
+that only calls a hosted model**, which cannot run where this product is for, **and over picking a
+reader per image at run time**, which adds moving parts for an accuracy gain nobody has measured.
+`docs/approach.md` argues each at length.
 
 The optional hosted reader calls a hosted OpenAI vision model, pinned to a dated snapshot so two
 runs of the same label agree. `.env.example` names the snapshot in force.
@@ -325,6 +355,10 @@ designation like `BOURBON WHISKEY` to `BOURBON`.
 
 ## Assumptions
 
+The brief's technical requirements are a single sentence, and it says nothing about speed, batch
+sizes, error handling, retention or who uses this. Each item below is a gap the brief left and a
+call we made in it, stated as our call rather than as a finding.
+
 - **The application is right and the label is what is being checked.** Where the two disagree, the
   app reports a mismatch on the label; it never assumes the application is the error.
 - **The application names the beverage type**, and that is what selects the rule pack. A label
@@ -335,15 +369,18 @@ designation like `BOURBON WHISKEY` to `BOURBON`.
 - **The warning text is fixed.** 27 CFR 16.21's wording is pinned as a committed asset and compared
   against by hash, so a change to the regulation is a deliberate edit and not a silent drift.
 - **What is kept is kept for seven days and no longer.** Application data lives only as long as the
-  request that carried it, except on a single-label check, where the result — which restates the
-  declared values beside the readings — is written to disk so a reviewer can overrule a finding on
-  it. The uploaded label image is written the same way, so the result page survives a restart. Both
-  are a demo's bargain rather than a production one: the labels this ships are public TTB COLA
+  request that carried it. On a single-label check the result is written to disk so a reviewer can
+  overrule a finding on it, stripped of every value it read and every value the application
+  declared. The uploaded label image is written the same way, so the result page survives a restart.
+  Both are a demo's bargain rather than a production one: the labels this ships are public TTB COLA
   Registry images, and a real deployment would hold an applicant's material inside the agency's
   boundary, encrypted, and drop it the moment the result had been read
   ([decision 0018](docs/decisions.md#0018)).
-- **No integration with COLA or any other TTB system**, which was an explicit constraint from the
-  systems administrator in the brief.
+- **The agency's own plumbing sets three constraints, and none was treated as negotiable.** No
+  integration with COLA or any other TTB system; outbound traffic blocked at the firewall, which is
+  why the default reader ships its models rather than calling anything; and nothing new for IT to
+  operate, which is why there is no database, no queue and no service to run beside the app. All
+  three came from the systems administrator in the brief.
 
 ## Trade-offs
 
@@ -351,11 +388,18 @@ designation like `BOURBON WHISKEY` to `BOURBON`.
   labels and not others, it says on which it could not and sends that point to a reviewer. Where it
   could not be made correct at all, it is switched off in the rule pack rather than returning a
   verdict it has not earned, and it is named under Limitations. A wrong verdict on a real label is
-  the one failure this product cannot have.
+  the one failure this product cannot have, and the two kinds of wrong are not equal. A false
+  rejection lands on the applicant, who goes back round a filing process that takes weeks, and it is
+  the error that would end a pilot. A false pass lands on the agent, who rules on every finding
+  anyway and is the last check either way. So the design leans toward sending a doubtful point to a
+  person, and the cost of that lean lands on the reviewer, as the extra items under Limitations.
 - **Determinism over capability.** Rules decide, models only read. The cost is that anything needing
   judgement beyond a scored comparison goes to a person rather than being resolved automatically.
-- **Local CPU reading by default, accuracy second.** The hosted reader is better on hard images. It
-  is not the default, because a reviewer should be able to clone and run this with no account.
+- **Local CPU reading by default, accuracy second.** The hosted reader is expected to be better on
+  hard images, on the vendor's word rather than on a run of ours. It is not the default, because a
+  reviewer should be able to clone and run this with no account, and the firewall the brief
+  describes would block the call anyway. What that costs is the display-type recognition limit named
+  under Reading accuracy.
 - **State in memory, except what a result page and an override need.** A server restart loses an
   in-flight batch and the reviewer re-uploads. Two things are written down: the label image, because
   a result page that cannot show the label it is describing is not a result page, and a single
@@ -368,17 +412,22 @@ designation like `BOURBON WHISKEY` to `BOURBON`.
 
 ## What the brief asked for
 
-The seven label elements the brief lists, and where each is answered:
+The seven label elements the brief lists, and where each is answered. Which regulation sets a check
+depends on the beverage: wine comes from 27 CFR part 4, distilled spirits from part 5, malt
+beverages from part 7, the health warning from part 16, and an import's origin marking from 19 CFR
+part 134. The sections below are the wine pack's; the spirits and malt packs carry the parallel
+sections of parts 5 and 7, and every rule states its own citation, which is why `rules/` can be read
+on its own.
 
-| Element | Status | Where |
-|---|---|---|
-| Brand name | Checked — scored against the application's brand, fanciful and trade names | `rules/wine/wine.yaml`, `rules/spirits/spirits.yaml`, `rules/malt/malt.yaml` |
-| Class/type designation | Checked — matched against the application and against the designation tables; for spirits, also against the standards of identity | `rules/tables/wine_designations.yaml`, `rules/tables/malt_designations.yaml`, `rules/spirits-deep.yaml` |
-| Alcohol content | Checked — format, and the figure against the application. Required-or-not follows the beverage class | the three class packs |
-| Net contents | Checked — compared as a quantity, with units converted before comparing | `rules/tables/volume_units.yaml` |
-| Name and address | Checked — applicant or declared trade name, plus city and state | the three class packs |
-| Country of origin | Checked for imports, against the application's English country name. The other forms customs accepts are a named limitation | the three class packs |
-| Government Health Warning | Checked — present, word for word against the pinned 27 CFR 16.21 text, heading in capitals, heading boldness measured where it can be. The typography rules are switched off, because a photograph does not carry what they measure | `rules/common/health_warning.yaml`, `assets/warnings/govt_warning_16_21.txt` |
+| Element | Status | Regulation | Where the check lives |
+|---|---|---|---|
+| Brand name | Checked — scored against the application's brand, fanciful and trade names | §4.32(a)(1), §4.33 | `rules/wine/wine.yaml`, `rules/spirits/spirits.yaml`, `rules/malt/malt.yaml` |
+| Class/type designation | Checked — matched against the application and against the designation tables; for spirits, also against the standards of identity | §4.32(a)(2), §4.34; spirits Subpart I | `rules/tables/wine_designations.yaml`, `rules/tables/malt_designations.yaml`, `rules/spirits-deep.yaml` |
+| Alcohol content | Checked — format, and the figure against the application. Required-or-not follows the beverage class | §4.32(b)(1), §4.36 | the three class packs |
+| Net contents | Checked — compared as a quantity, with units converted before comparing | §4.32(b)(2), §4.37 | `rules/tables/volume_units.yaml` |
+| Name and address | Checked — applicant or declared trade name, plus city and state | §4.32(a)(3), §4.35 | the three class packs |
+| Country of origin | Checked for imports, against the application's English country name. The other forms customs accepts are a named limitation | §4.35(e), 19 CFR §134.45 | the three class packs |
+| Government Health Warning | Checked — present, word for word against the pinned text, heading in capitals, heading boldness measured where it can be. The typography rules are switched off, because a photograph does not carry what they measure | §16.21; typography §16.22 | `rules/common/health_warning.yaml`, `assets/warnings/govt_warning_16_21.txt` |
 
 Both deliverables:
 
@@ -399,9 +448,10 @@ Python. `ARCHITECTURE.md` maps every directory in one table, and `app/services/e
 eight steps one check runs through, in order.
 
 **To judge whether it works,** `tests/fixtures/labels/` is the answer key: 30 real approved labels
-with a transcription of what each one prints and the verdict each check should return.
-`uv run python -m eval.read_accuracy` scores the reader against it and reproduces every figure in
-Reading accuracy above.
+with a transcription of what each one prints and the verdict each check should return. The brief
+suggested generating test labels; we used real ones instead, because a generated label only proves
+the reader can read what we drew. `uv run python -m eval.read_accuracy` scores the reader against
+it and reproduces every figure in Reading accuracy above.
 
 | Question | Document |
 |---|---|
@@ -468,3 +518,6 @@ check listed here is switched off in the rule pack rather than reporting a verdi
   like the typography above — legibility and conspicuousness are judgements rather than
   measurements, and type height needs the label's physical scale, which a photograph does not carry
   — but they were absent rather than decided, and this entry is where that is put on the record.
+  For an agent the consequence is the same as for the typography above, and it is silent: a label
+  can come back with every check passed and none of these five looked at, so the agent's own eye is
+  the only thing standing between a badly set label and an approval.
