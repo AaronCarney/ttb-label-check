@@ -4,7 +4,9 @@ from __future__ import annotations
 import json
 
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
+from fastapi.responses import JSONResponse
 
+from app.api import limits
 from app.config import Settings
 from app.deps import build_evaluator
 from app.schemas.application import Application
@@ -43,6 +45,34 @@ async def post_labels(
         raise HTTPException(status_code=400, detail=f"rejected_input: {e}")
 
     label_bytes = await label.read()
+    filename = label.filename or "the label image"
+    if len(label_bytes) > limits.MAX_UPLOAD_BYTES:
+        return JSONResponse(
+            status_code=413,
+            content=limits.rejected_input(
+                limits.UPLOAD_TOO_LARGE,
+                limits.upload_too_large_message(
+                    filename, len(label_bytes), limits.MAX_UPLOAD_BYTES
+                ),
+                filename=filename,
+                size_bytes=len(label_bytes),
+                limit_bytes=limits.MAX_UPLOAD_BYTES,
+            ).model_dump(),
+        )
+    bomb = limits.bomb_refusal(filename, label_bytes)
+    if bomb is not None:
+        message, pixels = bomb
+        return JSONResponse(
+            status_code=413,
+            content=limits.rejected_input(
+                limits.IMAGE_TOO_MANY_PIXELS,
+                message,
+                filename=filename,
+                pixels=pixels,
+                limit_pixels=limits.MAX_IMAGE_PIXELS,
+            ).model_dump(),
+        )
+
     content_type = _detect_content_type(label_bytes)
     if content_type is None:
         raise HTTPException(status_code=400, detail="rejected_input: unsupported MIME (only PNG/JPEG)")

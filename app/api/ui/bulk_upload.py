@@ -21,6 +21,7 @@ from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, File, Form, Request, UploadFile
 from fastapi.responses import RedirectResponse
 
+from app.api import limits
 from app.api.ui._page import _get_settings, templates
 from app.api.ui._submission import (
     _build_application,
@@ -66,14 +67,55 @@ async def batches_upload_submit(
             status_code=400,
         )
 
+    # The file count is checked before a single file is read, because reading
+    # them is the cost the cap exists to bound.
+    if len(labels) > limits.MAX_BATCH_FILES:
+        return templates.TemplateResponse(
+            request=request,
+            name="batches_upload.html",
+            context={
+                "dev_mode": settings.dev_mode,
+                "upload_error": limits.too_many_files_message(
+                    len(labels), limits.MAX_BATCH_FILES
+                ),
+            },
+            status_code=413,
+        )
+
     # Read every file up front. A file that is not a PNG or JPEG does not end
     # the submission: it is queued like the rest and refused by name as its own
     # result, so the reviewer is told which file was not read and every other
     # file still has an answer (requirement R13; `docs/decisions.md#0020`).
+    #
+    # An oversized file does end it, and deliberately: an unreadable file is a
+    # fact about that one file, but a file over the cap is a request this
+    # service declined to hold in memory, and queueing the rest would mean
+    # holding them anyway.
     raw: list[tuple[str, bytes, str | None]] = []
     for upload in labels:
         body = await upload.read()
-        raw.append((upload.filename or f"label-{len(raw)}", body, _detect_image_mime(body)))
+        filename = upload.filename or f"label-{len(raw)}"
+        if len(body) > limits.MAX_UPLOAD_BYTES:
+            return templates.TemplateResponse(
+                request=request,
+                name="batches_upload.html",
+                context={
+                    "dev_mode": settings.dev_mode,
+                    "upload_error": limits.upload_too_large_message(
+                        filename, len(body), limits.MAX_UPLOAD_BYTES
+                    ),
+                },
+                status_code=413,
+            )
+        bomb = limits.bomb_refusal(filename, body)
+        if bomb is not None:
+            return templates.TemplateResponse(
+                request=request,
+                name="batches_upload.html",
+                context={"dev_mode": settings.dev_mode, "upload_error": bomb[0]},
+                status_code=413,
+            )
+        raw.append((filename, body, _detect_image_mime(body)))
 
     if all(mime is None for _, _, mime in raw):
         # Nothing to check and so no batch to show a refusal in. This is the

@@ -10,6 +10,7 @@ from __future__ import annotations
 from fastapi import APIRouter, Depends, File, Form, Request, UploadFile
 from fastapi.responses import HTMLResponse
 
+from app.api import limits
 from app.api.ui._page import _get_settings
 from app.api.ui._result_page import refuse, render_single_result
 from app.api.ui._submission import _detect_image_mime, _get_upload_evaluator
@@ -67,6 +68,28 @@ async def single_label_upload(
     }
 
     image_bytes = await label.read()
+    filename = label.filename or "that image"
+    if len(image_bytes) > limits.MAX_UPLOAD_BYTES:
+        return refuse(
+            request=request,
+            settings=settings,
+            message=limits.upload_too_large_message(
+                filename, len(image_bytes), limits.MAX_UPLOAD_BYTES
+            ),
+            posted=posted,
+            status_code=413,
+        )
+
+    bomb = limits.bomb_refusal(filename, image_bytes)
+    if bomb is not None:
+        return refuse(
+            request=request,
+            settings=settings,
+            message=bomb[0],
+            posted=posted,
+            status_code=413,
+        )
+
     mime = _detect_image_mime(image_bytes)
     if mime is None:
         return refuse(

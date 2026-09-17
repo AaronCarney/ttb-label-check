@@ -15,6 +15,7 @@ from app.api._sse_bus import SSEBus
 from app.batch.anomaly import AnomalyDetector
 from app.batch.state import InFlightBatch
 from app.batch.worker import BatchWorker
+from app.api import limits
 from app.config import Settings
 from app.schemas.batch import BatchItem, ItemState
 from app.schemas.wire.batch import BatchEnvelope
@@ -64,6 +65,18 @@ async def post_batches(
     settings: Settings = Depends(_get_settings),
 ) -> dict[str, str]:
     """Spawn a worker and return the batch_id."""
+    if len(envelope.items) > limits.MAX_BATCH_FILES:
+        # The same fairness limit the browser's bulk upload enforces. This route
+        # takes references rather than files, so no byte cap applies to it, and
+        # the item count is the only thing bounding the work one request asks
+        # for.
+        raise HTTPException(
+            status_code=413,
+            detail=limits.too_many_files_message(
+                len(envelope.items), limits.MAX_BATCH_FILES
+            ),
+        )
+
     if envelope.batch_id in request.app.state.batches:
         _logger.warning(
             f"batch_submit_conflict batch_id={envelope.batch_id} agent_id={envelope.agent_id} items={len(envelope.items)}",

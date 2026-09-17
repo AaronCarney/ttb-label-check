@@ -20,6 +20,7 @@ from pathlib import Path
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
+from app.api.body_limit import BodySizeLimitMiddleware
 from app.api.healthz import router as healthz_router
 from app.api.ui import router as ui_router
 from app.config import Settings
@@ -59,6 +60,11 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         version=settings.app_version,
         lifespan=_lifespan,
     )
+    # Before any route. The per-file caps in the upload routes can only run once
+    # multipart parsing has already pulled the whole body into memory, so
+    # something has to bound the body first, for every route including the ones
+    # written after this line.
+    application.add_middleware(BodySizeLimitMiddleware)
     application.include_router(healthz_router)
     application.include_router(ui_router)
     _static_dir = Path(__file__).resolve().parent / "ui" / "static"

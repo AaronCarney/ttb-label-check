@@ -230,6 +230,22 @@ codes:
     description: "Uploaded file is not a PNG or JPEG image, so it was not read."
     cfr_anchors: []
     severity: reject
+  ENGINE.INPUT.REQUEST_TOO_LARGE:
+    description: "The upload is larger than this service reads in one request, so no part of it was read."
+    cfr_anchors: []
+    severity: reject
+  ENGINE.INPUT.UPLOAD_TOO_LARGE:
+    description: "One uploaded image is larger than the per-image limit, so it was not read."
+    cfr_anchors: []
+    severity: reject
+  ENGINE.INPUT.TOO_MANY_FILES:
+    description: "The batch carries more files than this service checks in one upload, so none were read."
+    cfr_anchors: []
+    severity: reject
+  ENGINE.INPUT.IMAGE_TOO_MANY_PIXELS:
+    description: "The file is small but declares an image too large to open, so it was refused rather than decoded."
+    cfr_anchors: []
+    severity: reject
   ENGINE.RULE.CONFLICT:
     description: "Two or more rules emit conflicting dispositions for the same field."
     cfr_anchors: []
