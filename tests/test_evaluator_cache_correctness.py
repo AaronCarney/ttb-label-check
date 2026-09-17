@@ -194,3 +194,90 @@ async def test_the_real_rule_pack_is_named_in_the_audit_trail():
     )
     assert envelope.audit_trail.rule_set_version != "unknown"
     assert envelope.audit_trail.rule_set_version.startswith("0.")
+
+
+# ---------------------------------------------------------------------------
+# A replayed answer must describe the request it is answering
+# ---------------------------------------------------------------------------
+#
+# The cache key is a fingerprint of the application and the image bytes. It does
+# not carry the label's *name*, and deliberately so — renaming a file does not
+# change what is printed on the label. But the envelope reports that name back
+# as `label_ref`, and a batch can legitimately carry one image under two names.
+#
+# These were found by submitting the same bytes twice under different names
+# against a stable application_ref, which is exactly what the batch path does:
+# `app/batch/worker.py` takes `application_id` from the submitted item rather
+# than minting one, so a batch is where the cache actually hits today.
+
+
+def _evaluator_with_cache() -> tuple[Evaluator, _SlowVision]:
+    vision = _SlowVision(delay_s=0.0)
+    return (
+        Evaluator(
+            vision=vision,
+            rules=FakeRuleEngine(results=()),
+            settings=Settings(),
+            cache=SessionCache(maxsize=8),
+        ),
+        vision,
+    )
+
+
+@pytest.mark.asyncio
+async def test_a_cache_hit_answers_under_the_label_it_was_asked_about():
+    """Two names, one image. The reviewer asked about the second and must be
+    told about the second — a results page headed with another label's filename
+    is a wrong answer, whatever the verdict underneath it says."""
+    evaluator, vision = _evaluator_with_cache()
+
+    await evaluator.evaluate(
+        application=Application(application_id="A", evaluation_id="EV-001"),
+        label=_label(label_id="first-name.jpg"),
+    )
+    second = await evaluator.evaluate(
+        application=Application(application_id="A", evaluation_id="EV-002"),
+        label=_label(label_id="second-name.jpg"),
+    )
+
+    assert vision.calls == 1, "precondition: the second call was served from the cache"
+    assert second.label_ref == "second-name.jpg"
+
+
+@pytest.mark.asyncio
+async def test_a_cache_hit_s_output_hash_verifies_against_the_envelope_returned():
+    """`output_hash` covers `evaluation_id` and `label_ref`, and a replay
+    rewrites both. Left alone it is the *first* call's hash, so the one check a
+    verifier can run against a warm-path envelope fails on an envelope nobody
+    tampered with — in a product whose claim is a defensible audit trail."""
+    import hashlib
+
+    from app.services.audit import _canonical_json
+
+    evaluator, vision = _evaluator_with_cache()
+
+    await evaluator.evaluate(
+        application=Application(application_id="A", evaluation_id="EV-001"),
+        label=_label(label_id="first-name.jpg"),
+    )
+    second = await evaluator.evaluate(
+        application=Application(application_id="A", evaluation_id="EV-002"),
+        label=_label(label_id="second-name.jpg"),
+    )
+    assert vision.calls == 1, "precondition: the second call was served from the cache"
+
+    # The shape `app/services/evaluator.py` hashes on the cold path. The
+    # envelope's `fields` are the same objects that went into it
+    # (`build_success_envelope` passes them through), so this recomputation is
+    # the verification a third party would run, not an approximation of it.
+    recomputed = hashlib.sha256(
+        _canonical_json(
+            {
+                "evaluation_id": second.evaluation_id,
+                "label_ref": second.label_ref,
+                "disposition": second.disposition,
+                "fields": [f.model_dump() for f in second.fields],
+            }
+        )
+    ).hexdigest()
+    assert second.audit_trail.output_hash == recomputed

@@ -25,6 +25,7 @@ from app.schemas.extracted import FieldObservation
 from app.schemas.label import Label
 from app.schemas.rejection import Outcome, ValidationResult
 from app.schemas.wire.disposition import DispositionEnvelope
+from app.services.audit import _output_hash
 from app.services.cache import SessionCache
 from app.vision.base import VisionExtractor
 from app.vision.quality import assess as assess_quality
@@ -108,7 +109,7 @@ class Evaluator:
             ).hexdigest()
             cached = self._cache.get(cache_key)
             if cached is not None:
-                return self._replay(cached, application, started_at, t_hit)
+                return self._replay(cached, application, label, started_at, t_hit)
 
         # `_sla_seconds` is the per-instance override tests set to make the
         # guard fire in milliseconds; the setting is what ships.
@@ -129,6 +130,7 @@ class Evaluator:
         self,
         cached: DispositionEnvelope,
         application: Application,
+        label: Label,
         started_at: datetime,
         t_hit: float,
     ) -> DispositionEnvelope:
@@ -146,16 +148,43 @@ class Evaluator:
         so a repeat submission reported time it never spent, and four
         byte-identical latencies measured against production on 2026-09-16
         were four copies of one measurement.
+
+        `label_ref` is this request's label for the same reason. The cache key
+        is a fingerprint of the application and the image bytes and carries no
+        filename, which is right — renaming a file does not change what is
+        printed on the label — but a batch may legitimately carry one image
+        under two names, and a results page headed with the other one is a
+        wrong answer whatever the verdict beneath it says.
+
+        `output_hash` is recomputed because it covers `evaluation_id` and
+        `label_ref`, both of which this method rewrites. Carried over
+        unchanged it is the first call's hash, so the one check a third party
+        can run against a warm-path envelope fails on an envelope nobody
+        tampered with. `input_hash` is NOT recomputed and must not be: it
+        fingerprints the application minus `evaluation_id` plus the image
+        bytes, which is what the cache key matched on, so the stored one is
+        already this request's.
         """
         elapsed_ms = int((time.monotonic() - t_hit) * 1000)
         # Keeping evaluation_id consistent means patching the nested
         # audit_trail too — a top-level model_copy alone leaves
         # audit_trail.evaluation_id pointing at the cold-path UUID.
+        # The same shape `_evaluate_inner` hashes on the cold path. `fields` are
+        # the envelope's own — `build_success_envelope` passes the field
+        # findings straight through — so this reproduces the cold-path hash
+        # exactly rather than approximating it.
+        envelope_for_hash = {
+            "evaluation_id": application.evaluation_id,
+            "label_ref": label.label_id,
+            "disposition": cached.disposition,
+            "fields": [f.model_dump() for f in cached.fields],
+        }
         new_audit = cached.audit_trail.model_copy(
             update={
                 "evaluation_id": application.evaluation_id,
                 "started_at": started_at,
                 "completed_at": datetime.now(UTC),
+                "output_hash": _output_hash(envelope_for_hash),
             }
         )
         new_metrics = cached.metrics.model_copy(
@@ -171,6 +200,7 @@ class Evaluator:
         return cached.model_copy(
             update={
                 "evaluation_id": application.evaluation_id,
+                "label_ref": label.label_id,
                 "audit_trail": new_audit,
                 "metrics": new_metrics,
             }
