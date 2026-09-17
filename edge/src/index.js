@@ -1,18 +1,136 @@
-// Proxies ttb.aaroncarney.me to the Cloud Run service.
+// The front door: ttb.aaroncarney.me, forwarding to the Cloud Run service.
 //
-// The origin is addressed by its own hostname on purpose. Cloud Run's front end
-// routes on the Host header, so forwarding this request with its own Host
-// produces Google's 404 rather than the app. Building a Request against the
-// origin URL sets the Host the origin expects, and carries the method, headers,
-// and body through unchanged — which matters here, because a label check is a
-// multipart upload and a batch reads a server-sent event stream.
+// Two jobs beyond forwarding, both argued in docs/decisions.md.
+//
+// It signs every forwarded request (0028). The service runs with the invoker
+// check on and grants roles/run.invoker to this Worker's service account and to
+// nobody else, so the run.app URL answers everyone else with 403 — and a request
+// IAM denies is never billed, which is what actually bounds the meter. The
+// Worker holds a key for that account as a secret and mints a Google ID token
+// from it.
+//
+// It rate-limits what does get through (0029). A Free zone's own WAF rule cannot
+// match a hostname, so it cannot be scoped to this project alone; the Worker can,
+// because it runs for this hostname only.
+
+const TOKEN_ENDPOINT = "https://oauth2.googleapis.com/token";
+const JWT_BEARER_GRANT = "urn:ietf:params:oauth:grant-type:jwt-bearer";
+
+// Refresh this far before the hour is out, so a request never races an expiry.
+const REFRESH_MARGIN_SECONDS = 300;
+
+// Cached across requests in the same isolate. An isolate that has never minted
+// one pays the exchange on its first request; the rest read this.
+let cachedToken = null; // { token: string, expiresAt: number (epoch seconds) }
+
+function base64Url(input) {
+  const bytes =
+    typeof input === "string" ? new TextEncoder().encode(input) : new Uint8Array(input);
+  let binary = "";
+  for (const byte of bytes) binary += String.fromCharCode(byte);
+  return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+
+// The key arrives as PEM text inside the service account's JSON. WebCrypto wants
+// the DER bytes that PEM wraps.
+function pemToPkcs8(pem) {
+  const body = pem
+    .replace("-----BEGIN PRIVATE KEY-----", "")
+    .replace("-----END PRIVATE KEY-----", "")
+    .replace(/\s+/g, "");
+  const raw = atob(body);
+  const bytes = new Uint8Array(raw.length);
+  for (let i = 0; i < raw.length; i += 1) bytes[i] = raw.charCodeAt(i);
+  return bytes.buffer;
+}
+
+// The audience is the run.app URL, never ttb.aaroncarney.me: Google does not
+// support a custom domain as an `aud` value (0028).
+async function mintIdToken(credentials, audience) {
+  const now = Math.floor(Date.now() / 1000);
+  const header = base64Url(JSON.stringify({ alg: "RS256", typ: "JWT" }));
+  const claims = base64Url(
+    JSON.stringify({
+      iss: credentials.client_email,
+      sub: credentials.client_email,
+      aud: TOKEN_ENDPOINT,
+      iat: now,
+      exp: now + 3600,
+      target_audience: audience,
+    }),
+  );
+  const signingInput = `${header}.${claims}`;
+
+  const key = await crypto.subtle.importKey(
+    "pkcs8",
+    pemToPkcs8(credentials.private_key),
+    { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" },
+    false,
+    ["sign"],
+  );
+  const signature = await crypto.subtle.sign(
+    "RSASSA-PKCS1-v1_5",
+    key,
+    new TextEncoder().encode(signingInput),
+  );
+
+  const response = await fetch(TOKEN_ENDPOINT, {
+    method: "POST",
+    headers: { "content-type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({
+      grant_type: JWT_BEARER_GRANT,
+      assertion: `${signingInput}.${base64Url(signature)}`,
+    }),
+  });
+  if (!response.ok) {
+    throw new Error(`token exchange failed: ${response.status} ${await response.text()}`);
+  }
+
+  const { id_token: idToken } = await response.json();
+  if (!idToken) throw new Error("token exchange returned no id_token");
+
+  // Trust the token's own expiry rather than assuming the hour we asked for.
+  const payload = JSON.parse(atob(idToken.split(".")[1].replace(/-/g, "+").replace(/_/g, "/")));
+  return { token: idToken, expiresAt: payload.exp };
+}
+
+async function invokerToken(env) {
+  const now = Math.floor(Date.now() / 1000);
+  if (cachedToken && cachedToken.expiresAt - REFRESH_MARGIN_SECONDS > now) {
+    return cachedToken.token;
+  }
+  cachedToken = await mintIdToken(JSON.parse(env.INVOKER_KEY), env.ORIGIN);
+  return cachedToken.token;
+}
+
 export default {
   async fetch(request, env) {
+    // One key for the whole hostname, not one per client address. What is being
+    // bounded is the bill, and a per-address limit multiplies by the number of
+    // addresses. The cost is that a flood can crowd out a reviewer here — which
+    // is the lesser failure, because it spends nothing, and because the invoker
+    // check is what stands between a flood and the meter (0028).
+    if (env.PROXY_RATE_LIMIT) {
+      const { success } = await env.PROXY_RATE_LIMIT.limit({ key: "ttb.aaroncarney.me" });
+      if (!success) {
+        return new Response("Too many requests. Try again shortly.\n", {
+          status: 429,
+          headers: { "retry-after": "60", "content-type": "text/plain; charset=utf-8" },
+        });
+      }
+    }
+
     const url = new URL(request.url);
     const origin = new URL(env.ORIGIN);
     url.protocol = origin.protocol;
     url.hostname = origin.hostname;
     url.port = origin.port;
-    return fetch(new Request(url, request));
+
+    // Built against the origin URL so the Host header is the one Cloud Run routes
+    // on; method, headers and body carry through, which a multipart label upload
+    // and a batch's event stream both need.
+    const forwarded = new Request(url, request);
+    forwarded.headers.set("authorization", `Bearer ${await invokerToken(env)}`);
+    return fetch(forwarded);
   },
 };
