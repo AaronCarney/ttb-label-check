@@ -4,7 +4,6 @@ exceptions. Output is a tuple of ValidationResult, sorted by rule_id.
 """
 from __future__ import annotations
 
-import asyncio
 import importlib
 import inspect
 import pkgutil

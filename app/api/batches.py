@@ -2,20 +2,19 @@
 from __future__ import annotations
 
 import asyncio
-import logging
-import uuid
-from typing import Any
-
 import json
+import logging
+from datetime import UTC
+from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 from sse_starlette.sse import EventSourceResponse
 
+from app.api import limits
 from app.api._sse_bus import SSEBus
 from app.batch.anomaly import AnomalyDetector
 from app.batch.state import InFlightBatch
 from app.batch.worker import BatchWorker
-from app.api import limits
 from app.config import Settings
 from app.schemas.batch import BatchItem, ItemState
 from app.schemas.wire.batch import BatchEnvelope
@@ -32,9 +31,9 @@ def _get_settings() -> Settings:
 
 
 def _build_in_flight_from_envelope(env: BatchEnvelope, *, lookahead_k: int) -> InFlightBatch:
-    from datetime import datetime, timezone
+    from datetime import datetime
 
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     items = tuple(
         BatchItem(
             label_id=ref.label_ref,

@@ -6,7 +6,6 @@ from fastapi.testclient import TestClient
 
 from app.deps import reset_vision_extractor
 from app.main import app
-from tests._fakes.rules import FakeRuleEngine
 from tests._fakes.vision import FakeVisionExtractor
 
 

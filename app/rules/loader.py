@@ -42,9 +42,9 @@ from __future__ import annotations
 
 import hashlib
 import re
+from collections.abc import Iterable
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Iterable
 
 import yaml
 from pydantic import ValidationError
@@ -57,7 +57,6 @@ from app.schemas.rules import (
     RuleDefinition,
     RuleSet,
 )
-
 
 _REASON_CODE_RE = re.compile(r"^[A-Z][A-Z0-9_]*(?:\.[A-Z][A-Z0-9_]*){2,3}$")
 _SEMVER_RE = re.compile(r"^\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?$")
@@ -291,7 +290,6 @@ class YamlRuleLoader:
 
 
 def _cli_entry() -> int:
-    import sys
     from app.rules.__main__ import main
     return main()
 

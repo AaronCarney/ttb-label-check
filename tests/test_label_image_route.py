@@ -22,8 +22,8 @@ import pytest
 from fastapi.testclient import TestClient
 from PIL import Image
 
-from app.api.ui.images import UploadImageStore, _get_image_store
 from app.api.ui import _get_upload_evaluator
+from app.api.ui.images import UploadImageStore, _get_image_store
 from app.main import create_app
 from tests._fakes.evaluator import FakeEvaluator
 from tests.conftest import _stub_disposition_envelope

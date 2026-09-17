@@ -20,7 +20,7 @@ def main() -> int:
     for mod in pkgutil.iter_modules(pkg.__path__):
         importlib.import_module(f"app.rules._validators.{mod.name}")
 
-    from app.rules.loader import RuleLoaderError, YamlRuleLoader  # noqa: E402
+    from app.rules.loader import RuleLoaderError, YamlRuleLoader
 
     try:
         rs = YamlRuleLoader().load(Path(sys.argv[1]))

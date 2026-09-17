@@ -49,7 +49,7 @@ class QualityReport(BaseModel):
 def _decode_grayscale(image_bytes: bytes) -> np.ndarray | None:
     try:
         img = Image.open(io.BytesIO(image_bytes)).convert("L")
-    except (UnidentifiedImageError, OSError, Exception):  # noqa: BLE001
+    except (UnidentifiedImageError, OSError, Exception):
         return None
     return np.array(img)
 
@@ -72,7 +72,7 @@ def _extract_dpi(image_bytes: bytes, dimensions: Dimensions | None) -> int | Non
     XResolution/YResolution → applicant Dimensions.dpi → None."""
     try:
         img = Image.open(io.BytesIO(image_bytes))
-    except (UnidentifiedImageError, OSError, Exception):  # noqa: BLE001
+    except (UnidentifiedImageError, OSError, Exception):
         if dimensions is not None and dimensions.dpi is not None:
             return dimensions.dpi
         return None

@@ -25,7 +25,6 @@ from app.rules import build_rule_engine
 from app.schemas.expected import BeverageClass
 from app.schemas.rejection import Outcome, Severity
 from app.services.application_mapper import expected_values_from
-
 from tests.rules.fixtures import make_obs
 from tests.rules.manifest_labels import (
     FIELD_CHECKS,

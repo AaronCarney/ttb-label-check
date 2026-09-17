@@ -13,7 +13,7 @@ against expected.parameters and observed_value)."""
 from __future__ import annotations
 
 from app.rules._validators import VALIDATOR_REGISTRY
-from app.rules._validators.presence_check import presence_check, conditional_presence  # noqa: F401
+from app.rules._validators.presence_check import conditional_presence, presence_check
 from app.schemas.rejection import Outcome, Severity
 from app.services.disposition import rule_disposition
 from tests.rules.fixtures import (

@@ -11,7 +11,7 @@ from app.rules._validators import VALIDATOR_REGISTRY, register
 from app.rules.yaml_engine import YamlRuleEngine
 from app.schemas.expected import BeverageClass
 from app.schemas.rejection import Outcome
-from app.schemas.rules import MatchPolicy, RuleDefinition, RuleSet
+from app.schemas.rules import RuleSet
 from tests.rules.fixtures import make_context, make_expected, make_obs, make_rule
 
 

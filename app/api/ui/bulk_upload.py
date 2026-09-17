@@ -16,7 +16,7 @@ from __future__ import annotations
 
 import asyncio
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from fastapi import APIRouter, Depends, File, Form, Request, UploadFile
 from fastapi.responses import RedirectResponse
@@ -135,7 +135,7 @@ async def batches_upload_submit(
         )
 
     batch_id = f"B-{uuid.uuid4().hex[:10]}"
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     items: list[BatchItem] = []
     label_lookup: dict[str, LabelModel] = {}
     app_lookup: dict[str, Application] = {}

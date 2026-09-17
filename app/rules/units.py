@@ -22,10 +22,11 @@ each spell it as they find it: "FL. OZ.", "FL OZ" and "fl.oz" are one entry.
 from __future__ import annotations
 
 import re
+from collections.abc import Iterable, Mapping
 from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
-from typing import Any, Iterable, Mapping
+from typing import Any
 
 import yaml
 

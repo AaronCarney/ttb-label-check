@@ -13,7 +13,6 @@ from typing import Literal
 from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-
 _TRUTHY = frozenset({"1", "true", "yes", "on"})
 
 
@@ -85,7 +84,7 @@ class Settings(BaseSettings):
         return bool(value)
 
     @classmethod
-    def from_env(cls) -> "Settings":
+    def from_env(cls) -> Settings:
         """Convenience factory; equivalent to ``cls()``."""
         return cls()
 

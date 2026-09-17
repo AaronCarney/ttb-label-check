@@ -8,7 +8,7 @@ from fastapi.testclient import TestClient
 
 def test_app_module_exposes_app_object() -> None:
     os.environ.setdefault("OPENAI_API_KEY", "sk-test")
-    from app.main import app  # noqa: F401
+    from app.main import app
 
     assert app is not None
 

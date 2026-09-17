@@ -37,9 +37,9 @@ from __future__ import annotations
 
 import re
 import subprocess
+from collections.abc import Iterable
 from pathlib import Path
 from types import SimpleNamespace
-from typing import Iterable
 
 import yaml
 

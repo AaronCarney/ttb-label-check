@@ -74,14 +74,14 @@ def measure_heading_bold(
     """
     try:
         full = Image.open(BytesIO(image_bytes))
-    except Exception:  # noqa: BLE001 — defensive: malformed PNG
+    except Exception:
         return HeadingMeasurement(False, 0.0, 0.0, 0.0, confident=False)
 
     return measure_heading_bold_image(full, bbox)
 
 
 def measure_heading_bold_image(
-    image: "Image.Image",
+    image: Image.Image,
     bbox: tuple[int, int, int, int] | None,
 ) -> HeadingMeasurement:
     """The same measurement over an image already in memory.
@@ -93,7 +93,7 @@ def measure_heading_bold_image(
     """
     try:
         full = image.convert("L")
-    except Exception:  # noqa: BLE001 — defensive: an unreadable frame
+    except Exception:
         return HeadingMeasurement(False, 0.0, 0.0, 0.0, confident=False)
 
     crop = _resolve_crop(full, bbox)
@@ -104,9 +104,9 @@ def measure_heading_bold_image(
 
 
 def _resolve_crop(
-    full: "Image.Image",
+    full: Image.Image,
     bbox: tuple[int, int, int, int] | None,
-) -> "Image.Image | None":
+) -> Image.Image | None:
     """The heading's own crop, or None when there is no usable region.
 
     There is deliberately no fallback region. An earlier version measured the
@@ -134,7 +134,7 @@ def _resolve_crop(
         return None
     try:
         crop = full.crop((x0, y0, x1, y1))
-    except Exception:  # noqa: BLE001
+    except Exception:
         return None
     if crop.width < 8 or crop.height < 8:
         _logger.debug(
@@ -145,7 +145,7 @@ def _resolve_crop(
     return crop
 
 
-def _swt_on_crop(crop: "Image.Image") -> HeadingMeasurement:
+def _swt_on_crop(crop: Image.Image) -> HeadingMeasurement:
     gray = np.asarray(crop)
     _, binary = cv2.threshold(
         gray, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU

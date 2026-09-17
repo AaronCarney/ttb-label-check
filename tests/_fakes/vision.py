@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Sequence
+from collections.abc import Sequence
 
 from app.schemas.extracted import FieldObservation
 from app.schemas.label import Label
@@ -27,4 +27,4 @@ class FakeVisionExtractor:
         seam member has to be present for ``isinstance`` to hold; a fake
         missing one stops being a stand-in for the thing it stands in for.
         """
-        return None
+        return

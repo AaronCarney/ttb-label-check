@@ -6,7 +6,7 @@ ownership stays clean.
 """
 from __future__ import annotations
 
-from typing import Iterable
+from collections.abc import Iterable
 
 from app.schemas.application import Application
 from app.schemas.audit import AuditRecord, PerRuleTraceEntry
@@ -23,12 +23,11 @@ from app.schemas.wire.disposition import (
     FieldFindingWire,
     RuleFindingWire,
 )
-from app.vision.cloud import OBSERVED_VALUE_AUDIT_KEYS
 from app.services.aggregation import min_aggregate_confidence
 from app.services.confidence import to_band
 from app.services.disposition import rule_disposition
 from app.services.engine_meta import EvaluationTimeline
-
+from app.vision.cloud import OBSERVED_VALUE_AUDIT_KEYS
 
 # Canonical field id → wire field_name enum. Two input forms route to the
 # same wire slot: the long canonical form (`alcohol_content`, …) used by

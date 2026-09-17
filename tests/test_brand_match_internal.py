@@ -30,7 +30,6 @@ from app.rules.brand_match import (
     stage_b_fuzzy,
 )
 
-
 # ---------------------------------------------------------------------------
 # What canonicalize folds away, and what it keeps
 # ---------------------------------------------------------------------------

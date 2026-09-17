@@ -1,10 +1,10 @@
 """POST /batches and GET /batches/{batch_id} — basic shape, and what a batch
 of bare references actually gets back."""
 import json
+from datetime import UTC, datetime
 
 import httpx
 import pytest
-from datetime import datetime, timezone
 from fastapi.testclient import TestClient
 
 from app.main import create_app
@@ -15,7 +15,7 @@ def _stub_envelope(n_items: int = 3) -> dict:
     return BatchEnvelope(
         batch_id="B-test-001",
         agent_id="agent-mvp",
-        submitted_at=datetime(2026, 5, 4, 12, 0, 0, tzinfo=timezone.utc),
+        submitted_at=datetime(2026, 5, 4, 12, 0, 0, tzinfo=UTC),
         items=tuple(
             BatchItemRef(label_ref=f"lbl-{i}", application_ref=f"app-{i:04d}")
             for i in range(n_items)

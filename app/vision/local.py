@@ -34,7 +34,7 @@ import time
 import unicodedata
 from collections import deque
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from functools import lru_cache
 from io import BytesIO
 
@@ -410,7 +410,7 @@ class LocalVisionExtractor:
         await self.ensure_loaded()
         try:
             await asyncio.to_thread(self._read_serialised, _warm_image_bytes())
-        except Exception:  # noqa: BLE001 — see the docstring: never fatal
+        except Exception:
             _logger.warning(
                 "reader_warm_read_failed",
                 extra={"reason_code": "ENGINE.OK.NONE"},
@@ -525,7 +525,7 @@ class LocalVisionExtractor:
         readable = {k: v[0] for k, v in payloads.items()}
         self._ring.append(
             CallRecord(
-                ts=datetime.now(timezone.utc),
+                ts=datetime.now(UTC),
                 batch_id=label.batch_id,
                 label_id=label.label_id,
                 stage="vision.local_ocr",
@@ -1015,11 +1015,7 @@ _ORIGIN_RE = re.compile(
 # "DISTILLED IN INDIANA" is not declaring a country of origin. A place on this
 # list is not reported as one.
 _US_STATES = frozenset(
-    "ALABAMA ALASKA ARIZONA ARKANSAS CALIFORNIA COLORADO CONNECTICUT DELAWARE "
-    "FLORIDA GEORGIA HAWAII IDAHO ILLINOIS INDIANA IOWA KANSAS KENTUCKY "
-    "LOUISIANA MAINE MARYLAND MASSACHUSETTS MICHIGAN MINNESOTA MISSISSIPPI "
-    "MISSOURI MONTANA NEBRASKA NEVADA OHIO OKLAHOMA OREGON PENNSYLVANIA "
-    "TENNESSEE TEXAS UTAH VERMONT VIRGINIA WASHINGTON WISCONSIN WYOMING".split()
+    ["ALABAMA", "ALASKA", "ARIZONA", "ARKANSAS", "CALIFORNIA", "COLORADO", "CONNECTICUT", "DELAWARE", "FLORIDA", "GEORGIA", "HAWAII", "IDAHO", "ILLINOIS", "INDIANA", "IOWA", "KANSAS", "KENTUCKY", "LOUISIANA", "MAINE", "MARYLAND", "MASSACHUSETTS", "MICHIGAN", "MINNESOTA", "MISSISSIPPI", "MISSOURI", "MONTANA", "NEBRASKA", "NEVADA", "OHIO", "OKLAHOMA", "OREGON", "PENNSYLVANIA", "TENNESSEE", "TEXAS", "UTAH", "VERMONT", "VIRGINIA", "WASHINGTON", "WISCONSIN", "WYOMING"]
 ) | frozenset({
     "NEW HAMPSHIRE", "NEW JERSEY", "NEW MEXICO", "NEW YORK", "NORTH CAROLINA",
     "NORTH DAKOTA", "RHODE ISLAND", "SOUTH CAROLINA", "SOUTH DAKOTA",

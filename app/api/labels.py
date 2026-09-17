@@ -13,7 +13,6 @@ from app.schemas.application import Application
 from app.schemas.label import Label
 from app.schemas.wire.disposition import DispositionEnvelope
 
-
 router = APIRouter(tags=["evaluation"])
 
 _PNG_MAGIC = b"\x89PNG\r\n\x1a\n"

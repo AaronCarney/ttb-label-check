@@ -7,7 +7,9 @@ deleted (docs/decisions.md#0013); its cases went with it.
 from __future__ import annotations
 
 from app.rules._validators import VALIDATOR_REGISTRY
-from app.rules._validators.equality_match import enumerated_match  # noqa: F401  (forces import / registration)
+from app.rules._validators.equality_match import (
+    enumerated_match,
+)
 from app.schemas.rejection import Outcome
 from app.schemas.rules import MatchPolicy
 from tests.rules.fixtures import make_context, make_expected, make_obs, make_rule

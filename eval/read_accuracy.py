@@ -213,7 +213,7 @@ async def _read_one_face(
     # Cleared first so a recording is never written from the previous image:
     # a label the quality gate turns away never reaches the engine and produces
     # no reading at all.
-    setattr(reader, "last_reading", None)
+    reader.last_reading = None
     payloads: dict[str, dict] = {}
     for observation in await reader.extract(label):
         if isinstance(observation.observed_value, dict):

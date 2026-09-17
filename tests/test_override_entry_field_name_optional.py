@@ -1,6 +1,6 @@
 """OverrideEntry.field_name accepts None, for an override that applies to the
 whole submission rather than to one named field."""
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import pytest
 from pydantic import ValidationError
@@ -9,7 +9,7 @@ from app.schemas.audit import OverrideEntry
 
 
 def _now() -> datetime:
-    return datetime(2026, 5, 4, 12, 0, 0, tzinfo=timezone.utc)
+    return datetime(2026, 5, 4, 12, 0, 0, tzinfo=UTC)
 
 
 def test_override_entry_accepts_none_field_name_for_whole_envelope_override():

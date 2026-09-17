@@ -1,7 +1,7 @@
 """BatchWorker — anomaly broadcast, staying alive through an override, and
 completion semantics: stream-end fires once, after the last per-label event."""
 import asyncio
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import pytest
 
@@ -33,7 +33,7 @@ def _stub_item(idx: int) -> BatchItem:
         application_ref=f"app-{idx:04d}",
         state=ItemState.QUEUED,
         result=None,
-        enqueued_at=datetime(2026, 5, 4, 12, 0, idx, tzinfo=timezone.utc),
+        enqueued_at=datetime(2026, 5, 4, 12, 0, idx, tzinfo=UTC),
     )
 
 
@@ -77,7 +77,7 @@ def _envelope_with_reason_code(idx: int, code: str) -> DispositionEnvelope:
         RuleFindingWire,
     )
 
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     finding = RuleFindingWire(
         rule_id="R-001",
         cfr_citation="27 CFR §4.33",
@@ -131,7 +131,7 @@ def _short_circuit_envelope_with_reason_code(idx: int, code: str) -> Disposition
     """Short-circuit envelope (no fields) — `_headline_reason_code` falls back
     to `per_rule_trace[0].rule_id`, which carries the reason code on the
     envelopes the evaluator short-circuits."""
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     return DispositionEnvelope(
         evaluation_id=f"EV-{idx:04d}",
         label_ref=f"lbl-{idx:04d}",
@@ -240,7 +240,7 @@ async def test_worker_continues_after_in_flight_results_mutation_simulating_over
     assert e0["data"]["queue_position"] == 0
 
     # Mutate in_flight.results[lbl-0] — simulating the override endpoint
-    from datetime import datetime, timezone
+    from datetime import datetime
 
     original = in_flight.results["lbl-0"]
     new_audit = original.audit_trail.model_copy(update={
@@ -252,7 +252,7 @@ async def test_worker_continues_after_in_flight_results_mutation_simulating_over
                 reason_code="BRAND.NAME.NEEDS_REVIEW",
                 justification_text="Test override",
                 reviewer_id="session-test1234",
-                timestamp=datetime.now(timezone.utc),
+                timestamp=datetime.now(UTC),
             ),
         ),
     })

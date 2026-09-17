@@ -1,5 +1,6 @@
 """GET /batches/{batch_id}/stream — SSE per-label events + stream-end."""
 import asyncio
+from datetime import UTC
 
 import httpx
 import pytest
@@ -21,12 +22,13 @@ async def test_sse_stream_emits_per_label_events_then_stream_end_for_3_item_batc
 
     transport = httpx.ASGITransport(app=app)
     async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
-        from datetime import datetime, timezone
+        from datetime import datetime
+
         from app.schemas.wire.batch import BatchEnvelope, BatchItemRef
         payload = BatchEnvelope(
             batch_id="B-sse-001",
             agent_id="a",
-            submitted_at=datetime(2026, 5, 4, 12, 0, 0, tzinfo=timezone.utc),
+            submitted_at=datetime(2026, 5, 4, 12, 0, 0, tzinfo=UTC),
             items=tuple(
                 BatchItemRef(label_ref=f"lbl-{i}", application_ref=f"app-{i:04d}")
                 for i in range(3)
@@ -65,12 +67,13 @@ async def test_sse_subscriber_pruned_within_1s_on_client_disconnect(monkeypatch)
 
     transport = httpx.ASGITransport(app=app)
     async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
-        from datetime import datetime, timezone
+        from datetime import datetime
+
         from app.schemas.wire.batch import BatchEnvelope, BatchItemRef
         payload = BatchEnvelope(
             batch_id="B-sse-002",
             agent_id="a",
-            submitted_at=datetime(2026, 5, 4, 12, 0, 0, tzinfo=timezone.utc),
+            submitted_at=datetime(2026, 5, 4, 12, 0, 0, tzinfo=UTC),
             items=tuple(
                 BatchItemRef(label_ref=f"lbl-{i}", application_ref=f"app-{i:04d}")
                 for i in range(10)
@@ -97,7 +100,7 @@ async def test_sse_subscriber_pruned_within_1s_on_client_disconnect(monkeypatch)
 @pytest.mark.asyncio
 async def test_post_batches_rejects_duplicate_batch_id_with_409(monkeypatch):
     """409 collision: re-POST of an in-flight `batch_id` is rejected."""
-    from datetime import datetime, timezone
+    from datetime import datetime
 
     from app.schemas.wire.batch import BatchEnvelope, BatchItemRef
     from tests.conftest import _fake_evaluator
@@ -114,7 +117,7 @@ async def test_post_batches_rejects_duplicate_batch_id_with_409(monkeypatch):
             payload = BatchEnvelope(
                 batch_id="B-dup",
                 agent_id="a",
-                submitted_at=datetime(2026, 5, 4, 12, 0, 0, tzinfo=timezone.utc),
+                submitted_at=datetime(2026, 5, 4, 12, 0, 0, tzinfo=UTC),
                 items=tuple(
                     BatchItemRef(label_ref=f"lbl-{i}", application_ref=f"app-{i:04d}")
                     for i in range(2)

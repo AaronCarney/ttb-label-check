@@ -6,7 +6,6 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict
 
-
 # Every stage a call can be recorded under. A name belongs here only while
 # something in this project emits it; a name for work this project does not do
 # tells a reviewer the opposite of the truth.

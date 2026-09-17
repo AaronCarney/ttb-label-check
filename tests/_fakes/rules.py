@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Sequence
+from collections.abc import Sequence
 
 from app.rules._validators import ValidatorContext
 from app.rules.engine import RuleEngine

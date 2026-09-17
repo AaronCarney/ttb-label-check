@@ -148,8 +148,9 @@ async def test_cloud_short_circuits_on_quality_failure(monkeypatch):
     monkeypatch.setenv("OPENAI_API_KEY", "sk-test")
     ring = deque(maxlen=200)
     extractor = CloudVisionExtractor(settings=settings, ring_buffer=ring, api_key="sk-test")
-    from PIL import Image
     from io import BytesIO
+
+    from PIL import Image
     img = Image.new("L", (32, 32), color=128)
     buf = BytesIO()
     img.save(buf, "PNG")

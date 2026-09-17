@@ -54,7 +54,6 @@ def test_build_field_findings_projects_canonical_seven():
     """For a fixture-01-shaped happy path (one observation + one expected per
     canonical field, one passing ValidationResult per field), the projection
     emits exactly seven FieldFindingWire entries — one per distinct wire slot."""
-    from decimal import Decimal
 
     from app.schemas.expected import BeverageClass, ExpectedValue
     from app.schemas.extracted import Evidence, EvidenceSource, FieldObservation, MatchKind

@@ -7,7 +7,7 @@ in memory. The demand gate bounds how many are *evaluated* ahead of the
 reviewer who is reading the results, which is where the work actually is.
 """
 import asyncio
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import pytest
 
@@ -36,7 +36,7 @@ def _stub_item(idx: int) -> BatchItem:
         application_ref=f"app-{idx:04d}",
         state=ItemState.QUEUED,
         result=None,
-        enqueued_at=datetime(2026, 5, 4, 12, 0, idx, tzinfo=timezone.utc),
+        enqueued_at=datetime(2026, 5, 4, 12, 0, idx, tzinfo=UTC),
     )
 
 

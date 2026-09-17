@@ -20,7 +20,7 @@ from PIL import Image, ImageDraw, ImageFont
 
 from app.config import Settings
 from app.vision.heading_measure import measure_heading_bold
-from app.vision.local import MAX_EDGE_PX, _Box, LocalVisionExtractor
+from app.vision.local import MAX_EDGE_PX, LocalVisionExtractor, _Box
 
 _HEADING = "GOVERNMENT WARNING:"
 

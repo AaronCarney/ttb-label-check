@@ -48,7 +48,6 @@ from app.schemas.extracted import FieldObservation
 from app.schemas.rejection import Outcome, Severity, ValidationResult
 from app.schemas.rules import RuleDefinition
 
-
 # A State name and its postal code are the same State. The fold is applied
 # here rather than in shared normalisation because the equivalence belongs to
 # this element and to the clauses that permit it (27 CFR 4.35(c), 5.66(d)(1),

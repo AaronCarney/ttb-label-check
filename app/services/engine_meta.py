@@ -7,7 +7,7 @@ This is the ONE source of truth for per-evaluation timing + outcome data.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 
 @dataclass(frozen=True)
@@ -24,7 +24,7 @@ class EvaluationTimeline:
     ``Evaluator.evaluate`` and consumed exactly twice (audit + metrics)."""
 
     evaluation_id: str
-    started_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
+    started_at: datetime = field(default_factory=lambda: datetime.now(UTC))
     completed_at: datetime | None = None
     total_duration_ms: int = 0
     vision_duration_ms: int = 0
@@ -49,4 +49,4 @@ class EvaluationTimeline:
 
     def finish(self, total_duration_ms: int) -> None:
         self.total_duration_ms = total_duration_ms
-        self.completed_at = datetime.now(timezone.utc)
+        self.completed_at = datetime.now(UTC)

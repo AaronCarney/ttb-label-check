@@ -76,7 +76,7 @@ class SingleResultStore:
             return None
         try:
             return DispositionEnvelope.model_validate(json.loads(raw))
-        except Exception:  # noqa: BLE001 — a corrupt file is a miss, not a 500
+        except Exception:
             _logger.warning(
                 "single_result_unreadable",
                 extra={"evaluation_id": evaluation_id, "reason_code": "ENGINE.OK.NONE"},

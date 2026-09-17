@@ -13,7 +13,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from app.config import Settings
 from app.rules.engine import RuleEngine
@@ -59,7 +59,7 @@ class Evaluator:
         cache_key = None
         if self._cache is not None:
             t_hit = time.monotonic()
-            started_at = datetime.now(timezone.utc)
+            started_at = datetime.now(UTC)
             app_for_key = application.model_dump(mode="json")
             app_for_key.pop("evaluation_id", None)
             cache_key = hashlib.sha256(
@@ -79,7 +79,7 @@ class Evaluator:
             # Cache-write: success branch only (NEVER on TimeoutError).
             if self._cache is not None and cache_key is not None:
                 self._cache.put(cache_key, envelope)
-        except asyncio.TimeoutError:
+        except TimeoutError:
             envelope = self._timeout_envelope(application, label)
         return envelope
 
@@ -112,7 +112,7 @@ class Evaluator:
         new_audit = cached.audit_trail.model_copy(update={
             "evaluation_id": application.evaluation_id,
             "started_at": started_at,
-            "completed_at": datetime.now(timezone.utc),
+            "completed_at": datetime.now(UTC),
         })
         new_metrics = cached.metrics.model_copy(update={
             "cache_hit": True,
@@ -150,7 +150,7 @@ class Evaluator:
         t0 = time.monotonic()
         try:
             observations = await self._vision.extract(label)
-        except Exception as e:  # noqa: BLE001
+        except Exception as e:
             timeline.record_failure(
                 reason_code="ENGINE.EXTRACTION.UNAVAILABLE",
                 message=str(e), exception_class=type(e).__name__,
@@ -216,7 +216,7 @@ class Evaluator:
             ctx = self._rules.build_validator_context(started_at_ms=started_at_ms)
             expected = tuple(application.expected_values)
             results = await self._rules.evaluate(readings_for_rules, expected, ctx)
-        except Exception as e:  # noqa: BLE001
+        except Exception as e:
             timeline.record_failure(
                 reason_code="ENGINE.RULES.UNAVAILABLE",
                 message=str(e), exception_class=type(e).__name__,

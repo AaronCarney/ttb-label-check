@@ -57,6 +57,7 @@ def _stub_label(
 
 # === Batch-test helpers ===
 from collections.abc import Iterable
+from datetime import UTC
 
 from app.schemas.wire.disposition import DispositionEnvelope
 
@@ -66,13 +67,13 @@ def _stub_disposition_envelope(idx: int = 0, *, disposition: str = "pass") -> Di
 
     If `Metrics` or `AuditRecord` grow further required fields, add them here
     with the simplest schema-conforming defaults."""
-    from datetime import datetime, timezone
+    from datetime import datetime
 
     from app.schemas.audit import AuditRecord
     from app.schemas.metrics import Metrics
     from app.schemas.wire.disposition import ConfidenceBand
 
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     return DispositionEnvelope(
         evaluation_id=f"EV-{idx:04d}",
         label_ref=f"lbl-{idx:04d}",

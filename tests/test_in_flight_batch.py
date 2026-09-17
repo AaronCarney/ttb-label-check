@@ -1,6 +1,6 @@
 """InFlightBatch — mutable companion to the frozen BatchInFlightState."""
 from collections import deque
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import pytest
 
@@ -14,7 +14,7 @@ def _stub_item(label_id: str, *, position: int = 0) -> BatchItem:
         application_ref=f"app-{position:04d}",
         state=ItemState.QUEUED,
         result=None,
-        enqueued_at=datetime(2026, 5, 4, 12, 0, position, tzinfo=timezone.utc),
+        enqueued_at=datetime(2026, 5, 4, 12, 0, position, tzinfo=UTC),
     )
 
 

@@ -12,8 +12,9 @@ Contract:
 """
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Callable, TYPE_CHECKING
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from app.schemas.expected import ExpectedValue
@@ -30,8 +31,8 @@ ValidatorFn = Callable[
 
 @dataclass(frozen=True)
 class ValidatorContext:
-    assets: dict[str, "AssetRef"]
-    decision_tables: dict[str, "DecisionTable"]
+    assets: dict[str, AssetRef]
+    decision_tables: dict[str, DecisionTable]
     started_at_ms: int
     engine_version: str
 

@@ -36,7 +36,7 @@ import hashlib
 import logging
 import time
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from app.api._sse_bus import SSEBus
 from app.batch.anomaly import AnomalyDetector
@@ -47,6 +47,7 @@ from app.schemas.batch import BatchItem
 from app.schemas.label import Label
 from app.schemas.metrics import Metrics
 from app.schemas.wire.disposition import ConfidenceBand, DispositionEnvelope
+
 # The one canonicalisation every audit hash in the tree is computed over. A
 # second copy here would let two audit trails disagree about what the same
 # input hashes to.
@@ -188,7 +189,7 @@ class BatchWorker:
             input_hash=hashlib.sha256(_canonical_json(app_dict) + image_bytes).hexdigest(),
             output_hash=hashlib.sha256(_canonical_json(envelope_for_hash)).hexdigest(),
             started_at=started_at,
-            completed_at=datetime.now(timezone.utc),
+            completed_at=datetime.now(UTC),
             per_rule_trace=(
                 PerRuleTraceEntry(
                     rule_id=reason_code,
@@ -255,7 +256,7 @@ class BatchWorker:
             application = self._resolve_application(item)
             label = self._resolve_label(item)
             t_label = time.monotonic()
-            started_at = datetime.now(timezone.utc)
+            started_at = datetime.now(UTC)
             envelope: DispositionEnvelope | None = None
             refusal: tuple[str, str] | None = None  # (reason_code, plain words)
 
@@ -273,7 +274,7 @@ class BatchWorker:
             else:
                 try:
                     envelope = await self._evaluator.evaluate(application, label)
-                except Exception as error:  # noqa: BLE001 — one label, not the batch
+                except Exception as error:
                     # Caught rather than re-raised: the rest of the batch is
                     # still checked (docs/PRD.md FR-13). `Exception` and not
                     # `BaseException`, so cancelling the worker still cancels it.

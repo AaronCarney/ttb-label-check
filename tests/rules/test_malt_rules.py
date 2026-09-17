@@ -2,7 +2,6 @@
 §7.65(c) 0.5% alcohol hard floor."""
 from __future__ import annotations
 
-from decimal import Decimal
 from pathlib import Path
 
 import pytest

@@ -1,5 +1,4 @@
 """AnomalyDetector — M-of-N sliding window over a batch's reason codes."""
-import pytest
 
 from app.batch.anomaly import AnomalyAdvisory, AnomalyDetector
 

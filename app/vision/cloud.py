@@ -12,7 +12,7 @@ import hashlib
 import json
 import time
 from collections import deque
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import httpx
 
@@ -206,7 +206,7 @@ class CloudVisionExtractor:
     async def warm(self) -> None:
         """Nothing to warm: this reader holds no model. Its first call is as
         slow as every other one, and what makes it slow is the network."""
-        return None
+        return
 
     async def _call_per_field(
         self, *, field_name: str, crop: bytes, label: Label
@@ -267,7 +267,7 @@ class CloudVisionExtractor:
         content = json.loads(payload["choices"][0]["message"]["content"])
         self._ring.append(
             CallRecord(
-                ts=datetime.now(timezone.utc),
+                ts=datetime.now(UTC),
                 batch_id=label.batch_id,
                 label_id=label.label_id,
                 stage="vision.cloud_read",

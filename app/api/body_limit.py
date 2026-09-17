@@ -23,8 +23,6 @@ its headers say.
 """
 from __future__ import annotations
 
-import json
-
 from app.api import limits
 
 _METHODS_WITH_BODIES = frozenset({"POST", "PUT", "PATCH"})

@@ -3,7 +3,7 @@ of a long batch returned without waiting for the rest, and one failing label
 leaving the rest of the batch checked."""
 import asyncio
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import pytest
 
@@ -31,7 +31,7 @@ def _stub_item(idx: int) -> BatchItem:
         application_ref=f"app-{idx:04d}",
         state=ItemState.QUEUED,
         result=None,
-        enqueued_at=datetime(2026, 5, 4, 12, 0, idx, tzinfo=timezone.utc),
+        enqueued_at=datetime(2026, 5, 4, 12, 0, idx, tzinfo=UTC),
     )
 
 

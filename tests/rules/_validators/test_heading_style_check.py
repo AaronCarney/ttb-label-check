@@ -17,11 +17,10 @@ rather than measuring one, and is therefore read as measured.
 from __future__ import annotations
 
 from app.rules._validators import VALIDATOR_REGISTRY
-from app.rules._validators.heading_style_check import heading_style_check  # noqa: F401
+from app.rules._validators.heading_style_check import heading_style_check
 from app.schemas.rejection import Outcome, Severity
 from app.schemas.rules import MatchPolicy
 from tests.rules.fixtures import make_context, make_expected, make_obs, make_rule
-
 
 UNMEASURED_CODE = "WARNING.STYLE.BOLD_NOT_MEASURED"
 

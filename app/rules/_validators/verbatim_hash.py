@@ -27,7 +27,7 @@ from __future__ import annotations
 import hashlib
 import re
 import unicodedata
-from typing import Sequence
+from collections.abc import Sequence
 
 from app.rules._validators import ValidatorContext, register
 from app.rules._validators._helpers import (
@@ -42,7 +42,6 @@ from app.schemas.expected import ExpectedValue
 from app.schemas.extracted import FieldObservation
 from app.schemas.rejection import Outcome, ValidationResult
 from app.schemas.rules import RuleDefinition
-
 
 DEFAULT_NORMALIZATION_OPS: tuple[str, ...] = (
     "nfkc",

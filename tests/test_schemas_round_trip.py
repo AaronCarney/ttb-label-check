@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+from datetime import UTC
 
 import pytest
 
@@ -9,7 +10,6 @@ import pytest
 def test_extracted_field_observation_round_trip() -> None:
     from app.schemas.expected import BeverageClass
     from app.schemas.extracted import (
-        BBox,
         Evidence,
         EvidenceSource,
         FieldObservation,
@@ -45,7 +45,7 @@ def test_extracted_field_observation_round_trip() -> None:
 
 
 def test_extracted_models_are_frozen() -> None:
-    from app.schemas.extracted import BBox, Evidence, EvidenceSource, MatchKind
+    from app.schemas.extracted import Evidence, EvidenceSource, MatchKind
 
     ev = Evidence(
         field_id="brand",
@@ -138,9 +138,9 @@ def test_validation_result_round_trip() -> None:
 
 
 def test_audit_record_round_trip() -> None:
-    from datetime import datetime, timezone
+    from datetime import datetime
 
-    from app.schemas.audit import AuditRecord, OverrideEntry, PerRuleTraceEntry
+    from app.schemas.audit import AuditRecord, PerRuleTraceEntry
 
     rec = AuditRecord(
         evaluation_id="00000000-0000-4000-8000-000000000001",
@@ -149,8 +149,8 @@ def test_audit_record_round_trip() -> None:
         prompt_version="v1",
         input_hash="0" * 64,
         output_hash="1" * 64,
-        started_at=datetime(2026, 4, 1, 12, 0, 0, tzinfo=timezone.utc),
-        completed_at=datetime(2026, 4, 1, 12, 0, 1, 230000, tzinfo=timezone.utc),
+        started_at=datetime(2026, 4, 1, 12, 0, 0, tzinfo=UTC),
+        completed_at=datetime(2026, 4, 1, 12, 0, 1, 230000, tzinfo=UTC),
         per_rule_trace=(
             PerRuleTraceEntry(
                 rule_id="common.brand.exact_or_normalized",
@@ -270,7 +270,7 @@ def test_match_policy_enum_values() -> None:
 
 
 def test_batch_state_round_trip() -> None:
-    from datetime import datetime, timezone
+    from datetime import datetime
 
     from app.schemas.batch import BatchInFlightState, BatchItem, ItemState
 
@@ -279,7 +279,7 @@ def test_batch_state_round_trip() -> None:
         application_ref="app-001",
         state=ItemState.QUEUED,
         result=None,
-        enqueued_at=datetime(2026, 4, 1, 12, 0, 0, tzinfo=timezone.utc),
+        enqueued_at=datetime(2026, 4, 1, 12, 0, 0, tzinfo=UTC),
     )
     state = BatchInFlightState(
         batch_id="00000000-0000-4000-8000-00000000b001",
@@ -304,12 +304,12 @@ def test_item_state_transitions_documented() -> None:
 
 
 def test_call_record_round_trip() -> None:
-    from datetime import datetime, timezone
+    from datetime import datetime
 
     from app.schemas.calls import CallRecord
 
     rec = CallRecord(
-        ts=datetime(2026, 4, 1, 12, 0, 0, tzinfo=timezone.utc),
+        ts=datetime(2026, 4, 1, 12, 0, 0, tzinfo=UTC),
         batch_id="b1",
         label_id="l1",
         stage="vision.cloud_read",
@@ -326,7 +326,6 @@ def test_call_record_round_trip() -> None:
 
 
 def test_application_envelope_round_trip(wire_fixtures_dir) -> None:
-    import json
 
     from app.schemas.wire.application import ApplicationEnvelope
 
@@ -351,7 +350,6 @@ def test_application_envelope_rejects_extra_keys() -> None:
 
 
 def test_disposition_envelope_round_trip(wire_fixtures_dir) -> None:
-    import json
 
     from app.schemas.wire.disposition import DispositionEnvelope
 
@@ -369,7 +367,6 @@ def test_disposition_envelope_round_trip(wire_fixtures_dir) -> None:
 
 
 def test_batch_envelope_round_trip(wire_fixtures_dir) -> None:
-    import json
 
     from app.schemas.wire.batch import BatchEnvelope
 
@@ -381,7 +378,6 @@ def test_batch_envelope_round_trip(wire_fixtures_dir) -> None:
 
 
 def test_error_envelope_round_trip(wire_fixtures_dir) -> None:
-    import json
 
     from app.schemas.wire.error import ErrorEnvelope
 

@@ -28,7 +28,6 @@ from typing import Any
 
 from app.schemas.application_record import ApplicationRecord, DeclaredQuantity
 from app.schemas.extracted import FieldObservation
-
 from tests.rules.fixtures import make_obs
 
 MANIFEST_PATH = Path(__file__).resolve().parents[1] / "fixtures" / "labels" / "manifest.json"

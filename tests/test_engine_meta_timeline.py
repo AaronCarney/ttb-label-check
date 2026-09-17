@@ -1,8 +1,10 @@
 """EvaluationTimeline — the per-evaluation accumulator both the audit trail and
 the metrics block are built from."""
+from datetime import UTC
+
 import pytest
 
-from app.services.engine_meta import EvaluationTimeline, EngineFailure
+from app.services.engine_meta import EngineFailure, EvaluationTimeline
 
 
 def test_timeline_constructs_with_evaluation_id():
@@ -38,14 +40,14 @@ def test_timeline_records_engine_failure():
 
 
 def test_timeline_finish_records_completed_at():
-    from datetime import datetime, timezone
+    from datetime import datetime
 
     t = EvaluationTimeline(evaluation_id="EV-001")
     assert t.completed_at is None
     t.finish(total_duration_ms=500)
     assert t.total_duration_ms == 500
     assert isinstance(t.completed_at, datetime)
-    assert t.completed_at.tzinfo == timezone.utc
+    assert t.completed_at.tzinfo == UTC
 
 
 def test_engine_failure_is_frozen():

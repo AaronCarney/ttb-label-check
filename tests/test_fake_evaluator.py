@@ -1,5 +1,4 @@
 """FakeEvaluator — controllable per-call latency + canned envelopes."""
-import asyncio
 import time
 
 import pytest

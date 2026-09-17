@@ -1,16 +1,15 @@
 """SessionCache — bounded LRU keyed by canonical input hash."""
-import pytest
 
-from app.schemas.application import Application
+from datetime import UTC
+
 from app.schemas.audit import AuditRecord
-from app.schemas.label import Dimensions, Label
 from app.schemas.metrics import Metrics
 from app.schemas.wire.disposition import ConfidenceBand, DispositionEnvelope
 from app.services.cache import SessionCache
 
 
 def _stub_envelope(eid="EV-001"):
-    from datetime import datetime, timezone
+    from datetime import datetime
     return DispositionEnvelope(
         evaluation_id=eid, label_ref="lbl", disposition="pass",
         disposition_confidence=ConfidenceBand(band="high", numeric=1.0),
@@ -18,7 +17,7 @@ def _stub_envelope(eid="EV-001"):
         audit_trail=AuditRecord(
             evaluation_id=eid, rule_set_version="rs",
             input_hash="0" * 64, output_hash="0" * 64,
-            started_at=datetime.now(timezone.utc), completed_at=datetime.now(timezone.utc),
+            started_at=datetime.now(UTC), completed_at=datetime.now(UTC),
             per_rule_trace=(),
         ),
         metrics=Metrics(total_duration_ms=0, per_rule_durations_ms=(),

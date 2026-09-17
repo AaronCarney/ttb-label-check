@@ -8,7 +8,7 @@ not being able to mutate what it is handed.
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Sequence
+from collections.abc import Sequence
 
 from app.rules._validators import ValidatorContext
 from app.schemas.expected import ExpectedValue

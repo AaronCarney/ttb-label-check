@@ -13,7 +13,7 @@ from __future__ import annotations
 
 import hashlib
 import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 from app.schemas.application import Application
@@ -55,7 +55,7 @@ class AuditRecorder:
             )
             for rid in timeline.per_rule_durations.keys()
         )
-        completed = timeline.completed_at or datetime.now(timezone.utc)
+        completed = timeline.completed_at or datetime.now(UTC)
         return AuditRecord(
             evaluation_id=timeline.evaluation_id,
             rule_set_version=timeline.rule_set_version,

@@ -10,7 +10,7 @@ neighbour distance it compared, so `common.warning.separate_apart` now answers
 from __future__ import annotations
 
 from app.rules._validators import VALIDATOR_REGISTRY
-from app.rules._validators.layout_check import same_field_of_vision_check  # noqa: F401
+from app.rules._validators.layout_check import same_field_of_vision_check
 from app.schemas.rejection import Outcome
 from app.schemas.rules import MatchPolicy
 from tests.rules.fixtures import make_context, make_expected, make_obs, make_rule

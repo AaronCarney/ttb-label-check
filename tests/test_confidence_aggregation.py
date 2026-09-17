@@ -1,7 +1,11 @@
 """Envelope confidence aggregates as the minimum across its fields, so the
 weakest reading sets the overall band."""
 from app.schemas.wire.disposition import (
-    AISuggestionWire, ConfidenceBand, FieldEvidenceWire, FieldFindingWire, RuleFindingWire,
+    AISuggestionWire,
+    ConfidenceBand,
+    FieldEvidenceWire,
+    FieldFindingWire,
+    RuleFindingWire,
 )
 from app.services.aggregation import min_aggregate_confidence
 

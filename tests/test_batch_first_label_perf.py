@@ -8,9 +8,9 @@ The event count is exact because SSEBus replays on subscribe: a subscriber that
 attaches after the worker has already emitted item 0 still sees it, so the
 assertion ``lr == n_items`` holds rather than coming up one short.
 """
-import asyncio
 import statistics
 import time
+from datetime import UTC
 
 import httpx
 import pytest
@@ -20,7 +20,7 @@ import pytest
 @pytest.mark.asyncio
 async def test_first_label_p50_under_2_7s_and_p99_under_5_0s_for_50_item_batch(monkeypatch):
     """First-label latency and event count, measured at the HTTP boundary."""
-    from datetime import datetime, timezone
+    from datetime import datetime
 
     from app.main import create_app
     from app.schemas.wire.batch import BatchEnvelope, BatchItemRef
@@ -47,7 +47,7 @@ async def test_first_label_p50_under_2_7s_and_p99_under_5_0s_for_50_item_batch(m
                 envelope = BatchEnvelope(
                     batch_id=bid,
                     agent_id="a",
-                    submitted_at=datetime(2026, 5, 4, 12, 0, 0, tzinfo=timezone.utc),
+                    submitted_at=datetime(2026, 5, 4, 12, 0, 0, tzinfo=UTC),
                     items=tuple(
                         BatchItemRef(label_ref=f"lbl-{i}", application_ref=f"app-{i:04d}")
                         for i in range(N_ITEMS)

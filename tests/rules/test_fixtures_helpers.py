@@ -3,11 +3,8 @@ Pydantic instances so tests can construct typed payloads without verbosity.
 """
 from __future__ import annotations
 
-from decimal import Decimal
-
 import pytest
 
-from app.schemas.expected import BeverageClass
 from app.schemas.extracted import Evidence, EvidenceSource, FieldObservation, MatchKind
 from app.schemas.rejection import EngineMeta
 from tests.rules.fixtures import (

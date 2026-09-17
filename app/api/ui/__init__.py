@@ -38,4 +38,4 @@ for _part in (shells, single_upload, images, samples, bulk_upload):
 # The two dependencies a caller overrides — a test swaps the settings to turn
 # dev mode on, and swaps the evaluator so an upload never reaches a vision
 # model. Re-exported here so the import path does not move when a route does.
-__all__ = ["router", "_get_settings", "_get_upload_evaluator"]
+__all__ = ["_get_settings", "_get_upload_evaluator", "router"]

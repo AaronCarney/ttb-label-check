@@ -16,11 +16,9 @@ from pathlib import Path
 
 import pytest
 
-from app.rules import build_rule_engine
 from app.config import Settings
-from app.schemas.extracted import BeverageClass
+from app.rules import build_rule_engine
 from app.schemas.rejection import Outcome
-
 from tests.rules.fixtures import make_expected, make_obs
 
 WARNING_TEXT = (

@@ -16,7 +16,6 @@ from __future__ import annotations
 
 import logging
 
-
 REDACTED_FIELDS = (
     "application_content",
     "application_body",

@@ -9,7 +9,6 @@ from pydantic import BaseModel, ConfigDict, Field
 from app.schemas.expected import BeverageClass, ExpectedValue
 from app.schemas.extracted import Evidence, FieldObservation
 
-
 REASON_CODE_GRAMMAR = re.compile(r"^[A-Z][A-Z0-9_]*(?:\.[A-Z][A-Z0-9_]*){2,3}$")
 
 

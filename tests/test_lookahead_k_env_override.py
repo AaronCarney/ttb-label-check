@@ -1,6 +1,5 @@
 """AC #10: LOOKAHEAD_K=2 reduces lookahead to 2; LOOKAHEAD_K=4 increases to 4."""
-import asyncio
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import httpx
 import pytest
@@ -25,7 +24,7 @@ async def test_lookahead_k_env_var_overrides_default_3(k_value, monkeypatch):
         envelope = BatchEnvelope(
             batch_id=f"B-LA-{k_value}",
             agent_id="a",
-            submitted_at=datetime(2026, 5, 4, 12, 0, 0, tzinfo=timezone.utc),
+            submitted_at=datetime(2026, 5, 4, 12, 0, 0, tzinfo=UTC),
             items=tuple(
                 BatchItemRef(label_ref=f"lbl-{i}", application_ref=f"app-{i:04d}")
                 for i in range(10)
@@ -55,7 +54,7 @@ async def test_lookahead_k_default_is_3_when_env_absent(monkeypatch):
         envelope = BatchEnvelope(
             batch_id="B-LA-default",
             agent_id="a",
-            submitted_at=datetime(2026, 5, 4, 12, 0, 0, tzinfo=timezone.utc),
+            submitted_at=datetime(2026, 5, 4, 12, 0, 0, tzinfo=UTC),
             items=tuple(
                 BatchItemRef(label_ref=f"lbl-{i}", application_ref=f"app-{i:04d}")
                 for i in range(3)

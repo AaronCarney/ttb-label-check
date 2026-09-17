@@ -71,6 +71,5 @@ def test_settings_rejects_invalid_vision_mode() -> None:
 
     from app.config import Settings
 
-    with _env(OPENAI_API_KEY="sk-test", VISION_MODE="banana"):
-        with pytest.raises(ValidationError):
-            Settings()
+    with _env(OPENAI_API_KEY="sk-test", VISION_MODE="banana"), pytest.raises(ValidationError):
+        Settings()

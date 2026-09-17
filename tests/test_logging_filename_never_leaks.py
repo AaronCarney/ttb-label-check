@@ -12,7 +12,7 @@ from __future__ import annotations
 import asyncio
 import io
 import logging
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import pytest
 
@@ -46,7 +46,7 @@ class _Captured:
         self.handler.addFilter(RedactionFilter())
         self.handler.setLevel(logging.DEBUG)
 
-    def __enter__(self) -> "_Captured":
+    def __enter__(self) -> _Captured:
         self.root = logging.getLogger()
         self.prior_level = self.root.level
         self.root.addHandler(self.handler)
@@ -72,7 +72,7 @@ def _items(batch_id: str) -> tuple[BatchItem, ...]:
             application_ref=f"{batch_id}-app-{idx:03d}",
             state=ItemState.QUEUED,
             result=None,
-            enqueued_at=datetime(2026, 9, 16, 12, 0, idx, tzinfo=timezone.utc),
+            enqueued_at=datetime(2026, 9, 16, 12, 0, idx, tzinfo=UTC),
         )
         for idx, ext in enumerate(("txt", "png"))
     )

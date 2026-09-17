@@ -8,7 +8,6 @@ from __future__ import annotations
 from collections import deque
 from typing import Any
 
-
 DEFAULT_MAXLEN = 200
 
 

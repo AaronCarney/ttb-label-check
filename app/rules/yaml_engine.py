@@ -28,7 +28,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import time
-from typing import Sequence
+from collections.abc import Sequence
 
 from app.rules._validators import VALIDATOR_REGISTRY, ValidatorContext
 from app.rules._validators._helpers import unlocated, unlocated_is_absent
@@ -37,7 +37,6 @@ from app.schemas.expected import ExpectedValue
 from app.schemas.extracted import FieldObservation
 from app.schemas.rejection import EngineMeta, Outcome, Severity, ValidationResult
 from app.schemas.rules import RuleSet
-
 
 PER_RULE_TIMEOUT_S = 0.25
 
@@ -286,7 +285,7 @@ class YamlRuleEngine(RuleEngine):
                 asyncio.to_thread(validator, obs, exp, rule, ctx),
                 timeout=PER_RULE_TIMEOUT_S,
             )
-        except asyncio.TimeoutError:
+        except TimeoutError:
             meta = _meta(int((time.monotonic() - t0) * 1000))
             return self._finish(rule, ValidationResult(
                 rule_id=rule.rule_id, cfr_citation=rule.cfr_citation,

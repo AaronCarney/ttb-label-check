@@ -25,7 +25,6 @@ from pydantic import BaseModel, ConfigDict
 
 from app.schemas.expected import BeverageClass
 
-
 BeverageType = Literal["distilled_spirits", "wine", "malt_beverage"]
 SourceOfProduct = Literal["domestic", "imported"]
 

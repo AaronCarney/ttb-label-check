@@ -14,7 +14,6 @@ import pytest
 from app.schemas.wire.batch import BatchEnvelope
 from app.schemas.wire.disposition import DispositionEnvelope
 
-
 FIXTURE_ROOT = Path(__file__).parent / "fixtures" / "envelopes"
 SINGLE_DIR = FIXTURE_ROOT / "single"
 BATCH_DIR = FIXTURE_ROOT / "batch"

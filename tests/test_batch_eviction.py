@@ -1,15 +1,15 @@
 """Nothing about a submission outlives the process: app.state.batches is
 evicted on lifespan teardown."""
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import pytest
 
 
 @pytest.mark.asyncio
 async def test_lifespan_teardown_clears_app_state_batches():
-    from app.main import create_app
-    from app.batch.state import InFlightBatch
     from app.api._sse_bus import SSEBus
+    from app.batch.state import InFlightBatch
+    from app.main import create_app
     from app.schemas.batch import BatchItem, ItemState
 
     app = create_app()
@@ -20,7 +20,7 @@ async def test_lifespan_teardown_clears_app_state_batches():
             application_ref="app-0000",
             state=ItemState.QUEUED,
             result=None,
-            enqueued_at=datetime(2026, 5, 4, 12, 0, 0, tzinfo=timezone.utc),
+            enqueued_at=datetime(2026, 5, 4, 12, 0, 0, tzinfo=UTC),
         )
         in_flight = InFlightBatch(batch_id="B-EV", agent_id="a", items=(item,), lookahead_k=3)
         app.state.batches["B-EV"] = in_flight

@@ -13,7 +13,6 @@ from pathlib import Path
 
 from fastapi.testclient import TestClient
 
-
 REPO_ROOT = Path(__file__).parents[1]
 
 

@@ -26,13 +26,13 @@ from __future__ import annotations
 
 from app.rules._validators import ValidatorContext, register
 from app.rules._validators._helpers import (
-    not_read_result,
-    unlocated,
-    unlocated_is_absent,
     _build_meta,
     _conf,
     normalize_words,
+    not_read_result,
     project_reading,
+    unlocated,
+    unlocated_is_absent,
     word_run_present,
 )
 from app.schemas.expected import ExpectedValue

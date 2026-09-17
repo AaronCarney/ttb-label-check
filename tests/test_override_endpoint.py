@@ -1,7 +1,6 @@
 """POST /labels/{evaluation_id}/overrides — happy path + validation."""
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
-import pytest
 from fastapi.testclient import TestClient
 
 from app.main import create_app
@@ -10,19 +9,17 @@ from app.main import create_app
 def _seed_a_batch_with_one_completed_item(app):
     """Helper: drive a 1-item batch through and wait for completion so the
     override endpoint has a valid evaluation_id to target."""
-    from app.batch.anomaly import AnomalyDetector
-    from app.batch.state import InFlightBatch
-    from app.batch.worker import BatchWorker
     from app.api._sse_bus import SSEBus
+    from app.batch.state import InFlightBatch
     from app.schemas.batch import BatchItem, ItemState
-    from tests.conftest import _fake_evaluator, _stub_disposition_envelope
+    from tests.conftest import _stub_disposition_envelope
 
     item = BatchItem(
         label_id="lbl-0",
         application_ref="app-0000",
         state=ItemState.QUEUED,
         result=None,
-        enqueued_at=datetime(2026, 5, 4, 12, 0, 0, tzinfo=timezone.utc),
+        enqueued_at=datetime(2026, 5, 4, 12, 0, 0, tzinfo=UTC),
     )
     env = _stub_disposition_envelope(0, disposition="needs_review")
     in_flight = InFlightBatch(batch_id="B-OV", agent_id="a", items=(item,), lookahead_k=3)

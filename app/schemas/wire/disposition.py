@@ -16,7 +16,6 @@ from pydantic import BaseModel, ConfigDict, Field
 from app.schemas.audit import AuditRecord
 from app.schemas.metrics import Metrics
 
-
 Band = Literal["high", "medium", "low"]
 Disposition = Literal["pass", "fail", "needs_review"]
 

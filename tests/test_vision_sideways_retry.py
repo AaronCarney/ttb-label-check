@@ -23,7 +23,7 @@ from io import BytesIO
 from PIL import Image
 
 from app.config import Settings
-from app.vision.local import _Box, LocalVisionExtractor
+from app.vision.local import LocalVisionExtractor, _Box
 
 _HEADING = "GOVERNMENT WARNING: (1) ACCORDING TO THE SURGEON"
 

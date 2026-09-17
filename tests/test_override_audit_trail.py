@@ -1,16 +1,14 @@
 """Every field of an override lands on the persisted audit_trail."""
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
-import pytest
 from fastapi.testclient import TestClient
 
 from app.main import create_app
 
 
 def test_override_lands_on_in_flight_results_audit_trail_overrides_tuple():
-    from app.batch.anomaly import AnomalyDetector
-    from app.batch.state import InFlightBatch
     from app.api._sse_bus import SSEBus
+    from app.batch.state import InFlightBatch
     from app.schemas.batch import BatchItem, ItemState
     from tests.conftest import _stub_disposition_envelope
 
@@ -21,7 +19,7 @@ def test_override_lands_on_in_flight_results_audit_trail_overrides_tuple():
         application_ref="app-0000",
         state=ItemState.QUEUED,
         result=None,
-        enqueued_at=datetime(2026, 5, 4, 12, 0, 0, tzinfo=timezone.utc),
+        enqueued_at=datetime(2026, 5, 4, 12, 0, 0, tzinfo=UTC),
     )
     env = _stub_disposition_envelope(0, disposition="needs_review")
     in_flight = InFlightBatch(batch_id="B-OV2", agent_id="a", items=(item,), lookahead_k=3)

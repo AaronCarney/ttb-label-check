@@ -46,7 +46,6 @@ from app.schemas.extracted import FieldObservation
 from app.schemas.rejection import Outcome, Severity, ValidationResult
 from app.schemas.rules import RuleDefinition
 
-
 _WHITESPACE = re.compile(r"\s+")
 
 

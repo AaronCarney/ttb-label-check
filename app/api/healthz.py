@@ -8,7 +8,6 @@ from fastapi.responses import JSONResponse
 
 from app.config import Settings
 
-
 router = APIRouter(tags=["health"])
 _logger = logging.getLogger("app.healthz")
 _warmed: dict[str, bool] = {"done": False}
@@ -67,7 +66,7 @@ async def healthz(settings: Settings = Depends(_get_settings)) -> JSONResponse:
             # first label. `warm` awaits `ensure_loaded` itself, so a reader
             # that cannot load still fails here and still answers 503.
             await evaluator._vision.warm()
-        except Exception as exc:  # noqa: BLE001 — anything that raises here means not ready
+        except Exception as exc:
             body["status"] = "not_ready"
             body["warmup_error"] = str(exc)
             _logger.warning(

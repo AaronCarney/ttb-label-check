@@ -20,7 +20,6 @@ from PIL import Image
 
 from app.schemas.wire.error import ErrorEnvelope
 
-
 _MIB = 1024 * 1024
 
 # --------------------------------------------------------------------------

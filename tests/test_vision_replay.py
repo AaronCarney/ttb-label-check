@@ -194,7 +194,7 @@ def test_the_covered_images_are_the_corpus_slice_they_claim_to_be() -> None:
     file scores has at least one of its faces covered."""
     entries = _entries()
     named = {rel for e in entries.values() for rel in e["images"].values()}
-    assert COVERED_IMAGES <= named
+    assert named >= COVERED_IMAGES
     for label_id in ENTRIES:
         covered = [
             rel for rel in entries[label_id]["images"].values() if rel in COVERED_IMAGES

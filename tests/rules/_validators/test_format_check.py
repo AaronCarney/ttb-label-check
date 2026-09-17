@@ -20,12 +20,11 @@ from pathlib import Path
 import pytest
 
 from app.rules._validators import VALIDATOR_REGISTRY
-from app.rules._validators.format_check import _project_alc_text, regex_match  # noqa: F401
+from app.rules._validators.format_check import _project_alc_text, regex_match
 from app.rules.loader import YamlRuleLoader
 from app.schemas.rejection import Outcome
 from app.schemas.rules import MatchPolicy
 from tests.rules.fixtures import make_context, make_expected, make_obs, make_rule
-
 
 PAT = r"^\s*(?:alcohol|alc\.?)\s*[0-9]{1,2}(?:\.[0-9]+)?\s*%?\s*(?:by\s+volume|/\s*vol\.?|vol\.?)\s*$"
 

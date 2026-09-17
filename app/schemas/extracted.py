@@ -8,7 +8,6 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from app.schemas.expected import BeverageClass
 
-
 BBox = tuple[int, int, int, int]
 
 

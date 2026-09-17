@@ -1,10 +1,10 @@
 """Pure disposition rule: the overall result for one submission."""
 from __future__ import annotations
 
-from typing import Iterable, Literal
+from collections.abc import Iterable
+from typing import Literal
 
 from app.schemas.rejection import Outcome, Severity, ValidationResult
-
 
 Disposition = Literal["pass", "fail", "needs_review"]
 

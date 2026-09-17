@@ -10,10 +10,10 @@ from pathlib import Path
 
 import pytest
 
-from app.rules._validators import VALIDATOR_REGISTRY  # noqa: F401  (force registry population)
-import app.rules._validators.equality_match  # noqa: F401
-import app.rules._validators.presence_check  # noqa: F401
+import app.rules._validators.equality_match
+import app.rules._validators.presence_check
 import app.rules._validators.verbatim_hash  # noqa: F401
+from app.rules._validators import VALIDATOR_REGISTRY  # noqa: F401  (force registry population)
 from app.rules.loader import RuleLoaderError, YamlRuleLoader
 
 REGISTRY_YAML = """
@@ -144,7 +144,7 @@ def test_asset_hash_drift_fails_closed(tmp_path: Path) -> None:
     asset = tmp_path / "assets/warnings/x.txt"
     _write(asset, "different content here")
     real_sha = hashlib.sha256(b"different content here").hexdigest()
-    body = _baseline_rule_yaml(validator="verbatim_hash", reason="WARNING.VERBATIM.MISMATCH").rstrip() + f"""
+    body = _baseline_rule_yaml(validator="verbatim_hash", reason="WARNING.VERBATIM.MISMATCH").rstrip() + """
             asset:
               path: assets/warnings/x.txt
               sha256_pin: deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef

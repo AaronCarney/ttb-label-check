@@ -49,7 +49,7 @@ class InFlightBatch:
     recent_dispositions: deque = field(
         default_factory=lambda: deque(maxlen=10)
     )
-    queue: "BoundedQueue[BatchItem]" = field(init=False)
+    queue: BoundedQueue[BatchItem] = field(init=False)
 
     def __post_init__(self) -> None:
         # maxsize = k+1 (in BoundedQueue) bounds how far *ahead of the

@@ -30,10 +30,10 @@ import pytest
 
 from app.rules.loader import YamlRuleLoader
 from app.rules.yaml_engine import YamlRuleEngine
-from app.services.disposition import compute_disposition, rule_disposition
 from app.schemas.expected import BeverageClass
 from app.schemas.extracted import Evidence, EvidenceSource, FieldObservation, MatchKind
 from app.schemas.rejection import Outcome, Severity
+from app.services.disposition import compute_disposition, rule_disposition
 from app.vision.local import _parse
 from tests.rules.fixtures import make_context, make_expected
 

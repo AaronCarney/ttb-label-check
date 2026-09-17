@@ -21,7 +21,7 @@ def test_to_band_edges(numeric, expected):
 def test_to_band_monotonic():
     rank = {"low": 0, "medium": 1, "high": 2}
     last = -1
-    for x in [i / 100 for i in range(0, 101)]:
+    for x in [i / 100 for i in range(101)]:
         b = to_band(x)
         assert rank[b] >= last
         last = rank[b]

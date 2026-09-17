@@ -5,8 +5,6 @@ from __future__ import annotations
 
 import os
 
-import pytest
-
 
 def _settings_with(**overrides: str | None):
     from app.config import Settings

@@ -18,11 +18,10 @@ from __future__ import annotations
 import hashlib
 
 from app.rules._validators import VALIDATOR_REGISTRY
-from app.rules._validators.verbatim_hash import canonicalize_text, verbatim_hash  # noqa: F401
+from app.rules._validators.verbatim_hash import canonicalize_text, verbatim_hash
 from app.schemas.rejection import Outcome
 from app.schemas.rules import AssetRef, MatchPolicy
 from tests.rules.fixtures import make_context, make_expected, make_obs, make_rule
-
 
 CANONICAL = (
     "GOVERNMENT WARNING: (1) According to the Surgeon General, women should not drink "

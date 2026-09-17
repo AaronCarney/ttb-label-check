@@ -6,7 +6,6 @@ raise preceded by a `# programmer error` comment within two lines."""
 import re
 from pathlib import Path
 
-
 _RAISE_RX = re.compile(r"^\s*raise\s+(\S+)")
 
 

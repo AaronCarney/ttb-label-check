@@ -9,7 +9,6 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
-
 _OS_ENVIRON_RE = re.compile(r"\bos\.environ\b")
 
 

@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import logging
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Request
@@ -22,8 +22,9 @@ def _load_accepted_reason_codes() -> frozenset[str]:
     As in the rule-pack loader, any code not in the registry is refused.
     Raises ``FileNotFoundError`` if the registry is missing; loud failure
     is preferable to silently rejecting every override request with 400."""
-    import yaml
     from pathlib import Path
+
+    import yaml
 
     yaml_path = Path("rules/reason_codes.yaml")
     if not yaml_path.exists():
@@ -138,7 +139,7 @@ async def post_override(
         reason_code=payload.reason_code,
         justification_text=payload.justification_text,
         reviewer_id=_new_reviewer_id(),
-        timestamp=datetime.now(timezone.utc),
+        timestamp=datetime.now(UTC),
     )
 
     new_audit = env.audit_trail.model_copy(update={

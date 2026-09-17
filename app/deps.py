@@ -33,7 +33,7 @@ def build_vision_extractor(settings: Settings) -> VisionExtractor:
     return LocalVisionExtractor(settings=settings, ring_buffer=ring)
 
 
-_local_reader_singleton: "LocalVisionExtractor | None" = None
+_local_reader_singleton: LocalVisionExtractor | None = None
 _local_reader_build_lock = threading.Lock()
 
 
@@ -71,10 +71,10 @@ def reset_vision_extractor() -> None:
     _local_reader_singleton = None
 
 
-_session_cache_singleton: "SessionCache | None" = None
+_session_cache_singleton: SessionCache | None = None
 
 
-def _get_session_cache() -> "SessionCache":
+def _get_session_cache() -> SessionCache:
     """Process-wide singleton so the session cache survives across requests.
     Fresh-per-request would defeat the cache: identical (app, image) inputs
     must hit the same SessionCache instance to be deduplicated."""
@@ -92,7 +92,7 @@ def reset_session_cache() -> None:
     _session_cache_singleton = None
 
 
-def build_evaluator(settings: "Settings") -> "Evaluator":
+def build_evaluator(settings: Settings) -> Evaluator:
     """Construct an Evaluator wired to all three real dependencies."""
     from app.rules import build_rule_engine
     from app.services.evaluator import Evaluator
