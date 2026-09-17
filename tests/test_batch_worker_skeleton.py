@@ -3,6 +3,7 @@ of a long batch returned without waiting for the rest, and one failing label
 leaving the rest of the batch checked."""
 
 import asyncio
+import contextlib
 import time
 from datetime import UTC, datetime
 
@@ -162,10 +163,8 @@ async def test_worker_first_label_individual_does_not_wait_for_lookahead_window(
     first_event = await asyncio.wait_for(sub.get(), timeout=2.0)
     elapsed = time.perf_counter() - t0
     run_task.cancel()
-    try:
+    with contextlib.suppress(asyncio.CancelledError):
         await run_task
-    except asyncio.CancelledError:
-        pass
 
     assert first_event["event"] == "label-result"
     assert first_event["data"]["queue_position"] == 0

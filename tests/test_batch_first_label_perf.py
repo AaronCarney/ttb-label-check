@@ -39,41 +39,43 @@ async def test_first_label_p50_under_2_7s_and_p99_under_5_0s_for_50_item_batch(m
     app = create_app()
     transport = httpx.ASGITransport(app=app)
 
-    async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
-        async with app.router.lifespan_context(app):
-            samples_s: list[float] = []
-            event_counts: list[tuple[int, int]] = []
-            for trial in range(N_TRIALS):
-                bid = f"B-perf-{trial:03d}"
-                envelope = BatchEnvelope(
-                    batch_id=bid,
-                    agent_id="a",
-                    submitted_at=datetime(2026, 5, 4, 12, 0, 0, tzinfo=UTC),
-                    items=tuple(
-                        BatchItemRef(label_ref=f"lbl-{i}", application_ref=f"app-{i:04d}")
-                        for i in range(N_ITEMS)
-                    ),
-                ).model_dump(mode="json")
-                t0 = time.perf_counter()
-                post_resp = await client.post("/batches", json=envelope)
-                assert post_resp.status_code == 202, post_resp.text
+    async with (
+        httpx.AsyncClient(transport=transport, base_url="http://test") as client,
+        app.router.lifespan_context(app),
+    ):
+        samples_s: list[float] = []
+        event_counts: list[tuple[int, int]] = []
+        for trial in range(N_TRIALS):
+            bid = f"B-perf-{trial:03d}"
+            envelope = BatchEnvelope(
+                batch_id=bid,
+                agent_id="a",
+                submitted_at=datetime(2026, 5, 4, 12, 0, 0, tzinfo=UTC),
+                items=tuple(
+                    BatchItemRef(label_ref=f"lbl-{i}", application_ref=f"app-{i:04d}")
+                    for i in range(N_ITEMS)
+                ),
+            ).model_dump(mode="json")
+            t0 = time.perf_counter()
+            post_resp = await client.post("/batches", json=envelope)
+            assert post_resp.status_code == 202, post_resp.text
 
-                first_event_t = None
-                lr = se = 0
-                async with client.stream("GET", f"/batches/{bid}/stream") as resp:
-                    assert resp.status_code == 200
-                    async for line in resp.aiter_lines():
-                        if line.startswith("event: label-result"):
-                            if first_event_t is None:
-                                first_event_t = time.perf_counter() - t0
-                            lr += 1
-                        elif line.startswith("event: stream-end"):
-                            se += 1
-                            break
-                assert first_event_t is not None
-                if trial >= 2:  # drop warmup
-                    samples_s.append(first_event_t)
-                event_counts.append((lr, se))
+            first_event_t = None
+            lr = se = 0
+            async with client.stream("GET", f"/batches/{bid}/stream") as resp:
+                assert resp.status_code == 200
+                async for line in resp.aiter_lines():
+                    if line.startswith("event: label-result"):
+                        if first_event_t is None:
+                            first_event_t = time.perf_counter() - t0
+                        lr += 1
+                    elif line.startswith("event: stream-end"):
+                        se += 1
+                        break
+            assert first_event_t is not None
+            if trial >= 2:  # drop warmup
+                samples_s.append(first_event_t)
+            event_counts.append((lr, se))
 
     # Event count: every trial saw N label-result events and one stream-end.
     for trial_idx, (lr, se) in enumerate(event_counts):

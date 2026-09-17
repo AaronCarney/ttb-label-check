@@ -60,7 +60,7 @@ _FIELD_CANONICAL_TO_WIRE = {
 # value on the result page; the join is on the slot.
 _WIRE_TO_FIELD_IDS: dict[str, tuple[str, ...]] = {}
 for _field_id, _wire_slot in _FIELD_CANONICAL_TO_WIRE.items():
-    _WIRE_TO_FIELD_IDS[_wire_slot] = _WIRE_TO_FIELD_IDS.get(_wire_slot, ()) + (_field_id,)
+    _WIRE_TO_FIELD_IDS[_wire_slot] = (*_WIRE_TO_FIELD_IDS.get(_wire_slot, ()), _field_id)
 
 
 def _coerce_str(value) -> str:
@@ -220,7 +220,7 @@ def build_short_circuit_envelope(
             disposition="needs_review",
             evidence_ref=f"engine_failure/{reason_code}",
         )
-        augmented = audit.model_copy(update={"per_rule_trace": audit.per_rule_trace + (synthetic,)})
+        augmented = audit.model_copy(update={"per_rule_trace": (*audit.per_rule_trace, synthetic)})
     else:
         augmented = audit
     return DispositionEnvelope(

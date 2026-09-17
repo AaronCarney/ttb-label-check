@@ -292,7 +292,7 @@ class Evaluator:
             envelope_for_hash=envelope_for_hash,
         )
         metrics = MetricsBuilder().build(timeline)
-        envelope = build_success_envelope(
+        return build_success_envelope(
             application=application,
             label=label,
             timeline=timeline,
@@ -301,7 +301,6 @@ class Evaluator:
             audit=audit,
             metrics=metrics,
         )
-        return envelope
 
     def _new_timeline(self, application: Application):
         """A timeline that already knows which rules are answering.

@@ -8,6 +8,7 @@ reviewer who is reading the results, which is where the work actually is.
 """
 
 import asyncio
+import contextlib
 from datetime import UTC, datetime
 
 import pytest
@@ -87,10 +88,8 @@ async def test_worker_queue_saturates_at_lookahead_plus_one_when_consumer_holds(
     assert in_flight.queue.qsize() <= 4
     assert in_flight.queue.saturated is True
     run_task.cancel()
-    try:
+    with contextlib.suppress(asyncio.CancelledError):
         await run_task
-    except asyncio.CancelledError:
-        pass
 
 
 @pytest.mark.asyncio

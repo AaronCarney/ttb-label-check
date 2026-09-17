@@ -69,11 +69,15 @@ def test_no_cfr_string_literal_in_validator_code() -> None:
     for path in pkg_root.glob("*.py"):
         tree = ast.parse(path.read_text(encoding="utf-8"))
         for node in ast.walk(tree):
-            if isinstance(node, ast.Constant) and isinstance(node.value, str):
-                if "CFR" in node.value:
-                    if isinstance(getattr(node, "parent", None), ast.Expr):
-                        continue  # docstring/expression statement (best-effort)
-                    bad.append(f"{path.name}:{node.lineno}: {node.value!r}")
+            is_cfr_literal = (
+                isinstance(node, ast.Constant)
+                and isinstance(node.value, str)
+                and "CFR" in node.value
+            )
+            if is_cfr_literal:
+                if isinstance(getattr(node, "parent", None), ast.Expr):
+                    continue  # docstring/expression statement (best-effort)
+                bad.append(f"{path.name}:{node.lineno}: {node.value!r}")
     assert not bad, "validator files contain 'CFR' literals: " + "; ".join(bad)
 
 

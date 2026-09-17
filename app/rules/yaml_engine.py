@@ -111,9 +111,9 @@ def _scored_a_reading(rule, result: ValidationResult) -> bool:
     """
     if not result.evidence:
         return False
-    if result.observed is not None and unlocated_is_absent(rule) and unlocated(result.observed):
-        return False
-    return True
+    if result.observed is None:
+        return True
+    return not (unlocated_is_absent(rule) and unlocated(result.observed))
 
 
 class YamlRuleEngine(RuleEngine):

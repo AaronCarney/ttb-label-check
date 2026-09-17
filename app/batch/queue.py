@@ -9,12 +9,9 @@ bounded primitive is a one-file change.
 from __future__ import annotations
 
 import asyncio
-from typing import Generic, TypeVar
-
-T = TypeVar("T")
 
 
-class BoundedQueue(Generic[T]):
+class BoundedQueue[T]:
     """Thin typed wrapper around ``asyncio.Queue``."""
 
     def __init__(self, *, lookahead_k: int) -> None:

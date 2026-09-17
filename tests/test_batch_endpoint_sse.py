@@ -114,19 +114,20 @@ async def test_post_batches_rejects_duplicate_batch_id_with_409(monkeypatch):
     app = create_app()
 
     transport = httpx.ASGITransport(app=app)
-    async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
-        async with app.router.lifespan_context(app):
-            payload = BatchEnvelope(
-                batch_id="B-dup",
-                agent_id="a",
-                submitted_at=datetime(2026, 5, 4, 12, 0, 0, tzinfo=UTC),
-                items=tuple(
-                    BatchItemRef(label_ref=f"lbl-{i}", application_ref=f"app-{i:04d}")
-                    for i in range(2)
-                ),
-            ).model_dump(mode="json")
-            r1 = await client.post("/batches", json=payload)
-            assert r1.status_code == 202
-            r2 = await client.post("/batches", json=payload)
-            assert r2.status_code == 409
-            assert "B-dup" in r2.json()["detail"]
+    async with (
+        httpx.AsyncClient(transport=transport, base_url="http://test") as client,
+        app.router.lifespan_context(app),
+    ):
+        payload = BatchEnvelope(
+            batch_id="B-dup",
+            agent_id="a",
+            submitted_at=datetime(2026, 5, 4, 12, 0, 0, tzinfo=UTC),
+            items=tuple(
+                BatchItemRef(label_ref=f"lbl-{i}", application_ref=f"app-{i:04d}") for i in range(2)
+            ),
+        ).model_dump(mode="json")
+        r1 = await client.post("/batches", json=payload)
+        assert r1.status_code == 202
+        r2 = await client.post("/batches", json=payload)
+        assert r2.status_code == 409
+        assert "B-dup" in r2.json()["detail"]

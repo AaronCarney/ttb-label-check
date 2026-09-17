@@ -1573,7 +1573,7 @@ def _name_address(boxes: list[_Box], joined: str):
         tail = box.text[lead_in.end() :].strip(" ,.:;")
         following = _beneath(box, boxes, limit=3)
         parts = [tail] + [b.text.strip() for b in following]
-        used = [box] + following
+        used = [box, *following]
         name, city, state = "", "", ""
         for part in parts:
             if not part:

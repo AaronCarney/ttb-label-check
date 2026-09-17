@@ -87,7 +87,7 @@ def test_sample_zip_entries_are_valid_images(client: TestClient) -> None:
     for name in image_names:
         body = z.read(name)
         # JPEG magic
-        assert body.startswith(b"\xff\xd8\xff") or body.startswith(b"\x89PNG"), (
+        assert body.startswith((b"\xff\xd8\xff", b"\x89PNG")), (
             f"{name!r} is not a valid JPEG/PNG (first bytes {body[:4]!r})"
         )
 

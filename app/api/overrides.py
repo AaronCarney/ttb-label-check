@@ -145,7 +145,7 @@ async def post_override(
 
     new_audit = env.audit_trail.model_copy(
         update={
-            "overrides": env.audit_trail.overrides + (entry,),
+            "overrides": (*env.audit_trail.overrides, entry),
         }
     )
     new_env = env.model_copy(update={"audit_trail": new_audit})

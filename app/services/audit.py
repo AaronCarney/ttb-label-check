@@ -54,7 +54,7 @@ class AuditRecorder:
                 disposition=timeline.per_rule_dispositions.get(rid, "not_applicable"),  # type: ignore[arg-type]
                 evidence_ref=timeline.per_rule_evidence_refs.get(rid, ""),
             )
-            for rid in timeline.per_rule_durations.keys()
+            for rid in timeline.per_rule_durations
         )
         completed = timeline.completed_at or datetime.now(UTC)
         return AuditRecord(

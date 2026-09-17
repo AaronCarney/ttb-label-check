@@ -86,6 +86,19 @@ extend-exclude = ["*.md"]
 #   RUF  ruff's own, including unused `noqa` directives
 select = ["E", "W", "F", "I", "B", "UP", "SIM", "C4", "RET", "PIE", "RUF"]
 
+# `RUF001`/`RUF002` flag characters that look like ASCII, which is how a
+# homoglyph gets into a string unnoticed. This codebase normalises typography
+# for a living, so every one of the fourteen it found was the character being
+# deliberately matched or replaced: the curly quotes in `brand_match.py` and
+# `verbatim_hash.py` are the ones being folded to straight ones, the en dash in
+# `heading_style_check.py` is in a strip set, the fullwidth colon in
+# `local.py` is what an OCR pass returns, and the rest are correct typography
+# in prose. Allowing exactly those five keeps the rule watching for any other.
+# Written as escapes because a literal one here would be the same ambiguity the
+# rule exists to flag: U+00D7 multiplication sign, U+2013 en dash, U+2018 and
+# U+2019 single curly quotes, U+FF1A fullwidth colon.
+allowed-confusables = ["\u00d7", "\u2013", "\u2018", "\u2019", "\uff1a"]
+
 [tool.ruff.lint.per-file-ignores]
 # FastAPI declares a dependency as a default argument — `x = Depends(...)`,
 # `f: UploadFile = File(...)`. That is the framework's documented spelling, and
