@@ -406,7 +406,7 @@ Sources: `ttb.gov/about-ttb/who-we-are/offices`, `ttb.gov/about-ttb/organization
  - an optional `qualifications: string` field reserved for TTB output;
  - status enum `{Received, Needs_Correction, Conditionally_Approved, Approved, Rejected, Surrendered, Expired, Revoked}`.
 
- Rationale: this is the format an integrating system would actually send TTB if/when myTTB exposes a labeling API; it maps trivially to the paper form for fallback; it composes naturally with image inputs the prototype already needs; it's the easiest representation for a take-home reviewer to validate against the real form.
+ Rationale: this is the format an integrating system would actually send TTB if/when myTTB exposes a labeling API; it maps trivially to the paper form for fallback; it composes naturally with image inputs the prototype already needs; it's the easiest representation for a reader to validate against the real form.
 
 - **Fallback for batch: CSV export from the Public COLA Registry's "Save Search Results to File" function**, augmented with one additional column referencing the registry's printable-version URL for image retrieval. Rationale: zero authoring overhead, real production data, immediately suitable for evaluation runs of 100+ records.
 

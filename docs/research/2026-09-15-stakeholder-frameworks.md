@@ -11,9 +11,9 @@ Filed 2026-09-15.
 ## TL;DR
 
 - The phase-dependent stakeholder priority is the right call. Salience analysis confirms it concretely: Dave is **Dominant** (Power+Legitimacy, time-flexible) at prototype stage; Marcus flips from **Dormant** to **Definitive** the moment we say "production"; Sarah moves from sole sponsor to one of several gatekeepers.
-- The highest-leverage finding from this exercise is for the **demo**, not the architecture: Dave's first 30 seconds determine whether the take-home reviewer (likely watching with Dave's mindset in mind) leans in or folds arms. The STONE'S THROW case has to be in the first three demo labels.
+- The highest-leverage finding from this exercise is for the **demo**, not the architecture: Dave's first 30 seconds determine whether a first-time viewer leans in or folds arms. The STONE'S THROW case has to be in the first three demo labels.
 - Pre-mortem top risk is not a technical failure — it's that **the deployed URL cold-starts past Sarah's 5-second expectation on her first click**, killing trust before the system has a chance to show anything. Cheap to mitigate, easy to miss.
-- The original four-interview slate misses **Janet** (already flagged), the **take-home reviewer** themselves (the literal grader), and the **labor union** (NTEU; latent at prototype, definitive if production framing changes).
+- The original four-interview slate misses **Janet** (already flagged) and the **labor union** (NTEU; latent at prototype, definitive if production framing changes).
 
 ---
 
@@ -32,7 +32,7 @@ Filed 2026-09-15.
 
 | Stakeholder | Power | Legitimacy | Urgency | MAW class |
 |---|---|---|---|---|
-| **Sarah Chen** | High — sponsor, owns evaluation, sets hard constraints | High — formal role (Deputy Director), grading authority | High — take-home is on a deadline, her team is drowning | **Definitive** (P+L+U) |
+| **Sarah Chen** | High — sponsor, owns evaluation, sets hard constraints | High — formal role (Deputy Director), owns the acceptance decision | High — the work is on a deadline, her team is drowning | **Definitive** (P+L+U) |
 | **Dave Morrison** | Low formal power (no sign-off authority); high informal — adoption swings on his reaction | High — 28 years, recognized domain authority, coined the canonical edge case (STONE'S THROW) | Low-Medium — not personally time-pressed; his concerns are durable, not deadline-driven | **Dominant** (P+L) — informally. The Power/Interest grid would file him under "low power" and miss him. |
 | **Jenny Park** | Low — junior, no decision rights | Medium — legitimate user voice, but limited tenure | Medium — eager, supplies edge cases readily | **Discretionary** (L only) — easy to please, low cost to satisfy, often forgotten |
 | **Marcus Williams** | Low at prototype — explicitly said *"for a prototype, just don't do anything crazy"* | High — gatekeeper role on infra, security, federal compliance | Low — no time pressure on him in this phase | **Dormant** (P only) at prototype. Power exists, latent. |
@@ -67,23 +67,22 @@ Same four stakeholders, plus the emergent ones the phase-dependent stakeholder p
 
 One Accountable per row. "Us" = the take-home builder.
 
-| Activity | Sarah | Dave | Jenny | Marcus | Us | Take-home reviewer `[INF]` |
-|---|---|---|---|---|---|---|
-| Requirements definition | **A** | C | C | I | R | I |
-| Architecture decisions | A | C | I | C *(veto on production scope)* | **R** | I |
-| Test corpus design | A | C *(STONE'S THROW)* | C *(altered warning)* | I | **R** | — |
-| Build / implementation | A | I | I | I | **R** | — |
-| Demo / submission | A | — | — | I | **R** | **A** *(grades it)* |
-| Hand-off (if any) | **A** | I | I | C | R | — |
-| Pre-mortem & risk review | A | C | I | C | **R** | — |
-| 5s SLA validation | A | C | C | I | **R** | I |
-| Reasoning-output design (rejection reasoning) | A | **C** *(must read as legible to him)* | C | I | **R** | I |
-| Class-specific stretch features (the class-depth scope call) | A | C | C | I | **R** | I |
+| Activity | Sarah | Dave | Jenny | Marcus | Us |
+|---|---|---|---|---|---|
+| Requirements definition | **A** | C | C | I | R |
+| Architecture decisions | A | C | I | C *(veto on production scope)* | **R** |
+| Test corpus design | A | C *(STONE'S THROW)* | C *(altered warning)* | I | **R** |
+| Build / implementation | A | I | I | I | **R** |
+| Demo / submission | **A** | — | — | I | R |
+| Hand-off (if any) | **A** | I | I | C | R |
+| Pre-mortem & risk review | A | C | I | C | **R** |
+| 5s SLA validation | A | C | C | I | **R** |
+| Reasoning-output design (rejection reasoning) | A | **C** *(must read as legible to him)* | C | I | **R** |
+| Class-specific stretch features (the class-depth scope call) | A | C | C | I | **R** |
 
 **Notes.**
-- The phase-dependent stakeholder priority's tier order maps cleanly to A/C distribution: Sarah is A everywhere except where she explicitly delegated (Marcus on infra at production scope, take-home reviewer on grading).
-- The take-home reviewer is added as a column because they are **Accountable on grading** — pretending otherwise is a category error.
-- "Hand-off" assumes there is one. In a take-home there usually isn't, but if the prototype gets re-platformed, Sarah is A on what gets handed and to whom.
+- The phase-dependent stakeholder priority's tier order maps cleanly to A/C distribution: Sarah is A everywhere except where she explicitly delegated (Marcus on infra at production scope).
+- "Hand-off" assumes there is one. There usually is not at this stage, but if the prototype gets re-platformed, Sarah is A on what gets handed and to whom.
 
 ---
 
@@ -198,17 +197,13 @@ Per Klein (2007): assume the project failed badly; work backward to specific cau
                  │  └───────────────────────────────────────────────────────────┘   │
                  └──────────────────────────────────────────────────────────────────┘
 
-ALONGSIDE (not in any TTB ring): the take-home reviewer themselves —
-   the actual grader. Often forgotten; literally Accountable on submission outcome.
 ```
 
-**Three stakeholders the original four-interview slate missed:**
+**Two stakeholders the original four-interview slate missed:**
 
 1. **Janet (Seattle field office).** Named in Sarah's transcript ("Janet has been asking about this for years"). Not interviewed. Already flagged in 04-research-topics A-4. She likely has the most concrete batch-workflow requirements of anyone — and she'd be a high-leverage second-round interview if this advances. *Activation:* on any pilot framing.
 
-2. **The take-home reviewer.** The literal grader. Sits outside every TTB ring but is **A** on the only outcome the prototype actually produces. Often forgotten because they're framed as "the system reading our submission" rather than as a stakeholder. They are. *Activation:* now.
-
-3. **NTEU (National Treasury Employees Union).** Latent at prototype stage. Activates the moment any framing of this work could be read as "AI replacing agents" — which is exactly the framing the brief itself opens with ("47 agents... back in the 80s they had over 100"). *Activation:* on any production proposal that doesn't lead with augment-not-replace.
+2. **NTEU (National Treasury Employees Union).** Latent at prototype stage. Activates the moment any framing of this work could be read as "AI replacing agents" — which is exactly the framing the brief itself opens with ("47 agents... back in the 80s they had over 100"). *Activation:* on any production proposal that doesn't lead with augment-not-replace.
 
 **Inward-movement risk** (per the brief's prompt):
 - *Marcus moves from Enabler to gatekeeping Core* the moment production is mentioned.
@@ -327,6 +322,5 @@ Per 05-gaps-and-limitations §3.1: maintain a *stakeholder log* (running provena
 
 - **Empathy maps are inference-heavy by design.** "Thinks" and "Feels" are educated reads on the transcripts, not measurements. Tagged `[INF]`. Validate by showing a draft to Sarah on a follow-up if one happens.
 - **The phase-dependent stakeholder priority's percentages** (100/90/80/70) are useful as a tier signal, not as a literal weighting. Don't treat them as if they sum to anything.
-- **The take-home reviewer** is treated above as a stakeholder. They are. But we don't know who they are individually, what their priors are, or whether Sarah, Dave, and Jenny are personally on the panel. The persona work is the best proxy we have.
-- **Pre-mortem probabilities are subjective `[INF]`.** Klein's method works best when multiple people generate them independently and the consolidated list is the input. With a team of one on a take-home, this is a single-author list — read it as an opening contribution.
+- **Pre-mortem probabilities are subjective `[INF]`.** Klein's method works best when multiple people generate them independently and the consolidated list is the input. With a team of one, this is a single-author list — read it as an opening contribution.
 - **Salience is not stationary.** The Q10.1 and Q10.2 matrices are bookends. Real projects pass through intermediate states (pilot, scaled pilot, partial production). Re-run at each gate per Q10.10 cadence.
