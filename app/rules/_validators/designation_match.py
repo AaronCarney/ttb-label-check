@@ -25,6 +25,8 @@ adding a class is an edit to the rule pack and not to this file.
 
 from __future__ import annotations
 
+import re
+
 from app.rules._validators import ValidatorContext, register
 from app.rules._validators._helpers import (
     _build_meta,
@@ -41,28 +43,32 @@ from app.schemas.extracted import FieldObservation
 from app.schemas.rejection import Outcome, Severity, ValidationResult
 from app.schemas.rules import RuleDefinition
 
+# A class is its words, in order, and that is what every comparison below is
+# between. They were joined back into a string first, on both sides, purely so
+# two sets could be intersected - a separator written out twice that nothing
+# ever read. The words are already the thing being compared, so they are what
+# is carried around.
+Class = tuple[str, ...]
 
-def _classes_named(words: tuple[str, ...], recognised: list[str]) -> set[str]:
+
+def _classes_named(words: Class, recognised: list[str]) -> set[Class]:
     """Every recognised class whose words all appear in this designation.
 
     Word presence rather than a run, because a designation interleaves its
     qualifiers: "TABLE RED WINE" and "RED TABLE WINE" both name table wine.
     """
     present = set(words)
-    named = set()
-    for value in recognised:
-        class_words = normalize_words(str(value))
-        if class_words and present.issuperset(class_words):
-            named.add(" ".join(class_words))
-    return named
+    named = (normalize_words(str(value)) for value in recognised)
+    return {c for c in named if c and present.issuperset(c)}
 
 
-def _within(label_classes: set[str], application_classes: set[str], table: dict) -> bool:
+def _within(
+    label_classes: set[Class], application_classes: set[Class], table: dict[Class, list]
+) -> bool:
     """True when a class the label names falls within one the application did."""
     for declared in application_classes:
-        inner = table.get(declared) or []
-        inner_names = {" ".join(normalize_words(str(v))) for v in inner}
-        if label_classes & inner_names:
+        inner = {normalize_words(str(v)) for v in table.get(declared) or []}
+        if label_classes & inner:
             return True
     return False
 
@@ -147,26 +153,34 @@ def designation_match(
     )
 
 
-def _segments(declared: str) -> list[tuple[str, ...]]:
+def _segments(declared: str) -> list[Class]:
     """The declared class/type split where the registry packs several into one
-    string: on slashes and around a parenthesised alternative."""
-    text = declared.replace("(", "/").replace(")", "/")
-    return [normalize_words(part) for part in text.split("/")]
+    string: on slashes and around a parenthesised alternative.
+
+    One split on all three characters, rather than rewriting the brackets into
+    slashes first. The rewrite said "a bracket is a slash", which is not what
+    is meant and left the slash spelled out in two places.
+    """
+    return [normalize_words(part) for part in re.split(r"[/()]", declared)]
 
 
-def _within_table(rule: RuleDefinition, ctx: ValidatorContext) -> dict[str, list]:
+def _within_table(rule: RuleDefinition, ctx: ValidatorContext) -> dict[Class, list]:
     """The decision table as a map from a class to the designations within it.
 
     Each table entry names one class and the designations it covers:
-    `{class: Beer, designations_within: [Lager, Ale, ...]}`.
+    `{class: Beer, designations_within: [Lager, Ale, ...]}`. An entry naming no
+    class is dropped rather than stringified: `str(None)` is "None", which
+    would enter the map as a class called "none" and pair with any label
+    reading that word.
     """
     ref = rule.decision_table_ref
     table = ctx.decision_tables.get(ref) if ref else None
     if table is None:
         return {}
-    mapped: dict[str, list] = {}
+    mapped: dict[Class, list] = {}
     for entry in table.entries:
-        name = " ".join(normalize_words(str(entry.get("class", ""))))
+        declared = entry.get("class")
+        name = normalize_words(str(declared)) if declared is not None else ()
         if name:
-            mapped[name] = list(entry.get("designations_within", []))
+            mapped[name] = list(entry.get("designations_within") or [])
     return mapped
