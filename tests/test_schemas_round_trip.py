@@ -46,6 +46,8 @@ def test_extracted_field_observation_round_trip() -> None:
 
 
 def test_extracted_models_are_frozen() -> None:
+    from pydantic import ValidationError
+
     from app.schemas.extracted import Evidence, EvidenceSource, MatchKind
 
     ev = Evidence(
@@ -63,7 +65,7 @@ def test_extracted_models_are_frozen() -> None:
         confidence=0.5,
         notes=None,
     )
-    with pytest.raises(Exception):  # ValidationError or FrozenInstanceError-like
+    with pytest.raises(ValidationError, match="Instance is frozen"):
         ev.confidence = 0.9  # type: ignore[misc]
 
 

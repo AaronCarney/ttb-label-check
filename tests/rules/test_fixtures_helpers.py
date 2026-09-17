@@ -5,6 +5,7 @@ Pydantic instances so tests can construct typed payloads without verbosity.
 from __future__ import annotations
 
 import pytest
+from pydantic import ValidationError
 
 from app.schemas.extracted import Evidence, EvidenceSource, FieldObservation, MatchKind
 from app.schemas.rejection import EngineMeta
@@ -23,7 +24,7 @@ def test_make_obs_returns_field_observation() -> None:
     assert isinstance(obs, FieldObservation)
     assert obs.field_id == "brand"
     assert obs.observed_value == "STONE'S THROW"
-    with pytest.raises(Exception):
+    with pytest.raises(ValidationError, match="Instance is frozen"):
         obs.field_id = "x"  # type: ignore[misc]
 
 

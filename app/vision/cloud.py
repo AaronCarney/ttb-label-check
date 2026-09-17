@@ -338,7 +338,7 @@ class CloudVisionExtractor:
             )
         )
         observations: list[FieldObservation] = []
-        for fname, content in zip(_FIELD_NAMES, contents):
+        for fname, content in zip(_FIELD_NAMES, contents, strict=True):
             if fname == "gov_warning" and isinstance(content, dict):
                 # Override the model's self-reported bold with a deterministic
                 # stroke-width measurement on the heading bbox. The LLM's

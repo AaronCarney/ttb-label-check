@@ -38,6 +38,7 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 from functools import lru_cache
 from io import BytesIO
+from itertools import pairwise
 
 import numpy as np
 from PIL import Image
@@ -436,7 +437,7 @@ class LocalVisionExtractor:
             return []
         scores = result.scores if result.scores is not None else [1.0] * len(result.txts)
         boxes: list[_Box] = []
-        for quad, text, score in zip(result.boxes.tolist(), result.txts, scores):
+        for quad, text, score in zip(result.boxes.tolist(), result.txts, scores, strict=True):
             xs = [p[0] for p in quad]
             ys = [p[1] for p in quad]
             boxes.append(
@@ -755,7 +756,7 @@ def _columns(boxes: list[_Box]) -> list[list[_Box]]:
 
     cuts = [left] + [left + (g[0] + g[1]) / 2.0 for g in gutters] + [right + 1]
     columns: list[list[_Box]] = []
-    for lo, hi in zip(cuts, cuts[1:]):
+    for lo, hi in pairwise(cuts):
         column = [b for b in boxes if lo <= (b.x0 + b.x1) / 2.0 < hi]
         if column:
             columns.append(column)

@@ -83,7 +83,7 @@ def test_unknown_validator_fails_closed(tmp_path: Path) -> None:
 
 def test_unknown_reason_code_fails_closed(tmp_path: Path) -> None:
     rules = _setup(tmp_path, _baseline_rule_yaml(reason="DOES.NOT.EXIST"))
-    with pytest.raises(RuleLoaderError, match="reason_code .* not in registry"):
+    with pytest.raises(RuleLoaderError, match=r"reason_code .* not in registry"):
         YamlRuleLoader().load(rules)
 
 
@@ -147,10 +147,41 @@ def test_yaml_parse_error_fails_closed(tmp_path: Path) -> None:
         YamlRuleLoader().load(rules)
 
 
+def _asset_pack_yaml(sha256_pin: str) -> str:
+    """A one-rule pack pinning `assets/warnings/x.txt` to the given digest."""
+    body = (
+        _baseline_rule_yaml(validator="verbatim_hash", reason="WARNING.VERBATIM.MISMATCH").rstrip()
+        + f"""
+            asset:
+              path: assets/warnings/x.txt
+              sha256_pin: {sha256_pin}
+              normalization: []
+        """
+    )
+    body = body.replace("BRAND.PRESENCE.MISSING", "WARNING.VERBATIM.MISMATCH")
+    return body.replace("test.brand.present", "test.warning.verbatim")
+
+
+def test_asset_hash_matching_the_pin_loads(tmp_path: Path) -> None:
+    """The other half of the drift test.
+
+    `test_asset_hash_drift_fails_closed` shows a wrong pin is refused. On its
+    own that is also what a loader that refused every pin would do, so this
+    pins the same asset to its real digest and asserts the pack loads.
+    """
+    asset = tmp_path / "assets/warnings/x.txt"
+    _write(asset, "different content here")
+    real_sha = hashlib.sha256(asset.read_bytes()).hexdigest()
+
+    rules = _setup(tmp_path, _asset_pack_yaml(real_sha))
+    pack = YamlRuleLoader(rules_root_for_assets=tmp_path).load(rules)
+
+    assert pack is not None
+
+
 def test_asset_hash_drift_fails_closed(tmp_path: Path) -> None:
     asset = tmp_path / "assets/warnings/x.txt"
     _write(asset, "different content here")
-    real_sha = hashlib.sha256(b"different content here").hexdigest()
     body = (
         _baseline_rule_yaml(validator="verbatim_hash", reason="WARNING.VERBATIM.MISMATCH").rstrip()
         + """

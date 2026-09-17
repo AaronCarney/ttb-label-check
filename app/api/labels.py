@@ -42,7 +42,7 @@ async def post_labels(
         app_bytes = await application.read()
         app_obj = Application(**json.loads(app_bytes))
     except (json.JSONDecodeError, ValueError, TypeError) as e:
-        raise HTTPException(status_code=400, detail=f"rejected_input: {e}")
+        raise HTTPException(status_code=400, detail=f"rejected_input: {e}") from e
 
     label_bytes = await label.read()
     filename = label.filename or "the label image"

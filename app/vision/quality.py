@@ -82,7 +82,7 @@ def _extract_dpi(image_bytes: bytes, dimensions: Dimensions | None) -> int | Non
     if info_dpi:
         x = float(info_dpi[0])
         if x > 0:
-            return int(round(x))
+            return round(x)
 
     exif = img.getexif()
     x_res = exif.get(_EXIF_X_RESOLUTION)
@@ -92,7 +92,7 @@ def _extract_dpi(image_bytes: bytes, dimensions: Dimensions | None) -> int | Non
         if x_val > 0:
             if unit == 3:  # cm → convert to inch
                 x_val *= 2.54
-            return int(round(x_val))
+            return round(x_val)
 
     if dimensions is not None and dimensions.dpi is not None:
         return dimensions.dpi

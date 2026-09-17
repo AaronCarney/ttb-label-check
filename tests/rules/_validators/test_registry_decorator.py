@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from dataclasses import FrozenInstanceError
+
 import pytest
 
 from app.rules._validators import (
@@ -41,5 +43,5 @@ def test_validator_context_is_frozen_dataclass() -> None:
         started_at_ms=0,
         engine_version="0.0.0",
     )
-    with pytest.raises(Exception):
+    with pytest.raises(FrozenInstanceError):
         ctx.engine_version = "mutated"  # type: ignore[misc]

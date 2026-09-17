@@ -51,7 +51,6 @@ def glare(img: Image.Image, cx: float, cy: float, radius: float, strength: float
 
 def skew(img: Image.Image, angle: float, shear: float) -> Image.Image:
     """Rotate by angle degrees and apply a horizontal shear, as from a hand-held photo."""
-    w, h = img.size
     out = img.rotate(angle, resample=Image.BICUBIC, expand=True, fillcolor=(60, 60, 60))
     w2, h2 = out.size
     return out.transform(

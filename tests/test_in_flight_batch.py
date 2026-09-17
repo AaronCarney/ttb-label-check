@@ -4,6 +4,7 @@ from collections import deque
 from datetime import UTC, datetime
 
 import pytest
+from pydantic import ValidationError
 
 from app.batch.state import InFlightBatch
 from app.schemas.batch import BatchInFlightState, BatchItem, ItemState
@@ -69,7 +70,7 @@ def test_in_flight_batch_snapshot_returns_frozen_pydantic_state():
     assert snap.current_index == 0
     assert snap.lookahead_k == 3
     # Frozen — mutating raises
-    with pytest.raises(Exception):  # pydantic.ValidationError
+    with pytest.raises(ValidationError, match="Instance is frozen"):
         snap.batch_id = "X"  # type: ignore[misc]
 
 

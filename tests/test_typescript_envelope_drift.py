@@ -93,8 +93,6 @@ def test_typescript_envelopes_mirror_pydantic_fields() -> None:
     ts = TS_PATH.read_text()
     missing: list[str] = []
     for field in sorted(_pydantic_fields()):
-        if field in {}:
-            continue
         if field not in ts:
             missing.append(field)
     assert not missing, f"TypeScript envelope types missing fields: {missing}"

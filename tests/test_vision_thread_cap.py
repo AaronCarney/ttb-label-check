@@ -19,6 +19,7 @@ import os
 from collections import deque
 
 import pytest
+from pydantic import ValidationError
 
 from app.config import Settings
 from app.vision.local import LocalVisionExtractor
@@ -59,7 +60,7 @@ def test_cap_is_clamped_into_the_window_onnxruntime_accepts() -> None:
 
 def test_a_thread_count_below_one_is_refused_at_configuration_time() -> None:
     """Zero is the other silently-ignored value, so it never reaches the engine."""
-    with pytest.raises(Exception):
+    with pytest.raises(ValidationError):
         Settings(ocr_num_threads=0)
 
 
