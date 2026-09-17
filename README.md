@@ -6,7 +6,7 @@ look. The decision to approve or reject stays with the agent.
 
 ## Deployed URL
 
-Not up yet; the URL goes here when it is published.
+**https://ttb.aaroncarney.me**
 
 The host is settled — Google Cloud Run, argued in [decision 0025](docs/decisions.md#0025) — and the
 deploy is one command. Cloud Build builds the `Dockerfile` at the root of this repository from an
@@ -18,28 +18,44 @@ scripts/deploy.sh --check                   # every check that needs no network;
 TTB_GCP_PROJECT=your-project scripts/deploy.sh
 ```
 
+That address is this project's own hostname rather than the one Cloud Run issues. A small Cloudflare
+Worker in `edge/` answers it and forwards to the service, because Cloud Run's front end routes on the
+Host header and answers anything it does not recognise with a 404 of its own. It is deployed with
+`npx wrangler deploy` from that directory.
+
 `--check` is what proves the repository is deployable without making it public: it runs every
 precondition the deploy has that needs no network, and names any that fails. It runs as part of the
 test suite.
 
-### The five-second requirement is not verified
+### The five-second requirement is measured, and it is not met
 
 R15 in [the requirements](specs/0001-label-verification/requirements.md) and NFR-1 in
 [the PRD](docs/PRD.md) are one promise, and both mark it P0: 95 percent of single checks show
-results within five seconds. **No run has confirmed it, and this file publishes no figure for it.**
+results within five seconds. **Measured on the deployed service on 2026-09-16, it comes in under
+that.** Three runs, each posting all 38 test submissions one at a time and discarding the first as a
+cold start:
 
-Speed belongs to the machine doing the reading, and this prototype is built to read on the deployed
-service rather than on a developer's computer, so a number measured here would describe the wrong
-hardware. The service is not up, so the measurement has not been taken.
+| Address the run used | Inside five seconds |
+| --- | --- |
+| The Cloud Run URL, directly | 33 of 38 — 87% |
+| `ttb.aaroncarney.me`, through the Worker | 34 of 38 — 89% |
+| A local authenticated proxy, which adds a hop and inflates the figure | 27 of 38 — 71% |
 
-The check itself is written and waiting. `tests/test_deploy_healthz.py` posts every test submission
-to the deployed single-check route one at a time, throws away the first as a cold start, and asserts
-the share that came back inside five seconds. It skips while there is no URL and runs the moment
-there is one:
+The requirement is 95%. **The misses are narrow and they cluster:** on the two runs that describe
+what a reviewer actually meets, every check that missed landed between 5.00 and 5.21 seconds, and
+the fastest of them missed by two hundredths of a second. A fourth run earlier the same evening
+passed this assertion outright, so the true share sits near the line rather than below it, and a
+single figure would misrepresent it. Nothing here has been tuned for speed; the service runs at the
+size [decision 0025](docs/decisions.md#0025) argued from the free tier's limits, and raising the
+core count is the untried lever.
+
+The measurement runs against whatever URL it is given, and skips when there is none:
 
 ```bash
-TTB_DEPLOY_URL=<the URL the deploy printed> uv run pytest tests/test_deploy_healthz.py
+TTB_DEPLOY_URL=https://ttb.aaroncarney.me uv run pytest tests/test_deploy_healthz.py
 ```
+
+`tests/test_deploy_healthz.py` is what produced every figure above.
 
 Everything below runs today from a clone, which is the other half of the same deliverable.
 
@@ -250,7 +266,7 @@ Both deliverables:
 | Deliverable | Status |
 |---|---|
 | Source code repository — all source, a README with setup and run instructions, and documentation of approach, tools and assumptions | This repository and this file |
-| Deployed application URL — a working prototype Treasury can access and test | Host settled and the deploy is one command; standing the service up is the owner's to authorise. See "Deployed URL" above |
+| Deployed application URL — a working prototype Treasury can access and test | Live at https://ttb.aaroncarney.me. See "Deployed URL" above |
 
 ## Where to look next
 

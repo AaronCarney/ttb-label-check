@@ -146,18 +146,27 @@ def test_readme_coverage_table_answers_both_deliverables() -> None:
         assert deliverable in coverage, f"coverage table missing {deliverable!r}"
 
 
-def test_readme_records_the_latency_requirement_as_unverified() -> None:
-    """A P0 with no measurement has to be stated, not omitted.
+def test_readme_records_the_measured_latency_and_the_shortfall() -> None:
+    """A P0 the product misses has to be stated, not omitted.
 
-    R15/NFR-1 promises 95 percent of single checks inside five seconds and no
-    run has confirmed it. A README that simply stays quiet about it reads
-    exactly like one whose product met it, so the silence is the failure this
-    guard catches. The section also names the test that takes the number, so
-    whoever stands the service up knows what to run.
+    R15/NFR-1 promises 95 percent of single checks inside five seconds. The
+    service is up and the measurement has been taken, and it comes in under
+    that. A README that stays quiet about it, or that publishes the share
+    without the requirement beside it, reads exactly like one whose product met
+    the promise — that silence is the failure this guard catches. It replaces an
+    earlier guard that required the section to call the figure unverified, which
+    was right for as long as no run had produced one. The section also still
+    names the test that takes the number, so a reader can repeat it.
     """
     deployed = _section(_readme(), "## Deployed URL")
-    assert "not verified" in deployed.lower(), (
-        "Deployed URL section no longer records R15/NFR-1 as unverified"
+    assert "95%" in deployed or "95 percent" in deployed, (
+        "Deployed URL section does not state the share R15/NFR-1 requires"
+    )
+    assert "of 38" in deployed, (
+        "Deployed URL section publishes no measured share of checks inside the budget"
+    )
+    assert "not met" in deployed.lower(), (
+        "Deployed URL section does not say the five-second requirement is missed"
     )
     assert "tests/test_deploy_healthz.py" in deployed, (
         "Deployed URL section does not name the test that measures it"
