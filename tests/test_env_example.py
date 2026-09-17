@@ -17,6 +17,7 @@ REQUIRED_KEYS = {
     "LOOKAHEAD_K",
     "DEV_MODE",
     "OTEL_EXPORTER_OTLP_ENDPOINT",
+    "RULES_ROOT",
 }
 
 ENV_EXAMPLE = Path(__file__).parents[1] / ".env.example"

@@ -64,10 +64,11 @@ a file that could never have been filed in the first place.
 Held as 1.5 MiB rather than 1,500,000 bytes so that whichever unit TTB means,
 ours is never the stricter one, and we never refuse an image the registry took.
 
-The corpus agrees: 124 label images in `tests/fixtures/labels/` run from 13 KB
-to 547 KB, so the cap sits about 2.7x above the largest real label we hold. The
-reader would not use the extra bytes anyway — it downscales to
-`MAX_EDGE_PX = 1600` on the long edge before reading (`app/vision/local.py`).
+The bound is the registry's and not this repository's: what our own test
+images happen to weigh is a property of a demo corpus, and a cap a real filer's
+upload has to clear cannot be argued from it. The reader would not use the extra
+bytes in any case — it downscales to `MAX_EDGE_PX = 1600` on the long edge
+before reading (`app/vision/local.py`).
 
 The earlier cap was 10 MB, sized for a phone photograph rather than for a
 filing. That was the wrong constraint to derive from: a bound should be as tight

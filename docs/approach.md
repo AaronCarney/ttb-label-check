@@ -33,8 +33,9 @@ those as what it was, and the requirements came from elsewhere.
 **We took the requirements from the interviews, not from the field list.** The list of seven label
 elements is the only part of the brief that looks like a specification, and it says nothing about
 speed, batches, error handling, or who uses this. The four people in the transcripts say all of it.
-Every requirement we built against traces back to a person or a passage, and three asks are recorded
-as deliberately unanswered — so an ask nobody met cannot later be mistaken for one nobody noticed.
+Every requirement we built against traces back to a person or a passage, and the one ask we met with
+no requirement at all is recorded as such — so an ask nobody answered cannot later be mistaken for
+one nobody noticed.
 
 **When the four of them wanted different things, we ranked them, and the ranking changes with the
 phase.** For a prototype the deputy director decides, then the senior agent whose adoption it lives
@@ -154,10 +155,9 @@ and its text colour in the same rule, so a component that overrode only the back
 label it never asked for. So the claim we can make is that we built the mechanism and, on every
 page the product serves, met the part of the standard a machine can judge. Section 508 asks for a
 conformance review as well as an automated scan, and that review has not been run. A disposition is
-never carried by colour alone, which has its own passing test. We stopped
-short of claiming a newer conformance level
-for a different reason: the two criteria that would have justified one are criteria no automated
-check here can reach. A claim the product cannot test is the kind of promise this build refuses to
+never carried by colour alone, which has its own passing test. We stopped short of claiming a newer conformance level for a different reason: of the two criteria
+that would have justified one, axe-core runs no rule for either at the tags this gate requests, and
+for one of them it has no rule at any tag at all. A claim the product cannot test is the kind of promise this build refuses to
 make anywhere else.
 
 The heavier federal gates are real and none of them is met here. Each is named with what it would
@@ -212,8 +212,8 @@ checks at the reader's measured 1.18-second median. TTB's 150,000 applications a
 12,500 a month, so on volume alone the allowance covers the agency about three times over; what it
 does not cover is a peak-season burst, because each running copy reads one label at a time and
 hundreds filed at once queue rather than fan out. The real exposure is not the meter but the
-absence of a stop: the provider's budgets alert rather than cut off, so what actually bounds the
-bill is the instance cap, the request timeout and a rate limit at the edge. Storage is the one
+absence of a stop: the provider's budgets alert rather than cut off, so what actually bounds the bill is the instance cap and the request timeout. The rate limit at the
+edge was meant to be the third and denies nothing, measured. Storage is the one
 line that is not zero — the image exceeds the half-gigabyte grant, at ten cents per gigabyte per
 month — and it is small change rather than nothing.
 
@@ -232,8 +232,8 @@ do anything crazy, and we answered by building nothing that needs them.
 
 **The model reads. The rules decide.** That line is the centre of the design. A reader turns a
 photograph into text and locations; rules written as data, each naming the regulation it enforces,
-turn that into verdicts. We built a layer that sent finished results to a language model for a second
-opinion, and then deleted it — around 600 lines across 18 files — because a compliance verdict a
+turn that into verdicts. We built a layer that sent finished results to a language model for a second opinion, and then
+deleted it — 644 lines of subsystem and about twenty test files, reaching into eighteen more — because a compliance verdict a
 model can influence cannot be defended to the person who has to sign it. What the deletion buys is
 the property the product is sold on: the same label and the same application give the same answer
 every time, with a citation attached. What it costs is every capability that needs judgement beyond a
@@ -281,10 +281,9 @@ a single label's result keeps for seven days so an override has something to ame
 gone. What survives is also emptied on purpose: to keep no applicant material on disk, the kept copy
 blanks the value read off the artwork and the value the application declared, so it records that a
 field was rejected without recording what it said. That is the right privacy answer and it makes the
-kept copy useless as evidence — the two goals are in real conflict here, and we chose privacy. What
-survives is unlabelled as well: the trail attached to each verdict names the rule set that
-produced it as "unknown" on every evaluation, and names the reader not at all, so even a kept copy
-could not say which rules judged that label or what read it. The full record is in the result page's
+kept copy useless as evidence — the two goals are in real conflict here, and we chose privacy. What survives is half-labelled: the trail attached to each verdict now names the rule set that
+produced it, by version and content hash, but it names the reader not at all — so a kept copy can
+say which rules judged that label and not what read it. The full record is in the result page's
 own source, but the interface offers no save, no print and no download, and the drawer that would
 display it is a developer's switch that is off by default — so getting the record means calling the
 service directly, which a developer does and a reviewing agent does not. Every rule that fired on an
@@ -299,8 +298,8 @@ after a week, almost nothing for a privacy reviewer to ask about — is what lea
 rejection with no record to answer it. A
 deployment that must stand behind its verdicts needs three things we did not build: a retention
 period set by the agency's records schedule, a sign-in so an override names a person, and real
-versions on the trail. We would rather name the gap than fit a cheap version of it: a record that
-says "unknown" where its version belongs is worse than no record, because it looks like evidence.
+versions on the trail. We would rather name the gap than fit a cheap version of it: a record that filled the reader's name
+with a placeholder would be worse than no record, because it would look like evidence.
 
 **We designed around the error that costs more.** A false rejection sends a compliant applicant back
 round a process that takes weeks, and it is the error that would end a pilot. A false pass is caught
@@ -441,10 +440,11 @@ looking, so each is named:
 
 - The ten-minute target for a 300-label batch has no instrument at all — no test and no figure.
 - Accessibility past what a machine can check. The automated scan now covers all three screens and
-  the batch table both empty and populated, and passes on every one. Two checks axe cannot decide
-  by itself are recorded rather than discarded, so an undecidable check no longer reads as a pass.
-  The manual review the requirement really asks for has not been run, and an automated pass is the
-  floor of an accessibility claim rather than the whole of one.
+  the batch table both empty and populated. Whether it passes is the result of a run rather than a
+  property of the build, and the last run we made was green. One check axe cannot decide by itself
+  is recorded with the review that settled it rather than discarded, so an undecidable check no
+  longer reads as a pass. The manual review the requirement really asks for has not been run, and
+  an automated pass is the floor of an accessibility claim rather than the whole of one.
 
 The first is a missing measurement. The second is a limit on the proof rather than a gap in the
 build: the requirement was written, the mechanism was built, the half a machine can check is met,
@@ -477,12 +477,14 @@ explicit that they take on nothing new to operate — so the product had to be o
 did not write it. One readiness check answers whether the service is up and doubles as the warm-up
 that loads the reading models, so a copy that cannot load them announces itself as not ready rather
 than failing the first real label. Logs carry the identifiers needed to follow one submission
-through, with applicant material kept out. That is where the operability stops: no metrics endpoint,
-no alerting, no dashboard, no stored record of what the service did, so an operator can tell whether
-it is running and cannot tell whether it is right. Even the guard on cost is not the one we
-designed. The rate limit at the edge denies nothing — measured on the deployed service, not inferred
-from the code — so what bounds the bill is that the service refuses every caller but our own front
-door, and a refused request is never billed. Those are prerequisites before this ran inside the
+through, with applicant material kept out. That is where the operability stops: no metrics endpoint, no alerting, no dashboard, and nothing
+recording what the service did beyond the single-label results it keeps for a week so an override
+has something to amend. An operator can tell whether it is running and cannot tell whether it is
+right. Neither guard on cost is the one we designed. The rate limit at the edge denies nothing, and the
+invoker check that was meant to refuse every caller but our own front door is switched off so that a
+reviewer can reach the service — both measured on the deployed service rather than inferred from the
+code, and both recorded in `edge/src/index.js` beside the lines that assume otherwise. What is left
+bounding the meter is the two-instance cap. Those are prerequisites before this ran inside the
 agency, not improvements: a compliance service nobody is watching is one nobody can vouch for.
 
 **What we would do next, in order.** Run a real accessibility review rather than an automated one,
@@ -521,9 +523,16 @@ one tagged release so far. The deploy builds from an export of the committed rev
 the working tree, so nothing uncommitted on a developer's machine can reach the image, and it runs
 five checks first: the container file is present, the port the service is told to use is the one the
 container opens, the built interface bundle is committed, every path the build copies exists, and
-the working tree is clean. What is missing is the obvious thing: there is no continuous integration
-of any kind. No push runs the tests, so every gate above is a gate only while somebody remembers to
-pull it. On a team of one that held; it would not survive a second person.
+the working tree is clean. Every push runs the rest. Until a pipeline existed the suite ran only
+when somebody typed the command, which is how seven browser tests failed unnoticed for days; the
+pipeline now runs the three commands the README documents — lint, formatting, types — and then the
+whole suite on an image that installs pnpm and Playwright, so the browser group actually runs
+instead of skipping itself green. No job may be allowed to fail, and a test reads the pipeline file
+and fails if one is, because a job that cannot fail the pipeline is the same defect as a test that
+cannot fail. Origin is GitLab and that is where it runs; the GitHub remote is a mirror and runs
+nothing. What the pipeline still does not do is gate the deploy. The deploy is a command a person
+types, and the five checks it runs first do not include whether the pipeline passed, so a proven
+commit and a deployed image remain two separate acts of remembering.
 
 ## Assumptions we made
 

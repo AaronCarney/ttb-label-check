@@ -76,3 +76,7 @@ as it finishes, so a 300-label batch shows its first verdicts immediately instea
 | `frontend/` | React island source, built by Vite into `app/ui/static/`. |
 | `eval/` | Scores the reader against the real labels and their recorded ground truth. |
 | `tests/` | Tests; `tests/fixtures/labels/` holds the real labels and their ground truth. |
+| `scripts/` | `deploy.sh`, the one-command deploy. `--check` runs every precondition that needs no network. |
+| `edge/` | The Cloudflare Worker that answers the public hostname and forwards to the service. Its comments carry what was measured about the origin's access and the rate limit. |
+| `specs/` | The brief, and the requirements derived from it: every ask mapped to the requirement that answers it. |
+| `docs/` | The written record: `approach.md`, the PRD, `decisions.md`, `reference/` for the regulation texts, and `research/` for what was read before choosing. |

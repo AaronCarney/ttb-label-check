@@ -22,15 +22,19 @@ scripts/deploy.sh --check                   # every check that needs no network;
 TTB_GCP_PROJECT=your-project scripts/deploy.sh
 ```
 
-That address is this project's own hostname rather than the one Cloud Run issues, and it is the only
-way in. A small Cloudflare Worker in `edge/` answers it and forwards to the service, addressing the
-origin by its own hostname because Cloud Run's front end routes on the Host header. The service
-itself runs with its invoker check on and admits one service account, so the Cloud Run URL answers
-an uncredentialed request with 403 while the Worker, which signs each request with a Google ID token
-minted from a key held as a Worker secret, gets through. [Decision 0028](docs/decisions.md#0028)
-argues why the URL is closed with IAM rather than hidden — a request IAM denies is never billed — and
-[0029](docs/decisions.md#0029) records what happened to the rate limit that was meant to sit beside
-it. Deployed with `npx wrangler deploy` from that directory; the key is never in this repository.
+That address is this project's own hostname rather than the one Cloud Run issues. A small Cloudflare
+Worker in `edge/` answers it and forwards to the service, addressing the origin by its own hostname
+because Cloud Run's front end routes on the Host header, and it signs each request with a Google ID
+token minted from a key held as a Worker secret. [Decision 0028](docs/decisions.md#0028) argues why
+the design closes the Cloud Run URL with IAM rather than hiding it — a request IAM denies is never
+billed — and [0029](docs/decisions.md#0029) records the rate limit that was meant to sit beside it.
+**Neither is the state of the deployed service, and the code says so where it is measured.** The
+service is deployed with `TTB_PUBLIC=1` so that a reviewer can reach it, which grants the invoker
+role to everyone: measured on 2026-09-17, the Cloud Run URL answers an uncredentialed request with
+200, so the hostname above is the front door and not the only way in. The rate limit denies nothing
+either. What actually bounds the meter is the two-instance cap in `scripts/deploy.sh`. The Worker
+comment in `edge/src/index.js` carries both measurements. Deployed with `npx wrangler deploy` from
+that directory; the key is never in this repository.
 
 `--check` is what proves the repository is deployable without making it public: it runs every
 precondition the deploy has that needs no network, and names any that fails. It runs as part of the
@@ -41,8 +45,8 @@ test suite.
 R15 in [the requirements](specs/0001-label-verification/requirements.md) and NFR-1 in
 [the PRD](docs/PRD.md) are one promise, and both mark it P0: 95 percent of single checks show
 results within five seconds. **Measured on the deployed service on 2026-09-16, it comes in under
-that.** Three runs, each posting all 38 test submissions one at a time and discarding the first as a
-cold start:
+that.** Three runs, each posting a warm-up submission whose time is thrown away and then all 38 test
+submissions one at a time:
 
 | Address the run used | Inside five seconds |
 | --- | --- |
@@ -136,8 +140,9 @@ interface. The deploy measurement skips the same way without `TTB_DEPLOY_URL`, a
 says. Everything else runs from a clone with nothing but `uv sync`.
 
 **With pnpm and Playwright installed, that group runs and holds the accessibility scan.** It covers
-every screen the product serves, and it treats a check the scanner could not decide as a failure
-rather than a pass, so an undecidable result cannot read as a clean one. Six result-page cases once
+every screen the product serves, and it treats a check the scanner could not decide as a failure rather than a pass, so an undecidable
+result cannot read as a clean one. One check is exempt, and only because somebody reviewed it and
+wrote down what they found; an undecided check nobody has looked at still fails. Six result-page cases once
 failed it on colour contrast below the AA threshold, and the layout test once failed at a 320-pixel
 viewport on a 27-pixel overflow; both were ours and both are fixed. What a machine cannot settle it
 does not settle: Section 508 asks for a conformance review as well as an automated scan, and that
@@ -166,8 +171,9 @@ uv run pytest --cov            # branch coverage over app/
 **The measured figure is 92% branch coverage over `app/`**, from a run of the whole suite bar the
 browser group. It is reported, not gated: no `fail_under` is set, because a threshold chosen before
 anyone had measured the real number is how a suite gets shaped to the threshold rather than to the
-product. Two modules are at 0% and both are command-line entry points used by hand —
-`app/rules/__main__.py` and `app/vision/__main__.py`. The lowest-covered module that actually serves
+product. Two modules are at 0% and neither is untested: `app/rules/__main__.py` and `app/vision/__main__.py`
+are command-line entry points, and the suite drives both in a subprocess, which the coverage harness
+does not follow. The 0% is a limit of the measurement rather than a gap in the suite. The lowest-covered module that actually serves
 a request is the rule-pack loader at 80%.
 
 Each tool's configuration lives in `pyproject.toml` with the reasoning next to it: which lint rules
@@ -187,11 +193,12 @@ It serves the same <http://localhost:8000> and needs no secrets either.
 
 ### What is pinned, and what is not
 
-Every Python dependency resolves from `uv.lock`, which carries 802 hashes, and the container
-installs from it frozen — nothing is re-resolved at build time, so the image gets the versions this
+Every Python dependency resolves from `uv.lock`, which carries a hash for every artefact it pins,
+and the container installs from it frozen — nothing is re-resolved at build time, so the image gets the versions this
 repository was tested against. The built front-end bundle is committed, and
 `tests/test_island_build_clean.py` rebuilds it and fails if the result differs from the committed
-copy, so the bundle in the repository cannot drift from its source. The OCR models ship inside the
+copy. That test is in the pnpm-gated group above, so it is the pipeline rather than a local run that
+holds the bundle to its source. The OCR models ship inside the
 installed package; nothing is downloaded when the app runs.
 
 Two things are **not** pinned, and you should see them named rather than find them: the container's
@@ -248,14 +255,14 @@ finished results to a language model for a second opinion was removed for exactl
 image, **100** images in one batch, and refuses any image whose header declares more than
 **50,000,000** pixels. Each number is derived from a constraint rather than picked, and
 `app/api/limits.py` states the derivation beside it: the request cap sits under Cloud Run's 32 MiB
-HTTP/1 body limit so the refusal comes from this service with a message naming the file, rather
-than from Google with a message naming nothing; the per-image cap is TTB's own, since COLAs Online
+HTTP/1 body limit so the refusal comes from this service with a message naming the file, rather than
+from Google with a message naming nothing; the per-image cap is TTB's own, since COLAs Online
 refuses a label image over 1.5 MB and nothing larger can ever have been filed; 100 images of label
-size is about 18 MB, inside the request cap, and
-the PRD's 300 submissions in ten minutes is three such batches. The pixel ceiling is the guard
-against a decompression bomb — a few kilobytes of PNG can declare a 50,000 × 50,000 canvas, which no
-byte cap catches — and it is checked against the file's header before anything is decoded. A refusal
-carries a reason code and a sentence saying which file was refused and what the limit is.
+size is about 18 MB, inside the request cap, and the PRD's 300 submissions in ten minutes is three
+such batches. The pixel ceiling is the guard against a decompression bomb — a few kilobytes of PNG
+can declare a 50,000 × 50,000 canvas, which no byte cap catches — and it is checked against the
+file's header before anything is decoded. A refusal carries a reason code and a sentence saying
+which file was refused and what the limit is.
 
 **Almost nothing is kept, and what is kept is named.** There is no database and no COLA
 integration. Batch state lives in the process and is dropped when the response is returned or the
@@ -449,7 +456,7 @@ beside the readings are the whole product in one screen.
 
 **To read the code,** open `rules/` first. Verdicts are decided there, in YAML, and every check
 names the regulation behind it — so you can see everything this app enforces without reading any
-Python. `ARCHITECTURE.md` maps every directory in one table, and `app/services/evaluator.py` is the
+Python. `ARCHITECTURE.md` maps every directory the repository ships in one table, and `app/services/evaluator.py` is the
 eight steps one check runs through, in order.
 
 **To judge whether it works,** `tests/fixtures/labels/` is the answer key: 30 real approved labels
@@ -469,8 +476,10 @@ it and reproduces every figure in Reading accuracy above.
 
 ## Limitations
 
-Checks this app does not make, and why. Each entry names the decision record that settled it, and a
-check listed here is switched off in the rule pack rather than reporting a verdict it has not earned.
+Checks this app does not make, and why. The first five each name the decision record that settled
+them, and each is switched off in the rule pack rather than reporting a verdict it has not earned.
+The sixth is different: those requirements were never decided on at all, which is the point of the
+entry, so it cites nothing and nothing in the pack switches them off.
 
 - **An upload with no application is read but not checked.** The beverage the application declares
   is what decides which rules apply, so a label submitted on its own is read and reported, and no
