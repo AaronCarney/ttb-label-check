@@ -15,6 +15,23 @@ Filed 2026-09-15.
 - [T8](./2026-09-15-federal-ux-for-senior-users.md) — UX design + Q8.8 7-stage demo path; DP1–DP7 principles; fixtures 01–07.
 - [T10](./2026-09-15-stakeholder-frameworks.md) — Q10.4–Q10.6 empathy maps; TL;DR ("STONE'S THROW must be in first 3 demo labels"); Q10.7 #1 (cold-start risk).
 
+**Corrected 2026-09-16. The `docs/PRD.md` citation above names a requirement tiering that document
+never carried, and the rows resting on it are kept as written so the change is legible.**
+
+`docs/PRD.md` has three commits in its entire history: the scaffold (`c46b2d0`, seventeen empty
+section headings), the version written the day after this file was filed (`c34a15a`), and the
+brand-punctuation correction (`f0b37a9`). None of the three contains the word "Hard", "Strong" or
+"Stretch" anywhere in it, and the only commit in this repository that introduces the phrase is the
+one that added this research file. There was no tiering to cite — on 2026-09-15 `docs/PRD.md` was a
+page of empty headings.
+
+Five rows of the feature table below rest on that citation — 1a ("Strong bias"), 2 ("Hard tier covers
+4 of 7 … Medium bias"), 3a ("Hard"), 3c ("Stretch") and 4a ("Stretch") — as does the deployed-URL
+channel under "Demo shape" ("refines `docs/PRD.md` Medium bias `[INFRA]`"). Read each as this file's
+own scope judgement, argued from the brief and the interviews, and not as a tier inherited from an
+approved document. What the product is actually held to is `docs/PRD.md` as it now stands and
+[`specs/0001-label-verification/requirements.md`](../../specs/0001-label-verification/requirements.md).
+
 ---
 
 ## Note on one candidate override
@@ -181,6 +198,29 @@ Brand-name field uses a **two-stage policy**:
 **3. Reason-code grammar** follows the rejection-reasoning grammar `BIN.SUB.SPECIFIC[.QUALIFIER]` ([T8](./2026-09-15-federal-ux-for-senior-users.md) reference).
 
 **4. The LLM's role is paraphrase only** — it generates a human-readable explanation of which Stage A normalization fired, never the disposition (the deterministic core / DP2). The numeric similarity, threshold, and disposition all come from the rule engine.
+
+**Corrected 2026-09-16. Two parts of the decision above are not what shipped, and the decision is
+kept as written so the change is legible.**
+
+- **Stage A strips apostrophes; the product keeps them.** `app/rules/brand_match.py` maps curly
+  quotes and apostrophes to their straight counterparts, drops the ™ / ® / © glyphs and folds
+  accents, then stops. Punctuation stays and the difference is **scored** instead, because stripping
+  it produced a silent *exact* match on two strings that genuinely differed — the envelope then told
+  the reviewer the brand matched the application character for character, which was false. See
+  [decision 0015](../decisions.md#0015) and [decision 0017](../decisions.md#0017).
+- **The pass threshold is 0.92, not 0.95.** All three rule packs set `pass_threshold: 0.92` and
+  `needs_review_threshold: 0.85` (`rules/spirits/spirits.yaml`, `rules/wine/wine.yaml`,
+  `rules/malt/malt.yaml`); the review floor is the 0.85 written here. The validator is named
+  `fuzzy_brand`, not `two_stage_jw`, and its parameters are `pass_threshold` and
+  `needs_review_threshold` rather than the `stage_b_pass` / `stage_b_review` named under
+  "Consequences" below.
+
+The two changes pull against each other and the result is close to what this document intended:
+"Stones Throw" against "Stone's Throw" is no longer an exact match, but it scores 0.9846 against the
+0.92 floor and reports a match anyway, with the score visible to the reviewer. The three worked
+examples below still hold. Stage A's own normalization also gained a second test the document does
+not describe — one value's whole words appearing inside the other's as a consecutive run — so a brand
+mark carrying the declared brand with a word missing or added is treated as the same brand.
 
 ### Worked examples (canonical demo fixtures)
 
