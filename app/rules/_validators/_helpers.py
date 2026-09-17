@@ -214,20 +214,51 @@ def unlocated_is_absent(rule: RuleDefinition) -> bool:
     return bool(rule.parameters.get("unlocated_is_absent", False))
 
 
+# What each field is called in the sentence a reviewer reads. A validator that
+# serves many fields - presence_check, equality_match - cannot name the element
+# from its own arguments, and said "this element", which tells a reviewer
+# nothing they can act on: they are looking at a list of findings and have to
+# work out which line of the label each one is about. The observation knows the
+# field, so the sentence can say it.
+_ELEMENT_NAMES = {
+    "brand_name": "a brand name",
+    "class_type": "a class or type designation",
+    "abv": "an alcohol content statement",
+    "net_contents": "a net contents statement",
+    "gov_warning": "the government warning",
+    "name_address": "a name and address",
+    "country_origin": "a country of origin statement",
+}
+
+
+def element_name(obs: FieldObservation) -> str:
+    """The words for the element this observation is about.
+
+    Falls back to "this element" only for a field_id the table does not carry,
+    which is the honest answer when nothing here knows what it was.
+    """
+    return _ELEMENT_NAMES.get(obs.field_id, "this element")
+
+
 def not_read_result(
     obs: FieldObservation,
     exp: ExpectedValue,
     rule: RuleDefinition,
     ctx: ValidatorContext,
     *,
-    element: str,
+    element: str | None = None,
 ) -> ValidationResult:
     """The finding for an element the reader did not find: a reviewer's to settle.
+
+    `element` names it in the sentence. A validator that serves one element
+    passes its own words; one that serves many leaves it out and the name comes
+    from the observation's field, so no reviewer is told "this element".
 
     `INSUFFICIENT_EVIDENCE` and `warn`, whatever severity the rule carries, so
     `app/services/disposition.py` routes it to `needs_review` and it cannot
     reject the submission on its own.
     """
+    element = element or element_name(obs)
     return ValidationResult(
         rule_id=rule.rule_id,
         cfr_citation=rule.cfr_citation,

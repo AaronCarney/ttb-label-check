@@ -78,7 +78,7 @@ def enumerated_match(
     # The reader did not find this on the label. That is a question for a
     # reviewer, not a rejection - see `unlocated` in `_helpers.py`.
     if unlocated(obs) and not unlocated_is_absent(rule):
-        return not_read_result(obs, exp, rule, ctx, element="this element")
+        return not_read_result(obs, exp, rule, ctx)
 
     allowed: list[str] = rule.parameters.get("allowed_values", [])
     # `exact` (the default) requires the whole reading to be an allowed value.

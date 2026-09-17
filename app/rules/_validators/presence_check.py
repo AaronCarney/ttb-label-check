@@ -58,7 +58,7 @@ def presence_check(
     # The reader did not find this on the label. That is a question for a
     # reviewer, not a rejection - see `unlocated` in `_helpers.py`.
     if unlocated(obs) and not unlocated_is_absent(rule):
-        return not_read_result(obs, exp, rule, ctx, element="this element")
+        return not_read_result(obs, exp, rule, ctx)
 
     return _result(rule, ctx, obs, exp, _is_present(obs))
 
@@ -89,6 +89,6 @@ def conditional_presence(
     # The reader did not find this on the label. That is a question for a
     # reviewer, not a rejection - see `unlocated` in `_helpers.py`.
     if unlocated(obs) and not unlocated_is_absent(rule):
-        return not_read_result(obs, exp, rule, ctx, element="this element")
+        return not_read_result(obs, exp, rule, ctx)
 
     return _result(rule, ctx, obs, exp, _is_present(obs))
