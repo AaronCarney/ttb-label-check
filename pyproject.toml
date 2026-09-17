@@ -42,6 +42,12 @@ demo-prod = "uvicorn app.main:app --port 8000"
 testpaths = ["tests"]
 asyncio_mode = "auto"
 addopts = "-ra"
+# An `xfail` with no `strict=` passes whether the code works or not, so it is
+# counted in the total while asserting nothing. Under this setting a test marked
+# `xfail` that starts passing fails until someone removes the mark, which is the
+# point of marking it. `tests/test_no_test_can_pass_either_way.py` also refuses
+# an explicit `strict=False`, which would override this.
+xfail_strict = true
 markers = [
     "slow: marks tests as slow (deselect with '-m \"not slow\"')",
 ]

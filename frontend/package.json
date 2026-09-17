@@ -37,5 +37,10 @@
     "vite": "^5.4.10",
     "vitest": "^2.1.4",
     "vitest-axe": "^0.1.0"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
   }
 }
