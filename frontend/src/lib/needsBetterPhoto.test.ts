@@ -30,7 +30,7 @@ function shortCircuitEnvelope(reasonCode: string): DispositionEnvelope {
       ],
       overrides: [],
     },
-    metrics: { total_duration_ms: 12, per_rule_durations_ms: [], vision_duration_ms: 12 },
+    metrics: { total_duration_ms: 12, per_rule_durations_ms: [], vision_duration_ms: 12, cache_hit: false },
   };
 }
 

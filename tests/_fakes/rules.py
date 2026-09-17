@@ -10,8 +10,20 @@ from app.schemas.rejection import ValidationResult
 
 
 class FakeRuleEngine(RuleEngine):
-    def __init__(self, *, results: tuple[ValidationResult, ...] = ()) -> None:
+    def __init__(
+        self,
+        *,
+        results: tuple[ValidationResult, ...] = (),
+        rule_set_version: str = "fake-0.0.0",
+    ) -> None:
         self._results = results
+        self._rule_set_version = rule_set_version
+
+    @property
+    def rule_set_version(self) -> str:
+        # Settable per instance: a test that needs two different rule sets in
+        # one process — the cache-invalidation tests — builds two fakes.
+        return self._rule_set_version
 
     async def evaluate(
         self,

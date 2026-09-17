@@ -13,6 +13,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import time
+from datetime import datetime, timezone
 
 from app.config import Settings
 from app.rules.engine import RuleEngine
@@ -49,26 +50,26 @@ class Evaluator:
         from app.services.audit import _canonical_json
 
         # Cache check — key over canonicalized inputs MINUS the
-        # per-call evaluation_id (so two calls with the same app + label hit).
+        # per-call evaluation_id (so two calls with the same app + label hit),
+        # PLUS the rules that would answer it. A cached answer is only still
+        # the right answer while the rules that produced it are the rules that
+        # apply; without this, editing a rule left every label already in the
+        # cache being answered under the rules it replaced, for the life of
+        # the process.
         cache_key = None
         if self._cache is not None:
+            t_hit = time.monotonic()
+            started_at = datetime.now(timezone.utc)
             app_for_key = application.model_dump(mode="json")
             app_for_key.pop("evaluation_id", None)
             cache_key = hashlib.sha256(
-                _canonical_json(app_for_key) + label.image_bytes
+                _canonical_json(app_for_key)
+                + self._rules.rule_set_version.encode("utf-8")
+                + label.image_bytes
             ).hexdigest()
             cached = self._cache.get(cache_key)
             if cached is not None:
-                # Keeping evaluation_id consistent means patching the nested
-                # audit_trail too — a top-level model_copy alone leaves
-                # audit_trail.evaluation_id pointing at the cold-path UUID.
-                new_audit = cached.audit_trail.model_copy(
-                    update={"evaluation_id": application.evaluation_id}
-                )
-                return cached.model_copy(update={
-                    "evaluation_id": application.evaluation_id,
-                    "audit_trail": new_audit,
-                })
+                return self._replay(cached, application, started_at, t_hit)
 
         sla = getattr(self, "_sla_seconds", self._DEFAULT_SLA_SECONDS)
         try:
@@ -82,14 +83,58 @@ class Evaluator:
             envelope = self._timeout_envelope(application, label)
         return envelope
 
+    def _replay(
+        self,
+        cached: DispositionEnvelope,
+        application: Application,
+        started_at: datetime,
+        t_hit: float,
+    ) -> DispositionEnvelope:
+        """Hand back a stored answer as this request's answer, honestly.
+
+        The verdict and the findings are the stored ones — the inputs and the
+        rules are identical, which is what the cache key means. Everything
+        that describes *when* and *how long* is this request's, because that
+        is the request being answered: the durations are what serving it cost,
+        and the audit window is when it was served. `metrics.cache_hit` is
+        what says the verdict behind them was worked out earlier.
+
+        Before this, a hit patched only `evaluation_id` and returned the first
+        call's `total_duration_ms` and `vision_duration_ms` beside the new id —
+        so a repeat submission reported time it never spent, and four
+        byte-identical latencies measured against production on 2026-09-16
+        were four copies of one measurement.
+        """
+        elapsed_ms = int((time.monotonic() - t_hit) * 1000)
+        # Keeping evaluation_id consistent means patching the nested
+        # audit_trail too — a top-level model_copy alone leaves
+        # audit_trail.evaluation_id pointing at the cold-path UUID.
+        new_audit = cached.audit_trail.model_copy(update={
+            "evaluation_id": application.evaluation_id,
+            "started_at": started_at,
+            "completed_at": datetime.now(timezone.utc),
+        })
+        new_metrics = cached.metrics.model_copy(update={
+            "cache_hit": True,
+            "total_duration_ms": elapsed_ms,
+            "vision_duration_ms": 0,
+            # No rule ran on this request. The rules that produced the verdict
+            # are still named in audit_trail.per_rule_trace.
+            "per_rule_durations_ms": (),
+        })
+        return cached.model_copy(update={
+            "evaluation_id": application.evaluation_id,
+            "audit_trail": new_audit,
+            "metrics": new_metrics,
+        })
+
     async def _evaluate_inner(self, application: Application, label: Label) -> DispositionEnvelope:
         from app.services.audit import AuditRecorder
-        from app.services.engine_meta import EvaluationTimeline
         from app.services.envelope_builder import build_field_findings, build_success_envelope
         from app.services.metrics_builder import MetricsBuilder
 
         t_total = time.monotonic()
-        timeline = EvaluationTimeline(evaluation_id=application.evaluation_id)
+        timeline = self._new_timeline(application)
         # Stash for partial-state surfacing in timeout fallback.
         self._last_timeline = timeline
         self._last_t_total = t_total
@@ -233,6 +278,23 @@ class Evaluator:
         )
         return envelope
 
+    def _new_timeline(self, application: Application):
+        """A timeline that already knows which rules are answering.
+
+        `EvaluationTimeline.rule_set_version` defaults to "unknown" and, until
+        this, nothing in `app/` ever set it — so `audit_trail.rule_set_version`
+        read "unknown" on every envelope the service has served. That field is
+        the compliance record of which rules produced a verdict, and it is the
+        one fact about an evaluation nobody can reconstruct from the answer
+        afterwards.
+        """
+        from app.services.engine_meta import EvaluationTimeline
+
+        return EvaluationTimeline(
+            evaluation_id=application.evaluation_id,
+            rule_set_version=self._rules.rule_set_version,
+        )
+
     # The two audit-trail rows that name the rules a label was checked
     # against. Both are engine facts rather than rule outcomes, which is the
     # same footing as ENGINE.EXTRACTION.UNAVAILABLE and ENGINE.SLA.TIMEOUT
@@ -285,13 +347,10 @@ class Evaluator:
 
     def _timeout_envelope(self, application: Application, label: Label) -> DispositionEnvelope:
         from app.services.audit import AuditRecorder
-        from app.services.engine_meta import EvaluationTimeline
         from app.services.envelope_builder import build_short_circuit_envelope
         from app.services.metrics_builder import MetricsBuilder
 
-        timeline = getattr(self, "_last_timeline", None) or EvaluationTimeline(
-            evaluation_id=application.evaluation_id
-        )
+        timeline = getattr(self, "_last_timeline", None) or self._new_timeline(application)
         # A timeout that fired before `_evaluate_inner` recorded anything gets
         # a fresh timeline, and that envelope must still name its rules.
         # Re-recording on an existing timeline rewrites the same row.

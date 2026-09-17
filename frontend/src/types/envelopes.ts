@@ -102,6 +102,12 @@ export interface Metrics {
   total_duration_ms: number;
   per_rule_durations_ms: PerRuleDurationEntry[];
   vision_duration_ms: number;
+  /**
+   * The answer came out of the result cache rather than being worked out
+   * again. The durations beside it are then what serving this request cost,
+   * not what the evaluation behind the verdict cost.
+   */
+  cache_hit: boolean;
 }
 
 export interface DispositionEnvelope {

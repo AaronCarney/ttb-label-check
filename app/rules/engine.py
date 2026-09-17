@@ -17,6 +17,27 @@ from app.schemas.rejection import ValidationResult
 
 
 class RuleEngine(ABC):
+    @property
+    @abstractmethod
+    def rule_set_version(self) -> str:
+        """What this engine would check a label against, as one string.
+
+        Two things read it, and both break when it is approximate:
+
+        * the audit trail names it, so a reviewer can say which rules produced
+          a verdict — the one fact about an evaluation that cannot be
+          reconstructed afterwards from the answer;
+        * the result cache keys on it, so an answer produced under one set of
+          rules is never handed back after the rules have changed.
+
+        It must therefore change whenever the answer this engine would give
+        could change. A hand-maintained version number alone does not satisfy
+        that — nobody bumps it for a threshold edit — so an implementation is
+        expected to bind the declared version to the content it actually
+        loaded.
+        """
+        ...
+
     @abstractmethod
     async def evaluate(
         self,

@@ -43,7 +43,7 @@ const _row = (
     per_rule_trace: trace,
     overrides: [],
   },
-  metrics: { total_duration_ms: 10, per_rule_durations_ms: [], vision_duration_ms: 5 },
+  metrics: { total_duration_ms: 10, per_rule_durations_ms: [], vision_duration_ms: 5, cache_hit: false },
 });
 
 const _checked = _row([

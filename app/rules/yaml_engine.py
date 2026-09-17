@@ -123,6 +123,35 @@ def _scored_a_reading(rule, result: ValidationResult) -> bool:
 class YamlRuleEngine(RuleEngine):
     def __init__(self, ruleset: RuleSet) -> None:
         self._ruleset = ruleset
+        self._version: str | None = None
+
+    @property
+    def rule_set_version(self) -> str:
+        """The declared version, pinned to the rules actually loaded.
+
+        `0.1.0+8f2a1c4d9e01`. The declared half is what a person reads; the
+        digest is over every rule, reason code, asset reference and decision
+        table in the loaded pack, so editing a threshold changes it whether or
+        not anyone remembered to bump the semver. That matters because the
+        result cache keys on this string: an unchanged digest is the only
+        thing that makes a stored answer still the right answer.
+
+        The RuleSet is frozen, so this is computed once and kept.
+
+        Serialised here rather than through `app/services/audit.py`'s
+        `_canonical_json`, which is the same two lines: the rules layer does
+        not import the services layer.
+        """
+        if self._version is None:
+            import hashlib
+            import json
+
+            body = json.dumps(
+                self._ruleset.model_dump(mode="json"),
+                sort_keys=True, ensure_ascii=True, separators=(",", ":"),
+            ).encode("utf-8")
+            self._version = f"{self._ruleset.version}+{hashlib.sha256(body).hexdigest()[:12]}"
+        return self._version
 
     def build_validator_context(self, *, started_at_ms: int) -> ValidatorContext:
         rs = self._ruleset
