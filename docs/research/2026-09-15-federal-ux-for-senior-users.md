@@ -434,7 +434,7 @@ GOV.UK Design System "Error summary" and "Error message" components; Home Office
 
 # Q8.8 — Demo path design
 
-The take-home is graded on a 5–10-minute demo. The path below hits Sarah's, Dave's, and Jenny's signals in sequence without feeling scripted. (Note: this is the T8-side path. Cross-topic demo synthesis spanning T8+[T9](./2026-09-15-verification-targets-research.md)+[T10](./2026-09-15-stakeholder-frameworks.md) is X-6 and deferred.)
+The demo runs 5–10 minutes. The path below hits Sarah's, Dave's, and Jenny's signals in sequence without feeling scripted. (Note: this is the T8-side path. Cross-topic demo synthesis spanning T8+[T9](./2026-09-15-verification-targets-research.md)+[T10](./2026-09-15-stakeholder-frameworks.md) is X-6 and deferred.)
 
 ### Stakeholder signals
 

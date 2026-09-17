@@ -159,7 +159,7 @@ Reviewer time is finite; [T10](./2026-09-15-stakeholder-frameworks.md) TL;DR ide
 
 ### Alternatives considered
 
-- 90-second demo → fits one persona signal at most; loses Jenny entirely; insufficient for take-home grading.
+- 90-second demo → fits one persona signal at most; loses Jenny entirely; too short to show the system working end to end.
 - 10-minute demo → exceeds Sarah's time scarcity; dilutes the first-30-seconds leverage point.
 - Pre-cached / canned video only → fails the brief's deployed-URL deliverable.
 - Repo + README only → submits 0% of the demo signal; [T10](./2026-09-15-stakeholder-frameworks.md) pre-mortem #1 + the prior vendor disaster context make a live URL essential.
