@@ -53,6 +53,7 @@ async def healthz(settings: Settings = Depends(_get_settings)) -> JSONResponse:
     body: dict[str, object] = {
         "status": "ok",
         "version": settings.app_version,
+        "commit": settings.git_commit or "unknown",
         "mode": {"vision": settings.vision_mode},
         "warmup_ran": False,
     }

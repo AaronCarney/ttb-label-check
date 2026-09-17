@@ -62,6 +62,13 @@ class Settings(BaseSettings):
         default=None, alias="OTEL_EXPORTER_OTLP_ENDPOINT"
     )
 
+    # The commit this process is running, stamped by the deploy
+    # (`scripts/deploy.sh`). Unset outside a deploy — a working tree is not a
+    # commit — and `/api/health` reports "unknown" rather than omitting it, so a
+    # deploy that failed to stamp itself is distinguishable from an older build
+    # of the app that never could.
+    git_commit: str | None = Field(default=None, alias="GIT_COMMIT")
+
     # Logging level.
     log_level: str = Field(default="INFO", alias="LOG_LEVEL")
 

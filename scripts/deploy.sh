@@ -188,13 +188,26 @@ STAGING="$(mktemp -d)"
 trap 'rm -rf "$STAGING"' EXIT
 git archive --format=tar HEAD | tar -x -C "$STAGING"
 
+# The commit this deploy is made of. `git archive HEAD` is what gets uploaded,
+# so HEAD is the answer, and it is read here rather than anywhere later so the
+# stamp and the upload cannot name different commits.
+#
+# It is stamped twice on purpose, because the two are read by different people
+# at different moments: as a revision label, which `gcloud run revisions list`
+# prints without starting anything, and as GIT_COMMIT in the container, which
+# `/api/health` reports so the running service answers for itself. On
+# 2026-09-17 neither existed, and "are these fixes live?" took a behavioural
+# probe against the live service to settle.
+COMMIT="$(git rev-parse HEAD)"
+
+
 if [ "${TTB_PUBLIC:-0}" = "1" ]; then
     ACCESS_FLAG=--allow-unauthenticated
 else
     ACCESS_FLAG=--no-allow-unauthenticated
 fi
 
-echo "Deploying ${SERVICE} to ${REGION} in ${TTB_GCP_PROJECT}. Cloud Build builds the image."
+echo "Deploying ${SERVICE} to ${REGION} in ${TTB_GCP_PROJECT} at ${COMMIT}. Cloud Build builds the image."
 gcloud run deploy "$SERVICE" \
     --project "$TTB_GCP_PROJECT" \
     --region "$REGION" \
@@ -208,7 +221,8 @@ gcloud run deploy "$SERVICE" \
     --timeout "$TIMEOUT" \
     --cpu-boost \
     --startup-probe "$STARTUP_PROBE" \
-    --set-env-vars VISION_MODE=local \
+    --set-env-vars "VISION_MODE=local,GIT_COMMIT=${COMMIT}" \
+    --labels "commit=${COMMIT}" \
     "$ACCESS_FLAG"
 
 if [ "${TTB_PUBLIC:-0}" = "1" ]; then
