@@ -1,4 +1,4 @@
-<!-- updated: 2026-09-16 -->
+<!-- updated: 2026-09-17 -->
 # TTB Label Check — Decision Document
 
 **Settled forks and their rationale. Nothing else.** One entry per fork: what was chosen, what was
@@ -2288,3 +2288,69 @@ of a box.
   `assets/warnings/govt_warning_16_21.txt` by `tests/test_vision_warning_screen.py` rather than by a
   comment promising they match. The reader still decides only where to look; a word that drifted
   could cost a re-read and cannot change a verdict.
+
+<a id="0037"></a>
+## 0037. A measured heading boldness may send a label to a reviewer and may never reject it
+
+**Decided:** 2026-09-17. **Evidence:** `eval/heading_bold_ratios.py` and the run it produced over
+all 38 labels in `tests/fixtures/labels/manifest.json`, measured on the development box on
+2026-09-17 under the six-thread OCR budget; `app/vision/heading_measure.py`;
+`app/rules/_validators/heading_style_check.py`; `rules/common/health_warning.yaml`.
+
+**What was wrong.** `common.warning.heading_caps_bold` is a `severity: reject` rule, and until now a
+stroke-width measurement that came back below `WIDTH_HEIGHT_RATIO_BOLD_MIN` rejected the label
+outright. The threshold had never been measured against real labels — its own comment said so, and
+said the re-tune "is still to come". That re-tune has now been run, and it does not produce a better
+threshold. It shows the measurement cannot support a rejection at any threshold.
+
+**What was measured.** The warning-carrying face of each of the 38 corpus labels, through the
+reader's own `look()` so the crop is the frame production measures. Every label carries
+`registry.status: APPROVED`, and §16.22(a)(2) requires the heading in bold, so the whole population
+should sit above the cut.
+
+- Of the 30 real labels, 28 measured confidently. Their ratios ran **0.111 to 0.508**, median
+  0.1995 — a 4.6x spread across a population that is uniformly bold, where the difference between
+  bold and regular type is nearer 1.5x.
+- **At 0.25, 18 of those 28 came out below the cut** and would have been rejected.
+- No cut fixes it. 0.10 calls all 28 bold and therefore calls everything bold; 0.15 calls 17 bold;
+  0.30 calls 6. The distribution is continuous, with no gap to put a threshold in.
+
+**The measurement tracks the photograph, not the typeface**, and the corpus shows this without
+anyone having to take TTB's approvals on trust. `ttb-26232001000404` measures **0.111**. `var-blur`
+is that same image Gaussian-blurred at 2.5 px — the same printing, the same type — and measures
+**0.261**, 2.3x higher and on the other side of the cut. `var-glare` measures 0.555, the highest
+ratio in the corpus, on a label with a white hotspot over its warning. Blur and glare thicken
+strokes against a background that Otsu then thresholds differently; the ratio follows.
+
+**What was decided.** A weight the reader *measured* may never reject a label. Where it does not
+satisfy the rule — the measurement failed, was never taken, or came back low — the validator returns
+insufficient evidence at warn severity under `unmeasured_weight_reason_code`, and the label goes to
+a reviewer on that point alone. The words and the capitals are unaffected: both are read from the
+heading's own characters, and both still reject at the rule's own severity.
+
+A weight a payload *states* rather than measures still rejects. The legacy `heading_styles`
+sub-object used by hand-built fixtures asserts a weight as a fact about the label, not as a reading
+taken off a photograph, and a fixture saying its heading is regular is describing a non-compliant
+label. That is the line: a measurement may not reject, an assertion may.
+
+**What was rejected.**
+
+- **Lowering the threshold below the corpus minimum** (0.10 or under). It removes the false
+  rejections, but it makes the check vacuous — every heading passes, including one that is genuinely
+  not bold — while still reading as a working check to anyone looking at the rule pack. A check that
+  cannot fail is worse than a disclosed gap, because nothing tells the reader it stopped working.
+- **Normalising the ratio against resolution and print scale** so it means something. This is the
+  fix that would let the measurement decide again, and it is a genuine piece of work: it needs a
+  scale reference the product does not have, which is the same thing decision 0006 puts the type-size
+  rules out of scope for. Not started.
+- **Switching the boldness check off entirely**, as decision 0013 does for the typography rules it
+  cannot measure. Rejected because the measurement is not worthless — it is not good enough to
+  reject on, but it is a real signal a reviewer can use, and routing it to a reviewer keeps it
+  without letting it decide.
+
+**What this costs.** A large share of compliant labels now raise a review item on boldness — on this
+corpus, 18 of 28. That is the honest reading of a measurement this noisy, and it is the direction
+that fails safe: the product asks a person rather than rejecting a label TTB approved.
+`WIDTH_HEIGHT_RATIO_BOLD_MIN` is kept at 0.25 rather than lowered for the same reason. Now that it
+chooses only between passing a label and reviewing one, a low cut buys a quieter queue by passing
+headings nobody checked.

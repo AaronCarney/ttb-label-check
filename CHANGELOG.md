@@ -36,6 +36,17 @@ All notable changes to this project are recorded here. The format follows
 
 ### Changed
 
+- A GOVERNMENT WARNING heading whose boldness the app measured is no longer rejected for it. The
+  heading's boldness is a stroke-width measurement on a photograph, and a sweep of all 38 corpus
+  labels found the number moves with the photograph rather than with the type: the labels are all
+  TTB-approved and so all required to be bold, yet they measured from 0.111 to 0.508, and one label
+  measured 0.111 from a clean photograph and 0.261 from a blurred copy of the same printing. At the
+  shipped cut, 18 of the 28 labels the app measured confidently were being called "not bold" — every
+  one of them a rejection of a label TTB had approved. Those labels now go to a reviewer on that
+  point instead. The heading's words and its capitals are read from the heading's own characters and
+  still reject. See `docs/decisions.md#0037` and
+  `docs/research/2026-09-17-heading-bold-ratios.md`.
+
 - The accessibility conformance level the product commits to is WCAG 2.0 Level A and AA — the level
   Section 508 requires, and the level the automated scan has always checked. It was previously stated
   as WCAG 2.2 AA, which no test here could hold: of the two criteria that level was chosen for, one
@@ -54,6 +65,14 @@ All notable changes to this project are recorded here. The format follows
   `docs/decisions.md#0034`.
 
 ### Fixed
+
+- A label whose reading reported no heading weight at all was rejected as though the app had
+  measured the heading and found it not bold. Both readers drop the weight from the reading when
+  they cannot measure it, and the rule read that silence as a measurement of "not bold" against a
+  rule that rejects. It now goes to a reviewer, which is what the rule was always documented to do.
+
+- A hand-built fixture carrying an empty style report (`heading_styles: null`) crashed the whole
+  rule run with an `AttributeError` rather than being judged on the heading text it did carry.
 
 - A browser batch upload containing a file that is not a PNG or JPEG now names that file, says what
   to do with it, and checks every other file in the set. It previously refused the whole submission

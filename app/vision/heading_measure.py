@@ -14,9 +14,11 @@ Algorithm (Otsu + distance-transform + width:height ratio):
   5. Aggregate: mean(stroke_width) / mean(char_height). Bold when ratio
      exceeds WIDTH_HEIGHT_RATIO_BOLD_MIN.
 
-This is uncalibrated against a labeled corpus: the threshold started at 0.30 and
-works on the demo fixtures. A tighter cut belongs in the same sweep over real
-labels that settles the image-quality and brand-match thresholds.
+The measurement is deterministic and repeatable. What it is *not* is a reliable
+reading of stroke weight: the 2026-09-17 corpus sweep below found the ratio
+varies more with a photograph's resolution and focus than with the typeface, so
+nothing here may reject a label. `WIDTH_HEIGHT_RATIO_BOLD_MIN` carries the
+measurement and `docs/decisions.md#0037` carries what was done about it.
 """
 
 from __future__ import annotations
@@ -34,9 +36,35 @@ _logger = logging.getLogger("app.vision.heading_measure")
 
 WIDTH_HEIGHT_RATIO_BOLD_MIN = 0.25
 """Stroke-width-to-character-height ratio above which the heading is bold.
-Lowered from 0.30: dilation-merged bold blobs produce ratios ~0.28 on
-PIL's default bitmap font. Regular text without dilation lands at ~0.22.
-Empirical re-tune against a labeled corpus is still to come."""
+
+Set at 0.25 on PIL's default bitmap font, where dilation-merged bold blobs
+produce ~0.28 and regular text lands at ~0.22. The re-tune against a labeled
+corpus that this comment used to promise has now been run, and it did not
+produce a better number -- it showed that no number works.
+
+**Measured 2026-09-17 over all 38 labels in `tests/fixtures/labels`**, by
+`eval/heading_bold_ratios.py`, on the warning-carrying face of each. Every
+label in that corpus is TTB-approved, and §16.22(a)(2) requires the heading in
+bold, so the whole population should sit above whatever the cut is. It does
+not. Of the 30 real labels, 28 measured confidently, and those 28 ran from
+0.111 to 0.508 with a median of 0.1995 -- a 4.6x spread across labels that are
+all bold, where the difference between bold and regular type is nearer 1.5x.
+At 0.25, 18 of the 28 came out below the cut.
+
+The corpus also shows why, without needing the approvals to be taken on trust:
+`ttb-26232001000404` measures 0.111, and `var-blur` -- the same printing,
+Gaussian-blurred at 2.5 px -- measures 0.261. Same label, same type, 2.3x
+apart. `var-glare` measures 0.555, the highest in the corpus. The ratio tracks
+resolution, focus and lighting, not stroke weight.
+
+So this number is **no longer a compliance gate**: `heading_style_check` sends
+a heading measured below it to a reviewer and never rejects on it
+(`docs/decisions.md#0037`). It is kept at 0.25 rather than lowered because,
+once it can only choose between passing a label and reviewing it, a low cut
+buys a quieter queue by passing headings nobody checked. Raising the reviewer
+load is the safe side of a measurement this noisy. Making the ratio mean
+something would take normalising it against resolution and print scale, which
+is a different piece of work from choosing a threshold."""
 
 
 @dataclass(frozen=True)

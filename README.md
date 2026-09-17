@@ -586,12 +586,18 @@ that cannot check anything.
   the only check on warning typography, exactly as it is today — the app neither helps here nor
   claims to. See `docs/decisions.md#0006` and `docs/decisions.md#0013`.
 
-- **Bold type in the warning's heading is reported, not decided.** §16.22(a)(2) requires the heading
-  in bold as well as in capitals. Bold weight is a stroke-width measurement on the heading's own
-  region of the image, and the reader cannot always take it. Where it could not, the label goes to a
-  reviewer on that point rather than being rejected for a boldness nobody measured. The capitals are
-  read from the heading's text and are still decided. The cost is a steady trickle of review items
-  on labels that are very likely fine. See `docs/decisions.md#0013`.
+- **Bold type in the warning's heading is reported, never decided.** §16.22(a)(2) requires the
+  heading in bold as well as in capitals. Bold weight is a stroke-width measurement on the heading's
+  own region of the image, and a sweep of all 38 corpus labels on 2026-09-17
+  (`eval/heading_bold_ratios.py`) found the measurement is not good enough to reject anyone on. The
+  labels are all TTB-approved and so all required to be bold, yet the ratio ran 0.111 to 0.508 across
+  them, and one label measured 0.111 from a clean photograph and 0.261 from a blurred copy of the
+  same printing. At the 0.25 cut, 18 of the 28 labels it measured confidently came out "not bold".
+  So a heading that does not measure as bold sends the label to a reviewer rather than rejecting it,
+  whether the measurement failed or simply came back low. The capitals are read from the heading's
+  text and are still decided, at reject severity. The cost is a large share of review items on
+  labels that are very likely fine — on this corpus, most of them. See `docs/decisions.md#0037` and
+  `docs/decisions.md#0013`.
 
 - **Five more requirements have no check at all, disabled or otherwise.** A label's mandatory
   wording must be readily legible on a contrasting background, must stand separate and apart from
