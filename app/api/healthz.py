@@ -18,7 +18,12 @@ def _get_settings() -> Settings:
     return Settings()
 
 
+# Two paths, one handler. Cloud Run's front end answers /healthz itself with
+# its own 404 page and never forwards the request to the container, so the
+# deployed service needs a path the platform does not claim. /healthz stays
+# because every local caller and test uses it.
 @router.get("/healthz")
+@router.get("/api/healthz")
 async def healthz(settings: Settings = Depends(_get_settings)) -> JSONResponse:
     """Report whether the app is ready to evaluate a label.
 
