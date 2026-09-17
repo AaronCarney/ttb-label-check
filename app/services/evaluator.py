@@ -16,6 +16,7 @@ import logging
 import time
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
+from typing import TYPE_CHECKING
 
 from app.config import Settings
 from app.rules.engine import RuleEngine
@@ -27,6 +28,12 @@ from app.schemas.wire.disposition import DispositionEnvelope
 from app.services.cache import SessionCache
 from app.vision.base import VisionExtractor
 from app.vision.quality import assess as assess_quality
+
+if TYPE_CHECKING:
+    # Imported for the annotation only. `app.services.engine_meta` is imported
+    # inside the methods that build a timeline rather than at module load, and
+    # naming its type here would otherwise undo that.
+    from app.services.engine_meta import EvaluationTimeline
 
 _logger = logging.getLogger("app.services.evaluator")
 
@@ -48,7 +55,7 @@ class _PartialEvaluation:
     a different label, which is worse than reporting none.
     """
 
-    timeline: object | None = None
+    timeline: EvaluationTimeline | None = None
     t_total: float | None = None
     observations: tuple[FieldObservation, ...] = ()
     results: tuple[ValidationResult, ...] = field(default_factory=tuple)

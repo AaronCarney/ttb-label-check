@@ -2147,6 +2147,7 @@ reviewer a control that does nothing, which is the one thing a reviewer cannot c
 - **The work is deleted rather than shelved.** Both components and their tests are gone from the tree.
   They are in the history, at the commit before this one.
 
+<a id="0035"></a>
 ## 0035. A check that runs long returns what it finished, and the guard that stops it is not the requirement's own number
 
 **Decided:** 2026-09-17. **Evidence:** `plans/live-timing-2026-09-17.json` and
