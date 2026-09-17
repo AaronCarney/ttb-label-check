@@ -37,3 +37,24 @@ and in each case the product was built against a primary source the PRD's own te
 - Brand's admissible set: three TTB-approved labels in the 38-label corpus carry a brand the application
   records somewhere other than its brand-name field, and the old comparison rejected all three.
   [Decision 0015](decisions.md#0015) records the change.
+
+## 2026-09-16 — NFR-3, the accessibility conformance level
+
+**What moved.** NFR-3 said *"Every screen meets WCAG 2.2 level AA, read by a conformance review before
+each release."* It now names **WCAG 2.0 level A and AA**, says that this is the level Section 508
+requires, and names the automated scan alongside the conformance review as the way it is read.
+`specs/0001-label-verification/requirements.md` R17 is corrected to match, and gains an acceptance
+criterion for the automated scan it always had but never mentioned.
+
+**What made it necessary.** The requirement promised a level nothing in the repository was built to
+reach or could test. `tests/test_a11y_axe.py` requests the axe tags `wcag2a` and `wcag2aa` — WCAG 2.0
+Level A and AA — so no run of the gate could ever fail against a 2.2 requirement, and R17 was a P1 that
+nothing could hold. Section 508, 36 CFR part 1194 appendix A at E205.4 and E207.2, incorporates WCAG
+**2.0** Level A and AA by reference, so the level now named is both what the gate scans and what the
+regulation binds.
+
+The stated reason for 2.2 also failed on inspection. `docs/reference/accessibility.md` gave 2.5.8
+Target Size and 2.4.11 Focus Not Obscured as the criteria that justified the level; read against the
+installed axe-core 4.11.4, the `wcag22aa` tag turns on one rule, `target-size`, and **no rule exists for
+2.4.11 at any tag**. Settled in [decision 0031](decisions.md#0031), which also corrects
+`docs/reference/accessibility.md` and `docs/approach.md` and records what the change gives up.

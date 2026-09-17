@@ -206,8 +206,10 @@ the batch still runs.
 
 ### R17: Accessibility
 **Implements**: NFR-3
-**Description**: Every screen meets WCAG 2.2 AA.
+**Description**: Every screen meets WCAG 2.0 A and AA, the level Section 508 requires.
 **Acceptance criteria**:
+- Given the release candidate, when the automated accessibility scan runs against every screen, then
+  no level A or AA violation is recorded.
 - Given the release candidate, when a reviewer who did not build the UI runs the conformance review,
   then no level A or AA failure is recorded.
 **Priority**: P1

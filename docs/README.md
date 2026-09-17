@@ -12,7 +12,7 @@
 Rule text the app checks, each pinned to the date it was read.
 
 - [Reference library](reference/README.md) — what the folder holds and how it is kept.
-- [Accessibility](reference/accessibility.md) — the WCAG 2.2 AA criteria the app must meet.
+- [Accessibility](reference/accessibility.md) — the WCAG 2.0 A and AA criteria the app must meet.
 - [Health warning](reference/health-warning.md) — the Government Health Warning text and format rules.
 - [Label elements](reference/label-elements.md) — mandatory label elements for wine, spirits and malt beverages.
 

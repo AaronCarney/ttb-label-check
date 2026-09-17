@@ -1895,3 +1895,84 @@ the worker; the upload route was the last place still deciding it the other way.
   image opens.
 - **The refusal carries no `plain_language_explanation`.** Same gap [0020](#0020) named: the sentence
   lives on the snapshot's `failed_reason` and a client reading only the SSE stream does not see it.
+
+<a id="0031"></a>
+## 0031. The accessibility target is WCAG 2.0 A and AA, which Section 508 requires and the gate scans; WCAG 2.2 is not adopted
+
+**Decided:** 2026-09-16. **Evidence:** 36 CFR part 1194 appendix A, E205.4 and E207.2, quoted in
+`docs/reference/accessibility.md`; axe-core 4.11.4's own rule table, read here; `tests/test_a11y_axe.py`
+as it stands; [0017](#0017), the precedent for correcting approved requirement text rather than the
+product.
+
+**What was wrong.** Three documents promised a conformance level the project was not built to reach
+and had no test that could ever hold it. `docs/PRD.md` NFR-3 said *"Every screen meets WCAG 2.2 level
+AA"*; `specs/0001-label-verification/requirements.md` R17 repeated it; `docs/reference/accessibility.md`
+was titled for 2.2 and argued for it. The gate, `tests/test_a11y_axe.py:59` and `:75`, requests
+`['wcag2a', 'wcag2aa']` — WCAG 2.0 Level A and AA, and nothing above it. The test file's own docstring
+says so. A requirement above a gate that cannot fail against it is the requirement's defect, which is
+what [0017](#0017) settled for FR-7.
+
+The argument for 2.2 also did not survive being checked. `docs/reference/accessibility.md` gave two
+criteria as the whole reason for the level — 2.5.8 Target Size and 2.4.11 Focus Not Obscured. Read
+against the installed axe-core 4.11.4 (104 rules, `axe.getRules()`):
+
+| Requested tag | Rules that would actually run |
+|---|---|
+| `wcag22aa` | `target-size` (2.5.8) |
+| `wcag22a` | none |
+| `wcag21aa` | `autocomplete-valid`, `avoid-inline-spacing`; `css-orientation-lock` is tagged `experimental` and does not run unless enabled by name |
+| `wcag21a` | none; `label-content-name-mismatch` is tagged `experimental` |
+| anything for 2.4.11 | **none, at any tag** |
+
+So moving the gate to 2.2 would have bought exactly one meaningful rule, `target-size`, and bought
+nothing at all for 2.4.11 — one of the two criteria the level was chosen for has no automated rule in
+axe-core at all. A green run at 2.2 would have asserted a criterion it never examined.
+
+**Chosen.** The target is the level Section 508 makes binding, and the documents are corrected to it.
+
+| Where | What it says now |
+|---|---|
+| `docs/PRD.md` NFR-3 | Every screen meets WCAG 2.0 Level A and AA — the level Section 508 requires — read by an automated scan on each screen and a conformance review before each release |
+| `specs/0001-label-verification/requirements.md` R17 | The same level, with the automated scan named alongside the reviewer |
+| `tests/test_a11y_axe.py` | Unchanged. It already requests `wcag2a` and `wcag2aa`, and that is now the level the requirement names |
+| `docs/reference/accessibility.md` | Titled and argued for 2.0 A and AA. Its criteria table keeps every row and marks which WCAG version each criterion arrived in, so the ten that are the promise are distinguishable from the five built above it |
+| 1.4.10 Reflow, 1.4.11 Non-text Contrast, 4.1.3 Status Messages (WCAG 2.1 AA) | Built and kept, and 1.4.10 has its own test, `tests/test_reflow_320px.py`. Not promised as a conformance level |
+| 2.4.11 Focus Not Obscured, 2.5.8 Target Size (WCAG 2.2 AA) | Kept in the reference as design guidance. Neither is claimed, and 2.4.11 is stated as not machine-checkable |
+
+**Rejected.** *Adopt WCAG 2.2 AA and move the gate to match it* — the literal reading of the promise,
+and the cost is the reason it was not taken: it buys one runnable rule, `target-size`, whose result on
+this UI has never been measured, so the work is an unbounded frontend change discovered after the fact;
+it buys nothing for 2.4.11, which no automated rule covers, so half the stated reason for the level
+stays a review item either way; and it raises the product above the legal floor at a point where
+nothing requires it. *Adopt WCAG 2.1 AA* — closer to what was built, since three of the criteria in the
+reference are 2.1 and one of them has a dedicated test, but its axe tags add only `autocomplete-valid`
+and `avoid-inline-spacing`, both structural, and neither has been run here. Naming a level the gate has
+not been shown to pass would re-create the same defect one number lower. The three 2.1 criteria are
+kept and tested without being promised, which is the honest form of the same thing. *Leave NFR-3 at 2.2
+and record the gap as a known limitation* — costs nothing and buys nothing: the product keeps claiming
+a level it does not scan, and R17 stays a P1 that no run can fail.
+
+**Because** Section 508 is the regulation that binds this product, it names WCAG 2.0 Level A and AA,
+and that is the level the gate already scans on every screen. A requirement set above what is legally
+required and above what any test can hold is a promise to a reviewer that nothing in the repository
+keeps.
+
+**Cost, stated.**
+
+- **The product no longer claims the current accessibility recommendation.** A reviewer comparing this
+  against a product that states WCAG 2.2 AA sees the older standard, and `docs/approach.md` previously
+  made a virtue of the opposite. The defence is that the claim is now true and the older standard is
+  the one with legal force; it is still a smaller claim than the one withdrawn.
+- **2.5.8 Target Size is not measured anywhere.** Every control may already be 24×24 CSS pixels or
+  larger — nobody has run `target-size` against this UI, so nothing here knows. Adopting 2.2 later
+  starts with that measurement.
+- **2.4.11 Focus Not Obscured stays a review item under any level.** axe-core 4.11.4 carries no rule
+  for it, so the sticky-header case `docs/reference/accessibility.md` names can only be caught by a
+  person looking.
+- **The gate does not yet cover all three screens.** `app/api/ui/shells.py` serves `/`,
+  `/batch/{batch_id}` and `/batches`; `tests/test_a11y_axe.py` visits the first two. Lowering the level
+  does not close that hole — NFR-3 says *every* screen at whatever level, and `/batches` rests on
+  review alone until a third case is added. Named here so the correction is not mistaken for coverage.
+- **Two approved documents changed after approval**, the same cost [0017](#0017) carried: `docs/PRD.md`
+  NFR-3 and `specs/0001-label-verification/requirements.md` R17 were amended rather than the code. The
+  amendment is logged in `docs/PRD-decisions.md`.

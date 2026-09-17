@@ -151,7 +151,8 @@ results are known.
 **NFR-2** — A batch of 300 submissions shows all its results within 10 minutes, read on the deployed
 product.
 
-**NFR-3** — Every screen meets WCAG 2.2 level AA, read by a conformance review before each release.
+**NFR-3** — Every screen meets WCAG 2.0 level A and AA, the level Section 508 requires, read by
+an automated scan on every screen and by a conformance review before each release.
 
 **NFR-4** — Every control a single-submission check needs is on the start page and labelled in words,
 read by a walkthrough before each release.

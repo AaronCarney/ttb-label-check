@@ -13,6 +13,15 @@ All notable changes to this project are recorded here. The format follows
   single-label page uses. A label the app could not check says so and names the code recorded
   against it, rather than showing an empty panel. See `docs/PRD.md` FR-12.
 
+### Changed
+
+- The accessibility conformance level the product commits to is WCAG 2.0 Level A and AA — the level
+  Section 508 requires, and the level the automated scan has always checked. It was previously stated
+  as WCAG 2.2 AA, which no test here could hold: of the two criteria that level was chosen for, one
+  (2.4.11 Focus Not Obscured) has no automated rule in axe-core at all. The later criteria the UI is
+  built to, including reflow at 320 pixels, are kept and tested without being claimed as a level. See
+  `docs/decisions.md#0031`.
+
 ### Fixed
 
 - A browser batch upload containing a file that is not a PNG or JPEG now names that file, says what

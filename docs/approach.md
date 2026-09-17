@@ -93,8 +93,13 @@ rule produces no finding at all rather than a quiet pass.
 
 **The regulation that governs the product itself.** Nothing in the brief asks for accessibility, but a
 federal application is bound by Section 508 regardless, and that standard is binding regulation
-rather than agency policy. We built to the current accessibility recommendation rather than to
-508's older floor, because building to the floor ships something already behind.
+rather than agency policy. We built to the level it makes binding, WCAG 2.0 A and AA, and the
+check page and the result page are scanned against it automatically on each run; the batch-list page
+is not yet in that scan. We went past that floor where we could prove
+it — the layout reflows at 320 pixels and a disposition is never carried by colour alone, each held
+by its own test — and we stopped short of claiming a newer conformance level, because the two
+criteria that would have justified one are criteria no automated check here can reach. A claim the
+product cannot test is the kind of promise this build refuses to make anywhere else.
 
 The heavier federal gates are real and none of them is met here. Each is named with what it would
 actually require:
