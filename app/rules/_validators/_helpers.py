@@ -104,11 +104,11 @@ def project_reading(obs: FieldObservation) -> str:
     keys = _READING_KEYS.get(obs.field_id)
     if keys is None:
         keys = tuple(k for k in value if k not in _METADATA_KEYS)
-    # The "" in the guard is redundant today - the join below drops an empty
-    # part anyway - and it is kept as the local statement of the rule, so that
-    # removing the filter does not quietly change what an empty key projects to.
-    # Mutating it away therefore survives the suite; that mutant is equivalent.
-    parts = [str(value[k]).strip() for k in keys if value.get(k) not in (None, "")]
+    # The None check is load-bearing: str(None) is "None", which is truthy and
+    # would reach a reviewer as the reading for a key the reader left unset. An
+    # empty or whitespace-only value needs no check here - it strips to "" and
+    # the join drops it.
+    parts = [str(value[k]).strip() for k in keys if value.get(k) is not None]
     return ", ".join(p for p in parts if p)
 
 
@@ -130,11 +130,9 @@ def normalize_words(text: str) -> tuple[str, ...]:
     """
     folded = unicodedata.normalize("NFKD", text)
     folded = "".join(ch for ch in folded if not unicodedata.combining(ch))
+    folded = folded.lower()
     folded = folded.replace("&", " and ")
-    # A-Z cannot match, because .lower() has already run. It is kept so the class
-    # reads as "not a letter or a digit" on its own terms rather than only in
-    # company with the call beside it. Mutating it away is an equivalent mutant.
-    words = re.split(r"[^0-9a-zA-Z]+", folded.lower())
+    words = re.split(r"[^0-9a-z]+", folded)
     return tuple(_SPELLING_VARIANTS.get(w, w) for w in words if w)
 
 
@@ -145,9 +143,7 @@ def word_run_present(haystack: tuple[str, ...], needle: tuple[str, ...]) -> bool
     """
     if not needle or len(needle) > len(haystack):
         return False
-    return any(
-        haystack[i : i + len(needle)] == needle for i in range(len(haystack) - len(needle) + 1)
-    )
+    return any(haystack[i : i + len(needle)] == needle for i in range(len(haystack)))
 
 
 def first_number(value: object) -> float | None:
@@ -216,7 +212,7 @@ def unlocated_is_absent(rule: RuleDefinition) -> bool:
     Off unless the pack says otherwise, so a rule that has not thought about it
     sends the reviewer a question rather than issuing a rejection nobody checked.
     """
-    return bool(rule.parameters.get("unlocated_is_absent", False))
+    return bool(rule.parameters.get("unlocated_is_absent"))
 
 
 # What each field is called in the sentence a reviewer reads. A validator that
