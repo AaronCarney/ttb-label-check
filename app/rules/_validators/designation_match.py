@@ -26,6 +26,9 @@ from __future__ import annotations
 
 from app.rules._validators import ValidatorContext, register
 from app.rules._validators._helpers import (
+    not_read_result,
+    unlocated,
+    unlocated_is_absent,
     _build_meta,
     _conf,
     normalize_words,
@@ -88,6 +91,11 @@ def designation_match(
             observed=obs,
             engine_meta=meta,
         )
+
+    # The reader did not find this on the label. That is a question for a
+    # reviewer, not a rejection - see `unlocated` in `_helpers.py`.
+    if unlocated(obs) and not unlocated_is_absent(rule):
+        return not_read_result(obs, exp, rule, ctx, element="a class or type designation")
 
     # The designation has to be on the label whatever the application says.
     if not observed:

@@ -53,6 +53,27 @@ def make_evidence(
     )
 
 
+def _evidence_text(value: Any) -> str:
+    """The text a reader would have recorded for this payload.
+
+    Both readers put the string they read on the label into
+    `Evidence.extracted_text`, and leave it empty for a field they did not find
+    (`app/vision/local.py`, `app/vision/cloud.py`). This fixture used to put
+    `str(value)` there, so a dict payload whose reading was empty carried the
+    dict's repr as its evidence text and looked like a field the reader had
+    found - which is the one thing `unlocated` in
+    `app/rules/_validators/_helpers.py` asks about.
+    """
+    if value is None:
+        return ""
+    if isinstance(value, dict):
+        for v in value.values():
+            if isinstance(v, str) and v.strip():
+                return v
+        return ""
+    return str(value)
+
+
 def make_obs(
     *,
     field_id: str,
@@ -62,7 +83,7 @@ def make_obs(
     extra_evidence: tuple[Evidence, ...] = (),
     upstream_meta: dict[str, Any] | None = None,
 ) -> FieldObservation:
-    base = make_evidence(field_id=field_id, text=str(value) if value is not None else "", confidence=confidence)
+    base = make_evidence(field_id=field_id, text=_evidence_text(value), confidence=confidence)
     return FieldObservation(
         field_id=field_id,
         beverage_class=beverage_class,

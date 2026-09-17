@@ -5,7 +5,13 @@ import logging
 import re
 
 from app.rules._validators import ValidatorContext, register
-from app.rules._validators._helpers import _build_meta, _conf
+from app.rules._validators._helpers import (
+    _build_meta,
+    _conf,
+    not_read_result,
+    unlocated,
+    unlocated_is_absent,
+)
 from app.schemas.expected import ExpectedValue
 from app.schemas.extracted import FieldObservation
 from app.schemas.rejection import Outcome, ValidationResult
@@ -43,10 +49,15 @@ def regex_match(
     rule: RuleDefinition,
     ctx: ValidatorContext,
 ) -> ValidationResult:
+    # The reader did not find this on the label. That is a question for a
+    # reviewer, not a rejection - see `unlocated` in `_helpers.py`.
     pattern = rule.parameters.get("pattern", "")
     ignore_case = bool(rule.parameters.get("ignore_case", False))
     flags = re.IGNORECASE if ignore_case else 0
     observed = _project_alc_text(obs.observed_value, obs.field_id)
+    if unlocated(obs, observed) and not unlocated_is_absent(rule):
+        return not_read_result(obs, exp, rule, ctx, element="the statement this rule checks")
+
     if not observed and isinstance(obs.observed_value, dict):
         # Diagnostic for "why did this rule fail" — distinguishes projection
         # failure (no recognized key) from regex mismatch on a real string.

@@ -196,6 +196,16 @@ codes:
     severity: warn
 
   # ---- LEGIBILITY ----
+  LEGIBILITY.FIELD.NOT_READ:
+    # One code for every rule, because the finding is the same one whatever
+    # element it is about: the reader did not find it on the label, so nobody
+    # checked it and a reviewer has to. The rule_id and the field on the finding
+    # say which element. It is deliberately not a per-bin code - BRAND.*, say -
+    # because it is not a finding about the brand, it is a finding about the
+    # reading.
+    description: "The reader did not find this element on the label, so the check was not made; a reviewer settles it."
+    cfr_anchors: []
+    severity: warn
   LEGIBILITY.FIELD_OF_VISION.SPLIT:
     description: "Required spirits fields are not in the same field of vision (§5.63(a))."
     cfr_anchors: ["27 CFR §5.63(a)"]

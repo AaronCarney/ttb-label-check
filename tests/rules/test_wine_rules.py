@@ -68,7 +68,13 @@ def test_wine_class_type_neg(ruleset) -> None:
     rule = _r(ruleset, "wine.class_type.present")
     obs = make_obs(field_id="class_type", value=None, beverage_class=BeverageClass.WINE)
     res = VALIDATOR_REGISTRY[rule.validator](obs, make_expected(field_id="class_type"), rule, _ctx(ruleset))
-    assert res.outcome is Outcome.FAIL
+    # An observation with no reading, no box and no extracted text is the reader
+    # saying it did not find the element, which is not the finding that the label
+    # lacks it. This rule does not set `unlocated_is_absent`, so it goes to a
+    # reviewer. `common.warning.present` is the one rule that does set it, and its
+    # own test still asserts a rejection.
+    assert res.outcome is Outcome.INSUFFICIENT_EVIDENCE
+    assert res.reason_code == "LEGIBILITY.FIELD.NOT_READ"
 
 
 def test_wine_class_type_champagne_matches_a_sparkling_wine_application(ruleset) -> None:
@@ -105,7 +111,13 @@ def test_wine_alcohol_present_or_table_neg(ruleset) -> None:
     obs = make_obs(field_id="alc_text", value=None, beverage_class=BeverageClass.WINE)
     exp = make_expected(field_id="alc_text", parameters={"abv_required": True})
     res = VALIDATOR_REGISTRY[rule.validator](obs, exp, rule, _ctx(ruleset))
-    assert res.outcome is Outcome.FAIL
+    # An observation with no reading, no box and no extracted text is the reader
+    # saying it did not find the element, which is not the finding that the label
+    # lacks it. This rule does not set `unlocated_is_absent`, so it goes to a
+    # reviewer. `common.warning.present` is the one rule that does set it, and its
+    # own test still asserts a rejection.
+    assert res.outcome is Outcome.INSUFFICIENT_EVIDENCE
+    assert res.reason_code == "LEGIBILITY.FIELD.NOT_READ"
 
 
 def test_wine_alcohol_format_is_switched_off(ruleset) -> None:
@@ -131,7 +143,13 @@ def test_wine_name_address_neg(ruleset) -> None:
     rule = _r(ruleset, "wine.name_address.present")
     obs = make_obs(field_id="bottler", value=None, beverage_class=BeverageClass.WINE)
     res = VALIDATOR_REGISTRY[rule.validator](obs, make_expected(field_id="bottler"), rule, _ctx(ruleset))
-    assert res.outcome is Outcome.FAIL
+    # An observation with no reading, no box and no extracted text is the reader
+    # saying it did not find the element, which is not the finding that the label
+    # lacks it. This rule does not set `unlocated_is_absent`, so it goes to a
+    # reviewer. `common.warning.present` is the one rule that does set it, and its
+    # own test still asserts a rejection.
+    assert res.outcome is Outcome.INSUFFICIENT_EVIDENCE
+    assert res.reason_code == "LEGIBILITY.FIELD.NOT_READ"
 
 
 def test_wine_net_contents_pos(ruleset) -> None:
@@ -144,5 +162,11 @@ def test_wine_net_contents_pos(ruleset) -> None:
 def test_wine_net_contents_neg(ruleset) -> None:
     rule = _r(ruleset, "wine.net_contents.present")
     obs = make_obs(field_id="net_contents", value=None, beverage_class=BeverageClass.WINE)
+    # An observation with no reading, no box and no extracted text is the reader
+    # saying it did not find the element, which is not the finding that the label
+    # lacks it. This rule does not set `unlocated_is_absent`, so it goes to a
+    # reviewer. `common.warning.present` is the one rule that does set it, and its
+    # own test still asserts a rejection.
     res = VALIDATOR_REGISTRY[rule.validator](obs, make_expected(field_id="net_contents"), rule, _ctx(ruleset))
-    assert res.outcome is Outcome.FAIL
+    assert res.outcome is Outcome.INSUFFICIENT_EVIDENCE
+    assert res.reason_code == "LEGIBILITY.FIELD.NOT_READ"

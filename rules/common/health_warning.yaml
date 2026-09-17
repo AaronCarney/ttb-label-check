@@ -8,6 +8,14 @@ rules:
     severity: reject
     match_policy: exact
     validator: presence_check
+    parameters:
+      # The only rule in any pack that may read "the reader did not find it" as
+      # "the label does not carry it". Everywhere else that reading goes to a
+      # reviewer, because the reader is not reliable enough at finding the
+      # element for its silence to be evidence. Here it is: over the 30-label
+      # corpus the reader finds the warning on 30 of 30 (`plans/wave3-R.md`,
+      # `warning_present`), and §16.21 makes its absence the finding itself.
+      unlocated_is_absent: true
     evidence_required: [warning_block]
     confidence_floor: 0.50
     effective_date: "1989-11-18"

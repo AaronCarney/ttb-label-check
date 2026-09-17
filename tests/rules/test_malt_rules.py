@@ -37,7 +37,8 @@ def test_brand_neg(ruleset) -> None:
     rule = _r(ruleset, "malt.brand.matches_application")
     obs = make_obs(field_id="brand", value="Acme", beverage_class=BeverageClass.MALT)
     exp = make_expected(field_id="brand", value="Bizmark")
-    assert VALIDATOR_REGISTRY[rule.validator](obs, exp, rule, _ctx(ruleset)).outcome is Outcome.FAIL
+    res = VALIDATOR_REGISTRY[rule.validator](obs, exp, rule, _ctx(ruleset))
+    assert res.outcome is Outcome.FAIL
 
 
 def test_class_type_pos(ruleset) -> None:
@@ -59,7 +60,14 @@ def test_class_type_neg(ruleset) -> None:
     # Absence is the only failure this rule reports.
     rule = _r(ruleset, "malt.class_type.present")
     obs = make_obs(field_id="class_type", value=None, beverage_class=BeverageClass.MALT)
-    assert VALIDATOR_REGISTRY[rule.validator](obs, make_expected(field_id="class_type"), rule, _ctx(ruleset)).outcome is Outcome.FAIL
+    # An observation with no reading, no box and no extracted text is the reader
+    # saying it did not find the element, which is not the finding that the label
+    # lacks it. This rule does not set `unlocated_is_absent`, so it goes to a
+    # reviewer. `common.warning.present` is the one rule that does set it, and its
+    # own test still asserts a rejection.
+    res = VALIDATOR_REGISTRY[rule.validator](obs, make_expected(field_id="class_type"), rule, _ctx(ruleset))
+    assert res.outcome is Outcome.INSUFFICIENT_EVIDENCE
+    assert res.reason_code == "LEGIBILITY.FIELD.NOT_READ"
 
 
 @pytest.mark.parametrize("designation", ["BOCK", "CERVEZA", "IPA"])
@@ -108,7 +116,14 @@ def test_name_address_pos(ruleset) -> None:
 def test_name_address_neg(ruleset) -> None:
     rule = _r(ruleset, "malt.name_address.present")
     obs = make_obs(field_id="bottler", value=None, beverage_class=BeverageClass.MALT)
-    assert VALIDATOR_REGISTRY[rule.validator](obs, make_expected(field_id="bottler"), rule, _ctx(ruleset)).outcome is Outcome.FAIL
+    # An observation with no reading, no box and no extracted text is the reader
+    # saying it did not find the element, which is not the finding that the label
+    # lacks it. This rule does not set `unlocated_is_absent`, so it goes to a
+    # reviewer. `common.warning.present` is the one rule that does set it, and its
+    # own test still asserts a rejection.
+    res = VALIDATOR_REGISTRY[rule.validator](obs, make_expected(field_id="bottler"), rule, _ctx(ruleset))
+    assert res.outcome is Outcome.INSUFFICIENT_EVIDENCE
+    assert res.reason_code == "LEGIBILITY.FIELD.NOT_READ"
 
 
 def test_net_contents_pos(ruleset) -> None:
@@ -120,4 +135,11 @@ def test_net_contents_pos(ruleset) -> None:
 def test_net_contents_neg(ruleset) -> None:
     rule = _r(ruleset, "malt.net_contents.present")
     obs = make_obs(field_id="net_contents", value=None, beverage_class=BeverageClass.MALT)
-    assert VALIDATOR_REGISTRY[rule.validator](obs, make_expected(field_id="net_contents"), rule, _ctx(ruleset)).outcome is Outcome.FAIL
+    # An observation with no reading, no box and no extracted text is the reader
+    # saying it did not find the element, which is not the finding that the label
+    # lacks it. This rule does not set `unlocated_is_absent`, so it goes to a
+    # reviewer. `common.warning.present` is the one rule that does set it, and its
+    # own test still asserts a rejection.
+    res = VALIDATOR_REGISTRY[rule.validator](obs, make_expected(field_id="net_contents"), rule, _ctx(ruleset))
+    assert res.outcome is Outcome.INSUFFICIENT_EVIDENCE
+    assert res.reason_code == "LEGIBILITY.FIELD.NOT_READ"

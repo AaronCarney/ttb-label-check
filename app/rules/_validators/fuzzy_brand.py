@@ -29,7 +29,13 @@ here; the numbers are not.
 from __future__ import annotations
 
 from app.rules._validators import ValidatorContext, register
-from app.rules._validators._helpers import _build_meta, _conf
+from app.rules._validators._helpers import (
+    _build_meta,
+    _conf,
+    not_read_result,
+    unlocated,
+    unlocated_is_absent,
+)
 from app.rules.brand_match import (
     stage_a_normalized,
     stage_a_word_run,
@@ -147,6 +153,11 @@ def fuzzy_brand(
     # than silently failing every cold-loaded label.
     if not declared.strip():
         return result(Outcome.NOT_APPLICABLE, rule.severity, None)
+
+    # The reader did not find this on the label. That is a question for a
+    # reviewer, not a rejection - see `unlocated` in `_helpers.py`.
+    if unlocated(obs, observed) and not unlocated_is_absent(rule):
+        return not_read_result(obs, exp, rule, ctx, element="a brand mark")
 
     admissible = _admissible_values(declared, exp)
     pass_th = float(rule.parameters.get("pass_threshold", 0.92))

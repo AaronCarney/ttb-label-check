@@ -21,8 +21,9 @@ import re
 import unicodedata
 
 from app.rules._validators import ValidatorContext
+from app.schemas.expected import ExpectedValue
 from app.schemas.extracted import FieldObservation
-from app.schemas.rejection import EngineMeta
+from app.schemas.rejection import EngineMeta, Outcome, Severity, ValidationResult
 from app.schemas.rules import RuleDefinition
 
 
@@ -152,3 +153,96 @@ def first_number(value: object) -> float | None:
         return None
     match = re.search(r"[0-9]+(?:\.[0-9]+)?", str(value))
     return float(match.group()) if match else None
+
+
+# --- the element the reader did not find -------------------------------------
+#
+# A field a reader could not read and a field a label does not carry reach a
+# validator in the same shape: an observation whose reading is empty. Every
+# validator used to treat the pair as one thing and reject the label for both,
+# which rewards a reader for guessing. On a compliant label, a garbled `[OSTL`
+# for `LOST LANTERN` reaches a reviewer and an honest empty reading is a
+# rejection, which is the wrong way round: the guess is the answer that costs a
+# reviewer most, because it is wrong beside a field they have no reason to
+# re-check.
+#
+# The two are told apart by the evidence, not by the value. Both readers attach
+# one `Evidence` per field carrying the box the value was read from and the text
+# they read there (`app/vision/local.py`, `app/vision/cloud.py`), and a field
+# neither reader located carries neither. So an empty reading with no box and no
+# extracted text is the reader saying "I did not find this on the label" - which
+# is not the claim "this label does not carry it", and must not be reported as
+# though it were.
+#
+# What that distinction means for one rule is the rule pack's to decide, not
+# this module's, and it is decided on how reliably the reader finds that element.
+# For the government warning the reader is measured at 30 of 30 over the corpus
+# (`plans/wave3-R.md`), so not finding it is evidence it is absent and that rule
+# sets `unlocated_is_absent: true`. Everywhere else the default stands and the
+# finding goes to a reviewer, who has the label in front of them.
+
+NOT_READ_CODE = "LEGIBILITY.FIELD.NOT_READ"
+
+
+def unlocated(obs: FieldObservation, reading: str | None = None) -> bool:
+    """Did the reader fail to find this element on the label at all?
+
+    True only when the reading is empty *and* no evidence carries a box or any
+    extracted text. A reading the reader produced is located even when it is
+    wrong, and nothing about how a wrong reading is judged changes here.
+
+    `reading` is for the validators that do not compare `project_reading`:
+    `heading_style_check` reads the heading out of the warning payload,
+    `regex_match` projects the label's own alcohol wording, and
+    `same_field_of_vision_check` reads a panel map. Asking the generic
+    projection about those would call a field the reader found "not found",
+    because the projection looks for a key the payload does not carry.
+    """
+    if (project_reading(obs) if reading is None else reading).strip():
+        return False
+    return not any(
+        ev.bbox is not None or (ev.extracted_text or "").strip() for ev in obs.evidence
+    )
+
+
+def unlocated_is_absent(rule: RuleDefinition) -> bool:
+    """May this rule read "the reader did not find it" as "the label lacks it"?
+
+    Off unless the pack says otherwise, so a rule that has not thought about it
+    sends the reviewer a question rather than issuing a rejection nobody checked.
+    """
+    return bool(rule.parameters.get("unlocated_is_absent", False))
+
+
+def not_read_result(
+    obs: FieldObservation,
+    exp: ExpectedValue,
+    rule: RuleDefinition,
+    ctx: ValidatorContext,
+    *,
+    element: str,
+) -> ValidationResult:
+    """The finding for an element the reader did not find: a reviewer's to settle.
+
+    `INSUFFICIENT_EVIDENCE` and `warn`, whatever severity the rule carries, so
+    `app/services/disposition.py` routes it to `needs_review` and it cannot
+    reject the submission on its own.
+    """
+    return ValidationResult(
+        rule_id=rule.rule_id,
+        cfr_citation=rule.cfr_citation,
+        beverage_class=obs.beverage_class,
+        outcome=Outcome.INSUFFICIENT_EVIDENCE,
+        severity=Severity.WARN,
+        reason_code=NOT_READ_CODE,
+        aggregated_confidence=_conf(obs),
+        evidence=obs.evidence,
+        expected=exp,
+        observed=obs,
+        engine_meta=_build_meta(rule, ctx),
+        message=(
+            f"The reader did not find {element} on this label, so this check was "
+            "not made. That is not a finding that the label lacks it: compare the "
+            "label against the application yourself."
+        ),
+    )

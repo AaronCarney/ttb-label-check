@@ -66,6 +66,11 @@ def test_age_statement_neg(ruleset) -> None:
     rule = _r(ruleset, "spirits.age_statement.floor")
     obs = make_obs(field_id="age_statement", value=None, beverage_class=BeverageClass.SPIRITS)
     exp = make_expected(field_id="age_statement", parameters={"age_required": True})
+    # An observation with no reading, no box and no extracted text is the reader
+    # saying it did not find the element, which is not the finding that the label
+    # lacks it. This rule does not set `unlocated_is_absent`, so it goes to a
+    # reviewer. `common.warning.present` is the one rule that does set it, and its
+    # own test still asserts a rejection.
     res = VALIDATOR_REGISTRY[rule.validator](obs, exp, rule, _ctx(ruleset))
-    assert res.outcome is Outcome.FAIL
-    assert res.reason_code == "AGE_STATEMENT.FLOOR.MISSING"
+    assert res.outcome is Outcome.INSUFFICIENT_EVIDENCE
+    assert res.reason_code == "LEGIBILITY.FIELD.NOT_READ"

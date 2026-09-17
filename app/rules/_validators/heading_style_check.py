@@ -34,7 +34,13 @@ from __future__ import annotations
 import re
 
 from app.rules._validators import ValidatorContext, register
-from app.rules._validators._helpers import _build_meta, _conf
+from app.rules._validators._helpers import (
+    _build_meta,
+    _conf,
+    not_read_result,
+    unlocated,
+    unlocated_is_absent,
+)
 from app.schemas.expected import ExpectedValue
 from app.schemas.extracted import FieldObservation
 from app.schemas.rejection import Outcome, Severity, ValidationResult
@@ -75,6 +81,15 @@ def _weight_ok(payload: dict, weight: str) -> bool:
     return payload.get("heading_styles", {}).get("weight") == weight
 
 
+def _heading_reading(payload: dict) -> str:
+    """What this check needs to have been read: the heading, or a style report
+    about it. Either one means the reader found the heading."""
+    parts = [str(payload.get("heading_text") or "")]
+    if payload.get("heading_styles") or "heading_all_caps" in payload:
+        parts.append("styled")
+    return " ".join(p for p in parts if p)
+
+
 @register("heading_style_check")
 def heading_style_check(
     obs: FieldObservation,
@@ -82,7 +97,12 @@ def heading_style_check(
     rule: RuleDefinition,
     ctx: ValidatorContext,
 ) -> ValidationResult:
-    payload = obs.observed_value or {}
+    # The reader did not find this on the label. That is a question for a
+    # reviewer, not a rejection - see `unlocated` in `_helpers.py`.
+    payload = obs.observed_value if isinstance(obs.observed_value, dict) else {}
+    if unlocated(obs, _heading_reading(payload)) and not unlocated_is_absent(rule):
+        return not_read_result(obs, exp, rule, ctx, element="the warning heading")
+
     target = rule.parameters.get("target_phrase", "GOVERNMENT WARNING")
     required_case = rule.parameters.get("required_case", "upper")
     required_weight = rule.parameters.get("required_weight", "bold")

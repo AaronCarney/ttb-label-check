@@ -12,7 +12,13 @@ writes the comparison against that real signal.
 from __future__ import annotations
 
 from app.rules._validators import ValidatorContext, register
-from app.rules._validators._helpers import _build_meta, _conf
+from app.rules._validators._helpers import (
+    _build_meta,
+    _conf,
+    not_read_result,
+    unlocated,
+    unlocated_is_absent,
+)
 from app.schemas.expected import ExpectedValue
 from app.schemas.extracted import FieldObservation
 from app.schemas.rejection import Outcome, ValidationResult
@@ -42,7 +48,14 @@ def same_field_of_vision_check(
     rule: RuleDefinition,
     ctx: ValidatorContext,
 ) -> ValidationResult:
+    # The reader did not find this on the label. That is a question for a
+    # reviewer, not a rejection - see `unlocated` in `_helpers.py`.
     required: list[str] = rule.parameters.get("required_fields", [])
     panels: dict[str, list[str]] = (obs.observed_value or {}).get("panels", {})
+    # No panel map at all means the reader read no layout, not that the label
+    # splits its mandatory elements across faces.
+    if unlocated(obs, "read" if panels else "") and not unlocated_is_absent(rule):
+        return not_read_result(obs, exp, rule, ctx, element="the elements this rule places")
+
     on_one_panel = any(set(required).issubset(set(fields)) for fields in panels.values())
     return _result(rule, ctx, obs, exp, ok=on_one_panel)

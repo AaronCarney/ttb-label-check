@@ -14,7 +14,14 @@ payload so an empty one fails, which is what §16.21 requires.
 from __future__ import annotations
 
 from app.rules._validators import ValidatorContext, register
-from app.rules._validators._helpers import _build_meta, _conf, project_reading
+from app.rules._validators._helpers import (
+    _build_meta,
+    _conf,
+    not_read_result,
+    project_reading,
+    unlocated,
+    unlocated_is_absent,
+)
 from app.schemas.expected import ExpectedValue
 from app.schemas.extracted import FieldObservation
 from app.schemas.rejection import Outcome, ValidationResult
@@ -48,6 +55,11 @@ def presence_check(
     rule: RuleDefinition,
     ctx: ValidatorContext,
 ) -> ValidationResult:
+    # The reader did not find this on the label. That is a question for a
+    # reviewer, not a rejection - see `unlocated` in `_helpers.py`.
+    if unlocated(obs) and not unlocated_is_absent(rule):
+        return not_read_result(obs, exp, rule, ctx, element="this element")
+
     return _result(rule, ctx, obs, exp, _is_present(obs))
 
 
@@ -74,4 +86,9 @@ def conditional_presence(
             observed=obs,
             engine_meta=_build_meta(rule, ctx),
         )
+    # The reader did not find this on the label. That is a question for a
+    # reviewer, not a rejection - see `unlocated` in `_helpers.py`.
+    if unlocated(obs) and not unlocated_is_absent(rule):
+        return not_read_result(obs, exp, rule, ctx, element="this element")
+
     return _result(rule, ctx, obs, exp, _is_present(obs))

@@ -30,7 +30,14 @@ import unicodedata
 from typing import Sequence
 
 from app.rules._validators import ValidatorContext, register
-from app.rules._validators._helpers import _build_meta, _conf, project_reading
+from app.rules._validators._helpers import (
+    _build_meta,
+    _conf,
+    not_read_result,
+    project_reading,
+    unlocated,
+    unlocated_is_absent,
+)
 from app.schemas.expected import ExpectedValue
 from app.schemas.extracted import FieldObservation
 from app.schemas.rejection import Outcome, ValidationResult
@@ -91,6 +98,11 @@ def verbatim_hash(
     rule: RuleDefinition,
     ctx: ValidatorContext,
 ) -> ValidationResult:
+    # The reader did not find this on the label. That is a question for a
+    # reviewer, not a rejection - see `unlocated` in `_helpers.py`.
+    if unlocated(obs) and not unlocated_is_absent(rule):
+        return not_read_result(obs, exp, rule, ctx, element="the government warning")
+
     key = rule.parameters.get("asset_key")
     asset = ctx.assets.get(key) if key else None
     ops = (rule.asset or {}).get("normalization", DEFAULT_NORMALIZATION_OPS)
