@@ -31,6 +31,10 @@
 #   TTB_SERVICE       Cloud Run service name. Defaults to ttb-label-check.
 #   TTB_INVOKER_SA    The service account permitted to invoke the service.
 #                     Defaults to ttb-edge-invoker in TTB_GCP_PROJECT.
+#   TTB_ACCESS        Set to "keep" to pass no access flag at all, leaving the
+#                     service's existing IAM policy exactly as it is. Use this
+#                     for a deploy that ships code and is not meant to change
+#                     who can reach the service. Ignored when TTB_PUBLIC=1.
 #   TTB_PUBLIC        Set to 1 to deploy the service with its Cloud Run URL open
 #                     to anyone, instead of behind the invoker check. The edge
 #                     proxy decision 0025 describes does not exist yet, so this
@@ -201,9 +205,22 @@ git archive --format=tar HEAD | tar -x -C "$STAGING"
 COMMIT="$(git rev-parse HEAD)"
 
 
+# Which access flag, if any, this deploy passes.
+#
+# Omitting the flag is not the same as setting either form of it. gcloud reads
+# an unset --[no-]allow-unauthenticated as None and then skips the IAM call
+# altogether (serverless_operations.py, "if allow_unauthenticated is not
+# None:"), so the service keeps whatever policy it already had.
+#
+# That is what TTB_ACCESS=keep is for. Without it, shipping a bug fix to a
+# service the owner had deliberately opened would silently close it to
+# everyone, because the default here fails closed and a deploy would carry that
+# change in with it. Opening a service is still his call every time; leaving it
+# as he set it is not a new decision, and a code deploy should not make one.
+ACCESS_FLAG=
 if [ "${TTB_PUBLIC:-0}" = "1" ]; then
     ACCESS_FLAG=--allow-unauthenticated
-else
+elif [ "${TTB_ACCESS:-}" != "keep" ]; then
     ACCESS_FLAG=--no-allow-unauthenticated
 fi
 
@@ -223,11 +240,17 @@ gcloud run deploy "$SERVICE" \
     --startup-probe "$STARTUP_PROBE" \
     --set-env-vars "VISION_MODE=local,GIT_COMMIT=${COMMIT}" \
     --labels "commit=${COMMIT}" \
-    "$ACCESS_FLAG"
+    ${ACCESS_FLAG:+"$ACCESS_FLAG"}
 
 if [ "${TTB_PUBLIC:-0}" = "1" ]; then
     echo "Deployed open: the service URL answers anyone. The two-instance cap is"
     echo "the only bound on the meter. Delete the service when the review is done."
+    exit 0
+fi
+
+if [ "${TTB_ACCESS:-}" = "keep" ]; then
+    echo "Deployed with the access policy untouched: no IAM call was made, so"
+    echo "whoever could reach ${SERVICE} before this deploy can reach it now."
     exit 0
 fi
 
