@@ -46,6 +46,25 @@ def _normalize(s: str) -> str:
     return unicodedata.normalize("NFKC", s).strip().casefold()
 
 
+def _words(s: str) -> list[str]:
+    """`s` as a list of words, with punctuation treated as a word break.
+
+    Splitting on whitespace alone is not enough, because a designation on a
+    real label carries punctuation against the class word: "STRAIGHT BOURBON
+    WHISKEY, 40% ALC/VOL" and "BLENDED WHISKEY." both put the standard of
+    identity next to a mark, and `str.split` hands back "whiskey," and
+    "whiskey." - neither of which equals "whiskey". The effect was a
+    designation that plainly carries a listed class being reported as not
+    carrying it.
+
+    The test is `str.isalnum` rather than a character class, because the
+    allow-list in `rules/spirits-deep.yaml` holds "Cachaça". An ASCII class
+    would break that entry into "cacha" and "a" and stop it matching itself.
+    """
+    folded = unicodedata.normalize("NFKC", s).casefold()
+    return "".join(ch if ch.isalnum() else " " for ch in folded).split()
+
+
 def _contains_designation(observed: str, allowed: str) -> bool:
     """True when `allowed` appears in `observed` as a run of whole words.
 
@@ -57,10 +76,11 @@ def _contains_designation(observed: str, allowed: str) -> bool:
     designation includes one. The citation stays in the rule pack, where the
     allow-list itself lives.
 
-    Whole words, not substrings: "gin" must not match inside "Virginia".
+    Whole words, not substrings: "gin" must not match inside "Virginia". A
+    word break is punctuation as well as space - see `_words`.
     """
-    haystack = _normalize(observed).split()
-    needle = _normalize(allowed).split()
+    haystack = _words(observed)
+    needle = _words(allowed)
     if not needle or len(needle) > len(haystack):
         return False
     return any(
