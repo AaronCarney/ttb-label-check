@@ -33,6 +33,7 @@ dev = [
     "mypy>=2.3.1",
     "pytest-cov>=6.0",
     "hypothesis>=6.100",
+    "mutmut>=3.7.0",
 ]
 
 [tool.taskipy.tasks]
@@ -163,3 +164,21 @@ exclude_also = [
     "if TYPE_CHECKING:",
     "\\.\\.\\.$",
 ]
+
+[tool.mutmut]
+# Mutation testing deliberately breaks the source and checks whether a test
+# notices. A mutant that survives marks an assertion nobody is really making.
+#
+# Scoped deliberately narrow. `app/rules/_validators/` is where a rule's verdict
+# is actually decided, and `tests/rules/_validators/` drives those validators
+# directly in 0.47 s — a mutation run is the whole test suite once per mutant, so
+# a fast, focused suite is the difference between a run that finishes and one
+# nobody waits for. Widening this is its own decision, not a default.
+source_paths = ["app/rules/_validators/"]
+tests_dir = ["tests/rules/_validators/"]
+# The validators read the shipped decision tables, so the rule pack travels with
+# the copied tree mutmut builds under `mutants/`.
+# mutmut copies only `source_paths` out of `app/`, and `tests/conftest.py` imports
+# `app.main` at module load, so the rest of the package has to travel too. The
+# rule pack and its pinned assets come along because the validators read them.
+also_copy = ["rules", "assets", "app"]

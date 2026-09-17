@@ -181,5 +181,54 @@ def test_spacing_inside_the_heading_is_not_a_difference() -> None:
     assert res.outcome is Outcome.PASS
 
 
+def test_wrong_words_fail_however_well_they_are_printed() -> None:
+    """The heading has to say what §16.21 says it says.
+
+    Every other test here varies the capitals or the weight and leaves the
+    words alone, so nothing asserted that the words are checked at all — a
+    mutation run made `_phrase_and_case_ok` return True on a phrase mismatch
+    and the whole suite stayed green. A label headed HEALTH ADVISORY in bold
+    capitals is not carrying the mandated heading, and this is a reject-severity
+    rule.
+    """
+    res = _check(
+        {
+            "heading_text": "HEALTH ADVISORY",
+            "heading_all_caps": True,
+            "heading_bold": True,
+            "heading_bold_measured_confident": True,
+        }
+    )
+    assert res.outcome is Outcome.FAIL
+    assert res.severity is Severity.REJECT
+    assert res.reason_code == "WARNING.STYLE.HEADING_NOT_BOLD_CAPS"
+
+
+def test_only_the_separating_punctuation_is_ignored() -> None:
+    """`_heading_phrase` strips the punctuation that separates the heading from
+    the statement, and nothing else. A trailing colon is the regulation's own
+    (`GOVERNMENT WARNING: (1) …`) and must pass; a trailing letter is a
+    different word and must not. Without the second half, widening that strip
+    set to swallow letters goes unnoticed."""
+    styled = {
+        "heading_all_caps": True,
+        "heading_bold": True,
+        "heading_bold_measured_confident": True,
+    }
+    assert _check({"heading_text": "GOVERNMENT WARNING:", **styled}).outcome is Outcome.PASS
+    assert _check({"heading_text": "GOVERNMENT WARNINGX", **styled}).outcome is Outcome.FAIL
+
+
+def test_a_style_report_with_no_heading_text_fails_rather_than_raising() -> None:
+    """The legacy `heading_styles` shape means the reader found a heading, so
+    the check does not fall through to `not_read_result`. If the payload then
+    carries no `heading_text`, the words cannot match the target and the answer
+    is a failure — not a TypeError from handing `None` to the normaliser, which
+    is what this validator did when its default was anything but a string."""
+    res = _check({"heading_styles": {"weight": "bold", "case": "upper"}})
+    assert res.outcome is Outcome.FAIL
+    assert res.reason_code == "WARNING.STYLE.HEADING_NOT_BOLD_CAPS"
+
+
 def test_validator_registered() -> None:
     assert "heading_style_check" in VALIDATOR_REGISTRY

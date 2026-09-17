@@ -51,3 +51,7 @@ edge/.wrangler/
 .coverage.*
 coverage.xml
 htmlcov/
+
+# mutmut builds a mutated copy of the tree here on every run.
+mutants/
+.mutmut-cache
