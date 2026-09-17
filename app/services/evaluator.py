@@ -214,7 +214,9 @@ class Evaluator:
                     "error_class": "N/A",
                 },
             )
-            return self._short_circuit(application, label, timeline, quality.reason_code, t_total)
+            return self._short_circuit(
+                application, label, timeline, quality.failure_reason_code(), t_total
+            )
 
         # Step 3-4: rules
         try:

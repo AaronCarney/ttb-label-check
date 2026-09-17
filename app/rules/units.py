@@ -105,7 +105,7 @@ def shipped_table(rules_root: Path) -> UnitTable:
     return table_from_entries(raw.get("entries", []))
 
 
-def millilitres(amount: object, unit: object, table: UnitTable) -> float | None:
+def millilitres(amount: float | None, unit: object, table: UnitTable) -> float | None:
     """One figure and its unit in millilitres, or None where there is none.
 
     None when there is no figure, and None when the unit is one the table

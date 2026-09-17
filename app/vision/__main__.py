@@ -39,7 +39,7 @@ async def _run(args: argparse.Namespace) -> int:
         return 2
 
     settings = Settings()
-    ring = deque(maxlen=200)
+    ring: deque[dict] = deque(maxlen=200)
 
     label = Label(
         label_id=args.label.stem,

@@ -29,6 +29,7 @@ from app.api.ui._submission import (
     _get_upload_evaluator,
 )
 from app.config import Settings
+from app.schemas.label import ImageMediaType
 
 router = APIRouter()
 
@@ -89,7 +90,7 @@ async def batches_upload_submit(
     # fact about that one file, but a file over the cap is a request this
     # service declined to hold in memory, and queueing the rest would mean
     # holding them anyway.
-    raw: list[tuple[str, bytes, str | None]] = []
+    raw: list[tuple[str, bytes, ImageMediaType | None]] = []
     for upload in labels:
         body = await upload.read()
         filename = upload.filename or f"label-{len(raw)}"

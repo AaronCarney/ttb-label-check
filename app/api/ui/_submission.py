@@ -13,12 +13,13 @@ page shells do not: rendering a page needs none of it.
 from __future__ import annotations
 
 from app.config import Settings
+from app.schemas.label import ImageMediaType
 
 _PNG_MAGIC = b"\x89PNG\r\n\x1a\n"
 _JPEG_MAGIC = b"\xff\xd8\xff"
 
 
-def _detect_image_mime(data: bytes) -> str | None:
+def _detect_image_mime(data: bytes) -> ImageMediaType | None:
     """The media type of an upload, read from its own first bytes.
 
     The browser's declared content type is not consulted: it is whatever the

@@ -128,6 +128,24 @@ the accessibility scan on colour contrast below the AA threshold, and the layout
 a 320-pixel viewport on a 27-pixel overflow; both are fixed. `docs/approach.md` says what the scan
 does and does not settle for the Section 508 claim.
 
+### Linting, formatting and type checking
+
+Three commands, and all three are expected to pass before a commit:
+
+```bash
+uv run ruff check          # lint
+uv run ruff format --check # formatting, without rewriting anything
+uv run mypy                # types, over app/
+```
+
+`uv run ruff format` without `--check` writes the formatting instead of reporting it, and
+`uv run ruff check --fix` applies the fixes ruff considers safe.
+
+Each tool's configuration lives in `pyproject.toml` with the reasoning next to it: which lint rules
+are switched on beyond ruff's default and what each one has already caught here, why the line length
+is 100 rather than ruff's 88, why markdown is excluded from both the linter and the formatter, and
+why the type checker starts permissive. mypy checks `app/`; tightening it is separate, later work.
+
 ### The container path
 
 Same app, one command, if you would rather not install anything:

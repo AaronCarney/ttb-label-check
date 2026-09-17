@@ -11,7 +11,7 @@ from app.api import limits
 from app.config import Settings
 from app.deps import build_evaluator
 from app.schemas.application import Application
-from app.schemas.label import Label
+from app.schemas.label import ImageMediaType, Label
 from app.schemas.wire.disposition import DispositionEnvelope
 
 router = APIRouter(tags=["evaluation"])
@@ -20,7 +20,7 @@ _PNG_MAGIC = b"\x89PNG\r\n\x1a\n"
 _JPEG_MAGIC = b"\xff\xd8\xff"
 
 
-def _detect_content_type(data: bytes) -> str | None:
+def _detect_content_type(data: bytes) -> ImageMediaType | None:
     if data.startswith(_PNG_MAGIC):
         return "image/png"
     if data.startswith(_JPEG_MAGIC):
@@ -37,7 +37,7 @@ async def post_labels(
     application: UploadFile = File(...),
     label: UploadFile = File(...),
     settings: Settings = Depends(_get_settings),
-) -> DispositionEnvelope:
+) -> DispositionEnvelope | JSONResponse:
     try:
         app_bytes = await application.read()
         app_obj = Application(**json.loads(app_bytes))

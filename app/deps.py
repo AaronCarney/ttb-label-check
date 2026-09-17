@@ -36,7 +36,7 @@ def build_vision_extractor(settings: Settings) -> VisionExtractor:
     return LocalVisionExtractor(settings=settings, ring_buffer=ring)
 
 
-_local_reader_singleton: LocalVisionExtractor | None = None
+_local_reader_singleton: VisionExtractor | None = None
 _local_reader_build_lock = threading.Lock()
 
 

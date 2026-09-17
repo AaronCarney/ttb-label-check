@@ -2,10 +2,11 @@ import io
 from pathlib import Path
 
 import numpy as np
+import pytest
 from PIL import Image
 
 from app.schemas.label import Dimensions, Label
-from app.vision.quality import assess
+from app.vision.quality import QualityReport, assess
 
 # A real CC0 label from the TTB Public COLA Registry, front face: distilled
 # spirits, 1200x1800 JPEG. It passes the vision quality gates, so a test
@@ -152,3 +153,34 @@ def test_dpi_none_when_all_sources_missing():
     report = assess(label)
     assert report.dpi is None
     assert report.disposition == "ok"
+
+
+# -- the reason code a short-circuit is built from --------------------------
+#
+# `Evaluator._short_circuit` writes the failing report's reason code into the
+# envelope and into the audit hash. `QualityReport.reason_code` is optional
+# because a passing report has none, so nothing stopped a `None` reaching
+# either — an envelope with a null reason code, and an audit hash computed over
+# it. `failure_reason_code` is the accessor that says so out loud instead.
+
+
+def test_failure_reason_code_returns_the_code_of_a_failing_report():
+    report = QualityReport(
+        disposition="needs_better_photo",
+        reason_code="WARNING.LEGIBILITY.MOTION_BLUR",
+        dpi=300,
+    )
+    assert report.failure_reason_code() == "WARNING.LEGIBILITY.MOTION_BLUR"
+
+
+def test_failure_reason_code_refuses_a_failing_report_that_names_no_code():
+    report = QualityReport(disposition="needs_better_photo", reason_code=None, dpi=300)
+    with pytest.raises(ValueError, match="no reason code"):
+        report.failure_reason_code()
+
+
+def test_failure_reason_code_refuses_a_passing_report():
+    report = assess(_label(_textured_no_meta_png(), dpi=300))
+    assert report.disposition == "ok"
+    with pytest.raises(ValueError, match="no reason code"):
+        report.failure_reason_code()

@@ -46,6 +46,19 @@ class QualityReport(BaseModel):
     reason_code: str | None
     dpi: int | None
 
+    def failure_reason_code(self) -> str:
+        """The reason code of a failing report, for a caller that needs one.
+
+        `reason_code` is optional because a passing report names no problem,
+        and the short-circuit path writes this value into the envelope and
+        into the audit hash. Reading it through here means a report that
+        fails without naming why is refused at the point of use, rather than
+        serving an envelope with a null reason code and hashing it.
+        """
+        if self.reason_code is None:
+            raise ValueError("a quality report with no reason code names no failure")
+        return self.reason_code
+
 
 def _decode_grayscale(image_bytes: bytes) -> np.ndarray | None:
     try:

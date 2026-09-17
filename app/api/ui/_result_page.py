@@ -20,6 +20,7 @@ from app.api.ui._submission import _build_application
 from app.api.ui.images import UploadImageStore
 from app.api.ui.results import SingleResultStore
 from app.config import Settings
+from app.schemas.label import ImageMediaType
 
 
 def refuse(
@@ -60,7 +61,7 @@ async def render_single_result(
     results: SingleResultStore,
     posted: dict[str, str],
     image_bytes: bytes,
-    mime: str,
+    mime: ImageMediaType,
     label_id: str,
 ) -> HTMLResponse:
     """Check one label against one application and render the result shell.

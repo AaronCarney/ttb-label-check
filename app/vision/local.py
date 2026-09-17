@@ -34,11 +34,13 @@ import threading
 import time
 import unicodedata
 from collections import deque
+from collections.abc import Sequence
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from functools import lru_cache
 from io import BytesIO
 from itertools import pairwise
+from typing import Any, Protocol, cast
 
 import numpy as np
 from PIL import Image
@@ -298,13 +300,34 @@ _BARCODE_RE = re.compile(r"^[\s\d|\"'.,>\-]{8,}$")
 # ---------------------------------------------------------------------------
 
 
+class _OcrResult(Protocol):
+    """What this module reads off one RapidOCR call."""
+
+    txts: Sequence[object] | None
+    scores: Sequence[float] | None
+    boxes: Any
+
+
+class _OcrEngine(Protocol):
+    """The whole of RapidOCR this module uses.
+
+    RapidOCR's own `__call__` is annotated as returning one of four output
+    types, covering detection-only and recognition-only configurations this
+    module never asks for. Under the settings in `_load` it returns the one
+    that carries text, so `_load` casts to this and the cast is where that
+    claim is written down.
+    """
+
+    def __call__(self, image: Any) -> _OcrResult | None: ...
+
+
 class LocalVisionExtractor:
     """Reads one label image with a CPU OCR engine and reports seven fields."""
 
     def __init__(self, *, settings: Settings, ring_buffer: deque) -> None:
         self._settings = settings
         self._ring = ring_buffer
-        self._engine = None
+        self._engine: _OcrEngine | None = None
         self.last_reading: _Reading | None = None
         # One reader serves the whole process (``app/deps.py``), so these guard
         # against callers in different requests, and the requests run in
@@ -331,7 +354,7 @@ class LocalVisionExtractor:
         available = os.cpu_count() or 1
         return max(1, min(int(self._settings.ocr_num_threads), available))
 
-    def _load(self) -> object:
+    def _load(self) -> _OcrEngine:
         """Build the engine, held to its thread cap. Blocking: the models are
         read off disk.
 
@@ -374,7 +397,7 @@ class LocalVisionExtractor:
                 "cv2_threads": cv2.getNumThreads(),
             },
         )
-        return engine
+        return cast("_OcrEngine", engine)
 
     async def ensure_loaded(self) -> None:
         """Load the models before a read rather than during one.
@@ -432,7 +455,10 @@ class LocalVisionExtractor:
     # -- reading -----------------------------------------------------------
 
     def _boxes(self, image: Image.Image) -> list[_Box]:
-        result = self._engine(np.array(image))
+        engine = self._engine
+        if engine is None:
+            raise RuntimeError("the reader was asked for boxes before its models were loaded")
+        result = engine(np.array(image))
         if result is None or result.txts is None:
             return []
         scores = result.scores if result.scores is not None else [1.0] * len(result.txts)
@@ -1311,7 +1337,7 @@ def _parse(
     net = _net_contents(body)
     net_box = net[0] if net is not None else None
     if net is not None:
-        _, net_match, net_amount = net
+        net_box, net_match, net_amount = net
         out["net_contents"] = (
             {
                 "net_contents_value": net_amount,
@@ -1386,14 +1412,14 @@ def _parse(
         ),
     )
     if brand_box is not None:
-        block = _display_block(body, brand_box, taken)
-        text = " ".join(b.text.strip() for b in block if b.text.strip())
+        brand_block = _display_block(body, brand_box, taken)
+        text = " ".join(b.text.strip() for b in brand_block if b.text.strip())
         out["brand_name"] = (
             {
                 "brand_name": text,
-                "confidence": _confidence("brand_name", block),
+                "confidence": _confidence("brand_name", brand_block),
             },
-            _block_bbox(block),
+            _block_bbox(brand_block),
             text,
         )
     else:

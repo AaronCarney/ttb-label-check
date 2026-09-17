@@ -329,7 +329,12 @@ class CloudVisionExtractor:
         for entry in layout.get("fields", []):
             bbox = entry.get("bbox")
             if bbox and len(bbox) == 4:
-                bbox_by_id[entry["id"]] = tuple(int(v) for v in bbox)
+                bbox_by_id[entry["id"]] = (
+                    int(bbox[0]),
+                    int(bbox[1]),
+                    int(bbox[2]),
+                    int(bbox[3]),
+                )
 
         contents = await asyncio.gather(
             *(
