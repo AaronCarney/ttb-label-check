@@ -125,12 +125,13 @@ account, and name them rather than leave the list looking complete.
 **The regulation that governs the product itself.** Nothing in the brief asks for accessibility, but a
 federal application is bound by Section 508 regardless, and that standard is binding regulation
 rather than agency policy. We built to the level it makes binding, WCAG 2.0 A and AA, and the check
-page and the result page are scanned against it automatically on each run; the batch-list page is
-not yet in that scan. **The scan passes.** Six result-page cases once reported text whose colour
-contrast sat below the AA threshold, and the test that holds the layout to a 320-pixel viewport once
-failed on a 27-pixel overflow. Both were ours, one a palette and one a width, and both are fixed. So
-the claim we can make is that we built the mechanism and, on the two pages the scan covers, met the
-standard. A disposition is never carried by colour alone, which has its own passing test. We stopped
+page, the result page and the batch-list page are all scanned against it automatically on each run,
+which is every screen the product serves. **The scan passes.** Six result-page cases once reported
+text whose colour contrast sat below the AA threshold, and the test that holds the layout to a
+320-pixel viewport once failed on a 27-pixel overflow. Both were ours, one a palette and one a
+width, and both are fixed. So the claim we can make is that we built the mechanism and, on every
+page the product serves, met the part of the standard a machine can judge. A disposition is never
+carried by colour alone, which has its own passing test. We stopped
 short of claiming a newer conformance level
 for a different reason: the two criteria that would have justified one are criteria no automated
 check here can reach. A claim the product cannot test is the kind of promise this build refuses to
@@ -366,10 +367,11 @@ processor cores, is untried.
 looking, so each is named:
 
 - The ten-minute target for a 300-label batch has no instrument at all — no test and no figure.
-- Accessibility past what a machine can check. The automated scan covers two of the three screens —
-  the single-label page and a batch's results, not the bulk-upload page — and passes on both. The
-  manual review the requirement really asks for has not been run, and an automated pass is the floor
-  of an accessibility claim rather than the whole of one.
+- Accessibility past what a machine can check. The automated scan now covers all three screens and
+  the batch table both empty and populated, and passes on every one. Two checks axe cannot decide
+  by itself are recorded rather than discarded, so an undecidable check no longer reads as a pass.
+  The manual review the requirement really asks for has not been run, and an automated pass is the
+  floor of an accessibility claim rather than the whole of one.
 
 The first is a missing measurement. The second is a limit on the proof rather than a gap in the
 build: the requirement was written, the mechanism was built, the half a machine can check is met,
