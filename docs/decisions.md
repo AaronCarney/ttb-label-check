@@ -2354,3 +2354,66 @@ that fails safe: the product asks a person rather than rejecting a label TTB app
 `WIDTH_HEIGHT_RATIO_BOLD_MIN` is kept at 0.25 rather than lowered for the same reason. Now that it
 chooses only between passing a label and reviewing one, a low cut buys a quieter queue by passing
 headings nobody checked.
+
+<a id="0038"></a>
+## 0038. The cognac's class and type is the line the label sets largest, not its appellation line
+
+**Decided:** 2026-09-17. **Evidence:** commit `8ca3ecc` and the reading it changed, replayed on the
+frozen recording `tests/recordings/reader/26212001000085/front.json` at that commit and at its
+parent on 2026-09-17; `app/vision/local.py` (`_warning_block`, `_largest_matching`);
+`tests/fixtures/labels/manifest.json`, the `ttb-26212001000085` entry;
+`tests/test_vision_replay.py::test_the_cognac_label_now_reads_its_own_designation`;
+`plans/probes/item6_all_samples_before_item7.json` and the sweep that replaced it.
+
+**Why there is an entry at all.** `tests/test_vision_replay.py` says what a lost reading costs:
+*"It was correct when this suite was written. Either the change that did this is wrong, or this is a
+trade a decision record has to argue for."* Commit `8ca3ecc` — the warning block confined to its own
+column — changed one reading in the whole corpus for the worse. This is that argument.
+
+**What changed.** `ttb-26212001000085` is an imported cognac whose front prints its designation
+three times: a stylised `Cognac XO` set larger than anything else on the label, an appellation line,
+and a stylised pair the engine runs together as `Cognae PefiteChampagne`. Replayed on the frozen
+recording, the class-and-type payload is:
+
+| | class and type read | confidence |
+|---|---|---|
+| before, at `8ca3ecc^` | `APPELLAT'ON COGNAC PETITE CHAMPAGNE CONTRÓLÉE` | 0.841 |
+| after, at `8ca3ecc` | `Cognac XO` | 0.784 |
+
+Nobody chose this directly. The old warning block took a horizontal band across the label, and the
+band swallowed `Cognac XO`, so `_largest_matching` never saw the largest candidate and the
+appellation line won by being the only one left. Confining the block to the warning's own column
+returns `Cognac XO` to the body, and the largest line wins as the code has always said it should.
+
+**What was decided.** Take the new reading. `_largest_matching` expresses a rule about labels — the
+label says which words matter most by how large it sets them — and the old result was that rule
+being denied by a bug elsewhere, not a better answer. Both strings are correct against the corpus
+answer key, whose `label_observed.class_type` for this label is `Cognac XO / Cognac Petite
+Champagne`. On the real route the label's class-and-type field raises nothing before or after: it
+passes `spirits.class_type.matches_application` and `spirits.class_type.matches_soi` in both sweeps.
+The label's overall verdict is unchanged, and it fails for other reasons.
+
+**What was rejected.**
+
+- **Keeping the band so the appellation line keeps winning.** The band is the fault that failed 24
+  of 37 corpus labels on `common.warning.verbatim` by reading a neighbouring column into the
+  government warning. Preserving one label's richer designation is not worth reinstating it.
+- **Preferring the longer candidate over the largest.** It would produce the appellation line here
+  and the garbled `Cognae PefiteChampagne` elsewhere, and it replaces a rule about how labels are
+  printed with a rule about string length.
+- **Recording it as a known miss.** `KNOWN_MISSES` states that the reader gets something wrong. The
+  reader does not get this wrong, so the line would be a false statement about the reader — which is
+  what `test_the_known_misses_table_names_only_real_pairs` exists to stop.
+
+**What this costs.**
+
+- **The appellation is no longer reported.** A reviewer reading the result sees `Cognac XO` and not
+  `Cognac Petite Champagne`; the appellation is on the photograph and nowhere in the fields. This
+  product checks the designation against the application, which says `COGNAC (BRANDY) FB`, so
+  nothing in scope turns on it — but a reviewer who wanted the appellation has lost it.
+- **The replay suite protects this label by one assertion fewer.** The deleted assertion was
+  `assert "CHAMPAGNE" in read`. What remains is that the reading contains `COGNAC` and is not the
+  garbled pair.
+- **Reading confidence fell from 0.841 to 0.784.** The stylised line scores lower than the
+  appellation line, on a label where the fuller string was partly garbled anyway
+  (`APPELLAT'ON`, `CONTRÓLÉE`).
