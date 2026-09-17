@@ -247,6 +247,13 @@ def test_axe_zero_aa_violations_batch_populated(page: Page, live_server_url: str
 # success criterion 1.4.3. docs/PRD.md NFR-3 commits the console to AA.
 _AA_NORMAL_TEXT_MIN_RATIO = 4.5
 
+# A button carrying only an icon shows no text, so 1.4.3 does not reach it.
+# The nearest criterion is 1.4.11 Non-text Contrast at 3:1, which is WCAG 2.1
+# and sits above the WCAG 2.0 AA level NFR-3 commits to. It is held here as a
+# deliberate choice — kept and not claimed, the same way globals.css keeps the
+# reduced-motion gate — because an icon nobody can see is not a control.
+_NON_TEXT_MIN_RATIO = 3.0
+
 # WCAG's own relative-luminance and contrast formulas, run inside the page so
 # they read the colours the browser actually painted rather than the colours the
 # stylesheet asks for.
@@ -278,24 +285,69 @@ _CONTRAST_JS = r"""
 """
 
 
-@pytest.mark.usefixtures("live_server", "pnpm_built_island")
-def test_copy_message_button_label_is_legible(page: Page, live_server_url: str) -> None:
-    """The "Copy message" button's own label, against its own background.
+def _visible_button_contrasts(page: Page, screen: str) -> list[dict[str, Any]]:
+    """Measure every button the screen is currently showing, resting and hovered.
 
-    axe reports this button's contrast as undecided rather than as a violation:
-    it computed a foreground and a background and they came out identical, and
-    axe declines to judge a 1:1 ratio because 1:1 is also how deliberately
-    invisible text looks (`axe.js`, the `equalRatio` branch of the
-    color-contrast check). Undecided is not a pass, so the ratio is measured
-    here directly against WCAG 1.4.3 and the two colours are reported, which is
-    what tells a reviewer whether the label can be read at all.
+    Hover is measured because a background utility can win the cascade in the
+    hover state alone, and axe never enters that state: it scans the document as
+    loaded. A control that becomes unreadable under the pointer is unreadable in
+    the only moment the reader is using it.
+    """
+    measured: list[dict[str, Any]] = []
+    buttons = page.get_by_role("button")
+    for index in range(buttons.count()):
+        button = buttons.nth(index)
+        if not button.is_visible():
+            continue
+        label = (button.inner_text() or "").strip()
+        name = label or (button.get_attribute("aria-label") or "").strip() or f"button {index}"
+        floor = _AA_NORMAL_TEXT_MIN_RATIO if label else _NON_TEXT_MIN_RATIO
+        for state in ("resting", "hovered"):
+            if state == "hovered":
+                button.hover()
+            measured.append(
+                {"screen": screen, "button": name, "state": state, "floor": floor}
+                | button.evaluate(_CONTRAST_JS)
+            )
+    return measured
+
+
+def _assert_buttons_legible(measured: list[dict[str, Any]]) -> None:
+    assert measured, "no visible buttons were measured, so nothing was actually checked"
+    illegible = [m for m in measured if m["ratio"] < m["floor"]]
+    assert not illegible, "buttons below their contrast floor: " + "; ".join(
+        f'{m["screen"]} "{m["button"]}" {m["state"]}: {m["color"]} on {m["background"]} '
+        f"is {m['ratio']:.2f}:1, below {m['floor']}:1"
+        for m in illegible
+    )
+
+
+@pytest.mark.usefixtures("live_server", "pnpm_built_island")
+def test_single_screen_buttons_are_legible(page: Page, live_server_url: str) -> None:
+    """Every button on the single-result screen, in both states.
+
+    axe reports the "Copy message" button's contrast as undecided rather than as
+    a violation: it computed a foreground and a background, they came out
+    identical, and its color-contrast check returns undefined on a 1:1 ratio
+    because 1:1 is also how deliberately invisible text looks (the `equalRatio`
+    branch in `axe.js`). Undecided is not a pass, so the ratio is measured here
+    directly and both colours are reported, which is what tells a reviewer
+    whether the label can be read at all.
     """
     _load_single(page, live_server_url, "04-low-res-blurry.json")
-    button = page.get_by_role("button", name="Copy message")
-    button.wait_for(timeout=5000)
-    measured = button.evaluate(_CONTRAST_JS)
-    assert measured["ratio"] >= _AA_NORMAL_TEXT_MIN_RATIO, (
-        f"the Copy message button's label is {measured['color']} on "
-        f"{measured['background']}, a contrast ratio of {measured['ratio']:.2f}:1, "
-        f"below the {_AA_NORMAL_TEXT_MIN_RATIO}:1 WCAG 1.4.3 requires for normal text"
-    )
+    page.get_by_role("button", name="Copy message").wait_for(timeout=5000)
+    _assert_buttons_legible(_visible_button_contrasts(page, "/"))
+
+
+@pytest.mark.usefixtures("live_server", "pnpm_built_island")
+def test_override_drawer_buttons_are_legible(page: Page, live_server_url: str) -> None:
+    """The override drawer's own buttons, which no scan has ever reached.
+
+    The drawer renders through a React portal and only once it is open, so the
+    document axe scans on load does not contain it. Pressing "O" is how a
+    reviewer opens it (`useKeyboardShortcuts`), so that is how it is opened here.
+    """
+    _load_single(page, live_server_url, "04-low-res-blurry.json")
+    page.keyboard.press("o")
+    page.get_by_role("button", name="Cancel").wait_for(timeout=5000)
+    _assert_buttons_legible(_visible_button_contrasts(page, "/ (override drawer)"))
