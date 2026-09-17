@@ -45,3 +45,9 @@ frontend/*.tsbuildinfo
 
 # Wrangler's local build cache for the edge Worker.
 edge/.wrangler/
+
+# Coverage's own data file and the Cobertura report CI uploads as an artifact.
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/

@@ -26,6 +26,9 @@ REQUIRED_COMMANDS = (
     "ruff format --check",
     "mypy",
     "pytest",
+    # A coverage report produced only on a developer's machine is a number
+    # nobody sees again.
+    "--cov",
 )
 
 # GitLab's own reserved top-level keys, which are configuration rather than
@@ -90,4 +93,18 @@ def test_no_job_is_allowed_to_fail():
     ]
     assert not offenders, (
         f"{offenders} carry `allow_failure: true`, so the pipeline stays green when they fail"
+    )
+
+
+def test_a_job_tells_gitlab_how_to_read_the_coverage_number():
+    """The report has to reach the pipeline page, not just the job log.
+
+    `coverage:` is the regex GitLab runs over a job's output to pull the
+    percentage out; without it the number is buried in a log nobody opens, which
+    is the same as not measuring it.
+    """
+    jobs = _jobs(_config())
+    assert any("coverage" in body for body in jobs.values()), (
+        "no job carries a `coverage:` regex, so the measured percentage never "
+        "reaches the pipeline page"
     )

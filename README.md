@@ -141,6 +141,19 @@ uv run mypy                # types, over app/
 `uv run ruff format` without `--check` writes the formatting instead of reporting it, and
 `uv run ruff check --fix` applies the fixes ruff considers safe.
 
+Coverage comes with the suite:
+
+```bash
+uv run pytest --cov            # branch coverage over app/
+```
+
+**The measured figure is 92% branch coverage over `app/`**, from a run of the whole suite bar the
+browser group. It is reported, not gated: no `fail_under` is set, because a threshold chosen before
+anyone had measured the real number is how a suite gets shaped to the threshold rather than to the
+product. Two modules are at 0% and both are command-line entry points used by hand —
+`app/rules/__main__.py` and `app/vision/__main__.py`. The lowest-covered module that actually serves
+a request is the rule-pack loader at 80%.
+
 Each tool's configuration lives in `pyproject.toml` with the reasoning next to it: which lint rules
 are switched on beyond ruff's default and what each one has already caught here, why the line length
 is 100 rather than ruff's 88, why markdown is excluded from both the linter and the formatter, and

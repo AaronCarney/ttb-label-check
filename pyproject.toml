@@ -31,6 +31,7 @@ dev = [
     "pytest-playwright >= 0.6",
     "ruff>=0.16.8",
     "mypy>=2.3.1",
+    "pytest-cov>=6.0",
 ]
 
 [tool.taskipy.tasks]
@@ -132,3 +133,26 @@ files = ["app"]
 ignore_missing_imports = true
 warn_unused_configs = true
 warn_redundant_casts = true
+
+[tool.coverage.run]
+# `app` is the product; `tests`, `eval` and `scripts` are not what a coverage
+# figure is about. Branch coverage rather than line coverage, because a
+# validator that is entered and returns down one of two paths is the shape this
+# codebase is full of, and line coverage calls that covered.
+source = ["app"]
+branch = true
+# The browser group runs the app in a live server thread, so its work is
+# measured in the same process as the rest.
+concurrency = ["thread"]
+
+[tool.coverage.report]
+# No `fail_under` yet, deliberately. Setting a gate at a number nobody has
+# measured is how a suite gets shaped to the gate; the measured figure is
+# recorded first, and the gate is its own later piece of work.
+show_missing = false
+skip_covered = false
+exclude_also = [
+    # A branch that exists only for the type checker never runs.
+    "if TYPE_CHECKING:",
+    "\\.\\.\\.$",
+]
