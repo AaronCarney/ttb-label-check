@@ -880,6 +880,13 @@ def _net_contents(boxes: list[_Box]) -> tuple[_Box, re.Match, float] | None:
 # stops at a full stop followed by a space for the same reason: the run-on
 # past the end of the sentence was the other half of that one reading.
 #
+# "FROM" is only an origin lead-in after PRODUCT or IMPORTED. After the verbs
+# that name what was done to the drink it introduces the material and not the
+# place: "DISTILLED FROM CORN" and "DISTILLED FROM HEAVILY PEATED MALT" were
+# both read as the country of origin. That is the reading that costs a reviewer
+# most - a confident wrong answer beside a field, where reading nothing would
+# have sent them to look at the label themselves.
+#
 # The lead-ins are a lexicon for *spotting* the statement and not a list of
 # countries, and that distinction is settled outside this module.
 # `app/rules/_validators/origin_match.py` records that no country list is
@@ -895,7 +902,7 @@ def _net_contents(boxes: list[_Box]) -> tuple[_Box, re.Match, float] | None:
 _ORIGIN_RE = re.compile(
     r"(?:^|(?<=[^\w\s])|(?<=[^\w\s]\s))"
     r"(?:(?:PRODUCT|PRODUCE|PRODUCED|MADE|BREWED|DISTILLED|BOTTLED|IMPORTED)"
-    r"\s+(?:OF|IN|FROM)|HECHO\s+EN)\s+(?:THE\s+)?"
+    r"\s+(?:OF|IN)|(?:PRODUCT|IMPORTED)\s+FROM|HECHO\s+EN)\s+(?:THE\s+)?"
     r"([A-Za-z][\w.]*(?:(?<!\.)\s+(?:AND\s+|OF\s+)?[A-Za-z][\w.]*){0,3})",
     re.I,
 )
