@@ -302,9 +302,15 @@ is a review while the capitals — which were read — are still decided.
   cannot tell a wine from a spirit. The cost is stated rather than hidden: an image-only upload loses
   the warning check, which is the brief's most prominent single requirement
   ([0010](decisions.md#0010)).
-- **A batch item with no usable image is refused by name and the batch continues.** One bad file in
-  300 used to be able to end the run; now it produces a needs-review result naming the file, and the
-  other 299 are checked ([0020](decisions.md#0020)).
+- **A batch item with no usable image is refused by name and the batch continues** — on the
+  programmatic path. An item the worker holds no image for, and an item whose evaluation raises, each
+  produce a needs-review result naming the reason, and the consumer goes on to the next one, so one
+  bad label in 300 no longer ends the run ([0020](decisions.md#0020)). **The browser upload path does
+  not behave that way yet:** it checks the whole set before scheduling anything and answers a single
+  non-image file with an error for the entire upload, so the other 299 are not checked. R13 asks for
+  the file to be named *and* the rest to run, and the page delivers only the first half. This is
+  recorded here rather than described as done, and it is the gap in §4 a reviewer is most likely to
+  meet by using the product.
 
 ### The order the work runs in
 
@@ -361,9 +367,34 @@ not that it is comfortably below it. Nothing was tuned for speed.
 [The README](../README.md#the-five-second-requirement-is-measured-and-it-is-not-met) carries the
 table; `tests/test_deploy_healthz.py` produced every figure in it.
 
-**What is not proven.** The ten-minute figure for a 300-label batch has no instrument at all — no
-test, no number, and no way for a reader to check it. It is the one performance requirement this
-repository neither meets nor measures.
+**What is not proven.** Four things, stated because a reader cannot tell an unmeasured claim from a
+measured one by looking:
+
+- **A 300-label batch inside ten minutes** (NFR-2) has no instrument at all — no test, no number, and
+  no way for a reader to check it. Unlike the five-second requirement, it is not even disclosed as
+  unmeasured anywhere else in the repository.
+- **Accessibility is checked, but not at the level promised.** NFR-3 says every screen meets WCAG 2.2
+  level AA. The automated gate asks axe-core for the `wcag2a` and `wcag2aa` rule sets only
+  (`../tests/test_a11y_axe.py:59,75`), which are the 2.0 criteria — so the two 2.2 criteria that are
+  the stated reason for targeting 2.2 at all are never scanned — Focus Not Obscured and Target Size,
+  chosen because they help users over 50, who are half of Sarah Chen's team.
+  The batch screen is not scanned by any of it. And every browser-driven test skips itself when
+  `pnpm` is not on the path (`../tests/conftest.py:215`), which the README never mentions, so a
+  reviewer who follows the README sees a green suite in which every accessibility assertion was
+  skipped. The conformance review NFR-3 actually asks for — a person reading the screens — has not
+  been run.
+- **The confidence floor has no test.** It is the mechanism behind R9, the P0 that says an element the
+  reader is unsure of is reported as needs review rather than as a match or a mismatch: below a
+  rule's declared floor the engine rewrites the verdict (`../app/rules/yaml_engine.py:161-183`).
+  Nothing exercises it. The behaviour §3 leans on most heavily is the behaviour with the least proof.
+- **Opening one item of a batch does not show its check results.** The batch list and its per-row
+  overall result are real; the drill-down behind them is not built
+  (`../frontend/src/batch.tsx:32`). R12 asks for both halves, and batch is Sarah Chen's named ask, so
+  this is the most visible unbuilt thing in the product.
+
+The first is a missing measurement. The last three are a pattern worth naming rather than hiding: each
+is a place where the requirement was written, the mechanism was built, and the proof was not — which
+is the failure mode a week-long build produces when the deadline arrives before the test does.
 
 ## 5. What changed while it was being built
 
