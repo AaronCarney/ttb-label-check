@@ -189,22 +189,19 @@ requirement is 95 percent. The misses are narrow and they cluster — every one 
 the line rather than well below it. Nothing has been tuned for speed, and the obvious lever, more
 processor cores, is untried.
 
-**Four things we did not prove.** A reader cannot tell an unmeasured claim from a measured one by
+**Two things we did not prove.** A reader cannot tell an unmeasured claim from a measured one by
 looking, so each is named:
 
 - The ten-minute target for a 300-label batch has no instrument at all — no test and no figure.
 - Accessibility is checked automatically, but at the older standard, so the two criteria that were
-  our stated reason for targeting the newer one are never scanned. The batch screen is not scanned at
-  all, and the manual review the requirement really asks for has not been run.
-- The mechanism that turns a low-confidence reading into "needs review" has no test, and it is the
-  behaviour the rest of the design leans on most.
-- Opening one item of a batch does not show its per-element results. The list and its per-row
-  outcomes are real; the drill-down behind them is not built, and batch review is the deputy
-  director's named ask.
+  our stated reason for targeting the newer one are never scanned. Two screens are scanned, the
+  single-label page and a batch's results; the bulk-upload page is not. And the manual review the
+  requirement really asks for has not been run — an automated pass is the floor of an
+  accessibility claim, not the whole of one.
 
-The first is a missing measurement. The other three are one pattern, and we would rather name it than
-hide it: the requirement was written, the mechanism was built, and the proof was not. That is what a
-week-long build produces when the deadline arrives before the test does.
+The first is a missing measurement. The second is the pattern we would rather name than hide: the
+requirement was written, the mechanism was built, and the proof stopped at the half a machine can
+do. That is what a week-long build produces when the deadline arrives before the test does.
 
 ## What we changed our minds about
 
@@ -228,10 +225,10 @@ image-quality gate that turned out to be measuring how light the label stock is.
 never pass, deleted — while a different rule in a similar state was switched off instead, because one
 was unbuildable and the other merely unbuilt.
 
-**What we would do next, in order.** Build the batch drill-down; test the confidence mechanism and
-the batch timing that currently have no proof; run a real accessibility review rather than an
-automated one; then widen the corpus, which is the work that makes every figure above more
-trustworthy.
+**What we would do next, in order.** Scan the bulk-upload page and raise the automated accessibility
+check to the standard we committed to, then run a real accessibility review rather than an automated
+one; instrument the batch timing, which is the one requirement with no measurement at all; then widen
+the corpus, which is the work that makes every figure above more trustworthy.
 
 ## How the work was run
 
