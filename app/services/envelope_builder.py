@@ -51,6 +51,17 @@ _FIELD_CANONICAL_TO_WIRE = {
     "country_origin": "country_of_origin",
 }
 
+# One wire slot → every field id that routes to it, in the order above (long
+# canonical form first). The reader and the application name three of the same
+# elements differently — `abv`/`alcohol_content`, `name_address`/
+# `name_and_address`, `country_origin`/`country_of_origin` — so an observation
+# and the expected value it must be shown beside arrive under different ids.
+# Joining them on the id leaves those three slots with an empty application
+# value on the result page; the join is on the slot.
+_WIRE_TO_FIELD_IDS: dict[str, tuple[str, ...]] = {}
+for _field_id, _wire_slot in _FIELD_CANONICAL_TO_WIRE.items():
+    _WIRE_TO_FIELD_IDS[_wire_slot] = _WIRE_TO_FIELD_IDS.get(_wire_slot, ()) + (_field_id,)
+
 
 def _coerce_str(value) -> str:
     if value is None:
@@ -78,12 +89,16 @@ def build_field_findings(
     """Project (ValidationResult, FieldObservation, ExpectedValue) tuples
     into the wire-side `FieldFindingWire` list.
 
-    One entry per canonical field for which there is either an observation OR an
-    expected value. Canonical fields with no observation AND no expected value
-    are omitted; they stay visible to the reviewer through the synthetic
+    One entry per wire slot for which there is either an observation OR an
+    expected value. Observation, expected value and rule results are joined on
+    the wire slot rather than on the field id, because the reader and the
+    application name three of the same elements differently
+    (`_WIRE_TO_FIELD_IDS`). A slot with no observation AND no expected value is
+    omitted; it stays visible to the reviewer through the synthetic
     `per_rule_trace` entries the audit record carries for engine_failure rows.
-    The seven canonical ids are listed in `_FIELD_CANONICAL_TO_WIRE`;
-    `country_of_origin` is included only when an observation surfaces it.
+    The seven slots and the ids that route to them are in
+    `_FIELD_CANONICAL_TO_WIRE`; `country_of_origin` is included only when an
+    observation surfaces it.
     """
     obs_by_field: dict[str, FieldObservation] = {o.field_id: o for o in observations}
     exp_by_field: dict[str, ExpectedValue] = {e.field_id: e for e in expected_values}
@@ -97,22 +112,16 @@ def build_field_findings(
         fid = vr.evidence[0].field_id
         results_by_field.setdefault(fid, []).append(vr)
 
-    candidate_fields = list(_FIELD_CANONICAL_TO_WIRE.keys())
     out: list[FieldFindingWire] = []
-    emitted_slots: set[str] = set()  # wire slot dedupe — both name forms route here
-    for fid in candidate_fields:
-        wire_slot = _FIELD_CANONICAL_TO_WIRE[fid]
-        if wire_slot in emitted_slots:
-            continue
-        obs = obs_by_field.get(fid)
-        exp = exp_by_field.get(fid)
+    for wire_slot, slot_ids in _WIRE_TO_FIELD_IDS.items():
+        obs = next((obs_by_field[i] for i in slot_ids if i in obs_by_field), None)
+        exp = next((exp_by_field[i] for i in slot_ids if i in exp_by_field), None)
         if obs is None and exp is None:
             continue
         if obs is None or not obs.evidence:
             # Per the contract: needs_review trace entry handled in audit;
             # skip the wire entry to keep the wire surface tight.
             continue
-        emitted_slots.add(wire_slot)
         ev = obs.evidence[0]
         evidence_wire = FieldEvidenceWire(
             bbox=ev.bbox if ev.bbox is not None else (0, 0, 0, 0),
@@ -135,7 +144,8 @@ def build_field_findings(
         # measured nothing, so excluding it keeps the aggregate honest.
         rule_findings: list[RuleFindingWire] = []
         confidences: list[float] = []
-        for vr in results_by_field.get(fid, []):
+        slot_results = [vr for i in slot_ids for vr in results_by_field.get(i, [])]
+        for vr in slot_results:
             verdict = rule_disposition(vr)
             if verdict == "not_applicable":
                 continue
@@ -152,7 +162,7 @@ def build_field_findings(
         # fired on this field.
         numeric = min(confidences) if confidences else ev.confidence
         out.append(FieldFindingWire(
-            field_name=_FIELD_CANONICAL_TO_WIRE[fid],  # type: ignore[arg-type]
+            field_name=wire_slot,  # type: ignore[arg-type]
             extracted_value=_coerce_str(_strip_audit_keys(obs.observed_value)),
             expected_value=_coerce_str(exp.value if exp else None),
             evidence=evidence_wire,
