@@ -25,7 +25,7 @@ from app.schemas.extracted import FieldObservation
 from app.schemas.label import Label
 from app.schemas.rejection import Outcome, ValidationResult
 from app.schemas.wire.disposition import DispositionEnvelope
-from app.services.audit import _output_hash, face_bytes
+from app.services.audit import _output_hash, faces_fingerprint
 from app.services.cache import SessionCache
 from app.vision.base import VisionExtractor
 from app.vision.quality import assess as assess_quality
@@ -105,7 +105,7 @@ class Evaluator:
             cache_key = hashlib.sha256(
                 _canonical_json(app_for_key)
                 + self._rules.rule_set_version.encode("utf-8")
-                + face_bytes(label)
+                + faces_fingerprint(label)
             ).hexdigest()
             cached = self._cache.get(cache_key)
             if cached is not None:

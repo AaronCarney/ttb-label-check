@@ -1,6 +1,6 @@
 """AuditRecorder — pure assembly + canonical hashing.
 
-input_hash  = sha256(canonical_application_json_minus_evaluation_id ‖ face_bytes)
+input_hash  = sha256(canonical_application_json_minus_evaluation_id ‖ faces_fingerprint)
 output_hash = sha256(canonical_envelope_with_hashes_zeroed)
 
 evaluation_id is excluded from input_hash so the hash is a CONTENT fingerprint
@@ -27,22 +27,42 @@ def _canonical_json(obj: Any) -> bytes:
     return json.dumps(obj, sort_keys=True, ensure_ascii=True, separators=(",", ":")).encode("utf-8")
 
 
-def face_bytes(label: Label) -> bytes:
-    """Every face of the label, concatenated in face order.
+def faces_fingerprint(label: Label) -> bytes:
+    """The label's faces, as the bytes a hash of "what was submitted" is taken over.
 
-    What a hash of "the label's artwork" means once a label has more than one
-    face. Shared by `input_hash` and the evaluator's cache key so the two cannot
-    drift apart, and a plain concatenation so a one-face label hashes to exactly
-    what it hashed to when `Label` carried a single `image_bytes` — every stored
-    audit record and every frozen replay recording still verifies.
+    Shared by `input_hash` and the evaluator's cache key, so the audit trail and
+    the cache can never disagree about what two submissions have in common.
 
-    A plain concatenation does not encode where one face ends and the next
-    begins, so two faces split differently over the same total bytes collide.
-    Framing each face by length would fix that and would move every hash already
-    recorded; that trade belongs with the work that makes the key cover which
-    faces were sent, not here.
+    Each face contributes a length-framed descriptor and its length-framed image
+    bytes, in face order. Three things follow, and all three are the point:
+
+    * Two submissions that sent different faces cannot produce the same
+      fingerprint. A plain concatenation cannot promise that — `(b"ab", b"c")`
+      and `(b"a", b"bc")` concatenate identically — and an audit hash that two
+      different submissions can share is not a fingerprint of either.
+    * The same photograph submitted as a front and as a back are different
+      submissions, because every observation now carries the face it was read
+      from and the two answers differ. The descriptor carries `face_tag`, so
+      they key differently.
+    * Face order counts, and so do the applicant's declared dimensions, which
+      feed the DPI the quality report states.
     """
-    return b"".join(face.image_bytes for face in label.faces)
+    parts: list[bytes] = []
+    for face in label.faces:
+        descriptor = _canonical_json(
+            {
+                "face_tag": face.face_tag,
+                "content_type": face.content_type,
+                "dimensions": (
+                    None if face.dimensions is None else face.dimensions.model_dump(mode="json")
+                ),
+            }
+        )
+        parts.append(len(descriptor).to_bytes(8, "big"))
+        parts.append(descriptor)
+        parts.append(len(face.image_bytes).to_bytes(8, "big"))
+        parts.append(face.image_bytes)
+    return b"".join(parts)
 
 
 def _input_hash(application: Application, label: Label) -> str:
@@ -50,7 +70,7 @@ def _input_hash(application: Application, label: Label) -> str:
     # Exclude evaluation_id: input_hash is a content fingerprint, matching
     # the SessionCache key. See the module docstring on the warm path.
     app_dict.pop("evaluation_id", None)
-    return hashlib.sha256(_canonical_json(app_dict) + face_bytes(label)).hexdigest()
+    return hashlib.sha256(_canonical_json(app_dict) + faces_fingerprint(label)).hexdigest()
 
 
 def _output_hash(envelope_for_hash: dict[str, Any]) -> str:
