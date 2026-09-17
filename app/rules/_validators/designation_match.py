@@ -136,10 +136,14 @@ def designation_match(
         return result(Outcome.PASS, rule.severity, None)
 
     # 4a. The label names a different recognised class: a disagreement.
+    # The pack's own severity, like every other branch that reports against the
+    # label. All three packs set reject, so nothing moves today; hard-coding it
+    # here meant a pack could not pilot this rule as a warning and said so
+    # nowhere. 4b below is the deliberate exception and carries its reason.
     if label_classes and application_classes:
         return result(
             Outcome.FAIL,
-            Severity.REJECT,
+            rule.severity,
             rule.parameters.get("disagreement_reason_code", rule.reason_code),
         )
 

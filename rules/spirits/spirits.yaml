@@ -155,13 +155,17 @@ rules:
       # when they name the same class, not when they read the same.
       needs_review_reason_code: CLASS_TYPE.MATCH.NEEDS_REVIEW
       disagreement_reason_code: CLASS_TYPE.MATCH.APPLICATION_LABEL_DISAGREE
+      # One spelling each. The validator reduces both sides to plain words
+      # first and that fold reads whisky as whiskey (`_SPELLING_VARIANTS` in
+      # `app/rules/_validators/_helpers.py`), because the regulations permit
+      # either and the registry and the label routinely differ on it. Listing
+      # both spellings therefore named the same class twice and matched
+      # nothing the one spelling did not already match. Part 5 spells it
+      # "whisky", so that is the spelling kept.
       recognised_classes:
         - "Bourbon Whisky"
-        - "Bourbon Whiskey"
         - "Rye Whisky"
-        - "Rye Whiskey"
         - "Whisky"
-        - "Whiskey"
         - "Vodka"
         - "Gin"
         - "Tequila"

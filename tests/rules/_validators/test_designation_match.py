@@ -183,6 +183,15 @@ def test_4a_two_different_recognised_classes_is_a_disagreement() -> None:
     assert result.reason_code == _DISAGREE
 
 
+def test_4a_the_disagreement_carries_the_severity_the_pack_set() -> None:
+    # Every pack sets reject today, so this changes no outcome now. It says the
+    # pack decides, the way it does on every other branch that reports against
+    # the label, so a pack can pilot this rule as a warning.
+    result = _run("LONDON DRY GIN", "VODKA", rule=_rule(severity=Severity.WARN))
+    assert result.outcome is Outcome.FAIL
+    assert result.severity is Severity.WARN
+
+
 def test_4b_a_designation_the_list_does_not_know_goes_to_a_reviewer() -> None:
     # A designation the list has never heard of is no evidence the label is
     # wrong, so this is a question rather than a rejection - and warn, so
@@ -346,3 +355,26 @@ def test_a_table_entry_listing_no_designations_covers_nothing() -> None:
     tables = {"t": DecisionTable(entries=({"class": "Beer"},))}
     result = _run("LAGER", "BEER", rule=_rule(table_ref="t"), tables=tables)
     assert result.outcome is Outcome.FAIL
+
+
+def test_no_pack_names_the_same_class_twice() -> None:
+    """Both sides are reduced to plain words before anything is compared.
+
+    That fold reads whisky as whiskey, so "Bourbon Whisky" and "Bourbon
+    Whiskey" are one entry written twice: the second matches nothing the first
+    did not already match, while reading as though it covered a case of its
+    own. Three such pairs were in the spirits pack.
+    """
+    from app.rules._validators._helpers import normalize_words
+
+    for pack, _ in _PACK_FOR.values():
+        raw = _shipped_rule(pack)
+        listed = [str(c) for c in raw["parameters"]["recognised_classes"]]
+        seen: dict[tuple[str, ...], str] = {}
+        for entry in listed:
+            name = normalize_words(entry)
+            assert name not in seen, (
+                f"{raw['rule_id']} lists {entry!r} and {seen[name]!r}, "
+                f"which are the same class once both are normalized"
+            )
+            seen[name] = entry
