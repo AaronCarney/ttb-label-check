@@ -64,8 +64,13 @@ tests:
   before_script:
     # libgl1 and libglib2.0-0 are OpenCV's, which the reader imports at module
     # load; nodejs and pnpm build the front-end island the browser tests drive.
+    # jq is scripts/deploy.sh's, which reads the pipeline verdict for the commit
+    # being deployed; tests/test_deploy_pipeline_gate.py runs that script here as
+    # a black box, and without jq the script refuses before reaching the gate the
+    # test is about. Skipping those tests when jq is absent is the failure this
+    # file's header names: a run that reports green having proved nothing.
     - apt-get update
-    - apt-get install -y --no-install-recommends libgl1 libglib2.0-0 nodejs npm
+    - apt-get install -y --no-install-recommends libgl1 libglib2.0-0 nodejs npm jq
     # Pinned to the version `frontend/package.json` declares as its packageManager.
     # Unpinned, this job took whatever npm called latest, which is how a pnpm major
     # that moved where settings live arrived without anyone choosing it.
