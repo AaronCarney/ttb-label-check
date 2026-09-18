@@ -523,7 +523,7 @@ statement as the label prints it — verbatim, as a string, alongside the parsed
 instead of it. Until then `format_check.py`'s projection is what it has always been: a restatement of
 the reader's numbers, not a reading of the label.
 
-**Amended 2026-09-17 — the pattern rejects forms the regulations permit.**
+**Amended — the pattern rejects forms the regulations permit.**
 
 Both readers return the alcohol statement as the label prints it, under `alc_text`, and
 `regex_match` matches the rule's pattern against that text. A statement the reader could not place
