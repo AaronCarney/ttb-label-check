@@ -243,7 +243,7 @@ def _corpus_statements() -> list[tuple[str, str, str]]:
 def test_the_corpus_holds_the_thirty_approved_labels() -> None:
     statements = _corpus_statements()
     assert len(statements) == 30
-    assert _CORPUS_REVIEWS <= {label_id for label_id, _, _ in statements}
+    assert _CORPUS_REVIEWS.issubset(label_id for label_id, _, _ in statements)
 
 
 @pytest.mark.parametrize(("label_id", "cls", "statement"), _corpus_statements())
