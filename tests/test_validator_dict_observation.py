@@ -113,17 +113,21 @@ def test_fuzzy_brand_string_observation_still_works():
 # ---- regex_match (alcohol.format) --------------------------------------
 
 
-def test_regex_match_synthesizes_alc_text_from_dict():
-    """ABV dict {abv_pct, unit, confidence} must project to the string
-    'ALCOHOL <pct>% BY VOLUME' the alc-format regex expects."""
-    obs = _obs("abv", {"abv_pct": 40.0, "unit": "%", "confidence": 0.9})
+def test_regex_match_reads_alc_text_from_dict():
+    """ABV dict {abv_pct, unit, alc_text, confidence}: the pattern is matched
+    against the label's own wording in `alc_text`, not a sentence built from
+    the number."""
+    obs = _obs(
+        "abv",
+        {"abv_pct": 40.0, "unit": "%", "alc_text": "Alcohol 40% by volume", "confidence": 0.9},
+    )
     exp = ExpectedValue(field_id="abv")
     result = regex_match(obs, exp, _alcohol_format_rule(), _ctx())
     assert result.outcome == Outcome.PASS
 
 
 def test_regex_match_dict_off_pattern_fails():
-    obs = _obs("abv", {"abv_pct": 40.0, "unit": "PROOF", "confidence": 0.9})
+    obs = _obs("abv", {"abv_pct": 40.0, "unit": "PROOF", "alc_text": "80 PROOF", "confidence": 0.9})
     exp = ExpectedValue(field_id="abv")
     result = regex_match(obs, exp, _alcohol_format_rule(), _ctx())
     assert result.outcome == Outcome.FAIL
