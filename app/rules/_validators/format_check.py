@@ -20,25 +20,22 @@ from app.schemas.rules import RuleDefinition
 _logger = logging.getLogger("app.rules._validators.format_check")
 
 
-def _project_alc_text(value: object, field_id: str) -> str:
-    """Build the canonical 'alcohol N% by volume' string from the cloud
-    extractor's abv dict. Legacy string observations pass through unchanged."""
-    if value is None:
-        return ""
+def _project_alc_text(value: object) -> str:
+    """The alcohol statement as the label prints it, for the pattern to judge.
+
+    Both readers return it as `alc_text` alongside the number. This used to
+    build `alcohol {pct}{unit} by volume` from the number instead, so the
+    pattern judged a sentence the validator had written in the form the pattern
+    accepts, and passed every label that had a number on it
+    (`docs/decisions.md#0011`). A reading that is already a string is the
+    wording itself.
+    """
     if isinstance(value, str):
         return value
     if isinstance(value, dict):
-        if field_id in ("abv", "alcohol_content"):
-            pct = value.get("abv_pct")
-            unit = value.get("unit", "%")
-            if pct is None:
-                return ""
-            return f"alcohol {pct}{unit} by volume"
-        # Generic projection: pick the first scalar value with a stable order.
-        for key in ("text", "value", "name"):
-            v = value.get(key)
-            if isinstance(v, str) and v:
-                return v
+        text = value.get("alc_text")
+        if isinstance(text, str):
+            return text
     return ""
 
 
@@ -54,7 +51,7 @@ def regex_match(
     pattern = rule.parameters.get("pattern", "")
     ignore_case = bool(rule.parameters.get("ignore_case", False))
     flags = re.IGNORECASE if ignore_case else 0
-    observed = _project_alc_text(obs.observed_value, obs.field_id)
+    observed = _project_alc_text(obs.observed_value)
     if unlocated(obs, observed) and not unlocated_is_absent(rule):
         return not_read_result(obs, exp, rule, ctx, element="the statement this rule checks")
 
