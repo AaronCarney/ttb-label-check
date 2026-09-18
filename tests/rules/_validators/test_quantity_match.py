@@ -174,6 +174,56 @@ def test_a_customary_figure_rounded_down_agrees_too() -> None:
     assert _check("8.4", "FL OZ", "250") is Outcome.PASS
 
 
+def test_a_reading_with_no_unit_is_in_the_application_s_unit() -> None:
+    """A reader that reports no unit is reporting the unit the application
+    declares, so the figure is compared as it stands rather than sent to a
+    reviewer for a conversion nobody asked for."""
+    obs = make_obs(
+        field_id="net_contents",
+        value={"net_contents_value": "375"},
+        beverage_class=BeverageClass.MALT,
+    )
+    exp = make_expected(field_id="net_contents", container_volume_ml=Decimal("375"))
+    rule = make_rule(
+        rule_id="malt.net_contents.matches_application",
+        cfr_citation="27 CFR §7.70",
+        validator="quantity_match",
+        reason_code="NET_CONTENTS.MATCH.APPLICATION_LABEL_DISAGREE",
+        applies_to_classes=(BeverageClass.MALT,),
+        decision_table_ref="volume_units",
+        parameters={"amount_field": "container_volume_ml"},
+    )
+    ctx = make_context(decision_tables={"volume_units": _volume_units()})
+    assert quantity_match(obs, exp, rule, ctx).outcome is Outcome.PASS
+
+
+def _check_alcohol(label_text: str, declared_pct: str) -> Outcome:
+    """The alcohol-content rule as the packs ship it: no conversion table, and
+    a reading that carries the reader's `%` unit all the same."""
+    obs = make_obs(
+        field_id="abv",
+        value={"abv_pct": label_text, "unit": "%"},
+        beverage_class=BeverageClass.SPIRITS,
+    )
+    exp = make_expected(field_id="alcohol_content", abv_labeled_pct=Decimal(declared_pct))
+    rule = make_rule(
+        rule_id="spirits.alcohol.matches_application",
+        cfr_citation="27 CFR §5.65",
+        validator="quantity_match",
+        reason_code="ALCOHOL_CONTENT.MATCH.APPLICATION_LABEL_DISAGREE",
+        applies_to_classes=(BeverageClass.SPIRITS,),
+        parameters={"amount_field": "abv_labeled_pct"},
+    )
+    return quantity_match(obs, exp, rule, make_context()).outcome
+
+
+def test_a_rule_with_no_table_compares_the_figures_as_they_stand() -> None:
+    """Alcohol content has one unit, so its rule carries no conversion table,
+    and the `%` the reader reports beside the figure is not a unit to look up."""
+    assert _check_alcohol("40% ALC./VOL. 80 PROOF", "40") is Outcome.PASS
+    assert _check_alcohol("40% ALC./VOL. 80 PROOF", "45") is Outcome.FAIL
+
+
 def test_the_table_lists_the_words_a_label_prints() -> None:
     """A label reading 11.2 FL. OUNCES converts like any other fluid ounce.
     While the table lacked the spelled-out form the check could not be settled
@@ -210,6 +260,13 @@ def test_same_unit_on_both_sides_is_still_compared_exactly() -> None:
     Half a unit must not be rounded into agreement."""
     assert _check("12", "mL", "12.5") is Outcome.FAIL
     assert _check("375", "mL", "375") is Outcome.PASS
+
+
+def test_a_rule_s_tolerance_does_not_reach_a_same_unit_comparison() -> None:
+    """The rule ships a cross-unit tolerance, and 376 mL against 375 is inside
+    it. Nothing was converted, so the tolerance does not apply and the
+    one-millilitre difference is a disagreement."""
+    assert _check("376", "mL", "375") is Outcome.FAIL
 
 
 def test_a_rule_carrying_no_tolerance_compares_exactly() -> None:
