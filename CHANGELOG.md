@@ -7,6 +7,12 @@ date: the release's git tag records when it was cut. Versions follow
 
 ## [Unreleased]
 
+### Added
+
+- Every check writes one log line when it finishes: the outcome, the reason code behind it and how
+  long it took, under the evaluation's id. A check that succeeded used to log nothing. Nothing from
+  the application or the label is on the line.
+
 ### Changed
 
 - The app checks the wording of a label's alcohol statement. A statement in one of the forms its
@@ -33,6 +39,9 @@ date: the release's git tag records when it was cut. Versions follow
   says how far the running batch has got. Starting a batch drops the finished one, each label's image
   is let go once it is checked, and the request-size guard no longer holds a second copy of the
   upload. See `docs/decisions.md#0041`.
+- A batch's anomaly advisory, which warns when many labels in a row fail for the same reason, now
+  counts a check that ran out of time as a timeout. It used to count it under the rule-pack
+  selection, the first line of the label's trail.
 - `eval.read_accuracy --sleep` pauses after each image the reader reads, so a label with several
   faces gets a pause between every face, and the seconds it reports per label leave the pause out.
 

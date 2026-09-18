@@ -496,10 +496,11 @@ explicit that they take on nothing new to operate — so the product had to be o
 did not write it. One readiness check answers whether the service is up and doubles as the warm-up
 that loads the reading models, so a copy that cannot load them announces itself as not ready rather
 than failing the first real label. Logs carry the identifiers needed to follow one submission
-through, with applicant material kept out. That is where the operability stops: no metrics endpoint, no alerting, no dashboard, and nothing
-recording what the service did beyond the single-label results it keeps for a week so an override
-has something to amend. An operator can tell whether it is running and cannot tell whether it is
-right. Those are prerequisites before this ran inside the agency, not improvements: a compliance
+through, with applicant material kept out, and every check leaves one line with its outcome, the
+reason code behind it and what it cost. That is where the operability stops: nobody is told when
+those lines go wrong — no metrics endpoint, no alerting, no dashboard — and nothing records what the
+service did beyond those lines and the single-label results it keeps for a week so an override has
+something to amend. An operator can find out whether it is right only by reading the logs. Those are prerequisites before this ran inside the agency, not improvements: a compliance
 service nobody is watching is one nobody can vouch for. What bounds the cost is the invoker check,
 which refuses every caller but our own front door before a request is billed, and the two-instance
 cap. The rate limit at the edge denies nothing — measured on the deployed service rather than

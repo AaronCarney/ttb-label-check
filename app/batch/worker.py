@@ -53,6 +53,7 @@ from app.schemas.wire.disposition import ConfidenceBand, DispositionEnvelope
 # second copy here would let two audit trails disagree about what the same
 # input hashes to.
 from app.services.audit import _canonical_json, faces_fingerprint
+from app.services.headline import headline_reason_code
 
 _logger = logging.getLogger("app.batch.worker")
 
@@ -60,24 +61,6 @@ _logger = logging.getLogger("app.batch.worker")
 # `rules/reason_codes.yaml`; neither is a verdict about the label.
 _NO_IMAGE = "ENGINE.INPUT.LABEL_IMAGE_MISSING"
 _EVALUATION_RAISED = "ENGINE.WORKER.UNHANDLED"
-
-
-def _headline_reason_code(envelope: DispositionEnvelope) -> str | None:
-    """Pick one canonical reason-code string for anomaly observation.
-
-    PerRuleTraceEntry carries no `reason_code` field; reason codes live on
-    RuleFindingWire inside envelope.fields, with a short-circuit fallback to
-    per_rule_trace[0].rule_id for envelopes that carry no per-field findings
-    at all."""
-    if envelope.disposition == "pass":
-        return None
-    for field in envelope.fields:
-        for finding in field.rule_findings:
-            if finding.disposition in ("fail", "needs_review"):
-                return finding.reason_code
-    if envelope.audit_trail.per_rule_trace:
-        return envelope.audit_trail.per_rule_trace[0].rule_id
-    return None
 
 
 class BatchWorker:
@@ -329,7 +312,7 @@ class BatchWorker:
             self._label_lookup.pop(item.label_id, None)
             label = None
 
-            headline_code = _headline_reason_code(envelope)
+            headline_code = headline_reason_code(envelope)
             _logger.info(
                 f"label_result batch_id={batch_id} pos={queue_position} "
                 f"disposition={envelope.disposition} duration_ms={duration_ms}",

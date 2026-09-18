@@ -27,6 +27,7 @@ from app.schemas.rejection import Outcome, ValidationResult
 from app.schemas.wire.disposition import DispositionEnvelope
 from app.services.audit import _output_hash, faces_fingerprint
 from app.services.cache import SessionCache
+from app.services.headline import headline_reason_code
 from app.vision.base import VisionExtractor
 from app.vision.quality import assess as assess_quality
 
@@ -85,6 +86,27 @@ class Evaluator:
         self._cache = cache
 
     async def evaluate(self, application: Application, label: Label) -> DispositionEnvelope:
+        """Check one label, and leave one log line saying how it came out.
+
+        The line carries the outcome, the reason code behind it and what the
+        check cost, under the evaluation's id. Nothing from the application or
+        the label reaches it (`docs/PRD.md` C-2): the message holds only the
+        disposition, and every other value is on the logging allow-list.
+        """
+        t_start = time.monotonic()
+        envelope = await self._evaluate_once(application, label)
+        duration_ms = int((time.monotonic() - t_start) * 1000)
+        _logger.info(
+            f"evaluation_finished disposition={envelope.disposition}",
+            extra={
+                "evaluation_id": application.evaluation_id,
+                "reason_code": headline_reason_code(envelope) or "ENGINE.OK.NONE",
+                "duration_ms": duration_ms,
+            },
+        )
+        return envelope
+
+    async def _evaluate_once(self, application: Application, label: Label) -> DispositionEnvelope:
         import hashlib
 
         from app.services.audit import _canonical_json
