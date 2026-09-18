@@ -22,7 +22,7 @@ from app.rules._validators.fuzzy_brand import fuzzy_brand
 from app.rules.brand_match import stage_b_fuzzy
 from app.schemas.rejection import Outcome, Severity
 from app.schemas.rules import MatchPolicy
-from tests.rules.fixtures import make_context, make_expected, make_obs, make_rule
+from tests.rules.fixtures import make_context, make_evidence, make_expected, make_obs, make_rule
 
 PASS_THRESHOLD = 0.92
 NEEDS_REVIEW_THRESHOLD = 0.85
@@ -99,6 +99,35 @@ def test_a_mark_that_is_a_word_run_of_the_declared_brand_is_a_match() -> None:
 
 def test_a_trade_name_does_not_rescue_an_unrelated_mark() -> None:
     res = _verdict("Bizmark", "Acme", trade_names_used_on_label=("Acme Spirits",))
+    assert res.outcome is Outcome.FAIL
+    assert res.reason_code == "BRAND.NAME.MISMATCH"
+
+
+def test_a_trade_name_repeating_the_brand_leaves_the_finding_on_the_brand() -> None:
+    """An applicant whose trade name repeats its brand is common. When both
+    score the same, the finding names the brand the application declares, not
+    the trade name, because that is the ordinary case. The trade name sorts
+    after the brand, so a tie settled by comparing the names would pick it."""
+    res = _verdict("Acmee Spirits", "ACME SPIRITS", trade_names_used_on_label=("Acme Spirits",))
+    assert res.outcome is Outcome.PASS
+    assert res.message and "the brand the application declares" in res.message, res.message
+
+
+def test_a_blank_name_in_the_application_matches_nothing() -> None:
+    """The reader placed a brand box and read no text from it, so the check runs
+    on an empty reading. A blank fanciful name or trade name must not be the
+    empty string that reading equals."""
+    obs = make_obs(
+        field_id="brand",
+        value="",
+        extra_evidence=(make_evidence(field_id="brand", bbox=(1, 2, 3, 4)),),
+    )
+    exp = make_expected(
+        field_id="brand",
+        value="Acme",
+        parameters={"fanciful_name": "  ", "trade_names_used_on_label": (" ",)},
+    )
+    res = fuzzy_brand(obs, exp, _rule(), make_context())
     assert res.outcome is Outcome.FAIL
     assert res.reason_code == "BRAND.NAME.MISMATCH"
 

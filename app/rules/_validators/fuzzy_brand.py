@@ -34,6 +34,7 @@ from app.rules._validators._helpers import (
     _build_meta,
     _conf,
     not_read_result,
+    project_reading,
     unlocated,
     unlocated_is_absent,
 )
@@ -57,49 +58,26 @@ _FANCIFUL = "the fanciful name the application declares"
 _TRADE_NAME = "a name the application marks as used on the label"
 
 
-def _project_brand(value: object) -> str:
-    """The cloud extractor produces {brand_name, confidence}; legacy fixtures
-    pass a bare string. Return the brand string in either shape."""
-    if value is None:
-        return ""
-    if isinstance(value, str):
-        return value
-    if isinstance(value, dict):
-        # `brand_name` is the canonical cloud key; `value` is the legacy fixture key.
-        for key in ("brand_name", "value"):
-            v = value.get(key)
-            if isinstance(v, str) and v:
-                return v
-    return ""
-
-
 def _admissible_values(declared: str, exp: ExpectedValue) -> tuple[tuple[str, str], ...]:
     """Every name the application says this label may carry, declared first.
 
-    Duplicates are dropped — an applicant whose trade name repeats its brand
-    is common — so a reviewer is never told the same name matched twice.
+    `application_mapper` supplies the fanciful name as a string and the trade
+    names as a tuple of strings. A blank one is dropped: an empty name equals
+    the empty reading of a brand box the reader found but could not read, and
+    would pass it.
+
+    A trade name that repeats the brand is kept. Every route below stops at
+    the first value that answers, and the declared brand comes first, so the
+    repeat can never be the one a finding names.
     """
-    candidates: list[tuple[str, str]] = [(declared.strip(), _DECLARED)]
-
+    candidates = [(declared, _DECLARED)]
     fanciful = exp.parameters.get("fanciful_name")
-    if isinstance(fanciful, str) and fanciful.strip():
-        candidates.append((fanciful.strip(), _FANCIFUL))
-
-    trade_names = exp.parameters.get("trade_names_used_on_label") or ()
-    if isinstance(trade_names, str):
-        trade_names = (trade_names,)
-    for name in trade_names:
-        if isinstance(name, str) and name.strip():
-            candidates.append((name.strip(), _TRADE_NAME))
-
-    seen: set[str] = set()
-    admissible: list[tuple[str, str]] = []
-    for value, source in candidates:
-        key = value.casefold()
-        if value and key not in seen:
-            seen.add(key)
-            admissible.append((value, source))
-    return tuple(admissible)
+    if fanciful:
+        candidates.append((fanciful, _FANCIFUL))
+    candidates += [
+        (name, _TRADE_NAME) for name in exp.parameters.get("trade_names_used_on_label", ())
+    ]
+    return tuple((value.strip(), source) for value, source in candidates if value.strip())
 
 
 def _best(
@@ -108,13 +86,11 @@ def _best(
     score_of,
 ) -> tuple[float, str, str]:
     """The highest score the label's mark reaches, and the value it reached it
-    against."""
-    best_score, best_value, best_source = 0.0, admissible[0][0], admissible[0][1]
-    for value, source in admissible:
-        score = score_of(observed, value)
-        if score > best_score:
-            best_score, best_value, best_source = score, value, source
-    return best_score, best_value, best_source
+    against. On a tie the earlier value wins, so the declared brand does."""
+    return max(
+        ((score_of(observed, value), value, source) for value, source in admissible),
+        key=lambda scored: scored[0],
+    )
 
 
 @register("fuzzy_brand")
@@ -124,7 +100,7 @@ def fuzzy_brand(
     rule: RuleDefinition,
     ctx: ValidatorContext,
 ) -> ValidationResult:
-    observed = _project_brand(obs.observed_value)
+    observed = project_reading(obs)
     declared = "" if exp.value is None else str(exp.value)
     meta = _build_meta(rule, ctx)
 
