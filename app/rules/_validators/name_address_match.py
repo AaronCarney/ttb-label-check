@@ -129,7 +129,7 @@ def _fold_state_names(words: tuple[str, ...]) -> tuple[str, ...]:
     folded: list[str] = []
     i = 0
     while i < len(words):
-        for length in range(min(_LONGEST_STATE_NAME, len(words) - i), 0, -1):
+        for length in range(_LONGEST_STATE_NAME, 0, -1):
             code = _STATE_POSTAL_CODES.get(words[i : i + length])
             if code is not None:
                 folded.append(code)
@@ -148,11 +148,8 @@ def _after_lead_in(words: tuple[str, ...], lead_in_word: str, window: int) -> tu
     the split is the last occurrence of that word inside the opening `window`
     words. A reading that has no lead-in is returned whole.
     """
-    head = words[:window]
-    for i in range(len(head) - 1, -1, -1):
-        if head[i] == lead_in_word:
-            return words[i + 1 :]
-    return words
+    last = max((i for i, word in enumerate(words[:window]) if word == lead_in_word), default=-1)
+    return words[last + 1 :]
 
 
 @register("name_address_match")

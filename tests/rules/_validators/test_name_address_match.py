@@ -106,6 +106,37 @@ def test_a_different_state_does_not_corroborate() -> None:
 
 
 # ---------------------------------------------------------------------------
+# The lead-in phrase
+# ---------------------------------------------------------------------------
+
+
+def test_a_lead_in_ending_on_the_last_word_of_the_window_is_dropped() -> None:
+    """The rule looks for the lead-in within the opening eight words, and this
+    one ends on the eighth."""
+    res = _verdict(
+        "VINTED, PRODUCED, CELLARED, BLENDED, AGED AND BOTTLED BY CHATEAU DIANA, Healdsburg",
+        CHATEAU_DIANA_BLOCK,
+    )
+    assert res.outcome is Outcome.PASS
+
+
+def test_a_by_past_the_window_is_not_a_lead_in() -> None:
+    """A ninth-word "by" sits past the window, so the reading is taken whole and
+    its first two words are not a name the block carries."""
+    res = _verdict(
+        "VINTED, PRODUCED, CELLARED, BLENDED, AGED, FINISHED AND BOTTLED BY CHATEAU DIANA, "
+        "Healdsburg",
+        CHATEAU_DIANA_BLOCK,
+    )
+    assert res.outcome is Outcome.INSUFFICIENT_EVIDENCE
+
+
+def test_a_reading_with_no_lead_in_is_taken_whole() -> None:
+    res = _verdict("CHATEAU DIANA, Healdsburg, California", CHATEAU_DIANA_BLOCK)
+    assert res.outcome is Outcome.PASS
+
+
+# ---------------------------------------------------------------------------
 # What the check does when it cannot line the two sides up
 # ---------------------------------------------------------------------------
 
