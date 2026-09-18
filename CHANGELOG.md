@@ -28,6 +28,12 @@ All notable changes to this project are recorded here. The format follows
   its faces, and no test ran that step. It now builds a one-face label, and
   `tests/test_read_accuracy_reads.py` holds it.
 
+### Changed
+
+- The README's reading accuracy figures are re-measured after the fixes above. The warning now
+  reads word for word on 20 of the 30 labels, up from 14; brand is 17, up from 16, and net
+  contents 23 of 29, up from 22. Every other check is unchanged.
+
 ## [0.3.0] - 2026-09-17
 
 ### Added

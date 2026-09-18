@@ -380,7 +380,7 @@ runs of the same label agree. `.env.example` names the snapshot in force.
 
 ## Reading accuracy
 
-Measured on 2026-09-16 over the whole real corpus — all 30 labels in
+Measured on 2026-09-17 over the whole real corpus — all 30 labels in
 `tests/fixtures/labels` and their 56 face images — with the default on-machine reader (`local`).
 Every figure below came from that run. Reproduce it with:
 
@@ -394,14 +394,14 @@ the checks fail in different ways and an average hides that.
 
 | Check | What it asks | Correct of scoreable |
 | --- | --- | --- |
-| `brand` | the brand name the label carries | 16 of 30 |
+| `brand` | the brand name the label carries | 17 of 30 |
 | `class_type` | the class and type designation | 19 of 30 |
 | `abv` | the stated alcohol content | 25 of 30 |
-| `net_contents` | the stated net contents | 22 of 29 |
+| `net_contents` | the stated net contents | 23 of 29 |
 | `name_address` | the bottler's or importer's name and address | 22 of 30 |
 | `origin` | the country of origin | 24 of 30 |
 | `warning_present` | that the health warning is on the label at all | 30 of 30 |
-| `warning_exact` | that the warning reads word for word as the regulation sets it | 14 of 30 |
+| `warning_exact` | that the warning reads word for word as the regulation sets it | 20 of 30 |
 | `warning_heading_caps` | that `GOVERNMENT WARNING:` is capitalised as required | 30 of 30 |
 
 The figures are counts, not percentages, and the denominator differs between checks. One label
