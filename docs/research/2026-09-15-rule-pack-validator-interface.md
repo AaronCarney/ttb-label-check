@@ -896,7 +896,7 @@ class ExpectedValue(BaseModel):
     abv_actual_pct: Decimal | None = None          # if known (lab analysis)
     container_volume_ml: Decimal | None = None     # for §16.22(b) / §16.22(a)(4)
     parameters: dict[str, Any] = Field(default_factory=dict)
-    source_cola: str | None = None                 # COLA / T2 reference id
+    source_cola: str | None = None                 # COLA reference id
 
 
 # ---------------------------------------------------------------------------

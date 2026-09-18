@@ -1,9 +1,8 @@
 # Economic Analysis (Cost-Effectiveness) for the AI-Powered TTB COLA Label Verification Prototype
 
-**Sources consumed:** R0 / [T2](./2026-09-15-cola-operational-context.md) / [T4](./2026-09-15-ocr-vision-architecture.md) / [T5](./2026-09-15-llm-orchestration-architecture.md) / [T7](./2026-09-15-federal-deployment-compliance.md) / 01–05 project knowledge
-**Status:** Draft for internal review; numbers anchored to verified primary sources as of 30 April 2026
-**Author:** TTB COLA AI Prototype Working Group
-**Distribution:** Internal — paired with [T7](./2026-09-15-federal-deployment-compliance.md) (policy/compliance overlay) and [T12](./2026-09-15-decision-communication-visualization.md) (visualization deck)
+**Sources consumed:** OMB Circular A-94 and GAO-20-195G; the [COLA operational context](./2026-09-15-cola-operational-context.md), [OCR and vision architecture](./2026-09-15-ocr-vision-architecture.md), [LLM orchestration architecture](./2026-09-15-llm-orchestration-architecture.md) and [federal deployment compliance](./2026-09-15-federal-deployment-compliance.md) notes; `docs/PRD.md`, `ARCHITECTURE.md` and `docs/decisions.md`
+**Status:** Draft for internal review; numbers anchored to verified primary sources
+**Distribution:** Internal — paired with the [federal deployment compliance](./2026-09-15-federal-deployment-compliance.md) note (policy/compliance overlay) and the [decision communication and visualization](./2026-09-15-decision-communication-visualization.md) note (visualization deck)
 
 ---
 
@@ -12,22 +11,22 @@
 ### Linked prerequisite outputs
 | Doc | Role in this analysis |
 |---|---|
-| **R0** federal-cost-conventions | Binding methodology layer; sets A-94 § 5 framing, GAO-20-195G four-pillar / 12-step structure, percentile-naming convention, real-dollar default |
-| **[T2](./2026-09-15-cola-operational-context.md)** volumes / processing times | Source for label volume tiers and current TTB processing-time snapshot |
-| **[T4](./2026-09-15-ocr-vision-architecture.md)** OCR & vision pricing | Verified cloud-OCR list prices and Azure DI on-prem container parity finding |
-| **[T5](./2026-09-15-llm-orchestration-architecture.md)** LLM orchestration costs | Per-call cost table; "cost is not the driver at TTB scale" conclusion |
-| **[T7](./2026-09-15-federal-deployment-compliance.md)** policy / compliance cost overlay | 5-yr WBS for Options A / C / G; ATO, ConMon, 3PAO, M-25-21 § 4 line items |
-| **`docs/PRD.md` / `ARCHITECTURE.md` / `docs/decisions/`** | Hard and strong constraints; the settled build decisions; the open review-time research item |
+| **Federal cost conventions** (OMB Circular A-94, GAO-20-195G) | Binding methodology layer; sets A-94 § 5 framing, GAO-20-195G four-pillar / 12-step structure, percentile-naming convention, real-dollar default |
+| **[COLA operational context](./2026-09-15-cola-operational-context.md)** — volumes / processing times | Source for label volume tiers and current TTB processing-time snapshot |
+| **[OCR and vision architecture](./2026-09-15-ocr-vision-architecture.md)** — OCR & vision pricing | Verified cloud-OCR list prices and Azure DI on-prem container parity finding |
+| **[LLM orchestration architecture](./2026-09-15-llm-orchestration-architecture.md)** — LLM orchestration costs | Per-call cost table; "cost is not the driver at TTB scale" conclusion |
+| **[federal deployment compliance](./2026-09-15-federal-deployment-compliance.md)** — policy / compliance cost overlay | 5-yr WBS for Options A / C / G; ATO, ConMon, 3PAO, M-25-21 § 4 line items |
+| **`docs/PRD.md` / `ARCHITECTURE.md` / `docs/decisions.md`** | Hard and strong constraints; the settled build decisions; the open review-time research item |
 
 ### Methodology statement
 
 This analysis is structured as a **Cost-Effectiveness Analysis (CEA)** under **OMB Circular A-94 § 5** ("Cost-Effectiveness analysis is appropriate … where the benefits from competing alternatives are the same or where a policy decision has been made that the benefits must be provided"; A-94, 9 Nov 2023). CEA — not Benefit-Cost Analysis (BCA) — is the correct frame here because the *benefit* (label-application review against 27 CFR parts 4/5/7) is statutorily mandated by the FAA Act; the policy question is which delivery alternative provides the mandated review at lowest life-cycle cost while honoring the binding constraints in `docs/PRD.md` and the production-parity substitutability design rule.
 
-All figures default to **constant FY 2026 dollars** per A-94 § 6.b. NPV is computed using the **real Treasury rates from the current Appendix C (Revised 6 March 2026, transmitted as OMB M-26-09; valid through Dec 2026)**: 3-yr **1.1 %**, 5-yr **1.3 %**, 7-yr **1.4 %**. (Note: R0 cited the prior Nov 2024 Appendix C; this document uses the current 2026 update verified at whitehouse.gov/wp-content/uploads/2026/03/.)
+All figures default to **constant FY 2026 dollars** per A-94 § 6.b. NPV is computed using the **real Treasury rates from the current Appendix C (Revised 6 March 2026, transmitted as OMB M-26-09; valid through Dec 2026)**: 3-yr **1.1 %**, 5-yr **1.3 %**, 7-yr **1.4 %**. (This document uses the current 2026 update, not the prior Nov 2024 Appendix C; source: whitehouse.gov/wp-content/uploads/2026/03/.)
 
-The analysis is organized to map directly to the **GAO-20-195G four pillars** (comprehensive, well-documented, accurate, credible) and follows the **GAO 12-step process**, with explicit pointers to each step. Per R0, percentile estimates use the federal-audience naming convention **50th-percentile (most likely) / 80th-percentile (should-cost) / 90th-percentile (reserve)** — *not* P10/P50/P90.
+The analysis is organized to map directly to the **GAO-20-195G four pillars** (comprehensive, well-documented, accurate, credible) and follows the **GAO 12-step process**, with explicit pointers to each step. Percentile estimates use the federal-audience naming convention **50th-percentile (most likely) / 80th-percentile (should-cost) / 90th-percentile (reserve)** — *not* P10/P50/P90.
 
-### A-94 required-component checklist (R0 §3.1)
+### A-94 required-component checklist
 
 | A-94 § 5 component | Where addressed |
 |---|---|
@@ -48,12 +47,12 @@ The analysis is organized to map directly to the **GAO-20-195G four pillars** (c
 |---|---|---|
 | **Discount rate (real)** | 1.1 % (3-yr) / 1.3 % (5-yr) | OMB Circular A-94 Appendix C, Revised 6 Mar 2026, transmitted as M-26-09; valid CY 2026. |
 | **Base year** | FY 2026 (constant $) | A-94 § 6.b real-dollar default |
-| **Currency convention** | Real / constant FY 2026 USD throughout | A-94; avoids R0 anti-pattern of mixed real / nominal |
+| **Currency convention** | Real / constant FY 2026 USD throughout | A-94; avoids mixing real and nominal dollars |
 | **Time horizon — primary** | 3 years (CEA window) | Aligned with prototype-to-production decision cadence and TMF reporting horizons |
 | **Time horizon — secondary** | 5 years (TCO sensitivity) | Aligned with [T7](./2026-09-15-federal-deployment-compliance.md)'s 5-yr WBS in Options A / C / G |
-| **Application-volume baseline** | ~180,000–200,000 / yr; central case **190 K** | [T2](./2026-09-15-cola-operational-context.md)-verified: TTB NPRM (Notice 176) cites *"approximately 200,000 label applications that TTB receives each year"* (87 FR 8266, finalized as T.D. TTB-176, 9 Feb 2022); FY2020 Annual Report ~190K; About-TTB page "nearly 180K"; CY2026 YTD 55,528 through 28 Apr 2026 → annualized ~180–185K. |
+| **Application-volume baseline** | ~180,000–200,000 / yr; central case **190 K** | Checked in the [COLA operational context](./2026-09-15-cola-operational-context.md): TTB NPRM (Notice 176) cites *"approximately 200,000 label applications that TTB receives each year"* (87 FR 8266, finalized as T.D. TTB-176, 9 Feb 2022); FY2020 Annual Report ~190K; About-TTB page "nearly 180K"; CY2026 YTD 55,528 through 28 Apr 2026 → annualized ~180–185K. |
 | **Volume growth rate** | Historical **~4 % CAGR (2010–2020)**; **forward growth: "we don't know"** | Computed from 134K (2010) → 146K (2011) → 153K+ (FY2015) → 190K (FY2020). FY2025 Budget-in-Brief notes malt-beverage submissions *declined ~15 % over 5 years*. Forward growth modeled as flat in 50th-percentile case; ±25 % swing in sensitivity. |
-| **Seasonality** | Modeled as flat | **TTB does not publish seasonality data for COLA volumes.** Sarah's "200–300 batches in peak season" is an interview anecdote, not a published TTB metric. Industry-blog seasonality narratives are not authoritative. Per R0, do-not-invent. |
+| **Seasonality** | Modeled as flat | **TTB does not publish seasonality data for COLA volumes.** Sarah's "200–300 batches in peak season" is an interview anecdote, not a published TTB metric. Industry-blog seasonality narratives are not authoritative. None is invented here. |
 | **Submission distribution** (importer vs domestic; small vs large) | Not modeled | Not publicly published by TTB. |
 | **ALFD specialist headcount denominator** | **47 agents** | Marcus interview; down from "over 100" in the 1980s. This is the relevant FTE pool for time-savings ÷ realization analysis. |
 | **Per-application review-time anchor** | **5–10 min for a "simple" application; longer with issues** | Sarah interview anchor. **This is interview anecdote, not benchmarked empirical data, and remains an open research item** and listed in the §XI "we don't know" register. |
@@ -171,7 +170,7 @@ At **190 K apps × 2.0 min × $89.05/hr ÷ 60 = ~$564 K/yr** gross labor-time va
 
 ### Q11.8 Realization Rate — DEEP DIVE
 
-This is the most important — and most-often-skipped — input in any federal automation business case (R0 anti-pattern: "missing realization-rate discussion"). Gross hours saved ≠ budget recovered.
+This is the most important — and most-often-skipped — input in any federal automation business case; leaving it undiscussed is an anti-pattern. Gross hours saved ≠ budget recovered.
 
 **Anchors:**
 - **GSA OIG 2021** (CAP report): GSA's claimed RPA savings of *"more than 240,000 work hours annually was inaccurate and unreliable"* — GSA was not verifying actual hours saved with end-users. (gsaig.gov)
@@ -186,7 +185,7 @@ This is the most important — and most-often-skipped — input in any federal a
 3. M-25-21 § 4 *adds* human-oversight/appeals workload that partially offsets savings.
 4. SLAs and the 85 %/15-day customer-service goal mean recovered hours flow to faster turnaround, not budget cut.
 
-**Modeled realization range (50th/80th/90th naming per R0):**
+**Modeled realization range (50th/80th/90th percentile naming):**
 
 | Percentile | Realization rate | Realized $/yr (190 K × 2 min anchor = $564 K gross) |
 |---|---|---|
@@ -246,7 +245,7 @@ Per [T5](./2026-09-15-llm-orchestration-architecture.md) across all paths: **clo
 ### Q11.13 Self-hosted LLM costing
 Per [T5](./2026-09-15-llm-orchestration-architecture.md): Llama 3.1 8B / Qwen3 / IBM Granite on a single L4 GPU on a FedRAMP-High VM ≈ **$0.00006–0.00015 / call** ⇒ ~$30–$75 / yr compute-only. Strongest production-parity story; weakest staffing story (need ML-Ops + GPU patching + monitoring loaded into ConMon FTE).
 
-### Q11.14 Lock-In — DEEP DIVE (R0 anti-pattern: "lock-in left out")
+### Q11.14 Lock-In — DEEP DIVE (leaving lock-in out is an anti-pattern)
 
 Federal lock-in is **categorically different** from commercial lock-in. The switching cost of an LLM/OCR provider is dominated not by data egress or re-coding but by **ATO/3PAO re-issuance and FedRAMP package re-mapping**.
 
@@ -298,9 +297,9 @@ Federal lock-in is **categorically different** from commercial lock-in. The swit
 - Benefit (realized): $0.68 M — $1.09 M — $0.41 M
 - **Net 5-yr NPV (50th / Option A):** **−$1.7 M** (cost exceeds realized monetized labor savings)
 
-> **Honest framing per R0:** A *single-point ROI* would be misleading here (R0 anti-pattern). On directly-monetized labor savings alone, **no option produces a positive NPV in the 5-yr CEA window** at the 50th percentile. This is the **expected and correct CEA result for a mandated-benefit program** — the question is least-cost delivery of mandated review against `docs/PRD.md`, plus optionality / non-monetizable factors below.
+> **Honest framing:** A *single-point ROI* would be misleading here. On directly-monetized labor savings alone, **no option produces a positive NPV in the 5-yr CEA window** at the 50th percentile. This is the **expected and correct CEA result for a mandated-benefit program** — the question is least-cost delivery of mandated review against `docs/PRD.md`, plus optionality / non-monetizable factors below.
 
-### Q11.17 Non-monetizable factors (listed without forcing dollars per R0)
+### Q11.17 Non-monetizable factors (listed without forcing dollars)
 
 | Factor | Direction | Notes |
 |---|---|---|
@@ -316,7 +315,7 @@ Federal lock-in is **categorically different** from commercial lock-in. The swit
 ---
 
 ## IX. Stage 5 — Sensitivity (GAO Step 8) and Risk / Uncertainty (GAO Step 9)
-*Treated as **separate** sections per R0.*
+*Sensitivity and risk / uncertainty are treated as **separate** sections.*
 
 ### Q11.18 Sensitivity tornado (Step 8)
 
@@ -342,7 +341,7 @@ Inputs ranked by **NPV swing (5-yr, Option A central case)**:
 - If **Claude Sonnet 4.5 / Opus 4.x receives Bedrock GovCloud FedRAMP High** before deployment date, Option C's LLM-quality advantage strengthens; not enough to flip if Treasury Azure-incumbency holds.
 - If TTB's headcount ceiling is **lifted** (workload growth → ALFD goes back toward 100), realization rises sharply because savings translate directly into capacity rather than budget.
 
-### Q11.20 Headline framing — honest synthesis (R0 explicit guidance)
+### Q11.20 Headline framing — honest synthesis
 
 **At TTB scale, the cloud-vs-self-hosted choice is not decided on raw inference cost** — [T5](./2026-09-15-llm-orchestration-architecture.md) establishes that cloud LLM cost is ≈$750–1,800/yr and self-hosted compute ≈$30–75/yr; both rounding-error against the $2.4–5.8 M 5-yr TCO of any Option-A-class build ([T7](./2026-09-15-federal-deployment-compliance.md)).
 
@@ -352,7 +351,7 @@ The decision **turns on:**
 3. **Lock-in posture** (Q11.14) — federal switching costs are 12–36 months and $250 K–$500 K, not commercial 1–3 months.
 4. **TTB's Azure incumbency** ([T7](./2026-09-15-federal-deployment-compliance.md) Q7.4) — Treasury migrated to Azure in 2019; the prior vendor was firewall-blocked; **Option A is the most deployable** and incurs no second-hyperscaler stand-up.
 
-We do **not** force a winner on direct-monetized labor savings (R0: "Anti-pattern: single-point ROI"). The CEA conclusion is that **Option A provides mandated-benefit delivery at the lowest credible 5-yr TCO** (~$2.4 M / 50th, [T7](./2026-09-15-federal-deployment-compliance.md)), and the savings side does not change the ranking among A / C / G — it sets the ceiling on how much complexity is justifiable.
+We do **not** force a winner on direct-monetized labor savings (a single-point ROI would mislead; see Q11.16). The CEA conclusion is that **Option A provides mandated-benefit delivery at the lowest credible 5-yr TCO** (~$2.4 M / 50th, [T7](./2026-09-15-federal-deployment-compliance.md)), and the savings side does not change the ranking among A / C / G — it sets the ceiling on how much complexity is justifiable.
 
 ---
 
@@ -402,7 +401,7 @@ The following are clean, publication-ready data structures for [T12](./2026-09-1
 5. **OPM grade × locality matrix** — GS-9 / 11 / 12 / 13 × DC / Cincinnati / RUS loaded $/hr.
 6. **GAO-12-step compliance map** — steps covered (1, 2, 3, 4, 5, 6, 8, 9, 10) vs steps deferred (7 ICE, 11 risk-monitoring runtime, 12 ongoing update).
 
-**Cross-topic synthesis (X-7) is deferred** per task scope.
+**A combined cost, policy and technical-fit comparison per option is not made here.**
 
 ---
 
@@ -427,8 +426,8 @@ The following are clean, publication-ready data structures for [T12](./2026-09-1
 - **AWS Bedrock GovCloud** — Anthropic Claude 3.5 Sonnet v1 + Claude 3 Haiku **FedRAMP High + DoD IL4/5 (May 2025)**; aws.amazon.com/about-aws/whats-new/2025/05/amazon-bedrock-models-fedramp-high-dod-il-4-5-govcloud/; anthropic.com/news/claude-in-amazon-bedrock-fedramp-high. Claude 3.7 Sonnet added July 2025.
 - **FedRAMP Marketplace** — fedramp.gov; **FedRAMP 20x Phase 2** (Nov 2025–31 Mar 2026) and Phase 3 (Q3–Q4 FY26).
 - **Azure OpenAI Service** in Azure Government — FedRAMP High.
-- **T-document trail (project-internal):** [T2](./2026-09-15-cola-operational-context.md), [T4](./2026-09-15-ocr-vision-architecture.md), [T5](./2026-09-15-llm-orchestration-architecture.md), [T7](./2026-09-15-federal-deployment-compliance.md) (cited in §I links) — used directly per task instruction *"Re-derive LLM costs that [T5](./2026-09-15-llm-orchestration-architecture.md) already provides; cite [T5](./2026-09-15-llm-orchestration-architecture.md) directly. Re-derive ATO/build cost ranges that [T7](./2026-09-15-federal-deployment-compliance.md) already provides; cite [T7](./2026-09-15-federal-deployment-compliance.md) directly."*
+- **This project's research notes:** [COLA operational context](./2026-09-15-cola-operational-context.md), [OCR and vision architecture](./2026-09-15-ocr-vision-architecture.md), [LLM orchestration architecture](./2026-09-15-llm-orchestration-architecture.md), [federal deployment compliance](./2026-09-15-federal-deployment-compliance.md) (cited in §I links). LLM costs are taken from the LLM orchestration note and ATO/build cost ranges from the federal deployment compliance note, and are cited to them directly.
 
 ---
 
-*End of T11. Pair with [T7](./2026-09-15-federal-deployment-compliance.md) (policy/compliance overlay) and [T12](./2026-09-15-decision-communication-visualization.md) (visualization). Cross-topic synthesis question X-7 deferred per task scope.*
+*Pair with the [federal deployment compliance](./2026-09-15-federal-deployment-compliance.md) note (policy/compliance overlay) and the [decision communication and visualization](./2026-09-15-decision-communication-visualization.md) note (visualization). A combined cost, policy and technical-fit comparison per option is not made here.*

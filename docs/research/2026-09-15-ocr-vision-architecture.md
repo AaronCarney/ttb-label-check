@@ -1,14 +1,14 @@
 # OCR & Vision Architecture (Research Deep-Dive)
 
 **Project:** AI-powered TTB Alcohol Label Verification Prototype
-**Topic:** T4 (OCR & Vision Architecture)
-**Scope:** Q4.1–Q4.10 of this topic. Cross-topic synthesis questions (X-1, X-2, X-3) explicitly deferred.
+**Topic:** OCR & Vision Architecture
+**Scope:** Q4.1–Q4.10 of this topic. Questions that span several research notes are not answered here (see the last section).
 **Decision references:** substitutability (cloud-substitutable architecture), per-field match policies (declared explicitly, not buried in code), rejection reasoning (required on every disposition), the economics-and-policy test (TCO + FedRAMP/ATO story for every option).
 **Depth weighting:** Q4.2 ≈30%, Q4.4 ≈20%, remaining 50% across Q4.1, Q4.3, Q4.5–Q4.10.
 
 **Project artifacts consulted:**
-- [T1](./2026-09-15-ttb-regulatory-framework.md), [T2](./2026-09-15-cola-operational-context.md), original take-home brief
-- `docs/PRD.md` (hard / strong / stretch tier mapping; the outbound-network constraint that frames where the vision layer can run), `ARCHITECTURE.md` (vision-layer position), `docs/decisions/` (substitutability, per-field match policies, rejection reasoning, the economics-and-policy test), and the open questions on preprocessing cost-versus-benefit and "needs better photo" as a first-class disposition
+- [TTB regulatory framework](./2026-09-15-ttb-regulatory-framework.md), [COLA operational context](./2026-09-15-cola-operational-context.md), original take-home brief
+- `docs/PRD.md` (hard / strong / stretch tier mapping; the outbound-network constraint that frames where the vision layer can run), `ARCHITECTURE.md` (vision-layer position), `docs/decisions.md` (substitutability, per-field match policies, rejection reasoning, the economics-and-policy test), and the open questions on preprocessing cost-versus-benefit and "needs better photo" as a first-class disposition
 - Three standing limitations of the prototype directly inform this topic: (a) "Image-quality robustness is best-effort. Labels with severe glare, extreme angles, or poor resolution may fail-out as 'needs better photo' rather than be recovered" → ratifies Q4.6 disposition policy; (b) "Cloud inference is acceptable for the prototype... architecture is designed to allow this swap, but it is not implemented" → ratifies Q4.9 phased-migration framing; (c) "No persistent storage or audit trail. Session-only" → constrains Q4.7 (no inter-application image caching; per-application reconciliation only)
 
 **Primary external sources consulted (selection):**
@@ -715,9 +715,9 @@ Cloud inference is acceptable for the prototype; the architecture is *designed* 
 
 ---
 
-## Q4.10 — Real-World Label Characteristics (gated by [T2](./2026-09-15-cola-operational-context.md))
+## Q4.10 — Real-World Label Characteristics (inputs from the [COLA operational context](./2026-09-15-cola-operational-context.md))
 
-[T2](./2026-09-15-cola-operational-context.md) confirmed inputs to the system:
+The [COLA operational context](./2026-09-15-cola-operational-context.md) confirmed inputs to the system:
 - **Format:** JPEG/PNG only (PDF/TIFF rejected).
 - **File size:** ≤1.5 MB per image.
 - **Resolution:** 120–170 DPI minimum per TTB FAQ; 300 DPI recommended by practitioners.

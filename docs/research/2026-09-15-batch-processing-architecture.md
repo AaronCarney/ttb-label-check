@@ -211,7 +211,7 @@ The expected number of in-flight labels needed to keep the agent busy is well be
 
 ### Q6.9 — Realistic peak-season batch shape and dominant constraint
 
-**Empirical batch shape.** Sarah's anecdote: 200–300 labels per large importer in peak season. [T2](./2026-09-15-cola-operational-context.md) establishes that TTB does not publish seasonality data. CY2026 YTD through April = 55,528 applications (TTB FAQ data). For prototype risk planning, treat **300 as a mid-estimate; treat 500 as a worst-case** (industry patterns include occasional very large submissions).
+**Empirical batch shape.** Sarah's anecdote: 200–300 labels per large importer in peak season. The [COLA operational context](./2026-09-15-cola-operational-context.md) establishes that TTB does not publish seasonality data. CY2026 YTD through April = 55,528 applications (TTB FAQ data). For prototype risk planning, treat **300 as a mid-estimate; treat 500 as a worst-case** (industry patterns include occasional very large submissions).
 
 **Wall-clock floor for one agent on one batch (compute-only).** With C = 2 and P = 3 s, pipeline throughput is ~0.67 labels/s. For 300 labels: ~7.5 minutes of pipeline time. For 500: ~12.5 minutes. **This is dominated by the agent.**
 

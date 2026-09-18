@@ -2,7 +2,7 @@
 
 ## TTB Alcohol Label Verification MVP
 
-> **Note on project knowledge access.** The `project_knowledge_search` tool referenced in the task brief was **not available** in the execution environment — only public web research tools were accessible. Where this report needs values from project-knowledge files ([T1](./2026-09-15-ttb-regulatory-framework.md) reason codes, [T2](./2026-09-15-cola-operational-context.md) §Q2.10 fields, [T9](./2026-09-15-verification-targets-research.md) evaluation methodology, [S1](./2026-09-15-vision-stack.md) fixture spec, [S2](./2026-09-15-mvp-scope-demo-shape.md) MVP rule count), I have **reconstructed reasonable defaults from the contextual hints in the task brief and from primary TTB regulatory sources**, and have flagged each such reconstruction inline as `[ASSUMED — confirm against project knowledge]`. All external claims are cited with URLs.
+> **Note on assumed values.** Where this report needs values from this project's other research notes (the [TTB regulatory framework](./2026-09-15-ttb-regulatory-framework.md) reason codes, the [COLA operational context](./2026-09-15-cola-operational-context.md) §Q2.10 fields, the [verification targets](./2026-09-15-verification-targets-research.md) evaluation methodology, the [vision stack](./2026-09-15-vision-stack.md) fixture spec, the [MVP scope](./2026-09-15-mvp-scope-demo-shape.md) rule count), those values are **not checked against the notes here; reasonable defaults drawn from primary TTB regulatory sources stand in for them**, each flagged inline as `[ASSUMED — …]`. All external claims are cited with URLs.
 
 ---
 
@@ -52,7 +52,7 @@ $$n = \frac{(1.96)^2 \cdot 0.5 \cdot 0.5}{(0.15)^2} = \frac{0.9604}{0.0225} = 42
 
 For the "negative" arm (rule should *not* fire), the same 43 is needed to estimate specificity at ±15 pp, so **86 cases per rule** are needed if both precision and recall are to be bounded at ±15 pp.
 
-**Multiplying by MVP rule count.** The [S2](./2026-09-15-mvp-scope-demo-shape.md) output's exact rule count was not retrievable from project knowledge in this session [ASSUMED — confirm against [S2](./2026-09-15-mvp-scope-demo-shape.md) output]. Based on TTB's mandatory label-information lists (27 CFR Parts 4, 5, 7, and 16) the MVP scope plausibly covers:
+**Multiplying by MVP rule count.** The exact rule count in the [MVP scope](./2026-09-15-mvp-scope-demo-shape.md) is not checked here [ASSUMED — confirm against the [MVP scope](./2026-09-15-mvp-scope-demo-shape.md)]. Based on TTB's mandatory label-information lists (27 CFR Parts 4, 5, 7, and 16) the MVP scope plausibly covers:
 
 | # | Rule (MVP candidate) | [T1](./2026-09-15-ttb-regulatory-framework.md) reason-code family |
 |---|---|---|
@@ -69,7 +69,7 @@ For the "negative" arm (rule should *not* fire), the same 43 is needed to estima
 | R11 | Fanciful name + statement of composition (specialty products) | `MISSING_STATEMENT_OF_COMPOSITION` |
 | R12 | Appellation of origin on brand label when vintage + varietal listed (wine) | `MISSING_APPELLATION` |
 
-[ASSUMED 12 rules — replace with [S2](./2026-09-15-mvp-scope-demo-shape.md) actual count.]
+[ASSUMED 12 rules — replace with the actual count in the [MVP scope](./2026-09-15-mvp-scope-demo-shape.md).]
 
 → Per-rule positive cases: **43 × 12 = 516 positive failure events**, or 86 × 12 = 1,032 if symmetric specificity is also required.
 
@@ -182,7 +182,7 @@ Krippendorff's standard interpretive thresholds (Krippendorff 2019; reaffirmed i
 
 **Q10. Eval-set size — 250 labels** (97 happy-path + ~150 stratified rule-failure + 3 reserve).
 
-**Q11. Class balance per [S2](./2026-09-15-mvp-scope-demo-shape.md) MVP scope** [ASSUMED — confirm against [S2](./2026-09-15-mvp-scope-demo-shape.md)]. Recommended split mirroring TTB's COLA volume distribution (wine ~45%, malt ~40%, distilled spirits ~15%):
+**Q11. Class balance per the [MVP scope](./2026-09-15-mvp-scope-demo-shape.md)** [ASSUMED — confirm against the [MVP scope](./2026-09-15-mvp-scope-demo-shape.md)]. Recommended split mirroring TTB's COLA volume distribution (wine ~45%, malt ~40%, distilled spirits ~15%):
 
 | Class | Count | % |
 |---|---|---|
@@ -212,9 +212,9 @@ Krippendorff's standard interpretive thresholds (Krippendorff 2019; reaffirmed i
 
 #### (Q13/Q14) JSONL manifest schema with worked example
 
-[T1](./2026-09-15-ttb-regulatory-framework.md) reason codes [ASSUMED — confirm against [T1](./2026-09-15-ttb-regulatory-framework.md) §7.3]: `MISSING_BRAND_NAME`, `MISSING_CLASS_TYPE`, `INVALID_CLASS_TYPE`, `MISSING_ABV`, `INVALID_ABV_FORMAT`, `MISSING_NET_CONTENTS`, `NET_CONTENTS_NON_US_UNITS`, `MISSING_NAME_ADDRESS`, `WARNING_TEXT_ALTERED`, `WARNING_NOT_BOLD_CAPS`, `WARNING_TYPE_TOO_SMALL`, `WARNING_NOT_LEGIBLE`, `MISSING_SULFITE_DECL`, `MISSING_STATEMENT_OF_COMPOSITION`, `MISSING_APPELLATION`, `NEEDS_BETTER_PHOTO`.
+[TTB regulatory framework](./2026-09-15-ttb-regulatory-framework.md) reason codes [ASSUMED — confirm against its §7.3]: `MISSING_BRAND_NAME`, `MISSING_CLASS_TYPE`, `INVALID_CLASS_TYPE`, `MISSING_ABV`, `INVALID_ABV_FORMAT`, `MISSING_NET_CONTENTS`, `NET_CONTENTS_NON_US_UNITS`, `MISSING_NAME_ADDRESS`, `WARNING_TEXT_ALTERED`, `WARNING_NOT_BOLD_CAPS`, `WARNING_TYPE_TOO_SMALL`, `WARNING_NOT_LEGIBLE`, `MISSING_SULFITE_DECL`, `MISSING_STATEMENT_OF_COMPOSITION`, `MISSING_APPELLATION`, `NEEDS_BETTER_PHOTO`.
 
-[T2](./2026-09-15-cola-operational-context.md) §Q2.10 application fields [ASSUMED based on TTB Form 5100.31 / `colacloud.us/posts/ttb-data-definitions`]: `product_class_type`, `alcohol_content`, `net_contents`, `brand_name`, `fanciful_name`, `appellation_of_origin` (wine), `vintage_date` (wine), `formula_id` (if applicable), `plant_registry_basic_permit_brewers_no`.
+[COLA operational context](./2026-09-15-cola-operational-context.md) §Q2.10 application fields [ASSUMED based on TTB Form 5100.31 / `colacloud.us/posts/ttb-data-definitions`]: `product_class_type`, `alcohol_content`, `net_contents`, `brand_name`, `fanciful_name`, `appellation_of_origin` (wine), `vintage_date` (wine), `formula_id` (if applicable), `plant_registry_basic_permit_brewers_no`.
 
 ```jsonl
 {"id":"ttb-2024-W-000123","image_path":"data/eval/wine/ttb-2024-W-000123.png","class":"wine","expected_disposition":"reject","expected_failures":["WARNING_TEXT_ALTERED","MISSING_SULFITE_DECL"],"application_fields":{"product_class_type":"Pinot Noir","alcohol_content":"13.5","net_contents":"750 mL","brand_name":"TAMAL","fanciful_name":null,"appellation_of_origin":"Russian River Valley","vintage_date":"2021","formula_id":null,"plant_registry_basic_permit_brewers_no":"BWN-CA-12345"},"difficulty_axes":["stylized_fonts","faded_scan"],"provenance":{"source":"ttb-cola","source_id":"21345001000456","source_url":"https://www.ttbonline.gov/colasonline/viewColaDetails.do?action=publicDisplaySearchBasic&ttbid=21345001000456","license":"CC0","fetched_at":"2026-09-10T10:22:11Z","c2pa_manifest_sha256":null},"notes":"Warning paragraph reads 'According to the General Surgeon...' (word order swapped). Sulfite declaration absent on back label.","annotation":{"primary_pass_at":"2026-09-11T14:00:00Z","secondary_pass_at":"2026-09-12T15:00:00Z","intra_rater_match":true}}
@@ -226,10 +226,10 @@ Krippendorff's standard interpretive thresholds (Krippendorff 2019; reaffirmed i
 |---|---|---|---|
 | `id` | string | Y | Stable, source-prefixed |
 | `image_path` | string (relative) | Y | Repo-relative |
-| `class` | enum: wine / malt / spirits | Y | Per [S2](./2026-09-15-mvp-scope-demo-shape.md) scope |
-| `expected_disposition` | enum: approve / needs_review / reject | Y | Per [T1](./2026-09-15-ttb-regulatory-framework.md) |
-| `expected_failures` | string[] (reason codes) | Y (empty if approve) | Per [T1](./2026-09-15-ttb-regulatory-framework.md) §7.3 |
-| `application_fields` | object | Y | Per [T2](./2026-09-15-cola-operational-context.md) §Q2.10 |
+| `class` | enum: wine / malt / spirits | Y | Per the [MVP scope](./2026-09-15-mvp-scope-demo-shape.md) |
+| `expected_disposition` | enum: approve / needs_review / reject | Y | Per the [TTB regulatory framework](./2026-09-15-ttb-regulatory-framework.md) |
+| `expected_failures` | string[] (reason codes) | Y (empty if approve) | Per the [TTB regulatory framework](./2026-09-15-ttb-regulatory-framework.md) §7.3 |
+| `application_fields` | object | Y | Per the [COLA operational context](./2026-09-15-cola-operational-context.md) §Q2.10 |
 | `difficulty_axes` | string[] | Y (empty allowed) | From axis matrix |
 | `provenance` | object | Y | Source/license/C2PA |
 | `notes` | string | N | Free-text annotator commentary |
@@ -402,8 +402,8 @@ Following Gebru et al., "Datasheets for Datasets," arXiv:1803.09010 (Mar 2018, l
 
 ## Composition
 - **Instances:** 250 labels (113 wine, 100 malt beverage, 37 distilled spirits) 
-  with per-label image, expected disposition, expected reason codes (T1 §7.3), 
-  application fields (T2 §Q2.10), provenance, and difficulty-axis tags.
+  with per-label image, expected disposition, expected reason codes (TTB regulatory framework §7.3), 
+  application fields (COLA operational context §Q2.10), provenance, and difficulty-axis tags.
 - **Sampling:** Stratified by class and per-rule failure bucket (R01–R12); 
   non-probability convenience sample from public TTB COLA registry plus 
   permissively-licensed supplements.
@@ -505,7 +505,7 @@ eval/
 
 ## Caveats
 
-- **Project-knowledge files were not retrievable in this session.** The MVP rule count ([S2](./2026-09-15-mvp-scope-demo-shape.md) output), the exact [T1](./2026-09-15-ttb-regulatory-framework.md) §7.3 reason-code list, the [T2](./2026-09-15-cola-operational-context.md) §Q2.10 application-field list, the [S1](./2026-09-15-vision-stack.md) fixture-set spec, and the [T9](./2026-09-15-verification-targets-research.md) §5 Krippendorff methodology section were all referenced in the task brief but could not be fetched via `project_knowledge_search`. I have substituted reasonable defaults derived from primary TTB regulatory pages (ttb.gov "Anatomy of a Malt Beverage Label", "Wine Labeling: Health Warning Statement", 27 CFR Part 16) and from the colacloud.us TTB-data-definitions reference. **Every assumption is flagged inline as `[ASSUMED — confirm against project knowledge]`.** The numerical recommendations (250 eval labels, 1,000 reservoir, ~15% synthetic, etc.) hold as long as the actual MVP rule count is in the 8–15 range; outside that range, recompute n_per_rule × R.
+- **Values from the other research notes are assumed, not checked.** The MVP rule count (the [MVP scope](./2026-09-15-mvp-scope-demo-shape.md)), the exact reason-code list (the [TTB regulatory framework](./2026-09-15-ttb-regulatory-framework.md) §7.3), the application-field list (the [COLA operational context](./2026-09-15-cola-operational-context.md) §Q2.10), the fixture-set spec (the [vision stack](./2026-09-15-vision-stack.md)), and the Krippendorff methodology (the [verification targets](./2026-09-15-verification-targets-research.md) §5) are not checked against those notes here. Reasonable defaults stand in for them, derived from primary TTB regulatory pages (ttb.gov "Anatomy of a Malt Beverage Label", "Wine Labeling: Health Warning Statement", 27 CFR Part 16) and from the colacloud.us TTB-data-definitions reference. **Every assumption is flagged inline as `[ASSUMED — …]`.** The numerical recommendations (250 eval labels, 1,000 reservoir, ~15% synthetic, etc.) hold as long as the actual MVP rule count is in the 8–15 range; outside that range, recompute n_per_rule × R.
 - **Vivino/WineSensed lineage.** WineSensed (Bender et al., NeurIPS 2023) was scraped from Vivino. Although the dataset is published on figshare DTU under an academic-use posture, redistributing the images carries Vivino-ToS contamination. For the MVP, **cite the dataset as a benchmark reference but do not redistribute the images**.
 - **DALL·E 3 text-rendering reliability is not proven for this exact use case.** The 92% short-text accuracy figure comes from third-party benchmarks (skywork.ai, Glyph-ByT5 paper arXiv:2403.09622) and degrades sharply on text spans >12 characters. The TTB GOVERNMENT WARNING is 49 words / ~250 characters. **Do not rely on synthetic images to test the *correctness* of the warning** — only to test that the verifier correctly *flags* known-broken cases. C2PA metadata is automatically embedded but is trivially stripped by re-encoding (e.g., JPEG conversion through ImageMagick), per the OpenAI Help Center "C2PA in ChatGPT Images" article. Persist a SHA-256 of the original C2PA manifest in the JSONL `provenance.c2pa_manifest_sha256` field at fetch time, since it may be lost in pipeline post-processing.
 - **Sample-size math is Wald-asymptotic.** For very low or very high true precision/recall (e.g., a rule that fires correctly 99% of the time), the Wald CI is anti-conservative. Wilson or Clopper-Pearson intervals would be more honest at the extremes; the per-rule N=43 is a *minimum*, and rules where the model is near-perfect or near-zero will have wider effective CIs.

@@ -9,7 +9,7 @@
 | Most recent labeling Treasury Decisions in scope | T.D. TTB-158 (4/2/2020), T.D. TTB-176 (2/9/2022, "Phase 2"), T.D. TTB-176A correction (3/9/2022), T.D. TTB-196 (11/6/2024 technical corrections) |
 | Public COLA Registry image coverage | Images available 1999–present; data-only records pre-1999; results before 1996 may be incomplete (per registry banner text on `publicSearchColasBasic.do`) |
 | Current ALFD label processing snapshot (TTB.gov, "Updated 04/28/2026 7:00 AM") | Distilled spirits **4 days**, Malt beverages **1 day**, Wine **5 days**; CY2026 label applications received YTD: **55,528**; service goal: **85% within 15 days** |
-| Cross-topic synthesis questions skipped per instructions | X-5 ([T1](./2026-09-15-ttb-regulatory-framework.md)+T2+[T9](./2026-09-15-verification-targets-research.md) corpus design) and (T2+[T6](./2026-09-15-batch-processing-architecture.md)) batch-sizing math |
+| Not covered in this note | Evaluation-corpus design (with the [TTB regulatory framework](./2026-09-15-ttb-regulatory-framework.md) and [verification targets](./2026-09-15-verification-targets-research.md) notes) and batch-sizing math (with the [batch processing architecture](./2026-09-15-batch-processing-architecture.md) note) |
 
 > Throughout this document, "what the regulation says" is distinguished from "what TTB actually does in practice." Inline citations identify the source URL and the exact regulation/section/page when possible. The document deliberately does **not** rely on undated industry blog snippets where a primary TTB source exists.
 

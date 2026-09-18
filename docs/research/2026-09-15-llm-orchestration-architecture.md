@@ -2,11 +2,12 @@
 
 ```
 Project:        TTB COLA Label Verification Prototype
-Topic:          T5 — AI/LLM Orchestration Architecture
-Author:         Architecture Working Group
+Topic:          AI/LLM Orchestration Architecture
 Status:         DRAFT — provisional sections explicitly flagged
-Sister docs:    T3 (rule engine, NOT YET FINAL), T4 (vision, FINAL)
-Cross-topic:    X-1, X-2, X-3 are deferred
+Sister docs:    2026-09-15-rule-engine-architecture.md (rule engine),
+                2026-09-15-ocr-vision-architecture.md (vision)
+Not covered:    end-to-end latency budget, confidence composition, decision
+                provenance (see "Cross-Topic Synthesis Questions")
 Decisions
   honored:      The deterministic core (LLM orchestrates, does NOT decide pass/fail)
                 Substitutability (production parity; cloud OK for prototype, swap-in path required)

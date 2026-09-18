@@ -2,8 +2,8 @@
 
 **Project:** AI-powered TTB Alcohol Label Verification Prototype
 **Decisions referenced:** The deterministic core (manual review always available; safe-failure = needs-review), per-field match policies (per-field evidence + CFR citation), the spirits ABV tolerance of ±0.3 pp, rejection reasoning (rule engine vs. LLM separation; reason_code grammar `BIN.SUB.SPECIFIC[.QUALIFIER]`)
-**Upstream outputs consumed:** [T2](./2026-09-15-cola-operational-context.md) (workflow), [T3](./2026-09-15-rule-engine-architecture.md) (RejectionReason data model), [T4](./2026-09-15-ocr-vision-architecture.md) (vision layer + needs_better_photo taxonomy), [T5](./2026-09-15-llm-orchestration-architecture.md) (orchestrator), [T6](./2026-09-15-batch-processing-architecture.md) (operational shape), [T7](./2026-09-15-federal-deployment-compliance.md) (accessibility legal floor)
-**Out of scope (deferred):** X-6 (cross-topic stakeholder demo synthesis) — Q8.8 covers only the T8-side demo path.
+**Research notes drawn on:** [COLA operational context](./2026-09-15-cola-operational-context.md) (workflow), [rule engine architecture](./2026-09-15-rule-engine-architecture.md) (RejectionReason data model), [OCR and vision architecture](./2026-09-15-ocr-vision-architecture.md) (vision layer + needs_better_photo taxonomy), [LLM orchestration architecture](./2026-09-15-llm-orchestration-architecture.md) (orchestrator), [batch processing architecture](./2026-09-15-batch-processing-architecture.md) (operational shape), [federal deployment compliance](./2026-09-15-federal-deployment-compliance.md) (accessibility legal floor)
+**Out of scope:** a demo path drawn together from the UX, verification, stakeholder and visualization notes — Q8.8 covers only the UX side of the demo path.
 
 **Revisions:** corrected ABV tolerance worked example (±0.3 pp); standardized hover-reveal citation to WCAG 1.4.13 throughout; replaced verbatim USWDS principle list with general citation to the *Design Principles* page; consolidated keyboard model table to include `S`, `P`, `Shift+?`, `0`; resolved C-BboxOverlay ARIA role to a single `region`+`list`+`button` pattern (removed `role="application"` waffle); aligned demo Stage 5 narration with [T6](./2026-09-15-batch-processing-architecture.md) lookahead k=2–3.
 
@@ -479,7 +479,7 @@ If the deployed URL is slow or the LLM API has a transient failure during the de
 
 # Q8.9 — Workflow integration with agent's existing process
 
-[T2](./2026-09-15-cola-operational-context.md) documents the actual workflow. Two structural facts dominate:
+The [COLA operational context](./2026-09-15-cola-operational-context.md) documents the actual workflow. Two structural facts dominate:
 - **The agent will alt-tab.** COLAs Online (internal queue UI) is open in another window. The agent moves between our tool and COLAs Online constantly.
 - **Our tool is standalone.** No integration; we don't get to put a button in COLAs Online's toolbar.
 
@@ -517,7 +517,7 @@ Our tool's job is to make the next step take *less* keystrokes than today, not m
 
 ### Citation
 
-[T2](./2026-09-15-cola-operational-context.md) (workflow); USWDS button and table component guidance; GOV.UK Service Manual on serving caseworkers (gov.uk/service-manual — caseworker user category).
+[COLA operational context](./2026-09-15-cola-operational-context.md) (workflow); USWDS button and table component guidance; GOV.UK Service Manual on serving caseworkers (gov.uk/service-manual — caseworker user category).
 
 ---
 

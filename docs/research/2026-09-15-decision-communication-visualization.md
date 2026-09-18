@@ -57,7 +57,7 @@ Synthesizing GAO‑20‑195G, OMB A‑94 (rev. Nov 2023) + Appendix C (rev. 6 Ma
 
 **What federal audiences expect:**
 
-1. **Percentile naming:** spelled out — *"50th-percentile (most-likely)", "80th-percentile (should-cost)", "90th-percentile (reserve)"*. Never P50/P80/P90; never "low/mid/high"; never "best/worst case." This matches [T11](./2026-09-15-economic-cost-effectiveness-analysis.md)/R0 federal naming convention and the GAO‑20‑195G chapter on risk and sensitivity.
+1. **Percentile naming:** spelled out — *"50th-percentile (most-likely)", "80th-percentile (should-cost)", "90th-percentile (reserve)"*. Never P50/P80/P90; never "low/mid/high"; never "best/worst case." This matches the federal naming convention the [economic analysis](./2026-09-15-economic-cost-effectiveness-analysis.md) uses and the GAO‑20‑195G chapter on risk and sensitivity.
 2. **Constant-dollar labelling:** every chart titled or sub-titled "FY 2026 constant $; A‑94 App. C real rate 1.3% (5‑yr)." A‑94 Appendix C real Treasury rates for CY 2026 are 1.1% (3‑yr), 1.3% (5‑yr), 1.4% (7‑yr) per M‑26‑09; [T11](./2026-09-15-economic-cost-effectiveness-analysis.md) uses 1.3% for 5‑yr NPV.
 3. **Citation-in-visual:** every figure carries a one-line source footer. Federal style is to cite the *guide section* not the URL — e.g., "Source: [T11](./2026-09-15-economic-cost-effectiveness-analysis.md) Stage 4; OMB A‑94 App. C (2026); GAO‑20‑195G ch. 14." CBO and GAO both do this.
 4. **Color discipline:** USWDS-aligned palette; never red/green alone for increase/decrease (Section 508). For waterfalls, use blue for increases and orange for decreases ([T8](./2026-09-15-federal-ux-for-senior-users.md) Q8.10 4-channel encoding) plus a hatch pattern; for the percentile range, three monotonic blues sequenced light→dark = 50th/80th/90th. Same hue, varying lightness, always paired with a text label and a shape redundancy (Munzner 2014 channel separability; [T8](./2026-09-15-federal-ux-for-senior-users.md) 4-channel rule).
@@ -474,7 +474,7 @@ Lighter than the C4-Container diagram [T7](./2026-09-15-federal-deployment-compl
 Per [T10](./2026-09-15-stakeholder-frameworks.md). Two artifacts:
 
 1. **Snapshot** (date-stamped, per [T10](./2026-09-15-stakeholder-frameworks.md) cadence): Mendelow salience grid (power × interest), 2×2, with current names placed. Single PNG; updated at each milestone.
-2. **Log** (cumulative, per [T10](./2026-09-15-stakeholder-frameworks.md) §3.1 and 05‑gaps §3.1): chronological list of stakeholder engagements with date, channel, and what was learned. Markdown table, not a chart.
+2. **Log** (cumulative, per the [stakeholder frameworks](./2026-09-15-stakeholder-frameworks.md) note, Q10.10): chronological list of stakeholder engagements with date, channel, and what was learned. Markdown table, not a chart.
 
 The snapshot is the chart; the log is the table. Don't try to combine them.
 
@@ -496,7 +496,7 @@ The ABV ±0.3 pp correction ([T9](./2026-09-15-verification-targets-research.md)
 
 ## Q12.14 Demo Path Visualization (lighter)
 
-Per [T8](./2026-09-15-federal-ux-for-senior-users.md) Q8.8 and 05‑gaps §3.4. Two artifacts:
+Per the [federal UX for senior users](./2026-09-15-federal-ux-for-senior-users.md) note, Q8.8. Two artifacts:
 
 1. **Demo flow** (linear): a 6-station ASCII sequence with per-station time budget and "what we show / what we say / what we hide." Renders in markdown.
 2. **Pacing chart** (timeline): horizontal bar with 6 segments scaled to time budget; annotations at expected handoff points. Use [T8](./2026-09-15-federal-ux-for-senior-users.md)'s reconciliation between live demo and recorded fallback.
@@ -531,7 +531,7 @@ Anti-pattern: showing the architecture diagram during the demo. A3 (Marcus) want
 
 **AP‑12 — Treat HOPs as a presentation chart.** HOPs are an *analyst* idiom. They fail in PDFs and are not 508-conformant in static form.
 
-**AP‑13 — Conflate snapshot stakeholder map with cumulative log.** Per [T10](./2026-09-15-stakeholder-frameworks.md) / 05‑gaps §3.1. Snapshot answers "who right now"; log answers "what was learned over time." Different artifacts.
+**AP‑13 — Conflate snapshot stakeholder map with cumulative log.** Per the [stakeholder frameworks](./2026-09-15-stakeholder-frameworks.md) note, Q10.10. Snapshot answers "who right now"; log answers "what was learned over time." Different artifacts.
 
 **AP‑14 — Skip the alt-text.** USWDS data-viz guidance and Section 508 require it. Auto-generate from the `P‑PercentileNotch` data structure; never ship a chart without it.
 
@@ -568,9 +568,6 @@ Anti-pattern: showing the architecture diagram during the demo. A3 (Marcus) want
 - [T8](./2026-09-15-federal-ux-for-senior-users.md) (Q8.8 demo path; Q8.10 4-channel encoding; Section 508 / WCAG 2.0 AA color floor).
 - [T9](./2026-09-15-verification-targets-research.md) (Krippendorff α ≥ 0.80; Datasheets / Data Statements; ABV ±0.3 pp tolerance).
 - [T10](./2026-09-15-stakeholder-frameworks.md) (Sarah, Dave/Jenny scoping; snapshot vs log cadence).
-- R0 federal cost conventions (50th/80th/90th naming; constant FY26 $; A‑94 / GAO‑20‑195G alignment).
-- 04-research-topics A‑3 (review-time benchmark gap) and D‑1 (on-prem inference signal).
-- 05-gaps-and-limitations §3.1 (stakeholder log cadence), §3.3 (pre-mortem), §3.4 (demo design checklist).
 
 **Federal / policy:**
 

@@ -199,7 +199,7 @@ Per Klein (2007): assume the project failed badly; work backward to specific cau
 
 **Two stakeholders the original four-interview slate missed:**
 
-1. **Janet (Seattle field office).** Named in Sarah's transcript ("Janet has been asking about this for years"). Not interviewed. Already flagged in 04-research-topics A-4. She likely has the most concrete batch-workflow requirements of anyone — and she'd be a high-leverage second-round interview if this advances. *Activation:* on any pilot framing.
+1. **Janet (Seattle field office).** Named in Sarah's transcript ("Janet has been asking about this for years"). Not interviewed. She likely has the most concrete batch-workflow requirements of anyone — and she'd be a high-leverage second-round interview if this advances. *Activation:* on any pilot framing.
 
 2. **NTEU (National Treasury Employees Union).** Latent at prototype stage. Activates the moment any framing of this work could be read as "AI replacing agents" — which is exactly the framing the brief itself opens with ("47 agents... back in the 80s they had over 100"). *Activation:* on any production proposal that doesn't lead with augment-not-replace.
 
@@ -234,7 +234,7 @@ Building from what the phase-dependent stakeholder priority already anticipates,
 
 ## Q10.10 — Stakeholder log template and cadence
 
-Per 05-gaps-and-limitations §3.1: maintain a *stakeholder log* (running provenance) separate from the *matrix snapshot* (point-in-time framework output).
+Maintain a *stakeholder log* (running provenance) separate from the *matrix snapshot* (point-in-time framework output).
 
 ### Log template
 
@@ -254,8 +254,8 @@ Per 05-gaps-and-limitations §3.1: maintain a *stakeholder log* (running provena
   channel: interview-transcript
   source: Dave Morrison
   said: "STONE'S THROW vs Stone's Throw — technically a mismatch, obviously the same thing."
-  derived_requirement: STRONG-FUNC-005 (fuzzy/judgment-based brand match)
-  derived_test_case: tests/fixtures/dave_stones_throw.json
+  derived_requirement: FR-7 (fuzzy/judgment-based brand match)
+  derived_test_case: tests/test_brand_match_policies.py
   status: captured
   follow_ups: []
   notes: Canonical adoption-credibility test. Demo must include.
@@ -276,10 +276,10 @@ Per 05-gaps-and-limitations §3.1: maintain a *stakeholder log* (running provena
   channel: interview-transcript-mention
   source: Sarah Chen (mentioning Janet)
   said: "Janet from our Seattle office has been asking about this for years."
-  derived_requirement: STRONG-FUNC-001 (batch upload)
+  derived_requirement: FR-12 (batch upload)
   status: incomplete-source
   follow_ups:
-    - "15-minute conversation with Janet (research topic A-4)."
+    - "15-minute conversation with Janet."
   notes: Janet not directly interviewed. Surrogate signal only.
 ```
 
@@ -287,7 +287,7 @@ Per 05-gaps-and-limitations §3.1: maintain a *stakeholder log* (running provena
 - `entry_id`, `date`, `channel` (interview / hallway / Slack / email / artifact-review)
 - `source` (named individual or role)
 - `said` (verbatim where possible; paraphrase tagged otherwise)
-- `derived_requirement` and/or `derived_decision` (link out to `docs/PRD.md` / `docs/decisions/`)
+- `derived_requirement` and/or `derived_decision` (link out to `docs/PRD.md` / `docs/decisions.md`)
 - `status`: captured | partially-captured | incomplete-source | superseded
 - `follow_ups`: list
 - `notes`: free text, especially provenance for trade-offs
@@ -305,7 +305,7 @@ Per 05-gaps-and-limitations §3.1: maintain a *stakeholder log* (running provena
 
 **Maintenance ownership.** PM (or PM-equivalent role) maintains the log. Snapshots are circulated; the log itself is internal.
 
-**Why log + snapshot separately** (from 05-gaps §3.1): the matrix is for current decisions; the log is for *future* trade-off defense — when someone six months from now asks "why didn't we do X?", the log shows who said what when. Without it, the project loses institutional memory exactly when it most needs it.
+**Why log + snapshot separately:** the matrix is for current decisions; the log is for *future* trade-off defense — when someone six months from now asks "why didn't we do X?", the log shows who said what when. Without it, the project loses institutional memory exactly when it most needs it.
 
 ---
 
