@@ -206,7 +206,7 @@ The regulatory basis is **27 CFR 13.61 (Publicity of information)**:
 **Appeals data:** 27 CFR §13.25 (first appeal — 45 days from notice of denial), §13.26 (decision after appeal — 90 days, extendable once by 90 more), §13.27 (second appeal — same 45/90 cadence; 90-day clock for an informal conference under §13.71 begins 10 days after the conference). Decisions on appeal are not aggregated in a public dataset; published TTB decisions are limited to administrative-action announcements at `ttb.gov/business-central/fo/administrative-cases`, and labeling-only appeals are rarely highlighted there.
 
 **Rejection-reason taxonomy from indirect sources:**
-- Industry Circular 2011-4 effectively establishes a *non-rejection* zone (TTB stopped reviewing for type size, characters/inch, contrasting background).
+- Industry Circular 2011-4 took type size, characters per inch and contrasting background out of routine review: TTB "will no longer return applications for correction due to these issues", but "reserves the right to review and return applications for these reasons when it deems necessary".
 - Common rejection categories triangulated from law-firm and trade-press sources (Lindsey Zahn P.C., Husch Blackwell, Park Street, FIVE x 5, Blue Label Packaging) — these are practitioner-aggregated, not TTB-canonical:
  - Mandatory information missing (brand name, class/type, ABV, name & address, net contents, country of origin)
  - Health-warning statement formatting (exact wording, type-size, comma placement, contrasting background)
@@ -240,7 +240,7 @@ For test-data design, use these indirect categories as candidate buckets, but ta
 
 - The internal-facing module of COLAs Online "serves as the sole internal database for TTB's Alcohol Labeling and Formulation Division (ALFD) to track all work-related documentation, including all COLA submissions received for approval either on paper or electronically through our COLAs Online system" (TTB FAQ). The internal UI is not publicly documented in detail; the public Industry Member User Manual implies a parallel "specialist queue" UI.
 - The 2022 TTB Boot Camp for Brewers — Labeling presentation (Stephanie Fields, Labeling Specialist; `ttb.gov/system/files?file=images/pdfs/TTB_Boot_Camp_for_Brewers-_Labeling.pdf`) walks brewers through the COLA basics from a specialist's vantage point: brand, class/type, ABV, name & address, net contents, country of origin, health warning, statement of composition for Distilled Spirits Specialty / Flavored Malt Beverage products. The Wine Boot Camp 2024 deck (`ttb.gov/system/files/2024-12/Boot_Camp_for_Wine_Records_Presentation.pdf`) covers similar material from the wine side.
-- The "Anatomy of a Malt Beverage Label" interactive tool (`ttb.gov/beer/labeling/anatomy-of-a-malt-beverage-label-tool`) and the corresponding tools for distilled spirits and wine are effectively the public face of the specialist's mental model — each mandatory-information element is checked against placement, type size (industry-self-attestation since IC 2011-4), and content rules.
+- The "Anatomy of a Malt Beverage Label" interactive tool (`ttb.gov/beer/labeling/anatomy-of-a-malt-beverage-label-tool`) and the corresponding tools for distilled spirits and wine are effectively the public face of the specialist's mental model — each mandatory-information element is checked against placement, type size (not routinely reviewed since IC 2011-4, which leaves it to the industry member), and content rules.
 
 ### Standard checks (triangulated)
 
@@ -252,7 +252,7 @@ Per 27 CFR Parts 4 (wine), 5 (distilled spirits — recodified by T.D. TTB-176),
 4. **Name and address** of bottler/importer matches the basic permit / brewer's notice / plant registry.
 5. **Country of origin** for imports.
 6. **Net contents** in standard US units (metric authorized for wine and spirits per standards-of-fill regulations; T.D. TTB-200 modernized standards of fill in January 2025).
-7. **Health warning statement** — exact wording, capitalization of "GOVERNMENT WARNING:", type size by container size, contrasting background (industry self-attests since IC 2011-4 but TTB retains the right to reject).
+7. **Health warning statement** — exact wording, capitalization of "GOVERNMENT WARNING:", type size by container size, contrasting background. Since IC 2011-4 TTB does not routinely review type size, characters per inch or contrasting background, and prints a qualification on every COLA saying the industry member "must continue to ensure" them; it "reserves the right to review and return applications for these reasons". The circular covers only those three points, not the statement's wording.
 8. **Sulfite/allergen disclosures** when applicable (FD&C Yellow No. 5; cochineal/carmine; sulfites at ≥10 ppm; aspartame warning).
 9. **Class/type-specific rules**: appellation of origin and varietal percentages for wine; age statements for whisky; geographic-name compliance.
 10. **Truthful and non-misleading review**: prohibited-practices regulations; disparagement (clarified in T.D. TTB-176); health claims (TTB Ruling 2003-1, T.D. TTB-1).
