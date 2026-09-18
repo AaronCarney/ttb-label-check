@@ -70,22 +70,41 @@ rules:
   - rule_id: spirits.alcohol.format
     cfr_citation: "27 CFR §5.65(b)"
     applies_to_classes: [spirits]
-    reason_code: ALCOHOL_CONTENT.FORMAT.INVALID
-    severity: reject
+    reason_code: ALCOHOL_CONTENT.FORMAT.NEEDS_REVIEW
+    severity: warn
     match_policy: regex
     validator: regex_match
     parameters:
-      pattern: '^\s*(?:alcohol|alc\.?)\s*[0-9]{1,2}(?:\.[0-9]+)?\s*%?\s*(?:by\s+volume|/\s*vol\.?|vol\.?)\s*$'
+      # §5.65(b)(3): "alc" for alcohol, "%" for percent, "/" for "by", "vol"
+      # for volume. §5.65(b)(2)(ii): any word or symbol may sit in parentheses,
+      # and an abbreviation may carry a period or not.
+      pattern: |-
+        (?x) ^\s*
+        (?:
+            # (A) "Alcohol ____ percent by volume"
+            \(?(?:alcohol|alc\.?)\)? \s* \(?(?:\d+(?:\.\d+)?|\.\d+)\)? \s* \(?(?:%|percent)\)?
+            \s* (?:\(?by\)?|/) \s* \(?(?:volume|vol\.?)\)?
+          | # (B) "____ percent alcohol by volume"
+            \(?(?:\d+(?:\.\d+)?|\.\d+)\)? \s* \(?(?:%|percent)\)? \s* \(?(?:alcohol|alc\.?)\)?
+            \s* (?:\(?by\)?|/) \s* \(?(?:volume|vol\.?)\)?
+          | # (C) "Alcohol by volume ____ percent"
+            \(?(?:alcohol|alc\.?)\)? \s* (?:\(?by\)?|/) \s* \(?(?:volume|vol\.?)\)?
+            \s* \(?(?:\d+(?:\.\d+)?|\.\d+)\)? \s* \(?(?:%|percent)\)?
+        )
+        # §5.65(b)(1)(i): a statement of proof may accompany it.
+        (?: \s* [/,(]? \s* \d+(?:\.\d+)? \s* °? \s* proof \)? )?
+        \s* \.? \s* $
       ignore_case: true
     evidence_required: [alc_text]
-    disabled: true
     notes: >-
-      Off, docs/decisions.md#0011. The pattern takes the word only before the
-      number, and after it only "by volume", "/vol" or "vol". It rejects forms
-      §5.65(b) permits, such as "40% ALC./VOL." and "ALC. 42.8% BY VOL.", and
-      it rejects all 14 approved spirits labels in the fixture corpus.
+      Passes a statement in one of the three forms §5.65(b)(2)(i) lists, with
+      the abbreviations and parentheses §5.65(b)(2)(ii) and (b)(3) allow, and
+      a statement of proof after it. Anything else goes to a reviewer: the
+      regulation also permits other representations alongside the statement,
+      such as alcohol by weight, which no pattern can list
+      (docs/decisions.md#0011).
     effective_date: "2022-02-09"
-    test_fixtures: [F-SPIRITS-ALC-FORMAT-PASS-01, F-SPIRITS-ALC-FORMAT-FAIL-01]
+    test_fixtures: [F-SPIRITS-ALC-FORMAT-PASS-01, F-SPIRITS-ALC-FORMAT-REVIEW-01]
 
   - rule_id: spirits.same_field_of_vision
     cfr_citation: "27 CFR §5.63(a)"

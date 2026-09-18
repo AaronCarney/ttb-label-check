@@ -75,25 +75,46 @@ rules:
     test_fixtures: [F-WINE-ALC-PRESENT-01, F-WINE-ALC-MISSING-01]
 
   - rule_id: wine.alcohol.format
-    cfr_citation: "27 CFR §4.36(b)(1)"
+    cfr_citation: "27 CFR §4.36(b)"
     applies_to_classes: [wine]
-    reason_code: ALCOHOL_CONTENT.FORMAT.INVALID
-    severity: reject
+    reason_code: ALCOHOL_CONTENT.FORMAT.NEEDS_REVIEW
+    severity: warn
     match_policy: regex
     validator: regex_match
     parameters:
-      pattern: '^\s*(?:alcohol|alc\.?)\s*[0-9]{1,2}(?:\.[0-9]+)?\s*%?\s*(?:by\s+volume|/\s*vol\.?|vol\.?)\s*$'
+      # §4.36(b)(1) and (b)(2) give "Alcohol __ % by volume" and "Alcohol __ %
+      # to __ % by volume", "or similar appropriate phrase", with "alc." (alc)
+      # and "vol." (vol) as the only abbreviations. The similar phrases taken
+      # here are the three word orders §5.65(b) and §7.65(b) list for the other
+      # classes, "percent" for "%", "/" for "by", and parentheses.
+      pattern: |-
+        (?x) ^\s*
+        (?:
+            # "Alcohol __ % by volume", and the range "Alcohol __ % to __ % by volume"
+            \(?(?:alcohol|alc\.?)\)? \s* \(?(?:\d+(?:\.\d+)?|\.\d+)\)? \s*
+            (?: (?:\(?(?:%|percent)\)? \s*)? (?:to|-|–) \s* \(?(?:\d+(?:\.\d+)?|\.\d+)\)? \s* )?
+            \(?(?:%|percent)\)? \s* (?:\(?by\)?|/) \s* \(?(?:volume|vol\.?)\)?
+          | # "__ % alcohol by volume", and its range
+            \(?(?:\d+(?:\.\d+)?|\.\d+)\)? \s*
+            (?: (?:\(?(?:%|percent)\)? \s*)? (?:to|-|–) \s* \(?(?:\d+(?:\.\d+)?|\.\d+)\)? \s* )?
+            \(?(?:%|percent)\)? \s* \(?(?:alcohol|alc\.?)\)?
+            \s* (?:\(?by\)?|/) \s* \(?(?:volume|vol\.?)\)?
+          | # "Alcohol by volume __ %", with or without a colon, and its range
+            \(?(?:alcohol|alc\.?)\)? \s* (?:\(?by\)?|/) \s* \(?(?:volume|vol\.?)\)? \s* :? \s*
+            \(?(?:\d+(?:\.\d+)?|\.\d+)\)? \s*
+            (?: (?:\(?(?:%|percent)\)? \s*)? (?:to|-|–) \s* \(?(?:\d+(?:\.\d+)?|\.\d+)\)? \s* )?
+            \(?(?:%|percent)\)?
+        )
+        \s* \.? \s* $
       ignore_case: true
     evidence_required: [alc_text]
-    disabled: true
     notes: >-
-      Off, docs/decisions.md#0011. The pattern takes the word only before the
-      number, and after it only "by volume", "/vol" or "vol". It rejects forms
-      §4.36(b)(1) permits, such as "12% ALC. BY VOL." and "ALC. 12.8% BY
-      VOL.", and it rejects 5 of the 8 approved wine labels in the fixture
-      corpus.
+      Passes a single figure or a range in any of three word orders, with the
+      abbreviations §4.36(b) allows. Anything else goes to a reviewer, who
+      judges whether it is a "similar appropriate phrase"
+      (docs/decisions.md#0011).
     effective_date: "1936-12-15"
-    test_fixtures: [F-WINE-ALC-FORMAT-PASS-01, F-WINE-ALC-FORMAT-FAIL-01]
+    test_fixtures: [F-WINE-ALC-FORMAT-PASS-01, F-WINE-ALC-FORMAT-REVIEW-01]
 
   - rule_id: wine.name_address.present
     cfr_citation: "27 CFR §4.32(a)(3), §4.35"

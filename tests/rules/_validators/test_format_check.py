@@ -1,13 +1,10 @@
 """format_check, registered as 'regex_match', judges the label's alcohol wording.
 
 Both readers return the alcohol statement as the label prints it, under
-`alc_text`, and the validator matches the rule's regex against that. The three
-rules that use it are off (docs/decisions.md#0011); these tests pin what the
-validator does when they run.
-
-It stays registered because app/rules/loader.py refuses startup when a rule
-names a validator the registry does not carry, and it makes that check for
-disabled rules too.
+`alc_text`, and the validator matches the rule's pattern against that. The
+patterns are the shipped ones, read from the rule pack, so these tests hold the
+three `alcohol.format` rules to the forms 27 CFR §4.36(b), §5.65(b) and
+§7.65(b) give, and to the examples those sections print.
 """
 
 from __future__ import annotations
@@ -18,29 +15,102 @@ from pathlib import Path
 
 import pytest
 
-from app.rules._validators import VALIDATOR_REGISTRY
 from app.rules._validators.format_check import _project_alc_text, regex_match
 from app.rules.loader import YamlRuleLoader
-from app.schemas.rejection import Outcome
-from app.schemas.rules import MatchPolicy
-from tests.rules.fixtures import make_context, make_expected, make_obs, make_rule
+from app.schemas.expected import BeverageClass
+from app.schemas.rejection import Outcome, Severity
+from tests.rules.fixtures import make_context, make_expected, make_obs
 
-PAT = (
-    r"^\s*(?:alcohol|alc\.?)\s*[0-9]{1,2}(?:\.[0-9]+)?\s*%?\s*(?:by\s+volume|/\s*vol\.?|vol\.?)\s*$"
-)
+CLASSES = {
+    "spirits": BeverageClass.SPIRITS,
+    "wine": BeverageClass.WINE,
+    "malt": BeverageClass.MALT,
+}
 
-DISABLED_RULES = ["spirits.alcohol.format", "wine.alcohol.format", "malt.alcohol.format"]
+# Each section's own examples, verbatim, and each form it lists with a figure in
+# the blank.
+PERMITTED = {
+    "spirits": [
+        # §5.65(b)(4)
+        "40% alc/vol",
+        "Alc. 40 percent by vol.",
+        "Alc 40% by vol",
+        "40% Alcohol by Volume.",
+        # §5.65(b)(2)(i) (A), (B), (C)
+        "Alcohol 40 percent by volume",
+        "40 percent alcohol by volume",
+        "Alcohol by volume 40 percent.",
+        # §5.65(b)(2)(ii): parentheses around any word or symbol
+        "(Alc.) 40 (%) (by) (vol.)",
+        "40% (alc/vol)",
+        # §5.65(b)(1)(i): proof alongside
+        "40% alc/vol (80 proof)",
+        "40%ALC/VOL/80 PROOF",
+        "45% alc./vol., 90° proof",
+    ],
+    "malt": [
+        # §7.65(b)(5)
+        "4.2% alc/vol",
+        "Alc. 4.0 percent by vol.",
+        "Alc 4% by vol",
+        "5.9% Alcohol by Volume.",
+        # §7.65(b)(3)(i) (A), (B), (C)
+        "Alcohol 4.2 percent by volume",
+        "4.2 percent alcohol by volume",
+        "Alcohol by volume: 4.2 percent.",
+        "ALC./VOL.: 4.2%",
+        # §7.65(b)(2): hundredths below 0.5 percent; §7.65(e) prints ".5%"
+        "0.45% alc/vol",
+        ".5% alc/vol",
+    ],
+    "wine": [
+        # §4.36(b)(1) and (b)(2), and the abbreviations they allow
+        "Alcohol 12% by volume",
+        "Alc. 12% by vol.",
+        "alc 12 % by vol",
+        "Alcohol 11% to 13% by volume",
+        "Alcohol 11 to 13 % by volume",
+        # similar appropriate phrases
+        "12% alc. by vol.",
+        "ALC. 12.5% BY VOLUME",
+        "Alcohol by volume 12%",
+        "Alc. by vol.: 12%",
+        "12.5 percent alcohol by volume",
+        "12% alc/vol",
+        "11%-13% alc. by vol.",
+        "11–13% alc. by vol.",
+    ],
+}
 
-
-def _rule():
-    return make_rule(
-        rule_id="x.format",
-        cfr_citation="27 CFR §0.0",
-        validator="regex_match",
-        reason_code="ALCOHOL_CONTENT.FORMAT.INVALID",
-        match_policy=MatchPolicy.REGEX,
-        parameters={"pattern": PAT, "ignore_case": True},
-    )
+# Statements no listed form covers. Each goes to a reviewer.
+UNRECOGNISED = {
+    "spirits": [
+        "45% ABV",
+        "12.5%",
+        "Alcohol 40%",
+        "40% by volume",
+        "40% ALC VOL",
+        "80 PROOF",
+        "ALC. 12,5% BY VOL.",
+        "Alc. by vol.: 40%",  # §5.65(b)(2)(i) (C) carries no colon
+        "40% alc/vol 80 proof extra",
+        "Alcohol 11% to 13% by volume",
+    ],
+    "malt": [
+        "ALC. BY VOL. 5%",  # §7.65(b)(3)(i) (C) carries its colon
+        "ALC. / VOL. 8.0 %",
+        "5% alc/vol, 10 proof",
+        "ALC. 20.3%",
+        "4.2% ABV",
+    ],
+    "wine": [
+        "12% alc/vol (24 proof)",
+        "ALC. 12,5% BY VOL.",
+        "12.5%",
+        "Alcohol 12%",
+        "12% ABV",
+    ],
+}
 
 
 @pytest.fixture(scope="module")
@@ -54,50 +124,73 @@ def ruleset():
     return YamlRuleLoader().load(Path("rules"))
 
 
-@pytest.mark.parametrize("rule_id", DISABLED_RULES)
-def test_every_rule_using_this_validator_is_disabled(ruleset, rule_id) -> None:
-    rule = next(r for r in ruleset.rules if r.rule_id == rule_id)
+def _rule(ruleset, cls: str):
+    return next(r for r in ruleset.rules if r.rule_id == f"{cls}.alcohol.format")
+
+
+def _judge(ruleset, cls: str, statement: str):
+    reading = {"abv_pct": 40.0, "unit": "%", "alc_text": statement, "confidence": 0.9}
+    obs = make_obs(field_id="abv", value=reading, beverage_class=CLASSES[cls])
+    return regex_match(obs, make_expected(field_id="abv"), _rule(ruleset, cls), make_context())
+
+
+@pytest.mark.parametrize("cls", CLASSES)
+def test_the_rule_is_on_and_cannot_reject(ruleset, cls) -> None:
+    rule = _rule(ruleset, cls)
     assert rule.validator == "regex_match"
-    assert rule.disabled is True
+    assert rule.disabled is False
+    assert rule.severity is Severity.WARN
+    assert rule.reason_code == "ALCOHOL_CONTENT.FORMAT.NEEDS_REVIEW"
 
 
-def test_validator_stays_registered_for_the_disabled_rules(ruleset) -> None:
-    # The loader raises rather than returning when a rule names a validator the
-    # registry does not carry, and it checks disabled rules too. So a ruleset
-    # that loaded at all is the proof: deleting this validator alongside its
-    # three rules would stop the app starting.
-    assert "regex_match" in VALIDATOR_REGISTRY
-    assert any(r.rule_id in DISABLED_RULES for r in ruleset.rules)
+@pytest.mark.parametrize(
+    ("cls", "statement"), [(c, s) for c, forms in PERMITTED.items() for s in forms]
+)
+def test_a_form_the_regulation_gives_passes(ruleset, cls, statement) -> None:
+    res = _judge(ruleset, cls, statement)
+    assert res.outcome is Outcome.PASS
+    assert res.reason_code is None
 
 
-def test_the_pattern_judges_the_label_s_wording_not_a_sentence_built_from_the_number() -> None:
-    # The defect behind the switch-off: a bare "12.5%" carries none of the
-    # wording the pattern asks for, and used to pass because the validator
-    # matched "alcohol 12.5% by volume", which it had written itself.
+@pytest.mark.parametrize(
+    ("cls", "statement"), [(c, s) for c, forms in UNRECOGNISED.items() for s in forms]
+)
+def test_a_form_the_pattern_does_not_list_goes_to_a_reviewer(ruleset, cls, statement) -> None:
+    res = _judge(ruleset, cls, statement)
+    assert res.outcome is Outcome.INSUFFICIENT_EVIDENCE
+    assert res.severity is Severity.WARN
+    assert res.reason_code == "ALCOHOL_CONTENT.FORMAT.NEEDS_REVIEW"
+    assert res.rule_id == f"{cls}.alcohol.format"
+    assert res.evidence and res.observed is not None
+
+
+def test_a_located_statement_with_no_wording_goes_to_a_reviewer(ruleset) -> None:
+    # The reader placed the alcohol statement, so this is not "not found", but
+    # returned none of its wording. There is nothing to judge the form of.
+    res = _judge(ruleset, "spirits", "")
+    assert res.outcome is Outcome.INSUFFICIENT_EVIDENCE
+    assert res.reason_code == "ALCOHOL_CONTENT.FORMAT.NEEDS_REVIEW"
+
+
+def test_the_pattern_judges_the_label_s_wording_not_a_sentence_built_from_the_number(
+    ruleset,
+) -> None:
+    # A bare "12.5%" carries none of the wording the forms ask for, and must not
+    # pass on a sentence the validator writes from the number.
     reading = {"abv_pct": 12.5, "unit": "%", "alc_text": "12.5%"}
     assert _project_alc_text(reading) == "12.5%"
-    obs = make_obs(field_id="abv", value=reading)
-    res = regex_match(obs, make_expected(field_id="abv"), _rule(), make_context())
-    assert res.outcome is Outcome.FAIL
-    assert res.reason_code == "ALCOHOL_CONTENT.FORMAT.INVALID"
+    assert _judge(ruleset, "wine", "12.5%").outcome is Outcome.INSUFFICIENT_EVIDENCE
 
 
-def test_the_label_s_own_wording_in_a_permitted_form_passes() -> None:
-    reading = {"abv_pct": 40.0, "unit": "%", "alc_text": "Alcohol 40% by volume"}
-    obs = make_obs(field_id="abv", value=reading)
-    res = regex_match(obs, make_expected(field_id="abv"), _rule(), make_context())
-    assert res.outcome is Outcome.PASS
-
-
-def test_a_statement_the_reader_did_not_find_goes_to_a_reviewer() -> None:
-    # The other half of the defect: with no number read the projection was
-    # empty and the rule rejected at reject severity, on a format it never saw.
-    # Both readers send `alc_text: ""` when they place no statement.
+def test_a_statement_the_reader_did_not_find_goes_to_a_reviewer(ruleset) -> None:
+    # Both readers send `alc_text: ""` when they place no statement, and attach
+    # no box. That is the reader not finding it, which is its own finding.
     reading = {"abv_pct": None, "unit": "", "alc_text": "", "confidence": 0.0}
     assert _project_alc_text(reading) == ""
     obs = make_obs(field_id="abv", value=reading)
-    res = regex_match(obs, make_expected(field_id="abv"), _rule(), make_context())
+    res = regex_match(obs, make_expected(field_id="abv"), _rule(ruleset, "spirits"), make_context())
     assert res.outcome is Outcome.INSUFFICIENT_EVIDENCE
+    assert res.reason_code == "LEGIBILITY.FIELD.NOT_READ"
 
 
 @pytest.mark.parametrize(
@@ -116,7 +209,9 @@ def test_nothing_but_the_label_s_wording_is_projected(value) -> None:
     assert _project_alc_text(value) == ""
 
 
-def test_a_string_reading_is_the_wording_itself() -> None:
+def test_a_string_reading_is_the_wording_itself(ruleset) -> None:
     obs = make_obs(field_id="alc_text", value="ALCOHOL 12.5% BY VOLUME")
-    res = regex_match(obs, make_expected(field_id="alc_text"), _rule(), make_context())
+    res = regex_match(
+        obs, make_expected(field_id="alc_text"), _rule(ruleset, "wine"), make_context()
+    )
     assert res.outcome is Outcome.PASS

@@ -69,14 +69,10 @@ codes:
     description: "Alcohol-content statement required but absent."
     cfr_anchors: ["27 CFR §4.32(b)(1)", "27 CFR §4.36(a)", "27 CFR §5.63(a)", "27 CFR §5.65(a)", "27 CFR §7.63(a)(3)"]
     severity: reject
-  ALCOHOL_CONTENT.FORMAT.INVALID:
-    # Not in `reviewer_vocabulary:` below, and that is correct: the three
-    # `alcohol.format` rules do name this code, so something emits it as far as
-    # the registry is concerned. Those rules are off, because their pattern
-    # rejects statements the regulations permit. See docs/decisions.md#0011.
-    description: "Alcohol-content statement format does not satisfy regulation pattern."
-    cfr_anchors: ["27 CFR §4.36(b)(1)", "27 CFR §5.65(b)", "27 CFR §7.65(b)"]
-    severity: reject
+  ALCOHOL_CONTENT.FORMAT.NEEDS_REVIEW:
+    description: "Alcohol-content statement is not in a form the regulation lists; a reviewer decides."
+    cfr_anchors: ["27 CFR §4.36(b)", "27 CFR §5.65(b)", "27 CFR §7.65(b)"]
+    severity: warn
   ALCOHOL_CONTENT.TOLERANCE.OUT_OF_BAND:
     # Nothing emits this; the reason it stays is in `reviewer_vocabulary:` at
     # the foot of this file, which is checked. See docs/decisions.md#0008.

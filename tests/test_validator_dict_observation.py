@@ -64,17 +64,11 @@ def _alcohol_format_rule() -> RuleDefinition:
         rule_id="spirits.alcohol.format",
         cfr_citation="27 CFR §5.65(b)",
         applies_to_classes=(BeverageClass.SPIRITS,),
-        reason_code="ALCOHOL_CONTENT.FORMAT.INVALID",
-        severity=Severity.REJECT,
+        reason_code="ALCOHOL_CONTENT.FORMAT.NEEDS_REVIEW",
+        severity=Severity.WARN,
         match_policy="regex",
         validator="regex_match",
-        parameters={
-            # Left on one line: a regex split across literals is a regex a
-            # reader has to reassemble before they can tell what it matches,
-            # and a lost character between the halves would not show.
-            "pattern": r"^\s*(?:alcohol|alc\.?)\s*[0-9]{1,2}(?:\.[0-9]+)?\s*%?\s*(?:by\s+volume|/\s*vol\.?|vol\.?)\s*$",  # noqa: E501
-            "ignore_case": True,
-        },
+        parameters={"pattern": r"^alcohol \d+% by volume$", "ignore_case": True},
         evidence_required=("alc_text",),
         effective_date="2022-02-09",
         test_fixtures=(),
@@ -126,11 +120,11 @@ def test_regex_match_reads_alc_text_from_dict():
     assert result.outcome == Outcome.PASS
 
 
-def test_regex_match_dict_off_pattern_fails():
+def test_regex_match_dict_off_pattern_goes_to_a_reviewer():
     obs = _obs("abv", {"abv_pct": 40.0, "unit": "PROOF", "alc_text": "80 PROOF", "confidence": 0.9})
     exp = ExpectedValue(field_id="abv")
     result = regex_match(obs, exp, _alcohol_format_rule(), _ctx())
-    assert result.outcome == Outcome.FAIL
+    assert result.outcome == Outcome.INSUFFICIENT_EVIDENCE
 
 
 def test_regex_match_string_observation_still_works():

@@ -10,7 +10,7 @@ import pytest
 from app.rules._validators import VALIDATOR_REGISTRY
 from app.rules.loader import YamlRuleLoader
 from app.schemas.expected import BeverageClass
-from app.schemas.rejection import Outcome
+from app.schemas.rejection import Outcome, Severity
 from tests.rules.fixtures import load_all_validators, make_context, make_expected, make_obs
 
 
@@ -116,11 +116,13 @@ def test_alcohol_conditional_not_applicable(ruleset) -> None:
     )
 
 
-def test_format_is_switched_off(ruleset) -> None:
-    # Off, docs/decisions.md#0011: the pattern rejects statements the
-    # regulations permit. The engine skips the rule (app/rules/yaml_engine.py).
+def test_format_is_on_and_warns(ruleset) -> None:
+    # On, and it cannot reject: a statement its pattern does not list goes to a
+    # reviewer (docs/decisions.md#0011). tests/rules/_validators/test_format_check.py
+    # holds the pattern to the regulation's forms and examples.
     rule = _r(ruleset, "malt.alcohol.format")
-    assert rule.disabled is True
+    assert rule.disabled is False
+    assert rule.severity is Severity.WARN
     assert rule.validator in VALIDATOR_REGISTRY
 
 
