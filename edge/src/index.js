@@ -18,11 +18,10 @@
 // scripts/deploy.sh sets this either way depending on the access flag it is
 // given, so this is a measurement and not a property of the design.
 //
-// It rate-limits what does get through (0029) — except that it does not, as the
-// measurement at the limit() call below records. So of the two things this file
-// names as bounding the meter, neither holds today, and each comment used to
-// excuse itself by pointing at the other. What is left is the two-instance cap
-// in scripts/deploy.sh. A Free zone's own WAF rule cannot match a hostname, so
+// It also calls a rate limit (0029), which denies nothing, as the measurement at
+// the limit() call below records. So what bounds the meter is the invoker check
+// above and the two-instance cap in scripts/deploy.sh; the rate limit is left in
+// place, inert. A Free zone's own WAF rule cannot match a hostname, so
 // it cannot be scoped to this project alone; the Worker can, because it runs
 // for this hostname only.
 

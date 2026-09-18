@@ -35,8 +35,9 @@ answers `/api/health` with **403** and no credentials at all, and the hostname a
 200. So the hostname is the only way in, which is what 0028 argues for. This has moved during the
 project — the service was deployed open with `TTB_PUBLIC=1` so a reviewer could reach it, and
 `scripts/deploy.sh` will reopen or reclose it depending on the access flag it is given, so treat
-this as a measurement rather than a fixed property. The rate limit still denies nothing. What
-bounds the meter is the two-instance cap in `scripts/deploy.sh`. The Worker comment in
+this as a measurement rather than a fixed property. The rate limit denies nothing and is left in
+place inert. What bounds the meter is the invoker check, since a request it refuses is never billed,
+and the two-instance cap in `scripts/deploy.sh`. The Worker comment in
 `edge/src/index.js` carries both measurements. Deployed with `npx wrangler deploy` from
 that directory; the key is never in this repository.
 

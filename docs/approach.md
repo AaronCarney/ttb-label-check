@@ -212,8 +212,10 @@ checks at the reader's measured 1.18-second median. TTB's 150,000 applications a
 12,500 a month, so on volume alone the allowance covers the agency about three times over; what it
 does not cover is a peak-season burst, because each running copy reads one label at a time and
 hundreds filed at once queue rather than fan out. The real exposure is not the meter but the
-absence of a stop: the provider's budgets alert rather than cut off, so what actually bounds the bill is the instance cap and the request timeout. The rate limit at the
-edge was meant to be the third and denies nothing, measured. Storage is the one
+absence of a stop: the provider's budgets alert rather than cut off, so what bounds the bill is the
+invoker check, which refuses every caller but our own front door before a request is billed, the
+two-instance cap and the request timeout. The rate limit at the edge denies nothing, measured, and
+is left in place inert. Storage is the one
 line that is not zero — the image exceeds the half-gigabyte grant, at ten cents per gigabyte per
 month — and it is small change rather than nothing.
 
@@ -474,7 +476,9 @@ pay-per-use host. We later moved to a pay-per-use service. No fact had changed a
 figure still stood. What changed is that a mechanism appeared — we already had our own domain, and a
 proxy in front of the service could carry a rate limit. With the meter bounded at the edge, the plan
 fee bought nothing the free tier did not already give. The constraint never moved; the instrument
-that satisfied it did.
+that satisfied it did. Deployed, the rate limit turned out to deny nothing, and what bounds the meter
+is the other half of that proxy: the service answers no caller but it, and a request it refuses is
+never billed.
 
 **We corrected a requirement rather than the code.** Our specification said a brand differing only in
 punctuation should go to a reviewer. TTB's own form permits punctuation changes with no new approval,
@@ -495,12 +499,12 @@ than failing the first real label. Logs carry the identifiers needed to follow o
 through, with applicant material kept out. That is where the operability stops: no metrics endpoint, no alerting, no dashboard, and nothing
 recording what the service did beyond the single-label results it keeps for a week so an override
 has something to amend. An operator can tell whether it is running and cannot tell whether it is
-right. Neither guard on cost is the one we designed. The rate limit at the edge denies nothing, and the
-invoker check that was meant to refuse every caller but our own front door is switched off so that a
-reviewer can reach the service — both measured on the deployed service rather than inferred from the
-code, and both recorded in `edge/src/index.js` beside the lines that assume otherwise. What is left
-bounding the meter is the two-instance cap. Those are prerequisites before this ran inside the
-agency, not improvements: a compliance service nobody is watching is one nobody can vouch for.
+right. Those are prerequisites before this ran inside the agency, not improvements: a compliance
+service nobody is watching is one nobody can vouch for. What bounds the cost is the invoker check,
+which refuses every caller but our own front door before a request is billed, and the two-instance
+cap. The rate limit at the edge denies nothing — measured on the deployed service rather than
+inferred from the code, and recorded in `edge/src/index.js` beside the call — and is left in place
+inert.
 
 **What we would do next, in order.** Run a real accessibility review rather than an automated one,
 which is the half of that requirement a machine cannot do for us; bound the memory a batch holds,

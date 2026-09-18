@@ -1636,6 +1636,10 @@ warm path is what the keep-warm ping exists to make the one a reviewer meets.
 - **Nothing is deployed by this decision.** Making the app publicly reachable is the owner's call.
   [0004](#0004) settles that a deployed URL is required, not when it goes up.
 
+**Amended — the edge rate limit answers nothing.** It denies nothing on this plan ([0029](#0029)).
+What answers the objection above is the instance cap, the request timeout, and the invoker check
+([0028](#0028)), under which a request from anyone but the Worker is refused before it is billed.
+
 <a id="0026"></a>
 ## 0026. Glare is not measured before the read; legibility is judged by what the reader returned
 
@@ -1775,6 +1779,10 @@ difference between the two requests is the ID token the Worker attaches. All 38 
 also completed through it, so the signing survives a multipart upload.
 
 
+**Amended — the edge limit governs nothing.** The rate limit this entry pairs with denies nothing
+([0029](#0029)). The invoker check stands alone as the bound on who can run up the meter, and the
+two-instance cap bounds how fast.
+
 <a id="0029"></a>
 ## 0029. The rate limit lives in the Worker, because a Free zone's own rate limiting rule cannot see the hostname
 
@@ -1842,6 +1850,13 @@ unique key you pass to your rate limiting binding, there is a unique limit per C
 one reviewer's traffic that is immaterial, and against a flood the Cloud Run invoker check
 ([0028](#0028)) is what actually holds. A Free Worker also allows 50 subrequests per invocation,
 which a one-request proxy does not approach.
+
+**Amended — the fork is closed, not reopened: the limit stays inert and nothing replaces it.** The
+owner ruled against a limiter of any kind for this deployment, the zone upgrade and a counter of our
+own included. It is a free demo that few people will ever reach, and spending on a plan or building a
+counter to guard it buys nothing the other two bounds do not already give. The call stays in the
+Worker, inert. What bounds the cost is the invoker check ([0028](#0028)), which refuses every caller
+but the Worker before a request is billed, and the two-instance cap in `scripts/deploy.sh`.
 
 <a id="0030"></a>
 ## 0030. A file that is not an image is refused by name inside the batch, not by rejecting the batch

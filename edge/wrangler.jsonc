@@ -14,7 +14,9 @@
   // 120 a minute for the whole hostname. The service takes one request at a
   // time on at most two instances, so this is above what it can actually serve
   // and well above the brief's heaviest case, 300 submissions inside ten
-  // minutes. The period may only be 10 or 60 (decision 0029).
+  // minutes. The period may only be 10 or 60 (decision 0029). Measured on the
+  // deployed Worker, it denies nothing on this plan, so it is left in place
+  // inert; the invoker check and the two-instance cap are what bound the cost.
   "ratelimits": [
     {
       "name": "PROXY_RATE_LIMIT",

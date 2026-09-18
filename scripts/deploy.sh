@@ -23,8 +23,9 @@
 # the service. This is what bounds the meter: Google's pricing page states that
 # "requests are only billed when they reach the container after successfully
 # being authenticated, requests denied by IAM policy are not billed", so a flood
-# aimed at the Cloud Run URL costs nothing, and every request that does arrive
-# has passed the edge's rate limit first (decision 0025).
+# aimed at the Cloud Run URL costs nothing. The other bound is the instance cap
+# below. The edge's rate limit is not one: measured on the deployed Worker, it
+# denies nothing (decision 0029).
 #
 # Deploying makes the app reachable through that edge, which is the owner's call
 # to make.
