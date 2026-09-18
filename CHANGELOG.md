@@ -6,6 +6,23 @@ All notable changes to this project are recorded here. The format follows
 
 ## [Unreleased]
 
+### Fixed
+
+- The reader no longer turns upright lines of the government warning upside down. Its line
+  orientation check flipped a line whenever it was 90% sure the line was inverted, and on real labels
+  it was wrong often enough that a correctly printed warning read as noise and was rejected. It now
+  flips a line only when it is 99.9% sure. The sideways cognac's warning goes from 227 characters
+  wrong to one. Measured over the 38 shipped labels, rejections for the warning's wording fell from
+  18 to 15, and no label is newly rejected on anything. Three labels gain a point for a reviewer,
+  where the reader now reads a line it used to garble and picks the wrong one for class and type or
+  for name and address. See `docs/decisions.md#0039`.
+
+- A government warning is no longer rejected because the reader lost the space between two words.
+  The comparison ignored spacing by collapsing runs of spaces, which cannot restore a space that is
+  missing, so a reading of `IMPAIRSYOUR` rejected a label that prints `IMPAIRS YOUR`. Spaces are now
+  removed from the comparison entirely. Every letter, digit and punctuation mark still has to match
+  in order, and the shipped label that prints "the RISKS of birth defects" is still rejected.
+
 ## [0.3.0] - 2026-09-17
 
 ### Added

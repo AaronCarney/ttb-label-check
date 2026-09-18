@@ -2391,7 +2391,8 @@ being denied by a bug elsewhere, not a better answer. Both strings are correct a
 answer key, whose `label_observed.class_type` for this label is `Cognac XO / Cognac Petite
 Champagne`. On the real route the label's class-and-type field raises nothing before or after: it
 passes `spirits.class_type.matches_application` and `spirits.class_type.matches_soi` in both sweeps.
-The label's overall verdict is unchanged, and it fails for other reasons.
+The label's overall verdict is unchanged, and it fails for other reasons. Since decision [0039](#0039) this
+field goes to a reviewer, for a reading of the back face, not the front.
 
 **What was rejected.**
 
@@ -2417,3 +2418,112 @@ The label's overall verdict is unchanged, and it fails for other reasons.
 - **Reading confidence fell from 0.841 to 0.784.** The stylised line scores lower than the
   appellation line, on a label where the fuller string was partly garbled anyway
   (`APPELLAT'ON`, `CONTRÓLÉE`).
+
+<a id="0039"></a>
+## 0039. The reader turns a line upside down only when it is all but certain, and the warning comparison removes spacing
+
+**Decided:** 2026-09-17. **Evidence:** `docs/evidence/2026-09-17-line-flip.json`, which holds every
+reading below; `app/vision/local.py` (`LINE_FLIP_CONFIDENCE`);
+`app/rules/_validators/verbatim_hash.py`; `rules/common/health_warning.yaml`;
+`tests/test_reader_line_flip.py`; `tests/rules/_validators/test_verbatim_hash.py`.
+
+**What was wrong.** After the warning block was confined to its own column (`8ca3ecc`), 18 of the 38
+corpus labels were still rejected under `common.warning.verbatim`, and only two of them print
+words that differ from §16.21. Reading each rejected warning against the §16.21 text showed two
+causes that were not the label's fault.
+
+- **The reader turned upright lines upside down.** rapidocr runs a 0/180 orientation classifier over
+  every line it detects, and flips a line when the classifier's confidence clears `Cls.cls_thresh`,
+  0.9 by default. On this corpus that default flips upright lines of the warning, and a flipped line
+  reads as noise: `ttb-26218001000369` came back 131 characters away from the §16.21 text.
+- **The comparison collapsed spacing but did not remove it.** Decision 0013 says spacing is not
+  compared. Collapsing turns a run of spaces into one, but it cannot restore a space the reader lost,
+  so `IMPAIRSYOUR` for `IMPAIRS YOUR` on `ttb-26239001000217` rejected an approved label for
+  spacing.
+
+**What was measured.** All on the development box, under the six-thread OCR budget, against the code
+at `29f7841` unless it says otherwise.
+
+The classifier threshold, on the nine faces whose readings moved when the classifier was switched off
+(distance is characters away from the §16.21 text; 0 is an exact read):
+
+| face | 0.9 (default) | 0.95 | 0.99 | 0.999 | off |
+|---|---|---|---|---|---|
+| `ttb-26218001000369` back | 131 | 57 | 0 | 0 | 0 |
+| `var-skew` back | 131 | 57 | 0 | 0 | 0 |
+| `ttb-26239001000079` back | 53 | 53 | 2 | 2 | 2 |
+| `ttb-26239001000081` back | 57 | 57 | 57 | 3 | 3 |
+| `ttb-26212001000085` front (the sideways cognac) | 227 | 1 | 1 | 1 | 1 |
+| `ttb-26240001000573` front | 119 | 119 | 109 | 109 | 109 |
+| `…132` front, `…662` back, `…716` back | 0 | 0 | 0 | 0 | 0 |
+
+Every label through the real route, both faces sent, before and after the change:
+
+| | before (`29f7841`) | threshold 0.999 alone | classifier off | after (`2ac3af5`) |
+|---|---|---|---|---|
+| rejected on `common.warning.verbatim` | 18 | 16 | 16 | **15** |
+| rule failures across the corpus | 32 | 30 | 33 | **29** |
+| labels newly rejected on any rule | — | 0 | 3 | **0** |
+
+`ttb-26229001000034`, which prints *"the RISKS of birth defects"* where §16.21 fixes *"the risk"*,
+is rejected on the warning in every one of the four sweeps.
+
+**What was decided.**
+
+1. **The classifier stays on and flips a line only at a confidence of 0.999**
+   (`LINE_FLIP_CONFIDENCE`). 0.999 is the lowest threshold measured that reads every warning above as
+   well as switching the classifier off does, and it keeps the classifier for the labels that need it.
+2. **The warning comparison removes every space rather than collapsing runs of them.** The canonical
+   form is now `nfkc → ascii_quotes → join_line_break_hyphens → drop_whitespace → casefold`, and the
+   asset hash is re-pinned to it. Removing spaces cannot make a different statement equal the
+   mandated one: the letters, digits and punctuation still have to match in order, and the corpus's
+   one true wording defect is still rejected. `eval/read_accuracy.py` already scored the warning this
+   way, so the score and the rule now agree.
+
+**What was rejected.**
+
+- **Switching the classifier off.** It clears the same warnings, and it newly rejects the brand on
+  three labels: `ttb-26239001000132`, a sample offered on the landing page, `var-heading-title-case`
+  and `var-warning-wording`. A change that rejects a label on a field it used to read correctly
+  costs more than it buys. 0.999 shows no such break.
+- **A lower threshold.** 0.95 leaves `ttb-26218001000369` and `var-skew` 57 characters wrong, and 0.99
+  leaves `ttb-26239001000081` 57 wrong.
+- **Cutting the warning out and reading it enlarged.** At 2x, 15 of the 38 warnings match against 19
+  read the ordinary way, and six that matched stop matching; at 3x, 12 match and eight stop.
+- **Re-reading each warning line on its own.** With the recognition model in use, 24 match, the most
+  of any option, but two warnings that match today stop matching (`ttb-26231001000333`,
+  `ttb-26238001000795`), and a rotated label reads nothing. With the English-only PP-OCRv5 model, 16
+  match and six stop; with the larger PP-OCRv6 medium model, 21 match and three stop. An option that
+  rejects approved labels the reader handles correctly today is not taken, whatever it clears
+  elsewhere. Combining a per-line re-read with the 0.999 threshold was not measured.
+
+**What this costs.**
+
+- **Three labels gain a review item.** The reader now reads lines it used to garble, and a field
+  picker sometimes chooses a wrong one of them.
+  - `ttb-26212001000085`, the cognac: its class and type goes to a reviewer on both
+    `spirits.class_type.matches_application` and `spirits.class_type.matches_soi`. The merged reading
+    takes each field from the face that read it most confidently, and for this label that is the back
+    both before and after. Before, the back read `COGNAC dePradière 16120 BIR4C` (0.840), a
+    misassembled line that happened to spell `COGNAC` correctly; now it reads `Cognae Petite
+    Champagne` (0.804). The front still reads `Cognac XO` (0.784), as decision 0038 intended, and
+    loses to the back in both cases. So the last paragraph of 0038, that this field raises nothing on
+    the real route, no longer holds.
+  - `ttb-26218001000369` and `var-skew`, the same bottle: name and address goes to a reviewer. The
+    back face used to yield the US importer, `EASTERN LIQUORS USA. INC`; it now yields the
+    producer, `ALLIED BLENDERS AND DISTILLERS LIMITED`.
+- **Three labels lose a review item.** `ttb-26231001000662`, `ttb-26236001000716` and
+  `var-brand-case-punctuation` now read their name and address where they did not.
+- **No reading time, measured on the development box.** Timed alternately in one process over 32
+  faces, so machine load falls on both arms alike, the reader took a median 447 ms per face at 0.999
+  and 478 ms at 0.9, and the paired difference has a median of −10 ms. The route sweeps disagree with
+  each other — 0.97 s median with the threshold alone, 1.46 s at the change, with identical reader
+  code — because they ran minutes apart on a shared machine. The deployed service has not been
+  re-measured.
+- **Fifteen labels are still rejected on the warning, and 13 of them print the
+  mandated words.** Four differ from §16.21 only by an accented letter the reader invented; seven by one to three wrong characters
+  or punctuation marks that no reader option above fixed; and on two the reader still assembles the wrong
+  text (`ttb-26212001000085` is one character off, and `ttb-26240001000573` reads an importer's
+  address into its warning). §16.21 fixes the punctuation, so none of these can be absorbed by
+  loosening the comparison, and this decision does not try. What to do about them is not settled
+  here.
