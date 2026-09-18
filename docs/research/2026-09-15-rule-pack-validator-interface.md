@@ -1,7 +1,5 @@
 # Rule Pack & Validator Interface (MVP)
 
-Filed 2026-09-15.
-
 **Project:** AI-Powered TTB Alcohol Label Verification Prototype
 **Scope:** Rule Data & Validation Engine
 **Authoritative regulatory source:** eCFR (current text of 27 CFR Parts 4, 5, 7, 16, as amended through T.D. TTB-176, 87 FR 7579 (Feb. 9, 2022) for Parts 5 and 7 modernization).

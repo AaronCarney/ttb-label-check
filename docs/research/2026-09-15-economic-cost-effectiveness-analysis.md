@@ -1,7 +1,5 @@
 # Economic Analysis (Cost-Effectiveness) for the AI-Powered TTB COLA Label Verification Prototype
 
-Filed 2026-09-15.
-
 **Sources consumed:** R0 / [T2](./2026-09-15-cola-operational-context.md) / [T4](./2026-09-15-ocr-vision-architecture.md) / [T5](./2026-09-15-llm-orchestration-architecture.md) / [T7](./2026-09-15-federal-deployment-compliance.md) / 01–05 project knowledge
 **Status:** Draft for internal review; numbers anchored to verified primary sources as of 30 April 2026
 **Author:** TTB COLA AI Prototype Working Group

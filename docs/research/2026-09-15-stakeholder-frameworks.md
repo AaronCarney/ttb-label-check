@@ -1,7 +1,5 @@
 # Stakeholder Frameworks Applied
 
-Filed 2026-09-15.
-
 > Working PM notebook for the TTB AI label verification take-home. Six frameworks applied to the four named stakeholders from the brief: **Sarah Chen** (Deputy Director), **Dave Morrison** (28-yr Senior Agent), **Jenny Park** (Junior Agent, 8 months), **Marcus Williams** (IT Sys Admin). Plus Janet (Seattle field office, named-but-not-interviewed) and the production-stage stakeholders the phase-dependent stakeholder priority already anticipates.
 >
 > **What's stated vs. inferred.** Quotes and roles are stated (transcripts in the brief). Internal states ("Thinks", "Feels"), pre-mortem probabilities, and emergent-stakeholder activation triggers are inferred — flagged with `[INF]`.

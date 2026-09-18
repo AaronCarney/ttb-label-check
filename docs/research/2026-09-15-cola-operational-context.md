@@ -1,7 +1,5 @@
 # COLA System & Operational Context — Research Output
 
-Filed 2026-09-15.
-
 ## Metadata
 
 | Field | Value |

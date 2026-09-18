@@ -1,6 +1,6 @@
 """A deploy must not be able to ship a commit nothing has tested.
 
-Until 2026-09-17 `scripts/deploy.sh` was typed by a person and its preflights
+Previously `scripts/deploy.sh` was typed by a person and its preflights
 answered only whether the repository was *shippable*: a Dockerfile, a service
 port matching the container's, a tracked island bundle, every COPY path
 present. Not one of them ran a test, so whether the code worked rested on

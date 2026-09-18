@@ -33,7 +33,7 @@ def _settings_aliases() -> set[str]:
 def test_env_example_documents_every_setting_the_app_reads() -> None:
     """Every field on `Settings` is documented, derived rather than listed.
 
-    This held a hand-written `REQUIRED_KEYS` until 2026-09-17, which made the
+    This used to hold a hand-written `REQUIRED_KEYS`, which made the
     test catch only the variables somebody had remembered to add to it. It was
     not a hypothetical weakness: `RULES_ROOT` was read from the environment
     from the first commit, was absent from `.env.example` the whole time, and

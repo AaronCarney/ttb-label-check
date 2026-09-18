@@ -44,7 +44,7 @@ _SINGLE_FIXTURES = sorted(p.name for p in FIXTURES.glob("*.json"))
 # fails the suite until somebody does.
 REVIEWED_INCOMPLETE: dict[str, str] = {
     "th-has-data-cells": (
-        "Reviewed 2026-09-17 on /batch. Only the empty batch table raises it: that page "
+        "Reviewed on /batch. Only the empty batch table raises it: that page "
         "loads a batch which streams nothing, so the table renders its column headers over "
         "an empty body and there are no data cells for the headers to describe. The markup "
         "is shown to be sound rather than asserted to be — "

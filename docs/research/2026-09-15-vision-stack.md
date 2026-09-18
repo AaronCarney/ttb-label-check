@@ -1,7 +1,5 @@
 # Vision Stack Research for an AI-Powered TTB COLA Label Verification Prototype
 
-Filed 2026-09-15.
-
 **Scope:** Local-first vision pipeline on Windows 11 + WSL2 with an RTX 3090 (24 GB), targeting TTB 27 CFR Part 16 compliance checks (Government Warning text + typography). The user has OpenAI, xAI/Grok, and Claude Max access; no cloud OCR vendors are permitted. Latency target: <5 s for the first label, then adaptive batch processing keyed to human review pace. The 10 questions in the brief are answered in order, then synthesized in a decision matrix, recommended primary stack, fallback stack, and a 10-label fixture-set spec.
 
 ---

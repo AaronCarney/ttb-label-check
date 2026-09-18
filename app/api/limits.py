@@ -32,7 +32,7 @@ CLOUD_RUN_HTTP1_REQUEST_BYTES = 32 * _MIB
 
 Google's published quota: *"Maximum HTTP/1 request size: 32 MiB per request.
 Limit applies if using HTTP/1 server. No limit if using HTTP/2 server"*
-(https://docs.cloud.google.com/run/quotas, read 2026-09-16). `scripts/deploy.sh`
+(https://docs.cloud.google.com/run/quotas). `scripts/deploy.sh`
 sets no `--use-http2`, so this service is HTTP/1 and the 32 MiB cap applies.
 
 It matters which side refuses. Over this line Google answers with its own error
@@ -43,7 +43,7 @@ cap therefore sits below it, so our message is the one they read.
 MAX_REQUEST_BYTES = 63 * _MIB // 2
 """The largest request body this service will read, across every route: 31.5 MiB.
 
-The owner's number, set 2026-09-17: as close to the platform ceiling as is safe,
+The owner's number: as close to the platform ceiling as is safe,
 so a batch upload gets every byte the platform will carry. He asked for a cap
 that fits a hundred files at once; 50 MB and 75 MB were both put to him and both
 are unreachable, because `CLOUD_RUN_HTTP1_REQUEST_BYTES` above is refused by

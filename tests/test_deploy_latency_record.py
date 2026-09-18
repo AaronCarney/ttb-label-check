@@ -2,7 +2,7 @@
 
 `tests/test_deploy_healthz.py` reads the envelope off the result page and
 writes every row to a file, so a run says what came back rather than only how
-long it took. Before 2026-09-17 it kept the status code and the wall clock and
+long it took. Previously it kept the status code and the wall clock and
 discarded both on a pass, which is why four consecutive runs against production
 yielded the same two facts and no way to tell a check that was cut off from one
 that was merely slow.

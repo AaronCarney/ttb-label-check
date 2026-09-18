@@ -841,7 +841,7 @@ class LocalVisionExtractor:
 # tall; sideways text detects as tall narrow strips, either several of them or
 # one long one.
 #
-# Measured over the corpus's 62 images on 2026-09-17 by `eval.box_ratios`,
+# Measured over the corpus's 62 images by `eval.box_ratios`,
 # which re-derives every number below. The gate is consulted only where the
 # upright pass found no warning heading, so 34 of those images never reach it
 # and these thresholds answer for the other 28:
@@ -877,7 +877,7 @@ _SIDEWAYS_LONE_RATIO = 3.0
 # found costs about 10 ms a strip, against about 440 ms for one rotated pass,
 # because it skips detection entirely and recognises only text already located.
 #
-# Measured over all 62 corpus images, 2026-09-17
+# Measured over all 62 corpus images
 # (`docs/decisions.md#0036`): four
 # images reach this point, and the rotated re-read recovers a warning from one
 # of them, ttb-26212001000085. Its strips read "THE SURGEON" and "DRIVE ACAR

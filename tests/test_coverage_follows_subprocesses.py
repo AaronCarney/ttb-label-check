@@ -2,8 +2,8 @@
 
 `app/rules/__main__.py` and `app/vision/__main__.py` are command-line entry
 points, and the only honest test of one runs it the way a person does. Four
-tests do, in subprocesses. Coverage measures the process it starts in, so until
-2026-09-17 it saw none of that and reported both modules at 0% — which reads as
+tests do, in subprocesses. Coverage measures the process it starts in, so at first
+it saw none of that and reported both modules at 0% — which reads as
 "nobody tests these" when the truth was "coverage cannot see these being
 tested". A wrong 0% is worse than no figure: it points effort at the one place
 that does not need it.

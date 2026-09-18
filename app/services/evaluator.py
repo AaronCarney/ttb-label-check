@@ -146,7 +146,7 @@ class Evaluator:
         Before this, a hit patched only `evaluation_id` and returned the first
         call's `total_duration_ms` and `vision_duration_ms` beside the new id —
         so a repeat submission reported time it never spent, and four
-        byte-identical latencies measured against production on 2026-09-16
+        byte-identical latencies measured against production
         were four copies of one measurement.
 
         `label_ref` is this request's label for the same reason. The cache key
@@ -418,7 +418,7 @@ class Evaluator:
         afterwards.
 
         `model_version` was the other half of the same gap and was fixed the
-        same way on 2026-09-17: it defaulted to `None`, nothing assigned it,
+        same way: it defaulted to `None`, nothing assigned it,
         and so no record said what read the label. Between the two, a record
         now names both the rules that judged a label and the reader that gave
         them the text to judge. `tests/test_audit_names_the_reader.py` holds it.
@@ -510,7 +510,7 @@ class Evaluator:
         ``docs/research/2026-09-15-rule-engine-architecture.md`` specified from
         the start: "needs_review whole-evaluation; partial results returned".
 
-        Until 2026-09-17 it returned no fields and ``total_duration_ms: 0``. On
+        It used to return no fields and ``total_duration_ms: 0``. On
         the live service that made the same label answer completely or not at
         all on a difference of about fifty milliseconds, and turned a check
         that was merely slow into one that reported nothing — failing the

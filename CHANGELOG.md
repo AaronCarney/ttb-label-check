@@ -1,12 +1,13 @@
 # Changelog
 
 All notable changes to this project are recorded here. The format follows
-[Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow
+[Keep a Changelog](https://keepachangelog.com/en/1.1.0/), except that a release heading carries no
+date: the release's git tag records when it was cut. Versions follow
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
-## [0.3.1] - 2026-09-17
+## [0.3.1]
 
 ### Fixed
 
@@ -36,7 +37,7 @@ All notable changes to this project are recorded here. The format follows
   reads word for word on 20 of the 30 labels, up from 14; brand is 17, up from 16, and net
   contents 23 of 29, up from 22. Every other check is unchanged.
 
-## [0.3.0] - 2026-09-17
+## [0.3.0]
 
 ### Added
 
@@ -175,13 +176,13 @@ All notable changes to this project are recorded here. The format follows
 
 - What reaches the Cloud Run URL directly is restated from a fresh measurement. The README and the
   edge Worker's own comment both said the origin answers an uncredentialed request with 200,
-  measured while the service was deployed open. Measured 2026-09-17 at 22:30 UTC it answers 403:
+  measured while the service was deployed open. Measured since, it answers 403:
   `roles/run.invoker` is granted to the Worker's service account and to nobody else, which is the
   design decision 0028 argues for, and `ttb.aaroncarney.me` still answers 200. Both places now say
   so, and both say it is a measurement rather than a fixed property, because the deploy script sets
   it either way.
 
-## [0.2.0] - 2026-09-16
+## [0.2.0]
 
 ### Added
 
@@ -265,7 +266,7 @@ All notable changes to this project are recorded here. The format follows
   coordination step the app no longer performs, so it was always reported as zero, and nothing in
   the interface read it. The other three timings — total, per-rule and reading — are unchanged.
 
-## [0.1.1] - 2026-09-15
+## [0.1.1]
 
 ### Fixed
 

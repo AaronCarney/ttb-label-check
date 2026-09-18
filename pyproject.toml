@@ -190,7 +190,7 @@ also_copy = ["rules", "assets", "app"]
 # the cached verdict and prints a warning. The validators read their thresholds
 # and reason codes out of the YAML rule pack, so a rule pack edit changes what
 # every one of these mutants does while leaving mutmut's answer untouched — a
-# survivor list that describes a tree nobody has now. Measured on 2026-09-17: a
+# survivor list that describes a tree nobody has now. In one measured case, a
 # run reporting 20 `heading_style_check` survivors was reporting cache, and two
 # of those mutants fail two tests apiece when actually run. Re-running costs
 # about ten seconds for the whole package, which is less than the cost of one

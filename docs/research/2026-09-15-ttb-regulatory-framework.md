@@ -1,7 +1,5 @@
 # TTB Regulatory Framework for AI-Powered COLA Verification
 
-Filed 2026-09-15.
-
 > **Status:** Reflects eCFR text current to 1Q-2Q 2026 and primary sources directly retrieved from eCFR, TTB.gov, the Federal Register, and govinfo.gov. Where eCFR text was not retrieved verbatim or is ambiguous, this is flagged in §12.
 
 ---

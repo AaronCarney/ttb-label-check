@@ -3,8 +3,8 @@
 Source: 27 CFR 16.21 and 16.22, eCFR <https://www.ecfr.gov/current/title-27/section-16.21> and
 <https://www.ecfr.gov/current/title-27/section-16.22> (text taken through the eCFR API,
 `https://www.ecfr.gov/api/versioner/v1/full/2026-09-11/title-27.xml?part=16`). eCFR shows Title 27
-current as of 2026-09-11; 16.22 was last amended by T.D. TTB-91, 76 FR 5477 (Feb. 1, 2011). Read
-2026-09-15. Everything in quotation marks or code blocks below is verbatim.
+current as of 2026-09-11; 16.22 was last amended by T.D. TTB-91, 76 FR 5477 (Feb. 1, 2011).
+Everything in quotation marks or code blocks below is verbatim.
 
 ## Where it goes, 16.21
 
@@ -21,7 +21,7 @@ GOVERNMENT WARNING: (1) According to the Surgeon General, women should not drink
 ```
 
 Joined with a single space it is 283 characters, all ASCII, with no double spaces (counted
-2026-09-15 from the eCFR XML). Where a label breaks its lines is a layout choice; the regulation
+from the eCFR XML). Where a label breaks its lines is a layout choice; the regulation
 fixes the words and their order.
 
 ## Format rules, 16.22 (verbatim)

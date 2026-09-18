@@ -93,7 +93,7 @@ TIMEOUT=900
 # and the OCR models load lazily on first use - inside that request. The load
 # pushed the evaluation past the evaluator's five-second SLA, so the first
 # person to click got ENGINE.SLA.TIMEOUT and an empty result: no findings, no
-# explanation of why. Observed on the live service 2026-09-16, and it is not a
+# explanation of why. Observed on the live service, and it is not a
 # first-boot-only fault - CONCURRENCY is 1, so every scale-up makes another
 # instance that would do the same.
 #
@@ -202,8 +202,8 @@ fi
 # It is stamped twice on purpose, because the two are read by different people
 # at different moments: as a revision label, which `gcloud run revisions list`
 # prints without starting anything, and as GIT_COMMIT in the container, which
-# `/api/health` reports so the running service answers for itself. On
-# 2026-09-17 neither existed, and "are these fixes live?" took a behavioural
+# `/api/health` reports so the running service answers for itself.
+# Previously neither existed, and "are these fixes live?" took a behavioural
 # probe against the live service to settle.
 COMMIT="$(git rev-parse HEAD)"
 

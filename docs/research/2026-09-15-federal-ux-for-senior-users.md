@@ -1,7 +1,5 @@
 # UX Design for Federal & Senior Users
 
-Filed 2026-09-15.
-
 **Project:** AI-powered TTB Alcohol Label Verification Prototype
 **Decisions referenced:** The deterministic core (manual review always available; safe-failure = needs-review), per-field match policies (per-field evidence + CFR citation), the spirits ABV tolerance of ±0.3 pp, rejection reasoning (rule engine vs. LLM separation; reason_code grammar `BIN.SUB.SPECIFIC[.QUALIFIER]`)
 **Upstream outputs consumed:** [T2](./2026-09-15-cola-operational-context.md) (workflow), [T3](./2026-09-15-rule-engine-architecture.md) (RejectionReason data model), [T4](./2026-09-15-ocr-vision-architecture.md) (vision layer + needs_better_photo taxonomy), [T5](./2026-09-15-llm-orchestration-architecture.md) (orchestrator), [T6](./2026-09-15-batch-processing-architecture.md) (operational shape), [T7](./2026-09-15-federal-deployment-compliance.md) (accessibility legal floor)

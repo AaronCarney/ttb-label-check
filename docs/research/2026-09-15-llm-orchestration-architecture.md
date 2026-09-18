@@ -1,7 +1,5 @@
 # LLM Orchestration Architecture for the TTB AI Label Verification Prototype
 
-Filed 2026-09-15.
-
 ```
 Project:        TTB COLA Label Verification Prototype
 Topic:          T5 — AI/LLM Orchestration Architecture

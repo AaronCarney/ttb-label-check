@@ -1,7 +1,5 @@
 # Validation / Rule Engine Architecture
 
-Filed 2026-09-15.
-
 > AI-Powered TTB Alcohol Label Verification Prototype
 > Scope: 27 CFR Parts 4 (wine), 5 (distilled spirits), 7 (malt beverages), and 16 (health warning).
 > Anchor decisions: the deterministic core (rules decide, the model does not), substitutability (cloud/on-prem parity), per-field match policies (each field declares its own), the spirits ABV tolerance (regulatory tolerances are data, not constants), rejection reasoning (full evidence on every fail/needs-review), 5-second SLA.

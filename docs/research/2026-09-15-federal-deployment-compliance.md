@@ -1,7 +1,5 @@
 # Federal Deployment: Policy Gradations & Compliance Pathways
 
-Filed 2026-09-15.
-
 ---
 
 **Project:** TTB AI-Powered Alcohol Label Verification Prototype

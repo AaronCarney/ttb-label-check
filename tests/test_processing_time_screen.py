@@ -81,7 +81,7 @@ def test_single_screen_says_a_cached_answer_is_cached(page: Page, live_server_ur
 
 @pytest.mark.usefixtures("live_server", "pnpm_built_island")
 def test_single_screen_says_a_stopped_check_was_stopped(page: Page, live_server_url: str) -> None:
-    """Since 2026-09-17 the evaluation guard reports real elapsed time instead
+    """The evaluation guard now reports real elapsed time instead
     of 0, so the number on a stopped check is how far it got, not how long a
     whole check takes. The screen has to say so."""
     envelope = _envelope()

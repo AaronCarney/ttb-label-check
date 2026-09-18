@@ -1,5 +1,4 @@
 {
- "measured": "2026-09-17",
  "where": "development box, six-thread OCR budget, two-second pause per image",
  "corpus": "tests/fixtures/labels/manifest.json, 38 labels",
  "before_commit": "29f7841",

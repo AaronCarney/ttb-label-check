@@ -1,6 +1,6 @@
 """A deploy that ships code must not change who can reach the service.
 
-On 2026-09-17 the live service was open to the public (`allUsers` held
+The live service was once open to the public (`allUsers` held
 `roles/run.invoker`) and five committed bug fixes were waiting to go out.
 Running the deploy as written would have passed `--no-allow-unauthenticated`
 and closed the service to everyone, because the script's default fails closed

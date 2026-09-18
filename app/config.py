@@ -57,7 +57,7 @@ class Settings(BaseSettings):
     # seconds") on top of failing FR-1 and FR-8.
     #
     # 30 seconds: six times the slowest whole check measured on the live
-    # service (5.04 s on 2026-09-17), so no legitimate check can reach it, and
+    # service (5.04 s), so no legitimate check can reach it, and
     # far short of Cloud Run's 900 s request timeout (`scripts/deploy.sh`),
     # which is the outer bound but is far too long for a page a person is
     # waiting at. `tests/test_deploy_healthz.py` independently picked the same

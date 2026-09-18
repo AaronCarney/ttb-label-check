@@ -24,7 +24,7 @@ def _get_settings() -> Settings:
 # issues page states the rule and offers no way to turn it off: "You can't use
 # the following URL paths: Paths starting with /_ah/; Some paths ending with z.
 # To prevent conflicts with reserved paths, we recommend avoiding all paths
-# that end in z" (cloud.google.com/run/docs/known-issues, read 2026-09-16).
+# that end in z" (cloud.google.com/run/docs/known-issues).
 # /api/health therefore ends in no z at all. /healthz stays because every local
 # caller and test uses it, and locally nothing intercepts it.
 @router.get("/healthz")

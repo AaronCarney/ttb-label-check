@@ -15,7 +15,7 @@ Algorithm (Otsu + distance-transform + width:height ratio):
      exceeds WIDTH_HEIGHT_RATIO_BOLD_MIN.
 
 The measurement is deterministic and repeatable. What it is *not* is a reliable
-reading of stroke weight: the 2026-09-17 corpus sweep below found the ratio
+reading of stroke weight: the corpus sweep below found the ratio
 varies more with a photograph's resolution and focus than with the typeface, so
 nothing here may reject a label. `WIDTH_HEIGHT_RATIO_BOLD_MIN` carries the
 measurement and `docs/decisions.md#0037` carries what was done about it.
@@ -42,7 +42,7 @@ produce ~0.28 and regular text lands at ~0.22. The re-tune against a labeled
 corpus that this comment used to promise has now been run, and it did not
 produce a better number -- it showed that no number works.
 
-**Measured 2026-09-17 over all 38 labels in `tests/fixtures/labels`**, by
+**Measured over all 38 labels in `tests/fixtures/labels`**, by
 `eval/heading_bold_ratios.py`, on the warning-carrying face of each. Every
 label in that corpus is TTB-approved, and §16.22(a)(2) requires the heading in
 bold, so the whole population should sit above whatever the cut is. It does

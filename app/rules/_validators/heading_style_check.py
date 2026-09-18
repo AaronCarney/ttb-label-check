@@ -14,7 +14,7 @@ Words or capitals wrong is a rejection: the label is not compliant and the
 image was good enough to show it.
 
 **A measured weight never rejects a label.** It used to, when the measurement
-was confident. A sweep of the 38-label corpus on 2026-09-17
+was confident. A sweep of the 38-label corpus
 (`eval/heading_bold_ratios.py`) showed it cannot carry that: the stroke-width
 ratio ran from 0.111 to 0.508 across labels that are all TTB-approved and
 therefore all required to be bold, and one label measured 0.111 from a clean

@@ -1,4 +1,4 @@
-> Received as the README of https://github.com/treasurytakehome-rgb/instructions, copied unedited below this line. Read 2026-09-10.
+> Received as the README of https://github.com/treasurytakehome-rgb/instructions, copied unedited below this line.
 
 ---
 

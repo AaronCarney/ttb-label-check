@@ -1,7 +1,6 @@
 {
   "schema_version": 1,
   "description": "Real approved labels from the TTB Public COLA Registry, each paired with the application fields it must match, plus flawed variants derived from them. See docs/research/2026-09-15-test-labels.md.",
-  "sources_read": "2026-09-15",
   "warning_text_27_cfr_16_21": "GOVERNMENT WARNING: (1) According to the Surgeon General, women should not drink alcoholic beverages during pregnancy because of the risk of birth defects. (2) Consumption of alcoholic beverages impairs your ability to drive a car or operate machinery, and may cause health problems.",
   "check_rules": {
     "brand": "Application brand name appears on the label; case, punctuation and spacing differences pass.",
@@ -46,7 +45,7 @@
         "class_type_code": "141",
         "origin_code": "04",
         "permit_no": "DSP-IL-15026",
-        "verified_live": "2026-09-15"
+        "verified_live": true
       },
       "application": {
         "brand_name": "LUCKY LUCY'S",
@@ -131,7 +130,7 @@
         "class_type_code": "142",
         "origin_code": "25",
         "permit_no": "DSP-MD-20010",
-        "verified_live": "2026-09-15"
+        "verified_live": true
       },
       "application": {
         "brand_name": "BENT 301",
@@ -214,7 +213,7 @@
         "class_type_code": "301",
         "origin_code": "02",
         "permit_no": "DSP-NY-21027",
-        "verified_live": "2026-09-15"
+        "verified_live": true
       },
       "application": {
         "brand_name": "TACONIC DISTILLERY",
@@ -297,7 +296,7 @@
         "class_type_code": "301",
         "origin_code": "04",
         "permit_no": "DSP-IL-58",
-        "verified_live": "2026-09-15"
+        "verified_live": true
       },
       "application": {
         "brand_name": "AVIATION",
@@ -381,7 +380,7 @@
         "class_type_code": "209",
         "origin_code": "02",
         "permit_no": "DSP-NY-21027",
-        "verified_live": "2026-09-15"
+        "verified_live": true
       },
       "application": {
         "brand_name": "TACONIC DISTILLERY",
@@ -465,7 +464,7 @@
         "class_type_code": "268",
         "origin_code": "81",
         "permit_no": "CA-I-24240",
-        "verified_live": "2026-09-15"
+        "verified_live": true
       },
       "application": {
         "brand_name": "SATVRNAL",
@@ -549,7 +548,7 @@
         "class_type_code": "493",
         "origin_code": "4H",
         "permit_no": "CA-I-15737",
-        "verified_live": "2026-09-15"
+        "verified_live": true
       },
       "application": {
         "brand_name": "FOURSQUARE",
@@ -633,7 +632,7 @@
         "class_type_code": "977",
         "origin_code": "81",
         "permit_no": "TX-I-21390",
-        "verified_live": "2026-09-15"
+        "verified_live": true
       },
       "application": {
         "brand_name": "JUAN LOBO",
@@ -717,7 +716,7 @@
         "class_type_code": "151",
         "origin_code": "5K",
         "permit_no": "PR-I-765",
-        "verified_live": "2026-09-15"
+        "verified_live": true
       },
       "application": {
         "brand_name": "BLACK & WHITE",
@@ -809,7 +808,7 @@
         "class_type_code": "153",
         "origin_code": "5K",
         "permit_no": "FL-I-15704",
-        "verified_live": "2026-09-15"
+        "verified_live": true
       },
       "application": {
         "brand_name": "SALTIRE RARE MALT WHISKY COMPANY",
@@ -902,7 +901,7 @@
         "class_type_code": "551",
         "origin_code": "51",
         "permit_no": "CA-I-15732",
-        "verified_live": "2026-09-15"
+        "verified_live": true
       },
       "application": {
         "brand_name": "TERRE ET BOIS DE PRADIÈRE",
@@ -995,7 +994,7 @@
         "class_type_code": "629",
         "origin_code": "02",
         "permit_no": "DSP-NY-21235",
-        "verified_live": "2026-09-15"
+        "verified_live": true
       },
       "application": {
         "brand_name": "BREVIS",
@@ -1079,7 +1078,7 @@
         "class_type_code": "166",
         "origin_code": "38",
         "permit_no": "DSP-VT-21048",
-        "verified_live": "2026-09-15"
+        "verified_live": true
       },
       "application": {
         "brand_name": "LOST LANTERN",
@@ -1163,7 +1162,7 @@
         "class_type_code": "171",
         "origin_code": "5E",
         "permit_no": "NY-I-15605",
-        "verified_live": "2026-09-15"
+        "verified_live": true
       },
       "application": {
         "brand_name": "AODH",
@@ -1252,7 +1251,7 @@
         "class_type_code": "80",
         "origin_code": "01",
         "permit_no": "BWN-CA-21100",
-        "verified_live": "2026-09-15"
+        "verified_live": true
       },
       "application": {
         "brand_name": "PORTALUPI",
@@ -1343,7 +1342,7 @@
         "class_type_code": "80",
         "origin_code": "01",
         "permit_no": "BW-CA-5368",
-        "verified_live": "2026-09-15"
+        "verified_live": true
       },
       "application": {
         "brand_name": "UGLY SWEATER",
@@ -1434,7 +1433,7 @@
         "class_type_code": "81",
         "origin_code": "01",
         "permit_no": "BWN-CA-15093",
-        "verified_live": "2026-09-15"
+        "verified_live": true
       },
       "application": {
         "brand_name": "BEAR PATH",
@@ -1523,7 +1522,7 @@
         "class_type_code": "81",
         "origin_code": "01",
         "permit_no": "BWN-CA-22007",
-        "verified_live": "2026-09-15"
+        "verified_live": true
       },
       "application": {
         "brand_name": "PATRIA",
@@ -1614,7 +1613,7 @@
         "class_type_code": "80A",
         "origin_code": "50",
         "permit_no": "CT-I-21179",
-        "verified_live": "2026-09-15"
+        "verified_live": true
       },
       "application": {
         "brand_name": "FABIO SIGNORELLI",
@@ -1698,7 +1697,7 @@
         "class_type_code": "88",
         "origin_code": "01",
         "permit_no": "BW-CA-4213",
-        "verified_live": "2026-09-15"
+        "verified_live": true
       },
       "application": {
         "brand_name": "MARK WEST",
@@ -1790,7 +1789,7 @@
         "class_type_code": "904",
         "origin_code": "01",
         "permit_no": "BR-CA-BRU-15000",
-        "verified_live": "2026-09-15"
+        "verified_live": true
       },
       "application": {
         "brand_name": "THE BRUERY",
@@ -1882,7 +1881,7 @@
         "class_type_code": "951",
         "origin_code": "6C",
         "permit_no": "FL-I-22422",
-        "verified_live": "2026-09-15"
+        "verified_live": true
       },
       "application": {
         "brand_name": "ZHIGULEVSKOYE",
@@ -1968,7 +1967,7 @@
         "class_type_code": "951",
         "origin_code": "53",
         "permit_no": "FL-I-15704",
-        "verified_live": "2026-09-15"
+        "verified_live": true
       },
       "application": {
         "brand_name": "FREISINGER",
@@ -2052,7 +2051,7 @@
         "class_type_code": "902",
         "origin_code": "04",
         "permit_no": "BR-IL-21378",
-        "verified_live": "2026-09-15"
+        "verified_live": true
       },
       "application": {
         "brand_name": "HOP BUTCHER FOR THE WORLD",
@@ -2137,7 +2136,7 @@
         "class_type_code": "901",
         "origin_code": "44",
         "permit_no": "BR-TX-20554",
-        "verified_live": "2026-09-15"
+        "verified_live": true
       },
       "application": {
         "brand_name": "OKTOBERFEST",
@@ -2221,7 +2220,7 @@
         "class_type_code": "902",
         "origin_code": "22",
         "permit_no": "BR-KY-20166",
-        "verified_live": "2026-09-15"
+        "verified_live": true
       },
       "application": {
         "brand_name": "I HEARD CASSAROLE",
@@ -2322,7 +2321,7 @@
         "class_type_code": "951",
         "origin_code": "6I",
         "permit_no": "CA-I-5385",
-        "verified_live": "2026-09-15"
+        "verified_live": true
       },
       "application": {
         "brand_name": "SVYTURYS",
@@ -2411,7 +2410,7 @@
         "class_type_code": "951",
         "origin_code": "5M",
         "permit_no": "FL-I-22698",
-        "verified_live": "2026-09-15"
+        "verified_live": true
       },
       "application": {
         "brand_name": "QALIO",
@@ -2503,7 +2502,7 @@
         "class_type_code": "81",
         "origin_code": "51",
         "permit_no": "TX-I-22215",
-        "verified_live": "2026-09-15"
+        "verified_live": true
       },
       "application": {
         "brand_name": "DOMAINE DU GRAND TINEL",
@@ -2590,7 +2589,7 @@
         "class_type_code": "84",
         "origin_code": "51",
         "permit_no": "CA-I-15220",
-        "verified_live": "2026-09-15"
+        "verified_live": true
       },
       "application": {
         "brand_name": "GAIFFE-BRUN",
@@ -2677,7 +2676,7 @@
         "class_type_code": "80A",
         "origin_code": "50",
         "permit_no": "CT-I-21179",
-        "verified_live": "2026-09-15"
+        "verified_live": true
       },
       "application": {
         "brand_name": "FABIO SIGNORELLI",
@@ -2773,7 +2772,7 @@
         "class_type_code": "80A",
         "origin_code": "50",
         "permit_no": "CT-I-21179",
-        "verified_live": "2026-09-15"
+        "verified_live": true
       },
       "application": {
         "brand_name": "FABIO SIGNORELLI",
@@ -2869,7 +2868,7 @@
         "class_type_code": "977",
         "origin_code": "81",
         "permit_no": "TX-I-21390",
-        "verified_live": "2026-09-15"
+        "verified_live": true
       },
       "application": {
         "brand_name": "JUAN LOBO",
@@ -2953,7 +2952,7 @@
         "class_type_code": "141",
         "origin_code": "04",
         "permit_no": "DSP-IL-15026",
-        "verified_live": "2026-09-15"
+        "verified_live": true
       },
       "application": {
         "brand_name": "Lucky Lucys",
@@ -3038,7 +3037,7 @@
         "class_type_code": "81",
         "origin_code": "01",
         "permit_no": "BWN-CA-22007",
-        "verified_live": "2026-09-15"
+        "verified_live": true
       },
       "application": {
         "brand_name": "PATRIA",
@@ -3156,7 +3155,7 @@
         "class_type_code": "171",
         "origin_code": "5E",
         "permit_no": "NY-I-15605",
-        "verified_live": "2026-09-15"
+        "verified_live": true
       },
       "application": {
         "brand_name": "AODH",
@@ -3275,7 +3274,7 @@
         "class_type_code": "81",
         "origin_code": "01",
         "permit_no": "BWN-CA-15093",
-        "verified_live": "2026-09-15"
+        "verified_live": true
       },
       "application": {
         "brand_name": "BEAR PATH",
@@ -3392,7 +3391,7 @@
         "class_type_code": "151",
         "origin_code": "5K",
         "permit_no": "PR-I-765",
-        "verified_live": "2026-09-15"
+        "verified_live": true
       },
       "application": {
         "brand_name": "BLACK & WHITE",

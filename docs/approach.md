@@ -436,12 +436,12 @@ and they are the honest state of a processor-only reader on display typefaces.
 
 **The five-second requirement has no current figure, and the one this document carried was
 counting the wrong thing.** It belongs to the deployed hardware, so we measure it there rather than
-on a developer's machine, and the 2026-09-16 runs returned 34 of 38 inside five seconds. Two things
+on a developer's machine, and the earlier runs returned 34 of 38 inside five seconds. Two things
 invalidated that number. It predates the change that made the reader's sideways re-read conditional,
 and at the time a check that crossed five seconds was stopped and returned a blank result — so the
 run counted an empty page as a slow check. That defect is fixed
 ([decision 0035](decisions.md#0035)) and the share is owed again after the next deploy. What is
-measured, on 2026-09-17 against the live service: a median check of 2.03 seconds and a median read
+measured, against the live service: a median check of 2.03 seconds and a median read
 of 1.22, with one label of twelve at 5.04. Two levers have been tried and neither is the answer:
 more processor cores moved one check of thirty-eight, and the reading path itself has now been tuned
 three times — most recently by reading a label's sideways strips before reading the whole label

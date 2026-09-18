@@ -250,7 +250,7 @@ def test_bulk_upload_names_a_non_image_and_checks_the_rest() -> None:
     """A non-PNG/JPEG in the upload set is named as its own failed item and
     every other file is still checked.
 
-    This asserted a 400 for the whole submission until 2026-09-16, defended on
+    This used to assert a 400 for the whole submission, defended on
     the grounds that scheduling the batch meant a batch that would "explode
     mid-stream". `docs/decisions.md#0020` removed that premise: the worker
     refuses an item it cannot check by name and carries on to the next one, so

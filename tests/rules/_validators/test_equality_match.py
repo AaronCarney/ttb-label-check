@@ -65,7 +65,7 @@ def test_enumerated_match_registered() -> None:
 # --------------------------------------------------------------------------
 # `match_mode: contains_designation`
 #
-# The mode had no test at all until 2026-09-17: `mutmut` reported 15 mutants
+# The mode once had no test at all: `mutmut` reported 15 mutants
 # of `_contains_designation` as "no tests" rather than as survivors, meaning
 # nothing executed the function. One shipped rule uses it,
 # `spirits.class_type.matches_soi` in `rules/spirits-deep.yaml`.

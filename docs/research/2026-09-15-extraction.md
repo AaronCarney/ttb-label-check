@@ -1,7 +1,5 @@
 # Label extraction: which reader turns a label image into fields inside 5 seconds
 
-Measured, and sources read, 2026-09-15.
-
 **Answer.** `gemini-3.5-flash-lite` with a JSON schema reads a whole application in one call. It
 covers front, back and neck images. The measured end-to-end time was 2.0 s at the median, and the
 slowest was 2.8 s one at a time, or 4.7 s with 16 requests in flight. It returned the Government
@@ -19,7 +17,6 @@ prototype, behind an interface that can be pointed at Azure OpenAI. Local OCR al
 
 ## Conditions
 
-- Date: 2026-09-15, between 12:30 and 14:30 CDT.
 - Machine: WSL2 Linux, 16 CPU cores, 15 GB RAM, no GPU, Python 3.12.
 - Network: residential connection to the public Gemini API (`generativelanguage.googleapis.com`),
   free tier, no billing account.
@@ -69,7 +66,7 @@ three were checked on the image:
 | Hybrid (model and OCR at once, one process) | 1 at a time | 13 | 1.53 s | 5.26 s | 5.28 s |
 
 - **The two RapidOCR rows describe neither the shipped reader nor a comparable machine.** They were
-  taken on 2026-09-15, before the reader was capped to four threads and before the sideways re-read
+  taken before the reader was capped to four threads and before the sideways re-read
   became conditional, and "8 processes" is a configuration the product never runs. Read them as what
   they were: a comparison between two readers on one afternoon. The shipped reader's own figures,
   measured on the deployed service, are in `README.md`.
@@ -150,7 +147,7 @@ resolution) and 214 to 225 output. The per-token prices are vendor-reported
 
 - **Published limits.** Google does not publish free-tier limits in its documentation. It says
   they can be seen in AI Studio (https://ai.google.dev/gemini-api/docs/rate-limits).
-- **What was observed.** 184 Flash-Lite calls were made on 2026-09-15, including 104 in 14 s.
+- **What was observed.** 184 Flash-Lite calls were made in one day, including 104 in 14 s.
   None was refused or rate-limited. The daily cap is not known, so a 300-label batch on the free tier
   is unverified.
 - **Data use.** On the free tier, "Google uses the content you submit ... to provide, improve, and

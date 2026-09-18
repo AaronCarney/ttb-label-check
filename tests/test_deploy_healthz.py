@@ -52,7 +52,7 @@ def test_deployed_tls_chain_valid(deploy_url):
 
 # --- R15/NFR-1: single-check latency, measured on the deployed product only ---
 #
-# The owner ruled on 2026-09-16 that speed is a property of the deployed system:
+# The owner ruled that speed is a property of the deployed system:
 # "since we're not actually processing it on our own processor, the speed tests
 # should probably only happen on the actual hugging face system." The host he
 # named there has since moved to Cloud Run (decision 0025), and the ruling is
@@ -115,7 +115,7 @@ def _submissions() -> list[tuple[str, Path, dict[str, str]]]:
 
 # --- Recording what came back, not only how long it took ---
 #
-# Until 2026-09-17 this harness kept a status code and a wall clock and threw
+# This harness used to keep a status code and a wall clock and throw
 # both away on a pass. Two checks that look identical to it are not the same
 # thing at all: one that ran five seconds and returned seven fields, and one
 # that ran five seconds, was stopped by the evaluation guard, and returned
@@ -253,7 +253,7 @@ def test_deployed_single_check_meets_the_five_second_budget(deploy_url):
     set. The service scales to zero and the platform holds an idle instance no
     longer than 15 minutes, so the first check after a quiet period pays a
     container start and a model load, and that number describes the start
-    rather than the product. Until 2026-09-17 the warm-up submission was also
+    rather than the product. The warm-up submission also used to be
     measured, as sample 0 — and by then the service had it cached, so a
     guaranteed cache hit counted as a check, worth 2.6 points of the reported
     share on 38 samples. A cached answer is not a check; the figure this test

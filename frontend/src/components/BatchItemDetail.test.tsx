@@ -98,7 +98,7 @@ describe("BatchItemDetail", () => {
     // which rules answered is recorded before anything can go wrong. Reading
     // that row told the reviewer rule-pack selection was recorded against their
     // label. The trace below is the one the live service produced for a check
-    // the evaluation guard stopped, on 2026-09-17.
+    // the evaluation guard stopped.
     const stopped = _row([], [
       {
         rule_id: "ENGINE.RULE_PACK.SELECTED",

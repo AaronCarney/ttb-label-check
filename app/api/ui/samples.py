@@ -126,7 +126,7 @@ _MANIFEST = _SAMPLE_LABELS_DIR / "manifest.json"
 # happening, not to list a catalogue.
 #
 # Every description here is what the label actually did, measured on this route
-# with both faces sent on 2026-09-17, in a sweep of the manifest taken after
+# with both faces sent, in a sweep of the manifest taken after
 # `8ca3ecc` and `a47d03c`. Two facts from that sweep decide the list:
 #
 #   - **No label in the corpus passes outright**, so none is offered as one. The
@@ -145,7 +145,7 @@ _MANIFEST = _SAMPLE_LABELS_DIR / "manifest.json"
 # a warning the reader garbled or carries the reader faults above; that is a
 # gap in what the reader can do, not a gap in the catalogue.
 #
-# Each of the four clears the image-quality gate, checked 2026-09-16 by running
+# Each of the four clears the image-quality gate, checked by running
 # `app.vision.quality.assess` over every front in the manifest; a sample that
 # short-circuits on its photo would demonstrate nothing about the rules.
 #

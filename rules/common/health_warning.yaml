@@ -70,7 +70,7 @@ rules:
       # The capitals are read from the heading's own text and are decided
       # here, at the reject severity above. Bold weight is not: it is a
       # stroke-width measurement on the heading's region of the image, and a
-      # sweep of the label corpus on 2026-09-17 found it moves with the
+      # sweep of the label corpus found it moves with the
       # photograph rather than the typeface -- 18 of 28 confidently-measured
       # TTB-approved labels came out below the cut. So no measured weight
       # rejects a label. Where the measurement fails, was never taken, or

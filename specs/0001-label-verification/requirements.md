@@ -6,7 +6,7 @@ PRD is approved.
 ## Brief coverage
 
 Every ask in the brief (`PRD.md` in this folder) and its email (`brief-email.md`), and the PRD entry
-that answers it. Complete as of 2026-09-15, read from both documents.
+that answers it. Complete, read from both documents.
 
 | Brief item | Source in the brief | Answered by |
 |---|---|---|

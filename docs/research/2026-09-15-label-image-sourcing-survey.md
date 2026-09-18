@@ -1,7 +1,5 @@
 # Label-Image Sourcing Survey (canonical reference)
 
-Filed 2026-09-15.
-
 > **Status: CANONICAL SOURCING REFERENCE for every tier of this project** — prototype, take-home, and v1. The eval corpus, the demo fixture set, *and* any synthetic supplements all source from the registry of paths surveyed here. Real-first ordering is mandatory: every synthetic asset (per the real-first sourcing rule) must justify itself against an attempted real-source pass before it ships.
 >
 > **Sister document:** [T9](./2026-09-15-verification-targets-research.md) §3 holds the concrete TTB Public COLA Registry access mechanics (URL patterns, CC0 license posture, search semantics). T13 owns the source-by-source survey and yield/effort matrix; [T9](./2026-09-15-verification-targets-research.md) owns the per-record retrieval contract.

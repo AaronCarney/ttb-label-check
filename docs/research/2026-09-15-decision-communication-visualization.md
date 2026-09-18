@@ -1,7 +1,5 @@
 # Decision Communication & Visualization
 
-Filed 2026-09-15.
-
 **Project:** TTB AI-powered alcohol-label verification prototype
 **Status:** Re-grounded in [T11](./2026-09-15-economic-cost-effectiveness-analysis.md) (CEA, 50/80/90 percentile convention, FY 2026 constant dollars, A‑94 Appendix C revised 6 March 2026 / M‑26‑09)
 **Scope:** Project-specific decisions and pattern library — not a viz-theory survey. Cross-topic synthesis (X‑6, X‑7) deferred.

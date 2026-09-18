@@ -9,7 +9,7 @@
 // for that account as a secret and mints a Google ID token from it.
 //
 // That design IS the state of the deployed service, as of the last measurement.
-// Measured 2026-09-17 at 22:30 UTC: the IAM policy grants roles/run.invoker to
+// At that measurement, the IAM policy grants roles/run.invoker to
 // this Worker's service account and to nobody else, the run.app URL answers
 // /api/health with 403 and no credentials at all, and ttb.aaroncarney.me
 // answers it with 200. It has not always been so - the service was deployed
@@ -121,14 +121,13 @@ export default {
     // One key for the whole hostname, not one per client address. What is being
     // bounded is the bill, and a per-address limit multiplies by the number of
     // addresses. The cost is that a flood can crowd out a reviewer here — which
-    // is the lesser failure, because it spends nothing. That reasoning used to
-    // rest on the invoker check standing between a flood and the meter (0028);
-    // as of 2026-09-17 that check is not on — see the header. So the argument
-    // for one key over one per address still holds on its own terms, but it is
-    // no longer backed by a second gate.
+    // is the lesser failure, because it spends nothing. The argument also rests
+    // on the invoker check (0028), which is on — see the header — so a request
+    // that goes around this Worker is refused and never billed, and everything
+    // that reaches the service has come through this one key.
     //
     // This call does not currently deny anything. Measured on the deployed
-    // Worker 2026-09-16: configured at 5 requests per 60 seconds, limit()
+    // Worker: configured at 5 requests per 60 seconds, limit()
     // returned success: true on the tenth request of ten, and 310 requests
     // inside one minute were all forwarded. The binding deploys, the call runs,
     // and it fails open on this plan — see decision 0029. It is kept because it

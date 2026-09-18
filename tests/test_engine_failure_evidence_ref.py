@@ -4,7 +4,7 @@ That prefix is what tells an engine failure apart from a rule outcome in the
 audit trail, and the reviewer's page depends on it: `engineFailureCode` in
 `frontend/src/lib/incompleteCheck.ts` finds the row naming why a check did not
 finish by matching it. Reading `per_rule_trace[0]` instead — which is what the
-batch panel did until 2026-09-17 — finds `ENGINE.RULE_PACK.SELECTED`, because
+batch panel used to do — finds `ENGINE.RULE_PACK.SELECTED`, because
 which rules answered is recorded before anything can go wrong and so leads
 every trace.
 

@@ -76,8 +76,7 @@ applies to the submission's beverage type.
 
 **FR-2** — The product checks each of these label elements that the application states against the
 label: brand name, class/type designation, alcohol content, net contents, name and address, and
-country of origin. This list is complete; it was read from the brief's Additional Context on
-2026-09-10.
+country of origin. This list is complete; it was read from the brief's Additional Context.
 
 **FR-3** — If a label element that is mandatory for the submission's beverage type is absent from
 its label images, the product reports a mismatch for that element. For every beverage type, brand

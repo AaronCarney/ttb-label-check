@@ -2,7 +2,7 @@
 
 `_SIDEWAYS_RATIO`, `_SIDEWAYS_MIN_BOXES` and `_SIDEWAYS_LONE_RATIO` in
 `app.vision.local` are set from a measurement over the label corpus, and the
-comment above them is the only record of that measurement. On 2026-09-17 it
+comment above them is the only record of that measurement. At one point it
 cited 72 images against a corpus of 62, so the numbers underneath it could not
 be the ones anybody had taken, and nothing failed to say so.
 

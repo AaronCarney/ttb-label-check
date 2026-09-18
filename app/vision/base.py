@@ -21,7 +21,7 @@ class VisionExtractor(Protocol):
         """What read the label, in a form the audit trail can record.
 
         `AuditRecord.model_version` is the half of the compliance record that
-        names the reader, and until 2026-09-17 nothing in `app/` ever set it,
+        names the reader, and originally nothing in `app/` ever set it,
         so every envelope the service served said the reader was unknown. A
         producer contesting a rejection is contesting a reading, and a record
         that cannot name the reader cannot answer them.

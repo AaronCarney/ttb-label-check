@@ -29,7 +29,7 @@ token minted from a key held as a Worker secret. [Decision 0028](docs/decisions.
 the design closes the Cloud Run URL with IAM rather than hiding it — a request IAM denies is never
 billed — and [0029](docs/decisions.md#0029) records the rate limit that was meant to sit beside it.
 **The first is now the state of the deployed service; the second is not, and the code says so where
-each is measured.** Measured 2026-09-17 at 22:30 UTC: the IAM policy grants `roles/run.invoker` to
+each is measured.** At the last measurement, the IAM policy grants `roles/run.invoker` to
 `ttb-edge-invoker@ttb-label-check.iam.gserviceaccount.com` and to nobody else, the Cloud Run URL
 answers `/api/health` with **403** and no credentials at all, and the hostname above answers it with
 200. So the hostname is the only way in, which is what 0028 argues for. This has moved during the
@@ -58,20 +58,20 @@ unreachable, and prints on the terminal that nothing has tested what is being sh
 R15 in [the requirements](specs/0001-label-verification/requirements.md) and NFR-1 in
 [the PRD](docs/PRD.md) are one promise, and both mark it P0: 95 percent of single checks show
 results within five seconds. **No current figure for that share exists, and the ones published here
-before 2026-09-17 should not be quoted.** They were taken on superseded code, and they were counting
+earlier should not be quoted.** They were taken on superseded code, and they were counting
 the wrong thing.
 
 **What is measured.** Twelve test submissions posted once each through the address a reviewer uses,
-on 2026-09-17, against the deployed service: median wall clock **2.03 seconds**, median read
+against the deployed service: median wall clock **2.03 seconds**, median read
 **1.22 seconds**, eleven of the twelve between 1.1 and 3.1 seconds. The service is fast. One label
 took 5.04 seconds, and it did so for a known reason — nothing on it looked like a government
 warning upright, so the reader read the whole label twice more at 90 and 270 degrees and found
-nothing either way. Measured over all 62 corpus images on 2026-09-17, that re-read ran on four and
+nothing either way. Measured over all 62 corpus images, that re-read ran on four and
 recovered a warning from one. It now runs only where the sideways text reads as the warning
 ([decision 0036](docs/decisions.md#0036)), which is that one image, and this label's read dropped
 from 1345 ms to 463 ms on the development box.
 
-**Why the old figures do not stand.** Four runs on 2026-09-16 returned 87%, 89%, 71% and 92% of 38
+**Why the old figures do not stand.** Four earlier runs returned 87%, 89%, 71% and 92% of 38
 submissions inside five seconds. Two things were wrong with them. They predate the change that made
 that sideways re-read conditional, and the screen that has since cut it further. And at the time, a check
 that crossed five seconds was *stopped* and returned an empty result rather than a slow one — so a
@@ -150,8 +150,8 @@ is Google's own error page, which names neither the limit nor the file that brok
 service's cap therefore sits just under the platform's, so the refusal you get is ours and it tells
 you which file to fix. Google's published quota is *"Maximum HTTP/1 request size: 32 MiB per
 request. Limit applies if using HTTP/1 server. No limit if using HTTP/2 server"* — [Cloud Run
-quotas and limits](https://docs.cloud.google.com/run/quotas), under *Request limits for Cloud Run*,
-read 2026-09-17. Running locally there is no Cloud Run in the way, but the caps are enforced by the
+quotas and limits](https://docs.cloud.google.com/run/quotas), under *Request limits for Cloud Run*.
+Running locally there is no Cloud Run in the way, but the caps are enforced by the
 application in both places, so a local run refuses exactly what the deployed one refuses.
 
 ### Running the tests
@@ -197,7 +197,7 @@ Coverage comes with the suite:
 uv run pytest --cov            # branch coverage over app/
 ```
 
-**The measured figure is 93% branch coverage over `app/`**, measured 2026-09-17 from a run of the
+**The measured figure is 93% branch coverage over `app/`**, measured from a run of the
 whole suite bar the two slow performance tests. It is reported, not gated: no `fail_under` is set,
 because a threshold chosen before anyone had measured the real number is how a suite gets shaped to
 the threshold rather than to the product. The lowest-covered module is the rule-pack loader at 82%.
@@ -380,7 +380,7 @@ runs of the same label agree. `.env.example` names the snapshot in force.
 
 ## Reading accuracy
 
-Measured on 2026-09-17 over the whole real corpus — all 30 labels in
+Measured over the whole real corpus — all 30 labels in
 `tests/fixtures/labels` and their 56 face images — with the default on-machine reader (`local`).
 Every figure below came from that run. Reproduce it with:
 
@@ -588,7 +588,7 @@ that cannot check anything.
 
 - **Bold type in the warning's heading is reported, never decided.** §16.22(a)(2) requires the
   heading in bold as well as in capitals. Bold weight is a stroke-width measurement on the heading's
-  own region of the image, and a sweep of all 38 corpus labels on 2026-09-17
+  own region of the image, and a sweep of all 38 corpus labels
   (`eval/heading_bold_ratios.py`) found the measurement is not good enough to reject anyone on. The
   labels are all TTB-approved and so all required to be bold, yet the ratio ran 0.111 to 0.508 across
   them, and one label measured 0.111 from a clean photograph and 0.261 from a blurred copy of the

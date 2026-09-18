@@ -49,7 +49,7 @@ beforeEach(() => {
 // `envelope.fields.map` had no empty-state branch, so a check that produced no
 // fields rendered a results page with no cards on it and nothing explaining it:
 // a blank result rather than an error, on the path a reviewer and a grader
-// actually take. Measured live on 2026-09-17, a check stopped by the
+// actually take. Measured live, a check stopped by the
 // five-second cutoff produced exactly that.
 
 const _auditTrail = (trace: PerRuleTraceEntry[]) => ({

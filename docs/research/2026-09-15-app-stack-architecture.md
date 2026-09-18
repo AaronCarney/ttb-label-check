@@ -1,7 +1,5 @@
 # App Stack & Architecture
 
-Filed 2026-09-15.
-
 **Project:** AI-powered TTB alcohol label verification — take-home prototype
 **Status:** Decisions ready for implementation
 **Hardware target:** Windows 11 + WSL2 + NVIDIA RTX 3090 (24 GB VRAM)
@@ -148,7 +146,7 @@ calls: deque[CallRecord] = field(default_factory=lambda: deque(maxlen=200))
 The `C-RawJSONDrawer` component fetches `GET /batches/{batch_id}/labels/{label_id}/calls` and renders the records grouped by stage. Reject "log to file only" — reviewer can't see it. Reject "full unbounded list" — a stuck batch could OOM the process; a 200-record cap × ~12 KB/record ≈ 2.4 MB, safe.
 *Grounding:* [T8](./2026-09-15-federal-ux-for-senior-users.md)'s `C-RawJSONDrawer` requirement explicitly demands "the full structured RejectionReason JSON, the full orchestrator prompt + output (when an LLM was involved), the full vision response envelope," and [T5](./2026-09-15-llm-orchestration-architecture.md) §Recommendation #8 demands `prompt_version`, `model_version`, `rule_set_version`, `input_hash`, `output_hash`, `latency_ms`, `ttft_ms`. The deque keeps insertion O(1) and capped, matching [T6](./2026-09-15-batch-processing-architecture.md)'s "in-memory per-batch state."
 
-**As built, 2026-09-16.** The decision holds — every reader call is captured in full, into a
+**As built.** The decision holds — every reader call is captured in full, into a
 bounded in-memory ring buffer. The *shape* it assumed was overtaken. Two things changed after it
 was written. The readers became one per process rather than one per request, so the buffer they
 record into (`app/logging/ring_buffer.py`, held by `app/deps.py`) outlives any single request and

@@ -3,7 +3,7 @@
 Sources: WCAG 2.0, W3C Recommendation 11 December 2008, <https://www.w3.org/TR/WCAG20/>; WCAG 2.2,
 W3C Recommendation 12 December 2024, <https://www.w3.org/TR/WCAG22/>; the Section 508 standards,
 36 CFR part 1194 appendix A, <https://www.ecfr.gov/current/title-36/part-1194> (eCFR, current as of
-2026-09-11). Read 2026-09-15; the target was corrected on 2026-09-16. Criterion text is verbatim from
+2026-09-11). The target was later corrected. Criterion text is verbatim from
 WCAG 2.2, which restates the earlier criteria unchanged; exceptions are cut where marked "…".
 
 ## Why WCAG 2.0 A and AA
@@ -17,7 +17,7 @@ shall conform to Level A and Level AA Success Criteria and Conformance Requireme
 three screens `app/api/ui/shells.py` serves — `/` and `/batch/{batch_id}`. `/batches` is not scanned
 yet, so on that screen the requirement rests on review alone.
 
-WCAG 2.2 AA was the stated target until 2026-09-16, on the grounds that it adds 2.5.8 Target Size and
+WCAG 2.2 AA was once the stated target, on the grounds that it adds 2.5.8 Target Size and
 2.4.11 Focus Not Obscured, which help the many users over 50. It is not adopted. Read against the
 installed axe-core 4.11.4, the `wcag22aa` tag turns on exactly one rule, `target-size`, and **no rule
 exists for 2.4.11 at any tag** — so a green run at 2.2 would have asserted a criterion it never

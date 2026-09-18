@@ -1,7 +1,5 @@
 # OCR & Vision Architecture (Research Deep-Dive)
 
-Filed 2026-09-15.
-
 **Project:** AI-powered TTB Alcohol Label Verification Prototype
 **Topic:** T4 (OCR & Vision Architecture)
 **Scope:** Q4.1–Q4.10 of this topic. Cross-topic synthesis questions (X-1, X-2, X-3) explicitly deferred.

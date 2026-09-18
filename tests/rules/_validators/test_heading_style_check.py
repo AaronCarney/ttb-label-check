@@ -4,7 +4,7 @@ and does not treat them alike.
 The words and the capitals are read from the heading's own text, so getting
 them wrong is the label's fault and §16.22(a)(2) makes it a rejection. Bold
 weight is a stroke-width measurement taken on the heading's region of the
-image, and the 2026-09-17 corpus sweep showed it moves with the photograph
+image, and the corpus sweep showed it moves with the photograph
 rather than the typeface. So no measured weight rejects a label: where it does
 not satisfy the rule the answer is insufficient evidence at warn severity under
 the code the rule declares, and a reviewer decides.
@@ -139,7 +139,7 @@ def test_unmeasured_weight_does_not_excuse_wrong_capitals() -> None:
 def test_a_confident_measurement_of_not_bold_goes_to_a_reviewer() -> None:
     """A measured weight never rejects, even when the reader was confident.
 
-    This test asserted the opposite until 2026-09-17, on the reasoning that a
+    This test used to assert the opposite, on the reasoning that a
     weight which *was* measured and came out regular is the label's fault. The
     corpus sweep in `eval/heading_bold_ratios.py` withdrew the premise: over the
     38 labels, all TTB-approved and so all required to be bold, the stroke-width

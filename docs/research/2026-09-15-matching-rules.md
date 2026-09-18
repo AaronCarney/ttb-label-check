@@ -18,7 +18,7 @@ and is still shown to the agent. The alcohol tolerances in
 the regulations (±0.3 points and so on) do not apply here: they compare the label with the liquid,
 while the app compares two declared values, which should be equal.
 
-Sources read 2026-09-15: 27 CFR parts 4, 5, 7 and 16 and 19 CFR 134.45 on eCFR (current as of
+Sources read: 27 CFR parts 4, 5, 7 and 16 and 19 CFR 134.45 on eCFR (current as of
 2026-09-11), <https://www.ecfr.gov/current/title-27/part-5> and siblings, text in
 [label-elements.md](../reference/label-elements.md) and [health-warning.md](../reference/health-warning.md);
 the TTB guidance pages linked in the next section; the brief, <https://github.com/treasurytakehome-rgb/instructions> (copied in
@@ -91,7 +91,7 @@ Punctuation other than quote style is kept, because dropping it can change a nam
 | Country of origin (imports) | **Normalised against a list** of English names plus accepted abbreviations and variants | Not recognised: needs review | 19 CFR 134.45 |
 | Required presence | Per beverage type (see [label-elements.md](../reference/label-elements.md)) | Required field absent: fail; optional field absent: pass | 4.32, 4.36(a), 5.63, 7.63 |
 
-**Corrected 2026-09-16. Two of the proposals above were settled the other way, and the table is kept
+**Corrected. Two of the proposals above were settled the other way, and the table is kept
 as written so the change is legible.**
 
 - **Brand name.** The row proposes "differs only by punctuation … needs review", which contradicts
@@ -115,7 +115,7 @@ as written so the change is legible.**
 - "STONE'S THROW" vs "Stone's Throw": equal after case-folding. Pass, with the case difference shown.
 - "Stone’s Throw" (curly) vs "Stone's Throw": equal after quote mapping. Pass.
 - "Stones Throw" vs "Stone's Throw": punctuation differs. Scored 0.9846 against a 0.92 match
-  threshold. Pass, with the score shown. *(Corrected 2026-09-16 — this line read "Needs review",
+  threshold. Pass, with the score shown. *(Corrected — this line read "Needs review",
   against the allowable revision this document's own opening paragraph cites. See
   [decision 0017](../decisions.md#0017).)*
 - "45% Alc./Vol. (90 Proof)" vs application "45%": ABV 45 = 45; proof 90 = 2 × 45; format uses "%",

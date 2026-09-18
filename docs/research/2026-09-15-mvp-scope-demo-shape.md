@@ -1,7 +1,5 @@
 # MVP Scope & Demo Shape Commitments
 
-Filed 2026-09-15.
-
 **Project:** TTB AI-Powered Alcohol Label Verification — Take-Home
 **Status:** Decided. Record the MVP scope, the demo shape and the brand-match policy in `docs/decisions/`.
 
@@ -15,14 +13,14 @@ Filed 2026-09-15.
 - [T8](./2026-09-15-federal-ux-for-senior-users.md) — UX design + Q8.8 7-stage demo path; DP1–DP7 principles; fixtures 01–07.
 - [T10](./2026-09-15-stakeholder-frameworks.md) — Q10.4–Q10.6 empathy maps; TL;DR ("STONE'S THROW must be in first 3 demo labels"); Q10.7 #1 (cold-start risk).
 
-**Corrected 2026-09-16. The `docs/PRD.md` citation above names a requirement tiering that document
+**Corrected. The `docs/PRD.md` citation above names a requirement tiering that document
 never carried, and the rows resting on it are kept as written so the change is legible.**
 
 `docs/PRD.md` has three commits in its entire history: the scaffold (`c46b2d0`, seventeen empty
 section headings), the version written the day after this file was filed (`c34a15a`), and the
 brand-punctuation correction (`f0b37a9`). None of the three contains the word "Hard", "Strong" or
 "Stretch" anywhere in it, and the only commit in this repository that introduces the phrase is the
-one that added this research file. There was no tiering to cite — on 2026-09-15 `docs/PRD.md` was a
+one that added this research file. There was no tiering to cite — when this file was added, `docs/PRD.md` was a
 page of empty headings.
 
 Five rows of the feature table below rest on that citation — 1a ("Strong bias"), 2 ("Hard tier covers
@@ -199,7 +197,7 @@ Brand-name field uses a **two-stage policy**:
 
 **4. The LLM's role is paraphrase only** — it generates a human-readable explanation of which Stage A normalization fired, never the disposition (the deterministic core / DP2). The numeric similarity, threshold, and disposition all come from the rule engine.
 
-**Corrected 2026-09-16. Two parts of the decision above are not what shipped, and the decision is
+**Corrected. Two parts of the decision above are not what shipped, and the decision is
 kept as written so the change is legible.**
 
 - **Stage A strips apostrophes; the product keeps them.** `app/rules/brand_match.py` maps curly

@@ -8,7 +8,7 @@ const _entry = (
 ): PerRuleTraceEntry => ({ rule_id, disposition: "needs_review", evidence_ref });
 
 // The trace an evaluation stopped by the guard actually produces, read off the
-// live service on 2026-09-17. The rule-pack row is written first, before
+// live service. The rule-pack row is written first, before
 // anything can go wrong, so it is always ahead of the failure.
 const _timedOut: PerRuleTraceEntry[] = [
   _entry("ENGINE.RULE_PACK.SELECTED", "rule_pack/spirits"),

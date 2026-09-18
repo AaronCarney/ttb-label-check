@@ -1,6 +1,6 @@
 """What commit is running must be answerable from the service itself.
 
-On 2026-09-17 the question "are these five fixes live?" could not be answered
+Once, the question "are these five fixes live?" could not be answered
 from Cloud Run at all: every revision's metadata carried a timestamp and an
 image digest, and neither names a commit. The revision timeline said the deploy
 was newer than the commits, which was true and still did not mean the commits

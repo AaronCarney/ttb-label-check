@@ -1,7 +1,5 @@
 # Batch Processing Architecture for the TTB ALFD Verification Prototype
 
-Filed 2026-09-15.
-
 **Scope.** This document answers Q6.1–Q6.10 with primary-source citations. It analyzes queueing, lookahead, concurrency, backpressure, mid-batch override semantics, in-flight state, multi-agent extensibility, lookahead sizing math, peak-season batch shape, and resource sizing for a prototype where a single ALFD agent reviews labels one-at-a-time, with batches of 200–300 (occasionally up to ~500) labels arriving from large importers in peak season. Per-label processing budget (input handling + OCR/Vision + AI orchestration + rule engine + audit assembly + serialization) is **p50 ≈ 2.7 s, p99 ≈ 5.0 s** under the 5-second SLA from [T3](./2026-09-15-rule-engine-architecture.md)/[T4](./2026-09-15-ocr-vision-architecture.md). Anecdotal agent review time is **5–10 minutes per simple application** (treated as p50 = 300 s, upper-bound = 600 s, with complex cases ~900 s as a tentative p90). All review-time numbers are flagged as anecdotal and unverified; [T11](./2026-09-15-economic-cost-effectiveness-analysis.md) should drive a measurement campaign before production sizing.
 
 ---

@@ -47,10 +47,10 @@ async def test_whole_eval_timeout_routes_to_needs_review(monkeypatch):
 #
 # `docs/research/2026-09-15-rule-engine-architecture.md:772` row 10 specifies
 # the whole-evaluation timeout as "needs_review whole-evaluation; partial
-# results returned", carrying "partial results, last completed rule". Until
-# 2026-09-17 the code returned an envelope with no fields and
+# results returned", carrying "partial results, last completed rule". Previously
+# the code returned an envelope with no fields and
 # `total_duration_ms: 0`, so a read that had finished was thrown away along
-# with the rules that had not started. Measured live on 2026-09-17, the same
+# with the rules that had not started. Measured live, the same
 # label submitted four times returned all seven fields once and none three
 # times, on a difference of about fifty milliseconds, with
 # `vision_duration_ms` reading 4911 and 4900 on two of the blank ones — the
@@ -143,7 +143,7 @@ async def test_timeout_reports_the_time_it_actually_spent(monkeypatch):
 # check does not "show its results within 5 seconds" any more than a slow
 # complete one does.
 #
-# The slowest whole check measured on the live service on 2026-09-17 was 5.04 s
+# The slowest whole check measured on the live service was 5.04 s
 # (`docs/decisions.md#0035`, measured against deployed commit `8cb5e70`). A guard
 # has to sit clear of the slowest legitimate check, not on it.
 _SLOWEST_LIVE_CHECK_SECONDS = 5.04

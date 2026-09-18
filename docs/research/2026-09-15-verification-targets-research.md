@@ -1,7 +1,5 @@
 # Research Summary: Verification Targets for TTB COLA Verification Prototype
 
-Filed 2026-09-15.
-
 ## TL;DR
 
 - **The user's draft has at least one significant numeric error**: 27 CFR 5.65's distilled-spirits ABV tolerance is **±0.3 percentage points**, not ±0.15% — confirm and correct. 27 CFR 4.36 (wine) and 27 CFR 7.65 (malt beverages) values are as specified below; the user's premise that the 2022 "modernization" updated all three is partly wrong — **only parts 5 and 7 were modernized (T.D. TTB-176, eff. March 11, 2022); Part 4 (wine) was deferred**, so § 4.36 still carries its pre-modernization text (T.D. 6521 of 1960, as amended). The Government Warning text (16.21) and type-size tiers (16.22(b)) are confirmed verbatim.

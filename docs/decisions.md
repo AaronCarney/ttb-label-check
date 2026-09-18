@@ -1,4 +1,3 @@
-<!-- updated: 2026-09-17 -->
 # TTB Label Check — Decision Document
 
 **Settled forks and their rationale. Nothing else.** One entry per fork: what was chosen, what was
@@ -14,7 +13,7 @@ that governs — never an entry itself as the reason something must be done. Whe
 governing document disagree, the governing document wins and the entry is a stale record to date and
 correct.
 
-Consolidated 2026-09-16 out of sixteen separate files under `docs/decisions/`. The entry numbers
+Consolidated out of sixteen separate files under `docs/decisions/`. The entry numbers
 are the numbers those files carried, so an
 existing citation to `docs/decisions/0011` is entry 0011 here and links resolve as
 `docs/decisions.md#0011`.
@@ -26,8 +25,6 @@ superseded reasoning is what makes the change legible later.
 
 <a id="0001"></a>
 ## 0001. Semantic versioning
-
-**Decided:** 2026-09-10.
 
 **Chosen.** The project's version follows Semantic Versioning 2.0.0 and reads `MAJOR.MINOR.PATCH`,
 starting at `0.0.0`. Once a stack is chosen the version lives in that stack's package manifest.
@@ -43,7 +40,7 @@ and Semantic Versioning is the scheme whose positions carry that meaning.
 <a id="0002"></a>
 ## 0002. Stakeholder priority depends on the phase
 
-**Decided:** 2026-09-15. **Evidence:** the brief, `specs/0001-label-verification/PRD.md`.
+**Evidence:** the brief, `specs/0001-label-verification/PRD.md`.
 
 **Chosen.** Four people in the brief shape what the prototype does. While it is a prototype their
 asks weigh in this order, and the weights are what settle it when two asks pull against each other:
@@ -78,8 +75,6 @@ prototype? Just don't do anything crazy."
 
 <a id="0003"></a>
 ## 0003. How build choices are judged
-
-**Decided:** 2026-09-15.
 
 **Chosen.** Every build choice — scope, extraction, stack, host — is judged by these criteria in
 this order. A choice that fails an earlier criterion is out, however well it does on a later one.
@@ -117,8 +112,6 @@ application with clean code is preferred over ambitious but incomplete features"
 <a id="0004"></a>
 ## 0004. The prototype runs locally from a clone, and also deploys
 
-**Decided:** 2026-09-15.
-
 **Chosen.** The product is built to run on a reviewer's own machine first: a clone, one install step
 and one command to start, with everything it needs contained in the repository. It needs no account,
 no API key and no outbound network call to do its job. Deployment is a thin layer over that same app
@@ -135,14 +128,14 @@ product has to survive.
 
 **Because** the brief's Deliverables section lists "README with setup and run instructions" under the
 repository and "Deployed Application URL — Working prototype we can access and test" as a second
-item; and the owner instructed on 2026-09-15 that this version runs locally with a cloud option if
+item; and the owner instructed that this version runs locally with a cloud option if
 time allows, and that "everything we include [is] contained within the app itself if possible to make
 installing simple".
 
 <a id="0005"></a>
 ## 0005. Two readers behind one interface, local by default
 
-**Decided:** 2026-09-15. **Evidence:** `docs/research/2026-09-15-extraction.md`.
+**Evidence:** `docs/research/2026-09-15-extraction.md`.
 
 **Chosen.** Reading a label image into fields is one replaceable component behind one interface, with
 two implementations:
@@ -156,7 +149,7 @@ two implementations:
 Neither reader decides anything. Rules decide; the reader reports what it saw with a confidence, and
 the product says "needs review" where the reader is unsure.
 
-**Open point.** Measured on 13 real labels on 2026-09-15, the hosted model returned the government
+**Open point.** Measured on 13 real labels, the hosted model returned the government
 health warning word for word on 12 of 13 and the local engine with simple parsing on 6 of 13. The
 warning must be checked exactly, so the local reader's parsing has to close that gap, and the shipped
 accuracy figure is whatever the evaluation run measures once it has.
@@ -181,7 +174,7 @@ CPU OCR 1.18 s median, 2.60 s worst. Per-field accuracy for both is tabulated in
 <a id="0006"></a>
 ## 0006. The health warning's typography rules are out of scope
 
-**Decided:** 2026-09-15. **Extended by** [0013](#0013), which settles what these rules answer instead.
+**Extended by** [0013](#0013), which settles what these rules answer instead.
 
 **Chosen.** Four rules in the health-warning pack are switched off, each carrying the reason in its
 own `notes` field:
@@ -237,8 +230,6 @@ so in the README.
 <a id="0007"></a>
 ## 0007. A class-and-type designation includes its standard of identity
 
-**Decided:** 2026-09-15.
-
 **Chosen.** The class-and-type rules pass when the label's designation **includes** a recognised class
 or type as a run of whole words, not when it equals one. The validator `enumerated_match` takes a
 `match_mode` parameter: `exact` stays the default, and the four class-and-type rules set
@@ -275,8 +266,6 @@ identity, not for a label that repeats the standard's name and nothing else.
 
 <a id="0008"></a>
 ## 0008. The alcohol-content tolerance rules are out of scope
-
-**Decided:** 2026-09-16.
 
 **Chosen.** Five rules are removed from the pack, with the validators and reason codes that served
 only them:
@@ -335,8 +324,6 @@ product is not given.
 <a id="0009"></a>
 ## 0009. The model reasoning layer is removed; the model reader stays
 
-**Decided:** 2026-09-16.
-
 **Chosen.** The optional layer that sent a finished rule result to a language model for a second
 opinion is deleted: `app/orchestrator/` and its three tasks, the component that merged the model's
 note back into a rule result, the predicate that decided when to call it, and the schema the model
@@ -387,8 +374,6 @@ else changes that schema.
 <a id="0010"></a>
 ## 0010. A label filed without a beverage class is checked against nothing
 
-**Decided:** 2026-09-16.
-
 **Chosen.** **The application decides which rules run, and where it names no beverage, no rule runs.**
 An upload that arrives without an application — the drop-zone on the landing page accepts one — is no
 longer checked against the distilled-spirits rules. It is checked against nothing. The reply still
@@ -419,7 +404,7 @@ it — a rejection manufactured out of a guess nobody made.
 *Nothing in the rule model can express "whatever the beverage is".* Every rule declares
 `applies_to_classes`, and `app/rules/yaml_engine.py:123` selects a rule only where a reading's class is
 in that list. The eight health-warning rules in `rules/common/health_warning.yaml` list all three
-beverages and every other rule lists exactly one — checked across all five rule files on 2026-09-16 —
+beverages and every other rule lists exactly one — checked across all five rule files —
 so the warning rules are already independent of the beverage in substance. What stops them running is the
 mechanism: `FieldObservation.beverage_class` is a required three-valued field
 (`app/schemas/extracted.py:61`) with no way to say "not stated", so a reading has to claim a beverage before any rule will look at it, including the eight
@@ -466,8 +451,6 @@ is handed to the consolidation pass with the replacement stated.
 
 <a id="0011"></a>
 ## 0011. The alcohol-content format check is switched off until the reader returns the label's wording
-
-**Decided:** 2026-09-16.
 
 **Chosen.** Three rules are switched off, each carrying the reason in its own `notes` field:
 
@@ -561,8 +544,6 @@ and malt packs. The design note gave spirits a pattern that accepted the number 
 <a id="0012"></a>
 ## 0012. A class-and-type designation the app cannot place goes to a reviewer, not to a rejection
 
-**Decided:** 2026-09-16.
-
 **Chosen.** **No rule rejects a label because its class-and-type designation is absent from a list.**
 
 | Rule | Before | Now |
@@ -652,7 +633,7 @@ that the label is wrong.
 <a id="0013"></a>
 ## 0013. The health-warning checks answer only what they measured
 
-**Decided:** 2026-09-16. **Extends** [0006](#0006), which put four of these checks out of scope. That
+**Extends** [0006](#0006), which put four of these checks out of scope. That
 entry said which checks are not made; this one says what they answer instead, and settles three further
 questions: what "the same words" means when a printer's spacing differs, what a boldness nobody could
 measure is worth, and what happens to a rule that duplicates another.
@@ -765,7 +746,7 @@ answer is to say which measurement is missing and hand the label to a reviewer.
 <a id="0014"></a>
 ## 0014. Cross-unit net contents is compared within the rounding the standards of fill carry
 
-**Decided:** 2026-09-16. **Evidence:** `docs/research/2026-09-15-ttb-regulatory-framework.md`.
+**Evidence:** `docs/research/2026-09-15-ttb-regulatory-framework.md`.
 
 **Chosen.** When the net contents on the label and on the application are in **different** units, the
 two agree if they are within **1% of the figure the application declared**. When they are in the **same**
@@ -847,7 +828,7 @@ prints its customary figure with the same rounding even though the size it round
 <a id="0015"></a>
 ## 0015. The brand check compares an admissible set, not one string
 
-**Decided:** 2026-09-16. **Evidence:** `docs/research/2026-09-15-matching-rules.md`.
+**Evidence:** `docs/research/2026-09-15-matching-rules.md`.
 
 **Chosen.** The brand comparison no longer asks whether the label's mark equals the application's
 `brand_name`. It asks whether the mark is **one of the names the application says the label may carry**:
@@ -961,8 +942,6 @@ the answer harder to defend and admitting pairs that are genuinely different nam
 <a id="0016"></a>
 ## 0016. The country-of-origin abbreviation table is not built
 
-**Decided:** 2026-09-16.
-
 **Chosen.** The country-of-origin check reads one form of the country's name: the English name the
 application declares, appearing as whole words inside whatever wording the label wraps around it —
 "PRODUCT OF LITHUANIA", "DISTILLED IN IRELAND". It does not read the other forms customs marking rules
@@ -1011,7 +990,7 @@ extra review is not a wrong verdict.
 <a id="0017"></a>
 ## 0017. A punctuation-only brand difference is a match, and the requirement text is corrected to say so
 
-**Decided:** 2026-09-16. **Evidence:** Form TTB F 5100.31, allowable revisions item 3.b; measured against
+**Evidence:** Form TTB F 5100.31, allowable revisions item 3.b; measured against
 the shipped comparison; [0015](#0015), which recorded the conflict and left it open.
 
 **Chosen.** Where a label's brand mark differs from the application's only in punctuation, the product
@@ -1025,7 +1004,7 @@ should report needs review are corrected to describe what the product does and w
 | `docs/research/2026-09-15-matching-rules.md`, "Proposed rule per field" | Brand row: *"Differs only by punctuation or a likely misread: needs review"* | Kept as written, with a dated correction under the table |
 | the same document, "Cases worked through" | *"'Stones Throw' vs 'Stone's Throw': punctuation differs. Needs review."* | Scored 0.9846, pass, with the score shown |
 
-Measured here on 2026-09-16 against `app/rules/brand_match.py` as shipped:
+Measured here against `app/rules/brand_match.py` as shipped:
 
 | Route | `Stones Throw` / `Stone's Throw` |
 |---|---|
@@ -1082,7 +1061,7 @@ product built against the list.
 <a id="0022"></a>
 ## 0022. The reason-code registry states which of its codes nothing emits, and a test holds both halves
 
-**Decided:** 2026-09-16. **Evidence:** measured here against the shipped tree — 60 registered codes,
+**Evidence:** measured here against the shipped tree — 60 registered codes,
 46 rules across five packs, and the scan that found `ENGINE.OVERRIDE.NOT_FOUND` unregistered.
 
 **Chosen.** `rules/reason_codes.yaml` gains a `reviewer_vocabulary:` block listing every registered
@@ -1159,10 +1138,10 @@ worked for the same failure in the decision document was a check rather than a c
 <a id="0023"></a>
 ## 0023. The deploy runs on Hugging Face Spaces, Docker SDK, CPU Basic hardware
 
-**Decided:** 2026-09-16. **Superseded by** [0025](#0025), which moves the host to Google Cloud Run;
+**Superseded by** [0025](#0025), which moves the host to Google Cloud Run;
 the reasoning below is left standing because what changed is not any fact it states.
 **Evidence:** `app/config.py:37`, `docs/research/2026-09-15-hosting.md`,
-`huggingface.co/docs/hub/spaces-overview` and `/spaces-config-reference`, both read 2026-09-16.
+`huggingface.co/docs/hub/spaces-overview` and `/spaces-config-reference`.
 
 **What was unsettled.** Two of this project's own documents disagreed. One research record picked
 Hugging Face Spaces and three tracked files already assumed it; the plan of work said the host was
@@ -1252,7 +1231,7 @@ $0 is a $0 that traffic can move. A bounded cost beats an unbounded one when nob
   create: PRO for personal accounts, Team or Enterprise for organizations" — and CPU Basic's zero
   hourly rate describes the hardware, not the right to create the Space.
 
-  **Confirmed against the live platform, 2026-09-16, and dated.** The gate was tested rather than
+  **Confirmed against the live platform.** The gate was tested rather than
   read: a request to create a private Docker Space on a free personal account was refused with HTTP
   402 and this body: `{"error":"Static Spaces are free for everyone, but hosting Gradio and Docker
   Spaces on free cpu-basic requires a PRO subscription. Subscribe at https://huggingface.co/pro"}`.
@@ -1284,7 +1263,7 @@ $0 is a $0 that traffic can move. A bounded cost beats an unbounded one when nob
 <a id="0024"></a>
 ## 0024. The README's specification is four tests; the demo-runbook tests are removed
 
-**Decided:** 2026-09-16. **Evidence:** the eight failures run and read here before any edit.
+**Evidence:** the eight failures run and read here before any edit.
 
 **What was wrong.** Eight tests asserting over `README.md` and a `DEMO-RUNBOOK.md` failed, and none
 of the eight was a code defect. They described a different project: a development process with
@@ -1334,8 +1313,6 @@ nobody here wrote.
 <a id="0018"></a>
 ## 0018. An uploaded label image is kept as a file, not in the process that received it
 
-**Decided:** 2026-09-16.
-
 **Chosen.** The image a reviewer uploads is written to a file — one per evaluation, named for the
 evaluation id and suffixed with its media type — in a directory under the machine's temporary
 directory, and `GET /labels/{evaluation_id}/image` reads it back from there. Three properties come
@@ -1380,11 +1357,11 @@ directory of files is the only one of the four that needs nothing from both.
 - **The sweep reads the whole directory on every write.** At this scale it is nothing beside the
   label read it follows. At a scale where it is not, the sweep is the part that changes.
 
-**Amended 2026-09-16 — the prototype does not meet C-2, and that is deliberate.**
+**Amended — the prototype does not meet C-2, and that is deliberate.**
 
 `docs/PRD.md` C-2 says the product "retains no label image or application data on its server once it
 has returned the results for them". A store that keeps an image for seven days does not meet it, and
-the entry above did not weigh it. The owner settled it on 2026-09-16: **this is a demo, and C-2 is a
+the entry above did not weigh it. The owner settled it: **this is a demo, and C-2 is a
 production requirement rather than a demo one.** The labels this ships are public TTB COLA Registry
 images under CC0 (`app/api/ui/samples.py`), so nothing it holds is anyone's private material. C-2
 stays in the PRD unchanged, because it is the right requirement for the real thing.
@@ -1408,8 +1385,6 @@ entry and is not true now. Correcting it is outstanding.
 
 <a id="0019"></a>
 ## 0019. The browser-facing surface is one module per job, behind one router
-
-**Decided:** 2026-09-16.
 
 **Chosen.** `app/api/ui.py` — 482 lines doing six unrelated jobs — becomes the package `app/api/ui/`,
 one module per job: the three page shells, the single-label upload, the image route and its store,
@@ -1443,8 +1418,6 @@ the reader. Splitting on that line is what lets each module say truthfully what 
 
 <a id="0020"></a>
 ## 0020. A batch item with no image is refused by name, and one bad label does not end the batch
-
-**Decided:** 2026-09-16.
 
 **Chosen.** Two halves of one mechanism in `app/batch/worker.py`. An item the worker holds no image
 for is refused: `_resolve_label` returns nothing, and the item gets a `needs_review` envelope with no
@@ -1505,8 +1478,6 @@ carrying on.
 <a id="0021"></a>
 ## 0021. The batch consumer paces on the reviewer's pull, not on the queue
 
-**Decided:** 2026-09-16.
-
 **Chosen.** After an item's events are broadcast, `_consume` holds the next evaluation while the
 slowest attached SSE subscriber is more than `lookahead_k` events behind. With no subscriber
 attached the gate is inert. It polls the subscriber queues every 10 ms and has no timeout.
@@ -1554,9 +1525,9 @@ costs something is what makes `LOOKAHEAD_K` govern anything at all.
 <a id="0025"></a>
 ## 0025. The deploy runs on Google Cloud Run, reached through this project's own DNS zone
 
-**Decided:** 2026-09-16, superseding [0023](#0023). **Evidence:**
+**Supersedes** [0023](#0023). **Evidence:**
 `cloud.google.com/free/docs/free-cloud-features`, `developers.cloudflare.com/workers/platform/limits`
-and `developers.cloudflare.com/containers/pricing`, all read 2026-09-16; `app/config.py:37`;
+and `developers.cloudflare.com/containers/pricing`; `app/config.py:37`;
 `docs/research/2026-09-15-hosting.md`.
 
 **What changed.** [0023](#0023) is not wrong about any fact it states, and none of its vendor
@@ -1565,7 +1536,7 @@ unauthenticated URL without a hard stop, while a $9 plan fee is known in advance
 that against no mechanism for bounding the meter, because none was on the table. A front door was:
 this project's DNS zone already exists, and a proxy in front of the service takes a rate limit. With
 the meter bounded at the edge, the $9 fee buys nothing the free tier does not already give, and the
-owner settled the fork on 2026-09-16.
+owner settled the fork.
 
 **Chosen.** **Google Cloud Run, one service, 4 vCPU and 4 GiB, scaling to zero,** built from source
 by Cloud Build so no image is built on a developer's machine. The free tier is 2 million requests,
@@ -1649,7 +1620,7 @@ warm path is what the keep-warm ping exists to make the one a reviewer meets.
 <a id="0026"></a>
 ## 0026. Glare is not measured before the read; legibility is judged by what the reader returned
 
-**Decided:** 2026-09-16. **Evidence:** the gate run over all 56 face images of the 30 real labels
+**Evidence:** the gate run over all 56 face images of the 30 real labels
 and all 6 damaged variants, and the reading-accuracy run before and after.
 
 **What was wrong.** `app/vision/quality.py` refused an image as
@@ -1689,7 +1660,7 @@ refusing readable labels, and it is paid only on images that produce no text.
 <a id="0027"></a>
 ## 0027. The reading-accuracy figures are published as counts, and the section no longer holds a hole
 
-**Decided:** 2026-09-16. **Evidence:** the run recorded in the section itself.
+**Evidence:** the run recorded in the section itself.
 
 **What changed.** [0024](#0024) settled that the reading-accuracy section may hold no percentage,
 because no run on this machine had produced one and an estimate presented as a measurement is the
@@ -1711,10 +1682,10 @@ The failure it catches is the same one — a number in front of a reviewer that 
 <a id="0028"></a>
 ## 0028. The Cloud Run URL is closed with IAM, not hidden, because the edge cannot be the only door
 
-**Decided:** 2026-09-16. **Evidence:** `docs.cloud.google.com/run/docs/securing/ingress`,
+**Evidence:** `docs.cloud.google.com/run/docs/securing/ingress`,
 `/run/docs/authenticating/public`, `/run/docs/authenticating/service-to-service`,
 `/run/docs/configuring/custom-audiences`, `/docs/authentication/token-types` and
-`cloud.google.com/run/pricing`, all read 2026-09-16; `scripts/deploy.sh`; the live service's IAM policy, read the same day.
+`cloud.google.com/run/pricing`; `scripts/deploy.sh`; the live service's IAM policy.
 
 **What was found.** [0025](#0025) bounds the meter with four settings, one of which is a rate limit
 on a proxy in front of the service. That reasoning holds only if the proxy is the sole way in. It is
@@ -1770,7 +1741,7 @@ on the edge, and none of it on the app. The key is a Worker secret. It is never 
 a key that leaks is an invoker for as long as it exists, so it is revoked at the service account
 rather than waited out.
 
-**The deployment met this record at 20:44 on 2026-09-16, and the state it describes is verified
+**The deployment came to meet this record, and the state it describes is verified
 rather than asserted.** It did not before: the service had been deployed with `TTB_PUBLIC=1`, the
 IAM policy listed `allUsers` beside the edge account, and the Worker forwarded anonymously, so both
 doors stood open. What closed it was removing the `allUsers` binding and redeploying without that
@@ -1788,9 +1759,9 @@ also completed through it, so the signing survives a multipart upload.
 <a id="0029"></a>
 ## 0029. The rate limit lives in the Worker, because a Free zone's own rate limiting rule cannot see the hostname
 
-**Decided:** 2026-09-16. **Evidence:** `developers.cloudflare.com/waf/rate-limiting-rules/`,
+**Evidence:** `developers.cloudflare.com/waf/rate-limiting-rules/`,
 `developers.cloudflare.com/workers/runtime-apis/bindings/rate-limit/` and
-`developers.cloudflare.com/workers/platform/limits/`, all read 2026-09-16.
+`developers.cloudflare.com/workers/platform/limits/`.
 
 **What was found.** [0025](#0025) names "a rate-limiting rule" on this project's zone as one of the
 four settings that bound the meter, and does not say which mechanism carries it. Cloudflare offers
@@ -1821,7 +1792,7 @@ be set to bound the meter.
 - *No limit, relying on the two-instance cap* — the cap bounds how fast money is spent, not how
   much. Two instances held busy for a month is the whole free allowance and then some.
 
-**Settled by measurement on 2026-09-16, and not in either direction this record expected.**
+**Settled by measurement, and not in either direction this record expected.**
 Cloudflare's documentation does not state whether the rate limiting binding is available on the
 Workers Free plan — its own page, the Workers pricing page and the GA changelog were all read that
 day and none says either way. This record supposed a deploy would either take the binding or refuse
@@ -1856,7 +1827,7 @@ which a one-request proxy does not approach.
 <a id="0030"></a>
 ## 0030. A file that is not an image is refused by name inside the batch, not by rejecting the batch
 
-**Decided:** 2026-09-16. **Evidence:** `app/api/ui/bulk_upload.py` as it stood; requirement R13;
+**Evidence:** `app/api/ui/bulk_upload.py` as it stood; requirement R13;
 [0020](#0020), which removed the premise the old behaviour rested on.
 
 **What was wrong.** `POST /batches/upload` read every uploaded file, and the first one whose bytes
@@ -1920,7 +1891,7 @@ the worker; the upload route was the last place still deciding it the other way.
 <a id="0031"></a>
 ## 0031. The accessibility target is WCAG 2.0 A and AA, which Section 508 requires and the gate scans; WCAG 2.2 is not adopted
 
-**Decided:** 2026-09-16. **Evidence:** 36 CFR part 1194 appendix A, E205.4 and E207.2, quoted in
+**Evidence:** 36 CFR part 1194 appendix A, E205.4 and E207.2, quoted in
 `docs/reference/accessibility.md`; axe-core 4.11.4's own rule table, read here; `tests/test_a11y_axe.py`
 as it stands; [0017](#0017), the precedent for correcting approved requirement text rather than the
 product.
@@ -2005,7 +1976,7 @@ keeps.
 <a id="0032"></a>
 ## 0032. A label's identifier is not its filename: `label_id` is display text and leaves the logs, `evaluation_id` is minted
 
-**Decided:** 2026-09-16. **Evidence:** `app/logging/redaction.py`'s own contract, *"nothing a
+**Evidence:** `app/logging/redaction.py`'s own contract, *"nothing a
 submission contains reaches the logs"*; `app/logging/otel_genai.py` as it stood; the reference
 envelopes in `tests/fixtures/envelopes/batch/`, where `evaluation_id` and `label_ref` are already
 different kinds of string; [0020](#0020), which put the filename in the refusal sentence on purpose.
@@ -2057,7 +2028,7 @@ of telemetry by a list of field names.
 <a id="0033"></a>
 ## 0033. A single label's result is kept, so a reviewer can overrule it
 
-**Decided:** 2026-09-16. **Evidence:** `app/api/overrides.py` as it stood, which searched
+**Evidence:** `app/api/overrides.py` as it stood, which searched
 `app.state.batches` and nothing else; `app/api/ui/_result_page.py`, which evaluated and kept only the
 image; [0018](#0018), which settled where an uploaded image is kept and why.
 
@@ -2111,7 +2082,7 @@ nothing, but it withdraws a capability the requirements ask for to avoid keeping
 <a id="0034"></a>
 ## 0034. The bbox overlay and the evidence panel are removed, because neither can be fed truthfully
 
-**Decided:** 2026-09-16. **Evidence:** `app/vision/local.py`, which reads boxes off a copy downscaled
+**Evidence:** `app/vision/local.py`, which reads boxes off a copy downscaled
 to 1600 pixels on its longest edge and reads the warning off a frame it may have rotated;
 `app/api/ui/images.py`, which serves the original uploaded bytes; the 43 distinct `cfr_citation`
 strings in `rules/`, against the one piece of regulation wording the product keeps
@@ -2175,8 +2146,8 @@ reviewer a control that does nothing, which is the one thing a reviewer cannot c
 <a id="0035"></a>
 ## 0035. A check that runs long returns what it finished, and the guard that stops it is not the requirement's own number
 
-**Decided:** 2026-09-17. **Evidence:** `docs/evidence/2026-09-17-live-timing.json` — twelve
-submissions against the deployed service (commit `8cb5e70`) on 2026-09-17;
+**Evidence:** `docs/evidence/2026-09-17-live-timing.json` — twelve
+submissions against the deployed service (commit `8cb5e70`);
 `app/services/evaluator.py`; `docs/research/2026-09-15-rule-engine-architecture.md:772`.
 
 **What was wrong.** `Evaluator._DEFAULT_SLA_SECONDS = 5.0` wrapped the whole evaluation in
@@ -2237,8 +2208,8 @@ answers completely is strictly better than one truncated at 5.0, and both miss R
 <a id="0036"></a>
 ## 0036. The sideways re-read is screened by reading the strips, not by their shape alone
 
-**Decided:** 2026-09-17. **Evidence:** `docs/evidence/2026-09-17-screen-corpus.json` — all 62
-corpus images, measured on the development box on 2026-09-17 under the six-thread OCR budget,
+**Evidence:** `docs/evidence/2026-09-17-screen-corpus.json` — all 62
+corpus images, measured on the development box under the six-thread OCR budget,
 recording for each image what a recognition-only strip screen decides against what the full
 two-angle re-read finds; `app/vision/local.py`.
 
@@ -2311,9 +2282,9 @@ of a box.
 <a id="0037"></a>
 ## 0037. A measured heading boldness may send a label to a reviewer and may never reject it
 
-**Decided:** 2026-09-17. **Evidence:** `eval/heading_bold_ratios.py` and the run it produced over
-all 38 labels in `tests/fixtures/labels/manifest.json`, measured on the development box on
-2026-09-17 under the six-thread OCR budget; `app/vision/heading_measure.py`;
+**Evidence:** `eval/heading_bold_ratios.py` and the run it produced over
+all 38 labels in `tests/fixtures/labels/manifest.json`, measured on the development box
+under the six-thread OCR budget; `app/vision/heading_measure.py`;
 `app/rules/_validators/heading_style_check.py`; `rules/common/health_warning.yaml`.
 
 **What was wrong.** `common.warning.heading_caps_bold` is a `severity: reject` rule, and until now a
@@ -2377,9 +2348,9 @@ headings nobody checked.
 <a id="0038"></a>
 ## 0038. The cognac's class and type is the line the label sets largest, not its appellation line
 
-**Decided:** 2026-09-17. **Evidence:** commit `8ca3ecc` and the reading it changed, replayed on the
+**Evidence:** commit `8ca3ecc` and the reading it changed, replayed on the
 frozen recording `tests/recordings/reader/26212001000085/front.json` at that commit and at its
-parent on 2026-09-17; `app/vision/local.py` (`_warning_block`, `_largest_matching`);
+parent; `app/vision/local.py` (`_warning_block`, `_largest_matching`);
 `tests/fixtures/labels/manifest.json`, the `ttb-26212001000085` entry;
 `tests/test_vision_replay.py::test_the_cognac_label_now_reads_its_own_designation`.
 
@@ -2440,7 +2411,7 @@ field goes to a reviewer, for a reading of the back face, not the front.
 <a id="0039"></a>
 ## 0039. The reader turns a line upside down only when it is all but certain, and the warning comparison removes spacing
 
-**Decided:** 2026-09-17. **Evidence:** `docs/evidence/2026-09-17-line-flip.json`, which holds every
+**Evidence:** `docs/evidence/2026-09-17-line-flip.json`, which holds every
 reading below; `app/vision/local.py` (`LINE_FLIP_CONFIDENCE`);
 `app/rules/_validators/verbatim_hash.py`; `rules/common/health_warning.yaml`;
 `tests/test_reader_line_flip.py`; `tests/rules/_validators/test_verbatim_hash.py`.
@@ -2550,7 +2521,7 @@ mark where the full stop belongs) and `var-warning-wording` (*"MAY IMPAIR"*).
   can be absorbed by loosening the comparison, and this decision does not try. What to do about them
   is not settled here.
 
-**Amended 2026-09-17 — the canonical form drops `ascii_quotes`.**
+**Amended — the canonical form drops `ascii_quotes`.**
 
 The form is now `nfkc → join_line_break_hyphens → drop_whitespace → casefold`. `ascii_quotes` turned
 curly quotation marks straight, and §16.21's text contains no quotation mark of either kind, so a

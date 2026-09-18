@@ -1,7 +1,5 @@
 # Test Corpus, Sample-Size Statistics & Evaluation Harness Design
 
-Filed 2026-09-15.
-
 ## TTB Alcohol Label Verification MVP
 
 > **Note on project knowledge access.** The `project_knowledge_search` tool referenced in the task brief was **not available** in the execution environment — only public web research tools were accessible. Where this report needs values from project-knowledge files ([T1](./2026-09-15-ttb-regulatory-framework.md) reason codes, [T2](./2026-09-15-cola-operational-context.md) §Q2.10 fields, [T9](./2026-09-15-verification-targets-research.md) evaluation methodology, [S1](./2026-09-15-vision-stack.md) fixture spec, [S2](./2026-09-15-mvp-scope-demo-shape.md) MVP rule count), I have **reconstructed reasonable defaults from the contextual hints in the task brief and from primary TTB regulatory sources**, and have flagged each such reconstruction inline as `[ASSUMED — confirm against project knowledge]`. All external claims are cited with URLs.

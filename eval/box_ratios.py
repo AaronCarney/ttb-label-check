@@ -50,8 +50,8 @@ from app.vision.local import (
 CORPUS = Path("tests/fixtures/labels")
 MANIFEST = CORPUS / "manifest.json"
 
-# The pause between images, in seconds. The owner set this budget on
-# 2026-09-17: "it is safe to run the OCR on six threads and with a two second
+# The pause between images, in seconds. The owner set this budget:
+# "it is safe to run the OCR on six threads and with a two second
 # pause between each image."
 PAUSE_SECONDS = 2.0
 

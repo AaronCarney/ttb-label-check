@@ -1,7 +1,5 @@
 # Test labels with known answers, from the TTB Public COLA Registry
 
-Sources read 2026-09-15.
-
 **Answer.** The TTB Public COLA Registry publishes every approved label application as a
 public-domain record (CC0) with the label artwork attached. From it, `tests/fixtures/labels/` holds
 30 real approved labels: 14 distilled spirits, 8 wine and 8 malt beverages, 14 of them imports.
@@ -100,7 +98,7 @@ in bold type."
 2. From each bucket, the first records that were status APPROVED, had a front image and (except
    malt beverages) a back image, had a brand name of 40 characters or fewer, and came from a permit
    holder not already used in that bucket. Fields were parsed from the live form view, and the front
-   and back images downloaded from it on 2026-09-15.
+   and back images downloaded from it.
 3. Every image was read by eye: which image holds the warning, the alcohol content and net contents
    as printed, the class/type designation, the name and address line, and any origin statement.
    Small or sideways warnings were checked on magnified crops. Two records were dropped because

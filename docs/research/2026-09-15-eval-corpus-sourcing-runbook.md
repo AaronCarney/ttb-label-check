@@ -1,7 +1,5 @@
 # Eval Corpus Sourcing Runbook — Production Target: 250 Labels, Real-First
 
-Filed 2026-09-15.
-
 > **Status: PRODUCTION-TARGET RUNBOOK.** Concrete walkthrough that translates the [T13](./2026-09-15-label-image-sourcing-survey.md) source survey into a ~26–32 hour curator effort yielding the ≥ 250-label corpus (≥ 97 happy-path, ≥ 20 borderline, ≥ 1 case per rule, Krippendorff α ≥ 0.80). The prototype right-sizing to ~50 labels was a calendar-driven scope cut that should not have been needed given that the canonical primary source (TTB Public COLA Registry) is CC0-licensed. This runbook is the path any next iteration follows to discharge that gap.
 >
 > **Companion docs:** the corpus specification set out below — sourcing mix, mandatory checklist, synthetic realism bar and anti-patterns. [T9](./2026-09-15-verification-targets-research.md) §3 (Registry access mechanics). [T13](./2026-09-15-label-image-sourcing-survey.md) §0 (sourcing ordering), §1.0 (Registry survey), §1.6 (PACER/CourtListener). The real-first sourcing rule. The corpus datasheet this design calls for (self-disclosure).

@@ -1,4 +1,4 @@
-# Heading boldness over the label corpus — 2026-09-17
+# Heading boldness over the label corpus
 
 **What was asked.** `WIDTH_HEIGHT_RATIO_BOLD_MIN` in `app/vision/heading_measure.py` decides whether
 the GOVERNMENT WARNING heading is bold, and until this measurement it was the one corpus-fitted
@@ -8,7 +8,7 @@ is that re-tune.
 
 **How.** `eval/heading_bold_ratios.py`, over the warning-carrying face of every label in
 `tests/fixtures/labels/manifest.json`, through the reader's own `look()` so the crop is the frame
-production measures. Run on the development box on 2026-09-17 under the six-thread OCR budget with a
+production measures. Run on the development box under the six-thread OCR budget with a
 two-second pause per image; 38 faces in 103.7 s.
 
 **The ground truth is the approval.** Every label in the corpus carries `registry.status: APPROVED`

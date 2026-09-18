@@ -15,14 +15,14 @@ produces it.
 ### `2026-09-17-live-timing.json`
 
 Twelve submissions against the deployed service at `https://ttb.aaroncarney.me`,
-commit `8cb5e70`, on 2026-09-17. `rows` carries one entry per submission with
+commit `8cb5e70`. `rows` carries one entry per submission with
 the end-to-end duration the caller saw. Cited by decision 0035, which is about
 what a check that runs long returns.
 
 ### `2026-09-17-screen-corpus.json`
 
-One row for each of the 62 corpus images, measured on the development box on
-2026-09-17 under the six-thread OCR budget. Each row records what a
+One row for each of the 62 corpus images, measured on the development box
+under the six-thread OCR budget. Each row records what a
 recognition-only strip screen decides about the image (`gate`, `n_tall`,
 `screen_ms`, `strips`) against what the full two-angle re-read actually finds
 (`reread`), so the screen can be judged against the pass it would replace.
@@ -34,7 +34,7 @@ the strips rather than by their shape alone.
 The measurements behind decision 0039, which is about how sure the reader's
 0/180 line classifier must be before it turns a line upside down, and about
 removing spacing from the government warning comparison. Development box,
-2026-09-17, six-thread OCR budget. It holds:
+six-thread OCR budget. It holds:
 
 - `threshold_by_face`: nine faces read at classifier thresholds 0.9, 0.95,
   0.99 and 0.999 and with the classifier off, each with how far its warning

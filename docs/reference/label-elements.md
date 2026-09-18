@@ -4,7 +4,7 @@ Sources: 27 CFR part 4 (wine), part 5 (distilled spirits), part 7 (malt beverage
 <https://www.ecfr.gov/current/title-27/part-4>, <https://www.ecfr.gov/current/title-27/part-5>,
 <https://www.ecfr.gov/current/title-27/part-7> (text taken through the eCFR API,
 `https://www.ecfr.gov/api/versioner/v1/full/2026-09-11/title-27.xml?part=N`). eCFR shows Title 27
-current as of 2026-09-11. Read 2026-09-15. Summarised faithfully; phrases in quotation marks are
+current as of 2026-09-11. Summarised faithfully; phrases in quotation marks are
 the regulation's words. Country-of-origin marking is CBP's rule, 19 CFR 134.45
 (<https://www.ecfr.gov/current/title-19/section-134.45>, current as of 2026-09-11).
 

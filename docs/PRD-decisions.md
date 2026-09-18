@@ -1,8 +1,9 @@
 # PRD amendment record
 
-One entry per change to the text of `PRD.md`: what moved, when, and what made it necessary.
+One entry per change to the text of `PRD.md`: what moved, and what made it necessary. The commit
+that made the change records when.
 
-## 2026-09-16 — FR-7, equivalent values
+## FR-7, equivalent values
 
 **What moved.** FR-7 was one paragraph listing what each comparison ignores. It is now four, and three
 statements in it changed rather than being reworded:
@@ -38,7 +39,7 @@ and in each case the product was built against a primary source the PRD's own te
   records somewhere other than its brand-name field, and the old comparison rejected all three.
   [Decision 0015](decisions.md#0015) records the change.
 
-## 2026-09-16 — NFR-3, the accessibility conformance level
+## NFR-3, the accessibility conformance level
 
 **What moved.** NFR-3 said *"Every screen meets WCAG 2.2 level AA, read by a conformance review before
 each release."* It now names **WCAG 2.0 level A and AA**, says that this is the level Section 508

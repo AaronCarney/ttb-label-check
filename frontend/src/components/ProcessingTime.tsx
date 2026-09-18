@@ -34,7 +34,7 @@ export function formatDuration(ms: number): string {
 //
 //  - A cache hit. The durations then describe what returning the stored answer
 //    cost, not what checking the label cost (app/schemas/metrics.py).
-//  - A check the evaluation guard stopped. Since 2026-09-17 that reports the
+//  - A check the evaluation guard stopped. That now reports the
 //    real elapsed time rather than 0, so the number is how far it got. The
 //    IncompleteCheckCard below says what that means for the results.
 export function ProcessingTime({
