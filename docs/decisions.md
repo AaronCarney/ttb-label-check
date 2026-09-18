@@ -523,23 +523,37 @@ statement as the label prints it — verbatim, as a string, alongside the parsed
 instead of it. Until then `format_check.py`'s projection is what it has always been: a restatement of
 the reader's numbers, not a reading of the label.
 
-**Amended — the pattern rejects forms the regulations permit.**
+**Amended — each class's pattern takes the forms its own section prints, and anything else goes to a
+reviewer.**
 
 Both readers return the alcohol statement as the label prints it, under `alc_text`, and
-`regex_match` matches the rule's pattern against that text. A statement the reader could not place
-goes to a reviewer, not to a rejection.
+`regex_match` matches the rule's pattern against that text. The three rules run at `severity: warn`.
+A statement the pattern matches passes. A statement it does not match, or one the reader could not
+place, goes to a reviewer under `ALCOHOL_CONTENT.FORMAT.NEEDS_REVIEW`. No statement is rejected.
 
-The pattern in all three packs takes the word only before the number, and after it only "by
-volume", "/vol" or "vol". §5.65(b) and §7.65(b) permit the number first, and their own examples —
-"40% alc/vol", "Alc 40% by vol", "4.2% alc/vol" — do not match it. Over the 30 approved labels in the
-fixture manifest it rejects 27: all 14 spirits, 5 of 8 wine and all 8 malt. The rules are off until
-the pattern accepts every form the regulations permit.
+| Rule | Forms it passes |
+|---|---|
+| `spirits.alcohol.format` | The three forms §5.65(b)(2)(i) lists — "Alcohol ____ percent by volume", "____ percent alcohol by volume", "Alcohol by volume ____ percent." — with a statement of proof after it, §5.65(b)(1)(i) |
+| `malt.alcohol.format` | The three forms §7.65(b)(3)(i) lists, the third with the colon it prints: "Alcohol by volume: percent." |
+| `wine.alcohol.format` | "Alcohol __ % by volume" and the range "Alcohol __ % to __ % by volume", §4.36(b)(1) and (b)(2); and, as the "similar appropriate phrase" those paragraphs allow, the other two word orders, the third with or without a colon, each with a figure or a range |
 
-One pattern serves three classes because the rule pack copied the wine pattern into the spirits
-and malt packs. The design note gave spirits a pattern that accepted the number first and "by vol".
+Each pattern takes the abbreviations its section allows — "alc", "%", "/" for "by", "vol", with or
+without a period — and parentheses around any word or symbol. §5.65(b)(3) and §7.65(b)(4) say the
+forms "must appear as shown" apart from those abbreviations, so a malt statement of the third form
+without its colon goes to a reviewer.
 
-**Evidence:** `tests/fixtures/labels/manifest.json`, `app/rules/_validators/format_check.py`,
-`docs/reference/label-elements.md`, `docs/research/2026-09-15-rule-pack-validator-interface.md`.
+A pattern cannot list every statement the regulations permit. §5.65 and §7.65 allow other
+representations alongside the statement, such as alcohol by weight; §4.36 allows any similar
+appropriate phrase; and none of the three sections says how the figure is written. A statement in a
+form the pattern does not list is a reviewer's judgement, not a defect.
+
+Over the 30 approved labels in the fixture manifest, 27 statements pass. Three go to a reviewer: two
+malt labels, `ttb-26238001000795` and `ttb-26240001000454`, print the third form without its colon,
+and one wine label, `ttb-26239001000331`, writes its figure with a decimal comma.
+
+**Evidence:** `rules/spirits/spirits.yaml`, `rules/wine/wine.yaml`, `rules/malt/malt.yaml`,
+`app/rules/_validators/format_check.py`, `tests/rules/_validators/test_format_check.py`,
+`tests/fixtures/labels/manifest.json`, `docs/reference/label-elements.md`.
 
 <a id="0012"></a>
 ## 0012. A class-and-type designation the app cannot place goes to a reviewer, not to a rejection

@@ -7,6 +7,20 @@ date: the release's git tag records when it was cut. Versions follow
 
 ## [Unreleased]
 
+### Changed
+
+- The app checks the wording of a label's alcohol statement. A statement in one of the forms its
+  beverage class's section gives — §4.36(b) for wine, §5.65(b) for spirits, §7.65(b) for malt
+  beverages, with the abbreviations and parentheses those sections allow — passes, and any other
+  statement goes to a reviewer at warn severity, so the check never rejects a label. Of the 30
+  approved labels in the fixture corpus, 27 statements pass and 3 go to a reviewer. See
+  `docs/decisions.md#0011`.
+
+### Fixed
+
+- `eval.read_accuracy --sleep` pauses after each image the reader reads, so a label with several
+  faces gets a pause between every face, and the seconds it reports per label leave the pause out.
+
 ## [0.3.1]
 
 ### Fixed
