@@ -12,7 +12,7 @@ All notable changes to this project are recorded here. The format follows
   orientation check flipped a line whenever it was 90% sure the line was inverted, and on real labels
   it was wrong often enough that a correctly printed warning read as noise and was rejected. It now
   flips a line only when it is 99.9% sure. The sideways cognac's warning goes from 227 characters
-  wrong to one. Measured over the 38 shipped labels, rejections for the warning's wording fell from
+  wrong to exactly what the label prints. Measured over the 38 shipped labels, rejections for the warning's wording fell from
   18 to 15, and no label is newly rejected on anything. Three labels gain a point for a reviewer,
   where the reader now reads a line it used to garble and picks the wrong one for class and type or
   for name and address. See `docs/decisions.md#0039`.

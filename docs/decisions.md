@@ -2428,8 +2428,8 @@ reading below; `app/vision/local.py` (`LINE_FLIP_CONFIDENCE`);
 `tests/test_reader_line_flip.py`; `tests/rules/_validators/test_verbatim_hash.py`.
 
 **What was wrong.** After the warning block was confined to its own column (`8ca3ecc`), 18 of the 38
-corpus labels were still rejected under `common.warning.verbatim`, and only two of them print
-words that differ from §16.21. Reading each rejected warning against the §16.21 text showed two
+corpus labels were still rejected under `common.warning.verbatim`, and the corpus answer key
+records only four of them as printing a statement that differs from §16.21. Reading each rejected warning against the §16.21 text showed two
 causes that were not the label's fault.
 
 - **The reader turned upright lines upside down.** rapidocr runs a 0/180 orientation classifier over
@@ -2453,9 +2453,12 @@ The classifier threshold, on the nine faces whose readings moved when the classi
 | `var-skew` back | 131 | 57 | 0 | 0 | 0 |
 | `ttb-26239001000079` back | 53 | 53 | 2 | 2 | 2 |
 | `ttb-26239001000081` back | 57 | 57 | 57 | 3 | 3 |
-| `ttb-26212001000085` front (the sideways cognac) | 227 | 1 | 1 | 1 | 1 |
+| `ttb-26212001000085` front (the sideways cognac)¹ | 227 | 1 | 1 | 1 | 1 |
 | `ttb-26240001000573` front | 119 | 119 | 109 | 109 | 109 |
 | `…132` front, `…662` back, `…716` back | 0 | 0 | 0 | 0 | 0 |
+
+¹ The one character left on the cognac is the label's, not the reader's: it prints `ALCOHOLIC
+BEVERAGE IMPAIRS`, singular, and the reader now returns exactly that.
 
 Every label through the real route, both faces sent, before and after the change:
 
@@ -2465,8 +2468,10 @@ Every label through the real route, both faces sent, before and after the change
 | rule failures across the corpus | 32 | 30 | 33 | **29** |
 | labels newly rejected on any rule | — | 0 | 3 | **0** |
 
-`ttb-26229001000034`, which prints *"the RISKS of birth defects"* where §16.21 fixes *"the risk"*,
-is rejected on the warning in every one of the four sweeps.
+The four labels whose printed warning really differs from §16.21 are rejected on the warning in
+every one of the four sweeps: `ttb-26229001000034` (*"the RISKS of birth defects"*),
+`ttb-26212001000085` (*"ALCOHOLIC BEVERAGE IMPAIRS"*), `ttb-26240001000454` (a closing quotation
+mark where the full stop belongs) and `var-warning-wording` (*"MAY IMPAIR"*).
 
 **What was decided.**
 
@@ -2476,8 +2481,8 @@ is rejected on the warning in every one of the four sweeps.
 2. **The warning comparison removes every space rather than collapsing runs of them.** The canonical
    form is now `nfkc → ascii_quotes → join_line_break_hyphens → drop_whitespace → casefold`, and the
    asset hash is re-pinned to it. Removing spaces cannot make a different statement equal the
-   mandated one: the letters, digits and punctuation still have to match in order, and the corpus's
-   one true wording defect is still rejected. `eval/read_accuracy.py` already scored the warning this
+   mandated one: the letters, digits and punctuation still have to match in order, and all four
+   corpus labels that print a different statement are still rejected. `eval/read_accuracy.py` already scored the warning this
    way, so the score and the rule now agree.
 
 **What was rejected.**
@@ -2520,10 +2525,19 @@ is rejected on the warning in every one of the four sweeps.
   each other — 0.97 s median with the threshold alone, 1.46 s at the change, with identical reader
   code — because they ran minutes apart on a shared machine. The deployed service has not been
   re-measured.
-- **Fifteen labels are still rejected on the warning, and 13 of them print the
-  mandated words.** Four differ from §16.21 only by an accented letter the reader invented; seven by one to three wrong characters
-  or punctuation marks that no reader option above fixed; and on two the reader still assembles the wrong
-  text (`ttb-26212001000085` is one character off, and `ttb-26240001000573` reads an importer's
-  address into its warning). §16.21 fixes the punctuation, so none of these can be absorbed by
-  loosening the comparison, and this decision does not try. What to do about them is not settled
-  here.
+- **Fifteen labels are still rejected on the warning, and 11 of them print the mandated words.**
+  On four the reader invented an accented letter; on six it got one to three characters or
+  punctuation marks wrong, which no reader option above fixed; and on `ttb-26240001000573` the
+  warning block still takes in an importer's address. §16.21 fixes the punctuation, so none of these
+  can be absorbed by loosening the comparison, and this decision does not try. What to do about them
+  is not settled here.
+
+**Amended 2026-09-17 — the canonical form drops `ascii_quotes`.**
+
+The form is now `nfkc → join_line_break_hyphens → drop_whitespace → casefold`. `ascii_quotes` turned
+curly quotation marks straight, and §16.21's text contains no quotation mark of either kind, so a
+label that prints one differs from the mandated text with or without the op. Removing it changes no
+comparison and leaves the asset pin as it was. Mutation testing found it: no test could tell the op
+from its absence. `collapse_whitespace`, `tighten_punctuation_spacing` and `strip_outer_ws`, which no
+rule named once `drop_whitespace` replaced them, are removed with it, and a rule that names an op
+that does not exist is refused at load, naming the rule and the op.

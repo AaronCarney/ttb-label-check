@@ -81,8 +81,7 @@ def test_missing_space_after_the_numeral_passes() -> None:
     """ttb-26237001000107 prints `(1)ACCORDING` with no space at all.
 
     So "spacing is ignored" cannot mean "collapse runs of spaces": there is no
-    run here to collapse. The whitespace on both sides of the punctuation comes
-    out instead.
+    run here to collapse. Every space comes out instead.
     """
     assert _outcome(CANONICAL.replace("(1) According", "(1)According")) is Outcome.PASS
 
@@ -97,8 +96,8 @@ def test_two_words_run_together_pass() -> None:
 
 def test_a_changed_letter_still_fails_with_spaces_removed() -> None:
     """ttb-26229001000034 prints `the RISKS of birth defects`, and TTB's text is
-    `the risk`. Removing spaces leaves every letter to match in order, so the one
-    true wording defect in the corpus is still rejected."""
+    `the risk`. Removing spaces leaves every letter to match in order, so a label
+    that prints a different word is still rejected."""
     assert _outcome(CANONICAL.replace("the risk of", "the risks of")) is Outcome.FAIL
 
 
