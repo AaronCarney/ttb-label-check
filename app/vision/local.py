@@ -1173,22 +1173,25 @@ def _warning_block(boxes: list[_Box]) -> tuple[str, str, _Box, list[_Box]] | Non
     return text, heading_text.strip(), heading, ordered
 
 
+# A figure starts at the start of a number, so the "00" of "100% GRAIN NEUTRAL
+# SPIRITS" is not read as an alcohol content.
 _ABV_RE = re.compile(
     r"(?:ALC(?:OHOL)?\.?\s*(?:BY\s*VOL\.?\s*)?[:\s]*)?"
-    r"(\d{1,2}(?:[.,]\d{1,2})?)\s*%"
+    r"(?<!\d)(\d{1,2}(?:[.,]\d{1,2})?)\s*%"
     r"|"
     r"(?:ALC(?:OHOL)?\.?\s*)(\d{1,2}(?:[.,]\d{1,2})?)\s*(?:%|DEGREES?)?\s*(?:BY\s*)?VOL",
     re.I,
 )
 # The alcohol statement as the label prints it, which is a different question
 # from what the percentage is. `_ABV_RE` finds the figure; this finds the words
-# around it, in either of the orders a label uses — "ALCOHOL 40% BY VOLUME" and
-# "40% ALC. BY VOL." are both printed, and 27 CFR §5.65(b) is about exactly that
-# form of words. A label that prints a bare "12.5%" yields a bare "12.5%", which
-# is the fact the format rule needs rather than a hole in the payload.
+# around it, in any of the three orders a label uses — "ALCOHOL 40% BY VOLUME",
+# "40% ALC. BY VOL." and "ALC. BY VOL. 5%" are all printed, and 27 CFR §5.65(b)
+# and §7.65(b) list exactly those forms of words. A label that prints a bare
+# "12.5%" yields a bare "12.5%", which is the fact the format rule needs rather
+# than a hole in the payload.
 _ALC_STATEMENT_RE = re.compile(
-    r"(?:ALC(?:OHOL)?\.?\s*)?"
-    r"\d{1,2}(?:[.,]\d{1,2})?\s*%?"
+    r"(?:ALC(?:OHOL)?\.?\s*(?:(?:BY\s*|/\s*)VOL(?:UME)?\.?\s*:?\s*)?)?"
+    r"(?<!\d)\d{1,2}(?:[.,]\d{1,2})?\s*%?"
     r"(?:\s*(?:ALC(?:OHOL)?\.?)?\s*(?:BY\s*VOL(?:UME)?|/\s*VOL|VOL)\.?)?",
     re.I,
 )
@@ -1595,7 +1598,12 @@ def _parse(
     joined = " ".join(b.text for b in _reading_order(body))
 
     # -- alcohol content --------------------------------------------------
-    abv_box, abv_match = _first_match(body, _ABV_RE)
+    # A label prints other percentages — a grape blend, "100% agave" — and the
+    # alcohol content is the one printed with the alcohol words. A bare
+    # percentage is the reading only where no statement carries them.
+    abv_box, abv_match = _first_match(body, _ABV_RE, reject=_lacks_alcohol_words)
+    if abv_match is None:
+        abv_box, abv_match = _first_match(body, _ABV_RE)
     if abv_match:
         raw = next(g for g in abv_match.groups() if g)
         # The label's own wording, alongside the number. The format rules judge
@@ -1726,6 +1734,12 @@ def _alcohol_statement(text: str, figure: str) -> str:
         if figure in candidate.group(0):
             return candidate.group(0).strip()
     return ""
+
+
+def _lacks_alcohol_words(match: re.Match) -> bool:
+    """Whether the statement around this figure carries no "alc" or "vol"."""
+    figure = next(g for g in match.groups() if g)
+    return not re.search(r"ALC|VOL", _alcohol_statement(match.string, figure), re.I)
 
 
 def _names_a_state(match: re.Match) -> bool:

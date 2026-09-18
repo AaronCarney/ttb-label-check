@@ -396,7 +396,7 @@ the checks fail in different ways and an average hides that.
 | --- | --- | --- |
 | `brand` | the brand name the label carries | 17 of 30 |
 | `class_type` | the class and type designation | 19 of 30 |
-| `abv` | the stated alcohol content | 25 of 30 |
+| `abv` | the stated alcohol content | 27 of 30 |
 | `net_contents` | the stated net contents | 23 of 29 |
 | `name_address` | the bottler's or importer's name and address | 22 of 30 |
 | `origin` | the country of origin | 24 of 30 |

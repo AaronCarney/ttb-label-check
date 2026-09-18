@@ -22,6 +22,12 @@ date: the release's git tag records when it was cut. Versions follow
   reader is known to misread on a correct label: an accent on a letter, `(I)` for `(1)`, `O` for `D`,
   or one punctuation mark. It reports needs review and names each difference. A warning that shows
   "surgeon general" with a lower-case S or G is no longer a match. See `docs/decisions.md#0040`.
+- The reader reads the alcohol content from the percentage printed with the alcohol words, and a
+  figure starts at the start of a number. On a spirits label that prints "100% GRAIN NEUTRAL SPIRITS"
+  above "40% ALC/VOL" it read 0, and on a wine label that lists its grape blend above the statement
+  it read the first grape's share. Both now read the statement. The reader also returns a statement
+  that puts the words first, "ALC. BY VOL. 5%", whole. The README's `abv` figure is 27 of 30, up
+  from 25.
 - `eval.read_accuracy --sleep` pauses after each image the reader reads, so a label with several
   faces gets a pause between every face, and the seconds it reports per label leave the pause out.
 
