@@ -1,11 +1,9 @@
 """format_check, registered as 'regex_match', judges the label's alcohol wording.
 
 Both readers return the alcohol statement as the label prints it, under
-`alc_text`, and the validator matches the rule's regex against that. It used to
-build the sentence "alcohol N% by volume" from the reader's number and match
-against its own construction, which is why the three rules that use it were
-switched off (docs/decisions.md#0011). They are still off; these tests pin what
-the validator does when they run.
+`alc_text`, and the validator matches the rule's regex against that. The three
+rules that use it are off (docs/decisions.md#0011); these tests pin what the
+validator does when they run.
 
 It stays registered because app/rules/loader.py refuses startup when a rule
 names a validator the registry does not carry, and it makes that check for

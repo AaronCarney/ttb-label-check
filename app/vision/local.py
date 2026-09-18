@@ -1598,12 +1598,10 @@ def _parse(
     abv_box, abv_match = _first_match(body, _ABV_RE)
     if abv_match:
         raw = next(g for g in abv_match.groups() if g)
-        # The label's own wording, alongside the number rather than instead of
-        # it. Keeping only the number left the format check comparing the rule
-        # pack's regex against a sentence the validator had written itself, so
-        # it passed every label it was shown and rejected every label it was
-        # shown nothing about (`docs/decisions.md#0011`). The rule packs already
-        # name the key they want for this: `evidence_required: [alc_text]`.
+        # The label's own wording, alongside the number. The format rules judge
+        # how the label phrases its alcohol statement, which the number alone
+        # cannot show; they name this key in `evidence_required: [alc_text]`
+        # (`docs/decisions.md#0011`).
         alc_text = _alcohol_statement(abv_box.text, raw) or abv_match.group(0).strip()
         out["abv"] = (
             {

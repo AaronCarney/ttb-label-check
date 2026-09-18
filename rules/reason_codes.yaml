@@ -72,9 +72,8 @@ codes:
   ALCOHOL_CONTENT.FORMAT.INVALID:
     # Not in `reviewer_vocabulary:` below, and that is correct: the three
     # `alcohol.format` rules do name this code, so something emits it as far as
-    # the registry is concerned. Those rules are switched off, because no reader
-    # returns the label's own alcohol wording and the check cannot be made
-    # without it. See docs/decisions.md#0011.
+    # the registry is concerned. Those rules are off, because their pattern
+    # rejects statements the regulations permit. See docs/decisions.md#0011.
     description: "Alcohol-content statement format does not satisfy regulation pattern."
     cfr_anchors: ["27 CFR §4.36(b)(1)", "27 CFR §5.65(b)", "27 CFR §7.65(b)"]
     severity: reject

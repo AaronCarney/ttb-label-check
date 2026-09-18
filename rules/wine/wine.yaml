@@ -87,15 +87,11 @@ rules:
     evidence_required: [alc_text]
     disabled: true
     notes: >-
-      Switched off, docs/decisions.md#0011. The check needs the alcohol
-      statement as the label prints it, and no reader returns that: the
-      reading arrives as a number and a unit, and the validator rebuilt a
-      sentence from them and matched the pattern against its own
-      construction. So the rule passed whenever any number was read and
-      failed when none was — and on a table wine, where §4.36(a) lets the
-      designation carry the statement instead, that is a rejection of a label
-      that complies. Switch it back on when the reader
-      returns the raw alcohol text.
+      Off, docs/decisions.md#0011. The pattern takes the word only before the
+      number, and after it only "by volume", "/vol" or "vol". It rejects forms
+      §4.36(b)(1) permits, such as "12% ALC. BY VOL." and "ALC. 12.8% BY
+      VOL.", and it rejects 5 of the 8 approved wine labels in the fixture
+      corpus.
     effective_date: "1936-12-15"
     test_fixtures: [F-WINE-ALC-FORMAT-PASS-01, F-WINE-ALC-FORMAT-FAIL-01]
 

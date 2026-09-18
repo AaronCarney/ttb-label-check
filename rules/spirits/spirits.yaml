@@ -80,14 +80,10 @@ rules:
     evidence_required: [alc_text]
     disabled: true
     notes: >-
-      Switched off, docs/decisions.md#0011. The check needs the alcohol
-      statement as the label prints it, and no reader returns that: the
-      reading arrives as a number and a unit, and the validator rebuilt a
-      sentence from them and matched the pattern against its own
-      construction. So the rule passed whenever any number was read and
-      failed when none was — and on a spirits label whose statement the reader
-      could not place, that is a rejection of a label that complies. Switch it back on when the reader
-      returns the raw alcohol text.
+      Off, docs/decisions.md#0011. The pattern takes the word only before the
+      number, and after it only "by volume", "/vol" or "vol". It rejects forms
+      §5.65(b) permits, such as "40% ALC./VOL." and "ALC. 42.8% BY VOL.", and
+      it rejects all 14 approved spirits labels in the fixture corpus.
     effective_date: "2022-02-09"
     test_fixtures: [F-SPIRITS-ALC-FORMAT-PASS-01, F-SPIRITS-ALC-FORMAT-FAIL-01]
 

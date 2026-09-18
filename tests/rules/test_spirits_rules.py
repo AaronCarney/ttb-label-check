@@ -122,12 +122,8 @@ def test_alcohol_present_neg(ruleset) -> None:
 
 
 def test_format_is_switched_off(ruleset) -> None:
-    # Switched off, docs/decisions.md#0011: the validator matches the pack's regex
-    # against a sentence it builds from the reader's percentage, never against
-    # the label's own wording. Exercising it here would test that construction
-    # and report a check the app does not make. The engine skips the rule
-    # (app/rules/yaml_engine.py), so the only thing to assert is that it stays
-    # off until the reader returns the raw alcohol text.
+    # Off, docs/decisions.md#0011: the pattern rejects statements the
+    # regulations permit. The engine skips the rule (app/rules/yaml_engine.py).
     rule = _r(ruleset, "spirits.alcohol.format")
     assert rule.disabled is True
     assert rule.validator in VALIDATOR_REGISTRY

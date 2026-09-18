@@ -540,6 +540,24 @@ statement as the label prints it — verbatim, as a string, alongside the parsed
 instead of it. Until then `format_check.py`'s projection is what it has always been: a restatement of
 the reader's numbers, not a reading of the label.
 
+**Amended 2026-09-17 — the pattern rejects forms the regulations permit.**
+
+Both readers return the alcohol statement as the label prints it, under `alc_text`, and
+`regex_match` matches the rule's pattern against that text. A statement the reader could not place
+goes to a reviewer, not to a rejection.
+
+The pattern in all three packs takes the word only before the number, and after it only "by
+volume", "/vol" or "vol". §5.65(b) and §7.65(b) permit the number first, and their own examples —
+"40% alc/vol", "Alc 40% by vol", "4.2% alc/vol" — do not match it. Over the 30 approved labels in the
+fixture manifest it rejects 27: all 14 spirits, 5 of 8 wine and all 8 malt. The rules are off until
+the pattern accepts every form the regulations permit.
+
+One pattern serves three classes because the rule pack copied the wine pattern into the spirits
+and malt packs. The design note gave spirits a pattern that accepted the number first and "by vol".
+
+**Evidence:** `tests/fixtures/labels/manifest.json`, `app/rules/_validators/format_check.py`,
+`docs/reference/label-elements.md`, `docs/research/2026-09-15-rule-pack-validator-interface.md`.
+
 <a id="0012"></a>
 ## 0012. A class-and-type designation the app cannot place goes to a reviewer, not to a rejection
 

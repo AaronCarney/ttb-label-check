@@ -23,10 +23,7 @@ _logger = logging.getLogger("app.rules._validators.format_check")
 def _project_alc_text(value: object) -> str:
     """The alcohol statement as the label prints it, for the pattern to judge.
 
-    Both readers return it as `alc_text` alongside the number. This used to
-    build `alcohol {pct}{unit} by volume` from the number instead, so the
-    pattern judged a sentence the validator had written in the form the pattern
-    accepts, and passed every label that had a number on it
+    Both readers return it as `alc_text` alongside the number
     (`docs/decisions.md#0011`). A reading that is already a string is the
     wording itself.
     """

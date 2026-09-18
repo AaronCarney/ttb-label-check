@@ -561,9 +561,9 @@ that cannot check anything.
 - **The wording of an alcohol-content statement is not checked.** The app checks that a label states
   its alcohol content where the regulations require one, and that the figure on the label is the
   figure the application declared. It does not check that the statement is phrased as 27 CFR
-  §4.36(b)(1), §5.65(b) and §7.65(b) require, because the reader returns the percentage it found and
-  not the words the label printed. See `docs/decisions.md#0011`. A label stating the right figure
-  in the wrong words passes this check, so the phrasing is still the agent's own read.
+  §4.36(b)(1), §5.65(b) and §7.65(b) require, because the rules' pattern rejects forms those sections
+  permit. See `docs/decisions.md#0011`. A label stating the right figure in the wrong words passes
+  this check, so the phrasing is still the agent's own read.
 
 - **A country of origin is read only as the application's English name.** Customs marking rules also
   accept the country's name in the language of the country, an abbreviation that unmistakably

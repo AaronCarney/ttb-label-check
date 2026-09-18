@@ -117,12 +117,8 @@ def test_alcohol_conditional_not_applicable(ruleset) -> None:
 
 
 def test_format_is_switched_off(ruleset) -> None:
-    # Switched off, docs/decisions.md#0011: the validator matches the pack's regex
-    # against a sentence it builds from the reader's percentage, never against
-    # the label's own wording. On a malt beverage that is worse than useless —
-    # §7.63(a)(3) requires the statement only where the alcohol comes from
-    # added nonbeverage ingredients, so a label that lawfully states nothing
-    # was rejected. The engine skips the rule (app/rules/yaml_engine.py).
+    # Off, docs/decisions.md#0011: the pattern rejects statements the
+    # regulations permit. The engine skips the rule (app/rules/yaml_engine.py).
     rule = _r(ruleset, "malt.alcohol.format")
     assert rule.disabled is True
     assert rule.validator in VALIDATOR_REGISTRY
