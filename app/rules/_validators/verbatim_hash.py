@@ -24,9 +24,10 @@ narrow gap as readily as a printer closes one. Removing them cannot make a
 different statement equal the mandated one: the letters, digits and
 punctuation still have to match in order.
 
-Supported ops: ``nfkc``, ``ascii_quotes``, ``join_line_break_hyphens``,
-``collapse_whitespace``, ``tighten_punctuation_spacing``, ``drop_whitespace``,
-``casefold``, ``strip_outer_ws``.
+Supported ops: ``nfkc``, ``join_line_break_hyphens``, ``drop_whitespace``,
+``casefold``. There is no op for quotation marks: the mandated statement
+contains none, so a label that prints one, curly or straight, differs from it
+either way.
 """
 
 from __future__ import annotations
@@ -51,7 +52,6 @@ from app.schemas.rules import RuleDefinition
 
 DEFAULT_NORMALIZATION_OPS: tuple[str, ...] = (
     "nfkc",
-    "ascii_quotes",
     "join_line_break_hyphens",
     "drop_whitespace",
     "casefold",
@@ -60,12 +60,6 @@ DEFAULT_NORMALIZATION_OPS: tuple[str, ...] = (
 # A hyphen with whitespace after it is a word a line break split. The mandated
 # statement contains no hyphen of its own, so nothing legitimate is joined here.
 _LINE_BREAK_HYPHEN = re.compile(r"-\s+")
-
-# Whitespace on either side of a punctuation mark. Removing it rather than
-# collapsing it is what makes "WARNING  :", "WARNING :" and "WARNING:" one
-# string: a label that omits the space is as common as one that doubles it,
-# and neither is a difference in the words the regulation mandates.
-_SPACE_AROUND_PUNCTUATION = re.compile(r"""\s*([(),.;:!?"'])\s*""")
 
 
 def canonicalize_text(s: str, ops: Sequence[str] = DEFAULT_NORMALIZATION_OPS) -> str:
@@ -76,20 +70,12 @@ def canonicalize_text(s: str, ops: Sequence[str] = DEFAULT_NORMALIZATION_OPS) ->
     for op in ops:
         if op == "nfkc":
             s = unicodedata.normalize("NFKC", s)
-        elif op == "ascii_quotes":
-            s = s.replace("“", '"').replace("”", '"').replace("‘", "'").replace("’", "'")
         elif op == "join_line_break_hyphens":
             s = _LINE_BREAK_HYPHEN.sub("", s)
-        elif op == "collapse_whitespace":
-            s = re.sub(r"\s+", " ", s)
-        elif op == "tighten_punctuation_spacing":
-            s = _SPACE_AROUND_PUNCTUATION.sub(r"\1", s)
         elif op == "drop_whitespace":
             s = re.sub(r"\s+", "", s)
         elif op == "casefold":
             s = s.casefold()
-        elif op == "strip_outer_ws":
-            s = s.strip()
         else:
             raise ValueError(f"unknown normalization op: {op!r}")
     return s

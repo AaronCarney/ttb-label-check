@@ -50,7 +50,7 @@ rules:
       # So case, every space and a line-break hyphen come out of the
       # comparison, and punctuation stays in.
       normalization:
-        [nfkc, ascii_quotes, join_line_break_hyphens, drop_whitespace, casefold]
+        [nfkc, join_line_break_hyphens, drop_whitespace, casefold]
     evidence_required: [warning_block]
     confidence_floor: 0.60
     effective_date: "1989-11-18"

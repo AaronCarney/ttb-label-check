@@ -213,6 +213,21 @@ def test_asset_file_missing_fails_closed(tmp_path: Path) -> None:
         YamlRuleLoader(rules_root_for_assets=tmp_path).load(rules)
 
 
+def test_unknown_normalization_op_fails_closed_naming_the_rule(tmp_path: Path) -> None:
+    """A pack naming an op `canonicalize_text` does not have is refused like
+    every other bad asset block: in the violation list, with the rule and the
+    op named, not as a bare exception out of the loader."""
+    _write(tmp_path / "assets/warnings/x.txt", "some text")
+    body = _asset_pack_yaml("deadbeef" * 8).replace(
+        "normalization: []", "normalization: [nfkc, strip_accents]"
+    )
+    rules = _setup(tmp_path, body)
+    with pytest.raises(
+        RuleLoaderError, match=r"test\.warning\.verbatim: unknown normalization op: 'strip_accents'"
+    ):
+        YamlRuleLoader(rules_root_for_assets=tmp_path).load(rules)
+
+
 def test_decision_table_ref_dangling_fails_closed(tmp_path: Path) -> None:
     body = _baseline_rule_yaml(validator="unmeasurable", reason="WARNING.PRESENCE.MISSING")
     body = body.replace(

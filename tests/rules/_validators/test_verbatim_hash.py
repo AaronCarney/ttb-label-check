@@ -18,6 +18,8 @@ from __future__ import annotations
 
 import hashlib
 
+import pytest
+
 from app.rules._validators import VALIDATOR_REGISTRY
 from app.rules._validators.verbatim_hash import canonicalize_text, verbatim_hash
 from app.schemas.rejection import Outcome
@@ -121,6 +123,13 @@ def test_changed_punctuation_still_fails() -> None:
     Punctuation is part of the mandated statement, so it is never normalized away.
     """
     assert _outcome(CANONICAL.replace("health problems.", 'health problems"')) is Outcome.FAIL
+
+
+def test_an_unknown_op_is_refused_by_name() -> None:
+    """The loader reports this message against the rule that named the op, so
+    the op's name is what tells a rule author what to fix."""
+    with pytest.raises(ValueError, match=r"^unknown normalization op: 'ascii_quotes'$"):
+        canonicalize_text(CANONICAL, ops=("nfkc", "ascii_quotes"))
 
 
 def test_verbatim_hash_registered() -> None:

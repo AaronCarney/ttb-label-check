@@ -292,9 +292,8 @@ class YamlRuleLoader:
             # CANONICALIZED form — that is what the asset-hash cross-check
             # compares. An empty list ([]) explicitly opts out and hashes raw
             # bytes (used by tmp_path fixtures in the fail-closed loader tests).
-            # Omitted (None) defaults to the standard 4-op pipeline, so a
-            # shipped asset is never silently broken by a stray trailing
-            # newline.
+            # Omitted (None) defaults to the standard pipeline, so a shipped
+            # asset is never silently broken by a stray trailing newline.
             if ops is None:
                 ops = list(DEFAULT_NORMALIZATION_OPS)
             if ops:
@@ -303,7 +302,11 @@ class YamlRuleLoader:
                 except UnicodeDecodeError as e:
                     acc.errors.append(f"{rd.rule_id}: asset is not utf-8: {e}")
                     continue
-                normalized = canonicalize_text(text, ops=ops)
+                try:
+                    normalized = canonicalize_text(text, ops=ops)
+                except ValueError as e:
+                    acc.errors.append(f"{rd.rule_id}: {e}")
+                    continue
                 actual = hashlib.sha256(normalized.encode("utf-8")).hexdigest()
             else:
                 actual = hashlib.sha256(full.read_bytes()).hexdigest()
