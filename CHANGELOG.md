@@ -23,6 +23,11 @@ All notable changes to this project are recorded here. The format follows
   removed from the comparison entirely. Every letter, digit and punctuation mark still has to match
   in order, and the shipped label that prints "the RISKS of birth defects" is still rejected.
 
+- `uv run python -m eval.read_accuracy`, the command the README's reading accuracy figures come
+  from, crashed on its first label. It still built a label as one image after a label came to carry
+  its faces, and no test ran that step. It now builds a one-face label, and
+  `tests/test_read_accuracy_reads.py` holds it.
+
 ## [0.3.0] - 2026-09-17
 
 ### Added

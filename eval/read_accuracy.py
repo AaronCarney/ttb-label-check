@@ -60,7 +60,7 @@ from pathlib import Path
 from app.config import Settings
 from app.rules._validators._helpers import normalize_words, word_run_present
 from app.rules.units import UnitTable, millilitres, shipped_table
-from app.schemas.label import Label
+from app.schemas.label import Face, Label
 from app.vision.local import freeze_reading, parse_reading, thaw_reading
 
 LABELS_ROOT = Path("tests/fixtures/labels")
@@ -203,9 +203,15 @@ async def _read_one_face(
     label = Label(
         label_id=f"{entry['id']}-{face}",
         batch_id="read-accuracy",
-        image_bytes=path.read_bytes(),
-        content_type="image/jpeg" if path.suffix.lower() in (".jpg", ".jpeg") else "image/png",
-        face_tag="front" if face == "front" else "back",
+        faces=(
+            Face(
+                image_bytes=path.read_bytes(),
+                content_type="image/jpeg"
+                if path.suffix.lower() in (".jpg", ".jpeg")
+                else "image/png",
+                face_tag="front" if face == "front" else "back",
+            ),
+        ),
     )
     # Cleared first so a recording is never written from the previous image:
     # a label the quality gate turns away never reaches the engine and produces
