@@ -234,7 +234,7 @@ async def _read_one_face(
 
 
 async def _read_faces(
-    reader, entry: dict, freeze_dir: Path | None = None
+    reader, entry: dict, freeze_dir: Path | None = None, pause: float = 0.0
 ) -> tuple[dict[str, dict], float, int]:
     """Read every face of one label; return the merged payloads, the seconds and
     how many of its faces came from a recording rather than from the reader.
@@ -243,9 +243,13 @@ async def _read_faces(
     ones the regulations put in the same field of vision, so the faces are read
     front first and the first face reporting a value for a field is the one
     that holds it. The warning is taken from whichever face carries it.
+
+    `pause` is the cooling gap after each face the reader actually read. It is
+    left out of the seconds returned, which time the reading and nothing else.
     """
     merged: dict[str, dict] = {}
     started = time.perf_counter()
+    paused = 0.0
     replayed = 0
     faces = sorted(
         entry["images"].items(),
@@ -260,6 +264,9 @@ async def _read_faces(
             continue
         payloads, from_recording = await _read_one_face(reader, entry, face, relative, freeze_dir)
         replayed += int(from_recording)
+        if pause > 0 and not from_recording:
+            await asyncio.sleep(pause)
+            paused += pause
         for field_id, payload in payloads.items():
             if _has_reading(merged.get(field_id)):
                 continue
@@ -267,7 +274,7 @@ async def _read_faces(
                 merged[field_id] = payload
             else:
                 merged.setdefault(field_id, payload)
-    return merged, time.perf_counter() - started, replayed
+    return merged, time.perf_counter() - started - paused, replayed
 
 
 def _score(entry: dict, read: dict[str, dict], warning_text: str) -> dict[str, bool | None]:
@@ -439,10 +446,10 @@ async def main() -> int:
         type=float,
         default=0.0,
         help=(
-            "wait this many seconds after each label that was actually read, to "
-            "let the CPU cool between labels. A label served entirely from "
-            "recordings spent no CPU, so it is not followed by a wait, and "
-            "neither is the last label."
+            "wait this many seconds after each image that was actually read, to "
+            "let the CPU cool between images. An image served from a recording "
+            "spent no CPU, so it is not followed by a wait, and the wait is not "
+            "counted in the seconds reported."
         ),
     )
     parser.add_argument(
@@ -478,16 +485,10 @@ async def main() -> int:
 
     rows, seconds = [], []
     faces_replayed = faces_read = 0
-    for position, entry in enumerate(entries):
-        read, elapsed, replayed = await _read_faces(reader, entry, args.freeze)
+    for entry in entries:
+        read, elapsed, replayed = await _read_faces(reader, entry, args.freeze, args.sleep)
         faces_replayed += replayed
-        read_now = len(entry["images"]) - replayed
-        faces_read += read_now
-        # The cooling gap belongs after work, so it is skipped for a label whose
-        # faces all came off disk and after the last label, where waiting delays
-        # the scoreboard and cools nothing.
-        if args.sleep > 0 and read_now > 0 and position + 1 < len(entries):
-            await asyncio.sleep(args.sleep)
+        faces_read += len(entry["images"]) - replayed
         # A variant is a damaged copy of a real label: it exercises the rules,
         # not the reader, so it is recorded but never scored.
         if entry["kind"] != "real":
