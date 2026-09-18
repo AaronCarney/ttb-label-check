@@ -10,8 +10,9 @@ from typing import Any
 from fastapi import APIRouter, Depends, HTTPException, Request
 from sse_starlette.sse import EventSourceResponse
 
-from app.api import _background, limits
+from app.api import limits
 from app.api._sse_bus import SSEBus
+from app.batch import admission
 from app.batch.anomaly import AnomalyDetector
 from app.batch.state import InFlightBatch
 from app.batch.worker import BatchWorker
@@ -87,8 +88,6 @@ async def post_batches(
     lookahead_k = _resolve_lookahead_k(settings)
     in_flight = _build_in_flight_from_envelope(envelope, lookahead_k=lookahead_k)
     bus = SSEBus()
-    request.app.state.batches[envelope.batch_id] = in_flight
-    request.app.state.buses[envelope.batch_id] = bus
 
     # Build the evaluator via the shared factory; tests monkeypatch this.
     from app.deps import build_evaluator
@@ -101,7 +100,16 @@ async def post_batches(
         anomaly=AnomalyDetector(),
         bus=bus,
     )
-    _background.spawn(request.app, worker.run(), name=f"batch-worker:{envelope.batch_id}")
+    try:
+        admission.start(request.app, in_flight, bus, worker)
+    except admission.BatchInProgress as busy:
+        _logger.warning(
+            f"batch_submit_busy batch_id={envelope.batch_id} agent_id={envelope.agent_id} "
+            f"items={len(envelope.items)} running_checked={busy.checked} "
+            f"running_total={busy.total}",
+            extra={"batch_id": envelope.batch_id, "reason_code": "ENGINE.BATCH.CONFLICT"},
+        )
+        raise HTTPException(status_code=409, detail=str(busy)) from None
     _logger.info(
         f"batch_accepted batch_id={envelope.batch_id} agent_id={envelope.agent_id} "
         f"items={len(envelope.items)} lookahead_k={lookahead_k}",

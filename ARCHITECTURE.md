@@ -68,7 +68,7 @@ as it finishes, so a 300-label batch shows its first verdicts immediately instea
 | `app/vision/` | The readers. `base.py` is the interface both implement; `local.py` reads on this machine with no outbound call and is the default; `cloud.py` reads with a vision model; `quality.py` gates unusable images; `heading_measure.py` measures whether the warning heading is set in bold. |
 | `app/rules/` | The engine. `loader.py` reads and cross-checks the YAML pack at startup; `yaml_engine.py` selects the rules that apply to each observation and runs them; `_validators/` holds one function per comparison kind, registered by name. |
 | `app/services/` | One step of the flow each: `evaluator.py` composes them, and `disposition.py`, `aggregation.py`, `confidence.py`, `envelope_builder.py`, `audit.py`, `metrics_builder.py`, `cache.py` do the rest. `application_mapper.py` and `application_form.py` turn an application into the declared values the rules compare against. |
-| `app/batch/` | The batch path: a bounded queue, a worker, and the anomaly check that flags a batch failing far more often than its neighbours. |
+| `app/batch/` | The batch path: the one-batch-at-a-time admission, a bounded queue, a worker, and the anomaly check that flags a batch failing far more often than its neighbours. |
 | `app/schemas/` | The pydantic types. `wire/` holds what crosses the HTTP boundary; the rest are internal. |
 | `app/logging/` | JSON-line logging, secret redaction, and a ring buffer the readers record each call into. It lives as long as the process; nothing reads it back yet. |
 | `app/ui/` | Jinja page shells and the built frontend bundle they mount. |

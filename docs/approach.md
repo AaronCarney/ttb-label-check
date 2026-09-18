@@ -376,9 +376,11 @@ and at the corpus median of about 184 KB all hundred. So the count is a fairness
 are the real one, and a reviewer sending a hundred large files is refused by the request cap with
 every offending file named. `files_that_fit()` in `app/api/limits.py` derives those numbers from the
 caps; this paragraph does not carry its own arithmetic.
-What is still unbounded is memory. A batch is read whole before any of it is queued, so a hundred
-files inside the caps are a hundred files held at once, and the results table has no pagination. On
-a laptop that does not show. On a service anyone can reach it is the next thing we would close.
+Memory is bounded by one batch. The service checks one batch at a time and refuses a second while
+the first runs, keeps a finished batch only until the next one starts, and lets go of each image
+once its label is checked, so what it holds at once is one upload, shrinking as it is checked. There
+is no login, so the limit is per running copy of the service rather than per person: whoever uploads
+while a batch runs is told how far it has got and asked to wait (`docs/decisions.md#0041`).
 
 **What a log is allowed to contain.** Logging is an allow-list rather than a filter: a line carries
 only the fields named in advance, anything else attached is dropped without comment, and the fields

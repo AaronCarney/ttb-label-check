@@ -90,3 +90,23 @@ async def test_disconnected_client_is_answered_without_touching_the_transport() 
         "the transport already reported the disconnect while the body was being "
         "read; it must not be called a third time"
     )
+
+
+@pytest.mark.anyio
+async def test_the_body_is_handed_on_as_it_arrived_not_copied() -> None:
+    """The middleware holds the body once. Replaying it as a fresh copy held the
+    whole upload twice, up to twice the request cap, until the replay ended."""
+    first, second = b"a" * 10, b"b" * 10
+    transport = _Transport(
+        [
+            {"type": "http.request", "body": first, "more_body": True},
+            {"type": "http.request", "body": second, "more_body": False},
+        ]
+    )
+    app = _TwiceReceivingApp()
+    await BodySizeLimitMiddleware(app)(_SCOPE, transport, _noop_send)
+
+    assert app.messages[0]["body"] is first
+    assert app.messages[0]["more_body"] is True
+    assert app.messages[1]["body"] is second
+    assert app.messages[1]["more_body"] is False

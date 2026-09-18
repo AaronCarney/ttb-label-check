@@ -2593,3 +2593,39 @@ mismatch it reports.
 **Because** the product reports what it can stand behind. A difference it cannot tell apart from its
 own misreading is a question for the reviewer, not a finding against the label, and a statement TTB
 would return for its capitals must never be reported as a match.
+
+<a id="0041"></a>
+## 0041. The service checks one batch at a time, and keeps a finished batch only until the next one starts
+
+**Evidence:** `app/batch/admission.py`; `app/batch/worker.py`; `app/api/body_limit.py`;
+`tests/test_one_batch_at_a_time.py`; `tests/test_body_limit_replay.py`.
+
+**What was wrong.** Memory had no bound. Every batch stayed in memory, finished or not, until the
+service restarted, and nothing stopped a second batch from starting while the first was still being
+checked: the upload page is one click away on every page, including the page showing the running
+batch's results, and `POST /batches` took any number. Each batch also held every uploaded image
+until its last label was done, and the request-size guard held a second copy of every upload while
+the application read it.
+
+**Chosen.** One batch at a time. While a batch is being checked, a second one is refused from either
+route with a 409 that says how far the running batch has got. Starting a batch drops the one before
+it, so a finished batch's results stay readable until the next upload and no longer. The worker lets
+go of each label's image as soon as that label is checked, and the request-size guard hands the body
+on in the pieces it arrived in instead of joining them into a copy. What the service holds at once
+is now one upload, shrinking as it is checked.
+
+There is no login, so the service cannot tell the reviewer who started a batch from anyone else.
+The limit is one batch per running copy of the service, and whoever uploads while a batch runs is
+told to wait. "Running" is read off the worker task, not off the results, so a worker that stopped
+on an error does not hold the service shut.
+
+**Rejected.** *One batch per person* — with no login there is no person to count against. *The new
+upload cancels the running batch* — with no login, a second visitor would end the first reviewer's
+batch halfway through. *Stream the upload instead of reading it whole* — it lowers what one request
+holds, but not how many batches pile up, which is what made memory unbounded; with one batch at a
+time, one request is the whole of it. *Paginate the results table* — a batch is at most 100 labels.
+
+**Because** a batch is a demonstration a reviewer watches from start to finish: the upload takes them
+straight to its results and the first result arrives almost at once. A second batch run beside it
+would compete for the same reader, and a batch nobody will open again is memory the service has no
+reason to hold.

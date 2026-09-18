@@ -21,7 +21,7 @@ from datetime import UTC, datetime
 from fastapi import APIRouter, Depends, File, Form, Request, UploadFile
 from fastapi.responses import RedirectResponse
 
-from app.api import _background, limits
+from app.api import limits
 from app.api.ui._faces import plan_labels
 from app.api.ui._page import _get_settings, templates
 from app.api.ui._submission import (
@@ -29,6 +29,7 @@ from app.api.ui._submission import (
     _detect_image_mime,
     _get_upload_evaluator,
 )
+from app.batch import admission
 from app.config import Settings
 from app.schemas.label import ImageMediaType
 
@@ -218,20 +219,23 @@ async def batches_upload_submit(
         lookahead_k=max(1, settings.lookahead_k),
     )
     bus = SSEBus()
-    request.app.state.batches[batch_id] = in_flight
-    if not hasattr(request.app.state, "buses"):
-        request.app.state.buses = {}
-    request.app.state.buses[batch_id] = bus
-
     worker = BatchWorker(
         in_flight=in_flight,
         evaluator=evaluator,
         anomaly=AnomalyDetector(),
         bus=bus,
+        app_lookup=app_lookup,
+        label_lookup=label_lookup,
+        refusals=refusals,
     )
-    worker._label_lookup = label_lookup
-    worker._app_lookup = app_lookup
-    worker._refusals = refusals
-    _background.spawn(request.app, worker.run(), name=f"batch-worker:{batch_id}")
+    try:
+        admission.start(request.app, in_flight, bus, worker)
+    except admission.BatchInProgress as busy:
+        return templates.TemplateResponse(
+            request=request,
+            name="batches_upload.html",
+            context={"dev_mode": settings.dev_mode, "upload_error": str(busy)},
+            status_code=409,
+        )
 
     return RedirectResponse(url=f"/batch/{batch_id}", status_code=303)

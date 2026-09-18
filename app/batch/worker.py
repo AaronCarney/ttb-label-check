@@ -323,6 +323,11 @@ class BatchWorker:
                 )
             assert envelope is not None  # one of the two branches always sets it
             self._in_flight.record_result(item.label_id, envelope)
+            # Nothing reads the label's image once it is checked: the batch page
+            # shows results, not images. Letting it go now is what keeps a batch
+            # from holding every upload until its last label is done.
+            self._label_lookup.pop(item.label_id, None)
+            label = None
 
             headline_code = _headline_reason_code(envelope)
             _logger.info(

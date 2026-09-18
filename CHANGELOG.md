@@ -28,6 +28,11 @@ date: the release's git tag records when it was cut. Versions follow
   it read the first grape's share. Both now read the statement. The reader also returns a statement
   that puts the words first, "ALC. BY VOL. 5%", whole. The README's `abv` figure is 27 of 30, up
   from 25.
+- Memory no longer grows with every batch. The service checks one batch at a time: while one is
+  being checked, a second upload, from the page or from `POST /batches`, is refused with a 409 that
+  says how far the running batch has got. Starting a batch drops the finished one, each label's image
+  is let go once it is checked, and the request-size guard no longer holds a second copy of the
+  upload. See `docs/decisions.md#0041`.
 - `eval.read_accuracy --sleep` pauses after each image the reader reads, so a label with several
   faces gets a pause between every face, and the seconds it reports per label leave the pause out.
 

@@ -14,8 +14,8 @@ How it refuses:
   * When it declares no length — a chunked upload — the body is counted as it
     arrives and refused the moment it passes the cap. The bytes held are
     therefore bounded by the cap itself, which is the guarantee this exists to
-    give. The app reads the same body into memory a moment later anyway, so
-    buffering here costs nothing extra.
+    give. The pieces are handed on as they arrived, not joined into a copy, so
+    the body is held once.
 
 The reply is `ErrorEnvelope` JSON for an API caller and the page's own words for
 a browser, because at this point the only thing known about the request is what
@@ -59,12 +59,12 @@ class BodySizeLimitMiddleware:
             await _refuse(scope, send, cap)
             return
 
-        body, disconnected = await _read_capped(receive, cap)
-        if body is None:
+        chunks, disconnected = await _read_capped(receive, cap)
+        if chunks is None:
             await _refuse(scope, send, cap)
             return
 
-        await self.app(scope, _replay(body, disconnected, receive), send)
+        await self.app(scope, _replay(chunks, disconnected, receive), send)
 
 
 def _declared_length(scope) -> int | None:
@@ -84,26 +84,33 @@ def _accepts_html(scope) -> bool:
     return False
 
 
-async def _read_capped(receive, cap: int) -> tuple[bytearray | None, bool]:
-    """The whole body, or `None` if it passes `cap` on the way in.
+async def _read_capped(receive, cap: int) -> tuple[list[bytes] | None, bool]:
+    """The whole body as the pieces it arrived in, or `None` if it passes `cap`.
 
     Stops at the first byte over the cap: a body twice the cap is never held,
     only the cap plus one message.
     """
-    body = bytearray()
+    chunks: list[bytes] = []
+    size = 0
     while True:
         message = await receive()
         if message["type"] == "http.disconnect":
-            return body, True
-        body.extend(message.get("body", b""))
-        if len(body) > cap:
+            return chunks, True
+        chunk = message.get("body", b"")
+        size += len(chunk)
+        if size > cap:
             return None, False
+        if chunk:
+            chunks.append(chunk)
         if not message.get("more_body", False):
-            return body, False
+            return chunks, False
 
 
-def _replay(body: bytearray, disconnected: bool, receive):
+def _replay(chunks: list[bytes], disconnected: bool, receive):
     """Hand the buffered body to the application as if it were arriving now.
+
+    Each piece goes on as it arrived, and the middleware lets go of it as it
+    does, so the application's copy is the only one.
 
     After the body, the two cases part. If the client disconnected while the
     body was being read, `receive` has already said so and is drained, so the
@@ -113,13 +120,16 @@ def _replay(body: bytearray, disconnected: bool, receive):
     had not — so the real transport is awaited, which is what the application
     would have been awaiting without this middleware in front of it.
     """
+    pending = list(reversed(chunks))
+    chunks.clear()
     sent = False
 
     async def _receive():
         nonlocal sent
         if not sent:
-            sent = True
-            return {"type": "http.request", "body": bytes(body), "more_body": False}
+            body = pending.pop() if pending else b""
+            sent = not pending
+            return {"type": "http.request", "body": body, "more_body": not sent}
         if disconnected:
             return {"type": "http.disconnect"}
         return await receive()
