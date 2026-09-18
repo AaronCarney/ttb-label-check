@@ -6,6 +6,8 @@ All notable changes to this project are recorded here. The format follows
 
 ## [Unreleased]
 
+## [0.3.1] - 2026-09-17
+
 ### Fixed
 
 - The reader no longer turns upright lines of the government warning upside down. Its line
