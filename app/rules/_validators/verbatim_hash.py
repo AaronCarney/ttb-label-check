@@ -28,17 +28,39 @@ Supported ops: ``nfkc``, ``join_line_break_hyphens``, ``drop_whitespace``,
 ``casefold``. There is no op for quotation marks: the mandated statement
 contains none, so a label that prints one, curly or straight, differs from it
 either way.
+
+A difference is not always the label's. Measured over the corpus, 11 of the
+15 warnings this check found different were the reader's misreads of a correct
+label: an accent added to a letter, ``(I)`` for ``(1)``, ``ORINK`` for
+``DRINK``, one punctuation mark added, dropped or swapped. The reader's own
+confidence does not tell those from the true differences at any granularity,
+so the kind of difference has to. Where every difference is of a kind the
+reader is measured to invent, the product cannot say whether the label or the
+reading is at fault, and FR-9 makes that needs review; the finding names each
+difference so the reviewer checks those spots on the label. A letter or a word
+added, dropped or changed any other way is not a kind the reader invents, and
+stays a mismatch.
+
+Folding case cannot let a lower-case "surgeon general" through as a match:
+TTB's checklists ask whether its S and G are capitals. A reading that shows
+either in lower case is needs review, because a reader that confuses s with S
+is not evidence the label prints it.
 """
 
 from __future__ import annotations
 
+import difflib
 import hashlib
 import re
 import unicodedata
 from collections.abc import Sequence
+from functools import lru_cache
+from pathlib import Path
 
 from app.rules._validators import ValidatorContext, register
 from app.rules._validators._helpers import (
+    _build_meta,
+    _conf,
     not_read_result,
     project_reading,
     unlocated,
@@ -47,8 +69,8 @@ from app.rules._validators._helpers import (
 )
 from app.schemas.expected import ExpectedValue
 from app.schemas.extracted import FieldObservation
-from app.schemas.rejection import ValidationResult
-from app.schemas.rules import RuleDefinition
+from app.schemas.rejection import Outcome, Severity, ValidationResult
+from app.schemas.rules import AssetRef, RuleDefinition
 
 DEFAULT_NORMALIZATION_OPS: tuple[str, ...] = (
     "nfkc",
@@ -56,6 +78,8 @@ DEFAULT_NORMALIZATION_OPS: tuple[str, ...] = (
     "drop_whitespace",
     "casefold",
 )
+
+NOT_CONFIRMED_CODE = "WARNING.VERBATIM.NOT_CONFIRMED"
 
 # A hyphen with whitespace after it is a word a line break split. The mandated
 # statement contains no hyphen of its own, so nothing legitimate is joined here.
@@ -99,8 +123,143 @@ def verbatim_hash(
     # The warning body, not the repr of the payload that carries it:
     # `str(obs.observed_value)` on the reader's dict hashes "{'text': …}" and
     # can never equal the hash of the asset text.
-    observed = canonicalize_text(project_reading(obs), ops=ops)
+    reading = project_reading(obs)
+    observed = canonicalize_text(reading, ops=ops)
     matched = (
         asset is not None and hashlib.sha256(observed.encode("utf-8")).hexdigest() == asset.sha256
     )
-    return verdict_result(obs, exp, rule, ctx, ok=matched)
+    if matched:
+        lowered = _lower_case_surgeon_general(reading)
+        if lowered:
+            return _needs_review(
+                obs,
+                exp,
+                rule,
+                ctx,
+                f'The reading prints "{lowered}". TTB\'s checklists ask for a capital S and G '
+                "in Surgeon General, and the reader can misread a capital as lower case, so "
+                "check those two letters on the label.",
+            )
+        return verdict_result(obs, exp, rule, ctx, ok=True)
+
+    mandated = _mandated_text(asset, ops) if asset is not None else None
+    doubts = _reader_doubts(canonicalize_text(mandated, ops=ops), observed) if mandated else None
+    if doubts:
+        return _needs_review(
+            obs,
+            exp,
+            rule,
+            ctx,
+            "The reading differs from the §16.21 statement only in ways this reader is "
+            f"measured to misread a correct label: {'; '.join(doubts)}. Check "
+            "those spots on the label: if the label prints them, it does not carry the "
+            "statement as prescribed.",
+        )
+    return verdict_result(obs, exp, rule, ctx, ok=False)
+
+
+# The repository root, which the loader anchors an asset's path to by default.
+_ROOT = Path(__file__).resolve().parents[3]
+
+
+@lru_cache(maxsize=4)
+def _read_asset(path: str) -> str | None:
+    try:
+        return (_ROOT / path).read_text(encoding="utf-8")
+    except OSError:
+        return None
+
+
+def _mandated_text(asset: AssetRef, ops: Sequence[str]) -> str | None:
+    """The statement itself, used only once no hash matched, to say where the
+    reading differs. It is trusted only if it hashes to the pin the loader
+    checked; otherwise the comparison falls back to a plain mismatch."""
+    text = _read_asset(asset.path)
+    if text is None:
+        return None
+    digest = hashlib.sha256(canonicalize_text(text, ops=ops).encode("utf-8")).hexdigest()
+    return text if digest == asset.sha256 else None
+
+
+# Glyphs the reader is measured to swap on a correct label, after case folding:
+# (1) read as (I), DRINK read as ORINK. Each set holds shapes that look alike
+# in the capitals most warnings are printed in.
+_LOOKALIKES = (frozenset("1il|"), frozenset("0od"))
+
+
+def _base_letter(ch: str) -> str:
+    return "".join(c for c in unicodedata.normalize("NFKD", ch) if not unicodedata.combining(c))
+
+
+def _reader_prone(expected: str, read: str) -> bool:
+    """Is this one difference a kind the reader is measured to invent?"""
+    if len(expected) <= 1 and len(read) <= 1 and not any(c.isalnum() for c in expected + read):
+        return True  # one punctuation mark added, dropped or swapped for another
+    if len(expected) != len(read) or not expected:
+        return False
+    for e, r in zip(expected, read, strict=True):
+        if e == r or _base_letter(e) == _base_letter(r) != r:
+            continue  # the same letter, or it with an accent the label lacks
+        if any(e in group and r in group for group in _LOOKALIKES):
+            continue
+        return False
+    return True
+
+
+def _reader_doubts(expected: str, observed: str) -> list[str] | None:
+    """Each difference, described for a reviewer, when every one of them is a
+    kind the reader invents; None when any is not, which leaves a mismatch."""
+    matcher = difflib.SequenceMatcher(None, expected, observed, autojunk=False)
+    doubts: list[str] = []
+    for tag, i1, i2, j1, j2 in matcher.get_opcodes():
+        if tag == "equal":
+            continue
+        want, got = expected[i1:i2], observed[j1:j2]
+        if not _reader_prone(want, got):
+            return None
+        where = observed[max(0, j1 - 8) : j2 + 8]
+        if not want:
+            doubts.append(f'"{got}" added in "{where}"')
+        elif not got:
+            doubts.append(f'"{want}" missing in "{where}"')
+        else:
+            doubts.append(f'"{got}" for "{want}" in "{where}"')
+    return doubts or None
+
+
+_SURGEON_GENERAL = re.compile(r"surgeon\s*general", re.IGNORECASE)
+
+
+def _lower_case_surgeon_general(reading: str) -> str | None:
+    """The words as read, when either initial is lower case."""
+    found = _SURGEON_GENERAL.search(unicodedata.normalize("NFKC", reading))
+    if found is None:
+        return None
+    words = found.group()
+    initials = (words[0], words[len(words) - len("general")])
+    return words if any(c.islower() for c in initials) else None
+
+
+def _needs_review(
+    obs: FieldObservation,
+    exp: ExpectedValue,
+    rule: RuleDefinition,
+    ctx: ValidatorContext,
+    message: str,
+) -> ValidationResult:
+    """Insufficient evidence at warn, which `app/services/disposition.py` routes
+    to needs review whatever severity the rule carries."""
+    return ValidationResult(
+        rule_id=rule.rule_id,
+        cfr_citation=rule.cfr_citation,
+        beverage_class=obs.beverage_class,
+        outcome=Outcome.INSUFFICIENT_EVIDENCE,
+        severity=Severity.WARN,
+        reason_code=NOT_CONFIRMED_CODE,
+        aggregated_confidence=_conf(obs),
+        evidence=obs.evidence,
+        expected=exp,
+        observed=obs,
+        engine_meta=_build_meta(rule, ctx),
+        message=message,
+    )

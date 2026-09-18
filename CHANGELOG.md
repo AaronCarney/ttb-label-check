@@ -18,6 +18,10 @@ date: the release's git tag records when it was cut. Versions follow
 
 ### Fixed
 
+- The government warning check no longer reports a mismatch when the only differences are ones the
+  reader is known to misread on a correct label: an accent on a letter, `(I)` for `(1)`, `O` for `D`,
+  or one punctuation mark. It reports needs review and names each difference. A warning that shows
+  "surgeon general" with a lower-case S or G is no longer a match. See `docs/decisions.md#0040`.
 - `eval.read_accuracy --sleep` pauses after each image the reader reads, so a label with several
   faces gets a pause between every face, and the seconds it reports per label leave the pause out.
 

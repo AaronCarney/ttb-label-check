@@ -2532,8 +2532,8 @@ mark where the full stop belongs) and `var-warning-wording` (*"MAY IMPAIR"*).
   On four the reader invented an accented letter; on six it got one to three characters or
   punctuation marks wrong, which no reader option above fixed; and on `ttb-26240001000573` the
   warning block still takes in an importer's address. §16.21 fixes the punctuation, so none of these
-  can be absorbed by loosening the comparison, and this decision does not try. What to do about them
-  is not settled here.
+  can be absorbed by loosening the comparison, and this decision does not try. [0040](#0040)
+  sends the misread ones to a reviewer.
 
 **Amended — the canonical form drops `ascii_quotes`.**
 
@@ -2544,3 +2544,47 @@ comparison and leaves the asset pin as it was. Mutation testing found it: no tes
 from its absence. `collapse_whitespace`, `tighten_punctuation_spacing` and `strip_outer_ws`, which no
 rule named once `drop_whitespace` replaced them, are removed with it, and a rule that names an op
 that does not exist is refused at load, naming the rule and the op.
+
+<a id="0040"></a>
+## 0040. A warning that differs only where the reader misreads goes to a reviewer, and a lower-case Surgeon General is never a match
+
+**Evidence:** `app/rules/_validators/verbatim_hash.py`; `tests/rules/_validators/test_verbatim_hash.py`;
+the TTB distilled spirits, wine and malt beverage labeling checklists.
+
+**What was wrong.** `common.warning.verbatim` was wrong in both directions. Of the 15 corpus labels it
+called mismatched, 11 print the mandated words and the reader misread them ([0039](#0039)): an
+accent added to a letter (`BEVERÁGES`, `ÍMPAIRS`, `WOMÈN`, `DRIVÉ`), `(I)` for `(1)`, `ORINK` for
+`DRINK`, or one punctuation mark added, dropped or swapped. And because the comparison folds the
+case of the whole body, a label printing "surgeon general" in lower case matched. All three TTB
+checklists ask *"Are the "S" in Surgeon and "G" in General capitalized?"*
+
+**Chosen.** Where no hash matches, the check lines the reading up against the statement and sorts each
+difference. An accent on a letter the statement prints plain, a swap inside `1 I l |` or `0 O D`,
+and one punctuation mark added, dropped or swapped are kinds the reader is measured to invent. If
+every difference is one of those, the check reports needs review under
+`WARNING.VERBATIM.NOT_CONFIRMED` and names each difference, so the reviewer checks those spots on the
+label. Any other difference — a letter or a word added, dropped or changed — stays a mismatch. A
+reading that matches but shows the S or G of Surgeon General in lower case reports needs review.
+
+On the corpus readings this turns 10 of the 11 false mismatches into needs review. The three labels
+that print different words (`RISKS`, `BEVERAGE`, `MAY IMPAIR`) stay mismatches. `ttb-26240001000454`,
+which ends `PROBLEMS"`, goes to needs review, which its answer key accepts. `ttb-26240001000573` stays
+a mismatch, because its reading takes in an importer's address; that is a reader defect, not this
+check's.
+
+**Rejected.** *A confidence threshold* — measured, the reader's confidence does not separate its
+misreads from true differences at any granularity: at the best per-character threshold, 3 of the 11
+misreads still sit above it, and the per-warning confidence the rule's `confidence_floor` reads
+separates none. *Folding accents and punctuation out of the comparison* — 27 U.S.C. 215(a) prescribes
+the statement word for word, and the checklists ask *"Does it match the exact wording and
+punctuation?"* A label that really prints an accent or a changed mark is not compliant, so it must
+never match; needs review is the most this check can say without knowing which is at fault.
+*Report a lower-case S or G as a mismatch* — the reader can read a capital as lower case, and FR-9
+sends a reading the product cannot trust to a reviewer. No reading in the corpus shows either letter
+in lower case, so no corpus result changes. *Report the misreads as mismatches and leave the reviewer
+to sort them out* — a mismatch the product cannot stand behind teaches the agent to discount every
+mismatch it reports.
+
+**Because** the product reports what it can stand behind. A difference it cannot tell apart from its
+own misreading is a question for the reviewer, not a finding against the label, and a statement TTB
+would return for its capitals must never be reported as a match.

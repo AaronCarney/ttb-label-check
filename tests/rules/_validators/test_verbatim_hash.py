@@ -117,12 +117,77 @@ def test_verbatim_hash_fail_when_paraphrase() -> None:
     assert res.reason_code == "WARNING.VERBATIM.MISMATCH"
 
 
-def test_changed_punctuation_still_fails() -> None:
+def test_changed_punctuation_is_never_a_match() -> None:
     """ttb-26240001000454 ends `HEALTH PROBLEMS"` and the manifest marks it false.
 
-    Punctuation is part of the mandated statement, so it is never normalized away.
+    Punctuation is part of the mandated statement, so it is never normalized
+    away. One swapped mark is also a kind the reader invents, so it goes to a
+    reviewer rather than being reported as the label's.
     """
-    assert _outcome(CANONICAL.replace("health problems.", 'health problems"')) is Outcome.FAIL
+    got = _outcome(CANONICAL.replace("health problems.", 'health problems"'))
+    assert got is Outcome.INSUFFICIENT_EVIDENCE
+
+
+# Each is a reading the reader made of a TTB-approved label that prints the
+# statement correctly, reduced to the one difference it made.
+READER_MISREADS = [
+    ("ttb-26233001000189", "beverages impairs", "beveráges impairs"),
+    ("ttb-26233001000566", "beverages impairs", "beverages ímpairs"),
+    ("ttb-26233001000569", "women should", "womèn should"),
+    ("ttb-26237001000107", "(1) According", "(I)According"),
+    ("ttb-26239001000239", "drive a car", "drive,a car"),
+    ("ttb-26239001000079", "General, women", "General women"),
+    ("ttb-26240001000563", "not drink", "not orink"),
+    ("ttb-26239001000081", "(1) According to", "(1). According _to"),
+]
+
+
+@pytest.mark.parametrize(("label", "printed", "read"), READER_MISREADS)
+def test_a_difference_the_reader_invents_goes_to_a_reviewer(
+    label: str, printed: str, read: str
+) -> None:
+    obs = make_obs(field_id="warning_block", value=CANONICAL.replace(printed, read))
+    res = verbatim_hash(obs, make_expected(field_id="warning_block"), _rule(), _ctx())
+    assert res.outcome is Outcome.INSUFFICIENT_EVIDENCE, label
+    assert res.reason_code == "WARNING.VERBATIM.NOT_CONFIRMED"
+    assert res.message is not None and "misread" in res.message
+
+
+def test_the_finding_names_where_the_reading_differs() -> None:
+    res = verbatim_hash(
+        make_obs(field_id="warning_block", value=CANONICAL.replace("not drink", "not orink")),
+        make_expected(field_id="warning_block"),
+        _rule(),
+        _ctx(),
+    )
+    assert res.message is not None and '"o" for "d"' in res.message
+
+
+# Each is a label that really prints something other than the statement.
+TRUE_DIFFERENCES = [
+    ("ttb-26229001000034", "the risk of", "the risks of"),
+    ("ttb-26212001000085", "beverages impairs", "beverage impairs"),
+    ("var-warning-wording", "beverages impairs", "beverages may impair"),
+]
+
+
+@pytest.mark.parametrize(("label", "printed", "read"), TRUE_DIFFERENCES)
+def test_an_added_or_dropped_letter_or_word_is_a_mismatch(
+    label: str, printed: str, read: str
+) -> None:
+    assert _outcome(CANONICAL.replace(printed, read)) is Outcome.FAIL, label
+
+
+def test_one_real_difference_outweighs_any_misread() -> None:
+    text = CANONICAL.replace("women should", "womèn should").replace("the risk of", "the risks of")
+    assert _outcome(text) is Outcome.FAIL
+
+
+@pytest.mark.parametrize("words", ["surgeon general", "Surgeon general", "surgeon General"])
+def test_a_lower_case_surgeon_general_is_not_a_match(words: str) -> None:
+    """TTB's checklists ask whether the S and G of Surgeon General are capitals;
+    folding case for the rest of the body must not wave a lower-case one through."""
+    assert _outcome(CANONICAL.replace("Surgeon General", words)) is Outcome.INSUFFICIENT_EVIDENCE
 
 
 def test_an_unknown_op_is_refused_by_name() -> None:
