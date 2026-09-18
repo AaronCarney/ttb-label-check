@@ -87,6 +87,21 @@ def test_missing_space_after_the_numeral_passes() -> None:
     assert _outcome(CANONICAL.replace("(1) According", "(1)According")) is Outcome.PASS
 
 
+def test_two_words_run_together_pass() -> None:
+    """ttb-26239001000217 prints `IMPAIRS YOUR`, and the reader returns
+    `IMPAIRSYOUR`: the gap between two words is lost, which is spacing, not
+    wording. Collapsing whitespace could not reach it — there is no space left
+    to collapse — so every space comes out of the comparison."""
+    assert _outcome(CANONICAL.replace("impairs your", "impairsyour")) is Outcome.PASS
+
+
+def test_a_changed_letter_still_fails_with_spaces_removed() -> None:
+    """ttb-26229001000034 prints `the RISKS of birth defects`, and TTB's text is
+    `the risk`. Removing spaces leaves every letter to match in order, so the one
+    true wording defect in the corpus is still rejected."""
+    assert _outcome(CANONICAL.replace("the risk of", "the risks of")) is Outcome.FAIL
+
+
 def test_line_break_splitting_a_word_passes() -> None:
     """ttb-26231001000333 breaks `PREG-\\nNANCY` across two printed lines."""
     assert _outcome(CANONICAL.replace("pregnancy", "preg-\nnancy")) is Outcome.PASS

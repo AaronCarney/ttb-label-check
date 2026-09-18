@@ -66,6 +66,14 @@ _logger = logging.getLogger("app.vision.local")
 # detection model gains nothing above this while costing time on every one.
 MAX_EDGE_PX = 1600
 
+# How sure rapidocr's 0/180 line classifier must be before a line is read
+# upside down. Its default, 0.9, flips upright lines of the health warning on
+# real labels, and a flipped line reads as noise: `ttb-26218001000369` came back
+# 131 characters from the §16.21 text at 0.9 and exact at 0.999. At 0.999 no
+# field on the 38-label corpus reads worse into a rejection
+# (`docs/decisions.md#0039`).
+LINE_FLIP_CONFIDENCE = 0.999
+
 # How definite each field's pick is, applied to the OCR engine's own character
 # confidence for the boxes the reading came from. A regex over the text either
 # matched or did not, so those fields keep almost all of it; a field chosen by
@@ -428,6 +436,7 @@ class LocalVisionExtractor:
             params={
                 "EngineConfig.onnxruntime.intra_op_num_threads": threads,
                 "EngineConfig.onnxruntime.inter_op_num_threads": threads,
+                "Cls.cls_thresh": LINE_FLIP_CONFIDENCE,
             }
         )
         _logger.info(

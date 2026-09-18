@@ -75,7 +75,9 @@ def test_load_passes_the_cap_on_both_onnxruntime_keys(monkeypatch) -> None:
 
     _reader(2)._load()
 
-    assert _StubRapidOCR.last_params == {_INTRA: 2, _INTER: 2}
+    assert _StubRapidOCR.last_params is not None
+    assert _StubRapidOCR.last_params[_INTRA] == 2
+    assert _StubRapidOCR.last_params[_INTER] == 2
 
 
 def test_load_caps_opencv_as_well(monkeypatch) -> None:

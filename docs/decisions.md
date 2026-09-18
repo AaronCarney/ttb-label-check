@@ -669,8 +669,11 @@ not ignore punctuation.** `common.warning.verbatim` keeps reject severity: once 
 of the comparison, a mismatch means the words differ, and §16.21 fixes the words. The canonical form
 both the loader and the validator use is, in order:
 
-    nfkc → ascii_quotes → join_line_break_hyphens → collapse_whitespace →
-    tighten_punctuation_spacing → casefold → strip_outer_ws
+    nfkc → ascii_quotes → join_line_break_hyphens → drop_whitespace → casefold
+
+Spacing is removed rather than collapsed. Collapsing runs of spaces left a gap the reader lost —
+`IMPAIRSYOUR` for `IMPAIRS YOUR` on `ttb-26239001000217` — rejecting an approved label for spacing,
+which this point says is not compared ([0039](#0039)).
 
 **4. `common.warning.heading_phrase` is deleted, not switched off.** It asked for evidence named
 `warning_heading` that no reader produces, and `common.warning.heading_caps_bold` already checks the

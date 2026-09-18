@@ -12,15 +12,21 @@ the mandated statement fixes the words, the numbers and the punctuation. It
 does not fix the letter case of the statement's body — the separate heading
 rule is what requires the heading's capitals — and it does not fix how the
 printer spaced or broke the lines. So the canonical form folds case, joins a
-word a line break split with a hyphen, and takes spacing out of the
-comparison altogether. A label that prints "GOVERNMENT WARNING  :" and one
-that prints "GOVERNMENT WARNING:(1)" both reach the same canonical string as
-the regulation's own text; a label that prints a different word, or ends the
-statement with a quotation mark instead of a full stop, does not.
+word a line break split with a hyphen, and takes every space out. A label that
+prints "GOVERNMENT WARNING  :", one that prints "GOVERNMENT WARNING:(1)" and a
+reading that runs "IMPAIRSYOUR" together all reach the same canonical string
+as the regulation's own text; a label that prints a different word or letter,
+or ends the statement with a quotation mark instead of a full stop, does not.
+
+Spaces are removed rather than collapsed because label type is justified,
+which closes some word gaps and opens others, and because the reader loses a
+narrow gap as readily as a printer closes one. Removing them cannot make a
+different statement equal the mandated one: the letters, digits and
+punctuation still have to match in order.
 
 Supported ops: ``nfkc``, ``ascii_quotes``, ``join_line_break_hyphens``,
-``collapse_whitespace``, ``tighten_punctuation_spacing``, ``casefold``,
-``strip_outer_ws``.
+``collapse_whitespace``, ``tighten_punctuation_spacing``, ``drop_whitespace``,
+``casefold``, ``strip_outer_ws``.
 """
 
 from __future__ import annotations
@@ -47,10 +53,8 @@ DEFAULT_NORMALIZATION_OPS: tuple[str, ...] = (
     "nfkc",
     "ascii_quotes",
     "join_line_break_hyphens",
-    "collapse_whitespace",
-    "tighten_punctuation_spacing",
+    "drop_whitespace",
     "casefold",
-    "strip_outer_ws",
 )
 
 # A hyphen with whitespace after it is a word a line break split. The mandated
@@ -80,6 +84,8 @@ def canonicalize_text(s: str, ops: Sequence[str] = DEFAULT_NORMALIZATION_OPS) ->
             s = re.sub(r"\s+", " ", s)
         elif op == "tighten_punctuation_spacing":
             s = _SPACE_AROUND_PUNCTUATION.sub(r"\1", s)
+        elif op == "drop_whitespace":
+            s = re.sub(r"\s+", "", s)
         elif op == "casefold":
             s = s.casefold()
         elif op == "strip_outer_ws":

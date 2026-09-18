@@ -142,10 +142,7 @@ def _normalize_warning(text: str) -> str:
     splitting a word at a line end are ignored. Spacing is dropped rather than
     collapsed because label type is justified, which closes word gaps and
     opens others — one real label sets its heading as "GOVERNMENT WARNING   :".
-
-    This is looser than `rules/common/health_warning.yaml`, which collapses
-    whitespace instead of removing it. Where the two disagree the rule pack
-    rejects a label this scores as compliant.
+    `rules/common/health_warning.yaml` removes spacing the same way.
     """
     text = unicodedata.normalize("NFKC", text)
     for curly, plain in (("‘", "'"), ("’", "'"), ("“", '"'), ("”", '"')):

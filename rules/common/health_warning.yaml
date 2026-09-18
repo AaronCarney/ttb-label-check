@@ -42,16 +42,15 @@ rules:
       asset_key: govt_warning_16_21
     asset:
       path: assets/warnings/govt_warning_16_21.txt
-      sha256_pin: "b92d05da8bc5bc6f4e730685464d98d708a45594e5480fd7d7af54a9d1dfc53c"
+      sha256_pin: "ea1f4ec004131487df4848a557370cf7312d49ee0da911ff14cbd4e85c82d3e1"
       # §16.21 fixes the words, the numbers and the punctuation of the
       # statement. It does not fix the case of the body — §16.22(a)(2) rules
       # the heading's capitals, and common.warning.heading_caps_bold scores
       # them — and it does not fix how a printer spaced or broke the lines.
-      # So case, spacing and a line-break hyphen come out of the comparison
-      # and punctuation stays in.
+      # So case, every space and a line-break hyphen come out of the
+      # comparison, and punctuation stays in.
       normalization:
-        [nfkc, ascii_quotes, join_line_break_hyphens, collapse_whitespace,
-         tighten_punctuation_spacing, casefold, strip_outer_ws]
+        [nfkc, ascii_quotes, join_line_break_hyphens, drop_whitespace, casefold]
     evidence_required: [warning_block]
     confidence_floor: 0.60
     effective_date: "1989-11-18"
