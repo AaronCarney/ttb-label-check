@@ -10,6 +10,7 @@ three `alcohol.format` rules to the forms 27 CFR §4.36(b), §5.65(b) and
 from __future__ import annotations
 
 import importlib
+import json
 import pkgutil
 from pathlib import Path
 
@@ -215,3 +216,39 @@ def test_a_string_reading_is_the_wording_itself(ruleset) -> None:
         obs, make_expected(field_id="alc_text"), _rule(ruleset, "wine"), make_context()
     )
     assert res.outcome is Outcome.PASS
+
+
+# The alcohol statements of the approved labels in the fixture corpus, as each
+# label prints them. Three are in no form the regulation lists: two malt labels
+# print form (C) without the colon §7.65(b)(3)(i) gives it, and one wine label
+# writes its figure with a decimal comma.
+_MANIFEST = Path("tests/fixtures/labels/manifest.json")
+_MANIFEST_CLASSES = {"distilled_spirits": "spirits", "wine": "wine", "malt_beverage": "malt"}
+_CORPUS_REVIEWS = {"ttb-26238001000795", "ttb-26240001000454", "ttb-26239001000331"}
+
+
+def _corpus_statements() -> list[tuple[str, str, str]]:
+    labels = json.loads(_MANIFEST.read_text(encoding="utf-8"))["labels"]
+    return [
+        (
+            label["id"],
+            _MANIFEST_CLASSES[label["beverage_type"]],
+            label["label_observed"]["abv"]["text"],
+        )
+        for label in labels
+        if label["id"].startswith("ttb-")
+    ]
+
+
+def test_the_corpus_holds_the_thirty_approved_labels() -> None:
+    statements = _corpus_statements()
+    assert len(statements) == 30
+    assert _CORPUS_REVIEWS <= {label_id for label_id, _, _ in statements}
+
+
+@pytest.mark.parametrize(("label_id", "cls", "statement"), _corpus_statements())
+def test_an_approved_label_s_statement_passes_or_goes_to_a_reviewer(
+    ruleset, label_id, cls, statement
+) -> None:
+    expected = Outcome.INSUFFICIENT_EVIDENCE if label_id in _CORPUS_REVIEWS else Outcome.PASS
+    assert _judge(ruleset, cls, statement).outcome is expected
