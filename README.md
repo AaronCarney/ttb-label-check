@@ -418,7 +418,7 @@ is an upper bound on what the reader does with a label it has never seen, not an
 Reserving a held-out split from 30 labels was judged worse than not having one: a ten-label test set
 would leave both halves too small to measure anything, and the corpus is the whole of what this
 project could source. The figure this matters most for is `warning_present`, 30 of 30, because that
-is what licenses the one rule in the pack allowed to reject a label on the reader finding nothing —
+is what licenses the one rule in the pack allowed to report a mismatch because the reader found nothing —
 `rules/common/health_warning.yaml` says so where the licence is granted. A reviewer weighing these
 numbers should read them as what the reader does on labels like the ones it was built against.
 
@@ -460,14 +460,15 @@ call we made in it, stated as our call rather than as a finding.
 ## Trade-offs
 
 - **A narrow core that works, over broad coverage that does not.** Where a check can be made on some
-  labels and not others, it says on which it could not and sends that point to a reviewer. Where it
-  could not be made correct at all, it is switched off in the rule pack rather than returning a
-  verdict it has not earned, and it is named under Limitations. A wrong verdict on a real label is
-  the one failure this product cannot have, and the two kinds of wrong are not equal. A false
-  rejection lands on the applicant, who goes back round a filing process that takes weeks, and it is
-  the error that would end a pilot. A false pass lands on the agent, who rules on every finding
-  anyway and is the last check either way. So the design leans toward sending a doubtful point to a
-  person, and the cost of that lean lands on the reviewer, as the extra items under Limitations.
+  labels and not others, it reports needs review on the labels where it could not. Where it could
+  not be made correct at all, it is switched off in the rule pack rather than returning a verdict it
+  has not earned, and it is named under Limitations. The product reports; the agent rules on every
+  finding and makes the decision. The two kinds of wrong result are still not equal. A false match
+  is the one the requirements rule out (`docs/PRD.md` S-2), because a label the product calls clean
+  is the one the agent has least reason to look at hard. A false mismatch costs the agent time and,
+  repeated, teaches them to discount every mismatch the product reports. So the design reports needs
+  review on a doubtful point rather than guessing either way, and the cost of that lean lands on the
+  agent, as the extra items under Limitations.
 - **Determinism over capability.** Rules decide, models only read. The cost is that anything needing
   judgement beyond a scored comparison goes to a person rather than being resolved automatically.
 - **Local CPU reading by default, accuracy second.** The hosted reader is expected to be better on
@@ -558,21 +559,21 @@ that cannot check anything.
   the app is no use for a quick look at a label on its own: the application's values have to be
   entered before anything is checked.
 
-- **An alcohol statement in a form the regulations do not print goes to a reviewer.** The app passes
+- **An alcohol statement in a form the regulations do not print is reported as needs review.** The app passes
   a statement in one of the forms 27 CFR §4.36(b), §5.65(b) and §7.65(b) give for its beverage
-  class, and sends any other statement to a reviewer rather than rejecting it: no pattern can list
+  class, and reports needs review for any other statement rather than a mismatch: no pattern can list
   every phrasing those sections permit, and none of them says how the figure is written. Of the 30
-  approved labels in the fixture corpus, 3 print a statement that goes to a reviewer — two malt
+  approved labels in the fixture corpus, 3 print a statement reported as needs review — two malt
   labels that leave out the colon §7.65(b) prints in "Alcohol by volume: percent", and one wine
   label that writes its figure with a decimal comma. A label whose statement the reader does not
-  return in full goes to a reviewer too. See `docs/decisions.md#0011`. For an agent this means a
+  return in full is reported as needs review too. See `docs/decisions.md#0011`. For an agent this means a
   compliant label can land in the review pile over its alcohol wording.
 
 - **A country of origin is read only as the application's English name.** Customs marking rules also
   accept the country's name in the language of the country, an abbreviation that unmistakably
   indicates it, and the adjectival form — "HECHO EN MEXICO", "U.K.", "Irish" (19 CFR §134.45(b),
-  (c)). The app does not read those, so an import that writes its origin one of those ways is sent
-  to a reviewer rather than being matched or rejected. See `docs/decisions.md#0016`. On a batch of
+  (c)). The app does not read those, so an import that writes its origin one of those ways is
+  reported as needs review rather than as a match or a mismatch. See `docs/decisions.md#0016`. On a batch of
   imports this is the main source of extra manual work — a compliant label lands in the review pile
   because the app cannot read the form it used, not because anything is wrong with it.
 
@@ -583,8 +584,8 @@ that cannot check anything.
   information (§16.21). The first three need the colour of the ink or the physical scale of the
   label, and a photograph carries neither; separateness is visible in a photograph but no reader
   measures it yet. Each of those rules stays in the pack with its citation and the reason it is
-  switched off, and a switched-off rule produces no finding at all, so a label is never passed or
-  rejected on one. TTB says it does not routinely review
+  switched off, and a switched-off rule produces no finding at all, so no label is reported as a
+  match or a mismatch on one. TTB says it does not routinely review
   labels for type size, characters per inch or contrasting background either. So the agent's eye is
   the only check on warning typography, exactly as it is today — the app neither helps here nor
   claims to. See `docs/decisions.md#0006` and `docs/decisions.md#0013`.
@@ -592,13 +593,13 @@ that cannot check anything.
 - **Bold type in the warning's heading is reported, never decided.** §16.22(a)(2) requires the
   heading in bold as well as in capitals. Bold weight is a stroke-width measurement on the heading's
   own region of the image, and a sweep of all 38 corpus labels
-  (`eval/heading_bold_ratios.py`) found the measurement is not good enough to reject anyone on. The
+  (`eval/heading_bold_ratios.py`) found the measurement is not good enough to call any label a mismatch on. The
   labels are all TTB-approved and so all required to be bold, yet the ratio ran 0.111 to 0.508 across
   them, and one label measured 0.111 from a clean photograph and 0.261 from a blurred copy of the
   same printing. At the 0.25 cut, 18 of the 28 labels it measured confidently came out "not bold".
-  So a heading that does not measure as bold sends the label to a reviewer rather than rejecting it,
+  So a heading that does not measure as bold is reported as needs review rather than a mismatch,
   whether the measurement failed or simply came back low. The capitals are read from the heading's
-  text and are still decided, at reject severity. The cost is a large share of review items on
+  text and are still decided: a heading not in capitals is a mismatch. The cost is a large share of review items on
   labels that are very likely fine — on this corpus, most of them. See `docs/decisions.md#0037` and
   `docs/decisions.md#0013`.
 
@@ -632,7 +633,7 @@ that cannot check anything.
   found in the upright pass, the box shapes look sideways, and the sideways strips themselves read
   like the warning. When either of the last two declines, the label is read upright only and reported
   as carrying no government warning — and no part of the result says a re-read was considered and
-  turned down. Since a missing warning became a §16.21 rejection rather than a review item, that
+  turned down. Since a missing warning became a §16.21 mismatch rather than needs review, that
   silence now decides labels rather than just delaying them. A label photographed fully upside down
   is a known gap of the same kind: no rotation covers 180°, and its boxes are horizontal, so the
   sideways test does not fire for it either.

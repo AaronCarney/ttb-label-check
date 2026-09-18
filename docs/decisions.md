@@ -18,6 +18,11 @@ are the numbers those files carried, so an
 existing citation to `docs/decisions/0011` is entry 0011 here and links resolve as
 `docs/decisions.md#0011`.
 
+**Older entries use "reject" loosely.** Where an entry says a check rejects a label, read that the
+check reports mismatch at the rule pack's `reject` severity; where it says a label goes or is sent to
+a reviewer, read that the check reports needs review. The product decides nothing: it reports match,
+mismatch or needs review, and the agent, who reviews every label, decides (`docs/PRD.md` SC-1, FR-11).
+
 When a decision changes, add a dated entry below the original. Do not edit the original away; the
 superseded reasoning is what makes the change legible later.
 
@@ -2546,7 +2551,7 @@ rule named once `drop_whitespace` replaced them, are removed with it, and a rule
 that does not exist is refused at load, naming the rule and the op.
 
 <a id="0040"></a>
-## 0040. A warning that differs only where the reader misreads goes to a reviewer, and a lower-case Surgeon General is never a match
+## 0040. A warning that differs only where the reader misreads is reported as needs review, and a lower-case Surgeon General is never a match
 
 **Evidence:** `app/rules/_validators/verbatim_hash.py`; `tests/rules/_validators/test_verbatim_hash.py`;
 the TTB distilled spirits, wine and malt beverage labeling checklists.

@@ -114,7 +114,7 @@ against every name the application says the label may carry, not its brand-name 
 Country of origin is read only as the English name the application declares, appearing as whole
 words inside the label's wording. The abbreviations, adjectival forms, other-language names and
 variant spellings 19 CFR 134.45 allows are not read; a label stating its origin in one of those
-forms goes to a reviewer rather than being rejected. See `docs/decisions.md#0016`.
+forms is reported as needs review rather than as a mismatch. See `docs/decisions.md#0016`.
 
 Alcohol content and net contents are compared as numbers, net contents after converting units, and a
 stated proof must equal twice the alcohol by volume. Where these rules cannot settle a difference,

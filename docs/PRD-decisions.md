@@ -59,3 +59,13 @@ Target Size and 2.4.11 Focus Not Obscured as the criteria that justified the lev
 installed axe-core 4.11.4, the `wcag22aa` tag turns on one rule, `target-size`, and **no rule exists for
 2.4.11 at any tag**. Settled in [decision 0031](decisions.md#0031), which also corrects
 `docs/reference/accessibility.md` and `docs/approach.md` and records what the change gives up.
+
+## FR-7, the result an unread country of origin gets
+
+**What moved.** FR-7 said a label stating its origin in a form the product does not read "goes to a
+reviewer rather than being rejected". It now says the label "is reported as needs review rather than
+as a mismatch".
+
+**What made it necessary.** The product rejects nothing and every label reaches the agent: SC-1 says
+"The decision to approve or reject stays with the agent", and FR-11 names the three results the
+product reports. The old wording described a product that decides.

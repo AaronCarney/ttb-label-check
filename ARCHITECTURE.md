@@ -23,7 +23,8 @@ default, because the agents who would use this work behind a firewall that block
 A cloud vision reader sits behind the same interface for comparison. Neither is wired into the rule
 engine's decisions (`docs/decisions.md#0005`).
 
-A verdict of `fail` means a rule the pack lets reject found a disagreement. `needs_review` means
+A verdict of `fail`, reported to the agent as mismatch, means a rule at `reject` severity found a
+disagreement. `needs_review` means
 either a rule whose disagreement is a reviewer's call rather than evidence the label is wrong, or a
 reading the product was not sure enough of. `pass` means every applicable check passed and none was
 skipped.
@@ -49,7 +50,7 @@ One evaluation, from `POST /labels` or the page form, runs in this order
 6. **Optional model refinement,** off by default. Every check on the requirements list is
    deterministic, and outbound model traffic is what the firewall constraint rules out. When it is
    enabled, the model may add explanation; it cannot change an outcome, a severity or a reason code.
-7. **Decide.** Any failure the rule pack lets reject makes the submission `fail`; all passes make it
+7. **Decide.** Any failure of a rule at `reject` severity makes the submission `fail`; all passes make it
    `pass`; anything else is `needs_review` (`app/services/disposition.py`).
 8. **Build the envelope,** with the audit trail, the per-rule timeline and the metrics.
 
