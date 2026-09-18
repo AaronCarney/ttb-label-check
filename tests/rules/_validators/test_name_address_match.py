@@ -87,6 +87,19 @@ def test_a_two_word_state_name_folds() -> None:
     assert res.outcome is Outcome.PASS
 
 
+def test_a_state_name_folds_with_words_after_it() -> None:
+    """Every case above ends on the State, where a slice that runs past the end
+    comes back short and can match a shorter name by accident. A label that
+    prints the country after the State must fold it all the same."""
+    res = _verdict("CELLARED AND BOTTLED BY CHATEAU DIANA, California, USA", CHATEAU_DIANA_BLOCK)
+    assert res.outcome is Outcome.PASS
+    res = _verdict(
+        "PRODUCED AND BOTTLED BY TACONIC DISTILLERY, New York, USA",
+        "Taconic Distillery, Taconic Distillery, LLC 179 BOWEN RD Stanfordville NY 12581",
+    )
+    assert res.outcome is Outcome.PASS
+
+
 def test_the_longest_state_name_wins() -> None:
     """ "West Virginia" is West Virginia, not Virginia with a word in front."""
     res = _verdict(
