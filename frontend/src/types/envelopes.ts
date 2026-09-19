@@ -25,6 +25,9 @@ export interface RuleFindingWire {
   disposition: RuleDisposition;
   reason_code: string;
   plain_language_explanation: string;
+  // Which of the application's values this rule matched, when it was not the
+  // one shown as expected. Empty otherwise.
+  matched_value: string;
 }
 
 export type AISuggestionTask =

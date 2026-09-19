@@ -109,6 +109,7 @@ def fuzzy_brand(
         severity: Severity,
         reason_code: str | None,
         message: str | None = None,
+        matched: str | None = None,
     ) -> ValidationResult:
         return ValidationResult(
             rule_id=rule.rule_id,
@@ -123,6 +124,7 @@ def fuzzy_brand(
             observed=obs,
             engine_meta=meta,
             message=message,
+            matched_value=matched,
         )
 
     # The rule needs something to compare against. Without an expected brand
@@ -152,7 +154,13 @@ def fuzzy_brand(
                 if source == _DECLARED
                 else f'The label shows "{observed}", which is {source}, "{value}".'
             )
-            return result(Outcome.PASS, rule.severity, None, message)
+            return result(
+                Outcome.PASS,
+                rule.severity,
+                None,
+                message,
+                matched=None if source == _DECLARED else value,
+            )
 
     for value, source in admissible:
         if stage_a_word_run(observed, value):
@@ -163,6 +171,7 @@ def fuzzy_brand(
                 f'The label shows "{observed}". Its words and those of {source}, '
                 f'"{value}", carry one inside the other in order, so the label '
                 "states that name with a word added or left off.",
+                matched=None if source == _DECLARED else value,
             )
 
     score, value, source = _best(observed, admissible, stage_b_fuzzy)
@@ -175,6 +184,7 @@ def fuzzy_brand(
             f'The label shows "{observed}" against {source}, "{value}" — the two '
             f"spellings score {score:.4f}, at or above the {pass_th:g} this rule "
             "treats as the same name.",
+            matched=None if source == _DECLARED else value,
         )
 
     # The borderline band. The two names are close enough that the difference

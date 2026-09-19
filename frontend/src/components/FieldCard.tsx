@@ -38,6 +38,16 @@ function _faceLabel(faceTag: string): string {
   return faceTag.charAt(0).toUpperCase() + faceTag.slice(1);
 }
 
+// An application declares more than one value a label may carry — a brand, a
+// fanciful name, trade names it says are printed on the label — and a rule that
+// passes on one of the others leaves a card reading "Expected FABIO SIGNORELLI /
+// Found Rossastro / PASS". The verdict is right and the card contradicts it, so
+// the card names the value that was matched.
+function _matchedValue(field: FieldFindingWire): string {
+  const named = field.rule_findings.find((r) => r.matched_value);
+  return named ? named.matched_value : "";
+}
+
 export function FieldCard({ field, verdict, aiSuggestion, className }: FieldCardProps): React.JSX.Element {
   const fieldDisp = _fieldDisposition(field);
   return (
@@ -65,6 +75,12 @@ export function FieldCard({ field, verdict, aiSuggestion, className }: FieldCard
           <dt className="font-medium text-muted-foreground">Expected</dt>
           <dd className="break-words">{field.expected_value || <em>(empty)</em>}</dd>
         </div>
+        {_matchedValue(field) ? (
+          <div>
+            <dt className="font-medium text-muted-foreground">Matched against</dt>
+            <dd className="break-words">{_matchedValue(field)}</dd>
+          </div>
+        ) : null}
         {field.evidence.face_tag ? (
           <div>
             <dt className="font-medium text-muted-foreground">Read from</dt>

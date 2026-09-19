@@ -81,4 +81,11 @@ class ValidationResult(BaseModel):
     expected: ExpectedValue | None = None
     observed: FieldObservation | None = None
     message: str | None = None
+    # The admissible value this rule actually matched, when that was not the
+    # one `expected.value` holds. An application declares more than one name a
+    # label may carry - a brand, a fanciful name, trade names it told TTB it
+    # prints - and a rule that passes on one of the others leaves a result page
+    # showing a label reading that differs from the expected value beside a
+    # pass. Naming it here is what lets the page say which one was matched.
+    matched_value: str | None = None
     engine_meta: EngineMeta

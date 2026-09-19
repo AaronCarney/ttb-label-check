@@ -24,6 +24,7 @@ REDACTED_FIELDS = (
     "image_bytes",
     "extracted_text",
     "extracted_value",
+    "matched_value",
     "verbatim_text",
 )
 

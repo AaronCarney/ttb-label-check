@@ -52,6 +52,11 @@ class RuleFindingWire(BaseModel):
     disposition: Literal["pass", "fail", "needs_review"]
     reason_code: str
     plain_language_explanation: str
+    # Which of the application's values this rule matched, when it was not the
+    # one shown as expected. Empty otherwise. Without it a card reads
+    # "Expected FABIO SIGNORELLI / Found Rossastro / PASS", which contradicts
+    # itself: the rule matched the fanciful name the same application declares.
+    matched_value: str = ""
 
 
 class AISuggestionWire(BaseModel):

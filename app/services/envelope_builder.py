@@ -28,6 +28,7 @@ from app.services.aggregation import min_aggregate_confidence
 from app.services.confidence import to_band
 from app.services.disposition import rule_disposition
 from app.services.engine_meta import EvaluationTimeline
+from app.services.reading_text import reading_for_display
 from app.vision.cloud import OBSERVED_VALUE_AUDIT_KEYS
 
 # Canonical field id → wire field_name enum. Two input forms route to the
@@ -161,6 +162,7 @@ def build_field_findings(
                     disposition=verdict,
                     reason_code=vr.reason_code or "",
                     plain_language_explanation=vr.message or "",
+                    matched_value=vr.matched_value or "",
                 )
             )
             confidences.append(vr.aggregated_confidence)
@@ -171,7 +173,13 @@ def build_field_findings(
         out.append(
             FieldFindingWire(
                 field_name=wire_slot,  # type: ignore[arg-type]
-                extracted_value=_coerce_str(_strip_audit_keys(obs.observed_value)),
+                # The words the label prints, not the reader's payload. `str()`
+                # on the payload put `{'brand_name': 'Patria'}` on the result
+                # page beside an application saying `PATRIA`, which a reviewer
+                # cannot compare against anything.
+                extracted_value=reading_for_display(
+                    wire_slot, _strip_audit_keys(obs.observed_value)
+                ),
                 expected_value=_coerce_str(exp.value if exp else None),
                 evidence=evidence_wire,
                 rule_findings=rule_findings_for_field,
