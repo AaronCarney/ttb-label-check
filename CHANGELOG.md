@@ -9,6 +9,11 @@ date: the release's git tag records when it was cut. Versions follow
 
 ### Added
 
+- The deployed service no longer makes its first visitor wait. Cloud Run scales to zero, so an idle
+  instance was reclaimed and whoever arrived next paid a container start plus an OCR model load —
+  36.48 seconds to first byte, measured, against 0.14 seconds warm. A cron trigger on the edge
+  Worker now calls `/api/health` every five minutes with the invoker token, keeping the loaded
+  instance alive. See `docs/decisions.md#0042`.
 - Every check writes one log line when it finishes: the outcome, the reason code behind it and how
   long it took, under the evaluation's id. A check that succeeded used to log nothing. Nothing from
   the application or the label is on the line.

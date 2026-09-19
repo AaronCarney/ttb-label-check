@@ -155,4 +155,34 @@ export default {
     forwarded.headers.set("authorization", `Bearer ${await invokerToken(env)}`);
     return fetch(forwarded);
   },
+
+  // Keep-warm (0042, which builds what 0025 named and left unbuilt). The
+  // service runs with --min-instances 0, so an idle instance is reclaimed and
+  // the next visitor pays a container start plus an OCR model load: 36.5
+  // seconds measured on the deployed service, against 0.14 seconds warm. Any
+  // request holds the instance, so this sends the cheapest one there is. The
+  // models are loaded by the startup probe before Cloud Run routes anything to
+  // an instance, so this ping never reloads them.
+  //
+  // It does not call the rate limit. That binding bounds a flood arriving from
+  // outside; this request is the Worker's own, and counting it against the same
+  // key would spend a reviewer's budget on housekeeping.
+  //
+  // A failure is logged and swallowed. The next ping is five minutes away, and
+  // a throw here only marks the cron invocation failed - it fixes nothing and
+  // reaches nobody.
+  async scheduled(event, env, ctx) {
+    ctx.waitUntil(
+      (async () => {
+        try {
+          const response = await fetch(`${env.ORIGIN}/api/health`, {
+            headers: { authorization: `Bearer ${await invokerToken(env)}` },
+          });
+          console.log(`keep-warm ping: ${response.status}`);
+        } catch (error) {
+          console.log(`keep-warm ping failed: ${error}`);
+        }
+      })(),
+    );
+  },
 };

@@ -2644,3 +2644,58 @@ time, one request is the whole of it. *Paginate the results table* — a batch i
 straight to its results and the first result arrives almost at once. A second batch run beside it
 would compete for the same reader, and a batch nobody will open again is memory the service has no
 reason to hold.
+
+## 0042. A scheduled ping holds an instance warm, because the first thing a visitor met was a 36-second wait
+
+**Evidence:** `edge/src/index.js` (`scheduled`); `edge/wrangler.jsonc` (`triggers.crons`);
+`scripts/deploy.sh:315`; [0025](#0025).
+
+**What was wrong.** The service runs with `--min-instances 0`, and the startup probe holds traffic
+off a new instance until the OCR models are loaded. So a visitor arriving at a quiet service waited
+for a container start and a model load before seeing a page. Measured on the deployed service on
+2026-09-19, against `https://ttb.aaroncarney.me/`:
+
+```
+cold: ttfb=36.48s  code=200
+warm: ttfb=0.14s   code=200
+```
+
+Nothing about the application is slow. The warm path is 140 milliseconds. The 36 seconds is the
+price of having scaled to zero, and it was being paid by whoever arrived first — which, for a
+prototype whose whole purpose is to be opened by someone who has never seen it, is everyone who
+matters.
+
+[0025](#0025) already argued this and named the fix: "a scheduled request every ten minutes holds an
+instance warm for a few hundred vCPU-seconds a month." It was never built. That record also said the
+deployed cold start was unknown until timed on the service. It has now been timed.
+
+**Chosen.** A cron trigger on the edge Worker, every five minutes, calling
+`${ORIGIN}/api/health` with the same invoker token the Worker mints for a forwarded request. Any
+request resets the instance's idle clock, so the ping sends the cheapest one the service has. The
+models are loaded by the startup probe before Cloud Run routes anything to an instance, so the ping
+never reloads them; it only keeps the instance that already holds them from being reclaimed.
+
+Five minutes, not the ten 0025 costed. Google documents no idle-retention window for a Cloud Run
+instance, so ten minutes was a guess at an undocumented number. Five sits below the fifteen minutes
+commonly observed with margin to spare, and the extra cost is nil: 8,640 pings a month, each a few
+milliseconds of CPU, against a free allowance measured in millions of requests.
+
+The ping does not call the rate limit. That binding exists to bound a flood arriving from outside,
+and this request is the Worker's own; counting it against the same key would spend a reviewer's
+budget on housekeeping. A failed ping is logged and swallowed, because the next one is five minutes
+away and a throw reaches nobody.
+
+**Accepted cost.** `--concurrency 1` means a ping that arrives while a reviewer's check is running
+starts a second instance, which cold-starts. It is a few seconds of an instance nobody is waiting
+on, and `--max-instances 2` caps how far it can go.
+
+**Rejected.** *`--min-instances 1`* — it is the direct fix and it bills a 4-vCPU, 4 GiB instance
+around the clock whether or not anyone visits, which is the one thing [0025](#0025) chose this host
+to avoid. *Pinging `/healthz`* — it rebuilds the evaluator, so it does more work than keeping an
+instance alive requires. *A ping from outside the Worker* — the invoker check ([0028](#0028)) means
+an unsigned request is refused with a 403 and never reaches the service, so a plain uptime pinger
+would hold nothing warm; the Worker is the only thing already holding the key.
+
+**Because** a prototype is judged by someone who opens it once. A 36-second blank page is the first
+and possibly only thing that person learns about it, and it says nothing true about the product
+behind it.

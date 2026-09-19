@@ -41,6 +41,15 @@ and the two-instance cap in `scripts/deploy.sh`. The Worker comment in
 `edge/src/index.js` carries both measurements. Deployed with `npx wrangler deploy` from
 that directory; the key is never in this repository.
 
+**The same Worker holds the service warm.** Cloud Run runs at `--min-instances 0`, so an idle
+instance is reclaimed and the next visitor pays a container start plus an OCR model load. Measured
+on 2026-09-19 that cost **36.48 seconds** to first byte, against **0.14 seconds** on a warm
+instance — nothing about the application is slow; the wait was the price of having scaled to zero.
+A cron trigger on the Worker now calls `/api/health` every five minutes with the same invoker
+token, which keeps the instance that already holds the loaded models from being reclaimed.
+[Decision 0042](docs/decisions.md#0042) records the period, the rejected `--min-instances 1`, and
+the measurements.
+
 `--check` is what proves the repository is deployable without making it public: it runs every
 precondition the deploy has that needs no network, and names any that fails. It runs as part of the
 test suite.

@@ -24,5 +24,13 @@
       "simple": { "limit": 120, "period": 60 }
     }
   ],
+  // The keep-warm ping decision 0025 called for and decision 0042 built. The
+  // service runs with --min-instances 0, so an idle instance is reclaimed and
+  // the next visitor pays a container start plus an OCR model load. Five
+  // minutes rather than the ten 0025 costed: Google documents no idle-retention
+  // window for a Cloud Run instance, so the period sits below the fifteen
+  // minutes commonly observed, with margin.
+  "triggers": { "crons": ["*/5 * * * *"] },
+
   "observability": { "enabled": true }
 }
