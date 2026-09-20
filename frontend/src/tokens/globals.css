@@ -246,6 +246,33 @@ input[type="submit"]:disabled {
   align-items: center;
 }
 
+/* ---------- The faces of the label being submitted ---------- */
+
+.label-faces {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 1rem;
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius);
+}
+.label-faces legend {
+  padding: 0 0.25rem;
+  font-weight: 600;
+  color: hsl(var(--uswds-base-darker));
+}
+.label-face-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+/* Two dropzones stacked at the full padding push the application fields off
+   the first screen, so each face's zone is shorter than the single one was. */
+.label-faces .dropzone {
+  padding: 1rem;
+}
+
 /* ---------- The application fields beside the upload ---------- */
 
 .application-fields {

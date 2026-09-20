@@ -161,8 +161,9 @@ uv sync
 uv run task demo
 ```
 
-Then open <http://localhost:8000>. Upload a label image, fill in the application fields beside it,
-and submit.
+Then open <http://localhost:8000>. Upload the front of a label and, if the label has one, its back
+— the government warning is usually printed on the back, so a front on its own is checked for a
+warning that is not on it. Fill in the application fields beside the images and submit.
 
 **To try the batch path with no labels of your own**, open `/batches` and download the 10-label
 sample pack the page offers. It is built from real approved labels shipped in this repository, and

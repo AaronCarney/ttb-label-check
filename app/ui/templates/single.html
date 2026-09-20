@@ -29,10 +29,32 @@
     </section>
   {% endif %}
   <form action="/" method="post" enctype="multipart/form-data" class="upload-form" aria-label="Upload a label for evaluation">
-    <label for="label-upload" class="upload-form-label">Upload a label (PNG or JPEG)</label>
-    <div class="dropzone">
-      <input id="label-upload" type="file" name="label" accept="image/png,image/jpeg" required />
-    </div>
+    {# A COLA is filed with every face of the label and the mandatory elements
+       are spread across them — the government warning is most often printed on
+       the back — so the page asks for the faces the reviewer has. `POST /`
+       has taken both since the reader started reading both
+       (`app/api/ui/single_upload.py`). A front on its own is still a whole
+       submission, and the check is then honestly a check of what was shown. #}
+    <fieldset class="label-faces">
+      <legend>The label&rsquo;s photographs (PNG or JPEG)</legend>
+      <p class="application-fields-hint">
+        Send every face you have. The government warning is usually printed on
+        the back, so a front on its own is checked for a warning that is not on
+        it and the warning is reported missing.
+      </p>
+      <div class="label-face-field">
+        <label for="label-upload" class="upload-form-label">Front of the label</label>
+        <div class="dropzone">
+          <input id="label-upload" type="file" name="label" accept="image/png,image/jpeg" required />
+        </div>
+      </div>
+      <div class="label-face-field">
+        <label for="label-back-upload" class="upload-form-label">Back of the label, if there is one</label>
+        <div class="dropzone">
+          <input id="label-back-upload" type="file" name="label_back" accept="image/png,image/jpeg" />
+        </div>
+      </div>
+    </fieldset>
     {% set app_form = application_form or {} %}
     <fieldset class="application-fields">
       <legend>The application filed for this label</legend>
