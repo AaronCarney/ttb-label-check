@@ -1,10 +1,11 @@
 """What a posted upload becomes before the engine sees it.
 
-Both upload routes — one label on ``POST /``, a folder of them on
-``POST /batches/upload`` — need the same three things: the uploaded bytes
-identified as an image the reader can open, the application the form declares,
-and the evaluator that checks one against the other. They are here so the two
-routes cannot drift apart on any of the three.
+The one upload route, ``POST /``, needs three things whether it carries one
+label or three hundred: the uploaded bytes identified as an image the reader
+can open, the application the form declares, and the evaluator that checks one
+against the other. They are here rather than in the route so that the sample
+route, which checks a shipped label against its filed application, cannot drift
+from the form on any of the three.
 
 This module reaches into ``app.services`` and ``app.deps``, which is why the
 page shells do not: rendering a page needs none of it.

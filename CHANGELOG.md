@@ -36,6 +36,26 @@ date: the release's git tag records when it was cut. Versions follow
 
 ### Changed
 
+- One system, and a check of one label is a batch of one. The product had two ways in — a page for a
+  single label and a page for a folder of them — which meant two upload forms, two result layouts
+  and two paths through the engine for the same job, and a reviewer had to decide which one their
+  submission was before they could start. `GET /` is now the only form, `POST /` always starts a
+  batch and answers 303 to `/batch/{id}`, and the results page opens the first result the moment it
+  lands, so a reviewer checking one label waits no longer than before and a reviewer checking three
+  hundred reads the first while the rest run. `GET /batches`, the bulk page's URL, redirects there
+  permanently rather than 404ing, because it is the address the deployed service has been handing
+  out. Two costs come with it, both accepted: the service checks one batch at a time
+  (`docs/decisions.md#0041`), so a reviewer submitting one label while a 300-label batch runs is now
+  refused and told to wait, where before the single-label path was never refused; and a reviewer
+  holding two unsuffixed photographs of one label must tick **These images are all faces of one
+  label**, because filename pairing cannot read two phone photographs. See
+  `docs/decisions.md#0045`.
+
+- Every check's result is kept for seven days, not only a single label's. The result is what an
+  override amends, and it used to be written only when a check ran outside a batch — so with every
+  check now a batch, it is written for every label. It is stripped before it is written exactly as
+  before: every value read off the artwork and every value the application declared is blanked.
+
 - The landing page no longer offers four curated labels as buttons, each with a sentence describing
   what checking it would show. A tour of the product is not the product, and one of those sentences
   asserted an outcome the engine explicitly refuses to assert: it said of a beer that *"Neither
@@ -55,11 +75,11 @@ date: the release's git tag records when it was cut. Versions follow
 
 ### Fixed
 
-- The single-label page takes the back of the label. `POST /` had accepted a second image since the
+- A reviewer can send the back of the label. `POST /` had accepted a second image since the
   multi-face work, but the page offered one file input, so no reviewer could send one — and the
   government warning is printed on the back of 20 of the 30 corpus labels, so the product's one
-  entry point reported a warning missing that the label carries. The page now asks for a front and
-  an optional back and says why the back matters. The five-second measurement sends what the page
+  entry point reported a warning missing that the label carries. The form takes the faces of a label
+  together and says why the back matters. The five-second measurement sends what the page
   sends, and the number it returns is published: 18 of 37 checks and 21 of 37 inside five seconds
   across two runs on the deployed service, against a requirement of 95 percent, where a front-only
   run of the same set made 35 of 37. See `docs/decisions.md#0044`.

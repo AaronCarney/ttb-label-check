@@ -177,7 +177,7 @@ actually require:
   judgement that has to be defended on its own authority.
 - **A privacy review and a records schedule.** Anything holding applicant material needs both. This
   prototype keeps two things for seven days: an uploaded image, so a result page survives a restart,
-  and a single label's result, so a reviewer can overrule a finding on it. That second one used to
+  and every check's result, so a reviewer can overrule a finding on it. That second one used to
   restate what the application declared, the applicant's name and address included; it no longer
   does. Every value it read and every value the application declared is blanked before the file is
   written, and what stays is what an override amends — the dispositions, the citations, the reason
@@ -255,9 +255,9 @@ ships has to run with no key and no network call, and the one that reads harder 
 replaceable by something inside the agency's own boundary without a rewrite. The uploaded image is a
 file on disk rather than something held in the process because the clone a reviewer runs and the
 deployed container are the same application, and a directory of files is the only store that needs no
-account, no service and no configuration. A single label's result sits beside it for the same reason
-and on the same sweep, because an override arriving after the page was rendered needs something to
-amend. We added no seam for elegance, and the seam we have not
+account, no service and no configuration. Every check's result sits beside it for the same reason
+and on the same sweep, because an override arriving after the batch that held it has been dropped
+needs something to amend. We added no seam for elegance, and the seam we have not
 built is named as missing: no rule can yet say "this applies whatever the beverage is", which is why a
 label filed with no application is read and not checked.
 
@@ -279,7 +279,7 @@ is still the reviewer's own work.
 
 **Whether the record would answer a producer who contests a rejection.** It would not, and that is
 worth saying because everything above makes it sound as though it would. What survives is short —
-a single label's result keeps for seven days so an override has something to amend, and then it is
+a check's result keeps for seven days so an override has something to amend, and then it is
 gone. What survives is also emptied on purpose: to keep no applicant material on disk, the kept copy
 blanks the value read off the artwork and the value the application declared, so it records that a
 field was rejected without recording what it said. That is the right privacy answer and it makes the
@@ -559,7 +559,7 @@ than failing the first real label. Logs carry the identifiers needed to follow o
 through, with applicant material kept out, and every check leaves one line with its outcome, the
 reason code behind it and what it cost. That is where the operability stops: nobody is told when
 those lines go wrong — no metrics endpoint, no alerting, no dashboard — and nothing records what the
-service did beyond those lines and the single-label results it keeps for a week so an override has
+service did beyond those lines and the results it keeps for a week so an override has
 something to amend. An operator can find out whether it is right only by reading the logs. Those are prerequisites before this ran inside the agency, not improvements: a compliance
 service nobody is watching is one nobody can vouch for. What bounds the cost is the invoker check,
 which refuses every caller but our own front door before a request is billed, and the two-instance

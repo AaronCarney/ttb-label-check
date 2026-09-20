@@ -151,9 +151,10 @@ the regulation behind it. Three outcomes only — **match**, **mismatch**, or **
 the interface labels Pass, Fail and Needs review — and the third is a real answer, used wherever the
 app can see the element but cannot honestly decide it.
 
-It handles one label at a time through a web page, or a batch of them through an upload that streams
-results back as each finishes. In a batch the first label is checked on its own and the rest run
-behind it, which is the ordering rather than an accident of it: the reviewer gets a real result in
+There is one way in and one way it works: a form that takes one label or three hundred, and a
+results page that streams verdicts back as each label finishes. A submission of one label is a batch
+of one, checked by the same path as a submission of three hundred. The first label is checked on its
+own and the rest run behind it, which is the ordering rather than an accident of it: the reviewer gets a real result in
 seconds instead of a progress bar, and starts working while the remainder runs. The batch then paces
 itself against how fast they are actually reading, rather than racing ahead to compute results
 nobody has asked for yet.
@@ -175,8 +176,8 @@ Then open <http://localhost:8000>. Upload the front of a label and, if the label
 — the government warning is usually printed on the back, so a front on its own is checked for a
 warning that is not on it. Fill in the application fields beside the images and submit.
 
-**To try the batch path with no labels of your own**, open `/batches` and download the 10-label
-sample pack the page offers. It is built from real approved labels shipped in this repository, and
+**To try it with no labels of your own**, follow the **Download a 10-label sample** link on the
+entry page. It is built from real approved labels shipped in this repository, and
 it carries `applications.csv` beside the images: one row per label, holding the application that was
 actually filed for it. Unzip the pack and select the whole unzipped folder in the label-images
 picker — the CSV among the images is read as the applications, so nothing has to be typed and no
@@ -187,7 +188,7 @@ every label must carry, and says so.
 **To supply your own applications**, write the same CSV: a `filename` column, then
 `beverage_type`, `brand_name`, `fanciful_name`, `class_type`, `alcohol_content`, `net_contents`,
 `applicant_name_address`, `source_of_product`, `origin` and `wine_appellation` — the same ten fields
-the single-label page asks for. `filename` joins on the image name, with or without its extension
+the form asks for. `filename` joins on the image name, with or without its extension
 and with or without a `-front`/`-back` suffix, so one row covers both faces of a label. Columns of
 your own are ignored rather than refused. Two rows naming one label are refused: at 300 labels the
 failure you cannot see from the page is not a missing application but the wrong one.
@@ -336,7 +337,7 @@ uploader who names their files differently. The downloadable sample set is named
 
 **How a batch knows which application belongs to which label.** By that same filename. The
 applications travel as one CSV, `applications.csv`, a row per label carrying the ten fields the
-single-label page asks for, and a row joins to a label on the image name. A CSV is what a reviewer
+form asks for, and a row joins to a label on the image name. A CSV is what a reviewer
 holding 300 filings already has, which the JSON body `POST /batches` accepts is not; a sidecar file
 per label was rejected for spending the 100-file cap on paperwork. The brief rules out integrating
 with COLAs Online, so a file the reviewer supplies stands in for the feed a real deployment would
@@ -388,12 +389,11 @@ file's header before anything is decoded. A refusal carries a reason code and a 
 which file was refused and what the limit is.
 
 **Almost nothing is kept, and what is kept is named.** There is no database and no COLA
-integration. Batch state lives in the process and is dropped when the response is returned or the
+integration. Batch state lives in the process and is dropped when the next batch starts or the
 server stops, and nothing the form collects reaches a log. Two things are written to a directory on
 disk and swept after seven days. The uploaded label image, so the result page can still show it
-after a restart or on a second worker. And, on a check run against a single label, the result
-itself — because an override has to have something to amend, and a single label is in no batch to
-hold it. That second file is stripped before it is written: the value read off the artwork, the
+after a restart or on a second worker. And every check's result — because an override has to have
+something to amend, and the batch that held it is dropped as soon as the next one starts. That second file is stripped before it is written: the value read off the artwork, the
 value the application declared, each finding's explanation, any model prose and the uploaded file's
 name are blanked, leaving what an override actually amends — the dispositions, the confidences, the
 rule ids, the CFR citations, the reason codes, the evidence boxes and the audit trail. One piece of
@@ -505,7 +505,7 @@ call we made in it, stated as our call rather than as a finding.
 - **The warning text is fixed.** 27 CFR 16.21's wording is pinned as a committed asset and compared
   against by hash, so a change to the regulation is a deliberate edit and not a silent drift.
 - **What is kept is kept for seven days and no longer.** Application data lives only as long as the
-  request that carried it. On a single-label check the result is written to disk so a reviewer can
+  request that carried it. Every check's result is written to disk so a reviewer can
   overrule a finding on it, stripped of every value it read and every value the application
   declared. The uploaded label image is written the same way, so the result page survives a restart.
   Both are a demo's bargain rather than a production one: the labels this ships are public TTB COLA
@@ -704,7 +704,6 @@ that cannot check anything.
   find the image. There is no image store for it to find one in, so every item comes back as a
   refusal carrying `ENGINE.INPUT.LABEL_IMAGE_MISSING` and the batch reports zero labels checked. The
   alternative to refusing was to run the reader and the rules over a stand-in and report a verdict
-  about something that is not the label, which would be worse. The batch path that works is
-  `POST /batches/upload`, which carries the files themselves, and it is what the `/batches` page
-  uses. See `docs/decisions.md#0020`. For an agent this means the JSON endpoint is usable only for
+  about something that is not the label, which would be worse. The path that works is `POST /`,
+  which carries the files themselves, and it is what the form uses. See `docs/decisions.md#0020`. For an agent this means the JSON endpoint is usable only for
   its shape — the batch id, the queue, the SSE stream — and never for an answer about a label.

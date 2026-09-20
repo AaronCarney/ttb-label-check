@@ -1,8 +1,8 @@
 """Which batch the service is holding, and whether it will take another.
 
 One batch at a time (`docs/decisions.md#0041`). A batch is started from the
-upload page or `POST /batches`; the reviewer is taken to its results and
-watches them arrive. While it is being checked, a second one is refused. Once
+form on `POST /` or from `POST /batches`; the reviewer is taken to its results
+and watches them arrive. While it is being checked, a second one is refused. Once
 it is finished it is kept only until the next one starts, so its results stay
 readable until then and no longer.
 
