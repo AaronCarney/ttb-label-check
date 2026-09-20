@@ -139,3 +139,29 @@ def test_a_citation_that_parses_but_is_not_held_holds_nothing() -> None:
 def test_the_loader_reads_the_manifest_once() -> None:
     """Serving a panel must not re-read 24 files per request."""
     assert load_manifest() is load_manifest()
+
+
+def test_the_text_does_not_repeat_the_heading_the_panel_already_prints() -> None:
+    """The panel prints `heading` above `text`, so a text that opens with its
+    own heading shows the reviewer the same line twice.
+
+    The file on disk keeps the heading — it is the eCFR's own wording, and
+    `tests/test_cfr_corpus_matches_ecfr.py` compares it against the live
+    section — so the line is dropped here, once, where the section is assembled.
+    """
+    repeated = []
+    for citation in sorted(_rule_pack_citations()):
+        for section in held_sections(citation):
+            first_line = section.text.split("\n", 1)[0].strip()
+            if first_line == section.heading.strip():
+                repeated.append(section.key)
+    assert repeated == [], f"heading repeated as the text's first line: {sorted(set(repeated))}"
+
+
+def test_dropping_the_heading_keeps_the_wording_whole() -> None:
+    """Only the heading line goes. The regulation itself is untouched."""
+    (section,) = held_sections("27 CFR §7.64")
+    assert section.heading == "§ 7.64 Brand name."
+    assert not section.text.startswith("§ 7.64")
+    assert section.text.startswith("(a) Requirement.")
+    assert "(b) Misleading brand names." in section.text

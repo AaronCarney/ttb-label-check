@@ -8,7 +8,9 @@ import { CitationPanel } from "./CitationPanel";
 const _section = (over: Record<string, unknown> = {}) => ({
   key: "title-27-section-4.33",
   heading: "§ 4.33 Brand names.",
-  text: "§ 4.33 Brand names.\n\n(a) General. The product shall bear a brand name…",
+  // The route strips the heading line the file opens with, because the panel
+  // prints `heading` itself — see `_body` in `app/cfr/corpus.py`.
+  text: "(a) General. The product shall bear a brand name…",
   paragraph: null,
   source_url: "https://www.ecfr.gov/api/versioner/v1/full/2026-09-16/title-27.xml?part=4&section=4.33",
   version_date: "2026-09-16",

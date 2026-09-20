@@ -71,6 +71,22 @@ def _key_for(target: Section | object) -> str:
     return f"title-{target.title}-part-{target.part}-subpart-{target.subpart}"
 
 
+def _body(text: str, heading: str) -> str:
+    """The section's wording without the heading line the panel prints itself.
+
+    Every file under `assets/cfr/` opens with its own heading, because that is
+    how the eCFR serves the section and the file is kept as fetched — it is
+    compared against the live section by `tests/test_cfr_corpus_matches_ecfr.py`.
+    The panel renders the heading above the text, so the line is dropped here,
+    once, rather than shown to a reviewer twice. A file that does not open with
+    its heading is returned whole.
+    """
+    first, separator, rest = text.partition("\n")
+    if separator and first.strip() == heading.strip():
+        return rest.lstrip("\n")
+    return text
+
+
 def held_sections(citation: str) -> list[HeldSection]:
     """The regulation behind one citation string, or nothing.
 
@@ -97,7 +113,7 @@ def held_sections(citation: str) -> list[HeldSection]:
             HeldSection(
                 key=_key_for(target),
                 heading=entry["heading"],
-                text=text,
+                text=_body(text, entry["heading"]),
                 paragraph=target.paragraph if isinstance(target, Section) else None,
                 source_url=entry["source_url"],
                 version_date=entry["version_date"],
