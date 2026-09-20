@@ -303,6 +303,9 @@ elif [ "${TTB_ACCESS:-}" != "keep" ]; then
 fi
 
 echo "Deploying ${SERVICE} to ${REGION} in ${TTB_GCP_PROJECT} at ${COMMIT}. Cloud Build builds the image."
+# OCR_NUM_THREADS travels with CPU so the reader is always sized for the cores it
+# actually has. Left to its default, the two constants live in two files, and a
+# change to CPU here would silently leave the reader sized for the old count.
 gcloud run deploy "$SERVICE" \
     --project "$TTB_GCP_PROJECT" \
     --region "$REGION" \
@@ -316,7 +319,7 @@ gcloud run deploy "$SERVICE" \
     --timeout "$TIMEOUT" \
     --cpu-boost \
     --startup-probe "$STARTUP_PROBE" \
-    --set-env-vars "VISION_MODE=local,GIT_COMMIT=${COMMIT}" \
+    --set-env-vars "VISION_MODE=local,OCR_NUM_THREADS=${CPU},GIT_COMMIT=${COMMIT}" \
     --labels "commit=${COMMIT}" \
     ${ACCESS_FLAG:+"$ACCESS_FLAG"}
 
