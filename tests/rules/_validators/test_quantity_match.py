@@ -340,3 +340,59 @@ def test_the_shipped_tolerance_sits_between_its_two_derived_bounds() -> None:
     # The bounds themselves, so a change in the size lists is visible here too.
     assert round(floor, 5) == 0.00633, f"floor moved to {floor:.5%}"
     assert round(ceiling, 5) == 0.01216, f"ceiling moved to {ceiling:.5%}"
+
+
+# ---- a pass says which two figures agreed ------------------------------------
+#
+# The result card shows the application's words beside the label's, and on this
+# element the two routinely differ while the figures agree exactly: "12.7 FL.
+# OZ" against "12.7 FL. OZ.", "750 ML" against "750ML". A reviewer reading a
+# PASS over two visibly different strings has to be told the comparison was
+# between numbers and which numbers those were — otherwise the card looks like
+# a rule that is not reading the difference in front of it.
+
+
+def _result(label_number: str, label_unit: str, declared_ml: str):
+    obs = make_obs(
+        field_id="net_contents",
+        value={"net_contents_value": label_number, "unit": label_unit},
+        beverage_class=BeverageClass.MALT,
+    )
+    exp = make_expected(field_id="net_contents", container_volume_ml=Decimal(declared_ml))
+    rule = make_rule(
+        rule_id="malt.net_contents.matches_application",
+        cfr_citation="27 CFR §7.70",
+        validator="quantity_match",
+        reason_code="NET_CONTENTS.MATCH.APPLICATION_LABEL_DISAGREE",
+        applies_to_classes=(BeverageClass.MALT,),
+        decision_table_ref="volume_units",
+        tolerance=_shipped_tolerance(),
+        parameters={"amount_field": "container_volume_ml"},
+    )
+    return quantity_match(
+        obs, exp, rule, make_context(decision_tables={"volume_units": _volume_units()})
+    )
+
+
+def test_a_pass_in_one_unit_names_both_figures() -> None:
+    result = _result("375", "ML", "375")
+    assert result.outcome is Outcome.PASS
+    assert result.message is not None
+    assert "375" in result.message
+
+
+def test_a_pass_across_units_names_the_conversion_and_the_tolerance() -> None:
+    """12.7 fluid ounces converts to 375.58 against a declared 375. The card
+    shows neither number, so the sentence has to carry the conversion and the
+    allowance that made it a pass."""
+    result = _result("12.7", "FL. OZ.", "375")
+    assert result.outcome is Outcome.PASS
+    assert result.message is not None
+    assert "12.7" in result.message
+    assert "375" in result.message
+
+
+def test_a_pass_carries_no_second_value_for_the_card() -> None:
+    """The rule matched the figure the application declared, not some other
+    admissible value, so there is nothing to put under "Matched against"."""
+    assert _result("375", "ML", "375").matched_value is None

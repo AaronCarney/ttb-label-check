@@ -186,3 +186,63 @@ def test_the_check_never_rejects() -> None:
 
 def test_validator_registered() -> None:
     assert "name_address_match" in VALIDATOR_REGISTRY
+
+
+# ---------------------------------------------------------------------------
+# A pass says which name in the block it matched
+# ---------------------------------------------------------------------------
+#
+# The application's block runs several names together and the label prints one
+# of them. A reviewer sees the whole block beside a short statement under a
+# PASS pill, and without being told which name matched they cannot tell
+# agreement from a rule matching on a common word.
+
+
+def test_a_pass_names_the_name_it_found_in_the_block() -> None:
+    res = _verdict(
+        "CELLARED AND BOTTLED BY CHATEAU DIANA, Healdsburg, California",
+        CHATEAU_DIANA_BLOCK,
+    )
+    assert res.outcome is Outcome.PASS
+    assert res.message is not None
+    assert "CHATEAU DIANA" in res.message.upper()
+
+
+def test_a_pass_carries_the_matched_name_for_the_card() -> None:
+    """The block is long and the name is a few words inside it, so the card
+    shows the name on its own rather than making a reviewer find it."""
+    res = _verdict(
+        "CELLARED AND BOTTLED BY CHATEAU DIANA, Healdsburg, California",
+        CHATEAU_DIANA_BLOCK,
+    )
+    assert res.matched_value is not None
+    assert "CHATEAU DIANA" in res.matched_value.upper()
+
+
+def test_a_pass_names_what_corroborated_the_match() -> None:
+    """The anchor alone is not what passed the check: one further word of the
+    label had to appear in the block too. A reviewer auditing the rule needs
+    that word, because it is the difference between a match and a coincidence."""
+    res = _verdict(
+        "CELLARED AND BOTTLED BY CHATEAU DIANA, Healdsburg, California",
+        CHATEAU_DIANA_BLOCK,
+    )
+    assert res.message is not None
+    assert "HEALDSBURG" in res.message.upper()
+
+
+def test_the_corroborating_word_is_not_a_fragment_of_a_longer_one() -> None:
+    """The State is folded to its postal code before the comparison, so the
+    word that corroborated may be two letters. Looking those two letters up in
+    the application block without requiring whole words finds them inside the
+    first longer word that starts the same way — and the sentence then tells a
+    reviewer that "Ca" appeared on both sides, when the block says Calistoga."""
+    res = _verdict(
+        "BOTTLED BY SEPIA WINES LLC, Calistoga, California",
+        "Sepia Wines, LLC 817 LOMMEL RD Calistoga CA 94515",
+    )
+    assert res.outcome is Outcome.PASS
+    assert res.message is not None
+    assert "Ca," not in res.message
+    assert '"Ca"' not in res.message
+    assert "CALISTOGA" in res.message.upper()

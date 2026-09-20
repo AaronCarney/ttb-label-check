@@ -12,6 +12,7 @@ import { OverrideDrawer } from "./components/OverrideDrawer";
 import { ProcessingTime } from "./components/ProcessingTime";
 import { RawJSONDrawer } from "./components/RawJSONDrawer";
 import { RuleVerdict } from "./components/RuleVerdict";
+import { decidingFinding } from "./lib/decidingFinding";
 import { Toast } from "./components/Toast";
 import { useKeyboardShortcuts } from "./hooks/useKeyboardShortcuts";
 import { engineFailureCode, wasStoppedEarly } from "./lib/incompleteCheck";
@@ -125,7 +126,10 @@ export function SingleApp({ envelope }: { envelope: DispositionEnvelope | null }
           <FieldCard
             key={field.field_name}
             field={field}
-            verdict={field.rule_findings[0] ? <RuleVerdict finding={field.rule_findings[0]} /> : null}
+            verdict={(() => {
+              const deciding = decidingFinding(field);
+              return deciding ? <RuleVerdict finding={deciding} /> : null;
+            })()}
             aiSuggestion={<AISuggestionBlock suggestion={field.ai_suggestion} />}
           />
         ))}

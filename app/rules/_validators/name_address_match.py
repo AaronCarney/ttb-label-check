@@ -42,6 +42,7 @@ from app.rules._validators._helpers import (
     _conf,
     normalize_words,
     project_reading,
+    text_as_written,
     word_run_present,
 )
 from app.schemas.expected import ExpectedValue
@@ -161,7 +162,13 @@ def name_address_match(
 ) -> ValidationResult:
     meta = _build_meta(rule, ctx)
 
-    def result(outcome: Outcome, severity: Severity, reason_code: str | None) -> ValidationResult:
+    def result(
+        outcome: Outcome,
+        severity: Severity,
+        reason_code: str | None,
+        message: str | None = None,
+        matched: str | None = None,
+    ) -> ValidationResult:
         return ValidationResult(
             rule_id=rule.rule_id,
             cfr_citation=rule.cfr_citation,
@@ -174,6 +181,8 @@ def name_address_match(
             expected=exp,
             observed=obs,
             engine_meta=meta,
+            message=message,
+            matched_value=matched,
         )
 
     def cannot_check() -> ValidationResult:
@@ -206,4 +215,21 @@ def name_address_match(
     if not corroborating:
         return cannot_check()
 
-    return result(Outcome.PASS, rule.severity, None)
+    # The card shows the whole application block beside a short statement off
+    # the label, under one pill. A reviewer cannot tell that pass from a rule
+    # matching on a common word unless it names both halves of what it did:
+    # the name it found in the block, and the further word that corroborated
+    # it. Where several words corroborate, the longest is named: "Calistoga"
+    # tells a reviewer more than the "CA" beside it, and picking by length
+    # rather than alphabetically keeps the choice the same on every run.
+    name = text_as_written(declared, anchor)
+    support = text_as_written(declared, (max(sorted(corroborating), key=len),))
+    return result(
+        Outcome.PASS,
+        rule.severity,
+        None,
+        f'The label names "{name}", which the application\'s block carries, and '
+        f'"{support}" appears on both sides — so the name is corroborated rather '
+        f"than carried by one word alone.",
+        matched=name,
+    )

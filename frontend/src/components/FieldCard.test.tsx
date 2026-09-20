@@ -16,6 +16,7 @@ const _stub: FieldFindingWire = {
       disposition: "pass",
       reason_code: "BRAND.NAME.MATCH",
       plain_language_explanation: "OK",
+      matched_value: "",
     },
   ],
   ai_suggestion: { present: false, task: null, text: null, model_disposition: null },

@@ -10,6 +10,7 @@ const _rf: RuleFindingWire = {
   disposition: "fail",
   reason_code: "WARNING.STYLE.HEADING_NOT_BOLD_CAPS",
   plain_language_explanation: "Heading not in bold caps.",
+  matched_value: "",
 };
 
 describe("RuleVerdict", () => {

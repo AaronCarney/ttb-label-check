@@ -29,6 +29,15 @@ date: the release's git tag records when it was cut. Versions follow
 
 ### Fixed
 
+- A result card says what the rule matched. A card read `Found: {'brand_name': 'Rossastro'}` against
+  `Expected: FABIO SIGNORELLI` under a **Pass** pill: the found value was a Python dict, and the
+  expected value named only the application's brand field while the rule had matched the fanciful
+  name the same application declares. The card now shows the words the label prints, and a check
+  that passed on something other than the application's literal value says so — the designation
+  found inside a longer one, the figure behind two differently worded quantities, the name located
+  in the applicant block. The card also shows the rule that set its pill rather than whichever rule
+  ran first, so a "Needs review" card no longer carries a silent **Pass** verdict from an unrelated
+  check.
 - The government warning check no longer reports a mismatch when the only differences are ones the
   reader is known to misread on a correct label: an accent on a letter, `(I)` for `(1)`, `O` for `D`,
   or one punctuation mark. It reports needs review and names each difference. A warning that shows

@@ -149,6 +149,33 @@ def word_run_present(haystack: tuple[str, ...], needle: tuple[str, ...]) -> bool
     return any(haystack[i : i + len(needle)] == needle for i in range(len(haystack)))
 
 
+def text_as_written(source: str, run: tuple[str, ...]) -> str:
+    """The words of `run` as `source` writes them.
+
+    A validator matches on normalised words: lower case, accents folded,
+    punctuation gone. Naming that match to a reviewer means pointing back at
+    text they can see on the card, so the run is located in the source and the
+    source's own characters are returned.
+
+    Where the run cannot be located the words themselves are returned in upper
+    case. That happens when a comparison folded something away — a State name
+    matched as its postal code — and an approximate name is still better for a
+    reviewer than none.
+    """
+    if not run:
+        return ""
+    # Whole words on both ends. Without them a two-letter match — a State
+    # folded to its postal code — finds itself inside the first longer word
+    # that happens to start the same way, and reports "Ca" for "Calistoga".
+    pattern = (
+        r"(?<![0-9A-Za-z])"
+        + r"[^0-9A-Za-z]*".join(re.escape(word) for word in run)
+        + r"(?![0-9A-Za-z])"
+    )
+    found = re.search(pattern, source, flags=re.IGNORECASE)
+    return found.group(0).strip() if found else " ".join(run).upper()
+
+
 def first_number(value: object) -> float | None:
     """The first number in a reading, whether it arrived as one or as text."""
     if isinstance(value, bool):

@@ -2645,6 +2645,7 @@ straight to its results and the first result arrives almost at once. A second ba
 would compete for the same reader, and a batch nobody will open again is memory the service has no
 reason to hold.
 
+<a id="0042"></a>
 ## 0042. A scheduled ping holds an instance warm, because the first thing a visitor met was a 36-second wait
 
 **Evidence:** `edge/src/index.js` (`scheduled`); `edge/wrangler.jsonc` (`triggers.crons`);

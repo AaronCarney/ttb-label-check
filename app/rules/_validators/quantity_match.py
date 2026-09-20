@@ -115,6 +115,49 @@ def _margin(declared_amount: float, factor: float, rule: RuleDefinition) -> floa
     return max(abs(declared_amount) * float(ratio), _EQUALITY_MARGIN)
 
 
+def _number(value: float) -> str:
+    """A figure written the way the label or the application writes it, without
+    the trailing zeros a float prints."""
+    return f"{value:g}"
+
+
+def _agreement(obs: FieldObservation, factor: float, declared: float) -> str:
+    """Why these two agreed, for the reviewer reading the card.
+
+    The card puts the application's words beside the label's, and on this
+    element the two routinely differ while the figures are identical: "12.7 FL.
+    OZ" against "12.7 FL. OZ.", "750 ML" against "750ML". A pass with nothing
+    beside it reads as a rule failing to see the difference in front of it,
+    when what happened is that the rule compared numbers and the numbers
+    matched.
+    """
+    observed_amount = first_number(project_reading(obs).strip())
+    if observed_amount is None:  # pragma: no cover - the caller checked this
+        return ""
+    if factor == 1.0:
+        # Neither side is quoted back. `project_reading` has already reduced
+        # the label's statement to the bare figure, so quoting it would show a
+        # reviewer something that appears on no card; and the two statements as
+        # written are the card's two columns, already in front of them.
+        return (
+            f"The label states {_number(observed_amount)} and the application "
+            f"{_number(declared)}: the same figure. Where the two statements "
+            f"differ above, it is in the words around the number, which this "
+            f"check does not compare."
+        )
+    converted = observed_amount * factor
+    # Neither figure is attributed to the document as written. The label's has
+    # been converted, and the application's is whatever its own declaration
+    # comes to in this unit — which is not always the number it wrote down.
+    return (
+        f"The label states {_number(observed_amount)} {_observed_unit(obs)}, which is "
+        f"{_number(round(converted, 2))} in the unit this check compares in. The "
+        f"application's declaration is {_number(round(declared, 2))} in the same unit. A "
+        f"customary size and its rounded metric equivalent cannot convert into each other "
+        f"exactly, so the two agree within the allowance this rule carries."
+    )
+
+
 @register("quantity_match")
 def quantity_match(
     obs: FieldObservation,
@@ -124,7 +167,12 @@ def quantity_match(
 ) -> ValidationResult:
     meta = _build_meta(rule, ctx)
 
-    def result(outcome: Outcome, severity: Severity, reason_code: str | None) -> ValidationResult:
+    def result(
+        outcome: Outcome,
+        severity: Severity,
+        reason_code: str | None,
+        message: str | None = None,
+    ) -> ValidationResult:
         return ValidationResult(
             rule_id=rule.rule_id,
             cfr_citation=rule.cfr_citation,
@@ -137,6 +185,7 @@ def quantity_match(
             expected=exp,
             observed=obs,
             engine_meta=meta,
+            message=message,
         )
 
     def cannot_check() -> ValidationResult:
@@ -172,7 +221,7 @@ def quantity_match(
     declared = float(declared_amount)
     difference = abs(observed_amount * factor - declared)
     if difference <= _margin(declared, factor, rule):
-        return result(Outcome.PASS, rule.severity, None)
+        return result(Outcome.PASS, rule.severity, None, _agreement(obs, factor, declared))
     return result(
         Outcome.FAIL,
         Severity.REJECT,

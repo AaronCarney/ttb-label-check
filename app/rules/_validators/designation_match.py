@@ -34,6 +34,7 @@ from app.rules._validators._helpers import (
     normalize_words,
     not_read_result,
     project_reading,
+    text_as_written,
     unlocated,
     unlocated_is_absent,
     word_run_present,
@@ -62,15 +63,45 @@ def _classes_named(words: Class, recognised: list[str]) -> set[Class]:
     return {c for c in named if c and present.issuperset(c)}
 
 
-def _within(
+def _within_pair(
     label_classes: set[Class], application_classes: set[Class], table: dict[Class, list]
-) -> bool:
-    """True when a class the label names falls within one the application did."""
-    for declared in application_classes:
+) -> tuple[Class, Class] | None:
+    """The class the label names and the one it falls within, or None.
+
+    The pairing rather than a yes: a pass has to tell a reviewer which of the
+    label's classes the table placed inside which of the application's, and
+    answering that from outside would repeat this walk.
+    """
+    for declared in sorted(application_classes):
         inner = {normalize_words(str(v)) for v in table.get(declared) or []}
-        if label_classes & inner:
-            return True
-    return False
+        found = label_classes & inner
+        if found:
+            return _longest(found), declared
+    return None
+
+
+def _longest(classes: set[Class]) -> Class:
+    """The most specific class in a set — the one naming the most words.
+
+    A designation names every class whose words it carries, so "TABLE WINE"
+    also names "WINE". Telling a reviewer the label named wine, when the rule
+    had table wine to work with, is true and useless. Ties break on the words
+    themselves, so the same input always names the same class.
+    """
+    return max(classes, key=lambda c: (len(c), c))
+
+
+def _class_as_written(name: Class, recognised: list[str]) -> str:
+    """A class as the rule pack spells it, which is what a reviewer can look up.
+
+    The comparison runs on normalised words; the pack writes "Table Wine". A
+    class not found in the list — it cannot be, since that list is where it
+    came from — falls back to its own words.
+    """
+    for value in recognised:
+        if normalize_words(str(value)) == name:
+            return str(value)
+    return " ".join(name).upper()
 
 
 @register("designation_match")
@@ -84,7 +115,13 @@ def designation_match(
     declared = "" if exp.value is None else str(exp.value).strip()
     meta = _build_meta(rule, ctx)
 
-    def result(outcome: Outcome, severity: Severity, reason_code: str | None) -> ValidationResult:
+    def result(
+        outcome: Outcome,
+        severity: Severity,
+        reason_code: str | None,
+        message: str | None = None,
+        matched: str | None = None,
+    ) -> ValidationResult:
         return ValidationResult(
             rule_id=rule.rule_id,
             cfr_citation=rule.cfr_citation,
@@ -97,6 +134,8 @@ def designation_match(
             expected=exp,
             observed=obs,
             engine_meta=meta,
+            message=message,
+            matched_value=matched,
         )
 
     # The reader did not find this on the label. That is a question for a
@@ -118,22 +157,65 @@ def designation_match(
     declared_words = normalize_words(declared)
 
     # 1. The application's designation, or any segment of it, inside the label's.
+    #
+    # The card shows "STOUT" beside "BARREL-AGED IMPERIAL STOUT" under one
+    # pill, which reads as a contradiction until the pass says where the
+    # application's words were found. A segment that is the whole declared
+    # designation is already on the card as the expected value, so only a
+    # shorter one — the registry packs four classes into
+    # "DESSERT /PORT/SHERRY/(COOKING) WINE" — is carried as a value of its own.
     for segment in _segments(declared):
         if segment and word_run_present(label_words, segment):
-            return result(Outcome.PASS, rule.severity, None)
+            written = text_as_written(declared, segment)
+            whole = segment == declared_words
+            return result(
+                Outcome.PASS,
+                rule.severity,
+                None,
+                f'The label designates "{observed}", which carries the '
+                + ("application's designation" if whole else "designation the application declares")
+                + f', "{written}", inside it as whole words.',
+                matched=None if whole else written,
+            )
 
     recognised = list(rule.parameters.get("recognised_classes", []))
     label_classes = _classes_named(label_words, recognised)
     application_classes = _classes_named(declared_words, recognised)
 
     # 2. Both name the same class.
-    if label_classes & application_classes:
-        return result(Outcome.PASS, rule.severity, None)
+    #
+    # Neither side need read like the class they share: "RED TABLE WINE" and
+    # "TABLE RED WINE" both name table wine and neither spells it that way, so
+    # the class is the only thing a reviewer can check the verdict against.
+    shared = label_classes & application_classes
+    if shared:
+        named = _longest(shared)
+        written = _class_as_written(named, recognised)
+        return result(
+            Outcome.PASS,
+            rule.severity,
+            None,
+            f'The label designates "{observed}" and the application declares '
+            f'"{declared}". Both name the class "{written}".',
+            matched=None if named == declared_words else written,
+        )
 
     # 3. The label's class falls within the application's.
     table = _within_table(rule, ctx)
-    if _within(label_classes, application_classes, table):
-        return result(Outcome.PASS, rule.severity, None)
+    pairing = _within_pair(label_classes, application_classes, table)
+    if pairing is not None:
+        inner, outer = pairing
+        inner_written = _class_as_written(inner, recognised)
+        outer_written = _class_as_written(outer, recognised)
+        return result(
+            Outcome.PASS,
+            rule.severity,
+            None,
+            f'The label designates "{observed}", which names "{inner_written}". '
+            f'The rule pack lists that as falling within "{outer_written}", the '
+            f'class the application declares as "{declared}".',
+            matched=inner_written,
+        )
 
     # 4a. The label names a different recognised class: a disagreement.
     # The pack's own severity, like every other branch that reports against the

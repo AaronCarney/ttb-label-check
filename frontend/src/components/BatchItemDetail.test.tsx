@@ -54,6 +54,7 @@ const _checked = _row([
       disposition: "fail",
       reason_code: "BRAND.NAME.MISMATCH",
       plain_language_explanation: "The brand on the label is not the brand on the application.",
+      matched_value: "",
     },
   ]),
   _field("net_contents", "750 ML", "750 ML", []),

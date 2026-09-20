@@ -378,3 +378,58 @@ def test_no_pack_names_the_same_class_twice() -> None:
                 f"which are the same class once both are normalized"
             )
             seen[name] = entry
+
+
+# ---------------------------------------------------------------------------
+# A pass says what it matched
+# ---------------------------------------------------------------------------
+#
+# The result card shows the application's value and the label's side by side
+# under one pill, and on this element the two almost never read the same: the
+# application declares STOUT and the label designates BARREL-AGED IMPERIAL
+# STOUT. A pass with nothing beside it leaves a reviewer reading a card that
+# appears to contradict its own verdict, with no way to tell agreement from a
+# rule that is simply wrong.
+
+
+def test_a_pass_names_the_declared_designation_found_inside_the_labels() -> None:
+    result = _run("BARREL-AGED IMPERIAL STOUT", "STOUT")
+    assert result.outcome is Outcome.PASS
+    assert result.message is not None
+    assert "BARREL-AGED IMPERIAL STOUT" in result.message
+    assert "STOUT" in result.message
+    # Nothing other than the declared designation was matched, so the card has
+    # no second value to show; the sentence carries it.
+    assert result.matched_value is None
+
+
+def test_a_pass_on_one_of_several_packed_designations_carries_that_one() -> None:
+    # "DESSERT /PORT/SHERRY/(COOKING) WINE" declares four. A reviewer reading
+    # the whole string beside a label saying COOKING WINE needs to be told
+    # which of the four the rule matched.
+    result = _run("COOKING WINE", "DESSERT /PORT/SHERRY/(COOKING) WINE")
+    assert result.outcome is Outcome.PASS
+    assert result.matched_value is not None
+    assert "COOKING" in result.matched_value.upper()
+    assert result.message is not None
+
+
+def test_a_pass_on_a_shared_class_names_the_class() -> None:
+    rule = _rule(recognised=("Wine", "Table Wine"))
+    result = _run("RED TABLE WINE", "TABLE RED WINE", rule=rule)
+    assert result.outcome is Outcome.PASS
+    assert result.message is not None
+    assert "TABLE WINE" in result.message.upper()
+
+
+def test_a_pass_within_a_class_names_the_class_it_falls_within() -> None:
+    tables = {"t": DecisionTable(entries=({"class": "Beer", "designations_within": ["Lager"]},))}
+    result = _run("LAGER", "BEER", rule=_rule(table_ref="t"), tables=tables)
+    assert result.outcome is Outcome.PASS
+    assert result.message is not None
+    assert "LAGER" in result.message.upper()
+    assert "BEER" in result.message.upper()
+    # The label's class is a value the application never wrote, so it goes on
+    # the card as well as into the sentence.
+    assert result.matched_value is not None
+    assert "LAGER" in result.matched_value.upper()

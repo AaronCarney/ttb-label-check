@@ -8,6 +8,7 @@ import { FieldCard } from "./FieldCard";
 import { IncompleteCheckCard } from "./IncompleteCheckCard";
 import { ProcessingTime } from "./ProcessingTime";
 import { RuleVerdict } from "./RuleVerdict";
+import { decidingFinding } from "../lib/decidingFinding";
 import { engineFailureCode, wasStoppedEarly } from "../lib/incompleteCheck";
 
 export interface BatchItemDetailProps {
@@ -94,9 +95,10 @@ export function BatchItemDetail({ row, className }: BatchItemDetailProps): React
             <FieldCard
               key={field.field_name}
               field={field}
-              verdict={
-                field.rule_findings[0] ? <RuleVerdict finding={field.rule_findings[0]} /> : null
-              }
+              verdict={(() => {
+                const deciding = decidingFinding(field);
+                return deciding ? <RuleVerdict finding={deciding} /> : null;
+              })()}
               aiSuggestion={<AISuggestionBlock suggestion={field.ai_suggestion} />}
             />
           ))}

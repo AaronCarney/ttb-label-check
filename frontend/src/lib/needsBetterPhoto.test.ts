@@ -85,6 +85,7 @@ describe("needsBetterPhotoFrom", () => {
             disposition: "needs_review",
             reason_code: "WARNING.LEGIBILITY.GLARE",
             plain_language_explanation: "",
+            matched_value: "",
           },
         ],
         ai_suggestion: { present: false, task: null, text: null, model_disposition: null },
