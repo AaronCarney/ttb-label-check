@@ -2794,3 +2794,40 @@ hand.
 
 **Because** the product is the comparison. A batch that reads labels and compares nothing is the
 half of the job the brief is not about.
+
+<a id="0044"></a>
+## 0044. The page takes the back of the label, and the five-second share is published as what that costs
+
+**Evidence:** `app/ui/templates/single.html`; `app/api/ui/single_upload.py`;
+`tests/test_single_page_offers_the_back.py`; `tests/test_deploy_healthz.py`;
+`docs/evidence/2026-09-20-five-second-both-faces-run1.json` and
+`docs/evidence/2026-09-20-five-second-both-faces-run2.json` (the two runs, row by row);
+[0005](#0005), [0035](#0035), [0036](#0036).
+
+**What was wrong.** `POST /` had accepted a second face called `label_back` since the multi-face
+work, and its docstring, its route and its tests were all written for two faces. The page offered
+one file input. No reviewer using the product could send a back, and the government warning is
+printed on the back of 20 of the 30 corpus labels: the one entry point a reviewer reaches answered
+fast and wrongly, reporting a warning missing that the label carries. The plan's own gate had
+ticked the item, because it tested the sample route, which cannot fail on the page's markup.
+
+**Chosen.** The page asks for a front and an optional back, and the five-second measurement sends
+what the page sends. The owner took the trade explicitly — add the input, re-measure on the deployed
+service, and publish whatever number comes back including a miss.
+
+**What it cost, measured 2026-09-20 on the deployed service.** 18 of 37 checks inside five seconds
+in one run and 21 of 37 in a second run minutes later, against R15/NFR-1's 95 percent. Medians of
+5.01 and 4.38 seconds, slowest 9.01. The 33 submissions carrying a back ran at medians of 5.55 and
+4.95; the four with only a front ran 4 of 4 inside the budget at 2.39 and 2.74. The previous
+deployed commit, which could only be sent fronts, measured 35 of 37 inside five seconds. Nothing
+was stopped early and nothing came out of the cache in either run, so the harness is measuring slow
+checks rather than blank ones ([0035](#0035)).
+
+**Not chosen, and not yet measured: reading the faces concurrently.** `app/vision/local.py` reads
+`label.faces` one after another. Reading two at once is the obvious lever and it is not obviously
+free — eight concurrent reads moved the 95th percentile from 2.26 seconds to 10.02 on these same
+four cores ([0005](#0005)). Two is not eight, and nobody has taken that measurement.
+
+**Because** a check that answers in three seconds about the wrong half of the label is not a faster
+product, it is a wrong one. The requirement is missed and the number saying so is published beside
+the requirement, rather than the number being kept by not sending the back.

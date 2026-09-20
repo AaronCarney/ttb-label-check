@@ -55,6 +55,15 @@ date: the release's git tag records when it was cut. Versions follow
 
 ### Fixed
 
+- The single-label page takes the back of the label. `POST /` had accepted a second image since the
+  multi-face work, but the page offered one file input, so no reviewer could send one — and the
+  government warning is printed on the back of 20 of the 30 corpus labels, so the product's one
+  entry point reported a warning missing that the label carries. The page now asks for a front and
+  an optional back and says why the back matters. The five-second measurement sends what the page
+  sends, and the number it returns is published: 18 of 37 checks and 21 of 37 inside five seconds
+  across two runs on the deployed service, against a requirement of 95 percent, where a front-only
+  run of the same set made 35 of 37. See `docs/decisions.md#0044`.
+
 - A result card says what the rule matched. A card read `Found: {'brand_name': 'Rossastro'}` against
   `Expected: FABIO SIGNORELLI` under a **Pass** pill: the found value was a Python dict, and the
   expected value named only the application's brand field while the rule had matched the fanciful

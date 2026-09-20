@@ -163,7 +163,11 @@ def test_readme_records_the_measured_latency_and_the_shortfall() -> None:
     assert "95%" in deployed or "95 percent" in deployed, (
         "Deployed URL section does not state the share R15/NFR-1 requires"
     )
-    assert "of 38" in deployed, (
+    # A count, not a percentage, and not a fixed one: the number of test
+    # submissions moves with the corpus, and pinning the guard to one of them
+    # made it fail on a run of a different size rather than on a README that
+    # had gone quiet.
+    assert re.search(r"\b\d+ of \d+ checks\b", deployed), (
         "Deployed URL section publishes no measured share of checks inside the budget"
     )
     assert "not met" in deployed.lower(), (

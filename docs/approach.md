@@ -474,19 +474,28 @@ present, twenty of thirty on it being word for word, seventeen of thirty on bran
 from thirty labels reads as a precision this corpus does not carry. The figures are not flattering
 and they are the honest state of a processor-only reader on display typefaces.
 
-**The five-second requirement has no current figure, and the one this document carried was
-counting the wrong thing.** It belongs to the deployed hardware, so we measure it there rather than
-on a developer's machine, and the earlier runs returned 34 of 38 inside five seconds. Two things
-invalidated that number. It predates the change that made the reader's sideways re-read conditional,
-and at the time a check that crossed five seconds was stopped and returned a blank result — so the
-run counted an empty page as a slow check. That defect is fixed
-([decision 0035](decisions.md#0035)) and the share is owed again after the next deploy. What is
-measured, against the live service: a median check of 2.03 seconds and a median read
-of 1.22, with one label of twelve at 5.04. Two levers have been tried and neither is the answer:
-more processor cores moved one check of thirty-eight, and the reading path itself has now been tuned
-three times — most recently by reading a label's sideways strips before reading the whole label
-again, which took the slowest corpus read from 1345 ms to 463 ms on the development box
-([decision 0036](decisions.md#0036)).
+**The five-second requirement is measured on the deployed service, and it is missed.** It belongs
+to the deployed hardware, so we measure it there rather than on a developer's machine. Measured
+2026-09-20, with both faces of each label: 18 of 37 checks inside five seconds in one run and 21 of
+37 in a second run minutes later, against a requirement of 95 percent. Medians of 5.01 and 4.38
+seconds; slowest 9.01. Nothing was stopped early and nothing came out of the cache in either run,
+so these are slow checks rather than blank ones.
+
+**The cost is the second face, and it bought a correct answer.** Until 2026-09-19 the page took one
+image, and the same set measured 35 of 37 inside five seconds — but the government warning is on
+the back of 20 of the 30 corpus labels, so those fast answers reported a warning missing that the
+label carries. The page now takes a front and a back, the faces are read one after another, and the
+submissions carrying a back came in at a median of 5.55 and 4.95 seconds against 2.39 and 2.74 for
+the four that have only a front. We took the trade knowingly and we publish the number it cost.
+Reading the faces concurrently is the untried lever; it is not obviously free, because eight
+concurrent reads moved the 95th percentile from 2.26 to 10.02 seconds on these four cores
+([decision 0005](decisions.md#0005)). Two levers have been tried and neither is the answer: more
+processor cores moved one check of thirty-eight, and the reading path itself has been tuned three
+times — most recently by reading a label's sideways strips before reading the whole label again,
+which took the slowest corpus read from 1345 ms to 463 ms on the development box
+([decision 0036](decisions.md#0036)). Earlier published shares of 87, 89, 71 and 92 percent stand
+as history only: they predate that tuning and a harness that could not tell a check the evaluation
+guard had blanked from a slow one ([decision 0035](decisions.md#0035)).
 
 **Two things we did not prove.** A reader cannot tell an unmeasured claim from a measured one by
 looking, so each is named:

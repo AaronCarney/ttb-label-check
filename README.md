@@ -83,27 +83,36 @@ unreachable, and prints on the terminal that nothing has tested what is being sh
 
 R15 in [the requirements](specs/0001-label-verification/requirements.md) and NFR-1 in
 [the PRD](docs/PRD.md) are one promise, and both mark it P0: 95 percent of single checks show
-results within five seconds. **No current figure for that share exists, and the ones published here
-earlier should not be quoted.** They were taken on superseded code, and they were counting
-the wrong thing.
+results within five seconds. Measured on the deployed service on 2026-09-20, sending every face of
+each label the way the page now sends them: **18 of 37 checks inside five seconds in one run and 21
+of 37 in a second run minutes later** — 49% and 57% against a requirement of 95%. The median check
+took 5.01 and 4.38 seconds; the slowest took 9.01. The requirement is missed by a wide margin, and
+the margin is the back of the label.
 
-**What is measured.** Twelve test submissions posted once each through the address a reviewer uses,
-against the deployed service: median wall clock **2.03 seconds**, median read
-**1.22 seconds**, eleven of the twelve between 1.1 and 3.1 seconds. The service is fast. One label
-took 5.04 seconds, and it did so for a known reason — nothing on it looked like a government
-warning upright, so the reader read the whole label twice more at 90 and 270 degrees and found
-nothing either way. Measured over all 62 corpus images, that re-read ran on four and
-recovered a warning from one. It now runs only where the sideways text reads as the warning
-([decision 0036](docs/decisions.md#0036)), which is that one image, and this label's read dropped
-from 1345 ms to 463 ms on the development box.
+**What changed.** Until 2026-09-19 the page offered one file input, so the measurement posted one
+image. The government warning is printed on the back of 20 of the 30 corpus labels, so a front-only
+check reported a warning missing that the label carries — a fast wrong answer. The page now takes a
+front and a back, the measurement sends both, and the faces are read one after another, so the
+second face costs roughly what the first one costs.
 
-**Why the old figures do not stand.** Four earlier runs returned 87%, 89%, 71% and 92% of 38
-submissions inside five seconds. Two things were wrong with them. They predate the change that made
-that sideways re-read conditional, and the screen that has since cut it further. And at the time, a check
-that crossed five seconds was *stopped* and returned an empty result rather than a slow one — so a
-run counted a blank page as a check that took too long, which is not the same thing and is worse.
-That defect is fixed ([decision 0035](docs/decisions.md#0035)); the share has to be measured again
-after the next deploy, and until then this section claims nothing about it.
+Both halves of that are visible inside the same runs. The 33 submissions carrying a back came in 14
+and 17 inside the budget, median 5.55 and 4.95 seconds. The four that have only a front came in 4
+of 4, median 2.39 and 2.74 seconds. Against the previous deployed commit, which could only be sent
+fronts, the whole set measured 35 of 37 inside five seconds — 94.6%, median 2.90. That number was
+real and it is not a number about this product: it describes a submission the page no longer makes
+and an answer that was wrong about the warning on 19 of 29 real labels.
+
+Nothing was stopped early, nothing was answered out of the cache, and every check returned all
+seven fields, in both runs. These are slow checks, not blank ones.
+
+**What might close it, and what it would cost.** The two faces are read in sequence
+(`app/vision/local.py`). Reading them concurrently is the obvious lever and it is not free: eight
+concurrent reads moved the 95th percentile from 2.26 seconds to 10.02 seconds on these same four
+cores ([decision 0005](docs/decisions.md#0005)). Two at once is not eight, and that measurement has
+not been taken. Nothing here is tuned to make the number look better: the earlier runs of 87%, 89%,
+71% and 92% were taken on superseded code and on a harness that counted a check the evaluation
+guard had blanked as a slow one, which is why they are quoted as history rather than as figures
+([decision 0035](docs/decisions.md#0035)).
 
 **Cores are not the lever.** Doubling the service to eight cores moved one check of thirty-eight,
 which is smaller than the spread between two runs at the same size. The service is back at the four
