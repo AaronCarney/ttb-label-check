@@ -93,6 +93,10 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     application.include_router(overrides_module.router)
 
+    from app.api import cfr as cfr_module
+
+    application.include_router(cfr_module.router)
+
     # Pre-init state so routes work even when lifespan hasn't fired (e.g. httpx tests).
     # Lifespan startup will re-assign; shutdown will clear.
     application.state.batches = {}

@@ -9,6 +9,19 @@ date: the release's git tag records when it was cut. Versions follow
 
 ### Added
 
+- The regulation a finding rests on is in the product, beside the finding. Pressing a citation fills
+  a column with the wording of the section it names — reserved, so it fills in place rather than
+  covering what a reviewer is comparing it against, and reached from a chip that is a button, so
+  keyboard and pointer reach it alike and nothing appears on hover. The product holds all 24
+  sections its 43 citations name, across 27 CFR and 19 CFR. `docs/decisions.md#0034` had refused
+  this because filling the panel meant typing regulation text into a compliance tool with no test
+  that could check it against the regulation; the wording is now fetched from the eCFR's own API by
+  `uv run python -m tools.fetch_cfr` and committed with the issue date, the retrieval date and a
+  hash, and `TTB_CHECK_ECFR=1 uv run pytest tests/test_cfr_corpus_matches_ecfr.py` re-fetches every
+  section and compares it character for character. Nothing is fetched while the service runs. A
+  citation the parser cannot read whole shows as not held rather than as a guess at a section, which
+  is the other half of what 0034 refused. See `docs/decisions.md#0046`.
+
 - A batch of labels is now checked against the applications filed for them. The engine always did
   this, but the only bulk path a reviewer could reach carried images and nothing else, so every
   comparison rule reported that it had nothing to compare and the page showed a column of **Not

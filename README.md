@@ -353,7 +353,11 @@ the reference tables the rules read (volume units, class/type designations, char
 limits) are data files rather than code.
 
 **3. Report.** Each check returns a verdict, a reason code, and a citation to the regulation it came
-from, so a reviewer can see why and not just what. The result also carries the region of the image
+from, so a reviewer can see why and not just what — and the citation opens. Pressing it fills a
+column beside the finding with the wording of the section itself, which the product holds for every
+section its rules cite: 24 sections across 27 CFR and 19 CFR, fetched from the eCFR and committed
+with the issue date, the retrieval date and a hash. Nothing is fetched while the service runs. See
+`docs/decisions.md#0046`. The result also carries the region of the image
 the reading was taken from, and the interface deliberately does not draw it on the label: that box
 is measured in the frame the reader worked in — the photograph shrunk to fit and sometimes turned
 upright — and not in the photograph the page displays.
@@ -503,7 +507,12 @@ call we made in it, stated as our call rather than as a finding.
   scope; where the app cannot read a field it says so rather than guessing at one. How well it
   tells a poor photograph from a good one is a separate question, and an open one.
 - **The warning text is fixed.** 27 CFR 16.21's wording is pinned as a committed asset and compared
-  against by hash, so a change to the regulation is a deliberate edit and not a silent drift.
+  against by hash, so a change to the regulation is a deliberate edit and not a silent drift. The
+  same bargain covers the sections the citation panel shows, in `assets/cfr/`: they were fetched
+  from the eCFR once and committed, and `TTB_CHECK_ECFR=1 uv run pytest
+  tests/test_cfr_corpus_matches_ecfr.py` re-fetches every one and compares it character for
+  character. Nothing runs that on a schedule, so the corpus is as current as the last time somebody
+  ran it — the manifest says which issue of each title is held.
 - **What is kept is kept for seven days and no longer.** Application data lives only as long as the
   request that carried it. Every check's result is written to disk so a reviewer can
   overrule a finding on it, stripped of every value it read and every value the application

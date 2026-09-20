@@ -277,6 +277,26 @@ photograph after it has been shrunk to fit and sometimes turned upright, not the
 shows. A box drawn from it would point confidently at the wrong place. Finding the spot on the label
 is still the reviewer's own work.
 
+**The regulation itself is in the product, and it was not typed in.** A finding's citation opens a
+column beside it holding the wording of the section — reserved, so it fills in place rather than
+covering the finding it explains, and reached from a chip that is a button so keyboard and pointer
+reach it alike. We had refused this once (`docs/decisions.md#0034`): the rules name 43 citations and
+the product held the wording of one, and filling the rest meant typing regulation text into a
+compliance tool with no test that could check it. What changed is that the eCFR publishes an API
+this machine can reach, so the wording is fetched from the government's own copy, committed with its
+issue date and a hash, and re-checked against that copy by a test.
+
+The part the API did not solve is the part that shaped the work. Our rules cite in prose —
+`27 CFR §4.32(a)(1), §4.33`, `27 CFR §5 Subpart I`, `27 CFR §4.35(e), 19 CFR §134.45` — and the eCFR
+is addressed by title, part and section, so something has to read one into the other. 0034 had
+rejected linking the chips for exactly this: heterogeneous strings "would mislink some, and a
+compliance tool showing the wrong regulation is worse than one showing none". So the parser refuses
+rather than guesses. A citation it cannot read whole yields nothing and the panel says the text is
+not held; a reference it cannot cover fails the whole string rather than showing the reviewer the
+parts that parsed, which would tell them the rule rests on less than it does. Every shape the rule
+pack uses is asserted against the sections a reader of that string would turn to, and ten strings
+that invite a guess are asserted to yield nothing (`docs/decisions.md#0046`).
+
 **Whether the record would answer a producer who contests a rejection.** It would not, and that is
 worth saying because everything above makes it sound as though it would. What survives is short —
 a check's result keeps for seven days so an override has something to amend, and then it is

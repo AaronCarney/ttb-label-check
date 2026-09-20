@@ -2905,3 +2905,100 @@ the empty-table case it used to.
 
 **Because** a reviewer should not have to know which of a product's two halves they are in. There is
 one system, it presents one graded item per moment, and the whole batch is processed.
+
+<a id="0046"></a>
+## 0046. The regulation is in the product, because the eCFR will hand it over and a test can check it
+
+**Evidence:** `app/cfr/citations.py`; `app/cfr/corpus.py`; `app/api/cfr.py`; `tools/fetch_cfr.py`;
+`assets/cfr/manifest.json`; `frontend/src/components/CitationPanel.tsx`;
+`frontend/src/components/CitationChip.tsx`; `frontend/src/app.tsx`;
+`tests/test_cfr_citations.py`; `tests/test_cfr_corpus.py`;
+`tests/test_cfr_corpus_matches_ecfr.py`; `tests/test_cfr_route.py`;
+`assets/warnings/govt_warning_16_21.txt`; [0034](#0034), [0018](#0018).
+
+**What changed since 0034.** [0034](#0034) deleted the citation panel and made the citation chip a
+span. Its reason was not that a panel is the wrong shape — it was that nothing could fill one
+honestly: "Filling the other 42 means writing regulation text by hand into a compliance tool with no
+test that can check it against the regulation — the kind of claim this build refuses everywhere
+else."
+
+The eCFR publishes an API, and this machine can reach it. Probed 2026-09-20:
+`GET https://www.ecfr.gov/api/versioner/v1/full/{date}/title-27.xml?part=4&section=4.33` answers 200
+with the section as structured XML — heading, paragraphs, amendment note. So the wording can be
+fetched rather than typed, and a test can re-fetch it and compare. 0034's reason is spent, and this
+entry is argued on its own rather than against 0034's conclusion.
+
+**0034's second objection is not spent, and it is what shaped this.** 0034 also rejected linking
+each chip to the eCFR, because "the citation strings are heterogeneous enough that parsing them into
+section URLs would mislink some, and a compliance tool showing the wrong regulation is worse than
+one showing none." An API does not answer that: it serves a section to a caller who already knows
+how to name one, and the rule pack names its sections in prose — `27 CFR §4.32(a)(1), §4.33`,
+`27 CFR §5 Subpart I`, `27 CFR §4.35(e), 19 CFR §134.45`.
+
+So the parse is the load-bearing part, and it refuses rather than guesses. `parse_citation` reads a
+citation whole or yields nothing: a reference it cannot cover fails the whole string, not just its
+own part, because showing a reviewer the one reference of three that parsed tells them the rule
+rests on that reference alone. `tests/test_cfr_citations.py` asserts every shape the pack uses
+against the sections a reader of that string would turn to, written out rather than computed, and
+asserts that ten strings which invite a guess — a title with no section, a subpart with no part,
+trailing prose — yield nothing. It also reads the pack itself and fails if any citation in it does
+not parse, so a citation added tomorrow is covered on the day it is added.
+
+**Chosen.** `tools/fetch_cfr.py` reads every citation in `rules/`, parses it, and fetches the
+sections it names from the eCFR, writing each into `assets/cfr/` with a manifest recording the
+source URL, the issue date, the retrieval date and a SHA-256. Twenty-four sections across two
+titles cover all 43 citations, in 164 KB. `GET /cfr?citation=…` serves them. The results page
+reserves a column for `CitationPanel`, which fills in place; `CitationChip` is a button again.
+
+**Whole sections, not the cited paragraph.** A rule cites `§4.32(a)(1)`; the panel shows §4.32 and
+says the finding rests on (a)(1). A reviewer deciding whether a label complies needs the clause in
+its context, and a tool that quotes one clause of a section is making an editorial choice about the
+regulation it has no standing to make.
+
+**Fetched once and committed, not fetched per request.** The product makes no outbound network call
+(`README.md`), and a compliance tool whose regulation text depends on a third party being up is
+worse than one that ships the text. Committing it also means an amendment arrives as a diff somebody
+reviews. This is the bargain `assets/warnings/govt_warning_16_21.txt` already makes for §16.21.
+
+**Each title is pinned at its own issue date.** The titles do not move together: on the day this was
+written the eCFR had title 27 issued 2026-09-16 and title 19 issued 2026-08-26, and a request naming
+a date a title has no issue for is a 404. The fetcher asks the API which dates it has, and the
+manifest records what was actually retrieved rather than what somebody typed.
+
+**The test 0034 asked for exists and passes.** `tests/test_cfr_corpus_matches_ecfr.py` re-fetches
+every section and compares it character for character with the committed file. It reaches the
+network, so it runs on `TTB_CHECK_ECFR=1` rather than by default — the bargain
+`tests/test_deploy_healthz.py` already makes. Run 2026-09-20: 24 passed. There is also one check
+that needs no network at all: this repository pinned §16.21 independently, for the verbatim
+validator, and `tests/test_cfr_corpus.py` asserts the fetched §16.21 carries the same sentences. If
+the fetch or its XML extraction were mangling the regulation, that is where it would show.
+
+**A chip is a control only where something opens.** 0034's finding was that the chip "rendered as a
+button whose `onOpen` neither call site supplied, so on both the single-label page and a batch's
+detail panel a reviewer could press it and nothing happened" — offering a reviewer a control that
+does nothing is "the one thing a reviewer cannot check for themselves". That rule is kept
+literally rather than reversed: `CitationChip` takes `onOpen` as optional and renders a span
+without it. The results page supplies one; anywhere that does not gets text.
+
+**Rejected.** *Link the chip to ecfr.gov* — an outbound link takes the reviewer out of the product
+mid-comparison, and it still needs the same parse to build a URL, so it carries 0034's mislinking
+risk without the benefit. *A pop-up or an overlay* — the reviewer's task is comparing the finding
+with the regulation, and an overlay covers the thing being compared. *Fetch at runtime* — see above.
+*Hold the paragraph only* — see above. *Parse in the island* — two grammars that agree until they do
+not; the one that mislinks is the one nobody tested.
+
+**Cost, stated.**
+
+- **The corpus goes stale silently unless someone runs the check.** The committed text is the issue
+  of the date in the manifest. `TTB_CHECK_ECFR=1` catches drift, and nothing runs it on a schedule.
+  A deployment that mattered would run it in the pipeline.
+- **164 KB of regulation text is now in the repository and in the image.**
+- **The panel is only as good as the rule pack's citations.** It shows the section a rule names. A
+  rule citing the wrong section gets a panel confidently showing the wrong regulation — the parse is
+  tested, the citations in the pack are not.
+- **A reviewer still cannot see where on the label a value was read from.** 0034's other cost stands
+  untouched; the bbox is still in the reader's pixel space.
+
+**Because** a reviewer deciding whether a label complies should be able to read the rule it is being
+held to, in the place they are deciding, and this product can now show them that wording without
+anybody having typed it.

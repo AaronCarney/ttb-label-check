@@ -67,6 +67,12 @@ export interface LabelResultProps {
   envelope: DispositionEnvelope | null;
   /** True while the override control should be offered. */
   overridable?: boolean;
+  /** Opens a finding's citation in the regulation panel beside this result. */
+  onOpenCitation?: (citation: string) => void;
+  /** The citation the panel is showing. */
+  openCitation?: string | null;
+  /** The id of that panel. */
+  citationPanelId?: string;
   className?: string;
 }
 
@@ -79,6 +85,9 @@ export interface LabelResultProps {
 export function LabelResult({
   envelope,
   overridable = true,
+  onOpenCitation,
+  openCitation,
+  citationPanelId,
   className,
 }: LabelResultProps): React.JSX.Element {
   const headingRef = React.useRef<HTMLHeadingElement>(null);
@@ -227,6 +236,9 @@ export function LabelResult({
                 return deciding ? <RuleVerdict finding={deciding} /> : null;
               })()}
               aiSuggestion={<AISuggestionBlock suggestion={field.ai_suggestion} />}
+              onOpenCitation={onOpenCitation}
+              openCitation={openCitation}
+              citationPanelId={citationPanelId}
             />
           ))}
         </div>

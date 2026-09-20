@@ -160,3 +160,98 @@ describe("the results page", () => {
     expect(await findByRole("region", { name: /Check results for lucy\.jpg/i })).toBeTruthy();
   });
 });
+
+// --- The regulation beside the finding ---
+//
+// `docs/decisions.md#0046` settled the shape: a reserved column that fills in
+// place, never a pop-up and never an overlay, reached from a chip that is a
+// button. These are the claims that shape makes on the page.
+
+function _resultWithCitation(labelRef: string) {
+  const base = _result(labelRef, 0);
+  return {
+    ...base,
+    envelope: {
+      ...base.envelope,
+      fields: [
+        {
+          field_name: "brand_name",
+          extracted_value: "Portalupi",
+          expected_value: "PORTALUPI",
+          field_confidence: { band: "high", numeric: 0.9 },
+          evidence: { bbox: [0, 0, 1, 1], crop_ref: "", extraction_confidence: 0.9, face_tag: "front" },
+          ai_suggestion: { present: false, task: null, text: null, model_disposition: null },
+          rule_findings: [
+            {
+              rule_id: "wine.brand.present",
+              cfr_citation: "27 CFR §4.33",
+              disposition: "pass",
+              reason_code: "",
+              plain_language_explanation: "",
+              matched_value: "",
+            },
+          ],
+        },
+      ],
+    },
+  };
+}
+
+describe("the regulation panel", () => {
+  beforeEach(() => {
+    _FakeEventSource.instances = [];
+    vi.stubGlobal("EventSource", _FakeEventSource);
+  });
+
+  it("holds its column before a reviewer has chosen anything", async () => {
+    const { renderWithProviders } = await import("./test/render");
+    const { ResultsApp } = await import("./app");
+    const { getByRole } = renderWithProviders(<ResultsApp batchId="B-1" />);
+    expect(getByRole("region", { name: /the regulation/i })).toBeInTheDocument();
+  });
+
+  it("fills in place when a citation is pressed, without a dialog", async () => {
+    const { act } = await import("@testing-library/react");
+    const { renderWithProviders } = await import("./test/render");
+    const { ResultsApp } = await import("./app");
+
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: RequestInfo | URL) =>
+        String(input).startsWith("/cfr")
+          ? {
+              ok: true,
+              json: async () => ({
+                citation: "27 CFR §4.33",
+                sections: [
+                  {
+                    key: "title-27-section-4.33",
+                    heading: "§ 4.33 Brand names.",
+                    text: "The product shall bear a brand name.",
+                    paragraph: null,
+                    source_url: "https://www.ecfr.gov/x",
+                    version_date: "2026-09-16",
+                    retrieved: "2026-09-20",
+                  },
+                ],
+              }),
+            }
+          : { ok: true, json: async () => ({ faces: [] }) },
+      ),
+    );
+
+    const { findByRole, findByText, queryByRole } = renderWithProviders(
+      <ResultsApp batchId="B-1" />,
+    );
+    const es = _FakeEventSource.instances[_FakeEventSource.instances.length - 1]!;
+    act(() => es.fire("label-result", _resultWithCitation("lucy.jpg")));
+
+    const chip = await findByRole("button", { name: /27 CFR §4\.33/ });
+    act(() => chip.click());
+
+    expect(await findByText("§ 4.33 Brand names.")).toBeInTheDocument();
+    // Filled in place: the regulation is a region of the page, not something
+    // laid over it.
+    expect(queryByRole("dialog")).toBeNull();
+  });
+});

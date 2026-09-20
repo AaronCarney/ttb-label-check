@@ -9,6 +9,13 @@ export interface FieldCardProps {
   field: FieldFindingWire;
   verdict?: React.ReactNode;
   aiSuggestion?: React.ReactNode;
+  /** Opens the citation in the regulation panel. Absent leaves the chips as
+   * text, which is what a surface with no panel beside it must do. */
+  onOpenCitation?: (citation: string) => void;
+  /** The citation the panel is showing, so its chip reads as the open one. */
+  openCitation?: string | null;
+  /** The id of the panel the chips fill. */
+  citationPanelId?: string;
   className?: string;
 }
 
@@ -48,7 +55,15 @@ function _matchedValue(field: FieldFindingWire): string {
   return named ? named.matched_value : "";
 }
 
-export function FieldCard({ field, verdict, aiSuggestion, className }: FieldCardProps): React.JSX.Element {
+export function FieldCard({
+  field,
+  verdict,
+  aiSuggestion,
+  onOpenCitation,
+  openCitation,
+  citationPanelId,
+  className,
+}: FieldCardProps): React.JSX.Element {
   const fieldDisp = _fieldDisposition(field);
   return (
     <section
@@ -94,7 +109,13 @@ export function FieldCard({ field, verdict, aiSuggestion, className }: FieldCard
         <ConfidenceIndicator band={field.field_confidence.band} numeric={field.field_confidence.numeric} />
         <div className="flex flex-wrap gap-2">
           {field.rule_findings.map((rf) => (
-            <CitationChip key={rf.rule_id} citation={rf.cfr_citation} />
+            <CitationChip
+              key={rf.rule_id}
+              citation={rf.cfr_citation}
+              onOpen={onOpenCitation}
+              selected={openCitation === rf.cfr_citation}
+              controls={citationPanelId}
+            />
           ))}
         </div>
       </footer>

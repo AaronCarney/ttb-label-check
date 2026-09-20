@@ -2,6 +2,7 @@ import * as React from "react";
 import { createRoot } from "react-dom/client";
 import "./tokens/globals.css";
 import { BatchTable } from "./components/BatchTable";
+import { CitationPanel } from "./components/CitationPanel";
 import { LabelResult } from "./components/LabelResult";
 import { LiveRegion } from "./components/LiveRegion";
 import { QueuePosition } from "./components/QueuePosition";
@@ -12,6 +13,8 @@ import { useBatchStream } from "./sse/useBatchStream";
 // it lands and deliberately does not hold the first one back — and this is the
 // surface that finally shows it: the first result to arrive opens itself, and
 // the list of what else is running appears only once there is something else.
+const CITATION_PANEL_ID = "citation-panel";
+
 export function ResultsApp({ batchId }: { batchId: string }): React.JSX.Element {
   const { events, error, total, done } = useBatchStream(batchId);
   const latest = events[events.length - 1];
@@ -31,6 +34,16 @@ export function ResultsApp({ batchId }: { batchId: string }): React.JSX.Element 
     () => events.find((e) => e.label_ref === selectedRef) ?? null,
     [events, selectedRef],
   );
+
+  // Which citation the regulation panel is showing. The panel is on the page
+  // either way — it is a column of the layout, not something a chip summons —
+  // so this only decides what is in it. It clears when the reviewer opens a
+  // different label, because a section left over from the previous label sits
+  // beside findings it has nothing to do with.
+  const [openCitation, setOpenCitation] = React.useState<string | null>(null);
+  React.useEffect(() => {
+    setOpenCitation(null);
+  }, [selectedRef]);
 
   // Until the worker reports the submission's size, the count of results
   // received is the only honest number there is; a denominator taken from that
@@ -66,7 +79,20 @@ export function ResultsApp({ batchId }: { batchId: string }): React.JSX.Element 
         </p>
       )}
       {several && <BatchTable rows={events} onSelect={setSelectedRef} selectedRef={selectedRef} />}
-      <LabelResult envelope={selected} />
+      {/* The result and the regulation side by side, so a reviewer compares
+          them rather than remembering one while reading the other. The panel
+          keeps its column at every width it fits in; below that the columns
+          stack and it sits under the result, still in the document rather than
+          over it. */}
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] lg:items-start">
+        <LabelResult
+          envelope={selected}
+          onOpenCitation={setOpenCitation}
+          openCitation={openCitation}
+          citationPanelId={CITATION_PANEL_ID}
+        />
+        <CitationPanel citation={openCitation} className="lg:sticky lg:top-4" id={CITATION_PANEL_ID} />
+      </div>
       <LiveRegion
         message={
           latest ? `Label ${latest.label_ref}: ${latest.disposition}` : checking ? "Checking" : ""
