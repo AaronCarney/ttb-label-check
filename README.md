@@ -53,6 +53,19 @@ period with no container start in it.
 [Decision 0042](docs/decisions.md#0042) records the period, the rejected `--min-instances 1`, and
 the measurements.
 
+**What the service runs on.** Cloud Run, **4 vCPU and 4 GiB, one request at a time**, scaling to
+zero behind a two-instance cap. Startup CPU boost doubles the allocation to eight cores for the
+first ten seconds of a container start, so the start a keep-warm ping pays for is the shortest the
+platform offers. Inside the container one uvicorn worker holds one OCR reader, and that reader is
+allowed **four threads**: `OCR_NUM_THREADS` defaults to the service's core count and sets
+onnxruntime's intra-op and inter-op pools and OpenCV's thread count alike. OpenBLAS is held to two
+threads by the image, because left unset it runs one thread per core and contends with the sessions
+a read has already sized. One request at a time is not only a cost control — it is what the
+five-second requirement needs, because eight concurrent reads moved the 95th percentile from 2.26
+seconds to 10.02 seconds ([decision 0005](docs/decisions.md#0005),
+[0025](docs/decisions.md#0025)). Every figure here was read back from the deployed service on
+2026-09-19 rather than copied from the deploy script.
+
 `--check` is what proves the repository is deployable without making it public: it runs every
 precondition the deploy has that needs no network, and names any that fails. It runs as part of the
 test suite.
