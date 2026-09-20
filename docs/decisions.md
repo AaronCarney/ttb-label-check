@@ -2697,6 +2697,32 @@ instance alive requires. *A ping from outside the Worker* — the invoker check 
 an unsigned request is refused with a 403 and never reaches the service, so a plain uptime pinger
 would hold nothing warm; the Worker is the only thing already holding the key.
 
+**Confirmed to hold, not merely to land.** Two signals were required and both are in. That the ping
+*lands* was shown on 2026-09-19 from the container's own access lines. That it *holds* an instance
+was left open, because a warm figure on its own proves nothing — Cloud Run may have kept the
+instance for reasons of its own. Measured on 2026-09-20: `https://ttb.aaroncarney.me/` was left
+alone for a full 25 minutes, from 00:23:18Z to 00:48:18Z, and the landing page then answered
+
+```
+after 25 minutes idle: ttfb=0.284s  code=200
+```
+
+against the 36.48s cold and 0.14s warm above. The figure is attributable because the log for the
+same span carries the pings and nothing else: `/api/health` at 00:20:45Z, 00:25:41Z, 00:30:53Z,
+00:35:41Z, 00:40:45Z and 00:45:48Z, six requests on the five-minute period spanning the whole
+window, with **no container start and no shutdown line anywhere in it** — so one instance served
+throughout and the request that produced the 0.284s figure appears in that same log at 00:48:19Z.
+Read it back with
+
+```
+gcloud logging read 'resource.type="cloud_run_revision"' --project=ttb-label-check \
+  --limit=60 --freshness=30m --format="value(timestamp,textPayload)"
+```
+
+and read the container's text payload rather than filtering on `httpRequest.requestUrl`: these
+pings do not appear under `httpRequest` at all, so that filter returns nothing while the access
+line is plainly there.
+
 **Because** a prototype is judged by someone who opens it once. A 36-second blank page is the first
 and possibly only thing that person learns about it, and it says nothing true about the product
 behind it.
