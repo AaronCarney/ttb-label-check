@@ -167,10 +167,7 @@ async def test_a_label_is_checked_against_its_own_row() -> None:
         [
             _image("lucy-front.png"),
             _image("lucy-back.png"),
-            _csv(
-                "filename,beverage_type,brand_name\n"
-                "lucy,distilled_spirits,LUCKY LUCY'S\n"
-            ),
+            _csv("filename,beverage_type,brand_name\nlucy,distilled_spirits,LUCKY LUCY'S\n"),
         ]
     )
     assert len(calls) == 1
@@ -265,13 +262,15 @@ def _browser_body() -> bytes:
     """
     parts = [
         f'--{_BOUNDARY}\r\nContent-Disposition: form-data; name="labels"; '
-        f'filename="lucy.png"\r\nContent-Type: image/png\r\n\r\n'.encode() + _PNG_1x1 + b"\r\n",
+        f'filename="lucy.png"\r\nContent-Type: image/png\r\n\r\n'.encode()
+        + _PNG_1x1
+        + b"\r\n",
         f'--{_BOUNDARY}\r\nContent-Disposition: form-data; name="labels"; '
         f'filename="applications.csv"\r\nContent-Type: text/csv\r\n\r\n'.encode()
         + b"filename,beverage_type,brand_name\r\nlucy,distilled_spirits,LUCKY LUCY'S\r\n\r\n",
         f'--{_BOUNDARY}\r\nContent-Disposition: form-data; name="applications"; '
         f'filename=""\r\nContent-Type: application/octet-stream\r\n\r\n\r\n'.encode(),
-        f'--{_BOUNDARY}\r\nContent-Disposition: form-data; '
+        f"--{_BOUNDARY}\r\nContent-Disposition: form-data; "
         f'name="beverage_type"\r\n\r\n\r\n'.encode(),
         f"--{_BOUNDARY}--\r\n".encode(),
     ]
