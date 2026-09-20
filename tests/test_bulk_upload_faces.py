@@ -268,7 +268,8 @@ def test_sample_zip_n_counts_labels_not_files() -> None:
     client = TestClient(create_app())
     response = client.get("/batches/sample.zip?n=4")
     names = zipfile.ZipFile(io.BytesIO(response.content)).namelist()
-    stems = {name.rsplit("-", 1)[0] for name in names}
+    images = [name for name in names if name.lower().endswith((".jpg", ".jpeg", ".png"))]
+    stems = {name.rsplit("-", 1)[0] for name in images}
     assert len(stems) == 4
 
 

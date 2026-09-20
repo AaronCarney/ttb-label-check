@@ -102,12 +102,13 @@ def test_root_renders_empty_inbox(client: TestClient) -> None:
     assert 'id="envelope"' not in response.text
 
 
-def test_root_links_to_starter_pack(client: TestClient) -> None:
-    """The empty-inbox landing must surface the starter-pack download so a
-    reviewer without their own labels can still try the pipeline."""
+def test_root_reaches_the_sample_pack_through_navigation(client: TestClient) -> None:
+    """A reviewer without labels of their own has to be able to get to the
+    pack. It is no longer advertised on the landing page — the pack is images
+    *and* the applications filed for them, and the form that takes both is the
+    bulk one — so the landing page has to carry the way there."""
     response = client.get("/")
-    assert "/batches/sample.zip" in response.text
-    assert "starter pack" in response.text.lower()
+    assert 'href="/batches"' in response.text
 
 
 def test_root_no_longer_serves_fixture_query(client: TestClient) -> None:

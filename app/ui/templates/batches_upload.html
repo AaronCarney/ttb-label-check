@@ -4,8 +4,9 @@
 {% block content %}
   <section class="bulk-upload" aria-labelledby="bulk-heading">
     <h2 id="bulk-heading">Bulk label upload</h2>
-    <p>Pick multiple PNG or JPEG files. Each becomes one label in a single
-    batch; the streaming results page opens once the worker spawns.</p>
+    <p>Pick the label images and the applications filed for them. Each label
+    is checked against its own application; the streaming results page opens
+    once the worker spawns.</p>
     <p class="face-pairing-hint">
       <strong>Two photographs of one label?</strong> Name them
       <code>anything-front.jpg</code> and <code>anything-back.jpg</code> and
@@ -17,16 +18,21 @@
     <p class="sample-batch-hint">
       Don&rsquo;t have label images?
       <a href="/batches/sample.zip" download>Download a 10-label sample</a>
-      pulled from the TTB Public COLA Registry (CC0). Unzip and drop into
-      the file picker below to exercise the full pipeline. Its files are
-      already named that way, so the labels that have two faces arrive as two
-      faces.
+      pulled from the TTB Public COLA Registry (CC0), with the applications
+      filed for them in <code>applications.csv</code>. Unzip it and select
+      everything &mdash; images and CSV together &mdash; in the picker below.
+      Its files are already named for pairing, so the labels that have two
+      faces arrive as two faces.
     </p>
     <form action="/batches/upload" method="post" enctype="multipart/form-data" class="upload-form">
       <label for="bulk-labels">Label images (multi-select)</label>
-      <input id="bulk-labels" type="file" name="labels" accept="image/png,image/jpeg" multiple required />
+      <input id="bulk-labels" type="file" name="labels" accept="image/png,image/jpeg,text/csv,.csv" multiple required />
       <div class="application-field">
-        <label for="bulk-beverage-type">Beverage type for every label in this batch</label>
+        <label for="bulk-applications">The applications, as a CSV (optional)</label>
+        <input id="bulk-applications" type="file" name="applications" accept="text/csv,.csv" />
+      </div>
+      <div class="application-field">
+        <label for="bulk-beverage-type">Beverage type for a label with no row of its own</label>
         <select id="bulk-beverage-type" name="beverage_type">
           <option value="">Not stated</option>
           <option value="distilled_spirits">Distilled spirits</option>
@@ -35,11 +41,24 @@
         </select>
       </div>
       <p class="application-fields-hint">
-        A bulk upload carries images and no applications, so nothing is
-        compared against one. The beverage type still decides which rules
-        apply: a wine label checked against the spirits rules fires none of
-        the wine rules. To compare a label against its application, submit it
-        on the <a href="/">single-label page</a>.
+        One row per label. The first column is the image filename &mdash;
+        <code>26230001000420</code> matches both
+        <code>26230001000420-front.jpg</code> and its back &mdash; and the rest
+        are the ten application fields:
+        <code>beverage_type</code>, <code>brand_name</code>,
+        <code>fanciful_name</code>, <code>class_type</code>,
+        <code>alcohol_content</code>, <code>net_contents</code>,
+        <code>applicant_name_address</code>, <code>source_of_product</code>,
+        <code>origin</code>, <code>wine_appellation</code>. A blank cell means
+        the application declared nothing for that element, and the check
+        against it reports that it does not apply.
+      </p>
+      <p class="application-fields-hint">
+        A label the CSV has no row for is still read and still checked for what
+        every label must carry, and its result says nothing was compared. The
+        beverage type above applies to those labels, because it decides which
+        rule pack runs at all: a wine checked against the spirits rules fires
+        none of the wine rules.
       </p>
       <button type="submit" class="primary-button">Submit batch</button>
     </form>

@@ -33,11 +33,9 @@ def refuse(
 ) -> HTMLResponse:
     """The landing page again, with an inline banner and nothing checked.
 
-    The samples go back with it: a reviewer who mis-typed something should still
-    have the one-click way out in front of them.
+    What the reviewer typed goes back with it, so a mis-typed field is one
+    correction away rather than ten fields away.
     """
-    from app.api.ui.samples import offered_samples
-
     return templates.TemplateResponse(
         request=request,
         name="single.html",
@@ -46,7 +44,6 @@ def refuse(
             "dev_mode": settings.dev_mode,
             "upload_error": message,
             "application_form": posted,
-            "samples": offered_samples(),
         },
         status_code=status_code,
     )

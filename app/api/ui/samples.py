@@ -1,13 +1,14 @@
 """The shipped labels a reviewer can try without having any of their own.
 
-Two ways in, because a reviewer arrives with two different amounts of patience:
-
-- ``GET /batches/sample.zip`` downloads a handful of real TTB Public COLA
-  Registry images (CC0) to drop into the bulk-upload form.
+- ``GET /batches/sample.zip`` downloads real TTB Public COLA Registry images
+  (CC0) **and the applications filed for them**, as
+  ``applications.csv``. Unzipping it and dropping the lot into the bulk-upload
+  form runs the check the product is for — each label against its own
+  application — rather than the label-only half of it. Without the CSV the pack
+  was images alone, and a reviewer who downloaded it watched the product
+  decline to do the assignment.
 - ``POST /samples/{sample_id}`` checks one shipped label straight away, with
-  the application it was really filed with already filled in. Without it, the
-  first thing the product asks of a reviewer with no labels is a download, an
-  unzip, a file picker and ten typed fields before anything happens at all.
+  the application it was really filed with already filled in.
 
 Both read the same shipped images, one directory per TTB ID, so neither
 fetches anything over the network: the product works with outbound traffic
@@ -30,6 +31,7 @@ from pathlib import Path
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import HTMLResponse, Response
 
+from app.api.ui._application_csv import render as render_application_csv
 from app.api.ui._page import _get_settings
 from app.api.ui._result_page import render_single_result
 from app.api.ui._submission import _detect_image_mime, _get_upload_evaluator
@@ -79,10 +81,11 @@ def _installed_faces(ttbid: str) -> list[tuple[FaceTag, bytes]]:
 
 @router.get("/batches/sample.zip")
 async def batches_sample_zip(n: int = 10) -> Response:
-    """Stream a zip of N sample labels, drawn at random from those installed.
+    """Stream a zip of N sample labels and the applications filed for them.
 
-    Each entry is named for the TTB ID it came from, so a reviewer can trace a
-    sample back to its registry record.
+    Each image is named for the TTB ID it came from, so a reviewer can trace a
+    sample back to its registry record, and `applications.csv` carries one row
+    per TTB ID keyed on that same name.
     """
     if n <= 0:
         return Response(
@@ -107,6 +110,7 @@ async def batches_sample_zip(n: int = 10) -> Response:
         for ttbid in chosen:
             for face_tag, body in _installed_faces(ttbid):
                 zf.writestr(f"{ttbid}-{face_tag}.jpg", body)
+        zf.writestr(APPLICATIONS_CSV_NAME, applications_csv_for(chosen))
     buf.seek(0)
     return Response(
         content=buf.getvalue(),
@@ -116,69 +120,10 @@ async def batches_sample_zip(n: int = 10) -> Response:
 
 
 # ---------------------------------------------------------------------------
-# One shipped label, checked on a click.
+# The applications filed for the shipped labels.
 # ---------------------------------------------------------------------------
 
 _MANIFEST = _SAMPLE_LABELS_DIR / "manifest.json"
-
-# The labels offered on the landing page, in the order they appear there. Four
-# rather than thirty-eight, because the point is to show four different things
-# happening, not to list a catalogue.
-#
-# Every description here is what the label actually did, measured on this route
-# with both faces sent, in a sweep of the manifest taken after
-# `8ca3ecc` and `a47d03c`. Two facts from that sweep decide the list:
-#
-#   - **No label in the corpus passes outright**, so none is offered as one. The
-#     nearest is a wine with a single point for a reviewer.
-#   - **The two samples this list used to lead with described a pass that does
-#     not happen.** `ttb-26231001000662`, offered as "a bourbon where everything
-#     matches", returns five review points, three of them the reader misreading
-#     the label (the brand logo, a two-line class and type, and the
-#     name-and-address line). `var-brand-case-punctuation` is the same two
-#     photographs with the brand typed without its apostrophe, and it returns
-#     findings identical to the bourbon's — including a brand review — so it no
-#     longer demonstrates that case and punctuation do not fail a brand. Both
-#     are dropped rather than described around.
-#
-# No distilled spirit is offered. Every one in the corpus is either rejected on
-# a warning the reader garbled or carries the reader faults above; that is a
-# gap in what the reader can do, not a gap in the catalogue.
-#
-# Each of the four clears the image-quality gate, checked by running
-# `app.vision.quality.assess` over every front in the manifest; a sample that
-# short-circuits on its photo would demonstrate nothing about the rules.
-#
-# The button text is carried here rather than taken from the brand, because two
-# of these labels are the same wine and two buttons reading "Check FABIO
-# SIGNORELLI" tell a reviewer nothing about which is which.
-_OFFERED = (
-    (
-        "ttb-26236001000652",
-        "PATRIA",
-        "Domestic wine, and the closest thing here to a clean label: one point "
-        "for a reviewer, where the label's CHARDONNAY meets the application's "
-        "TABLE WHITE WINE.",
-    ),
-    (
-        "ttb-26239001000132",
-        "FABIO SIGNORELLI",
-        "Imported, so the country-of-origin check runs — and it passes. Two "
-        "other points go to a reviewer.",
-    ),
-    (
-        "ttb-26230001000420",
-        "THE BRUERY",
-        "Neither photograph of this beer shows a bottler's name and address, "
-        "and the check says so.",
-    ),
-    (
-        "var-warning-wording",
-        "FABIO SIGNORELLI, warning reworded",
-        "The same wine with one word of its GOVERNMENT WARNING repainted — "
-        "“may impair” for “impairs”. Rejected.",
-    ),
-)
 
 
 @lru_cache(maxsize=1)
@@ -235,27 +180,58 @@ def _posted_from(entry: dict) -> dict[str, str]:
     }
 
 
-def offered_samples() -> list[dict[str, str]]:
-    """The samples the landing page offers: the text on each button and the
-    line beside it. A sample whose manifest entry or image is not installed is
-    left out, so a partial build shows fewer buttons rather than a broken one."""
-    entries = _manifest_entries()
-    out: list[dict[str, str]] = []
-    for sample_id, button, blurb in _OFFERED:
-        entry = entries.get(sample_id)
+APPLICATIONS_CSV_NAME = "applications.csv"
+"""What the applications file is called inside the pack.
+
+The batch form reads any CSV it is handed, whatever its name; this is only what
+the download ships, so the instruction on the page and the file in the zip
+agree.
+"""
+
+
+@lru_cache(maxsize=1)
+def _entry_by_directory() -> dict[str, dict]:
+    """The real manifest entry for each installed sample directory.
+
+    The zip names its images for the directory (`26230001000420-front.jpg`)
+    while the manifest keys its entries by id (`ttb-26230001000420`), so the
+    CSV needs the map between them. Only `kind == "real"` entries are taken:
+    several variants point their `images` at a real label's directory, and a
+    variant's application describes the altered label rather than the filed
+    one.
+    """
+    out: dict[str, dict] = {}
+    for entry in _manifest_entries().values():
+        if entry.get("kind") != "real":
+            continue
+        front = entry.get("images", {}).get("front", "")
+        directory = front.split("/", 1)[0]
+        if directory:
+            out[directory] = entry
+    return out
+
+
+def applications_csv_for(ttbids: list[str]) -> str:
+    """The applications CSV for the sample directories in one pack.
+
+    A directory with no real manifest entry is left out rather than written as
+    a blank row: a row that names a file and declares nothing would have the
+    label checked against an empty application, which reads as "the application
+    said nothing about any of this" instead of "no application was supplied".
+    """
+    by_directory = _entry_by_directory()
+    rows: list[dict[str, str]] = []
+    for ttbid in ttbids:
+        entry = by_directory.get(ttbid)
         if entry is None:
             continue
-        front = entry.get("images", {}).get("front")
-        if not front or not (_SAMPLE_LABELS_DIR / front).is_file():
-            continue
-        out.append(
-            {
-                "id": sample_id,
-                "button": button,
-                "blurb": blurb,
-            }
-        )
-    return out
+        rows.append({"filename": ttbid, **_posted_from(entry)})
+    return render_application_csv(rows)
+
+
+# ---------------------------------------------------------------------------
+# One shipped label, checked on a click.
+# ---------------------------------------------------------------------------
 
 
 @router.post("/samples/{sample_id}", response_class=HTMLResponse)

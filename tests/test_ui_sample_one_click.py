@@ -1,24 +1,28 @@
-"""One click from arriving to a checked label.
+"""``POST /samples/{sample_id}`` — one shipped label against its filed application.
 
 Everything the product does needs a label and the application filed for it.
-Before this route, a reviewer with neither had to download a zip, unzip it,
-pick a file and type ten application fields before anything happened at all —
-so the most likely outcome of a first visit was that nothing was ever checked.
+This route supplies both from the shipped corpus, so a single label can be
+checked in one request without a download, an unzip and ten typed fields.
 
-These tests hold the three things that make the one-click path worth having:
-the landing page offers it, clicking it checks a real shipped image against the
-application really filed for that label, and it runs the same path a reviewer's
-own upload runs rather than a demonstration path of its own.
+The landing page no longer offers a row of buttons onto it. A demo that opens
+with a tour of itself is not the product, and the buttons carried blurbs
+describing outcomes — one of them an outcome the engine explicitly refuses to
+assert. The bulk path carries the demonstration now: `/batches/sample.zip`
+ships the images and the applications filed for them, and the reviewer drops
+the pack into the same form their own labels go through.
+
+What these tests hold is what makes the route worth keeping: it checks a real
+shipped image against the application really filed for that label, and it runs
+the same path a reviewer's own upload runs rather than a path of its own.
 """
 
 from __future__ import annotations
 
 import pytest
 from fastapi.testclient import TestClient
-from markupsafe import escape
 
 from app.api.ui import _get_upload_evaluator
-from app.api.ui.samples import _manifest_entries, _posted_from, offered_samples
+from app.api.ui.samples import _manifest_entries, _posted_from
 from app.main import create_app
 from tests.conftest import _stub_disposition_envelope
 
@@ -46,59 +50,25 @@ def client(recorder):
     return TestClient(app)
 
 
-# ---------------------------------------------------------------------------
-# The landing page offers it
-# ---------------------------------------------------------------------------
-
-
-def test_the_landing_page_offers_at_least_one_sample_to_check():
-    response = TestClient(create_app()).get("/")
-    assert response.status_code == 200
-    samples = offered_samples()
-    assert samples, "no sample labels are installed, so the page can offer none"
-    for sample in samples:
-        assert f'action="/samples/{sample["id"]}"' in response.text
-
-
-def test_each_offered_sample_says_what_checking_it_will_show():
-    """A row of identical buttons is not an offer. Each one names the label and
-    what the check demonstrates, or a reviewer has no reason to pick any."""
-    response = TestClient(create_app()).get("/")
-    for sample in offered_samples():
-        # Escaped as Jinja renders it — a name such as LUCKY LUCY'S reaches the
-        # page with its apostrophe as an entity.
-        assert str(escape(sample["button"])) in response.text
-        assert str(escape(sample["blurb"])) in response.text
-
-
-def test_no_two_samples_share_a_button():
-    """Two of the shipped labels are the same wine, so taking the button text
-    from the brand put two buttons reading 'Check FABIO SIGNORELLI' side by
-    side — which tells a reviewer nothing about which is which."""
-    buttons = [sample["button"] for sample in offered_samples()]
-    assert len(set(buttons)) == len(buttons), buttons
-
-
-def test_the_offered_samples_are_all_installed():
-    entries = _manifest_entries()
-    for sample in offered_samples():
-        assert sample["id"] in entries
+# One shipped label, named here rather than taken from a list, because these
+# tests are about the route and not about which labels a page happens to offer.
+_ANY_SAMPLE = "ttb-26236001000652"
 
 
 # ---------------------------------------------------------------------------
-# Clicking it checks the label against the application really filed for it
+# It checks the label against the application really filed for it
 # ---------------------------------------------------------------------------
 
 
-def test_clicking_a_sample_returns_a_result_page(client):
-    sample_id = offered_samples()[0]["id"]
+def test_checking_a_sample_returns_a_result_page(client):
+    sample_id = _ANY_SAMPLE
     response = client.post(f"/samples/{sample_id}")
     assert response.status_code == 200
     assert 'id="envelope"' in response.text, "the page carries no envelope to render"
 
 
-def test_clicking_a_sample_sends_the_real_image_to_the_evaluator(client, recorder):
-    sample_id = offered_samples()[0]["id"]
+def test_checking_a_sample_sends_the_real_image_to_the_evaluator(client, recorder):
+    sample_id = _ANY_SAMPLE
     client.post(f"/samples/{sample_id}")
     assert len(recorder.calls) == 1
     _, label = recorder.calls[0]
@@ -106,7 +76,7 @@ def test_clicking_a_sample_sends_the_real_image_to_the_evaluator(client, recorde
     assert len(label.faces[0].image_bytes) > 1000, "a real label image, not a placeholder"
 
 
-def test_clicking_a_sample_sends_the_application_filed_for_that_label(client, recorder):
+def test_checking_a_sample_sends_the_application_filed_for_that_label(client, recorder):
     """The point of the click is a comparison, so the application values have
     to arrive as reference values — otherwise every rule reports that it has
     nothing to compare and the reviewer learns nothing."""
@@ -132,7 +102,7 @@ def test_the_result_page_shows_the_application_it_used(client):
 
 
 def test_the_result_page_shows_the_label_image(client):
-    sample_id = offered_samples()[0]["id"]
+    sample_id = _ANY_SAMPLE
     response = client.post(f"/samples/{sample_id}")
     assert "/image" in response.text, "the result page shows no label image"
 
@@ -168,7 +138,7 @@ def test_a_sample_id_cannot_name_a_file_outside_the_samples_directory(client):
 def test_the_sample_route_and_the_upload_route_render_the_same_shell(client):
     """One result page, not two. If these diverge, a reviewer's own upload stops
     demonstrating what the sample demonstrated."""
-    sample_id = offered_samples()[0]["id"]
+    sample_id = _ANY_SAMPLE
     sample_page = client.post(f"/samples/{sample_id}")
     upload_page = client.post(
         "/",

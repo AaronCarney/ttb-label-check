@@ -6,11 +6,18 @@ own files in a browser. This route reads the files, hands the worker the exact
 bytes that were uploaded, and redirects into the batch shell that streams the
 results back.
 
-A bulk upload carries images and no applications, so there is nothing to
-compare each label against. The one thing the form can ask for is which
-beverage the set is, because it decides which rules apply at all. A reviewer who
-skips it gets each label read and nothing checked, and each reply says so
-(`docs/decisions.md#0010`).
+A bulk upload carries the applications too, as one CSV beside the images: the
+check this product is for is the label against the application filed for it,
+and a batch that dropped the application half was showing a reviewer the
+product declining to do the assignment. Rows join to images on the filename
+stem — the same stem `app/api/ui/_faces.py` reads to pair a front with a back —
+and `app/api/ui/_application_csv.py` holds the format and why it is a CSV.
+
+The CSV is optional, and a label with no row of its own is not an error. It is
+read and checked for what every label must carry, with nothing to compare
+against the application, and its reply says so (`docs/decisions.md#0010`). The
+form's beverage type is the fallback for those labels, because it decides which
+rule pack applies at all; a row's own `beverage_type` overrides it.
 """
 
 from __future__ import annotations
@@ -22,6 +29,9 @@ from fastapi import APIRouter, Depends, File, Form, Request, UploadFile
 from fastapi.responses import RedirectResponse
 
 from app.api import limits
+from app.api.ui._application_csv import ApplicationCsvError
+from app.api.ui._application_csv import key_for as application_key_for
+from app.api.ui._application_csv import parse as parse_applications
 from app.api.ui._faces import plan_labels
 from app.api.ui._page import _get_settings, templates
 from app.api.ui._submission import (
@@ -45,6 +55,7 @@ UNSUPPORTED_IMAGE = "ENGINE.INPUT.LABEL_IMAGE_UNSUPPORTED"
 async def batches_upload_submit(
     request: Request,
     labels: list[UploadFile] = File(...),
+    applications: UploadFile | None = File(default=None),
     beverage_type: str = Form(default=""),
     settings: Settings = Depends(_get_settings),
     evaluator=Depends(_get_upload_evaluator),
@@ -100,6 +111,21 @@ async def batches_upload_submit(
     # each refusal hiding the next.
     raw: list[tuple[str, bytes, ImageMediaType | None]] = []
     too_large: list[str] = []
+    # The applications may arrive in their own field or among the images. The
+    # pack is one zip holding both, and a reviewer who unzips it and selects
+    # everything sends the CSV through the image picker; refusing it there as
+    # "not a PNG or JPEG" would name the one file carrying the applications as
+    # the one file that was not read.
+    #
+    # A file input the reviewer left alone still posts a part — an empty one,
+    # with no filename. Read naively that empty part is an applications file,
+    # and it shadows the real CSV sitting in the image picker: every label in
+    # the batch then arrives with nothing to compare against, on the path that
+    # exists to compare. So an upload is only an applications file if it
+    # carries a name and bytes.
+    applications_body: bytes | None = None
+    if applications is not None and applications.filename:
+        applications_body = (await applications.read()) or None
     for index, upload in enumerate(labels):
         body = await upload.read()
         filename = upload.filename or f"label-{index}"
@@ -119,6 +145,12 @@ async def batches_upload_submit(
             continue
         if too_large:
             continue
+        if filename.lower().endswith(".csv"):
+            # A second CSV does not replace the first: a reviewer who sent one
+            # deliberately in its own field meant that one.
+            if applications_body is None:
+                applications_body = body
+            continue
         raw.append((filename, body, _detect_image_mime(body)))
 
     if too_large:
@@ -131,6 +163,28 @@ async def batches_upload_submit(
                 "upload_error_items": too_large,
             },
             status_code=413,
+        )
+
+    try:
+        posted_by_label = parse_applications(applications_body) if applications_body else {}
+    except ApplicationCsvError as error:
+        return templates.TemplateResponse(
+            request=request,
+            name="batches_upload.html",
+            context={"dev_mode": settings.dev_mode, "upload_error": str(error)},
+            status_code=400,
+        )
+
+    if not raw:
+        # Applications and no labels. The CSV is not a submission on its own.
+        return templates.TemplateResponse(
+            request=request,
+            name="batches_upload.html",
+            context={
+                "dev_mode": settings.dev_mode,
+                "upload_error": "Pick at least one PNG or JPEG file.",
+            },
+            status_code=400,
         )
 
     if all(mime is None for _, _, mime in raw):
@@ -193,9 +247,18 @@ async def batches_upload_submit(
                     for face in planned.faces
                 ),
             )
+        # The application filed for this label, or the beverage type alone
+        # where the CSV has no row for it. A row's own beverage type wins: a
+        # pack of wines, beers and spirits is one batch, and the form's single
+        # select cannot be right for all three.
+        posted = posted_by_label.get(application_key_for(planned.name))
+        if posted is None:
+            posted = {"beverage_type": beverage_type}
+        elif not posted.get("beverage_type"):
+            posted = {**posted, "beverage_type": beverage_type}
         try:
             app_lookup[application_ref] = _build_application(
-                {"beverage_type": beverage_type},
+                posted,
                 settings,
                 application_id=application_ref,
                 # Minted, not borrowed from `label_id`: `label_id` carries the
@@ -205,10 +268,18 @@ async def batches_upload_submit(
                 evaluation_id=f"ev-{uuid.uuid4().hex[:12]}",
             )
         except ApplicationFormError as error:
+            # Named by label, because with a CSV in play the reviewer has to
+            # know which row to fix, and "pick the beverage type" said about
+            # three hundred labels at once names none of them.
+            where = (
+                f"The application for {planned.name!r} cannot be read: {error}"
+                if posted_by_label
+                else str(error)
+            )
             return templates.TemplateResponse(
                 request=request,
                 name="batches_upload.html",
-                context={"dev_mode": settings.dev_mode, "upload_error": str(error)},
+                context={"dev_mode": settings.dev_mode, "upload_error": where},
                 status_code=400,
             )
 

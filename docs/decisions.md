@@ -2700,3 +2700,71 @@ would hold nothing warm; the Worker is the only thing already holding the key.
 **Because** a prototype is judged by someone who opens it once. A 36-second blank page is the first
 and possibly only thing that person learns about it, and it says nothing true about the product
 behind it.
+
+<a id="0043"></a>
+## 0043. The batch carries the applications too, as one CSV, and the sample pack ships both halves
+
+**Evidence:** `app/api/ui/_application_csv.py`; `app/api/ui/bulk_upload.py`;
+`app/api/ui/samples.py` (`applications_csv_for`); `tests/test_batch_checks_against_applications.py`;
+[0010](#0010), [0019](#0019), [0020](#0020).
+
+**What was wrong.** The brief's central ask is a label checked against the application filed for it,
+across batches of 200-300. The engine has always done it — `POST /batches` takes
+`BatchItemRef{label_ref, application_ref}` — but the only path a reviewer could reach dropped the
+application half. `app/api/ui/bulk_upload.py` said so in its own words: *"A bulk upload carries
+images and no applications, so there is nothing to compare each label against."* Every comparison
+rule in the pack then reported that it had nothing to compare, and the page showed a column of
+**Not checked** beside **Expected (empty)**. A reviewer who downloaded the sample pack and uploaded
+it watched the product decline to do the assignment.
+
+**Chosen.** The applications travel as a **CSV**, one row per label: the image filename, then the
+ten fields the single-label form posts. `/batches/sample.zip` ships that file, `applications.csv`,
+beside the images, filled in from `tests/fixtures/labels/manifest.json` — the application really
+filed for each label in the registry. The batch form takes it in a field of its own **or** among the
+images, because a reviewer who unzips the pack and selects everything sends it through the image
+picker, and refusing it there would name the one file carrying the applications as the one file that
+was not read.
+
+Rows join to labels on the filename stem — the same stem `app/api/ui/_faces.py` already reads to
+decide that `lucy-front.jpg` and `lucy-back.jpg` are one label. A row may name either face or the
+bare stem; all three reduce to one key.
+
+A row's own `beverage_type` beats the form's select, because a pack of wines, beers and spirits is
+one batch and a single select cannot be right for all three. A label the CSV has no row for is not
+an error: it is read and checked for what every label must carry, and its reply says nothing was
+compared ([0010](#0010)). That path existed before this entry and is unchanged.
+
+**Two rows for one label is refused, not resolved.** Picking one of them silently compares a label
+against an application that was never filed for it. At 300 labels the failure that matters is not
+"no application" but "the wrong one", and it is the one failure a reviewer cannot see from the page.
+
+**Rejected.** *The JSON envelope `POST /batches` already takes* — right for a machine and wrong for
+a person, who has 300 filings in a spreadsheet and a spreadsheet writes CSV. *A sidecar file per
+label* — it multiplies the file count against the 100-file cap the form already enforces, so a
+300-label batch that fitted before would not. *Filenames carrying the application values* — ten
+fields do not fit in a filename, and the brief bars integration with COLAs Online (C-1), so a file
+the reviewer supplies is the honest stand-in for the feed a real deployment would read from the
+system of record.
+
+**The curated sample buttons are retired with it.** The landing page offered four labels as buttons,
+each with a blurb describing what checking it would show. That is a tour of the product rather than
+the product, and one blurb asserted an outcome the engine explicitly refuses to assert: it said of a
+beer that *"Neither photograph of this beer shows a bottler's name and address, and the check says
+so"*, where the check says *"The reader did not find a name and address on this label, so this check
+was not made. That is not a finding that the label lacks it."* The demonstration is the pack now,
+dropped into the same form a reviewer's own labels go through. What the blurbs explained is in
+`README.md` and `docs/approach.md`, which the brief asks for by name. `POST /samples/{sample_id}`
+stays: it is a real path to one shipped label against its filed application, and nothing about it
+was a tour.
+
+**An untouched file input still posts a part, and it shadowed the CSV.** Found by driving the form
+in a browser rather than by posting to the route. A file input the reviewer never touches sends an
+empty part with no filename; read as an applications file it took precedence over the real CSV in
+the image picker, and every label in the batch came back with nothing compared. An HTTP client's own
+multipart writer drops that part, so the in-process test passed while the page was broken — the same
+lesson as the result card in [0020](#0020): a check that reads the envelope is not a check on what
+the reviewer sees. `tests/test_batch_checks_against_applications.py` builds the browser's bytes by
+hand.
+
+**Because** the product is the comparison. A batch that reads labels and compares nothing is the
+half of the job the brief is not about.

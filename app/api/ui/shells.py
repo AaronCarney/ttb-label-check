@@ -13,7 +13,6 @@ from fastapi import APIRouter, Depends, Request
 from fastapi.responses import HTMLResponse
 
 from app.api.ui._page import _get_settings, templates
-from app.api.ui.samples import offered_samples
 from app.config import Settings
 
 router = APIRouter()
@@ -24,20 +23,17 @@ async def single_page_shell(
     request: Request,
     settings: Settings = Depends(_get_settings),
 ) -> HTMLResponse:
-    """Render the empty-inbox single-label landing. No pre-loaded results; the
-    reviewer sees a drop-zone CTA and three ways on: upload their own label, try
-    one of the shipped samples on a click (`POST /samples/{sample_id}`), or
-    pull a starter pack from `/batches/sample.zip`. The React island mounts on
+    """Render the empty-inbox single-label landing. No pre-loaded results: the
+    reviewer uploads a label and the application filed for it, which is what
+    this page is for. The shipped labels and their applications are a download
+    on `/batches`, not a row of demonstration buttons here — a demo that opens
+    with a tour of itself is not the product. The React island mounts on
     `<div id="root" data-mode="single">` and renders an envelope only after a
     real check returns one."""
     return templates.TemplateResponse(
         request=request,
         name="single.html",
-        context={
-            "envelope_json": None,
-            "dev_mode": settings.dev_mode,
-            "samples": offered_samples(),
-        },
+        context={"envelope_json": None, "dev_mode": settings.dev_mode},
     )
 
 
