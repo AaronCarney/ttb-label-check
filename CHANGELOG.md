@@ -9,6 +9,22 @@ date: the release's git tag records when it was cut. Versions follow
 
 ### Added
 
+- A batch of labels is now checked against the applications filed for them. The engine always did
+  this, but the only bulk path a reviewer could reach carried images and nothing else, so every
+  comparison rule reported that it had nothing to compare and the page showed a column of **Not
+  checked** beside **Expected (empty)** — the half of the job the brief is about. The applications
+  travel as one CSV, a row per label, carrying the same ten fields the single-label form asks for
+  and joined to the images by filename. The form takes that file in a field of its own or among the
+  images, because a reviewer who unzips the sample pack and selects everything sends it through the
+  image picker. A row's own beverage type beats the form's select, so a pack of wines, beers and
+  spirits is one batch; a label the CSV has no row for is still read and still checked for what
+  every label must carry; and two rows for one label are refused rather than resolved, because at
+  300 labels the failure a reviewer cannot see from the page is not "no application" but "the wrong
+  one". See `docs/decisions.md#0043`.
+- The downloadable sample pack carries both halves. `/batches/sample.zip` now ships
+  `applications.csv` beside the images — the application really filed for each label, taken from the
+  registry record — so the pack a reviewer downloads exercises the comparison instead of
+  demonstrating its absence.
 - The deployed service no longer makes its first visitor wait. Cloud Run scales to zero, so an idle
   instance was reclaimed and whoever arrived next paid a container start plus an OCR model load —
   36.48 seconds to first byte, measured, against 0.14 seconds warm. A cron trigger on the edge
@@ -20,6 +36,16 @@ date: the release's git tag records when it was cut. Versions follow
 
 ### Changed
 
+- The landing page no longer offers four curated labels as buttons, each with a sentence describing
+  what checking it would show. A tour of the product is not the product, and one of those sentences
+  asserted an outcome the engine explicitly refuses to assert: it said of a beer that *"Neither
+  photograph of this beer shows a bottler's name and address, and the check says so"*, where the
+  check says *"The reader did not find a name and address on this label, so this check was not made.
+  That is not a finding that the label lacks it: compare the label against the application
+  yourself."* The demonstration is the sample pack now, dropped
+  into the same form a reviewer's own labels go through. What those sentences explained is in
+  `README.md` and `docs/approach.md`. `POST /samples/{sample_id}`, which checks one shipped label
+  against its filed application, is unchanged.
 - The app checks the wording of a label's alcohol statement. A statement in one of the forms its
   beverage class's section gives — §4.36(b) for wine, §5.65(b) for spirits, §7.65(b) for malt
   beverages, with the abbreviations and parentheses those sections allow — passes, and any other

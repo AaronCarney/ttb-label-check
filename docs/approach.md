@@ -426,6 +426,42 @@ we drew, and a real one proves it can read what a producer actually printed. Eac
 transcription of what it prints and the expected result for each check, so the key is independent of
 the reader being tested.
 
+**The same corpus is what a reviewer downloads, and it is meant to be run rather than read
+about.** `/batches/sample.zip` ships ten of those thirty labels at random, both faces of each where
+both were filed, and `applications.csv` beside them carrying the application really filed for each
+one. Unzipped and dropped whole into the batch form, it exercises the product's actual claim —
+every label checked against its own application — rather than a demonstration of it. What the pack
+puts in front of a reviewer, from the thirty it draws on:
+
+- **All three beverage types in one batch**, which is why a row's own `beverage_type` overrides the
+  form's single select: fourteen distilled spirits, eight wines and eight malt beverages, each
+  judged by the rule pack for its own class.
+- **Labels that are more than one photograph.** Twenty-six of the thirty were filed with a back, and
+  twenty of them print their GOVERNMENT WARNING there. A batch that read fronts only would fail the
+  warning check on labels that carry it, so pairing the faces is not a convenience — it is the
+  difference between the corpus passing and the corpus failing.
+- **Passes that are not literal matches**, which is most of what a reviewer's judgement is spent on:
+  a label printing `CHARDONNAY` against an application declaring `TABLE WHITE WINE`, a brand matched
+  on the fanciful name the same application declares, two differently worded quantities reduced to
+  one figure.
+- **The country-of-origin check actually running**, because fourteen of the thirty are imports and
+  the check does not apply to the rest.
+- **What the product refuses to decide.** A label whose photographs do not show a bottler's name and
+  address comes back as *"The reader did not find a name and address on this label, so this check
+  was not made"* — not as a finding that the label lacks it. That distinction is the product's
+  central honesty and the pack demonstrates it on a real label.
+
+**Eight deliberately flawed variants are not in the pack, and that is deliberate.** They are real
+labels with one thing altered — one word of a GOVERNMENT WARNING repainted from *impairs* to *may
+impair*, a warning heading dropped into title case, an application's alcohol content set to 45%
+where the label prints 40% — and they exist in the test corpus to prove the checks can fail. What
+ships in the batch pack is thirty approved labels, because a demonstration built out of planted
+failures proves the plant rather than the product. Nothing in the app offers a variant to click:
+they live in the repository, under `tests/fixtures/labels/`, and the tests are what exercise them. A
+reviewer holding the pack who wants to watch a check fail has the honest version of the same thing
+available — change one value in `applications.csv` and re-upload, which is exactly the mismatch
+between a filing and a label that this product exists to catch.
+
 **That corpus caught four failures that unit tests called green.** A class-and-type rule that failed
 thirteen genuinely approved labels. A format check that matched a string it had built itself. An
 image-quality gate that rejected seven faces of five perfectly readable labels and was right about
@@ -485,6 +521,19 @@ punctuation should go to a reviewer. TTB's own form permits punctuation changes 
 and the research behind the requirement contradicted itself. "Stones Throw" against "Stone's Throw"
 is exactly the case the senior agent complains about by name. So we amended the requirement and
 logged the change, rather than making the product do the wrong thing consistently.
+
+**We stopped explaining the product inside the product.** The landing page had carried four
+curated labels as buttons, each with a sentence saying what checking it would show, and the batch
+page had offered a starter pack of images with no applications. Two things were wrong with that. The
+smaller: one of those sentences asserted an outcome the engine explicitly refuses to assert, telling
+a reader that a beer's photographs show no bottler's name and address *"and the check says so"*,
+where the check says only that it could not make the finding — so the tour contradicted the product
+it was touring. The larger: a demo is only worth anything if it is the product with data supplied,
+and a page of curated buttons is a different artifact from the one an agency would run. So the
+buttons and their sentences are gone, the sample pack carries the applications too, and the
+demonstration is now a reviewer unzipping that pack into the same form their own labels go through.
+What the sentences explained lives here and in `README.md`, which is where a reader can be told
+things the product itself has no business claiming.
 
 **We deleted work that could not earn its place.** The second-opinion layer described above. An
 image-quality gate that turned out to be measuring how light the label stock is. A rule that could

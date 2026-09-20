@@ -146,8 +146,24 @@ uv run task demo
 ```
 
 Then open <http://localhost:8000>. Upload a label image, fill in the application fields beside it,
-and submit. To try the batch path, open `/batches`, or take the sample archive the page offers —
-it is built from real label images shipped in this repository.
+and submit.
+
+**To try the batch path with no labels of your own**, open `/batches` and download the 10-label
+sample pack the page offers. It is built from real approved labels shipped in this repository, and
+it carries `applications.csv` beside the images: one row per label, holding the application that was
+actually filed for it. Unzip the pack and select the whole unzipped folder in the label-images
+picker — the CSV among the images is read as the applications, so nothing has to be typed and no
+second gesture is needed. Every label then comes back checked against its own application, which is
+what the product is for; a batch of images with no CSV is still read and still checked for what
+every label must carry, and says so.
+
+**To supply your own applications**, write the same CSV: a `filename` column, then
+`beverage_type`, `brand_name`, `fanciful_name`, `class_type`, `alcohol_content`, `net_contents`,
+`applicant_name_address`, `source_of_product`, `origin` and `wine_appellation` — the same ten fields
+the single-label page asks for. `filename` joins on the image name, with or without its extension
+and with or without a `-front`/`-back` suffix, so one row covers both faces of a label. Columns of
+your own are ignored rather than refused. Two rows naming one label are refused: at 300 labels the
+failure you cannot see from the page is not a missing application but the wrong one.
 
 The first label is slower than the rest: the OCR models are read off disk once, on first use, and
 kept for the life of the process.
@@ -290,6 +306,14 @@ and no folders, so the only thing an uploader controls is what the files are cal
 names end `-front` and `-back` on the same stem — `lucy-front.jpg` and `lucy-back.jpg` — are checked
 together as one label. Every other filename is one label on its own, so nothing changes for an
 uploader who names their files differently. The downloadable sample set is named that way already.
+
+**How a batch knows which application belongs to which label.** By that same filename. The
+applications travel as one CSV, `applications.csv`, a row per label carrying the ten fields the
+single-label page asks for, and a row joins to a label on the image name. A CSV is what a reviewer
+holding 300 filings already has, which the JSON body `POST /batches` accepts is not; a sidecar file
+per label was rejected for spending the 100-file cap on paperwork. The brief rules out integrating
+with COLAs Online, so a file the reviewer supplies stands in for the feed a real deployment would
+read from the system of record. See `docs/decisions.md#0043`.
 Without this, a bourbon sent as two files came back as two answers, neither of them about the
 product: a front that fails the warning check the back satisfies, and a back with no brand and no
 class on it.
