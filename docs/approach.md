@@ -470,7 +470,7 @@ compared against comes from a laboratory and this app never sees one. Every one 
 the product against real labels, which is the argument for having the corpus at all.
 
 **We publish reading accuracy as counts, not percentages.** Thirty of thirty on the warning being
-present, fourteen of thirty on it being word for word, sixteen of thirty on brand. A percentage drawn
+present, twenty of thirty on it being word for word, seventeen of thirty on brand. A percentage drawn
 from thirty labels reads as a precision this corpus does not carry. The figures are not flattering
 and they are the honest state of a processor-only reader on display typefaces.
 
