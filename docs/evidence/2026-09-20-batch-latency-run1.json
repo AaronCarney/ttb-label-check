@@ -1,0 +1,360 @@
+{
+ "measured_at": "2026-09-20T22:42:59.932245+00:00",
+ "url": "http://127.0.0.1:8123",
+ "note": "development box, service on four cores with OCR_NUM_THREADS=4, run 1 of 2",
+ "healthz": {
+  "status": "ok",
+  "version": "0.3.1",
+  "commit": "unknown",
+  "mode": {
+   "vision": "local"
+  },
+  "warmup_ran": false
+ },
+ "labels": [
+  "26212001000085",
+  "26218001000369",
+  "26229001000034",
+  "26229001000513",
+  "26230001000420",
+  "26230001000540",
+  "26231001000333",
+  "26231001000662",
+  "26232001000404",
+  "26233001000189",
+  "26233001000566",
+  "26233001000569"
+ ],
+ "alone": {
+  "rows": [
+   {
+    "label_ref": "B-06cca274c2-000-26212001000085",
+    "queue_position": 0,
+    "seconds": 1.557,
+    "replayed": false,
+    "disposition": "fail",
+    "total_duration_ms": 1498,
+    "vision_duration_ms": 1461,
+    "cache_hit": false,
+    "faces_read": 2,
+    "label": "26212001000085",
+    "faces_sent": 2
+   },
+   {
+    "label_ref": "B-3ed9f6be53-000-26218001000369",
+    "queue_position": 0,
+    "seconds": 1.52,
+    "replayed": false,
+    "disposition": "fail",
+    "total_duration_ms": 1462,
+    "vision_duration_ms": 1366,
+    "cache_hit": false,
+    "faces_read": 2,
+    "label": "26218001000369",
+    "faces_sent": 2
+   },
+   {
+    "label_ref": "B-765876d558-000-26229001000034",
+    "queue_position": 0,
+    "seconds": 0.858,
+    "replayed": false,
+    "disposition": "fail",
+    "total_duration_ms": 800,
+    "vision_duration_ms": 716,
+    "cache_hit": false,
+    "faces_read": 2,
+    "label": "26229001000034",
+    "faces_sent": 2
+   },
+   {
+    "label_ref": "B-1eb4f2f5a5-000-26229001000513",
+    "queue_position": 0,
+    "seconds": 0.925,
+    "replayed": false,
+    "disposition": "needs_review",
+    "total_duration_ms": 867,
+    "vision_duration_ms": 818,
+    "cache_hit": false,
+    "faces_read": 2,
+    "label": "26229001000513",
+    "faces_sent": 2
+   },
+   {
+    "label_ref": "B-6cbf01251b-000-26230001000420",
+    "queue_position": 0,
+    "seconds": 1.585,
+    "replayed": false,
+    "disposition": "needs_review",
+    "total_duration_ms": 1529,
+    "vision_duration_ms": 1365,
+    "cache_hit": false,
+    "faces_read": 2,
+    "label": "26230001000420",
+    "faces_sent": 2
+   },
+   {
+    "label_ref": "B-3b592aa547-000-26230001000540",
+    "queue_position": 0,
+    "seconds": 1.436,
+    "replayed": false,
+    "disposition": "fail",
+    "total_duration_ms": 1375,
+    "vision_duration_ms": 1207,
+    "cache_hit": false,
+    "faces_read": 2,
+    "label": "26230001000540",
+    "faces_sent": 2
+   },
+   {
+    "label_ref": "B-1df5848968-000-26231001000333",
+    "queue_position": 0,
+    "seconds": 1.257,
+    "replayed": false,
+    "disposition": "needs_review",
+    "total_duration_ms": 1198,
+    "vision_duration_ms": 1157,
+    "cache_hit": false,
+    "faces_read": 2,
+    "label": "26231001000333",
+    "faces_sent": 2
+   },
+   {
+    "label_ref": "B-814335139a-000-26231001000662",
+    "queue_position": 0,
+    "seconds": 1.435,
+    "replayed": false,
+    "disposition": "needs_review",
+    "total_duration_ms": 1370,
+    "vision_duration_ms": 1258,
+    "cache_hit": false,
+    "faces_read": 2,
+    "label": "26231001000662",
+    "faces_sent": 2
+   },
+   {
+    "label_ref": "B-4fcaf43efa-000-26232001000404",
+    "queue_position": 0,
+    "seconds": 1.109,
+    "replayed": false,
+    "disposition": "fail",
+    "total_duration_ms": 1049,
+    "vision_duration_ms": 989,
+    "cache_hit": false,
+    "faces_read": 2,
+    "label": "26232001000404",
+    "faces_sent": 2
+   },
+   {
+    "label_ref": "B-90cd3aa223-000-26233001000189",
+    "queue_position": 0,
+    "seconds": 0.842,
+    "replayed": false,
+    "disposition": "needs_review",
+    "total_duration_ms": 784,
+    "vision_duration_ms": 768,
+    "cache_hit": false,
+    "faces_read": 2,
+    "label": "26233001000189",
+    "faces_sent": 2
+   },
+   {
+    "label_ref": "B-3a384a64eb-000-26233001000566",
+    "queue_position": 0,
+    "seconds": 1.212,
+    "replayed": false,
+    "disposition": "fail",
+    "total_duration_ms": 1130,
+    "vision_duration_ms": 1039,
+    "cache_hit": false,
+    "faces_read": 1,
+    "label": "26233001000566",
+    "faces_sent": 2
+   },
+   {
+    "label_ref": "B-d540ede888-000-26233001000569",
+    "queue_position": 0,
+    "seconds": 0.753,
+    "replayed": false,
+    "disposition": "needs_review",
+    "total_duration_ms": 697,
+    "vision_duration_ms": 683,
+    "cache_hit": false,
+    "faces_read": 2,
+    "label": "26233001000569",
+    "faces_sent": 2
+   }
+  ],
+  "seconds": {
+   "n": 12,
+   "median": 1.234,
+   "mean": 1.207,
+   "min": 0.753,
+   "max": 1.585
+  },
+  "by_faces": {
+   "2": {
+    "n": 12,
+    "median": 1.234,
+    "mean": 1.207,
+    "min": 0.753,
+    "max": 1.585
+   }
+  }
+ },
+ "batch": {
+  "batch_id": "B-54cfcdb819",
+  "labels": 12,
+  "images": 24,
+  "rows": [
+   {
+    "label_ref": "B-54cfcdb819-000-26212001000085",
+    "queue_position": 0,
+    "seconds": 1.493,
+    "replayed": false,
+    "disposition": "fail",
+    "total_duration_ms": 1391,
+    "vision_duration_ms": 1356,
+    "cache_hit": false,
+    "faces_read": 2
+   },
+   {
+    "label_ref": "B-54cfcdb819-001-26218001000369",
+    "queue_position": 1,
+    "seconds": 2.913,
+    "replayed": false,
+    "disposition": "fail",
+    "total_duration_ms": 1404,
+    "vision_duration_ms": 1314,
+    "cache_hit": false,
+    "faces_read": 2
+   },
+   {
+    "label_ref": "B-54cfcdb819-002-26229001000034",
+    "queue_position": 2,
+    "seconds": 3.711,
+    "replayed": false,
+    "disposition": "fail",
+    "total_duration_ms": 809,
+    "vision_duration_ms": 723,
+    "cache_hit": false,
+    "faces_read": 2
+   },
+   {
+    "label_ref": "B-54cfcdb819-003-26229001000513",
+    "queue_position": 3,
+    "seconds": 4.638,
+    "replayed": false,
+    "disposition": "needs_review",
+    "total_duration_ms": 864,
+    "vision_duration_ms": 808,
+    "cache_hit": false,
+    "faces_read": 2
+   },
+   {
+    "label_ref": "B-54cfcdb819-004-26230001000420",
+    "queue_position": 4,
+    "seconds": 6.169,
+    "replayed": false,
+    "disposition": "needs_review",
+    "total_duration_ms": 1521,
+    "vision_duration_ms": 1362,
+    "cache_hit": false,
+    "faces_read": 2
+   },
+   {
+    "label_ref": "B-54cfcdb819-005-26230001000540",
+    "queue_position": 5,
+    "seconds": 7.485,
+    "replayed": false,
+    "disposition": "fail",
+    "total_duration_ms": 1373,
+    "vision_duration_ms": 1202,
+    "cache_hit": false,
+    "faces_read": 2
+   },
+   {
+    "label_ref": "B-54cfcdb819-006-26231001000333",
+    "queue_position": 6,
+    "seconds": 8.757,
+    "replayed": false,
+    "disposition": "needs_review",
+    "total_duration_ms": 1220,
+    "vision_duration_ms": 1179,
+    "cache_hit": false,
+    "faces_read": 2
+   },
+   {
+    "label_ref": "B-54cfcdb819-007-26231001000662",
+    "queue_position": 7,
+    "seconds": 10.196,
+    "replayed": false,
+    "disposition": "needs_review",
+    "total_duration_ms": 1457,
+    "vision_duration_ms": 1340,
+    "cache_hit": false,
+    "faces_read": 2
+   },
+   {
+    "label_ref": "B-54cfcdb819-008-26232001000404",
+    "queue_position": 8,
+    "seconds": 11.214,
+    "replayed": false,
+    "disposition": "fail",
+    "total_duration_ms": 1040,
+    "vision_duration_ms": 975,
+    "cache_hit": false,
+    "faces_read": 2
+   },
+   {
+    "label_ref": "B-54cfcdb819-009-26233001000189",
+    "queue_position": 9,
+    "seconds": 12.068,
+    "replayed": false,
+    "disposition": "needs_review",
+    "total_duration_ms": 815,
+    "vision_duration_ms": 800,
+    "cache_hit": false,
+    "faces_read": 2
+   },
+   {
+    "label_ref": "B-54cfcdb819-010-26233001000566",
+    "queue_position": 10,
+    "seconds": 13.187,
+    "replayed": false,
+    "disposition": "fail",
+    "total_duration_ms": 1138,
+    "vision_duration_ms": 1042,
+    "cache_hit": false,
+    "faces_read": 1
+   },
+   {
+    "label_ref": "B-54cfcdb819-011-26233001000569",
+    "queue_position": 11,
+    "seconds": 13.875,
+    "replayed": false,
+    "disposition": "needs_review",
+    "total_duration_ms": 687,
+    "vision_duration_ms": 669,
+    "cache_hit": false,
+    "faces_read": 2
+   }
+  ],
+  "first_result_seconds": 1.493,
+  "last_result_seconds": 13.875,
+  "seconds_per_label": 1.156,
+  "gap_between_results": {
+   "n": 11,
+   "median": 1.119,
+   "mean": 1.126,
+   "min": 0.688,
+   "max": 1.531
+  },
+  "engine_total_duration_ms": {
+   "n": 12,
+   "median": 1179.0,
+   "mean": 1143.25,
+   "min": 687.0,
+   "max": 1521.0
+  }
+ }
+}

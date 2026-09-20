@@ -1,0 +1,360 @@
+{
+ "measured_at": "2026-09-20T22:43:54.109843+00:00",
+ "url": "http://127.0.0.1:8123",
+ "note": "development box, service on four cores with OCR_NUM_THREADS=4, run 2 of 2",
+ "healthz": {
+  "status": "ok",
+  "version": "0.3.1",
+  "commit": "unknown",
+  "mode": {
+   "vision": "local"
+  },
+  "warmup_ran": false
+ },
+ "labels": [
+  "26212001000085",
+  "26218001000369",
+  "26229001000034",
+  "26229001000513",
+  "26230001000420",
+  "26230001000540",
+  "26231001000333",
+  "26231001000662",
+  "26232001000404",
+  "26233001000189",
+  "26233001000566",
+  "26233001000569"
+ ],
+ "alone": {
+  "rows": [
+   {
+    "label_ref": "B-bd8b2700d8-000-26212001000085",
+    "queue_position": 0,
+    "seconds": 1.466,
+    "replayed": false,
+    "disposition": "fail",
+    "total_duration_ms": 1409,
+    "vision_duration_ms": 1368,
+    "cache_hit": false,
+    "faces_read": 2,
+    "label": "26212001000085",
+    "faces_sent": 2
+   },
+   {
+    "label_ref": "B-4148ff5da6-000-26218001000369",
+    "queue_position": 0,
+    "seconds": 1.421,
+    "replayed": false,
+    "disposition": "fail",
+    "total_duration_ms": 1364,
+    "vision_duration_ms": 1273,
+    "cache_hit": false,
+    "faces_read": 2,
+    "label": "26218001000369",
+    "faces_sent": 2
+   },
+   {
+    "label_ref": "B-75ccaaabda-000-26229001000034",
+    "queue_position": 0,
+    "seconds": 0.843,
+    "replayed": false,
+    "disposition": "fail",
+    "total_duration_ms": 784,
+    "vision_duration_ms": 698,
+    "cache_hit": false,
+    "faces_read": 2,
+    "label": "26229001000034",
+    "faces_sent": 2
+   },
+   {
+    "label_ref": "B-2ffcb41845-000-26229001000513",
+    "queue_position": 0,
+    "seconds": 0.924,
+    "replayed": false,
+    "disposition": "needs_review",
+    "total_duration_ms": 867,
+    "vision_duration_ms": 813,
+    "cache_hit": false,
+    "faces_read": 2,
+    "label": "26229001000513",
+    "faces_sent": 2
+   },
+   {
+    "label_ref": "B-8a60b83180-000-26230001000420",
+    "queue_position": 0,
+    "seconds": 1.546,
+    "replayed": false,
+    "disposition": "needs_review",
+    "total_duration_ms": 1487,
+    "vision_duration_ms": 1327,
+    "cache_hit": false,
+    "faces_read": 2,
+    "label": "26230001000420",
+    "faces_sent": 2
+   },
+   {
+    "label_ref": "B-7e5244c7a9-000-26230001000540",
+    "queue_position": 0,
+    "seconds": 1.421,
+    "replayed": false,
+    "disposition": "fail",
+    "total_duration_ms": 1362,
+    "vision_duration_ms": 1189,
+    "cache_hit": false,
+    "faces_read": 2,
+    "label": "26230001000540",
+    "faces_sent": 2
+   },
+   {
+    "label_ref": "B-58d1e67e73-000-26231001000333",
+    "queue_position": 0,
+    "seconds": 1.252,
+    "replayed": false,
+    "disposition": "needs_review",
+    "total_duration_ms": 1197,
+    "vision_duration_ms": 1157,
+    "cache_hit": false,
+    "faces_read": 2,
+    "label": "26231001000333",
+    "faces_sent": 2
+   },
+   {
+    "label_ref": "B-68095dabf3-000-26231001000662",
+    "queue_position": 0,
+    "seconds": 1.466,
+    "replayed": false,
+    "disposition": "needs_review",
+    "total_duration_ms": 1393,
+    "vision_duration_ms": 1279,
+    "cache_hit": false,
+    "faces_read": 2,
+    "label": "26231001000662",
+    "faces_sent": 2
+   },
+   {
+    "label_ref": "B-e6d0356ffc-000-26232001000404",
+    "queue_position": 0,
+    "seconds": 1.068,
+    "replayed": false,
+    "disposition": "fail",
+    "total_duration_ms": 1008,
+    "vision_duration_ms": 942,
+    "cache_hit": false,
+    "faces_read": 2,
+    "label": "26232001000404",
+    "faces_sent": 2
+   },
+   {
+    "label_ref": "B-8a99c73687-000-26233001000189",
+    "queue_position": 0,
+    "seconds": 0.829,
+    "replayed": false,
+    "disposition": "needs_review",
+    "total_duration_ms": 774,
+    "vision_duration_ms": 762,
+    "cache_hit": false,
+    "faces_read": 2,
+    "label": "26233001000189",
+    "faces_sent": 2
+   },
+   {
+    "label_ref": "B-9c3100bcd9-000-26233001000566",
+    "queue_position": 0,
+    "seconds": 1.165,
+    "replayed": false,
+    "disposition": "fail",
+    "total_duration_ms": 1109,
+    "vision_duration_ms": 1022,
+    "cache_hit": false,
+    "faces_read": 1,
+    "label": "26233001000566",
+    "faces_sent": 2
+   },
+   {
+    "label_ref": "B-c816a5cc4d-000-26233001000569",
+    "queue_position": 0,
+    "seconds": 0.723,
+    "replayed": false,
+    "disposition": "needs_review",
+    "total_duration_ms": 663,
+    "vision_duration_ms": 649,
+    "cache_hit": false,
+    "faces_read": 2,
+    "label": "26233001000569",
+    "faces_sent": 2
+   }
+  ],
+  "seconds": {
+   "n": 12,
+   "median": 1.208,
+   "mean": 1.177,
+   "min": 0.723,
+   "max": 1.546
+  },
+  "by_faces": {
+   "2": {
+    "n": 12,
+    "median": 1.208,
+    "mean": 1.177,
+    "min": 0.723,
+    "max": 1.546
+   }
+  }
+ },
+ "batch": {
+  "batch_id": "B-72af63327a",
+  "labels": 12,
+  "images": 24,
+  "rows": [
+   {
+    "label_ref": "B-72af63327a-000-26212001000085",
+    "queue_position": 0,
+    "seconds": 1.5,
+    "replayed": false,
+    "disposition": "fail",
+    "total_duration_ms": 1393,
+    "vision_duration_ms": 1359,
+    "cache_hit": false,
+    "faces_read": 2
+   },
+   {
+    "label_ref": "B-72af63327a-001-26218001000369",
+    "queue_position": 1,
+    "seconds": 2.868,
+    "replayed": false,
+    "disposition": "fail",
+    "total_duration_ms": 1359,
+    "vision_duration_ms": 1269,
+    "cache_hit": false,
+    "faces_read": 2
+   },
+   {
+    "label_ref": "B-72af63327a-002-26229001000034",
+    "queue_position": 2,
+    "seconds": 3.614,
+    "replayed": false,
+    "disposition": "fail",
+    "total_duration_ms": 752,
+    "vision_duration_ms": 668,
+    "cache_hit": false,
+    "faces_read": 2
+   },
+   {
+    "label_ref": "B-72af63327a-003-26229001000513",
+    "queue_position": 3,
+    "seconds": 4.539,
+    "replayed": false,
+    "disposition": "needs_review",
+    "total_duration_ms": 865,
+    "vision_duration_ms": 816,
+    "cache_hit": false,
+    "faces_read": 2
+   },
+   {
+    "label_ref": "B-72af63327a-004-26230001000420",
+    "queue_position": 4,
+    "seconds": 6.066,
+    "replayed": false,
+    "disposition": "needs_review",
+    "total_duration_ms": 1517,
+    "vision_duration_ms": 1366,
+    "cache_hit": false,
+    "faces_read": 2
+   },
+   {
+    "label_ref": "B-72af63327a-005-26230001000540",
+    "queue_position": 5,
+    "seconds": 7.424,
+    "replayed": false,
+    "disposition": "fail",
+    "total_duration_ms": 1400,
+    "vision_duration_ms": 1236,
+    "cache_hit": false,
+    "faces_read": 2
+   },
+   {
+    "label_ref": "B-72af63327a-006-26231001000333",
+    "queue_position": 6,
+    "seconds": 8.679,
+    "replayed": false,
+    "disposition": "needs_review",
+    "total_duration_ms": 1215,
+    "vision_duration_ms": 1173,
+    "cache_hit": false,
+    "faces_read": 2
+   },
+   {
+    "label_ref": "B-72af63327a-007-26231001000662",
+    "queue_position": 7,
+    "seconds": 10.032,
+    "replayed": false,
+    "disposition": "needs_review",
+    "total_duration_ms": 1362,
+    "vision_duration_ms": 1246,
+    "cache_hit": false,
+    "faces_read": 2
+   },
+   {
+    "label_ref": "B-72af63327a-008-26232001000404",
+    "queue_position": 8,
+    "seconds": 11.06,
+    "replayed": false,
+    "disposition": "fail",
+    "total_duration_ms": 1048,
+    "vision_duration_ms": 982,
+    "cache_hit": false,
+    "faces_read": 2
+   },
+   {
+    "label_ref": "B-72af63327a-009-26233001000189",
+    "queue_position": 9,
+    "seconds": 11.92,
+    "replayed": false,
+    "disposition": "needs_review",
+    "total_duration_ms": 822,
+    "vision_duration_ms": 810,
+    "cache_hit": false,
+    "faces_read": 2
+   },
+   {
+    "label_ref": "B-72af63327a-010-26233001000566",
+    "queue_position": 10,
+    "seconds": 13.015,
+    "replayed": false,
+    "disposition": "fail",
+    "total_duration_ms": 1112,
+    "vision_duration_ms": 1026,
+    "cache_hit": false,
+    "faces_read": 1
+   },
+   {
+    "label_ref": "B-72af63327a-011-26233001000569",
+    "queue_position": 11,
+    "seconds": 13.715,
+    "replayed": false,
+    "disposition": "needs_review",
+    "total_duration_ms": 698,
+    "vision_duration_ms": 681,
+    "cache_hit": false,
+    "faces_read": 2
+   }
+  ],
+  "first_result_seconds": 1.5,
+  "last_result_seconds": 13.715,
+  "seconds_per_label": 1.143,
+  "gap_between_results": {
+   "n": 11,
+   "median": 1.095,
+   "mean": 1.11,
+   "min": 0.7,
+   "max": 1.527
+  },
+  "engine_total_duration_ms": {
+   "n": 12,
+   "median": 1163.5,
+   "mean": 1128.583,
+   "min": 698.0,
+   "max": 1517.0
+  }
+ }
+}
