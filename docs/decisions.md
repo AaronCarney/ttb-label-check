@@ -1578,10 +1578,10 @@ that an unauthenticated URL cannot run up a bill. Four settings meet it without 
 the service caps at two instances, takes one request at a time, times out, and sits behind a proxy
 on this project's own zone carrying a rate-limiting rule. One request at a time is not only a cost
 control — it is what the five-second requirement needs, and it is what makes four cores worth
-having, because the reader's own measurements show eight concurrent readers pushing the 95th
-percentile from 2.26 seconds to 10.02 seconds when ONNX Runtime threads contend for the same cores.
-One reader alone on four cores is the opposite of that case, and `OCR_NUM_THREADS` defaults to the
-service's core count so a developer's machine reads the way the deployed product does.
+having: `OCR_NUM_THREADS` defaults to the service's core count, so one read is sized to use every
+core the instance has, and a second request arriving beside it would contend for those cores rather
+than add to them. The same default means a developer's machine reads the way the deployed product
+does.
 
 **And because the cold start stops being unfixable.** [0023](#0023) records one unresolved cost:
 free Spaces hardware sleeps after 48 hours idle, so a reviewer arriving cold waits through a
@@ -2824,9 +2824,11 @@ was stopped early and nothing came out of the cache in either run, so the harnes
 checks rather than blank ones ([0035](#0035)).
 
 **Not chosen, and not yet measured: reading the faces concurrently.** `app/vision/local.py` reads
-`label.faces` one after another. Reading two at once is the obvious lever and it is not obviously
-free — eight concurrent reads moved the 95th percentile from 2.26 seconds to 10.02 on these same
-four cores ([0005](#0005)). Two is not eight, and nobody has taken that measurement.
+`label.faces` one after another, and within a process it reads one image at a time: a single OCR
+engine serves every request and a second read waits on the first. Reading two faces at once is
+therefore not a matter of issuing both reads together — it means lifting that serialisation. Nobody
+has measured what that does, either to the time a reviewer waits for one check or to the time each
+label takes inside a batch, and both are the measurement to take.
 
 **Because** a check that answers in three seconds about the wrong half of the label is not a faster
 product, it is a wrong one. The requirement is missed and the number saying so is published beside

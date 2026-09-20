@@ -61,10 +61,10 @@ allowed **four threads**: `OCR_NUM_THREADS` defaults to the service's core count
 onnxruntime's intra-op and inter-op pools and OpenCV's thread count alike. OpenBLAS is held to two
 threads by the image, because left unset it runs one thread per core and contends with the sessions
 a read has already sized. One request at a time is not only a cost control — it is what the
-five-second requirement needs, because eight concurrent reads moved the 95th percentile from 2.26
-seconds to 10.02 seconds ([decision 0005](docs/decisions.md#0005),
-[0025](docs/decisions.md#0025)). Every figure here was read back from the deployed service on
-2026-09-19 rather than copied from the deploy script.
+five-second requirement needs: a read is sized to use all four cores, so a second check arriving at
+the same moment would compete with the first rather than run beside it
+([decision 0025](docs/decisions.md#0025)). Every figure here was read back from the deployed service
+on 2026-09-19 rather than copied from the deploy script.
 
 `--check` is what proves the repository is deployable without making it public: it runs every
 precondition the deploy has that needs no network, and names any that fails. It runs as part of the
@@ -105,11 +105,12 @@ and an answer that was wrong about the warning on 19 of 29 real labels.
 Nothing was stopped early, nothing was answered out of the cache, and every check returned all
 seven fields, in both runs. These are slow checks, not blank ones.
 
-**What might close it, and what it would cost.** The two faces are read in sequence
-(`app/vision/local.py`). Reading them concurrently is the obvious lever and it is not free: eight
-concurrent reads moved the 95th percentile from 2.26 seconds to 10.02 seconds on these same four
-cores ([decision 0005](docs/decisions.md#0005)). Two at once is not eight, and that measurement has
-not been taken. Nothing here is tuned to make the number look better: the earlier runs of 87%, 89%,
+**What might close it.** The two faces are read one after another, and a running copy reads one
+image at a time: it holds a single OCR engine, and a second read waits for the first to finish
+(`app/vision/local.py`). Reading a submission's two faces at once therefore means lifting that
+serialisation rather than merely asking for both together, and whether that helps is a measurement
+nobody has taken. It is the next one to take, against both numbers that matter: the time a reviewer
+waits for one check, and the time each label takes inside a batch. Nothing here is tuned to make the number look better: the earlier runs of 87%, 89%,
 71% and 92% were taken on superseded code and on a harness that counted a check the evaluation
 guard had blanked as a slow one, which is why they are quoted as history rather than as figures
 ([decision 0035](docs/decisions.md#0035)).

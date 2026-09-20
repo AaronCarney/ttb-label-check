@@ -308,14 +308,16 @@ round a process that takes weeks, and it is the error that would end a pilot. A 
 downstream by the agent, who rules on every finding anyway. That asymmetry is why anything
 unmeasurable goes to review rather than to rejection.
 
-**The numbers, and which of them we can defend.** Three thresholds carry real evidence. The
+**The numbers, and which of them we can defend.** Three numbers shape this product and they are not
+equally well founded. The
 tolerance that lets a net contents figure in millilitres match one in fluid ounces is one percent,
 derived rather than picked: above the 0.633 percent that rounding needs across every container size
 the regulations authorise, below the 1.216 percent at which an authorised size stops being
 distinguishable from the customary figure printed for the size next to it — and a test recomputes
 both bounds on every run, so the number cannot drift from its reason. One label at a time per
-running copy comes from a measurement: eight readings at once pushed the slowest five percent from
-2.26 seconds to just over ten, because the reader's threads compete for the same processor cores.
+running copy is a choice about the machine rather than a measured threshold: a read is sized to use
+all four of the service's processor cores, so a second read beside it would compete with the first
+rather than add to it.
 The brand-matching thresholds — 0.92 to pass, 0.85 to send to a person — rest on published
 record-matching work and on an argument about which error costs more, not on this project's own
 labels. That is the weaker evidence, and we would rather say so than present all three as equally
@@ -487,9 +489,9 @@ the back of 20 of the 30 corpus labels, so those fast answers reported a warning
 label carries. The page now takes a front and a back, the faces are read one after another, and the
 submissions carrying a back came in at a median of 5.55 and 4.95 seconds against 2.39 and 2.74 for
 the four that have only a front. We took the trade knowingly and we publish the number it cost.
-Reading the faces concurrently is the untried lever; it is not obviously free, because eight
-concurrent reads moved the 95th percentile from 2.26 to 10.02 seconds on these four cores
-([decision 0005](decisions.md#0005)). Two levers have been tried and neither is the answer: more
+Reading the faces concurrently is the untried lever, and it is a larger change than it sounds: a
+running copy holds one reader and takes one image at a time, so asking for both faces at once would
+queue them rather than overlap them. Two levers have been tried and neither is the answer: more
 processor cores moved one check of thirty-eight, and the reading path itself has been tuned three
 times — most recently by reading a label's sideways strips before reading the whole label again,
 which took the slowest corpus read from 1345 ms to 463 ms on the development box
