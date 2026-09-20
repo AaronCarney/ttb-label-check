@@ -52,10 +52,28 @@ six-thread OCR budget. It holds:
   and at the change itself. Each row is the verdict and every finding that did
   not pass.
 
+### `2026-09-20-five-second-both-faces-run1.json` and `-run2.json`
+
+Two runs against the deployed service at `https://ttb.aaroncarney.me`,
+minutes apart on 2026-09-20, each sending both faces of every corpus label the
+way the page sends them. `summary` holds the figures the README quotes — checks
+made, how many carried a back, how many finished inside five seconds, the median
+and the slowest, and the counts of checks stopped early or answered out of the
+cache. `rows` holds one entry per check with what came back, not only how long
+it took, because a harness keeping the clock alone cannot tell a slow check from
+a blank one. Produced by the deploy latency harness,
+`TTB_DEPLOY_URL=<url> TTB_LATENCY_RECORD_DIR=<dir> uv run pytest
+tests/test_deploy_healthz.py -k five_second`, whose record was copied here.
+Cited by decision 0044, which is about the page taking the back of the label and
+publishing what that cost.
+
 ## Re-measuring
 
-All three runs read the corpus in `tests/fixtures/labels/` and the transcription in
-`tests/fixtures/labels/manifest.json`. The corpus is ground truth and does not
-move, so a re-measurement is comparable to the run recorded here. Local OCR runs
-under the six-thread budget the project works to; a run at a different thread
-count gives different durations and the same readings.
+Every run here reads the corpus in `tests/fixtures/labels/` and the
+transcription in `tests/fixtures/labels/manifest.json`. The corpus is ground
+truth and does not move, so a re-measurement is comparable to the run recorded
+here. The two deployed runs need a deploy as well, and they measure the commit
+that was live on the day: a later run on later code answers a different question
+rather than checking this one. Local OCR runs under the six-thread budget the
+project works to; a run at a different thread count gives different durations
+and the same readings.
