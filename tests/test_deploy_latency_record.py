@@ -52,11 +52,12 @@ def test_reports_no_envelope_rather_than_raising_on_a_page_without_one():
 
 
 def test_a_row_records_what_came_back_not_only_how_long_it_took():
-    row = _row_from_page("ttb-1", 200, 2.89, _page(_COMPLETE))
+    row = _row_from_page("ttb-1", 200, 2.89, _page(_COMPLETE), 2)
     assert row == {
         "label_id": "ttb-1",
         "status": 200,
         "wall_seconds": 2.89,
+        "faces": 2,
         "disposition": "fail",
         "field_count": 7,
         "total_duration_ms": 2555,
@@ -70,17 +71,17 @@ def test_a_row_records_what_came_back_not_only_how_long_it_took():
 def test_a_row_tells_a_check_that_was_stopped_apart_from_one_that_was_slow():
     """Both cross five seconds and both return HTTP 200. Only the trace says
     which is which, and the harness recorded neither."""
-    stopped = _row_from_page("ttb-2", 200, 5.04, _page(_STOPPED))
-    slow = _row_from_page("ttb-3", 200, 5.12, _page(_COMPLETE))
+    stopped = _row_from_page("ttb-2", 200, 5.04, _page(_STOPPED), 2)
+    slow = _row_from_page("ttb-3", 200, 5.12, _page(_COMPLETE), 2)
     assert stopped["stopped_early"] is True
     assert slow["stopped_early"] is False
 
 
 def test_the_summary_counts_what_the_requirement_asks_about():
     rows = [
-        _row_from_page("a", 200, 1.2, _page(_COMPLETE)),
-        _row_from_page("b", 200, 2.0, _page(_COMPLETE)),
-        _row_from_page("c", 200, 5.04, _page(_STOPPED)),
+        _row_from_page("a", 200, 1.2, _page(_COMPLETE), 2),
+        _row_from_page("b", 200, 2.0, _page(_COMPLETE), 1),
+        _row_from_page("c", 200, 5.04, _page(_STOPPED), 2),
     ]
     summary = _summarise(rows)
     assert summary["checked"] == 3
@@ -89,3 +90,12 @@ def test_the_summary_counts_what_the_requirement_asks_about():
     assert summary["stopped_early"] == 1
     assert summary["cache_hits"] == 0
     assert summary["median_wall_seconds"] == 2.0
+    assert summary["two_faced"] == 2
+
+
+def test_the_summary_says_how_many_checks_carried_a_back():
+    """A run mixing one-faced and two-faced submissions cannot be read without
+    it: the second face is a second read, and four of the test labels have no
+    back to send."""
+    fronts_only = [_row_from_page("a", 200, 1.2, _page(_COMPLETE), 1)]
+    assert _summarise(fronts_only)["two_faced"] == 0
