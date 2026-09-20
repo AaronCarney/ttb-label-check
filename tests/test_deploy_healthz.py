@@ -83,19 +83,32 @@ def _form_text(value) -> str:
     return str(value)
 
 
-def _submissions() -> list[tuple[str, Path, dict[str, str]]]:
-    """Every test submission: its id, its front image, and its application fields.
+def _submissions() -> list[tuple[str, list[Path], dict[str, str]]]:
+    """Every test submission: its id, its images, and its application fields.
 
     These are the project's own test labels with the applications filed for
     them, which is what R15 measures against — not a synthetic image, because
     reading time depends on what is actually on the label.
+
+    Every face the manifest lists travels, because that is now what the page
+    sends: `app/ui/templates/single.html` offers a front and an optional back,
+    and 34 of the 38 test labels have a back. Measuring a front-only submission
+    would be measuring something no reviewer posts, and the back is not free —
+    the faces are read one after another (`app/vision/local.py`), so a second
+    face costs roughly a second read.
     """
     manifest = json.loads((_LABELS_DIR / "manifest.json").read_text())
-    submissions: list[tuple[str, Path, dict[str, str]]] = []
+    submissions: list[tuple[str, list[Path], dict[str, str]]] = []
     for entry in manifest["labels"]:
         front = _LABELS_DIR / entry["images"]["front"]
         if not front.is_file():
             continue
+        faces = [front]
+        back_name = (entry.get("images") or {}).get("back")
+        if back_name:
+            back = _LABELS_DIR / back_name
+            if back.is_file():
+                faces.append(back)
         application = entry.get("application") or {}
         form = {
             "beverage_type": entry["beverage_type"],
@@ -109,7 +122,7 @@ def _submissions() -> list[tuple[str, Path, dict[str, str]]]:
             "origin": _form_text(application.get("origin")),
             "wine_appellation": _form_text(application.get("wine_appellation")),
         }
-        submissions.append((entry["id"], front, form))
+        submissions.append((entry["id"], faces, form))
     return submissions
 
 
@@ -149,12 +162,20 @@ def _envelope_from_page(html: str) -> dict | None:
         return None
 
 
-def _row_from_page(label_id: str, status: int | None, wall_seconds: float, html: str) -> dict:
-    """One check, as the record keeps it."""
+def _row_from_page(
+    label_id: str, status: int | None, wall_seconds: float, html: str, faces: int
+) -> dict:
+    """One check, as the record keeps it.
+
+    `faces` is how many images the submission carried, because a one-faced
+    label and a two-faced one are not the same measurement and a run mixing
+    both cannot be read without it.
+    """
     row: dict = {
         "label_id": label_id,
         "status": status,
         "wall_seconds": wall_seconds,
+        "faces": faces,
         "disposition": None,
         "field_count": None,
         "total_duration_ms": None,
@@ -189,6 +210,7 @@ def _summarise(rows: list[dict]) -> dict:
     inside = [w for w in walls if w <= _LATENCY_BUDGET_SECONDS]
     return {
         "checked": len(rows),
+        "two_faced": sum(1 for row in rows if (row.get("faces") or 1) > 1),
         "inside_budget": len(inside),
         "share_inside_budget": len(inside) / len(rows) if rows else 0.0,
         "budget_seconds": _LATENCY_BUDGET_SECONDS,
@@ -219,15 +241,23 @@ def _write_record(deploy_url: str, rows: list[dict]) -> Path:
 
 
 def _check_once(
-    deploy_url: str, front: Path, form: dict[str, str]
+    deploy_url: str, faces: list[Path], form: dict[str, str]
 ) -> tuple[int | None, float, str]:
     """Post one submission the way the page does, and time the round trip.
+
+    The first face goes as `label` and the second as `label_back`, which are
+    the two field names `app/ui/templates/single.html` offers; a label with
+    only a front posts only the front, exactly as the page would.
 
     Returns the status code, the seconds the reviewer waited, and the page they
     were shown. A timeout comes back as no status and the full timeout, because
     that is what it cost.
     """
+    front, *rest = faces
     files = {"label": (front.name, front.read_bytes(), "image/jpeg")}
+    if rest:
+        back = rest[0]
+        files["label_back"] = (back.name, back.read_bytes(), "image/jpeg")
     started = time.monotonic()
     try:
         response = httpx.post(
@@ -276,13 +306,13 @@ def test_deployed_single_check_meets_the_five_second_budget(deploy_url):
 
     # The warm-up, thrown away: it pays for the container start and the model
     # load, and it leaves the service holding this submission's answer.
-    _warm_id, warm_front, warm_form = submissions[0]
-    _check_once(deploy_url, warm_front, warm_form)
+    _warm_id, warm_faces, warm_form = submissions[0]
+    _check_once(deploy_url, warm_faces, warm_form)
 
     measured: list[dict] = []
-    for label_id, front, form in submissions[1:]:
-        status, elapsed, page = _check_once(deploy_url, front, form)
-        measured.append(_row_from_page(label_id, status, elapsed, page))
+    for label_id, faces, form in submissions[1:]:
+        status, elapsed, page = _check_once(deploy_url, faces, form)
+        measured.append(_row_from_page(label_id, status, elapsed, page, len(faces)))
 
     record = _write_record(deploy_url, measured)
     summary = _summarise(measured)
