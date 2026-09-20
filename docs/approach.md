@@ -375,7 +375,14 @@ human verdict on each, swept against the thresholds. That has not been done.
 **One label is checked first, then the rest run behind it.** The reviewer gets a real result in
 seconds instead of a progress bar, and starts working while the remainder runs. The batch then paces
 itself against how fast they are actually reading, rather than racing ahead to compute results nobody
-has asked for.
+has asked for. Measured over twelve labels on the development box, that is
+what a batch buys and it is all it buys: the first result lands at 1.49 seconds, about what one
+label costs on its own, and the rest arrive roughly 1.12 seconds apart. Per label a batch is no
+dearer than a check alone — 1.16 seconds against 1.23 — and the engine's own time per label is the
+same either way, 1164 ms alone against 1179 ms inside the batch. A batch is a queue of the same
+work rather than a cheaper way to do it, and what it buys a reviewer is starting after one label
+instead of after twelve (`docs/evidence/2026-09-20-batch-latency-run1.json`; the seconds belong to
+that box, not to the deployed service).
 
 **What it refuses to take.** An upload is identified by its own first bytes, and anything that is
 not a PNG or a JPEG is turned away before the reader sees it; what the browser declares the file to
@@ -509,15 +516,38 @@ the back of 20 of the 30 corpus labels, so those fast answers reported a warning
 label carries. The page now takes a front and a back, the faces are read one after another, and the
 submissions carrying a back came in at a median of 5.55 and 4.95 seconds against 2.39 and 2.74 for
 the four that have only a front. We took the trade knowingly and we publish the number it cost.
-Reading the faces concurrently is the untried lever, and it is a larger change than it sounds: a
-running copy holds one reader and takes one image at a time, so asking for both faces at once would
-queue them rather than overlap them. Two levers have been tried and neither is the answer: more
-processor cores moved one check of thirty-eight, and the reading path itself has been tuned three
-times — most recently by reading a label's sideways strips before reading the whole label again,
-which took the slowest corpus read from 1345 ms to 463 ms on the development box
-([decision 0036](decisions.md#0036)). Earlier published shares of 87, 89, 71 and 92 percent stand
-as history only: they predate that tuning and a harness that could not tell a check the evaluation
-guard had blanked from a slow one ([decision 0035](decisions.md#0035)).
+
+**Reading the faces concurrently was the untried lever, and it has now been tried on the bench
+rather than in the product.** A running copy holds one reader and takes one image at a time behind a
+lock, so the change is lifting that lock and not merely asking for both faces together; we measured
+each shape it could take, in-process at the four threads the service runs, before building any of
+it. The cores turn out to be spoken for already. A single read keeps 3.69 of 4 cores busy, and the
+thread ladder says why: 1.198, 0.693 and 0.535 seconds per image at one, two and four engine
+threads is close to linear, so four cores are genuinely working and nothing is idle for a second
+read to take. Read at once, one label's two faces took 1.60 seconds where reading them in turn took
+1.38, and kept only 2.4 cores busy against 3.74 — the Python half of a read does not run alongside
+itself, so the concurrent shape loses more to contention than it wins. For the one check a reviewer
+is waiting on, the lever lengthens the wait it was meant to shorten, by about 16 percent.
+
+**Over a queue the sign flips, and the price is what decided it.** Twelve faces cost 0.535 seconds per
+image as built, 0.475 with two engines of two threads and 0.450 with four engines of one — 11 to 16
+percent better. The slowest single image goes from 1.10 seconds to 1.92 and then 3.45, and resident
+memory from 658 MB to 911 and 1267 MB against the service's 4 GiB. That is throughput bought with
+the wait of whichever label a reviewer happens to be watching, and with the headroom of a 4 GiB
+instance. The smallest version of the change is the worst of the lot: lifting the lock and leaving
+one shared engine gave 0.734 seconds per image, 37 percent worse than doing nothing. So the
+serialisation stays ([decision 0047](decisions.md#0047)), and the shapes compare on this box even
+though the seconds do not compare to the deployed service
+(`docs/evidence/2026-09-20-read-scaling.json`).
+
+**Three levers have been tried now, and none of them closes the requirement.** More processor
+cores moved one check of thirty-eight. Reading both faces at once costs the single check more than
+it saves. The reading path itself has been tuned three times — most recently by reading a label's
+sideways strips before reading the whole label again, which took the slowest corpus read from
+1345 ms to 463 ms on the development box ([decision 0036](decisions.md#0036)). Earlier published
+shares of 87, 89, 71 and 92 percent stand as history only: they predate that tuning and a harness
+that could not tell a check the evaluation guard had blanked from a slow one
+([decision 0035](decisions.md#0035)).
 
 **Two things we did not prove.** A reader cannot tell an unmeasured claim from a measured one by
 looking, so each is named:

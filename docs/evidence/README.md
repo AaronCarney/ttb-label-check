@@ -67,6 +67,49 @@ tests/test_deploy_healthz.py -k five_second`, whose record was copied here.
 Cited by decision 0044, which is about the page taking the back of the label and
 publishing what that cost.
 
+### `2026-09-20-batch-latency-run1.json` and `-run2.json`
+
+The two numbers a reviewer feels, measured twice over the same twelve corpus
+labels, both faces each. `alone` is one submission at a time with nothing else
+in the service — what a reviewer waits for after pressing check. `batch` is the
+same twelve sent together, where the wait is the first result and then the gap
+between results rather than the total. Both are timed from the `label-result`
+event on `/batches/{id}/stream`, which is the event the page itself waits on.
+`engine_total_duration_ms` is the service's own figure for the work, so the
+queueing can be told apart from the reading.
+
+Taken on the development box against a service started
+`OCR_NUM_THREADS=4 nice -n 19 taskset -c 0-3 uv run uvicorn app.main:app --port
+8123` — the shape the deployed service runs, on hardware about four times
+faster. Only the comparison between the two numbers transfers; the seconds do
+not. Produced by `nice -n 19 taskset -c 4-7 uv run python -m
+tools.measure_batch_latency --labels 12 --out <path>`. Cited by decision 0047,
+which is about leaving the read serialisation alone.
+
+### `2026-09-20-read-scaling.json`
+
+What reading two images at once would buy, measured before anything was built to
+do it. A running copy reads one image at a time behind `_read_lock`
+(`app/vision/local.py`), so the tool lifts that lock by calling `_read` directly
+and measures the shapes the change could take against the reader as it is.
+Three sections, each shape in its own process and repeated three times:
+
+- `thread_ladder`: one read at one, two and four engine threads, with
+  `cores_busy` — CPU seconds over wall seconds — saying how much of the machine
+  a single read already uses, which decides whether there is anything left for a
+  second read to take.
+- `one_label_two_faces`: the reviewer's wait for one check, read serially
+  against read at once.
+- `twelve_faces`: throughput over a batch, for the serial reader, for one shared
+  engine with the lock lifted, and for one engine per worker with the thread
+  budget split. Each carries `slowest_image_seconds` and `rss_mb` beside the
+  seconds per image, because the shapes that win on throughput lose on both.
+
+Produced one shape per invocation, each in a fresh process:
+`OCR_NUM_THREADS=4 nice -n 19 taskset -c 0-3 uv run python -m
+tools.measure_read_scaling --images N --threads 4 --only '<shape>'`, which is
+what the file's own `notes.how_it_was_produced` records. Cited by decision 0047.
+
 ## Re-measuring
 
 Every run here reads the corpus in `tests/fixtures/labels/` and the
@@ -77,3 +120,11 @@ that was live on the day: a later run on later code answers a different question
 rather than checking this one. Local OCR runs under the six-thread budget the
 project works to; a run at a different thread count gives different durations
 and the same readings.
+
+The three 2026-09-20 concurrency runs are the exception to the thread budget:
+they are measurements *of* the thread count, so they run at the four threads the
+service has and say so in the file. `2026-09-20-batch-latency-*.json` also takes
+its twelve labels through the product's own sample pack rather than off disk,
+and takes the first twelve by TTB ID because `GET /batches/sample.zip` draws its
+labels at random and two runs asking for twelve would otherwise read two
+different twelves.

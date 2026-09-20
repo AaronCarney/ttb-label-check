@@ -105,14 +105,23 @@ and an answer that was wrong about the warning on 19 of 29 real labels.
 Nothing was stopped early, nothing was answered out of the cache, and every check returned all
 seven fields, in both runs. These are slow checks, not blank ones.
 
-**What might close it.** The two faces are read one after another, and a running copy reads one
-image at a time: it holds a single OCR engine, and a second read waits for the first to finish
-(`app/vision/local.py`). Reading a submission's two faces at once therefore means lifting that
-serialisation rather than merely asking for both together, and whether that helps is a measurement
-nobody has taken. It is the next one to take, against both numbers that matter: the time a reviewer
-waits for one check, and the time each label takes inside a batch. Nothing here is tuned to make the number look better: the earlier runs of 87%, 89%,
-71% and 92% were taken on superseded code and on a harness that counted a check the evaluation
-guard had blanked as a slow one, which is why they are quoted as history rather than as figures
+**Reading both faces at once will not close it, and that is measured rather than assumed.** The
+two faces are read one after another, and a running copy reads one image at a time: it holds a
+single OCR engine, and a second read waits for the first to finish (`app/vision/local.py`). Reading
+both faces at once therefore means lifting that serialisation rather than merely asking for both
+together. One read already keeps 3.7 of 4 cores busy, so there is nothing idle for a second read to
+take. One label's two faces read at once took **16% longer** than read one after the other: it
+lengthens the wait it was meant to shorten. Over a queue of labels it is 11 to 16% faster per
+image, and it buys that with the slowest single image — 1.10 seconds as built against 1.92 or 3.45
+— and with memory, 658 MB against 911 or 1267 MB of the service's 4 GiB. The serialisation stays
+([decision 0047](docs/decisions.md#0047)). What is left is making a single read cheaper. Those
+figures were taken on the development box, which is about four times faster than the deployed
+service: the comparison between shapes carries over, the seconds do not
+(`docs/evidence/2026-09-20-read-scaling.json`).
+
+**Nothing here is tuned to make the number look better.** The earlier runs of 87%, 89%, 71% and 92%
+were taken on superseded code and on a harness that counted a check the evaluation guard had
+blanked as a slow one, which is why they are quoted as history rather than as figures
 ([decision 0035](docs/decisions.md#0035)).
 
 **Cores are not the lever.** Doubling the service to eight cores moved one check of thirty-eight,

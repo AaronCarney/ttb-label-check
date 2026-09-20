@@ -3002,3 +3002,74 @@ not; the one that mislinks is the one nobody tested.
 **Because** a reviewer deciding whether a label complies should be able to read the rule it is being
 held to, in the place they are deciding, and this product can now show them that wording without
 anybody having typed it.
+
+<a id="0047"></a>
+## 0047. The read serialisation stays: reading both faces at once lengthens the wait it should shorten
+
+**Evidence:** `app/vision/local.py` (`_read_lock`, `_read_serialised`);
+`tools/measure_read_scaling.py` and `docs/evidence/2026-09-20-read-scaling.json`;
+`tools/measure_batch_latency.py`, `docs/evidence/2026-09-20-batch-latency-run1.json` and
+`docs/evidence/2026-09-20-batch-latency-run2.json`; [0044](#0044), which named this measurement as
+the next one to take; [0025](#0025), [0035](#0035).
+
+**What was asked.** [0044](#0044) published a missed five-second requirement and named one untried
+lever: a check reads the label's two faces one after another, and a running copy reads one image at
+a time — a single OCR engine behind `_read_lock`, where a second read waits for the first. Reading
+both faces at once means lifting that lock, not merely issuing both reads together. Whether that
+helps was unmeasured, against either number that matters: the time a reviewer waits for one check,
+and the time each label costs inside a batch.
+
+**Chosen.** `_read_lock` stays and the reader keeps reading one image at a time. The measurement
+was taken first, in-process on the development box at the four threads the service runs, with each
+shape in its own process and repeated three times. Every figure below is a median from
+`docs/evidence/2026-09-20-read-scaling.json`.
+
+**The cores are already spoken for.** One read at four engine threads keeps **3.69 of 4 cores**
+busy. The ladder says the same from the other side: **1.198 s, 0.693 s and 0.535 s** per image at
+one, two and four threads is close to linear, so four cores are genuinely working and there is no
+idle capacity for a concurrent read to occupy. Every shape below is therefore dividing the same
+machine rather than finding more of it.
+
+**For one check it is worse.** One label's two faces read at once took **1.60 s** against **1.38 s**
+read one after the other, and kept only **2.4 cores** busy against **3.74**: the Python half of a
+read does not run alongside itself, so the concurrent shape gives up more to contention than it
+wins. The lever named to shorten a reviewer's wait lengthens it by about **16%**. That is the
+number R15/NFR-1 is about, and it settles the question on its own.
+
+**For a queue it is 11–16% better, and the price is the single wait.** Twelve faces cost **0.535 s**
+per image as built, **0.475 s** with two engines of two threads, **0.450 s** with four engines of
+one. The slowest single image goes from **1.10 s** to **1.92 s** and **3.45 s**, and resident
+memory from **658 MB** to **911 MB** and **1267 MB** against the service's 4 GiB. Throughput is
+bought with the wait of whichever label a reviewer is watching, and with the headroom of a 4 GiB
+instance ([0025](#0025)).
+
+**The smallest version of the change is the worst one.** Lifting the lock and leaving one shared
+engine — the one-line change, and the one a reader of `app/vision/local.py` would reach for first —
+gave **0.734 s** per image, **37% worse than doing nothing**. It is recorded here so nobody tries
+it again on the grounds that it looked cheap.
+
+**A batch is a queue of the same work, and that is all it is.** The other run answers the second
+number. Over twelve labels, both faces each, a check on its own took **1.23 s and 1.21 s** across
+two runs, and a label inside a batch of twelve took **1.16 s and 1.14 s**. The first result lands
+at **1.49 s and 1.50 s** — about what one label costs — and results arrive **1.12 s and 1.10 s**
+apart. The engine's own time per label is the same either way (**1164 ms** alone against
+**1179 ms** in the batch, run 1). So a batch neither costs a label anything nor saves it anything;
+what it buys a reviewer is starting after one label instead of after twelve
+([0041](#0041), [0045](#0045)).
+
+**Rejected.** *One engine per worker with the thread budget split* — the only shape that improves
+throughput, and it triples the slowest single image and doubles the memory to do it. *One shared
+engine with the lock lifted* — worse than doing nothing, and it also drops the guarantee the lock
+provides, that an engine which does not promise to be called from two threads at once never is.
+*Issuing both face reads together without lifting the lock* — measures the lock and reports no
+improvement for the wrong reason. *More cores* — already rejected: doubling the service to eight
+moved one check of thirty-eight ([0044](#0044)).
+
+**These seconds are not figures about the product.** The development box reads a label in about
+1.2 s where the deployed service takes about 5 s. Only the comparisons between shapes transfer.
+The product's own latency figures are the deployed ones in `README.md` and [0044](#0044).
+
+**Because** the requirement is about the wait a reviewer sits through for one check, and the only
+change available makes that wait longer while buying throughput nobody has asked for. What is left
+is making a single read cheaper, which is where the reading path's three tunings already went
+([0036](#0036)).
