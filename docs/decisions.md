@@ -1861,7 +1861,8 @@ but the Worker before a request is billed, and the two-instance cap in `scripts/
 <a id="0030"></a>
 ## 0030. A file that is not an image is refused by name inside the batch, not by rejecting the batch
 
-**Evidence:** `app/api/ui/bulk_upload.py` as it stood; requirement R13;
+**Evidence:** `app/api/ui/submit.py`, which carries this behaviour now — it was written in
+*app/api/ui/bulk_upload.py*, the module [0045](#0045) merged away; requirement R13;
 [0020](#0020), which removed the premise the old behaviour rested on.
 
 **What was wrong.** `POST /batches/upload` read every uploaded file, and the first one whose bytes
@@ -2063,8 +2064,10 @@ of telemetry by a list of field names.
 ## 0033. A single label's result is kept, so a reviewer can overrule it
 
 **Evidence:** `app/api/overrides.py` as it stood, which searched
-`app.state.batches` and nothing else; `app/api/ui/_result_page.py`, which evaluated and kept only the
-image; [0018](#0018), which settled where an uploaded image is kept and why.
+`app.state.batches` and nothing else; `app/api/ui/results.py`, the store this entry added — the
+route that used to evaluate a single label and keep only its image was
+*app/api/ui/_result_page.py*, which [0045](#0045) deleted; [0018](#0018), which settled where an
+uploaded image is kept and why.
 
 **What was wrong.** The override endpoint answered 404 for every single-label check, always. It looks
 an evaluation up by walking the in-flight batches, and a single label is in no batch: the result page
@@ -2730,7 +2733,8 @@ behind it.
 <a id="0043"></a>
 ## 0043. The batch carries the applications too, as one CSV, and the sample pack ships both halves
 
-**Evidence:** `app/api/ui/_application_csv.py`; `app/api/ui/bulk_upload.py`;
+**Evidence:** `app/api/ui/_application_csv.py`; `app/api/ui/submit.py`, which took over the
+upload route this entry describes as *app/api/ui/bulk_upload.py* ([0045](#0045));
 `app/api/ui/samples.py` (`applications_csv_for`); `tests/test_batch_checks_against_applications.py`;
 [0010](#0010), [0019](#0019), [0020](#0020).
 
@@ -2798,8 +2802,9 @@ half of the job the brief is not about.
 <a id="0044"></a>
 ## 0044. The page takes the back of the label, and the five-second share is published as what that costs
 
-**Evidence:** `app/ui/templates/single.html`; `app/api/ui/single_upload.py`;
-`tests/test_single_page_offers_the_back.py`; `tests/test_deploy_healthz.py`;
+**Evidence:** `app/ui/templates/check.html` and `app/api/ui/submit.py` — the page and the route
+this entry describes as *single.html* and *single_upload.py*, renamed and merged by
+[0045](#0045); `tests/test_single_page_offers_the_back.py`; `tests/test_deploy_healthz.py`;
 `docs/evidence/2026-09-20-five-second-both-faces-run1.json` and
 `docs/evidence/2026-09-20-five-second-both-faces-run2.json` (the two runs, row by row);
 [0005](#0005), [0035](#0035), [0036](#0036).
@@ -2833,3 +2838,70 @@ label takes inside a batch, and both are the measurement to take.
 **Because** a check that answers in three seconds about the wrong half of the label is not a faster
 product, it is a wrong one. The requirement is missed and the number saying so is published beside
 the requirement, rather than the number being kept by not sending the back.
+
+<a id="0045"></a>
+## 0045. One system: every check is a batch, including a batch of one
+
+**Evidence:** `app/api/ui/submit.py`; `app/api/ui/shells.py`; `app/ui/templates/check.html`;
+`app/ui/templates/results.html`; `frontend/src/app.tsx`;
+`frontend/src/components/LabelResult.tsx`; `tests/test_ui_routes.py`;
+`tests/test_one_batch_at_a_time.py`; `tests/test_single_page_offers_the_back.py`;
+[0019](#0019), [0020](#0020), [0041](#0041), [0043](#0043), [0044](#0044).
+
+**What was wrong.** There were two products in one repository. `GET /` took one label and answered
+with a server-rendered result page; `GET /batches` took a folder and answered with a table a
+reviewer clicked into. A reviewer had to decide which of two systems they were in before they had
+checked anything, and the two answered differently about the same label: the single page rendered
+its result into the HTML, the batch page streamed it into a React island, and every capability had
+to be built twice or be missing from one of them. The multi-face work landed on the single page and
+not the batch page ([0044](#0044)); the applications CSV landed on the batch page and not the single
+page ([0043](#0043)). Each fix widened the gap it was fixing.
+
+Nothing underneath was ever split. The engine has always been handed one `(application, label)`
+pair at a time, and the batch worker has always broadcast each label's result the moment it landed
+rather than holding the first one back. The split was in the interface alone.
+
+**Chosen.** One form and one results page. `GET /` is the only way in, for one label or three
+hundred. `POST /` always starts a batch — a batch of one is a batch — and always answers `303` to
+`/batch/{batch_id}`. That page mounts the island, which subscribes to the result stream, **opens
+the first result the moment it arrives**, and lists the rest only when there is a rest. So the
+reviewer reads one graded label while the others are still being checked, which is what the owner
+asked for: one graded item per moment, and the whole batch processed.
+
+`POST /samples/{sample_id}` takes the same path — `launch_batch`, then the same redirect — so a
+shipped sample and a reviewer's own upload cannot demonstrate different behaviour. `GET /batches`
+is kept as a 308 redirect to `/`, because it is the URL the deployed service has been handing out
+and a bookmark that 404s tells a reviewer the product is broken when what happened is that it got
+simpler.
+
+**What it costs, both accepted.**
+
+*A single label can now be refused.* Admission allows one batch at a time ([0041](#0041)), and a
+single-label check is a batch, so a reviewer submitting one label while a 300-label batch runs is
+told to wait. Before this entry that reviewer was never refused — the single path ran outside
+admission entirely, which is to say it ran outside the one-batch-at-a-time guarantee and could put a
+second OCR load on a machine already committed to one. The refusal is the honest form of a limit
+that was always there; hiding it on one of two paths was the defect.
+`tests/test_one_batch_at_a_time.py::test_one_label_waits_for_a_running_batch_too` pins it.
+
+*Two photographs of one label need a tick.* Files pair into faces by name — `<stem>-front` and
+`<stem>-back` (`app/api/ui/_faces.py`) — and a reviewer who photographed both faces on a phone has
+`IMG_4417.jpg` and `IMG_4418.jpg`, which nothing can pair. So the form offers *These images are all
+faces of one label*, the `one_label` field, and `app/api/ui/submit.py::_as_one_label` places every
+uploaded image on one label in the order it was picked. Renaming files is not a thing to ask of
+someone checking one label.
+
+**Rejected.** *Keep both pages and share components between them* — that is what was already being
+attempted, and it is what produced a multi-face single page and a multi-face-blind batch page. Two
+surfaces drift whatever they share, because each fix is applied where it was noticed. *Make the
+batch page a list and keep the single page for one label* — a reviewer with one label and a reviewer
+with three hundred want the same thing first, which is the first graded label; a list is a worse
+answer to both. *Render the one-label result server-side and stream only batches* — one result, two
+renderers, and the server-rendered one cannot show a result that is still arriving.
+
+**The results island keeps the batch table for when there is a batch.** A submission of one renders
+no table at all — there is nothing to list — which is why `tests/test_a11y_axe.py` no longer carries
+the empty-table case it used to.
+
+**Because** a reviewer should not have to know which of a product's two halves they are in. There is
+one system, it presents one graded item per moment, and the whole batch is processed.

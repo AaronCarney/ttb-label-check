@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+{% block title %}Check labels — TTB Label Verification{% endblock %}
+{% block content %}
+  {# The only way in. One label or three hundred go through the same form and
+     the same check; what differs is how the applications arrive, and the form
+     says so where it asks. #}
+  <section class="empty-inbox" aria-labelledby="empty-inbox-heading">
+    <h2 id="empty-inbox-heading">Check a label against its application</h2>
+    <p class="empty-inbox-lead">
+      Upload one label or a folder of them. Each is checked against the
+      application filed for it, and the first result opens as soon as it is
+      ready while the rest are still running.
+    </p>
+  </section>
+
+  {% if upload_error %}
+  <div role="alert" class="upload-error">
+    {{ upload_error }}
+    {% if upload_error_items %}
+    <ul>
+      {% for item in upload_error_items %}<li>{{ item }}</li>{% endfor %}
+    </ul>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  <form action="/" method="post" enctype="multipart/form-data" class="upload-form" aria-label="Upload labels to check">
+    <fieldset class="label-faces">
+      <legend>The label photographs (PNG or JPEG)</legend>
+      <p class="application-fields-hint">
+        A COLA is filed with every face of the label and the mandatory elements
+        are spread across them — the government warning is usually printed on
+        the back — so send every face you have. A front on its own is still a
+        whole submission, and the check is then honestly a check of what you
+        showed: the warning is reported missing because it is not on the
+        photograph.
+      </p>
+      <div class="label-face-field">
+        <label for="label-upload" class="upload-form-label">Label images</label>
+        <div class="dropzone">
+          <input id="label-upload" type="file" name="labels" accept="image/png,image/jpeg,text/csv,.csv" multiple required />
+        </div>
+      </div>
+      <div class="application-field">
+        <input id="one-label" type="checkbox" name="one_label" value="1" />
+        <label for="one-label">These images are all faces of one label</label>
+      </div>
+      <p class="face-pairing-hint">
+        Leave that unticked and each image is its own label, unless two are
+        named <code>anything-front.jpg</code> and <code>anything-back.jpg</code>
+        — same stem, different suffix — in which case they are checked together
+        as one label.
+      </p>
+      <p class="sample-batch-hint">
+        Don&rsquo;t have label images?
+        <a href="/batches/sample.zip" download>Download a 10-label sample</a>
+        pulled from the TTB Public COLA Registry (CC0), with the applications
+        filed for them in <code>applications.csv</code>. Unzip it and select
+        everything &mdash; images and CSV together &mdash; in the picker above.
+        Its files are already named for pairing, so the labels that have two
+        faces arrive as two faces.
+      </p>
+    </fieldset>
+
+    {% set app_form = application_form or {} %}
+    <fieldset class="application-fields">
+      <legend>The application filed for this label</legend>
+      <p class="application-fields-hint">
+        The check compares the label against the application. Fill in what the
+        application declares; a field left empty is not checked, and the label
+        is still checked for what every label must carry.
+      </p>
+      <p class="application-fields-hint">
+        <strong>Uploading more than one label?</strong> These typed fields
+        describe one label, so only the beverage type is used — it decides
+        which rule pack runs at all. Send the rest as a CSV below, one row per
+        label.
+      </p>
+      <div class="application-field">
+        <label for="app-beverage-type">Beverage type</label>
+        <select id="app-beverage-type" name="beverage_type" required>
+          <option value="" {{ 'selected' if not app_form.get('beverage_type') }}>Choose one</option>
+          <option value="distilled_spirits" {{ 'selected' if app_form.get('beverage_type') == 'distilled_spirits' }}>Distilled spirits</option>
+          <option value="wine" {{ 'selected' if app_form.get('beverage_type') == 'wine' }}>Wine</option>
+          <option value="malt_beverage" {{ 'selected' if app_form.get('beverage_type') == 'malt_beverage' }}>Malt beverage</option>
+        </select>
+      </div>
+      <div class="application-field">
+        <label for="app-brand-name">Brand name</label>
+        <input id="app-brand-name" type="text" name="brand_name" value="{{ app_form.get('brand_name', '') }}" autocomplete="off" />
+      </div>
+      <div class="application-field">
+        <label for="app-fanciful-name">Fanciful name, if the application gives one</label>
+        <input id="app-fanciful-name" type="text" name="fanciful_name" value="{{ app_form.get('fanciful_name', '') }}" autocomplete="off" />
+      </div>
+      <div class="application-field">
+        <label for="app-class-type">Class or type, for example Kentucky Straight Bourbon Whiskey</label>
+        <input id="app-class-type" type="text" name="class_type" value="{{ app_form.get('class_type', '') }}" autocomplete="off" />
+      </div>
+      <div class="application-field">
+        <label for="app-alcohol-content">Alcohol content, as the application words it, for example 40% ALC/VOL</label>
+        <input id="app-alcohol-content" type="text" name="alcohol_content" value="{{ app_form.get('alcohol_content', '') }}" autocomplete="off" />
+      </div>
+      <div class="application-field">
+        <label for="app-net-contents">Net contents, as the application words it, for example 750 mL</label>
+        <input id="app-net-contents" type="text" name="net_contents" value="{{ app_form.get('net_contents', '') }}" autocomplete="off" />
+      </div>
+      <div class="application-field">
+        <label for="app-name-address">Applicant name and address</label>
+        <input id="app-name-address" type="text" name="applicant_name_address" value="{{ app_form.get('applicant_name_address', '') }}" autocomplete="off" />
+      </div>
+      <div class="application-field">
+        <label for="app-source">Where the product comes from</label>
+        <select id="app-source" name="source_of_product">
+          <option value="" {{ 'selected' if not app_form.get('source_of_product') }}>Not stated</option>
+          <option value="domestic" {{ 'selected' if app_form.get('source_of_product') == 'domestic' }}>Domestic</option>
+          <option value="imported" {{ 'selected' if app_form.get('source_of_product') == 'imported' }}>Imported</option>
+        </select>
+      </div>
+      <div class="application-field">
+        <label for="app-origin">Country of origin, for an imported product</label>
+        <input id="app-origin" type="text" name="origin" value="{{ app_form.get('origin', '') }}" autocomplete="off" />
+      </div>
+      <div class="application-field">
+        <label for="app-wine-appellation">Appellation of origin, for a wine</label>
+        <input id="app-wine-appellation" type="text" name="wine_appellation" value="{{ app_form.get('wine_appellation', '') }}" autocomplete="off" />
+      </div>
+    </fieldset>
+
+    <fieldset class="application-fields">
+      <legend>The applications, as a CSV, for more than one label</legend>
+      <div class="application-field">
+        <label for="bulk-applications">Applications CSV (optional)</label>
+        <input id="bulk-applications" type="file" name="applications" accept="text/csv,.csv" />
+      </div>
+      <p class="application-fields-hint">
+        One row per label. The first column is the image filename &mdash;
+        <code>26230001000420</code> matches both
+        <code>26230001000420-front.jpg</code> and its back &mdash; and the rest
+        are the ten application fields:
+        <code>beverage_type</code>, <code>brand_name</code>,
+        <code>fanciful_name</code>, <code>class_type</code>,
+        <code>alcohol_content</code>, <code>net_contents</code>,
+        <code>applicant_name_address</code>, <code>source_of_product</code>,
+        <code>origin</code>, <code>wine_appellation</code>. A blank cell means
+        the application declared nothing for that element, and the check
+        against it reports that it does not apply.
+      </p>
+      <p class="application-fields-hint">
+        A label the CSV has no row for is still read and still checked for what
+        every label must carry, and its result says nothing was compared. The
+        beverage type above applies to those labels.
+      </p>
+    </fieldset>
+
+    <div class="upload-form-actions">
+      <button type="submit" class="primary-button">Check</button>
+    </div>
+  </form>
+{% endblock %}

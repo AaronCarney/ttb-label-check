@@ -1,10 +1,9 @@
 """Upload size limits: what the service will accept before it reads anything.
 
-Nothing bounded an upload before this. No byte cap on any of the four upload
-paths, no `Content-Length` check, no body-size middleware — and
-`app/api/ui/bulk_upload.py` reads every file in a batch into memory before it
-looks at any of them. A single request could therefore decide how much memory
-the instance spends.
+Nothing bounded an upload before this. No byte cap on any upload path, no
+`Content-Length` check, no body-size middleware — and `app/api/ui/submit.py`
+reads every file in a submission into memory before it looks at any of them. A
+single request could therefore decide how much memory the instance spends.
 
 The numbers are derived in `app/api/limits.py` from three measured constraints,
 and the first test here pins that derivation: a limit nobody can trace back to a
@@ -179,7 +178,7 @@ def test_post_labels_refuses_an_oversized_image_by_name(
     assert "big.png" in body["message"] or "big.png" in json.dumps(body["details"])
 
 
-def test_the_single_upload_page_refuses_an_oversized_image(
+def test_the_upload_form_refuses_an_oversized_image(
     client, monkeypatch, deterministic_seams
 ) -> None:
     """The browser path answers in the page's own words, not a JSON envelope:
@@ -187,19 +186,21 @@ def test_the_single_upload_page_refuses_an_oversized_image(
     monkeypatch.setattr(limits, "MAX_UPLOAD_BYTES", 2048)
     response = client.post(
         "/",
-        files={"label": ("big.png", _png(4096), "image/png")},
+        files={"labels": ("big.png", _png(4096), "image/png")},
         data={"beverage_type": "distilled_spirits"},
     )
     assert response.status_code == 413
     assert "big.png" in response.text
 
 
-def test_the_bulk_upload_page_refuses_an_oversized_image(
+def test_the_upload_form_names_the_oversized_file_among_several(
     client, monkeypatch, deterministic_seams
 ) -> None:
+    """The refusal names the file that was too big, not the submission. One
+    label or several take the same route, so the naming has to survive a set."""
     monkeypatch.setattr(limits, "MAX_UPLOAD_BYTES", 2048)
     response = client.post(
-        "/batches/upload",
+        "/",
         files=[
             ("labels", ("ok.png", _png(64), "image/png")),
             ("labels", ("big.png", _png(4096), "image/png")),
@@ -218,7 +219,7 @@ def test_the_bulk_upload_page_refuses_an_oversized_image(
 def test_a_batch_over_the_file_count_is_refused(client, monkeypatch, deterministic_seams) -> None:
     monkeypatch.setattr(limits, "MAX_BATCH_FILES", 3)
     response = client.post(
-        "/batches/upload",
+        "/",
         files=[("labels", (f"l{i}.png", _png(64), "image/png")) for i in range(4)],
         data={"beverage_type": "distilled_spirits"},
     )
@@ -231,7 +232,7 @@ def test_a_batch_at_the_file_count_is_accepted(client, monkeypatch, deterministi
     """The cap is the largest batch accepted, not the first refused."""
     monkeypatch.setattr(limits, "MAX_BATCH_FILES", 3)
     response = client.post(
-        "/batches/upload",
+        "/",
         files=[("labels", (f"l{i}.png", _png(64), "image/png")) for i in range(3)],
         data={"beverage_type": "distilled_spirits"},
         follow_redirects=False,

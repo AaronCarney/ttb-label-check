@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Results — TTB Label Verification{% endblock %}
+{% block content %}
+  {# One graded label at a time, and the whole submission processed behind it.
+     The island opens the first result the moment it arrives. #}
+  <div id="root" data-batch-id="{{ batch_id }}">
+    <p>Checking. The first result appears here as soon as it is ready…</p>
+  </div>
+{% endblock %}
+{% block page_script %}
+  <script type="module" src="/static/island/app.js"></script>
+{% endblock %}

@@ -14,9 +14,19 @@ the pack into the same form their own labels go through.
 What these tests hold is what makes the route worth keeping: it checks a real
 shipped image against the application really filed for that label, and it runs
 the same path a reviewer's own upload runs rather than a path of its own.
+
+"The same path" is now literal: the route starts a batch of one through
+`launch_batch` and answers with a redirect to the results page, exactly as
+`POST /` does (`docs/decisions.md#0045`). Nothing about the result is in the
+reply any more — the page is a shell and the result arrives over the stream —
+so these read the check's own record rather than the HTML. What the page then
+draws from that record is `frontend/src/components/`'s own tests and the
+browser suites.
 """
 
 from __future__ import annotations
+
+import time
 
 import pytest
 from fastapi.testclient import TestClient
@@ -47,7 +57,28 @@ def recorder():
 def client(recorder):
     app = create_app()
     app.dependency_overrides[_get_upload_evaluator] = lambda: recorder
-    return TestClient(app)
+    # Entered as a context manager: the check runs as a background task on the
+    # app's own loop, and a bare TestClient tears that loop down between
+    # requests.
+    with TestClient(app) as entered:
+        yield entered
+
+
+def _check_sample(client, sample_id: str) -> list[dict]:
+    """Check one shipped sample and return its batch's finished items."""
+    response = client.post(f"/samples/{sample_id}", follow_redirects=False)
+    assert response.status_code == 303, response.text
+    location = response.headers["location"]
+    assert location.startswith("/batch/"), location
+    batch_id = location.removeprefix("/batch/")
+    deadline = time.monotonic() + 20.0
+    items: list[dict] = []
+    while time.monotonic() < deadline:
+        items = client.get(f"/batches/{batch_id}").json()["items"]
+        if items and all(item["state"] in ("ready", "failed") for item in items):
+            return items
+        time.sleep(0.02)
+    raise AssertionError(f"batch {batch_id} did not finish")
 
 
 # One shipped label, named here rather than taken from a list, because these
@@ -60,16 +91,15 @@ _ANY_SAMPLE = "ttb-26236001000652"
 # ---------------------------------------------------------------------------
 
 
-def test_checking_a_sample_returns_a_result_page(client):
-    sample_id = _ANY_SAMPLE
-    response = client.post(f"/samples/{sample_id}")
-    assert response.status_code == 200
-    assert 'id="envelope"' in response.text, "the page carries no envelope to render"
+def test_checking_a_sample_starts_a_check_and_sends_the_reviewer_to_it(client):
+    items = _check_sample(client, _ANY_SAMPLE)
+    assert len(items) == 1, items
+    assert items[0]["state"] == "ready", items[0]
+    assert items[0]["result"] is not None, "the check produced no result to show"
 
 
 def test_checking_a_sample_sends_the_real_image_to_the_evaluator(client, recorder):
-    sample_id = _ANY_SAMPLE
-    client.post(f"/samples/{sample_id}")
+    _check_sample(client, _ANY_SAMPLE)
     assert len(recorder.calls) == 1
     _, label = recorder.calls[0]
     assert label.faces[0].content_type in {"image/jpeg", "image/png"}
@@ -82,7 +112,7 @@ def test_checking_a_sample_sends_the_application_filed_for_that_label(client, re
     nothing to compare and the reviewer learns nothing."""
     sample_id = "ttb-26239001000132"  # imported wine: the widest set of fields
     entry = _manifest_entries()[sample_id]
-    client.post(f"/samples/{sample_id}")
+    _check_sample(client, sample_id)
     application, _ = recorder.calls[0]
 
     expected = {e.field_id: e.value for e in application.expected_values}
@@ -91,20 +121,43 @@ def test_checking_a_sample_sends_the_application_filed_for_that_label(client, re
     assert expected.get("country_of_origin") == entry["application"]["origin"]
 
 
-def test_the_result_page_shows_the_application_it_used(client):
-    """A reviewer has to be able to see what the label was checked against,
-    or a pass means nothing to them."""
-    sample_id = "ttb-26239001000132"
-    response = client.post(f"/samples/{sample_id}")
+def test_every_value_the_manifest_files_reaches_the_check(client, recorder):
+    """A reviewer has to be able to see what the label was checked against, or
+    a pass means nothing to them — and they see it field by field, so every
+    field the manifest files has to arrive, not a representative two.
+
+    Three of the ten the route posts are not reference values and are not
+    expected here: `beverage_type` picks the rule pack rather than being
+    compared, and no rule compares a fanciful name or whether the product was
+    imported.
+    """
+    sample_id = "ttb-26239001000132"  # imported wine: the widest set of fields
+    _check_sample(client, sample_id)
+    application, _ = recorder.calls[0]
+
     posted = _posted_from(_manifest_entries()[sample_id])
-    assert f'value="{posted["brand_name"]}"' in response.text
-    assert f'value="{posted["origin"]}"' in response.text
+    expected = {entry.field_id: entry.value for entry in application.expected_values}
+    assert expected == {
+        "brand_name": posted["brand_name"],
+        "class_type": posted["class_type"],
+        "alcohol_content": posted["alcohol_content"],
+        "net_contents": posted["net_contents"],
+        "name_and_address": posted["applicant_name_address"],
+        "country_of_origin": posted["origin"],
+        "wine_appellation": posted["wine_appellation"],
+    }
 
 
-def test_the_result_page_shows_the_label_image(client):
-    sample_id = _ANY_SAMPLE
-    response = client.post(f"/samples/{sample_id}")
-    assert "/image" in response.text, "the result page shows no label image"
+def test_the_sample_label_image_is_there_for_the_page_to_show(client):
+    """The result names an evaluation, and the photographs it was read from
+    have to be fetchable under that name or the page renders a broken figure.
+    """
+    items = _check_sample(client, _ANY_SAMPLE)
+    evaluation_id = items[0]["result"]["evaluation_id"]
+    faces = client.get(f"/labels/{evaluation_id}/faces").json()["faces"]
+    assert faces, "the check kept no photograph for its own result page"
+    for face in faces:
+        assert client.get(face["url"]).status_code == 200, face["url"]
 
 
 # ---------------------------------------------------------------------------
@@ -135,19 +188,35 @@ def test_a_sample_id_cannot_name_a_file_outside_the_samples_directory(client):
         assert client.post(f"/samples/{probe}").status_code in {404, 405}
 
 
-def test_the_sample_route_and_the_upload_route_render_the_same_shell(client):
+def test_the_sample_route_and_the_upload_route_land_on_the_same_page(client):
     """One result page, not two. If these diverge, a reviewer's own upload stops
-    demonstrating what the sample demonstrated."""
-    sample_id = _ANY_SAMPLE
-    sample_page = client.post(f"/samples/{sample_id}")
-    upload_page = client.post(
+    demonstrating what the sample demonstrated.
+
+    They are compared by the page each redirect lands on, with the batch id
+    taken out — that id is the only thing about the two pages that may differ.
+    """
+    _check_sample(client, _ANY_SAMPLE)
+
+    upload = client.post(
         "/",
-        files={"label": ("x.jpg", _jpeg_bytes(), "image/jpeg")},
+        files={"labels": ("x.jpg", _jpeg_bytes(), "image/jpeg")},
         data={"beverage_type": "distilled_spirits"},
+        follow_redirects=False,
     )
-    for marker in ('id="root"', 'data-mode="single"', 'id="envelope"'):
-        assert marker in sample_page.text
-        assert marker in upload_page.text
+    assert upload.status_code == 303, upload.text
+    upload_batch = upload.headers["location"].removeprefix("/batch/")
+
+    sample = client.post(f"/samples/{_ANY_SAMPLE}", follow_redirects=False)
+    assert sample.status_code == 303, sample.text
+    sample_batch = sample.headers["location"].removeprefix("/batch/")
+
+    def _shell(batch_id: str) -> str:
+        page = client.get(f"/batch/{batch_id}")
+        assert page.status_code == 200
+        assert 'id="root"' in page.text, "the results page mounts no island"
+        return page.text.replace(batch_id, "{batch_id}")
+
+    assert _shell(sample_batch) == _shell(upload_batch)
 
 
 def _jpeg_bytes() -> bytes:

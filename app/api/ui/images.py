@@ -169,6 +169,42 @@ def _get_image_store() -> UploadImageStore:
     return _store
 
 
+# What each face is called on the page. The tag is the engine's word; this is
+# the reviewer's.
+FACE_CAPTIONS = {
+    "front": "Front",
+    "back": "Back",
+    "neck": "Neck",
+    "side": "Side",
+}
+
+
+@router.get("/labels/{eval_id}/faces")
+async def upload_label_faces(
+    eval_id: str,
+    store: UploadImageStore = Depends(_get_image_store),
+) -> dict:
+    """Which photographs of this evaluation's label the store holds, front first.
+
+    The results page asks before it renders any, because the only other way to
+    find out is to request an image and see whether it 404s, which puts a
+    broken picture on the page of a product whose job is to be trusted. A label
+    whose images have passed their retention window answers with an empty list
+    rather than 404: the evaluation is real, and it is its photographs that are
+    gone.
+    """
+    return {
+        "faces": [
+            {
+                "tag": tag,
+                "caption": FACE_CAPTIONS.get(tag, tag.title()),
+                "url": f"/labels/{eval_id}/image?face={tag}",
+            }
+            for tag in store.faces(eval_id)
+        ]
+    }
+
+
 @router.get("/labels/{eval_id}/image")
 async def upload_label_image(
     eval_id: str,

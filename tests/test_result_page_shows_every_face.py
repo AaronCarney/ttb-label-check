@@ -9,11 +9,20 @@ convince, whatever the envelope underneath it says.
 The store has held every face since the sample and upload routes started
 sending them. What was missing was anything asking it what it had:
 `UploadImageStore.faces()` had no caller at all.
+
+The caller is now `GET /labels/{eval_id}/faces`, which the results island asks
+before it renders any photograph (`docs/decisions.md#0045`). The guard is
+therefore in two halves, and this is the server's: every face the check was
+made from is offered, each with a caption of its own and a URL that really
+loads. The other half — one `<img>` per offered face, each with alt text a
+screen reader user can tell apart — is
+`frontend/src/components/LabelResult.test.tsx`, because nothing about it
+reaches the server any more.
 """
 
 from __future__ import annotations
 
-import re
+import time
 from io import BytesIO
 from pathlib import Path
 
@@ -35,103 +44,106 @@ def _png(colour: tuple[int, int, int]) -> bytes:
 
 
 @pytest.fixture
-def client(tmp_path: Path) -> TestClient:
+def client(tmp_path: Path):
     app = create_app()
     app.state.envelope = _stub_disposition_envelope(7, disposition="needs_review")
-    app.dependency_overrides[_get_upload_evaluator] = lambda: FakeEvaluator(
-        [(0.0, app.state.envelope)]
-    )
+    evaluator = FakeEvaluator([(0.0, app.state.envelope)])
+    app.dependency_overrides[_get_upload_evaluator] = lambda: evaluator
     app.dependency_overrides[_get_image_store] = lambda: UploadImageStore(tmp_path)
-    return TestClient(app)
+    # Entered as a context manager: the check runs as a background task on the
+    # app's own loop, and the images are filed as each result lands.
+    with TestClient(app) as entered:
+        yield entered
 
 
-def _image_sources(html: str) -> list[str]:
-    return re.findall(r'<img src="([^"]+)"', html)
+def _await_batch(client: TestClient, response) -> None:
+    """Wait for the check the POST started to finish."""
+    assert response.status_code == 303, response.text
+    batch_id = response.headers["location"].removeprefix("/batch/")
+    deadline = time.monotonic() + 10.0
+    while time.monotonic() < deadline:
+        items = client.get(f"/batches/{batch_id}").json()["items"]
+        if items and all(item["state"] in ("ready", "failed") for item in items):
+            return
+        time.sleep(0.02)
+    raise AssertionError(f"batch {batch_id} did not finish")
 
 
-def test_a_front_and_a_back_both_appear_on_the_page(client: TestClient) -> None:
-    response = client.post(
-        "/",
-        files={
-            "label": ("front.png", _png((0, 0, 0)), "image/png"),
-            "label_back": ("back.png", _png((255, 255, 255)), "image/png"),
-        },
+def _check_two_faces(client: TestClient) -> list[dict]:
+    """Check one label with a front and a back; return the faces offered."""
+    _await_batch(
+        client,
+        client.post(
+            "/",
+            files=[
+                ("labels", ("lucy-front.png", _png((0, 0, 0)), "image/png")),
+                ("labels", ("lucy-back.png", _png((255, 255, 255)), "image/png")),
+            ],
+            data={"beverage_type": "distilled_spirits"},
+            follow_redirects=False,
+        ),
     )
-    assert response.status_code == 200
-
     evaluation_id = client.app.state.envelope.evaluation_id
-    sources = _image_sources(response.text)
+    return client.get(f"/labels/{evaluation_id}/faces").json()["faces"]
+
+
+def test_a_front_and_a_back_are_both_offered(client: TestClient) -> None:
+    evaluation_id = client.app.state.envelope.evaluation_id
+    sources = [face["url"] for face in _check_two_faces(client)]
     assert f"/labels/{evaluation_id}/image?face=front" in sources
     assert f"/labels/{evaluation_id}/image?face=back" in sources
 
 
 def test_both_photographs_really_load(client: TestClient) -> None:
-    """A URL on the page that 404s is the same broken page with extra steps."""
-    front, back = _png((0, 0, 0)), _png((255, 255, 255))
-    response = client.post(
-        "/",
-        files={
-            "label": ("front.png", front, "image/png"),
-            "label_back": ("back.png", back, "image/png"),
-        },
-    )
-
+    """A URL the page renders that 404s is the same broken page with extra
+    steps, and two URLs serving one photograph is the original fault wearing a
+    second `<img>`."""
     fetched = {}
-    for source in _image_sources(response.text):
-        got = client.get(source)
-        assert got.status_code == 200, f"{source} did not load"
-        fetched[source] = got.content
+    for face in _check_two_faces(client):
+        got = client.get(face["url"])
+        assert got.status_code == 200, f"{face['url']} did not load"
+        fetched[face["url"]] = got.content
     assert len(set(fetched.values())) == 2, "both figures showed the same photograph"
 
 
 def test_each_photograph_is_named_so_a_reviewer_can_tell_them_apart(
     client: TestClient,
 ) -> None:
-    response = client.post(
-        "/",
-        files={
-            "label": ("front.png", _png((0, 0, 0)), "image/png"),
-            "label_back": ("back.png", _png((255, 255, 255)), "image/png"),
-        },
-    )
-    assert "Front" in response.text and "Back" in response.text
+    """The caption is what the page's visible label and its alt text are both
+    built from, so two faces sharing one caption is two figures a reviewer
+    cannot tell apart."""
+    captions = [face["caption"] for face in _check_two_faces(client)]
+    assert captions == ["Front", "Back"], captions
 
 
-def test_the_alt_text_says_which_face_each_image_is(client: TestClient) -> None:
-    """Two images described identically are two images a screen reader user
-    cannot tell apart (NFR-3)."""
-    response = client.post(
-        "/",
-        files={
-            "label": ("front.png", _png((0, 0, 0)), "image/png"),
-            "label_back": ("back.png", _png((255, 255, 255)), "image/png"),
-        },
-    )
-    alts = re.findall(r'<img [^>]*alt="([^"]+)"', response.text)
-    assert len(alts) == 2
-    assert len(set(alts)) == 2, f"both images described the same way: {alts}"
-
-
-def test_a_one_faced_label_shows_one_photograph(client: TestClient) -> None:
+def test_a_one_faced_label_offers_one_photograph(client: TestClient) -> None:
     """Unchanged for the reviewer who sends a front and nothing else."""
-    response = client.post("/", files={"label": ("front.png", _png((0, 0, 0)), "image/png")})
-
-    sources = _image_sources(response.text)
-    assert len(sources) == 1
+    _await_batch(
+        client,
+        client.post(
+            "/",
+            files={"labels": ("front.png", _png((0, 0, 0)), "image/png")},
+            data={"beverage_type": "distilled_spirits"},
+            follow_redirects=False,
+        ),
+    )
     evaluation_id = client.app.state.envelope.evaluation_id
-    assert sources[0] == f"/labels/{evaluation_id}/image?face=front"
+    faces = client.get(f"/labels/{evaluation_id}/faces").json()["faces"]
+    assert [face["url"] for face in faces] == [f"/labels/{evaluation_id}/image?face=front"]
 
 
-def test_a_sample_with_a_back_shows_its_back(tmp_path: Path) -> None:
+def test_a_sample_with_a_back_offers_its_back(tmp_path: Path) -> None:
     """The shipped samples are the path a reviewer with no labels takes, and
     the bourbon's warning is on its back."""
     app = create_app()
     envelope = _stub_disposition_envelope(11, disposition="needs_review")
-    app.dependency_overrides[_get_upload_evaluator] = lambda: FakeEvaluator([(0.0, envelope)])
+    evaluator = FakeEvaluator([(0.0, envelope)])
+    app.dependency_overrides[_get_upload_evaluator] = lambda: evaluator
     app.dependency_overrides[_get_image_store] = lambda: UploadImageStore(tmp_path)
-    client = TestClient(app)
 
-    response = client.post("/samples/ttb-26231001000662")
-    assert response.status_code == 200
-    sources = _image_sources(response.text)
+    with TestClient(app) as client:
+        _await_batch(client, client.post("/samples/ttb-26231001000662", follow_redirects=False))
+        faces = client.get(f"/labels/{envelope.evaluation_id}/faces").json()["faces"]
+
+    sources = [face["url"] for face in faces]
     assert f"/labels/{envelope.evaluation_id}/image?face=back" in sources

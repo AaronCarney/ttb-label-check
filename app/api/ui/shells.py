@@ -1,16 +1,16 @@
-"""The three pages the reviewer navigates: single label, one batch, bulk upload.
+"""The two pages a reviewer sees: where they submit, and where results arrive.
 
 Template rendering only. This module imports nothing from ``app.services``,
 ``app.vision``, ``app.rules`` or ``app.deps``, because serving a page needs
 none of them: the React island it mounts fetches its data from the JSON API
-(``app.api.labels``, ``app.api.batches``, ``app.api.overrides``), and the two
-upload routes that do run the engine live beside this module rather than in it.
+(``app.api.batches``, ``app.api.overrides``), and the route that runs the
+engine lives beside this module rather than in it (``app.api.ui.submit``).
 """
 
 from __future__ import annotations
 
 from fastapi import APIRouter, Depends, Request
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 
 from app.api.ui._page import _get_settings, templates
 from app.config import Settings
@@ -19,48 +19,50 @@ router = APIRouter()
 
 
 @router.get("/", response_class=HTMLResponse)
-async def single_page_shell(
+async def entry_page(
     request: Request,
     settings: Settings = Depends(_get_settings),
 ) -> HTMLResponse:
-    """Render the empty-inbox single-label landing. No pre-loaded results: the
-    reviewer uploads a label and the application filed for it, which is what
-    this page is for. The shipped labels and their applications are a download
-    on `/batches`, not a row of demonstration buttons here — a demo that opens
-    with a tour of itself is not the product. The React island mounts on
-    `<div id="root" data-mode="single">` and renders an envelope only after a
-    real check returns one."""
+    """The way in, for one label or three hundred.
+
+    A plain form with no island on it: nothing here has a result to render yet,
+    and the results page is where a check is watched. The reviewer uploads the
+    label's photographs and the application filed for them, or a folder of
+    labels and the applications as a CSV, and `POST /` starts the check.
+    """
     return templates.TemplateResponse(
         request=request,
-        name="single.html",
-        context={"envelope_json": None, "dev_mode": settings.dev_mode},
+        name="check.html",
+        context={"dev_mode": settings.dev_mode},
     )
 
 
 @router.get("/batch/{batch_id}", response_class=HTMLResponse)
-async def batch_page_shell(
+async def results_page(
     request: Request,
     batch_id: str,
     settings: Settings = Depends(_get_settings),
 ) -> HTMLResponse:
-    """Render the batch review shell for a given batch_id. The React island
-    subscribes via SSE to ``/batches/{batch_id}/stream``."""
+    """Where a check is watched: one label's findings in full, the rest of the
+    submission listed behind it.
+
+    The React island subscribes to ``/batches/{batch_id}/stream`` and opens the
+    first result the moment it arrives, so a reviewer reads one graded label
+    while the others are still being checked.
+    """
     return templates.TemplateResponse(
         request=request,
-        name="batch.html",
+        name="results.html",
         context={"batch_id": batch_id, "dev_mode": settings.dev_mode},
     )
 
 
-@router.get("/batches", response_class=HTMLResponse)
-async def batches_upload_page(
-    request: Request,
-    settings: Settings = Depends(_get_settings),
-) -> HTMLResponse:
-    """Render the bulk-upload form. Submitting it lands at POST /batches/upload
-    which spawns a worker and redirects into the existing batch shell."""
-    return templates.TemplateResponse(
-        request=request,
-        name="batches_upload.html",
-        context={"dev_mode": settings.dev_mode},
-    )
+@router.get("/batches")
+async def batches_moved() -> RedirectResponse:
+    """The bulk-upload page was a second way in and no longer exists.
+
+    Kept as a redirect rather than deleted because it is the URL the deployed
+    service has been handing out, and a bookmark that 404s tells a reviewer the
+    product is broken when what happened is that it got simpler.
+    """
+    return RedirectResponse(url="/", status_code=308)

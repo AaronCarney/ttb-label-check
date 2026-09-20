@@ -1,14 +1,14 @@
-"""The page-shell GET routes and the StaticFiles mount.
+"""The page-shell GET routes, the StaticFiles mount, and `POST /`.
 
-These routes serve Jinja templates only; the engine is reached through the API
-routes. The test guards: (a) /healthz is unaffected by registering the UI,
-(b) GET / returns the single-mode shell with data-mode="single",
-(c) GET /batch/{batch_id} returns the batch shell with data-mode="batch" and
-    data-batch-id="{batch_id}",
-(d) /static/island/.gitkeep is served (proves the StaticFiles mount works).
+There is one way in and one place results arrive: `GET /` serves the form,
+`POST /` starts the check and redirects to `GET /batch/{batch_id}`, which
+streams the results. The bulk-upload page that used to sit at `/batches` is a
+redirect to `/` (`docs/decisions.md#0045`).
 """
 
 from __future__ import annotations
+
+import time
 
 import pytest
 from fastapi.testclient import TestClient
@@ -16,6 +16,13 @@ from fastapi.testclient import TestClient
 from app.api.ui import _get_settings
 from app.config import Settings
 from app.main import create_app
+
+# A tiny valid PNG (1x1 black pixel), used wherever a real image is needed.
+_PNG_1x1 = bytes.fromhex(
+    "89504e470d0a1a0a0000000d49484452000000010000000108060000001f15c4"
+    "89000000017352474200aece1ce90000000d4944415478da636060606000000005"
+    "0001a5f645400000000049454e44ae426082"
+)
 
 
 @pytest.fixture
@@ -36,24 +43,46 @@ def test_healthz_still_passes(client: TestClient) -> None:
     assert response.status_code == 200
 
 
-def test_single_page_shell(client: TestClient) -> None:
+# ---------------------------------------------------------------------------
+# The page shells
+# ---------------------------------------------------------------------------
+
+
+def test_entry_page_is_the_form(client: TestClient) -> None:
     response = client.get("/")
     assert response.status_code == 200
     assert "text/html" in response.headers["content-type"]
-    assert 'id="root"' in response.text
-    assert 'data-mode="single"' in response.text
-    assert "/static/island/single.js" in response.text
+    assert 'enctype="multipart/form-data"' in response.text
+    assert 'name="labels"' in response.text
+    assert "multiple" in response.text
+    assert 'method="post"' in response.text or 'method="POST"' in response.text
     # The noscript fallback, for a browser with JavaScript turned off.
     assert "<noscript>" in response.text
     assert "POST /labels" in response.text
 
 
-def test_batch_page_shell(client: TestClient) -> None:
+def test_entry_page_mounts_no_island(client: TestClient) -> None:
+    """Nothing on the form has a result to render, so it ships no JavaScript.
+    The island belongs to the page where a check is watched."""
+    response = client.get("/")
+    assert 'id="root"' not in response.text
+    assert "/static/island/app.js" not in response.text
+
+
+def test_results_page_shell(client: TestClient) -> None:
     response = client.get("/batch/abc-123")
     assert response.status_code == 200
-    assert 'data-mode="batch"' in response.text
+    assert 'id="root"' in response.text
     assert 'data-batch-id="abc-123"' in response.text
-    assert "/static/island/batch.js" in response.text
+    assert "/static/island/app.js" in response.text
+
+
+def test_the_old_bulk_page_redirects_to_the_one_form(client: TestClient) -> None:
+    """`/batches` was the second way in. It is the URL the deployed service has
+    been handing out, so it redirects rather than 404s."""
+    response = client.get("/batches", follow_redirects=False)
+    assert response.status_code == 308
+    assert response.headers["location"] == "/"
 
 
 def test_static_island_mount(client: TestClient) -> None:
@@ -66,158 +95,76 @@ def test_static_island_mount(client: TestClient) -> None:
 
 
 def test_dev_mode_off_by_default(client: TestClient) -> None:
-    """RawJSONDrawer guard (single.tsx) reads body[data-dev-mode] — default is '0'."""
-    response = client.get("/")
+    """RawJSONDrawer reads body[data-dev-mode] — default is '0'."""
+    response = client.get("/batch/abc-123")
     assert 'data-dev-mode="0"' in response.text
 
 
 def test_dev_mode_on_when_settings_enabled(dev_client: TestClient) -> None:
     """When DEV_MODE=1, the body attribute lets the React island render the
-    RawJSONDrawer. The single and batch shells both honour it."""
-    single = dev_client.get("/")
-    assert 'data-dev-mode="1"' in single.text
-    batch = dev_client.get("/batch/abc-123")
-    assert 'data-dev-mode="1"' in batch.text
+    RawJSONDrawer. Both shells honour it."""
+    assert 'data-dev-mode="1"' in dev_client.get("/").text
+    assert 'data-dev-mode="1"' in dev_client.get("/batch/abc-123").text
 
 
 def test_uswds_skip_link_present(client: TestClient) -> None:
     """NFR-3 keyboard-operable end-to-end (WCAG 2.1.1): the 'Skip to main
     content' link must be the first focusable element on every page."""
+    for path in ("/", "/batch/abc-123"):
+        response = client.get(path)
+        assert 'class="skip-link"' in response.text, path
+        assert "Skip to main content" in response.text, path
+
+
+def test_entry_page_reaches_the_sample_pack(client: TestClient) -> None:
+    """A reviewer with no labels of their own has to be able to get to the
+    pack, and the form is now the only page that can carry the way there."""
     response = client.get("/")
-    assert 'class="skip-link"' in response.text
-    assert "Skip to main content" in response.text
-
-
-def test_root_renders_empty_inbox(client: TestClient) -> None:
-    """A cold visit to `/` shows the empty-inbox landing — no pre-loaded
-    fixture envelope, no review surface populated. The metaphor is a
-    reviewer starting a shift with nothing in their queue."""
-    response = client.get("/")
-    assert response.status_code == 200
-    assert "Your inbox is empty" in response.text
-    assert "Drop new labels here" in response.text
-    # No fixture envelopes embedded — review surface stays a placeholder
-    # until an upload returns a real envelope.
-    assert "FIX-01-SPIRITS-CLEAN" not in response.text
-    assert 'id="envelope"' not in response.text
-
-
-def test_root_reaches_the_sample_pack_through_navigation(client: TestClient) -> None:
-    """A reviewer without labels of their own has to be able to get to the
-    pack. It is no longer advertised on the landing page — the pack is images
-    *and* the applications filed for them, and the form that takes both is the
-    bulk one — so the landing page has to carry the way there."""
-    response = client.get("/")
-    assert 'href="/batches"' in response.text
-
-
-def test_root_no_longer_serves_fixture_query(client: TestClient) -> None:
-    """`?fixture=NN` is no longer wired — bare `/` and `/?fixture=02` both
-    render the same empty-inbox shell. Param is silently ignored."""
-    bare = client.get("/")
-    with_param = client.get("/?fixture=02")
-    assert bare.status_code == 200
-    assert with_param.status_code == 200
-    assert "Your inbox is empty" in with_param.text
-    assert "FIX-02-STONES-THROW" not in with_param.text
+    assert "/batches/sample.zip" in response.text
 
 
 # ---------------------------------------------------------------------------
-# Single-label upload widget — POST /
+# POST / — the one way a check starts
 # ---------------------------------------------------------------------------
 
 
-def test_upload_form_present_on_root(client: TestClient) -> None:
-    """The reviewer needs an in-page upload affordance — a multipart POST form
-    targeting `/` with a file input named `label`."""
-    response = client.get("/")
-    assert 'enctype="multipart/form-data"' in response.text
-    assert 'name="label"' in response.text
-    assert 'method="post"' in response.text or 'method="POST"' in response.text
+def _wait_for_batch(client: TestClient, batch_id: str, *, timeout: float = 10.0) -> dict:
+    """Poll the batch snapshot until every item has finished."""
+    deadline = time.monotonic() + timeout
+    snapshot = client.get(f"/batches/{batch_id}").json()
+    while time.monotonic() < deadline:
+        if all(item["state"] in ("ready", "failed") for item in snapshot["items"]):
+            return snapshot
+        time.sleep(0.02)
+        snapshot = client.get(f"/batches/{batch_id}").json()
+    return snapshot
 
 
-def test_upload_with_real_image_returns_envelope() -> None:
-    """A multipart POST to / with a PNG runs the evaluator and re-renders the
-    shell with the live envelope. Uses dependency override to swap the
-    real evaluator for a stub so the test never calls OpenAI."""
+def test_one_label_starts_a_batch_and_redirects() -> None:
+    """One label is a batch of one. It takes the same route, starts the same
+    worker and lands on the same results page as three hundred."""
     from app.api.ui import _get_upload_evaluator
     from tests._fakes.evaluator import FakeEvaluator
     from tests.conftest import _stub_disposition_envelope
 
     app = create_app()
-    env = _stub_disposition_envelope(99, disposition="pass")
-    fake = FakeEvaluator([(0.0, env)])
+    fake = FakeEvaluator([(0.0, _stub_disposition_envelope(99, disposition="pass"))])
     app.dependency_overrides[_get_upload_evaluator] = lambda: fake
     client = TestClient(app)
 
-    # Tiny valid PNG (1x1 black pixel).
-    png_1x1 = bytes.fromhex(
-        "89504e470d0a1a0a0000000d49484452000000010000000108060000001f15c4"
-        "89000000017352474200aece1ce90000000d4944415478da636060606000000005"
-        "0001a5f645400000000049454e44ae426082"
-    )
     response = client.post(
         "/",
-        files={"label": ("upload.png", png_1x1, "image/png")},
+        files={"labels": ("upload.png", _PNG_1x1, "image/png")},
+        data={"beverage_type": "distilled_spirits"},
+        follow_redirects=False,
     )
-    assert response.status_code == 200, response.text
-    assert "EV-0099" in response.text  # evaluation_id from stub envelope
-    assert "lbl-0099" in response.text  # label_ref
+    assert response.status_code == 303, response.text
+    location = response.headers["location"]
+    assert location.startswith("/batch/")
+    assert location.removeprefix("/batch/") in app.state.batches
 
 
-def test_upload_with_invalid_mime_renders_error() -> None:
-    """An obviously-not-an-image upload should re-render the page with an
-    inline error banner rather than 500ing or showing a stack trace."""
-    app = create_app()
-    client = TestClient(app)
-    response = client.post(
-        "/",
-        files={"label": ("not_an_image.txt", b"hello world", "text/plain")},
-    )
-    assert response.status_code == 400
-    assert "unsupported" in response.text.lower() or "png" in response.text.lower()
-
-
-def test_upload_without_file_returns_422() -> None:
-    """FastAPI's File(...) requirement should produce a 422 when missing."""
-    app = create_app()
-    client = TestClient(app)
-    response = client.post("/", files={})
-    assert response.status_code == 422
-
-
-# ---------------------------------------------------------------------------
-# Bulk upload page — GET /batches + POST /batches/upload
-# ---------------------------------------------------------------------------
-
-# A tiny valid PNG used across the bulk-upload tests.
-_PNG_1x1 = bytes.fromhex(
-    "89504e470d0a1a0a0000000d49484452000000010000000108060000001f15c4"
-    "89000000017352474200aece1ce90000000d4944415478da636060606000000005"
-    "0001a5f645400000000049454e44ae426082"
-)
-
-
-def test_batches_upload_page_present(client: TestClient) -> None:
-    """A reviewer needs a top-level entry to bulk submission. `GET /batches`
-    should serve a multipart form whose file input accepts multiple files."""
-    response = client.get("/batches")
-    assert response.status_code == 200
-    assert 'enctype="multipart/form-data"' in response.text
-    assert "multiple" in response.text
-    assert 'name="labels"' in response.text
-
-
-def test_root_links_to_bulk_upload(client: TestClient) -> None:
-    """The single-label page surfaces a link to bulk upload so a reviewer who
-    hits `/` can find the batch flow without reading the README."""
-    response = client.get("/")
-    assert "/batches" in response.text
-
-
-def test_bulk_upload_redirects_to_batch_view() -> None:
-    """Submitting N files spawns a batch worker and redirects to the existing
-    `/batch/{batch_id}` shell that streams results via SSE."""
+def test_several_labels_start_one_batch() -> None:
     from app.api.ui import _get_upload_evaluator
     from tests._fakes.evaluator import FakeEvaluator
     from tests.conftest import _stub_disposition_envelope
@@ -233,34 +180,31 @@ def test_bulk_upload_redirects_to_batch_view() -> None:
     client = TestClient(app)
 
     response = client.post(
-        "/batches/upload",
+        "/",
         files=[
             ("labels", ("a.png", _PNG_1x1, "image/png")),
             ("labels", ("b.png", _PNG_1x1, "image/png")),
         ],
+        data={"beverage_type": "wine"},
         follow_redirects=False,
     )
     assert response.status_code == 303, response.text
-    location = response.headers["location"]
-    assert location.startswith("/batch/")
-    batch_id = location.removeprefix("/batch/")
+    batch_id = response.headers["location"].removeprefix("/batch/")
     assert batch_id in app.state.batches
 
 
-def test_bulk_upload_names_a_non_image_and_checks_the_rest() -> None:
+def test_a_non_image_is_named_and_the_rest_are_checked() -> None:
     """A non-PNG/JPEG in the upload set is named as its own failed item and
     every other file is still checked.
 
-    This used to assert a 400 for the whole submission, defended on
-    the grounds that scheduling the batch meant a batch that would "explode
-    mid-stream". `docs/decisions.md#0020` removed that premise: the worker
-    refuses an item it cannot check by name and carries on to the next one, so
-    rejecting four good files because a fifth is a `.txt` now throws away work
-    the product can do. Requirement R13 asks for the file to be named *and* the
-    rest to run, and is a P0.
+    This used to assert a 400 for the whole submission, defended on the grounds
+    that scheduling the batch meant a batch that would "explode mid-stream".
+    `docs/decisions.md#0020` removed that premise: the worker refuses an item it
+    cannot check by name and carries on to the next one, so rejecting four good
+    files because a fifth is a `.txt` now throws away work the product can do.
+    Requirement R13 asks for the file to be named *and* the rest to run, and is
+    a P0.
     """
-    import time
-
     from app.api.ui import _get_upload_evaluator
     from tests._fakes.evaluator import FakeEvaluator
     from tests.conftest import _stub_disposition_envelope
@@ -273,24 +217,17 @@ def test_bulk_upload_names_a_non_image_and_checks_the_rest() -> None:
 
     with TestClient(app) as client:
         response = client.post(
-            "/batches/upload",
+            "/",
             files=[
                 ("labels", ("ok.png", _PNG_1x1, "image/png")),
                 ("labels", ("oops.txt", b"not an image", "text/plain")),
             ],
+            data={"beverage_type": "wine"},
             follow_redirects=False,
         )
         assert response.status_code == 303, response.text
         batch_id = response.headers["location"].removeprefix("/batch/")
-
-        # The worker runs as a task on the app's loop; poll its snapshot rather
-        # than sleeping a fixed interval.
-        deadline = time.monotonic() + 10.0
-        while time.monotonic() < deadline:
-            snapshot = client.get(f"/batches/{batch_id}").json()
-            if all(item["state"] in ("ready", "failed") for item in snapshot["items"]):
-                break
-            time.sleep(0.02)
+        snapshot = _wait_for_batch(client, batch_id)
 
     items = {item["label_id"].split("-", 3)[-1]: item for item in snapshot["items"]}
     assert set(items) == {"ok.png", "oops.txt"}, snapshot
@@ -313,22 +250,35 @@ def test_bulk_upload_names_a_non_image_and_checks_the_rest() -> None:
     assert good["failed_reason"] is None
 
 
-def test_bulk_upload_rejects_a_submission_with_no_image_at_all() -> None:
+def test_a_submission_with_no_image_at_all_is_refused() -> None:
     """When no file in the set is an image there is no batch to show a refusal
     in, so the submission is refused at the form, as an empty one is."""
-    app = create_app()
-    client = TestClient(app)
+    client = TestClient(create_app())
     response = client.post(
-        "/batches/upload",
+        "/",
         files=[("labels", ("oops.txt", b"not an image", "text/plain"))],
+        data={"beverage_type": "wine"},
     )
     assert response.status_code == 400
     assert "PNG or JPEG" in response.text
 
 
-def test_bulk_upload_requires_at_least_one_file() -> None:
-    """Submitting an empty form is a usage error, not an empty batch."""
-    app = create_app()
-    client = TestClient(app)
-    response = client.post("/batches/upload", files=[])
-    assert response.status_code in (400, 422)
+def test_a_refusal_comes_back_on_the_form_with_what_was_typed() -> None:
+    """The reviewer's ten fields return with the banner, so a mis-typed field
+    is one correction away rather than ten."""
+    client = TestClient(create_app())
+    response = client.post(
+        "/",
+        files=[("labels", ("oops.txt", b"not an image", "text/plain"))],
+        data={"beverage_type": "wine", "brand_name": "Stone's Throw"},
+    )
+    assert response.status_code == 400
+    assert 'role="alert"' in response.text
+    assert "Stone&#39;s Throw" in response.text or "Stone's Throw" in response.text
+    assert 'value="distilled_spirits"' in response.text  # the form itself came back
+
+
+def test_submitting_no_file_at_all_is_a_422(client: TestClient) -> None:
+    """FastAPI's File(...) requirement produces a 422 when the part is missing."""
+    response = client.post("/", files={})
+    assert response.status_code == 422

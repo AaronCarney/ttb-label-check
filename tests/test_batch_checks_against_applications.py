@@ -1,11 +1,11 @@
 """A batch checks each label against the application filed for it.
 
-The fault this file guards: the bulk upload built one empty `Application` per
-label, so every comparison rule in the pack reported that it had nothing to
-compare. The brief's central ask is label-against-application across batches of
-200-300, and the only path a reviewer could reach dropped the application half
-— a grader who downloaded the sample pack and uploaded it watched the product
-decline to do the assignment.
+The fault this file guards: the multi-label upload built one empty
+`Application` per label, so every comparison rule in the pack reported that it
+had nothing to compare. The brief's central ask is label-against-application
+across batches of 200-300, and the only path a reviewer could reach dropped the
+application half — someone who downloaded the sample pack and uploaded it
+watched the product decline to do the assignment.
 
 The applications travel as a CSV joined to the images by filename stem. No
 reader and no rules here: what this route decides is *what each label is
@@ -54,8 +54,8 @@ async def _upload(
     files: list[tuple[str, tuple[str, bytes, str]]],
     data: dict[str, str] | None = None,
 ) -> list[tuple[Application, Label]]:
-    """Post to the batch upload route and return what the evaluator was handed,
-    in the order the worker asked about it."""
+    """Post to the form and return what the evaluator was handed, in the order
+    the worker asked about it."""
     from app.api.ui import _get_upload_evaluator
 
     app = create_app()
@@ -63,7 +63,7 @@ async def _upload(
     app.dependency_overrides[_get_upload_evaluator] = lambda: evaluator
     transport = httpx.ASGITransport(app=app)
     async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
-        response = await client.post("/batches/upload", files=files, data=data or {})
+        response = await client.post("/", files=files, data=data or {})
         assert response.status_code == 303, response.text
         batch_id = response.headers["location"].removeprefix("/batch/")
         async with client.stream("GET", f"/batches/{batch_id}/stream") as stream:
@@ -294,7 +294,7 @@ async def test_an_untouched_applications_field_does_not_shadow_the_csv() -> None
     transport = httpx.ASGITransport(app=app)
     async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
         response = await client.post(
-            "/batches/upload",
+            "/",
             content=_browser_body(),
             headers={"content-type": f"multipart/form-data; boundary={_BOUNDARY}"},
         )
@@ -314,7 +314,7 @@ async def test_an_untouched_applications_field_does_not_shadow_the_csv() -> None
 def test_an_unreadable_csv_refuses_the_upload_and_says_why() -> None:
     client = TestClient(create_app())
     response = client.post(
-        "/batches/upload",
+        "/",
         files=[
             ("labels", ("lucy.png", _PNG_1x1, "image/png")),
             ("applications", ("applications.csv", b"brand_name\nLUCKY LUCY'S\n", "text/csv")),
@@ -327,7 +327,7 @@ def test_an_unreadable_csv_refuses_the_upload_and_says_why() -> None:
 def test_a_csv_on_its_own_is_not_a_submission() -> None:
     client = TestClient(create_app())
     response = client.post(
-        "/batches/upload",
+        "/",
         files=[("labels", ("applications.csv", b"filename\nlucy\n", "text/csv"))],
     )
     assert response.status_code == 400

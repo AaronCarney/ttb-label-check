@@ -1,23 +1,23 @@
-"""The browser-facing surface: the pages a reviewer sees and the forms they post.
+"""The browser-facing surface: the pages a reviewer sees and the form they post.
 
 One module per job, because these jobs share almost nothing beyond the Jinja
 environment:
 
-- ``shells`` — the three page shells, ``/``, ``/batch/{batch_id}`` and
-  ``/batches``. Template rendering only.
-- ``single_upload`` — ``POST /``, one label checked against one application.
-- ``images`` — ``GET /labels/{eval_id}/image``, and the store the uploaded
-  image is kept in so a result page can still show it later.
+- ``shells`` — the two page shells, ``/`` and ``/batch/{batch_id}``, plus the
+  redirect that keeps the old bulk-upload URL working. Template rendering only.
+- ``submit`` — ``POST /``, the one way a check is started, for one label or
+  three hundred.
+- ``images`` — ``GET /labels/{eval_id}/image`` and ``GET /labels/{eval_id}/faces``,
+  and the store a checked label's photographs are kept in so the results page
+  can show them.
 - ``samples`` — the shipped labels a reviewer can try without having any of
   their own: ``GET /batches/sample.zip`` to download a starter pack, and
   ``POST /samples/{sample_id}`` to check one of them on a click.
-- ``bulk_upload`` — ``POST /batches/upload``, a folder of images as one batch.
-- ``_page``, ``_submission`` and ``_result_page`` — what more than one of the
-  above needs: the templates and settings, the pieces that turn a posted form
-  into an image and an application the engine can take, and the one path from
-  those two things to the result page. ``POST /`` and ``POST /samples/{id}``
-  share that last one, so a sample cannot demonstrate a path a reviewer's own
-  upload does not take.
+- ``_page``, ``_submission``, ``_faces`` and ``_application_csv`` — what more
+  than one of the above needs: the templates and settings, the pieces that turn
+  a posted form into an image and an application the engine can take, which
+  uploaded files are two faces of one label, and the CSV that carries an
+  application per label.
 
 ``router`` here is all of them mounted together, so ``app/main.py`` includes one
 router and a new page route is added by writing it in the module it belongs
@@ -28,12 +28,12 @@ from __future__ import annotations
 
 from fastapi import APIRouter
 
-from app.api.ui import bulk_upload, images, samples, shells, single_upload
+from app.api.ui import images, samples, shells, submit
 from app.api.ui._page import _get_settings
 from app.api.ui._submission import _get_upload_evaluator
 
 router = APIRouter(tags=["ui"])
-for _part in (shells, single_upload, images, samples, bulk_upload):
+for _part in (shells, submit, images, samples):
     router.include_router(_part.router)
 
 # The two dependencies a caller overrides — a test swaps the settings to turn

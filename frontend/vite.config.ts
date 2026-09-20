@@ -18,9 +18,10 @@ export default defineConfig({
     // breaks the deterministic link path Jinja needs.
     cssCodeSplit: false,
     rollupOptions: {
+      // One entry, because there is one interactive page. The entry form is
+      // plain HTML and mounts no island at all.
       input: {
-        single: resolve(__dirname, "src/single.tsx"),
-        batch: resolve(__dirname, "src/batch.tsx"),
+        app: resolve(__dirname, "src/app.tsx"),
       },
       output: {
         entryFileNames: "[name].js",

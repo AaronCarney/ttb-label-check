@@ -119,7 +119,7 @@ def test_the_upload_page_refuses_a_bomb_and_does_not_blame_the_photograph(
     sends the user off to re-photograph a label that was never at fault."""
     response = client.post(
         "/",
-        files={"label": ("bomb.png", _bomb_png(30_000, 30_000), "image/png")},
+        files={"labels": ("bomb.png", _bomb_png(30_000, 30_000), "image/png")},
         data={"beverage_type": "distilled_spirits"},
     )
     assert response.status_code == 413
@@ -127,9 +127,9 @@ def test_the_upload_page_refuses_a_bomb_and_does_not_blame_the_photograph(
     assert "better photo" not in response.text.lower()
 
 
-def test_the_bulk_page_refuses_a_bomb(client, deterministic_seams) -> None:
+def test_the_upload_form_names_the_bomb_among_several(client, deterministic_seams) -> None:
     response = client.post(
-        "/batches/upload",
+        "/",
         files=[
             ("labels", ("ok.png", _bomb_png(800, 600), "image/png")),
             ("labels", ("bomb.png", _bomb_png(30_000, 30_000), "image/png")),

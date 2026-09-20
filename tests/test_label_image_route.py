@@ -5,6 +5,12 @@
                                  carries, so the `<img>` the page renders
                                  resolves.
 
+`POST /` answers with a redirect to the results page, and that page is a shell:
+the image URL reaches the browser over the result stream rather than in the
+HTML. So a test here asks the store's own routes whether an image is there —
+`/labels/{eval_id}/faces` for which photographs exist and
+`/labels/{eval_id}/image` for the bytes — instead of reading a page.
+
 The route used to read from a 64-entry dictionary held in one process's memory,
 which meant a result page's own image stopped loading after 64 further uploads,
 after a restart, and on any worker but the one that took the upload. The three
@@ -53,8 +59,35 @@ def _app_storing_into(root: Path, envelopes) -> TestClient:
     return TestClient(app)
 
 
-def _upload(client: TestClient, body: bytes, name: str = "upload.png"):
-    return client.post("/", files={"label": (name, body, "image/png")})
+def _wait_for_batch(client: TestClient, batch_id: str, *, timeout: float = 10.0) -> dict:
+    """Poll the batch snapshot until every item has finished."""
+    deadline = time.monotonic() + timeout
+    snapshot = client.get(f"/batches/{batch_id}").json()
+    while time.monotonic() < deadline:
+        if all(item["state"] in ("ready", "failed") for item in snapshot["items"]):
+            return snapshot
+        time.sleep(0.02)
+        snapshot = client.get(f"/batches/{batch_id}").json()
+    return snapshot
+
+
+def _upload(client: TestClient, body: bytes, name: str = "upload.png") -> dict:
+    """Check one label and wait for the batch it started to finish.
+
+    The image is filed by the worker as each result lands, so a test that reads
+    it back has to wait for the worker rather than for the POST. The client
+    must be entered as a context manager, or the worker's task dies with the
+    request's event loop.
+    """
+    response = client.post(
+        "/",
+        files={"labels": (name, body, "image/png")},
+        data={"beverage_type": "distilled_spirits"},
+        follow_redirects=False,
+    )
+    assert response.status_code == 303, response.text
+    batch_id = response.headers["location"].removeprefix("/batch/")
+    return _wait_for_batch(client, batch_id)
 
 
 # ---------------------------------------------------------------------------
@@ -71,18 +104,20 @@ def test_upload_image_round_trips():
     app = create_app()
     env = _stub_disposition_envelope(42, disposition="pass")
     app.dependency_overrides[_get_upload_evaluator] = lambda: FakeEvaluator([(0.0, env)])
-    client = TestClient(app)
 
     png = _png_1x1()
-    response = _upload(client, png)
-    assert response.status_code == 200
-    # The shell references the image route by the id the envelope carries.
-    assert f"/labels/{env.evaluation_id}/image" in response.text
+    with TestClient(app) as client:
+        _upload(client, png)
 
-    img = client.get(f"/labels/{env.evaluation_id}/image")
-    assert img.status_code == 200
-    assert img.headers["content-type"] == "image/png"
-    assert img.content == png
+        # The route the results page asks names the image route by the id the
+        # envelope carries, which is what makes the rendered `<img>` resolve.
+        faces = client.get(f"/labels/{env.evaluation_id}/faces").json()["faces"]
+        assert [face["url"] for face in faces] == [f"/labels/{env.evaluation_id}/image?face=front"]
+
+        img = client.get(f"/labels/{env.evaluation_id}/image")
+        assert img.status_code == 200
+        assert img.headers["content-type"] == "image/png"
+        assert img.content == png
 
 
 def test_upload_image_404_on_unknown_eval_id():
@@ -95,17 +130,17 @@ def test_a_jpeg_upload_comes_back_as_a_jpeg(tmp_path: Path):
     """The media type survives the round trip, so the browser is not told a
     JPEG is a PNG."""
     env = _stub_disposition_envelope(7, disposition="pass")
-    client = _app_storing_into(tmp_path, [env])
 
     buf = BytesIO()
     Image.new("RGB", (2, 2), color=(255, 0, 0)).save(buf, "JPEG")
     jpeg = buf.getvalue()
 
-    assert client.post("/", files={"label": ("upload.jpg", jpeg, "image/jpeg")}).status_code == 200
-    img = client.get(f"/labels/{env.evaluation_id}/image")
-    assert img.status_code == 200
-    assert img.headers["content-type"] == "image/jpeg"
-    assert img.content == jpeg
+    with _app_storing_into(tmp_path, [env]) as client:
+        _upload(client, jpeg, name="upload.jpg")
+        img = client.get(f"/labels/{env.evaluation_id}/image")
+        assert img.status_code == 200
+        assert img.headers["content-type"] == "image/jpeg"
+        assert img.content == jpeg
 
 
 # ---------------------------------------------------------------------------
@@ -118,16 +153,16 @@ def test_the_image_survives_sixty_four_further_uploads(tmp_path: Path):
     65th upload took the first one's image away from a page still open on it."""
     first = _stub_disposition_envelope(0, disposition="pass")
     later = [_stub_disposition_envelope(i, disposition="pass") for i in range(1, 65)]
-    client = _app_storing_into(tmp_path, [first, *later])
 
     png = _png_1x1()
-    assert _upload(client, png).status_code == 200
-    for _ in later:
-        assert _upload(client, png).status_code == 200
+    with _app_storing_into(tmp_path, [first, *later]) as client:
+        _upload(client, png)
+        for _ in later:
+            _upload(client, png)
 
-    still_there = client.get(f"/labels/{first.evaluation_id}/image")
-    assert still_there.status_code == 200, "64 further uploads evicted the first image"
-    assert still_there.content == png
+        still_there = client.get(f"/labels/{first.evaluation_id}/image")
+        assert still_there.status_code == 200, "64 further uploads evicted the first image"
+        assert still_there.content == png
 
 
 def test_the_image_outlives_the_process_that_received_it(tmp_path: Path):
@@ -135,7 +170,8 @@ def test_the_image_outlives_the_process_that_received_it(tmp_path: Path):
     client here shares nothing with the first but the directory."""
     env = _stub_disposition_envelope(11, disposition="pass")
     png = _png_1x1()
-    assert _upload(_app_storing_into(tmp_path, [env]), png).status_code == 200
+    with _app_storing_into(tmp_path, [env]) as client:
+        _upload(client, png)
 
     after_restart = _app_storing_into(tmp_path, [])
     img = after_restart.get(f"/labels/{env.evaluation_id}/image")

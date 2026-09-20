@@ -42,7 +42,7 @@ describe("OverrideDrawer", () => {
     });
   });
 
-  // Mirrors the `_REASON_CODES` shape in single.tsx — three W-prefixed entries
+  // Mirrors the `REASON_CODES` shape in LabelResult.tsx — three W-prefixed entries
   // means typing 'w' does NOT trigger auto-resolve; ENTER must submit on
   // filtered[highlight=0]. Locks down the Playwright-only path the original
   // unit test masked.

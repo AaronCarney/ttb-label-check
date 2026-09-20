@@ -8,6 +8,11 @@ batch kept after the next one starts is memory nobody will ask for again
 
 There is no login, so "one at a time" is one per running service, not one per
 person: while a batch runs, anyone else who uploads is told to wait.
+
+Every check is a batch now, including a batch of one (`docs/decisions.md#0045`),
+so the wait reaches a reviewer checking a single label while someone else's
+three hundred are running. That is a real cost of the merge and it is asserted
+here rather than left to be discovered.
 """
 
 from __future__ import annotations
@@ -41,7 +46,7 @@ def _files(n: int) -> list[tuple[str, tuple[str, bytes, str]]]:
 
 
 async def _upload(client: httpx.AsyncClient, n: int = 2) -> httpx.Response:
-    return await client.post("/batches/upload", files=_files(n), data={"beverage_type": "wine"})
+    return await client.post("/", files=_files(n), data={"beverage_type": "wine"})
 
 
 async def _finish(app) -> None:
@@ -93,6 +98,23 @@ async def test_the_api_route_is_refused_while_an_upload_is_being_checked(gated) 
         await _finish(app)
 
 
+async def test_one_label_waits_for_a_running_batch_too(gated) -> None:
+    """The cost of one system. A reviewer with a single label used to have a
+    path of its own that was never refused; now it is a batch of one and it
+    queues behind whatever is running, like everything else."""
+    app, evaluator = gated
+    transport = httpx.ASGITransport(app=app)
+    async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
+        assert (await _upload(client, 2)).status_code == 303
+
+        one_label = await _upload(client, 1)
+        assert one_label.status_code == 409, one_label.text
+        assert "one batch at a time" in one_label.text
+
+        evaluator.gate.set()
+        await _finish(app)
+
+
 async def test_a_new_batch_drops_the_finished_one(gated) -> None:
     app, evaluator = gated
     evaluator.gate.set()
@@ -116,9 +138,11 @@ async def test_a_new_batch_drops_the_finished_one(gated) -> None:
 async def test_each_image_is_let_go_once_its_label_is_checked() -> None:
     """The worker holds a label's image only until that label is checked.
 
-    The batch page shows results, not images, so nothing needs the bytes once
-    the check has run. Measured at each evaluation: the labels still held are
-    the one being checked and the ones after it.
+    The bytes go as soon as the result is recorded — and, where the submission
+    came from the form, written to the store the results page fetches them
+    from. Holding them in the worker instead would mean a batch carrying every
+    upload until its last label is done. Measured at each evaluation: the
+    labels still held are the one being checked and the ones after it.
     """
     from app.api._sse_bus import SSEBus
     from app.batch.anomaly import AnomalyDetector

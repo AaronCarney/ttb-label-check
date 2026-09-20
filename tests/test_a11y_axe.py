@@ -1,11 +1,13 @@
 """Playwright and axe-core: zero WCAG 2.0 AA violations on every screen.
 
-Loads the Jinja shell against the live uvicorn fixture, injects the canned
-envelope into the DOM before the React island reads it, then runs axe-core
-inside the page and asserts no AA violations.
+Loads the Jinja shell against the live uvicorn fixture, streams a recorded
+result into it the way the worker does, then runs axe-core inside the page and
+asserts no AA violations.
 
-`app/api/ui/shells.py` serves three GET routes and NFR-3 in `docs/PRD.md` asks
-for "an automated scan on every screen", so all three are scanned here.
+`app/api/ui/shells.py` serves one form and one results page, and NFR-3 in
+`docs/PRD.md` asks for "an automated scan on every screen", so both are scanned
+here — the results page in each of the three states a reviewer meets it in:
+waiting, one label, and a submission of many.
 """
 
 from __future__ import annotations
@@ -17,13 +19,14 @@ from typing import Any
 import pytest
 from playwright.sync_api import Page
 
+from tests._browser import SINGLE_FIXTURES, envelope_fixture, open_results
+
 ROOT = Path(__file__).resolve().parent.parent
-FIXTURES = ROOT / "tests" / "fixtures" / "envelopes" / "single"
 BATCH_EVENTS = ROOT / "tests" / "fixtures" / "envelopes" / "batch" / "05-batch-of-50-events.jsonl"
 AXE_PATH = ROOT / "frontend" / "node_modules" / "axe-core" / "axe.min.js"
 
 
-_SINGLE_FIXTURES = sorted(p.name for p in FIXTURES.glob("*.json"))
+_SINGLE_FIXTURES = sorted(p.name for p in SINGLE_FIXTURES.glob("*.json"))
 
 
 # axe sorts every check it runs into four buckets: `violations`, `passes`,
@@ -42,17 +45,7 @@ _SINGLE_FIXTURES = sorted(p.name for p in FIXTURES.glob("*.json"))
 # decide and written down what they found. The reason is the record of that
 # review. An empty mapping means nobody has looked yet, and any undecided check
 # fails the suite until somebody does.
-REVIEWED_INCOMPLETE: dict[str, str] = {
-    "th-has-data-cells": (
-        "Reviewed on /batch. Only the empty batch table raises it: that page "
-        "loads a batch which streams nothing, so the table renders its column headers over "
-        "an empty body and there are no data cells for the headers to describe. The markup "
-        "is shown to be sound rather than asserted to be — "
-        "test_axe_zero_aa_violations_batch_populated scans the same table with fifty rows "
-        "in it, and axe decides this check there. So what is undecided is the empty state "
-        "alone, which has no data cells by definition."
-    ),
-}
+REVIEWED_INCOMPLETE: dict[str, str] = {}
 
 
 def _run_axe(page: Page) -> dict[str, Any]:
@@ -107,139 +100,54 @@ def _assert_accessible(result: dict[str, Any], screen: str) -> None:
 
 @pytest.mark.usefixtures("live_server", "pnpm_built_island")
 @pytest.mark.parametrize("fixture_name", _SINGLE_FIXTURES)
-def test_axe_zero_aa_violations_single(fixture_name: str, page: Page, live_server_url: str) -> None:
-    _load_single(page, live_server_url, fixture_name)
+def test_axe_zero_aa_violations_one_result(
+    fixture_name: str, page: Page, live_server_url: str
+) -> None:
+    """The results page showing one checked label, which is what a reviewer who
+    submitted one label sees: the result and no list beside it."""
+    open_results(page, live_server_url, [envelope_fixture(fixture_name)])
     _assert_accessible(_run_axe(page), fixture_name)
 
 
-def _load_single(page: Page, live_server_url: str, fixture_name: str) -> None:
-    """Open the single-result screen with one canned envelope already in the DOM."""
-    envelope = json.loads((FIXTURES / fixture_name).read_text())
-    # Inject the envelope BEFORE the island imports.
-    page.add_init_script(
-        script=f"""
-          (() => {{
-            const tag = document.createElement('script');
-            tag.id = 'envelope';
-            tag.type = 'application/json';
-            tag.textContent = {json.dumps(json.dumps(envelope))};
-            const insert = () => {{
-              if (document.body) {{
-                document.body.appendChild(tag);
-              }} else {{
-                setTimeout(insert, 0);
-              }}
-            }};
-            if (document.readyState === 'loading') {{
-              document.addEventListener('DOMContentLoaded', insert);
-            }} else {{
-              insert();
-            }}
-          }})();
-        """
-    )
+@pytest.mark.usefixtures("live_server", "pnpm_built_island")
+def test_axe_zero_aa_violations_entry_form(page: Page, live_server_url: str) -> None:
+    """The form a reviewer arrives at. It mounts no island — the whole page is
+    server-rendered HTML — so there is no `[data-mounted]` to wait for."""
     page.goto(f"{live_server_url}/")
-    # Wait for the island to mount.
-    page.wait_for_selector('[data-mounted="true"]', timeout=5000)
-
-
-@pytest.mark.usefixtures("live_server", "pnpm_built_island")
-def test_axe_zero_aa_violations_batch(page: Page, live_server_url: str) -> None:
-    page.goto(f"{live_server_url}/batch/abc-123")
-    page.wait_for_selector('[data-mounted="true"]', timeout=5000)
-    _assert_accessible(_run_axe(page), "/batch")
-
-
-@pytest.mark.usefixtures("live_server", "pnpm_built_island")
-def test_axe_zero_aa_violations_batch_list(page: Page, live_server_url: str) -> None:
-    """The third screen. `app/api/ui/shells.py` serves three GET routes and this
-    scan visited two of them, while NFR-3 in `docs/PRD.md` asks for "an
-    automated scan on every screen" — so the requirement was unmet on coverage
-    even with every existing case green.
-
-    This page renders server-side without the island, so there is no
-    `[data-mounted]` to wait for; the shell being loaded is the whole page.
-    """
-    page.goto(f"{live_server_url}/batches")
     page.wait_for_load_state("domcontentloaded")
-    _assert_accessible(_run_axe(page), "/batches")
+    _assert_accessible(_run_axe(page), "/")
 
 
-def _wrapped_batch_events() -> list[dict[str, Any]]:
-    """The recorded batch events, in the shape the SSE handler actually parses.
+@pytest.mark.usefixtures("live_server", "pnpm_built_island")
+def test_axe_zero_aa_violations_waiting(page: Page, live_server_url: str) -> None:
+    """The results page in the moment after a check is started, before the
+    first label is done. The stream is held open with nothing on it."""
+    open_results(page, live_server_url, [], end=False, wait_for_result=False)
+    _assert_accessible(_run_axe(page), "/batch (waiting)")
 
-    `useBatchStream.ts` reads `{batch_id, queue_position, envelope}` and flattens
-    it; the fixture stores the already-flattened form, so it is re-wrapped here
-    rather than being fed in a shape the real handler would reject.
-    """
-    events = [json.loads(line) for line in BATCH_EVENTS.read_text().splitlines() if line.strip()]
-    return [
-        {
-            "batch_id": e["batch_id"],
-            "queue_position": e["queue_position"],
-            "envelope": {k: v for k, v in e.items() if k not in ("batch_id", "queue_position")},
-        }
-        for e in events
-    ]
+
+def _batch_envelopes() -> list[dict[str, Any]]:
+    """The fifty recorded results of a batch, as the fixture stores them."""
+    return [json.loads(line) for line in BATCH_EVENTS.read_text().splitlines() if line.strip()]
 
 
 @pytest.mark.usefixtures("live_server", "pnpm_built_island")
 def test_axe_zero_aa_violations_batch_populated(page: Page, live_server_url: str) -> None:
-    """The batch table with rows in it, which is the state a reviewer actually sees.
+    """The submission list with rows in it, beside the label the reviewer has open.
 
-    The other batch case loads a batch that streams nothing, so the table renders
-    its headers over an empty body. That is a real state and worth scanning, but
-    it is the state in which axe cannot decide `th-has-data-cells` — there are no
-    data cells for the headers to refer to. Scanning only that page left the
-    populated table, the one with fifty rows of real dispositions in it,
-    unscanned.
+    This is the state a reviewer checking a folder of labels actually sees, and
+    it is the only one that renders the table at all: a submission of one shows
+    its result and no list. Fifty rows of real dispositions is what gives axe
+    data cells to decide `th-has-data-cells` against.
 
     The stream is stubbed rather than driven, because what is under test here is
     the rendered table's accessibility, not the transport.
     """
-    payloads = _wrapped_batch_events()
-    page.add_init_script(
-        script=f"""
-          (() => {{
-            const payloads = {json.dumps(payloads)};
-            class FakeEventSource {{
-              constructor(url) {{
-                this.url = url;
-                this.readyState = 1;
-                this._listeners = new Map();
-                this.onerror = null;
-                // Defer past the effect that registers the listeners.
-                setTimeout(() => {{
-                  for (const p of payloads) {{
-                    this._fire('label-result', JSON.stringify(p));
-                  }}
-                  this._fire('stream-end', JSON.stringify({{ total_count: payloads.length }}));
-                }}, 0);
-              }}
-              addEventListener(name, handler) {{
-                if (!this._listeners.has(name)) this._listeners.set(name, []);
-                this._listeners.get(name).push(handler);
-              }}
-              removeEventListener(name, handler) {{
-                const hs = this._listeners.get(name) || [];
-                const i = hs.indexOf(handler);
-                if (i >= 0) hs.splice(i, 1);
-              }}
-              close() {{ this.readyState = 2; }}
-              _fire(name, data) {{
-                if (this.readyState === 2) return;
-                for (const h of this._listeners.get(name) || []) h({{ data }});
-              }}
-            }}
-            window.EventSource = FakeEventSource;
-          }})();
-        """
-    )
-    page.goto(f"{live_server_url}/batch/abc-123")
-    page.wait_for_selector('[data-mounted="true"]', timeout=5000)
+    envelopes = _batch_envelopes()
+    open_results(page, live_server_url, envelopes)
     page.wait_for_selector("tbody tr", timeout=5000)
     rows = page.eval_on_selector_all("tbody tr", "els => els.length")
-    assert rows == len(payloads), f"expected {len(payloads)} rows, rendered {rows}"
+    assert rows == len(envelopes), f"expected {len(envelopes)} rows, rendered {rows}"
     _assert_accessible(_run_axe(page), "/batch (populated)")
 
 
@@ -366,8 +274,8 @@ def _assert_buttons_legible(measured: list[dict[str, Any]]) -> None:
 
 
 @pytest.mark.usefixtures("live_server", "pnpm_built_island")
-def test_single_screen_buttons_are_legible(page: Page, live_server_url: str) -> None:
-    """Every button on the single-result screen, in both states.
+def test_result_screen_buttons_are_legible(page: Page, live_server_url: str) -> None:
+    """Every button on the results screen, in both states.
 
     axe reports the "Copy message" button's contrast as undecided rather than as
     a violation: it computed a foreground and a background, they came out
@@ -377,9 +285,9 @@ def test_single_screen_buttons_are_legible(page: Page, live_server_url: str) -> 
     directly and both colours are reported, which is what tells a reviewer
     whether the label can be read at all.
     """
-    _load_single(page, live_server_url, "04-low-res-blurry.json")
+    open_results(page, live_server_url, [envelope_fixture("04-low-res-blurry.json")])
     page.get_by_role("button", name="Copy message").wait_for(timeout=5000)
-    _assert_buttons_legible(_visible_button_contrasts(page, "/"))
+    _assert_buttons_legible(_visible_button_contrasts(page, "/batch"))
 
 
 @pytest.mark.usefixtures("live_server", "pnpm_built_island")
@@ -390,7 +298,7 @@ def test_override_drawer_buttons_are_legible(page: Page, live_server_url: str) -
     document axe scans on load does not contain it. Pressing "O" is how a
     reviewer opens it (`useKeyboardShortcuts`), so that is how it is opened here.
     """
-    _load_single(page, live_server_url, "04-low-res-blurry.json")
+    open_results(page, live_server_url, [envelope_fixture("04-low-res-blurry.json")])
     page.keyboard.press("o")
     page.get_by_role("button", name="Cancel").wait_for(timeout=5000)
-    _assert_buttons_legible(_visible_button_contrasts(page, "/ (override drawer)"))
+    _assert_buttons_legible(_visible_button_contrasts(page, "/batch (override drawer)"))

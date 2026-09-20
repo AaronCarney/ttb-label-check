@@ -79,6 +79,8 @@ class BatchWorker:
         app_lookup: dict[str, Application] | None = None,
         label_lookup: dict[str, Label] | None = None,
         refusals: dict[str, tuple[str, str]] | None = None,
+        images=None,
+        results=None,
     ) -> None:
         self._in_flight = in_flight
         self._evaluator = evaluator
@@ -100,6 +102,12 @@ class BatchWorker:
         # it can give. Refusing per item rather than rejecting the submission is
         # what lets the rest of the batch run (`docs/decisions.md#0020`).
         self._refusals: dict[str, tuple[str, str]] = refusals or {}
+        # Where a finished label's photographs and its result are kept so the
+        # results page can show them and a reviewer's override has something to
+        # amend. Both are optional because a batch submitted as refs over the
+        # JSON API has no uploaded bytes to keep and no page to show them on.
+        self._images = images
+        self._results = results
 
     def _resolve_application(self, item: BatchItem) -> Application:
         """Resolve the Application for a queued BatchItem.
@@ -197,6 +205,49 @@ class BatchWorker:
                 vision_duration_ms=0,
             ),
         )
+
+    def _keep(self, envelope: DispositionEnvelope, label: Label | None) -> None:
+        """Put this label's photographs and its result where the page can read
+        them, under the id the finished envelope carries.
+
+        The photographs, because a finding a reviewer cannot see the photograph
+        for is a finding they cannot check, and the warning is usually on a face
+        the front does not show. The result, because an override amends a
+        recorded disposition and the in-flight batch holds one only until the
+        next batch starts (`docs/decisions.md#0033`).
+
+        A write that fails is logged and swallowed. Neither store is part of the
+        verdict, and a full disk must not turn a checked label into an
+        unchecked one.
+        """
+        if self._images is not None and label is not None:
+            for face in label.faces:
+                try:
+                    self._images.put(
+                        envelope.evaluation_id,
+                        face.content_type,
+                        face.image_bytes,
+                        face.face_tag,
+                    )
+                except Exception:
+                    _logger.exception(
+                        "label_image_not_kept",
+                        extra={
+                            "evaluation_id": envelope.evaluation_id,
+                            "reason_code": "ENGINE.OK.NONE",
+                        },
+                    )
+        if self._results is not None:
+            try:
+                self._results.put(envelope)
+            except Exception:
+                _logger.exception(
+                    "label_result_not_kept",
+                    extra={
+                        "evaluation_id": envelope.evaluation_id,
+                        "reason_code": "ENGINE.OK.NONE",
+                    },
+                )
 
     def _reviewer_backlog(self) -> int:
         """Events broadcast but not yet taken by the slowest attached reader."""
@@ -306,9 +357,10 @@ class BatchWorker:
                 )
             assert envelope is not None  # one of the two branches always sets it
             self._in_flight.record_result(item.label_id, envelope)
-            # Nothing reads the label's image once it is checked: the batch page
-            # shows results, not images. Letting it go now is what keeps a batch
-            # from holding every upload until its last label is done.
+            self._keep(envelope, label)
+            # The bytes go as soon as they have been written somewhere a page
+            # can fetch them from. Holding them in the worker instead would mean
+            # a batch carrying every upload until its last label is done.
             self._label_lookup.pop(item.label_id, None)
             label = None
 

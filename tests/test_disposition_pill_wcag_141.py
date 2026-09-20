@@ -3,14 +3,10 @@ never carried by colour alone (WCAG 1.4.1)."""
 
 from __future__ import annotations
 
-import json
-from pathlib import Path
-
 import pytest
 from playwright.sync_api import Page
 
-ROOT = Path(__file__).resolve().parent.parent
-FIXTURES = ROOT / "tests" / "fixtures" / "envelopes" / "single"
+from tests._browser import envelope_fixture, open_results
 
 
 @pytest.mark.usefixtures("live_server", "pnpm_built_island")
@@ -32,21 +28,9 @@ def test_disposition_pill_three_channels(
     page: Page,
     live_server_url: str,
 ) -> None:
-    envelope = json.loads((FIXTURES / fixture_name).read_text())
+    envelope = envelope_fixture(fixture_name)
     assert envelope["disposition"] == expected_disposition
-    page.add_init_script(
-        script=f"""
-          window.addEventListener('DOMContentLoaded', () => {{
-            const tag = document.createElement('script');
-            tag.id = 'envelope';
-            tag.type = 'application/json';
-            tag.textContent = {json.dumps(json.dumps(envelope))};
-            document.body.appendChild(tag);
-          }});
-        """
-    )
-    page.goto(f"{live_server_url}/")
-    page.wait_for_selector('[data-mounted="true"]', timeout=5000)
+    open_results(page, live_server_url, [envelope])
 
     # Disposition-level pill is in the header next to the label_ref.
     pill = page.locator(f'[role="status"][aria-label="Disposition: {expected_text}"]').first

@@ -142,7 +142,7 @@ fi
 #    committed and ships through 'COPY app ./app'. Untracked, the build
 #    succeeds and serves pages with no interface on them.
 MISSING_BUNDLE=0
-for asset in app/ui/static/island/single.js app/ui/static/island/batch.js app/ui/static/island/style.css; do
+for asset in app/ui/static/island/app.js app/ui/static/island/style.css; do
     if ! git ls-files --error-unmatch "$asset" >/dev/null 2>&1; then
         MISSING_BUNDLE=1
         echo "        untracked: $asset" >&2

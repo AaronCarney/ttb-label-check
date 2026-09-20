@@ -29,14 +29,14 @@ from functools import lru_cache
 from pathlib import Path
 
 from fastapi import APIRouter, Depends, HTTPException, Request
-from fastapi.responses import HTMLResponse, Response
+from fastapi.responses import RedirectResponse, Response
 
 from app.api.ui._application_csv import render as render_application_csv
 from app.api.ui._page import _get_settings
-from app.api.ui._result_page import render_single_result
 from app.api.ui._submission import _detect_image_mime, _get_upload_evaluator
 from app.api.ui.images import UploadImageStore, _get_image_store
 from app.api.ui.results import SingleResultStore, _get_result_store
+from app.api.ui.submit import LaunchRefusal, launch_batch
 from app.config import Settings
 from app.schemas.label import Face, FaceTag
 
@@ -234,7 +234,7 @@ def applications_csv_for(ttbids: list[str]) -> str:
 # ---------------------------------------------------------------------------
 
 
-@router.post("/samples/{sample_id}", response_class=HTMLResponse)
+@router.post("/samples/{sample_id}")
 async def check_shipped_sample(
     request: Request,
     sample_id: str,
@@ -242,30 +242,33 @@ async def check_shipped_sample(
     evaluator=Depends(_get_upload_evaluator),
     images: UploadImageStore = Depends(_get_image_store),
     results: SingleResultStore = Depends(_get_result_store),
-) -> HTMLResponse:
+) -> RedirectResponse:
     """Check one shipped label against the application it was really filed with.
 
-    Runs exactly the path `POST /` runs — same application parsing, same
-    evaluator, same result page — with the image and the ten application fields
-    supplied from the manifest instead of typed. A reviewer clicking this and a
-    reviewer uploading their own label therefore see the same product.
+    Starts the same check `POST /` starts, of one label, and sends the caller
+    to the same results page — with the images and the ten application fields
+    supplied from the manifest instead of uploaded and typed. A shipped sample
+    and a reviewer's own upload cannot demonstrate different behaviour if there
+    is one way to start a check.
     """
     entry = _manifest_entries().get(sample_id)
     if entry is None:
         raise HTTPException(status_code=404, detail=f"no sample label {sample_id!r}")
 
-    faces = _faces_of(sample_id, entry)
+    try:
+        batch_id = launch_batch(
+            request=request,
+            settings=settings,
+            evaluator=evaluator,
+            images=images,
+            results=results,
+            labels=[(sample_id, _faces_of(sample_id, entry), _posted_from(entry))],
+            refused=[],
+        )
+    except LaunchRefusal as declined:
+        raise HTTPException(status_code=declined.status_code, detail=declined.message) from declined
 
-    return await render_single_result(
-        request=request,
-        settings=settings,
-        evaluator=evaluator,
-        images=images,
-        results=results,
-        posted=_posted_from(entry),
-        faces=faces,
-        label_id=sample_id,
-    )
+    return RedirectResponse(url=f"/batch/{batch_id}", status_code=303)
 
 
 def _faces_of(sample_id: str, entry: dict) -> tuple[Face, ...]:

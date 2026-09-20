@@ -1,17 +1,24 @@
-"""The single-label page carries the application, so something gets compared.
+"""The form carries the application, so something gets compared.
 
 The brief's subject is whether a label agrees with the application filed for
-it. Through the running app that only happens if the page asks for the
-application's fields and passes them on, so these tests check the page offers
+it. Through the running app that only happens if the form asks for the
+application's fields and passes them on, so these tests check the form offers
 them and that what a reviewer types reaches the evaluator as reference values
 and as the beverage class the rules are picked by.
 
 A reviewer who fills nothing in still gets a check: the presence rules and the
 health-warning rules need no application, and every comparison reports that it
 does not apply.
+
+The typed fields describe one label, so they apply to a submission of one. A
+submission of several carries its applications as a CSV, and only the typed
+beverage type reaches those labels, because a label with no rule pack is not
+checked at all (`docs/decisions.md#0045`).
 """
 
 from __future__ import annotations
+
+import time
 
 import pytest
 from fastapi.testclient import TestClient
@@ -48,11 +55,26 @@ def recorder():
 def client(recorder):
     app = create_app()
     app.dependency_overrides[_get_upload_evaluator] = lambda: recorder
-    return TestClient(app)
+    # Entered as a context manager: the check runs as a background task on the
+    # app's own loop, and the evaluator is only asked once that task runs.
+    with TestClient(app) as entered:
+        yield entered
 
 
 def _expected(application) -> dict[str, object]:
     return {e.field_id: e for e in application.expected_values}
+
+
+def _check(client, recorder, *, expect: int = 1, **kwargs):
+    """Post the form and wait for the check it starts to reach the evaluator."""
+    kwargs.setdefault("follow_redirects", False)
+    response = client.post("/", **kwargs)
+    if response.status_code != 303:
+        return response
+    deadline = time.monotonic() + 20.0
+    while time.monotonic() < deadline and len(recorder.applications) < expect:
+        time.sleep(0.02)
+    return response
 
 
 # ---------------------------------------------------------------------------
@@ -91,9 +113,10 @@ def test_the_form_says_a_blank_field_is_not_checked():
 
 
 def test_typed_fields_become_reference_values(client, recorder):
-    client.post(
-        "/",
-        files={"label": ("upload.png", _PNG_1x1, "image/png")},
+    _check(
+        client,
+        recorder,
+        files={"labels": ("upload.png", _PNG_1x1, "image/png")},
         data={
             "beverage_type": "distilled_spirits",
             "brand_name": "Stone's Throw",
@@ -114,9 +137,10 @@ def test_typed_fields_become_reference_values(client, recorder):
 
 
 def test_the_declared_beverage_type_picks_the_rule_pack(client, recorder):
-    client.post(
-        "/",
-        files={"label": ("upload.png", _PNG_1x1, "image/png")},
+    _check(
+        client,
+        recorder,
+        files={"labels": ("upload.png", _PNG_1x1, "image/png")},
         data={"beverage_type": "wine", "wine_appellation": "Napa Valley"},
     )
     application = recorder.applications[0]
@@ -127,8 +151,8 @@ def test_the_declared_beverage_type_picks_the_rule_pack(client, recorder):
 def test_an_image_on_its_own_still_evaluates(client, recorder):
     """Today's behaviour is preserved: no application, no comparisons, and the
     presence and warning checks still run."""
-    response = client.post("/", files={"label": ("upload.png", _PNG_1x1, "image/png")})
-    assert response.status_code == 200
+    response = _check(client, recorder, files={"labels": ("upload.png", _PNG_1x1, "image/png")})
+    assert response.status_code == 303, response.text
     application = recorder.applications[0]
     assert application.expected_values == ()
     assert application.beverage_class is None
@@ -137,9 +161,10 @@ def test_an_image_on_its_own_still_evaluates(client, recorder):
 def test_an_unreadable_application_is_reported_not_ignored(client, recorder):
     """Dropping a field the reviewer filled in would show a checked label that
     was never compared."""
-    response = client.post(
-        "/",
-        files={"label": ("upload.png", _PNG_1x1, "image/png")},
+    response = _check(
+        client,
+        recorder,
+        files={"labels": ("upload.png", _PNG_1x1, "image/png")},
         data={"beverage_type": "cider", "brand_name": "Stone's Throw"},
     )
     assert response.status_code == 400
@@ -148,9 +173,10 @@ def test_an_unreadable_application_is_reported_not_ignored(client, recorder):
 
 
 def test_fields_without_a_beverage_type_are_reported(client, recorder):
-    response = client.post(
-        "/",
-        files={"label": ("upload.png", _PNG_1x1, "image/png")},
+    response = _check(
+        client,
+        recorder,
+        files={"labels": ("upload.png", _PNG_1x1, "image/png")},
         data={"beverage_type": "", "brand_name": "Stone's Throw"},
     )
     assert response.status_code == 400
@@ -159,39 +185,62 @@ def test_fields_without_a_beverage_type_are_reported(client, recorder):
 
 
 # ---------------------------------------------------------------------------
-# Bulk upload
+# More than one label
 # ---------------------------------------------------------------------------
 
 
-def test_the_bulk_page_asks_for_one_beverage_type():
+def test_the_form_says_the_typed_fields_describe_one_label():
     """A folder of wine labels checked against the spirits pack fires none of
-    the wine rules, so the batch form asks which pack applies to the set."""
-    response = TestClient(create_app()).get("/batches")
+    the wine rules, so the form says which of the typed fields carries over to
+    a submission of several, and which do not."""
+    response = TestClient(create_app()).get("/")
     assert 'name="beverage_type"' in response.text
+    assert "only the beverage type is used" in response.text.lower()
 
 
-def test_the_bulk_beverage_type_reaches_every_label(client, recorder):
-    response = client.post(
-        "/batches/upload",
+def test_the_typed_beverage_type_reaches_every_label(client, recorder):
+    response = _check(
+        client,
+        recorder,
+        expect=2,
         files=[
             ("labels", ("a.png", _PNG_1x1, "image/png")),
             ("labels", ("b.png", _PNG_1x1, "image/png")),
         ],
         data={"beverage_type": "malt_beverage"},
-        follow_redirects=False,
     )
     assert response.status_code == 303, response.text
     assert len(recorder.applications) == 2
     assert {a.beverage_class for a in recorder.applications} == {BeverageClass.MALT}
 
 
-def test_a_bulk_upload_without_a_beverage_type_still_runs(client, recorder):
-    """The batch form's type is an aid, not a gate: a reviewer who skips it gets
-    the same check the app gave before it existed."""
-    response = client.post(
-        "/batches/upload",
+def test_the_typed_brand_does_not_spread_across_several_labels(client, recorder):
+    """What the reviewer typed is the application for *one* label. Spread
+    across several it would claim every label declares the same brand, which is
+    a comparison the product must not invent."""
+    _check(
+        client,
+        recorder,
+        expect=2,
+        files=[
+            ("labels", ("a.png", _PNG_1x1, "image/png")),
+            ("labels", ("b.png", _PNG_1x1, "image/png")),
+        ],
+        data={"beverage_type": "wine", "brand_name": "Stone's Throw"},
+    )
+    assert len(recorder.applications) == 2
+    for application in recorder.applications:
+        assert application.beverage_class is BeverageClass.WINE
+        assert "brand_name" not in _expected(application)
+
+
+def test_a_submission_without_a_beverage_type_still_runs(client, recorder):
+    """The type is an aid, not a gate: a reviewer who skips it gets the same
+    check the app gave before it existed."""
+    response = _check(
+        client,
+        recorder,
         files=[("labels", ("a.png", _PNG_1x1, "image/png"))],
-        follow_redirects=False,
     )
     assert response.status_code == 303, response.text
     assert recorder.applications[0].beverage_class is None

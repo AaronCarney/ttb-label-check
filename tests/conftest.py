@@ -255,7 +255,7 @@ def pnpm_built_island() -> Path:
     subprocess.run([pnpm, "install", "--frozen-lockfile"], cwd=frontend, check=True)
     subprocess.run([pnpm, "build"], cwd=frontend, check=True)
     out_dir = root / "app" / "ui" / "static" / "island"
-    assert (out_dir / "single.js").exists(), "vite build did not produce single.js"
+    assert (out_dir / "app.js").exists(), "vite build did not produce app.js"
     return out_dir
 
 

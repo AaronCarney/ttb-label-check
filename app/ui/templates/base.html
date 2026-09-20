@@ -16,23 +16,25 @@
     <header role="banner">
       <h1>TTB Label Verification</h1>
       <p>Reviewer console — prototype</p>
+      {# One way in, whether the reviewer has one label or three hundred. The
+         nav carries the single link back to it rather than a choice between
+         two systems. #}
       <nav class="primary-nav" aria-label="Primary">
-        <a href="/">Single label</a>
-        <a href="/batches">Bulk batch</a>
+        <a href="/">Check labels</a>
       </nav>
     </header>
     <main id="main" role="main">
       {% block content %}{% endblock %}
     </main>
     <noscript>
-      <p><strong>JavaScript is required for the reviewer UI.</strong> For
-      programmatic submissions, use the API at <code>POST /labels</code>.
-      See the project README for details.</p>
+      <p><strong>JavaScript is required to watch results arrive.</strong> The
+      upload form itself works without it. For programmatic submissions, use the
+      API at <code>POST /labels</code>. See the project README for details.</p>
     </noscript>
     <footer role="contentinfo">
       <p>TTB AI-Powered Alcohol Label Verification — prototype.
       <a href="https://www.ttb.gov/labeling">TTB labeling regulations</a>.</p>
     </footer>
-    <script type="module" src="/static/island/{% block bundle_name_script %}single{% endblock %}.js"></script>
+    {% block page_script %}{% endblock %}
   </body>
 </html>

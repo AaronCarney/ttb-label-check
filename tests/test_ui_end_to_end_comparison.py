@@ -3,8 +3,13 @@
 The rule engine has always been able to compare a label with the application
 filed for it. What these tests cover is the path a reviewer actually takes: the
 page's own form, posted to the app's own route, through the real rule pack, to
-the result the page shows. Everything here is real except the reader, which
+the result the page receives. Everything here is real except the reader, which
 would otherwise call a vision model over the network.
+
+A check is a batch now, including a batch of one (`docs/decisions.md#0045`), so
+the result does not come back in the response to the form. The form redirects
+and the result arrives over the batch stream; these read it from the batch's own
+snapshot, which carries the same envelope the stream broadcasts.
 
 Both labels are real ones from the TTB Public COLA Registry, in
 `tests/fixtures/labels/manifest.json`:
@@ -20,8 +25,7 @@ Both labels are real ones from the TTB Public COLA Registry, in
 
 from __future__ import annotations
 
-import json
-import re
+import time
 
 import pytest
 from fastapi.testclient import TestClient
@@ -103,7 +107,7 @@ def _readings(entry):
     return readings
 
 
-def _client_for(label_id: str) -> TestClient:
+def _app_for(label_id: str):
     """The real app, the real rule pack, the real evaluator, a stubbed reader."""
     evaluator = Evaluator(
         vision=FakeVisionExtractor(observations=_readings(entries_by_id()[label_id])),
@@ -112,12 +116,16 @@ def _client_for(label_id: str) -> TestClient:
     )
     app = create_app()
     app.dependency_overrides[_get_upload_evaluator] = lambda: evaluator
-    return TestClient(app)
+    return app
 
 
 @pytest.fixture
 def client():
-    return _client_for(DOMESTIC_WINE)
+    # Entered as a context manager, because the check runs as a background task
+    # on the app's own loop and a bare TestClient tears that loop down between
+    # requests.
+    with TestClient(_app_for(DOMESTIC_WINE)) as entered:
+        yield entered
 
 
 def _application_form(label_id: str, **overrides) -> dict[str, str]:
@@ -138,24 +146,31 @@ def _application_form(label_id: str, **overrides) -> dict[str, str]:
     return form
 
 
-def _envelope(response) -> dict:
-    assert response.status_code == 200, response.text
-    embedded = re.search(
-        r'<script id="envelope" type="application/json">(.*?)</script>',
-        response.text,
-        re.DOTALL,
-    )
-    assert embedded, "the page embedded no result envelope"
-    return json.loads(embedded.group(1))
+def _only_result(client, response) -> dict:
+    """The one label's finished result, read off the batch it was checked in."""
+    assert response.status_code == 303, response.text
+    batch_id = response.headers["location"].removeprefix("/batch/")
+    deadline = time.monotonic() + 20.0
+    while time.monotonic() < deadline:
+        snapshot = client.get(f"/batches/{batch_id}").json()
+        items = snapshot["items"]
+        if items and all(item["state"] in ("ready", "failed") for item in items):
+            break
+        time.sleep(0.02)
+    assert len(items) == 1, items
+    assert items[0]["result"] is not None, items[0]
+    return items[0]["result"]
 
 
 def _submit(client, label_id=DOMESTIC_WINE, **overrides) -> dict:
-    return _envelope(
+    return _only_result(
+        client,
         client.post(
             "/",
-            files={"label": ("label.png", _PNG_1x1, "image/png")},
+            files={"labels": ("label.png", _PNG_1x1, "image/png")},
             data=_application_form(label_id, **overrides),
-        )
+            follow_redirects=False,
+        ),
     )
 
 
@@ -251,8 +266,8 @@ def test_a_net_contents_written_in_another_unit_still_agrees(client):
 
 
 def test_an_imported_labels_origin_is_compared():
-    client = _client_for(IMPORTED_WINE)
-    outcomes = _rule_outcomes(_submit(client, IMPORTED_WINE))
+    with TestClient(_app_for(IMPORTED_WINE)) as client:
+        outcomes = _rule_outcomes(_submit(client, IMPORTED_WINE))
     assert outcomes["wine.origin.matches_application"] == "pass"
 
 
@@ -266,8 +281,8 @@ def test_an_origin_the_application_does_not_carry_goes_to_a_reviewer():
     and none of those is built — so a hard `fail` here would reject compliant
     imports on a gap in the reader. See `docs/decisions.md#0016`.
     """
-    client = _client_for(IMPORTED_WINE)
-    envelope = _submit(client, IMPORTED_WINE, origin="PORTUGAL")
+    with TestClient(_app_for(IMPORTED_WINE)) as client:
+        envelope = _submit(client, IMPORTED_WINE, origin="PORTUGAL")
     assert _rule_outcomes(envelope)["wine.origin.matches_application"] == "needs_review"
 
 
@@ -292,7 +307,14 @@ def test_without_an_application_the_label_is_read_and_nothing_is_checked(client)
     says so in one audit row rather than leaving the reviewer to notice an
     absence. See `docs/decisions.md#0010`.
     """
-    envelope = _envelope(client.post("/", files={"label": ("label.png", _PNG_1x1, "image/png")}))
+    envelope = _only_result(
+        client,
+        client.post(
+            "/",
+            files={"labels": ("label.png", _PNG_1x1, "image/png")},
+            follow_redirects=False,
+        ),
+    )
     trace = envelope["audit_trail"]["per_rule_trace"]
     assert [row["rule_id"] for row in trace] == ["ENGINE.RULE_PACK.NOT_SELECTED"], trace
     assert trace[0]["evidence_ref"] == "rule_pack/none"

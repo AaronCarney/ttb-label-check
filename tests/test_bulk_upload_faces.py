@@ -1,6 +1,6 @@
 """Two files that are two faces of one label become one label, not two.
 
-The fault this file guards: the batch upload built one label per uploaded file,
+The fault this file guards: the upload route built one label per uploaded file,
 so a bourbon whose government warning is printed on the back came back twice —
 once as a front that fails the warning check, once as a back with no brand and
 no class. Two wrong answers about one product, on the path that exists to show
@@ -57,8 +57,8 @@ class _RecordingEvaluator:
 
 
 async def _upload(files: list[tuple[str, tuple[str, bytes, str]]]) -> list[Label]:
-    """Post `files` to the batch upload route and return the labels the
-    evaluator was handed, in the order the worker asked about them."""
+    """Post `files` to the upload route and return the labels the evaluator was
+    handed, in the order the worker asked about them."""
     from app.api.ui import _get_upload_evaluator
     from app.main import create_app
 
@@ -67,7 +67,7 @@ async def _upload(files: list[tuple[str, tuple[str, bytes, str]]]) -> list[Label
     app.dependency_overrides[_get_upload_evaluator] = lambda: evaluator
     transport = httpx.ASGITransport(app=app)
     async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
-        response = await client.post("/batches/upload", files=files)
+        response = await client.post("/", files=files)
         assert response.status_code == 303, response.text
         batch_id = response.headers["location"].removeprefix("/batch/")
         async with client.stream("GET", f"/batches/{batch_id}/stream") as stream:
@@ -214,7 +214,7 @@ async def test_an_unreadable_half_does_not_take_its_partner_down() -> None:
     transport = httpx.ASGITransport(app=app)
     async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
         response = await client.post(
-            "/batches/upload",
+            "/",
             files=[
                 _file("lucy-front.png"),
                 ("labels", ("lucy-back.png", b"not an image at all", "image/png")),

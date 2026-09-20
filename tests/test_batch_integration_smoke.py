@@ -2,13 +2,13 @@
 response. Drains the events and asserts five per-label events, a stream-end,
 no advisories, and that the connection closes.
 
-The batch is started through `POST /batches/upload`, not the JSON
-`POST /batches`. That is the whole point of the canary: the upload route is the
-one that carries the label images, and since `docs/decisions.md#0020` an item
-with no image is refused by name without ever reaching the evaluator. Run over
-the JSON route these tests would still be green and would be checking nothing —
-five refusals in place of five evaluations. The JSON route's own behaviour is
-covered in `tests/test_batch_endpoint_post.py`.
+The batch is started through `POST /`, the form, not the JSON `POST /batches`.
+That is the whole point of the canary: the form is the route that carries the
+label images, and since `docs/decisions.md#0020` an item with no image is
+refused by name without ever reaching the evaluator. Run over the JSON route
+these tests would still be green and would be checking nothing — five refusals
+in place of five evaluations. The JSON route's own behaviour is covered in
+`tests/test_batch_endpoint_post.py`.
 """
 
 import asyncio
@@ -42,7 +42,7 @@ async def test_5_item_batch_end_to_end_via_real_sse_response():
     )
     transport = httpx.ASGITransport(app=app)
     async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
-        upload_resp = await client.post("/batches/upload", files=_five_png_files())
+        upload_resp = await client.post("/", files=_five_png_files())
         assert upload_resp.status_code == 303, upload_resp.text
         batch_id = upload_resp.headers["location"].removeprefix("/batch/")
 
@@ -78,7 +78,7 @@ async def test_5_item_batch_with_mid_batch_override_continues_to_completion():
     app.dependency_overrides[_get_upload_evaluator] = lambda: _fake_evaluator(plan=plan)
     transport = httpx.ASGITransport(app=app)
     async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
-        upload_resp = await client.post("/batches/upload", files=_five_png_files())
+        upload_resp = await client.post("/", files=_five_png_files())
         assert upload_resp.status_code == 303, upload_resp.text
         batch_id = upload_resp.headers["location"].removeprefix("/batch/")
 

@@ -1,7 +1,7 @@
 """The reviewer's override picker offers only codes the override endpoint accepts.
 
-`frontend/src/single.tsx` carries its own short list of reason codes for the
-override drawer, so the picker and `rules/reason_codes.yaml` can drift apart
+`frontend/src/components/LabelResult.tsx` carries its own short list of reason
+codes for the override drawer, so the picker and `rules/reason_codes.yaml` can drift apart
 without anything noticing: `app/api/overrides.py` refuses a code the registry
 does not list, and the reviewer meets a 400 at the point of overriding.
 
@@ -17,13 +17,13 @@ from pathlib import Path
 import yaml
 
 ROOT = Path(__file__).resolve().parent.parent
-PICKER_SOURCE = ROOT / "frontend" / "src" / "single.tsx"
+PICKER_SOURCE = ROOT / "frontend" / "src" / "components" / "LabelResult.tsx"
 REGISTRY = ROOT / "rules" / "reason_codes.yaml"
 
 
 def _picker_codes() -> list[str]:
     source = PICKER_SOURCE.read_text(encoding="utf-8")
-    _, _, after = source.partition("const _REASON_CODES: ReasonCodeEntry[] = [")
+    _, _, after = source.partition("export const REASON_CODES: ReasonCodeEntry[] = [")
     assert after, f"override picker array not found in {PICKER_SOURCE}"
     block, _, _ = after.partition("];")
     return re.findall(r'code:\s*"([^"]+)"', block)
