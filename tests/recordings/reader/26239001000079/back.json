@@ -1,0 +1,240 @@
+{
+ "image": "26239001000079/back.jpg",
+ "schema_version": 1,
+ "frame_size": [
+  1050,
+  1275
+ ],
+ "rotation_deg": 0,
+ "boxes": [
+  {
+   "box": [
+    178.0,
+    135.0,
+    961.0,
+    423.0
+   ],
+   "text": "BONEFISHG",
+   "score": 0.9196
+  },
+  {
+   "box": [
+    363.0,
+    489.0,
+    703.0,
+    565.0
+   ],
+   "text": "VODKA",
+   "score": 0.9997
+  },
+  {
+   "box": [
+    222.0,
+    649.0,
+    835.0,
+    698.0
+   ],
+   "text": "Produced by Taconic Distillery in",
+   "score": 0.9924
+  },
+  {
+   "box": [
+    313.0,
+    701.0,
+    747.0,
+    741.0
+   ],
+   "text": "Stanfordville, New York",
+   "score": 0.9971
+  },
+  {
+   "box": [
+    354.0,
+    757.0,
+    704.0,
+    800.0
+   ],
+   "text": "taconicdistillery.com",
+   "score": 1.0
+  },
+  {
+   "box": [
+    73.0,
+    860.0,
+    983.0,
+    895.0
+   ],
+   "text": "GOVERNMENT WARNING: (1) ACCORDING TO THE SURGEON GENERAL",
+   "score": 0.9756
+  },
+  {
+   "box": [
+    75.0,
+    889.0,
+    983.0,
+    917.0
+   ],
+   "text": "WOMEN SHOULD NOT DRINK ALCOHOLIC BEVERAGES DURING PREGNANCY",
+   "score": 0.9856
+  },
+  {
+   "box": [
+    77.0,
+    914.0,
+    981.0,
+    944.0
+   ],
+   "text": "BECAUSE OF THE RISK OF BIRTH DEFECTS. (2) CONSUMPTION OF ALCOHOLIC",
+   "score": 0.9902
+  },
+  {
+   "box": [
+    78.0,
+    940.0,
+    982.0,
+    969.0
+   ],
+   "text": "BEVERAGES IMPAIRS YOUR ABILITY TO DRIV\u00c9 A CAR OR OPERATE MACHINERY,",
+   "score": 0.9845
+  },
+  {
+   "box": [
+    77.0,
+    965.0,
+    511.0,
+    995.0
+   ],
+   "text": "AND MAY CAUSE HEALTH PROBLEMS.",
+   "score": 0.9913
+  },
+  {
+   "box": [
+    593.0,
+    1182.0,
+    917.0,
+    1208.0
+   ],
+   "text": "PLEASE DRINK RESPONSIBLY",
+   "score": 0.9992
+  }
+ ],
+ "warning_boxes": [
+  {
+   "box": [
+    178.0,
+    135.0,
+    961.0,
+    423.0
+   ],
+   "text": "BONEFISHG",
+   "score": 0.9196
+  },
+  {
+   "box": [
+    363.0,
+    489.0,
+    703.0,
+    565.0
+   ],
+   "text": "VODKA",
+   "score": 0.9997
+  },
+  {
+   "box": [
+    222.0,
+    649.0,
+    835.0,
+    698.0
+   ],
+   "text": "Produced by Taconic Distillery in",
+   "score": 0.9924
+  },
+  {
+   "box": [
+    313.0,
+    701.0,
+    747.0,
+    741.0
+   ],
+   "text": "Stanfordville, New York",
+   "score": 0.9971
+  },
+  {
+   "box": [
+    354.0,
+    757.0,
+    704.0,
+    800.0
+   ],
+   "text": "taconicdistillery.com",
+   "score": 1.0
+  },
+  {
+   "box": [
+    73.0,
+    860.0,
+    983.0,
+    895.0
+   ],
+   "text": "GOVERNMENT WARNING: (1) ACCORDING TO THE SURGEON GENERAL",
+   "score": 0.9756
+  },
+  {
+   "box": [
+    75.0,
+    889.0,
+    983.0,
+    917.0
+   ],
+   "text": "WOMEN SHOULD NOT DRINK ALCOHOLIC BEVERAGES DURING PREGNANCY",
+   "score": 0.9856
+  },
+  {
+   "box": [
+    77.0,
+    914.0,
+    981.0,
+    944.0
+   ],
+   "text": "BECAUSE OF THE RISK OF BIRTH DEFECTS. (2) CONSUMPTION OF ALCOHOLIC",
+   "score": 0.9902
+  },
+  {
+   "box": [
+    78.0,
+    940.0,
+    982.0,
+    969.0
+   ],
+   "text": "BEVERAGES IMPAIRS YOUR ABILITY TO DRIV\u00c9 A CAR OR OPERATE MACHINERY,",
+   "score": 0.9845
+  },
+  {
+   "box": [
+    77.0,
+    965.0,
+    511.0,
+    995.0
+   ],
+   "text": "AND MAY CAUSE HEALTH PROBLEMS.",
+   "score": 0.9913
+  },
+  {
+   "box": [
+    593.0,
+    1182.0,
+    917.0,
+    1208.0
+   ],
+   "text": "PLEASE DRINK RESPONSIBLY",
+   "score": 0.9992
+  }
+ ],
+ "heading_measurement": {
+  "is_bold": true,
+  "mean_stroke_width": 4.1603,
+  "mean_character_height": 12.7143,
+  "width_height_ratio": 0.3272,
+  "confident": true
+ }
+}

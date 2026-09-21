@@ -1,0 +1,640 @@
+{
+ "image": "26218001000369/back.jpg",
+ "schema_version": 1,
+ "frame_size": [
+  1005,
+  1043
+ ],
+ "rotation_deg": 0,
+ "boxes": [
+  {
+   "box": [
+    251.0,
+    27.0,
+    753.0,
+    122.0
+   ],
+   "text": "AODH IRISH WHISKEY",
+   "score": 0.9997
+  },
+  {
+   "box": [
+    98.0,
+    123.0,
+    889.0,
+    157.0
+   ],
+   "text": "AODH IS FLAMED BY LEGEND AND FORGED IN FIRE.",
+   "score": 0.9939
+  },
+  {
+   "box": [
+    52.0,
+    160.0,
+    936.0,
+    190.0
+   ],
+   "text": "IGNITE YOUR SENSES WITH A SPIRIT THAT NEVER FADES.",
+   "score": 0.9899
+  },
+  {
+   "box": [
+    48.0,
+    207.0,
+    679.0,
+    236.0
+   ],
+   "text": "BRAND OWNED BY ALLIED BLENDERS AND DISTILLERS LIMITED.",
+   "score": 0.993
+  },
+  {
+   "box": [
+    48.0,
+    237.0,
+    905.0,
+    266.0
+   ],
+   "text": "REGD. OFF.: 394/C, LAMINGTON CHAMBERS, LAMINGTON ROAD, MUMBAI - 400004, MH.",
+   "score": 0.9732
+  },
+  {
+   "box": [
+    47.0,
+    276.0,
+    666.0,
+    304.0
+   ],
+   "text": "BOTTLED BY ALLIED BLENDERS AND DISTILLERS LIMITED,",
+   "score": 0.9993
+  },
+  {
+   "box": [
+    48.0,
+    306.0,
+    845.0,
+    335.0
+   ],
+   "text": "PLOT NO. 5,6,7, 7-A, MIDC INDUSTRIAL AREA, CHIKALTHANA, CHHATRAPATI",
+   "score": 0.9871
+  },
+  {
+   "box": [
+    48.0,
+    335.0,
+    514.0,
+    363.0
+   ],
+   "text": "SAMBHAJINAGAR - 431006, MAHARASHTRA.",
+   "score": 0.9963
+  },
+  {
+   "box": [
+    47.0,
+    378.0,
+    874.0,
+    409.0
+   ],
+   "text": "MKT. BY: ABD MAESTRO PRIVATE LIMITED, ADDRESS SAME AS BRAND OWNER.",
+   "score": 0.999
+  },
+  {
+   "box": [
+    47.0,
+    410.0,
+    541.0,
+    440.0
+   ],
+   "text": "CUSTOMER CARE EMAIL: CSO@ABDINDIA.COM,",
+   "score": 0.9984
+  },
+  {
+   "box": [
+    46.0,
+    439.0,
+    610.0,
+    467.0
+   ],
+   "text": "WWW.ABDINDIA.COM, ADDRESS SAME AS REGD. OFF.",
+   "score": 0.9854
+  },
+  {
+   "box": [
+    46.0,
+    476.0,
+    512.0,
+    505.0
+   ],
+   "text": "IMPORTED BY: EASTERN LIQUORS USA. INC.",
+   "score": 0.9885
+  },
+  {
+   "box": [
+    44.0,
+    503.0,
+    824.0,
+    536.0
+   ],
+   "text": "990 WESTBURY ROAD, 2ND FLOOR SUIT 200, A,B,C WESTBURY, NY 11590 ,",
+   "score": 0.9841
+  },
+  {
+   "box": [
+    46.0,
+    534.0,
+    410.0,
+    563.0
+   ],
+   "text": "WWW.EASTERNLIQUORSUSA.COM",
+   "score": 0.9997
+  },
+  {
+   "box": [
+    803.0,
+    580.0,
+    857.0,
+    614.0
+   ],
+   "text": "ABD",
+   "score": 0.9984
+  },
+  {
+   "box": [
+    44.0,
+    609.0,
+    90.0,
+    640.0
+   ],
+   "text": "B.No.",
+   "score": 0.9994
+  },
+  {
+   "box": [
+    99.0,
+    603.0,
+    169.0,
+    636.0
+   ],
+   "text": "10MM",
+   "score": 0.9999
+  },
+  {
+   "box": [
+    258.0,
+    596.0,
+    300.0,
+    627.0
+   ],
+   "text": "Mfg.",
+   "score": 0.9983
+  },
+  {
+   "box": [
+    380.0,
+    605.0,
+    448.0,
+    638.0
+   ],
+   "text": "19MM",
+   "score": 0.9999
+  },
+  {
+   "box": [
+    257.0,
+    619.0,
+    302.0,
+    650.0
+   ],
+   "text": "Date",
+   "score": 0.9997
+  },
+  {
+   "box": [
+    47.0,
+    674.0,
+    894.0,
+    702.0
+   ],
+   "text": "GOVERNMENT WARNING: (1) ACCORDING TO THE SURGEON GENERAL, WOMEN SHOULD NOT DRINK",
+   "score": 0.9922
+  },
+  {
+   "box": [
+    47.0,
+    704.0,
+    793.0,
+    730.0
+   ],
+   "text": "ALCOHOLIC BEVERAGES DURING PREGNANCY BECAUSE OF THE RISK OF BIRTH DEFECTS.",
+   "score": 0.9917
+  },
+  {
+   "box": [
+    46.0,
+    730.0,
+    896.0,
+    762.0
+   ],
+   "text": "(2) CONSUMPTION OF ALCOHOLIC BEVERAGES IMPAIRS YOUR ABILITY TO DRIVE A CAR OR OPERATE",
+   "score": 0.9916
+  },
+  {
+   "box": [
+    46.0,
+    762.0,
+    474.0,
+    788.0
+   ],
+   "text": "MACHINERY, AND MAY CAUSE HEALTH PROBLEMS.",
+   "score": 0.9991
+  },
+  {
+   "box": [
+    45.0,
+    801.0,
+    439.0,
+    834.0
+   ],
+   "text": "FOR OVERSEAS EXPORT ONLY.",
+   "score": 0.9767
+  },
+  {
+   "box": [
+    46.0,
+    847.0,
+    273.0,
+    874.0
+   ],
+   "text": "ENJOY RESPONSIBLY",
+   "score": 0.9999
+  },
+  {
+   "box": [
+    95.0,
+    880.0,
+    197.0,
+    915.0
+   ],
+   "text": "CONTENTS:",
+   "score": 0.9999
+  },
+  {
+   "box": [
+    330.0,
+    882.0,
+    535.0,
+    936.0
+   ],
+   "text": "Alc. 42.8% by vol.",
+   "score": 0.9981
+  },
+  {
+   "box": [
+    102.0,
+    931.0,
+    191.0,
+    975.0
+   ],
+   "text": "750ml",
+   "score": 0.9999
+  },
+  {
+   "box": [
+    355.0,
+    929.0,
+    537.0,
+    984.0
+   ],
+   "text": "85.6 US PROOF",
+   "score": 0.9682
+  },
+  {
+   "box": [
+    606.0,
+    957.0,
+    914.0,
+    993.0
+   ],
+   "text": "8190154410804301",
+   "score": 0.9599
+  }
+ ],
+ "warning_boxes": [
+  {
+   "box": [
+    251.0,
+    27.0,
+    753.0,
+    122.0
+   ],
+   "text": "AODH IRISH WHISKEY",
+   "score": 0.9997
+  },
+  {
+   "box": [
+    98.0,
+    123.0,
+    889.0,
+    157.0
+   ],
+   "text": "AODH IS FLAMED BY LEGEND AND FORGED IN FIRE.",
+   "score": 0.9939
+  },
+  {
+   "box": [
+    52.0,
+    160.0,
+    936.0,
+    190.0
+   ],
+   "text": "IGNITE YOUR SENSES WITH A SPIRIT THAT NEVER FADES.",
+   "score": 0.9899
+  },
+  {
+   "box": [
+    48.0,
+    207.0,
+    679.0,
+    236.0
+   ],
+   "text": "BRAND OWNED BY ALLIED BLENDERS AND DISTILLERS LIMITED.",
+   "score": 0.993
+  },
+  {
+   "box": [
+    48.0,
+    237.0,
+    905.0,
+    266.0
+   ],
+   "text": "REGD. OFF.: 394/C, LAMINGTON CHAMBERS, LAMINGTON ROAD, MUMBAI - 400004, MH.",
+   "score": 0.9732
+  },
+  {
+   "box": [
+    47.0,
+    276.0,
+    666.0,
+    304.0
+   ],
+   "text": "BOTTLED BY ALLIED BLENDERS AND DISTILLERS LIMITED,",
+   "score": 0.9993
+  },
+  {
+   "box": [
+    48.0,
+    306.0,
+    845.0,
+    335.0
+   ],
+   "text": "PLOT NO. 5,6,7, 7-A, MIDC INDUSTRIAL AREA, CHIKALTHANA, CHHATRAPATI",
+   "score": 0.9871
+  },
+  {
+   "box": [
+    48.0,
+    335.0,
+    514.0,
+    363.0
+   ],
+   "text": "SAMBHAJINAGAR - 431006, MAHARASHTRA.",
+   "score": 0.9963
+  },
+  {
+   "box": [
+    47.0,
+    378.0,
+    874.0,
+    409.0
+   ],
+   "text": "MKT. BY: ABD MAESTRO PRIVATE LIMITED, ADDRESS SAME AS BRAND OWNER.",
+   "score": 0.999
+  },
+  {
+   "box": [
+    47.0,
+    410.0,
+    541.0,
+    440.0
+   ],
+   "text": "CUSTOMER CARE EMAIL: CSO@ABDINDIA.COM,",
+   "score": 0.9984
+  },
+  {
+   "box": [
+    46.0,
+    439.0,
+    610.0,
+    467.0
+   ],
+   "text": "WWW.ABDINDIA.COM, ADDRESS SAME AS REGD. OFF.",
+   "score": 0.9854
+  },
+  {
+   "box": [
+    46.0,
+    476.0,
+    512.0,
+    505.0
+   ],
+   "text": "IMPORTED BY: EASTERN LIQUORS USA. INC.",
+   "score": 0.9885
+  },
+  {
+   "box": [
+    44.0,
+    503.0,
+    824.0,
+    536.0
+   ],
+   "text": "990 WESTBURY ROAD, 2ND FLOOR SUIT 200, A,B,C WESTBURY, NY 11590 ,",
+   "score": 0.9841
+  },
+  {
+   "box": [
+    46.0,
+    534.0,
+    410.0,
+    563.0
+   ],
+   "text": "WWW.EASTERNLIQUORSUSA.COM",
+   "score": 0.9997
+  },
+  {
+   "box": [
+    803.0,
+    580.0,
+    857.0,
+    614.0
+   ],
+   "text": "ABD",
+   "score": 0.9984
+  },
+  {
+   "box": [
+    44.0,
+    609.0,
+    90.0,
+    640.0
+   ],
+   "text": "B.No.",
+   "score": 0.9994
+  },
+  {
+   "box": [
+    99.0,
+    603.0,
+    169.0,
+    636.0
+   ],
+   "text": "10MM",
+   "score": 0.9999
+  },
+  {
+   "box": [
+    258.0,
+    596.0,
+    300.0,
+    627.0
+   ],
+   "text": "Mfg.",
+   "score": 0.9983
+  },
+  {
+   "box": [
+    380.0,
+    605.0,
+    448.0,
+    638.0
+   ],
+   "text": "19MM",
+   "score": 0.9999
+  },
+  {
+   "box": [
+    257.0,
+    619.0,
+    302.0,
+    650.0
+   ],
+   "text": "Date",
+   "score": 0.9997
+  },
+  {
+   "box": [
+    47.0,
+    674.0,
+    894.0,
+    702.0
+   ],
+   "text": "GOVERNMENT WARNING: (1) ACCORDING TO THE SURGEON GENERAL, WOMEN SHOULD NOT DRINK",
+   "score": 0.9922
+  },
+  {
+   "box": [
+    47.0,
+    704.0,
+    793.0,
+    730.0
+   ],
+   "text": "ALCOHOLIC BEVERAGES DURING PREGNANCY BECAUSE OF THE RISK OF BIRTH DEFECTS.",
+   "score": 0.9917
+  },
+  {
+   "box": [
+    46.0,
+    730.0,
+    896.0,
+    762.0
+   ],
+   "text": "(2) CONSUMPTION OF ALCOHOLIC BEVERAGES IMPAIRS YOUR ABILITY TO DRIVE A CAR OR OPERATE",
+   "score": 0.9916
+  },
+  {
+   "box": [
+    46.0,
+    762.0,
+    474.0,
+    788.0
+   ],
+   "text": "MACHINERY, AND MAY CAUSE HEALTH PROBLEMS.",
+   "score": 0.9991
+  },
+  {
+   "box": [
+    45.0,
+    801.0,
+    439.0,
+    834.0
+   ],
+   "text": "FOR OVERSEAS EXPORT ONLY.",
+   "score": 0.9767
+  },
+  {
+   "box": [
+    46.0,
+    847.0,
+    273.0,
+    874.0
+   ],
+   "text": "ENJOY RESPONSIBLY",
+   "score": 0.9999
+  },
+  {
+   "box": [
+    95.0,
+    880.0,
+    197.0,
+    915.0
+   ],
+   "text": "CONTENTS:",
+   "score": 0.9999
+  },
+  {
+   "box": [
+    330.0,
+    882.0,
+    535.0,
+    936.0
+   ],
+   "text": "Alc. 42.8% by vol.",
+   "score": 0.9981
+  },
+  {
+   "box": [
+    102.0,
+    931.0,
+    191.0,
+    975.0
+   ],
+   "text": "750ml",
+   "score": 0.9999
+  },
+  {
+   "box": [
+    355.0,
+    929.0,
+    537.0,
+    984.0
+   ],
+   "text": "85.6 US PROOF",
+   "score": 0.9682
+  },
+  {
+   "box": [
+    606.0,
+    957.0,
+    914.0,
+    993.0
+   ],
+   "text": "8190154410804301",
+   "score": 0.9599
+  }
+ ],
+ "heading_measurement": {
+  "is_bold": false,
+  "mean_stroke_width": 2.2165,
+  "mean_character_height": 16.8143,
+  "width_height_ratio": 0.1318,
+  "confident": true
+ }
+}

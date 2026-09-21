@@ -1,0 +1,420 @@
+{
+ "image": "26232001000404/back.jpg",
+ "schema_version": 1,
+ "frame_size": [
+  994,
+  816
+ ],
+ "rotation_deg": 0,
+ "boxes": [
+  {
+   "box": [
+    163.0,
+    38.0,
+    840.0,
+    183.0
+   ],
+   "text": "Black&White",
+   "score": 0.999
+  },
+  {
+   "box": [
+    217.0,
+    170.0,
+    750.0,
+    277.0
+   ],
+   "text": "Blended ScotchWhisky",
+   "score": 0.9794
+  },
+  {
+   "box": [
+    20.0,
+    277.0,
+    544.0,
+    315.0
+   ],
+   "text": "GOVERNMENT WARNING: (1) ACCORDING TO THE SUR-",
+   "score": 0.9887
+  },
+  {
+   "box": [
+    632.0,
+    302.0,
+    698.0,
+    349.0
+   ],
+   "text": "18+",
+   "score": 0.9967
+  },
+  {
+   "box": [
+    21.0,
+    313.0,
+    538.0,
+    348.0
+   ],
+   "text": "GEON GENERAL, WOMEN SHOULD NOT DRINK ALCOHOLIC",
+   "score": 0.9994
+  },
+  {
+   "box": [
+    21.0,
+    349.0,
+    540.0,
+    384.0
+   ],
+   "text": "BEVERAGES DURING PREGNANCY BECAUSE OF THE RISK",
+   "score": 0.9987
+  },
+  {
+   "box": [
+    752.0,
+    358.0,
+    850.0,
+    382.0
+   ],
+   "text": "PLEASE RECYCLE",
+   "score": 0.9977
+  },
+  {
+   "box": [
+    25.0,
+    384.0,
+    543.0,
+    420.0
+   ],
+   "text": "OF BIRTH DEFECTS. (2) CONSUMPTION OF ALCOHOLIC BEV-",
+   "score": 0.9991
+  },
+  {
+   "box": [
+    21.0,
+    420.0,
+    544.0,
+    455.0
+   ],
+   "text": "ERAGES IMPAIRS YOUR ABILITY TO DRIVE A CAR OR OP-",
+   "score": 0.9698
+  },
+  {
+   "box": [
+    21.0,
+    456.0,
+    542.0,
+    491.0
+   ],
+   "text": "ERATE MACHINERY, AND MAY CAUSE HEALTH PROBLEMS.",
+   "score": 0.9962
+  },
+  {
+   "box": [
+    79.0,
+    510.0,
+    648.0,
+    554.0
+   ],
+   "text": "Serving Facts: Serving size: 1.5 fl oz (44 ml); Servings per",
+   "score": 0.9702
+  },
+  {
+   "box": [
+    80.0,
+    550.0,
+    645.0,
+    591.0
+   ],
+   "text": "container: 16; Amount Per Serving: Alcohol by volume: 40%",
+   "score": 0.9957
+  },
+  {
+   "box": [
+    82.0,
+    587.0,
+    645.0,
+    629.0
+   ],
+   "text": "(80 proof); Fl oz of alcohol: 0.6; Calories: 97; Carbohydrates: Og;",
+   "score": 0.9873
+  },
+  {
+   "box": [
+    81.0,
+    627.0,
+    256.0,
+    667.0
+   ],
+   "text": "Fat: Og; Protein: 0g",
+   "score": 0.968
+  },
+  {
+   "box": [
+    19.0,
+    670.0,
+    42.0,
+    744.0
+   ],
+   "text": "3105540678",
+   "score": 1.0
+  },
+  {
+   "box": [
+    84.0,
+    690.0,
+    342.0,
+    727.0
+   ],
+   "text": "Imported by: MENDEZ &",
+   "score": 0.9945
+  },
+  {
+   "box": [
+    461.0,
+    687.0,
+    660.0,
+    720.0
+   ],
+   "text": "DRINKiQ.COM",
+   "score": 0.9994
+  },
+  {
+   "box": [
+    87.0,
+    722.0,
+    336.0,
+    761.0
+   ],
+   "text": "C\u00d3MPANY, SAN JUAN,",
+   "score": 0.962
+  },
+  {
+   "box": [
+    431.0,
+    737.0,
+    690.0,
+    776.0
+   ],
+   "text": "Product of Scotland",
+   "score": 0.9953
+  },
+  {
+   "box": [
+    135.0,
+    753.0,
+    290.0,
+    790.0
+   ],
+   "text": "PUERTO RICO",
+   "score": 0.9988
+  }
+ ],
+ "warning_boxes": [
+  {
+   "box": [
+    163.0,
+    38.0,
+    840.0,
+    183.0
+   ],
+   "text": "Black&White",
+   "score": 0.999
+  },
+  {
+   "box": [
+    217.0,
+    170.0,
+    750.0,
+    277.0
+   ],
+   "text": "Blended ScotchWhisky",
+   "score": 0.9794
+  },
+  {
+   "box": [
+    20.0,
+    277.0,
+    544.0,
+    315.0
+   ],
+   "text": "GOVERNMENT WARNING: (1) ACCORDING TO THE SUR-",
+   "score": 0.9887
+  },
+  {
+   "box": [
+    632.0,
+    302.0,
+    698.0,
+    349.0
+   ],
+   "text": "18+",
+   "score": 0.9967
+  },
+  {
+   "box": [
+    21.0,
+    313.0,
+    538.0,
+    348.0
+   ],
+   "text": "GEON GENERAL, WOMEN SHOULD NOT DRINK ALCOHOLIC",
+   "score": 0.9994
+  },
+  {
+   "box": [
+    21.0,
+    349.0,
+    540.0,
+    384.0
+   ],
+   "text": "BEVERAGES DURING PREGNANCY BECAUSE OF THE RISK",
+   "score": 0.9987
+  },
+  {
+   "box": [
+    752.0,
+    358.0,
+    850.0,
+    382.0
+   ],
+   "text": "PLEASE RECYCLE",
+   "score": 0.9977
+  },
+  {
+   "box": [
+    25.0,
+    384.0,
+    543.0,
+    420.0
+   ],
+   "text": "OF BIRTH DEFECTS. (2) CONSUMPTION OF ALCOHOLIC BEV-",
+   "score": 0.9991
+  },
+  {
+   "box": [
+    21.0,
+    420.0,
+    544.0,
+    455.0
+   ],
+   "text": "ERAGES IMPAIRS YOUR ABILITY TO DRIVE A CAR OR OP-",
+   "score": 0.9698
+  },
+  {
+   "box": [
+    21.0,
+    456.0,
+    542.0,
+    491.0
+   ],
+   "text": "ERATE MACHINERY, AND MAY CAUSE HEALTH PROBLEMS.",
+   "score": 0.9962
+  },
+  {
+   "box": [
+    79.0,
+    510.0,
+    648.0,
+    554.0
+   ],
+   "text": "Serving Facts: Serving size: 1.5 fl oz (44 ml); Servings per",
+   "score": 0.9702
+  },
+  {
+   "box": [
+    80.0,
+    550.0,
+    645.0,
+    591.0
+   ],
+   "text": "container: 16; Amount Per Serving: Alcohol by volume: 40%",
+   "score": 0.9957
+  },
+  {
+   "box": [
+    82.0,
+    587.0,
+    645.0,
+    629.0
+   ],
+   "text": "(80 proof); Fl oz of alcohol: 0.6; Calories: 97; Carbohydrates: Og;",
+   "score": 0.9873
+  },
+  {
+   "box": [
+    81.0,
+    627.0,
+    256.0,
+    667.0
+   ],
+   "text": "Fat: Og; Protein: 0g",
+   "score": 0.968
+  },
+  {
+   "box": [
+    19.0,
+    670.0,
+    42.0,
+    744.0
+   ],
+   "text": "3105540678",
+   "score": 1.0
+  },
+  {
+   "box": [
+    84.0,
+    690.0,
+    342.0,
+    727.0
+   ],
+   "text": "Imported by: MENDEZ &",
+   "score": 0.9945
+  },
+  {
+   "box": [
+    461.0,
+    687.0,
+    660.0,
+    720.0
+   ],
+   "text": "DRINKiQ.COM",
+   "score": 0.9994
+  },
+  {
+   "box": [
+    87.0,
+    722.0,
+    336.0,
+    761.0
+   ],
+   "text": "C\u00d3MPANY, SAN JUAN,",
+   "score": 0.962
+  },
+  {
+   "box": [
+    431.0,
+    737.0,
+    690.0,
+    776.0
+   ],
+   "text": "Product of Scotland",
+   "score": 0.9953
+  },
+  {
+   "box": [
+    135.0,
+    753.0,
+    290.0,
+    790.0
+   ],
+   "text": "PUERTO RICO",
+   "score": 0.9988
+  }
+ ],
+ "heading_measurement": {
+  "is_bold": false,
+  "mean_stroke_width": 2.6615,
+  "mean_character_height": 23.9,
+  "width_height_ratio": 0.1114,
+  "confident": true
+ }
+}

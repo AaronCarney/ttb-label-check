@@ -17,18 +17,15 @@ the heading measurement sits in the same pixel space as the boxes it was taken
 from, which `test_every_heading_box_lies_inside_its_own_frame` checks on real
 frozen boxes rather than on a drawn one.
 
-**It asserts its own coverage.** A suite that passes over eleven images and a
-suite that passes over sixty-two print the same green line, so the count and the
-image list are asserted outright. When the corpus grows, this file fails until
-somebody looks at what grew.
+**It asserts its own coverage.** A suite that passes over twenty-four images
+and a suite that passes over sixty-two print the same green line, so the count
+and the image list are asserted outright. When the corpus grows, this file fails
+until somebody looks at what grew.
 
-Why eleven and not the slice's twelve: `26237001000107/front.jpg` has no
-recording. It was recorded when `app/vision/quality.py` turned it away as
-glare, which produced no reading to record. That gate is gone - it counted
-bright pixels, which counts light label stock, and this sharp, readable face
-was one of seven it wrongly refused - so the image reads now, and a recording
-for it is one this suite could carry. Until one is frozen, eleven is what is on
-disk, and the count asserted is the count on disk.
+The twenty-four are a first slice of the corpus and every label that prints a
+proof statement, both faces of each. The proof labels are here because a proof
+read beside the ABV can reject a label, so how the reader finds one on real
+boxes is worth pinning without an OCR run.
 """
 
 from __future__ import annotations
@@ -39,6 +36,7 @@ from unittest import mock
 
 import pytest
 
+from app.rules.proof import find_proofs
 from app.rules.units import unit_key
 from app.vision.local import (
     MAX_EDGE_PX,
@@ -55,7 +53,7 @@ from eval.read_accuracy import CHECKS, LABELS_ROOT, WARNING_ASSET, _has_reading,
 
 RECORDINGS = Path("tests/recordings/reader")
 
-# The first slice of the corpus, minus the one image the quality gate rejects.
+# A first slice of the corpus, then the seven labels that print a proof.
 # Written out rather than globbed so that a recording appearing or disappearing
 # is a failure and not a silent change of subject.
 COVERED_IMAGES = frozenset(
@@ -71,10 +69,23 @@ COVERED_IMAGES = frozenset(
         "26240001000454/front.jpg",
         "variants/var-heading-title-case-front.jpg",
         "variants/var-warning-wording-front.jpg",
+        "26218001000369/front.jpg",
+        "26218001000369/back.jpg",
+        "26230001000540/front.jpg",
+        "26230001000540/back.jpg",
+        "26231001000662/front.jpg",
+        "26231001000662/back.jpg",
+        "26232001000404/front.jpg",
+        "26232001000404/back.jpg",
+        "26237001000107/front.jpg",
+        "26239001000079/front.jpg",
+        "26239001000079/back.jpg",
+        "26239001000081/front.jpg",
+        "26239001000081/back.jpg",
     }
 )
 
-# The seven manifest entries those eleven images belong to. Two are variants:
+# The thirteen manifest entries those images belong to. Two are variants:
 # `eval/read_accuracy.py` records them and does not score them, because they
 # exercise the rules rather than the reader. Here they are scored, because a
 # variant's `label_observed` is transcribed from the variant's own image and the
@@ -87,7 +98,24 @@ ENTRIES = (
     "ttb-26240001000454",
     "var-heading-title-case",
     "var-warning-wording",
+    "ttb-26218001000369",
+    "ttb-26230001000540",
+    "ttb-26231001000662",
+    "ttb-26232001000404",
+    "ttb-26239001000079",
+    "ttb-26239001000081",
 )
+
+# The proof each label prints, for the labels that print one.
+PRINTED_PROOF = {
+    "ttb-26218001000369": "85.6",
+    "ttb-26230001000540": "90",
+    "ttb-26231001000662": "80",
+    "ttb-26232001000404": "80",
+    "ttb-26237001000107": "80",
+    "ttb-26239001000079": "80",
+    "ttb-26239001000081": "80",
+}
 
 # What the reader gets wrong today, one line per check it misses, with the cause
 # beside it. Every pair not named here must be correct, and every pair named here
@@ -145,8 +173,7 @@ KNOWN_MISSES: dict[tuple[str, str], str] = {
         "ttb-26230001000420",
         "class_type",
     ): "C — returned the retailer 'Total Wine & More' for 'BARREL-AGED IMPERIAL STOUT'",
-    ("ttb-26237001000107", "abv"): "only the back is recorded here, and it prints no ABV",
-    ("ttb-26237001000107", "net_contents"): "same as above",
+    ("ttb-26237001000107", "brand"): "B — returned 'LOBO BLUE AG' for 'JUAN LOBO'",
     ("ttb-26237001000107", "warning_exact"): "the back's warning is not read word for word",
     (
         "ttb-26240001000454",
@@ -158,6 +185,37 @@ KNOWN_MISSES: dict[tuple[str, str], str] = {
         "brand",
     ): "B — returned the fanciful name 'ROSSASTRO' for the brand 'FABIO SIGNORELLI'",
     ("var-warning-wording", "brand"): "B — as the other variant; same image but for the warning",
+    (
+        "ttb-26218001000369",
+        "brand",
+    ): "B — returned the origin line 'DISTILLED IN IRELAND IRISH' for the brand 'AODH'",
+    ("ttb-26218001000369", "class_type"): "C — returned 'WHISKEY' for 'IRISH WHISKEY'",
+    (
+        "ttb-26218001000369",
+        "name_address",
+    ): "returned the distiller, not the importer the label names with its address",
+    (
+        "ttb-26218001000369",
+        "origin",
+    ): "returned nothing; 'DISTILLED IN IRELAND' was taken as the brand",
+    ("ttb-26230001000540", "brand"): "the engine read 'BENT 301' as 'ENT 301'",
+    ("ttb-26231001000662", "brand"): "the engine read 'Lucky Lucy's' as 'L3 Jucky Lucy's'",
+    ("ttb-26231001000662", "class_type"): "C — returned 'BOURBON' for 'BOURBON WHISKEY'",
+    (
+        "ttb-26232001000404",
+        "class_type",
+    ): "the engine read 'Scotch' as 'Sootch'",
+    ("ttb-26239001000079", "warning_exact"): "the warning is not read word for word",
+    ("ttb-26239001000081", "warning_exact"): "the warning is not read word for word",
+}
+
+# Alcohol statements the reader returns other than as printed, with the cause.
+# As with KNOWN_MISSES, a fixed one fails until its line is deleted.
+STATEMENT_MISSES = {
+    "ttb-26232001000404": (
+        "the engine read 'alc./vol.' as 'al./vol.', which the statement pattern "
+        "does not take, so only '40%' is kept"
+    ),
 }
 
 _FACE_ORDER = ("front", "back", "neck", "side")
@@ -214,10 +272,10 @@ def _scored(label_id: str) -> dict[str, bool | None]:
 
 
 def test_the_suite_covers_exactly_the_recordings_that_exist() -> None:
-    """Eleven images, named. A twelfth appearing is a failure until read."""
+    """Twenty-four images, named. Another appearing is a failure until read."""
     on_disk = {json.loads(p.read_text())["image"] for p in RECORDINGS.rglob("*.json")}
     assert on_disk == COVERED_IMAGES
-    assert len(on_disk) == 11
+    assert len(on_disk) == 24
 
 
 def test_the_covered_images_are_the_corpus_slice_they_claim_to_be() -> None:
@@ -233,11 +291,11 @@ def test_the_covered_images_are_the_corpus_slice_they_claim_to_be() -> None:
 
 def test_the_slice_is_a_fraction_of_the_corpus_and_says_so() -> None:
     """The denominator, asserted rather than assumed: 62 images in the corpus,
-    eleven replayed here. R8's accuracy figure is the 62 one and this is not it."""
+    twenty-four replayed here. R8's accuracy figure is the 62 one and this is not it."""
     entries = _entries()
     corpus = {rel for e in entries.values() for rel in e["images"].values()}
     assert len(corpus) == 62
-    assert len(COVERED_IMAGES) == 11
+    assert len(COVERED_IMAGES) == 24
 
 
 # ---------------------------------------------------------------------------
@@ -291,7 +349,7 @@ def test_no_image_and_no_socket_is_opened(monkeypatch: pytest.MonkeyPatch) -> No
     """`_parse` is pure, proved by breaking everything it must not reach.
 
     The rung-2 test in `tests/test_vision_reading_frame.py` proves it by reading
-    the signature. This proves it by replaying all eleven recordings with
+    the signature. This proves it by replaying every recording with
     `PIL.Image.open` and `socket.socket` raising, which also covers whatever
     `_parse` calls.
     """
@@ -318,7 +376,7 @@ def test_every_heading_box_lies_inside_its_own_frame() -> None:
     This is the real-data half of the fix in `tests/test_vision_reading_frame.py`.
     The reader shrinks a label longer than `MAX_EDGE_PX` and finds its boxes on
     the copy; the measurement crops a box out of an image and does not rescale.
-    Three of these eleven images were shrunk — `26230001000420/front.jpg`,
+    Three of the first eleven images were shrunk — `26230001000420/front.jpg`,
     2516×1594 for both variant fronts — so the defect's own conditions are
     present in the data, not just in a drawn fixture.
 
@@ -379,7 +437,7 @@ def test_the_warning_block_gives_back_the_label_lines_it_swept_up() -> None:
     other element, so a box the block keeps is a box no field can be read from.
     The block already trimmed its *text* at the statement's last words and kept
     the boxes past that point, which discarded mandatory elements the engine had
-    read perfectly — on these eleven recordings, `12% ALC. BY VOL.`, `750 ML`,
+    read perfectly — on the first eleven recordings, `12% ALC. BY VOL.`, `750 ML`,
     `PRODUCT OF ITALY` and an importer's name and city.
 
     Checked on the real frozen boxes, in the form the defect took: no box the
@@ -453,11 +511,17 @@ def test_the_alcohol_statement_is_returned_as_the_label_prints_it() -> None:
 
     Compared with spacing collapsed: the transcription is of the label, the
     reading is of the pixels, and `40 % ALC. BY VOL` against `40% ALC. BY VOL`
-    is a difference in kerning rather than in wording.
+    is a difference in kerning rather than in wording. A proof printed as part
+    of the statement ("40%ALC/VOL/80 PROOF") is reported in the reading's proof
+    list, so the statement is also accepted without it.
     """
 
     def spacing_removed(text: str) -> str:
         return "".join(text.split()).upper().rstrip(".")
+
+    def without_proof(text: str) -> str:
+        proofs = find_proofs(text)
+        return text[: proofs[0].start].rstrip(" /,(") if proofs else text
 
     entries = _entries()
     for label_id in ENTRIES:
@@ -467,25 +531,48 @@ def test_the_alcohol_statement_is_returned_as_the_label_prints_it() -> None:
             assert payload["alc_text"] == "", label_id
             continue
         printed = (entries[label_id]["label_observed"].get("abv") or {}).get("text")
-        assert spacing_removed(payload["alc_text"]) == spacing_removed(printed), (
-            label_id,
-            payload["alc_text"],
-            printed,
-        )
+        read = spacing_removed(payload["alc_text"])
+        right = read in (spacing_removed(printed), spacing_removed(without_proof(printed)))
+        assert right != (label_id in STATEMENT_MISSES), (label_id, payload["alc_text"], printed)
 
 
-def test_no_recorded_face_that_prints_no_proof_is_read_as_stating_one() -> None:
-    """None of the recorded faces prints a proof statement, and every number,
-    percentage and "100%" on them is read as something other than a proof.
+def test_no_label_that_prints_no_proof_is_read_as_stating_one() -> None:
+    """On the labels that print no proof, every number, percentage and "100%"
+    is read as something other than a proof.
 
     A figure read as a proof beside the ABV can reject a label
     (`spirits.alcohol.proof_agrees`), so a stray one here is the regression
     that matters. Every face still carries the list, empty, so the rule reports
     that it does not apply rather than finding no reading at all.
     """
-    for image in sorted(COVERED_IMAGES):
-        payload = parse_reading(thaw_reading(json.loads(_recording(image).read_text())))["abv"]
-        assert payload["proof"] == [], (image, payload["proof"])
+    entries = _entries()
+    for label_id in ENTRIES:
+        if label_id in PRINTED_PROOF:
+            continue
+        for image in entries[label_id]["images"].values():
+            if image not in COVERED_IMAGES:
+                continue
+            payload = parse_reading(thaw_reading(json.loads(_recording(image).read_text())))
+            assert payload["abv"]["proof"] == [], (image, payload["abv"]["proof"])
+
+
+def test_every_printed_proof_is_read_beside_the_alcohol_statement() -> None:
+    """Each proof label's proof is found, as printed, and nothing else is.
+
+    The figures are gathered across the label's faces, as the face merge
+    gathers them, because on some labels the proof and the ABV statement the
+    replay keeps are on different faces. Every figure found must sit beside an
+    ABV statement: only such a figure can reject, and a printed proof read as
+    one that cannot would never be checked.
+    """
+    entries = _entries()
+    for label_id, printed in PRINTED_PROOF.items():
+        found = []
+        for image in entries[label_id]["images"].values():
+            payload = parse_reading(thaw_reading(json.loads(_recording(image).read_text())))
+            found.extend(payload["abv"]["proof"])
+        assert {p["value"] for p in found} == {printed}, (label_id, found)
+        assert all(p["beside_abv"] for p in found), (label_id, found)
 
 
 def test_the_statement_is_cut_out_of_a_box_that_carries_other_text() -> None:

@@ -1,0 +1,314 @@
+{
+ "image": "26232001000404/front.jpg",
+ "schema_version": 1,
+ "frame_size": [
+  1029,
+  1300
+ ],
+ "rotation_deg": 0,
+ "boxes": [
+  {
+   "box": [
+    192.0,
+    130.0,
+    399.0,
+    156.0
+   ],
+   "text": "PRODUCT OF",
+   "score": 0.9944
+  },
+  {
+   "box": [
+    634.0,
+    131.0,
+    802.0,
+    154.0
+   ],
+   "text": "SCOTLAND",
+   "score": 0.9999
+  },
+  {
+   "box": [
+    356.0,
+    244.0,
+    677.0,
+    264.0
+   ],
+   "text": "SCOTCH WHISKY DISTILLERS",
+   "score": 0.9966
+  },
+  {
+   "box": [
+    343.0,
+    264.0,
+    688.0,
+    291.0
+   ],
+   "text": "JAMES BUCHANAN & COMPANY",
+   "score": 0.9981
+  },
+  {
+   "box": [
+    84.0,
+    283.0,
+    960.0,
+    478.0
+   ],
+   "text": "Black&White",
+   "score": 0.9999
+  },
+  {
+   "box": [
+    938.0,
+    428.0,
+    978.0,
+    454.0
+   ],
+   "text": "TM",
+   "score": 0.9996
+  },
+  {
+   "box": [
+    151.0,
+    445.0,
+    850.0,
+    610.0
+   ],
+   "text": "Blended Sootch Whisky",
+   "score": 0.9315
+  },
+  {
+   "box": [
+    228.0,
+    585.0,
+    800.0,
+    638.0
+   ],
+   "text": "FROM JAMES BUCHANAN & Co.",
+   "score": 0.8578
+  },
+  {
+   "box": [
+    285.0,
+    644.0,
+    741.0,
+    670.0
+   ],
+   "text": "MAKERS OF FINE WHISKY SINCE 1884",
+   "score": 0.9926
+  },
+  {
+   "box": [
+    964.0,
+    1012.0,
+    988.0,
+    1132.0
+   ],
+   "text": "3105540651",
+   "score": 1.0
+  },
+  {
+   "box": [
+    695.0,
+    1034.0,
+    716.0,
+    1050.0
+   ],
+   "text": "TM",
+   "score": 0.9998
+  },
+  {
+   "box": [
+    50.0,
+    1193.0,
+    201.0,
+    1269.0
+   ],
+   "text": "40% al./vol.",
+   "score": 0.9179
+  },
+  {
+   "box": [
+    869.0,
+    1195.0,
+    972.0,
+    1265.0
+   ],
+   "text": "700mL",
+   "score": 0.935
+  },
+  {
+   "box": [
+    205.0,
+    1205.0,
+    839.0,
+    1228.0
+   ],
+   "text": "DISTILLED, BLENDED AND BOTTLED IN SCOTLAND",
+   "score": 0.9982
+  },
+  {
+   "box": [
+    416.0,
+    1238.0,
+    636.0,
+    1260.0
+   ],
+   "text": "GLASGOW G4 9XF",
+   "score": 0.9988
+  }
+ ],
+ "warning_boxes": [
+  {
+   "box": [
+    192.0,
+    130.0,
+    399.0,
+    156.0
+   ],
+   "text": "PRODUCT OF",
+   "score": 0.9944
+  },
+  {
+   "box": [
+    634.0,
+    131.0,
+    802.0,
+    154.0
+   ],
+   "text": "SCOTLAND",
+   "score": 0.9999
+  },
+  {
+   "box": [
+    356.0,
+    244.0,
+    677.0,
+    264.0
+   ],
+   "text": "SCOTCH WHISKY DISTILLERS",
+   "score": 0.9966
+  },
+  {
+   "box": [
+    343.0,
+    264.0,
+    688.0,
+    291.0
+   ],
+   "text": "JAMES BUCHANAN & COMPANY",
+   "score": 0.9981
+  },
+  {
+   "box": [
+    84.0,
+    283.0,
+    960.0,
+    478.0
+   ],
+   "text": "Black&White",
+   "score": 0.9999
+  },
+  {
+   "box": [
+    938.0,
+    428.0,
+    978.0,
+    454.0
+   ],
+   "text": "TM",
+   "score": 0.9996
+  },
+  {
+   "box": [
+    151.0,
+    445.0,
+    850.0,
+    610.0
+   ],
+   "text": "Blended Sootch Whisky",
+   "score": 0.9315
+  },
+  {
+   "box": [
+    228.0,
+    585.0,
+    800.0,
+    638.0
+   ],
+   "text": "FROM JAMES BUCHANAN & Co.",
+   "score": 0.8578
+  },
+  {
+   "box": [
+    285.0,
+    644.0,
+    741.0,
+    670.0
+   ],
+   "text": "MAKERS OF FINE WHISKY SINCE 1884",
+   "score": 0.9926
+  },
+  {
+   "box": [
+    964.0,
+    1012.0,
+    988.0,
+    1132.0
+   ],
+   "text": "3105540651",
+   "score": 1.0
+  },
+  {
+   "box": [
+    695.0,
+    1034.0,
+    716.0,
+    1050.0
+   ],
+   "text": "TM",
+   "score": 0.9998
+  },
+  {
+   "box": [
+    50.0,
+    1193.0,
+    201.0,
+    1269.0
+   ],
+   "text": "40% al./vol.",
+   "score": 0.9179
+  },
+  {
+   "box": [
+    869.0,
+    1195.0,
+    972.0,
+    1265.0
+   ],
+   "text": "700mL",
+   "score": 0.935
+  },
+  {
+   "box": [
+    205.0,
+    1205.0,
+    839.0,
+    1228.0
+   ],
+   "text": "DISTILLED, BLENDED AND BOTTLED IN SCOTLAND",
+   "score": 0.9982
+  },
+  {
+   "box": [
+    416.0,
+    1238.0,
+    636.0,
+    1260.0
+   ],
+   "text": "GLASGOW G4 9XF",
+   "score": 0.9988
+  }
+ ],
+ "heading_measurement": null
+}

@@ -1,0 +1,240 @@
+{
+ "image": "26239001000081/back.jpg",
+ "schema_version": 1,
+ "frame_size": [
+  1050,
+  1275
+ ],
+ "rotation_deg": 0,
+ "boxes": [
+  {
+   "box": [
+    165.0,
+    136.0,
+    947.0,
+    417.0
+   ],
+   "text": "BONEFISH",
+   "score": 0.9928
+  },
+  {
+   "box": [
+    83.0,
+    491.0,
+    985.0,
+    564.0
+   ],
+   "text": "AMERICAN DRY GIN",
+   "score": 0.9614
+  },
+  {
+   "box": [
+    218.0,
+    646.0,
+    838.0,
+    703.0
+   ],
+   "text": "Produced by Taconic Distillery in",
+   "score": 0.9996
+  },
+  {
+   "box": [
+    313.0,
+    700.0,
+    748.0,
+    740.0
+   ],
+   "text": "Stanfordville, New York",
+   "score": 0.9989
+  },
+  {
+   "box": [
+    355.0,
+    760.0,
+    704.0,
+    800.0
+   ],
+   "text": "taconicdistillery.com",
+   "score": 1.0
+  },
+  {
+   "box": [
+    72.0,
+    859.0,
+    984.0,
+    896.0
+   ],
+   "text": "GOVERNMENT WARNING: (1). ACCORDING _TO THE SURGEON GENERAL,",
+   "score": 0.9562
+  },
+  {
+   "box": [
+    75.0,
+    889.0,
+    983.0,
+    917.0
+   ],
+   "text": "WOMEN SHOULD NOT DRINK ALCOHOLIC BEVERAGES DURING PREGNANCY",
+   "score": 0.985
+  },
+  {
+   "box": [
+    75.0,
+    911.0,
+    983.0,
+    945.0
+   ],
+   "text": "BECAUSE OF THE RISK OF BIRTH DEFECTS. (2) CONSUMPTION OF ALCOHOLIC",
+   "score": 0.98
+  },
+  {
+   "box": [
+    78.0,
+    940.0,
+    982.0,
+    969.0
+   ],
+   "text": "BEVERAGES IMPAIRS YOUR ABILITY TO DRIV\u00c9 A CAR OR OPERATE MACHINERY,",
+   "score": 0.9906
+  },
+  {
+   "box": [
+    77.0,
+    965.0,
+    511.0,
+    995.0
+   ],
+   "text": "AND MAY CAUSE HEALTH PROBLEMS.",
+   "score": 0.9919
+  },
+  {
+   "box": [
+    592.0,
+    1180.0,
+    915.0,
+    1207.0
+   ],
+   "text": "PLEASE DRINK RESPONSIBLY",
+   "score": 0.9931
+  }
+ ],
+ "warning_boxes": [
+  {
+   "box": [
+    165.0,
+    136.0,
+    947.0,
+    417.0
+   ],
+   "text": "BONEFISH",
+   "score": 0.9928
+  },
+  {
+   "box": [
+    83.0,
+    491.0,
+    985.0,
+    564.0
+   ],
+   "text": "AMERICAN DRY GIN",
+   "score": 0.9614
+  },
+  {
+   "box": [
+    218.0,
+    646.0,
+    838.0,
+    703.0
+   ],
+   "text": "Produced by Taconic Distillery in",
+   "score": 0.9996
+  },
+  {
+   "box": [
+    313.0,
+    700.0,
+    748.0,
+    740.0
+   ],
+   "text": "Stanfordville, New York",
+   "score": 0.9989
+  },
+  {
+   "box": [
+    355.0,
+    760.0,
+    704.0,
+    800.0
+   ],
+   "text": "taconicdistillery.com",
+   "score": 1.0
+  },
+  {
+   "box": [
+    72.0,
+    859.0,
+    984.0,
+    896.0
+   ],
+   "text": "GOVERNMENT WARNING: (1). ACCORDING _TO THE SURGEON GENERAL,",
+   "score": 0.9562
+  },
+  {
+   "box": [
+    75.0,
+    889.0,
+    983.0,
+    917.0
+   ],
+   "text": "WOMEN SHOULD NOT DRINK ALCOHOLIC BEVERAGES DURING PREGNANCY",
+   "score": 0.985
+  },
+  {
+   "box": [
+    75.0,
+    911.0,
+    983.0,
+    945.0
+   ],
+   "text": "BECAUSE OF THE RISK OF BIRTH DEFECTS. (2) CONSUMPTION OF ALCOHOLIC",
+   "score": 0.98
+  },
+  {
+   "box": [
+    78.0,
+    940.0,
+    982.0,
+    969.0
+   ],
+   "text": "BEVERAGES IMPAIRS YOUR ABILITY TO DRIV\u00c9 A CAR OR OPERATE MACHINERY,",
+   "score": 0.9906
+  },
+  {
+   "box": [
+    77.0,
+    965.0,
+    511.0,
+    995.0
+   ],
+   "text": "AND MAY CAUSE HEALTH PROBLEMS.",
+   "score": 0.9919
+  },
+  {
+   "box": [
+    592.0,
+    1180.0,
+    915.0,
+    1207.0
+   ],
+   "text": "PLEASE DRINK RESPONSIBLY",
+   "score": 0.9931
+  }
+ ],
+ "heading_measurement": {
+  "is_bold": true,
+  "mean_stroke_width": 2.8639,
+  "mean_character_height": 5.6389,
+  "width_height_ratio": 0.5079,
+  "confident": true
+ }
+}

@@ -1,0 +1,320 @@
+{
+ "image": "26231001000662/back.jpg",
+ "schema_version": 1,
+ "frame_size": [
+  1067,
+  1600
+ ],
+ "rotation_deg": 0,
+ "boxes": [
+  {
+   "box": [
+    313.0,
+    60.0,
+    774.0,
+    381.0
+   ],
+   "text": "L3",
+   "score": 0.8309
+  },
+  {
+   "box": [
+    154.0,
+    302.0,
+    914.0,
+    503.0
+   ],
+   "text": "Jucky Lucy's",
+   "score": 0.9764
+  },
+  {
+   "box": [
+    304.0,
+    476.0,
+    791.0,
+    512.0
+   ],
+   "text": "BAR-PIZZA - GAMING",
+   "score": 0.9503
+  },
+  {
+   "box": [
+    122.0,
+    755.0,
+    939.0,
+    881.0
+   ],
+   "text": "BOURBON",
+   "score": 0.987
+  },
+  {
+   "box": [
+    142.0,
+    904.0,
+    924.0,
+    1021.0
+   ],
+   "text": "WHISKEY",
+   "score": 0.9998
+  },
+  {
+   "box": [
+    103.0,
+    1060.0,
+    958.0,
+    1116.0
+   ],
+   "text": "DISTILLED IN INDIANA",
+   "score": 0.9637
+  },
+  {
+   "box": [
+    323.0,
+    1152.0,
+    744.0,
+    1198.0
+   ],
+   "text": "SMALL BATCH",
+   "score": 0.9984
+  },
+  {
+   "box": [
+    261.0,
+    1220.0,
+    807.0,
+    1263.0
+   ],
+   "text": "AGEDATLEASTONEYEAR",
+   "score": 0.9999
+  },
+  {
+   "box": [
+    131.0,
+    1282.0,
+    956.0,
+    1311.0
+   ],
+   "text": "GOVERNMENT WARNING : (1) ACCORDING TO THE SURGEON",
+   "score": 0.979
+  },
+  {
+   "box": [
+    101.0,
+    1316.0,
+    965.0,
+    1348.0
+   ],
+   "text": "GENERAL, WOMEN SHOULD NOT DRINK ALCOHOLIC BEVERAGES",
+   "score": 0.9799
+  },
+  {
+   "box": [
+    89.0,
+    1354.0,
+    976.0,
+    1383.0
+   ],
+   "text": "DURING PREGNANCY BECAUSE OF THE RISK OF BIRTH DEFECTS. (2)",
+   "score": 0.994
+  },
+  {
+   "box": [
+    68.0,
+    1390.0,
+    998.0,
+    1419.0
+   ],
+   "text": "CONSUMPTION OF ALCOHOLIC BEVERAGES IMPAIRS YOUR ABILITY TO",
+   "score": 0.9944
+  },
+  {
+   "box": [
+    96.0,
+    1424.0,
+    969.0,
+    1455.0
+   ],
+   "text": "DRIVE A CAR OR OPERATE MACHINERY, AND MAY CAUSE HEALTH",
+   "score": 0.9818
+  },
+  {
+   "box": [
+    452.0,
+    1460.0,
+    614.0,
+    1493.0
+   ],
+   "text": "PROBLEMS.",
+   "score": 1.0
+  },
+  {
+   "box": [
+    69.0,
+    1505.0,
+    996.0,
+    1539.0
+   ],
+   "text": "AGED AND BOTTLED BY CHICAGOLAND SPIRITS, ELK GROVE VILLAGE, IL.",
+   "score": 0.9938
+  }
+ ],
+ "warning_boxes": [
+  {
+   "box": [
+    313.0,
+    60.0,
+    774.0,
+    381.0
+   ],
+   "text": "L3",
+   "score": 0.8309
+  },
+  {
+   "box": [
+    154.0,
+    302.0,
+    914.0,
+    503.0
+   ],
+   "text": "Jucky Lucy's",
+   "score": 0.9764
+  },
+  {
+   "box": [
+    304.0,
+    476.0,
+    791.0,
+    512.0
+   ],
+   "text": "BAR-PIZZA - GAMING",
+   "score": 0.9503
+  },
+  {
+   "box": [
+    122.0,
+    755.0,
+    939.0,
+    881.0
+   ],
+   "text": "BOURBON",
+   "score": 0.987
+  },
+  {
+   "box": [
+    142.0,
+    904.0,
+    924.0,
+    1021.0
+   ],
+   "text": "WHISKEY",
+   "score": 0.9998
+  },
+  {
+   "box": [
+    103.0,
+    1060.0,
+    958.0,
+    1116.0
+   ],
+   "text": "DISTILLED IN INDIANA",
+   "score": 0.9637
+  },
+  {
+   "box": [
+    323.0,
+    1152.0,
+    744.0,
+    1198.0
+   ],
+   "text": "SMALL BATCH",
+   "score": 0.9984
+  },
+  {
+   "box": [
+    261.0,
+    1220.0,
+    807.0,
+    1263.0
+   ],
+   "text": "AGEDATLEASTONEYEAR",
+   "score": 0.9999
+  },
+  {
+   "box": [
+    131.0,
+    1282.0,
+    956.0,
+    1311.0
+   ],
+   "text": "GOVERNMENT WARNING : (1) ACCORDING TO THE SURGEON",
+   "score": 0.979
+  },
+  {
+   "box": [
+    101.0,
+    1316.0,
+    965.0,
+    1348.0
+   ],
+   "text": "GENERAL, WOMEN SHOULD NOT DRINK ALCOHOLIC BEVERAGES",
+   "score": 0.9799
+  },
+  {
+   "box": [
+    89.0,
+    1354.0,
+    976.0,
+    1383.0
+   ],
+   "text": "DURING PREGNANCY BECAUSE OF THE RISK OF BIRTH DEFECTS. (2)",
+   "score": 0.994
+  },
+  {
+   "box": [
+    68.0,
+    1390.0,
+    998.0,
+    1419.0
+   ],
+   "text": "CONSUMPTION OF ALCOHOLIC BEVERAGES IMPAIRS YOUR ABILITY TO",
+   "score": 0.9944
+  },
+  {
+   "box": [
+    96.0,
+    1424.0,
+    969.0,
+    1455.0
+   ],
+   "text": "DRIVE A CAR OR OPERATE MACHINERY, AND MAY CAUSE HEALTH",
+   "score": 0.9818
+  },
+  {
+   "box": [
+    452.0,
+    1460.0,
+    614.0,
+    1493.0
+   ],
+   "text": "PROBLEMS.",
+   "score": 1.0
+  },
+  {
+   "box": [
+    69.0,
+    1505.0,
+    996.0,
+    1539.0
+   ],
+   "text": "AGED AND BOTTLED BY CHICAGOLAND SPIRITS, ELK GROVE VILLAGE, IL.",
+   "score": 0.9938
+  }
+ ],
+ "heading_measurement": {
+  "is_bold": true,
+  "mean_stroke_width": 4.0559,
+  "mean_character_height": 12.1667,
+  "width_height_ratio": 0.3334,
+  "confident": true
+ }
+}
