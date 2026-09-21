@@ -165,200 +165,88 @@ to decide is a place the first two won.
 
 ## How we built it
 
-**The model reads. The rules decide.** That line is the centre of the design. A reader turns a
-photograph into text and locations; rules written as data, each naming the regulation it enforces,
-turn that into verdicts. We built a layer that sent finished results to a language model for a second opinion, and then
-deleted it — 644 lines of subsystem and about twenty test files, reaching into eighteen more — because a compliance verdict a
-model can influence cannot be defended to the person who has to sign it. What the deletion buys is
-the property the product is sold on: the same label and the same application give the same answer
-every time, with a citation attached. What it costs is every capability that needs judgement beyond a
-scored comparison. Those go to a person, which is the same answer the senior agent gave.
+**The model reads. The rules decide.** A reader turns a photograph into text and locations; rules
+written as data, each naming the regulation it enforces, turn that into verdicts. A layer that sent
+finished results to a language model for a second opinion was built and then deleted — 644 lines
+reaching into eighteen more files — because a verdict a model can influence cannot be defended to
+the person who signs it. Every capability needing judgement beyond a scored comparison goes to a
+person instead.
 
-**Nothing we depend on can move under us quietly.** The reader that runs by default sits inside the
-application, so there is no vendor who can change it. The optional hosted reader names a dated
-snapshot of the model rather than the name that follows whatever the vendor shipped last, and the
-prompt it sends carries its own version; the recorded answers the tests replay are filed under that
-snapshot, so moving to a new model leaves the tests with nothing to replay and says so. A vendor's
-upgrade is then a change someone makes deliberately and re-proves, rather than a day when the same
-label starts giving a different verdict.
+**Rules are data, not code.** Every check is an entry naming the section it enforces, and the build
+fails if a check carries that citation in code instead, so a compliance officer can read what the
+app checks without reading a programming language. Nothing we depend on moves under us quietly
+either: the default reader sits inside the application, and the optional hosted one names a dated
+snapshot of the model, so a vendor's upgrade is a change someone makes deliberately.
 
 **Every seam is there because something outside the code forced it.** The reader sits behind an
-interface with two implementations because the agency's outbound traffic is blocked: the one that
-ships has to run with no key and no network call, and the one that reads harder images has to be
-replaceable by something inside the agency's own boundary without a rewrite. The uploaded image is a
-file on disk rather than something held in the process because the clone a reviewer runs and the
-deployed container are the same application, and a directory of files is the only store that needs no
-account, no service and no configuration. Every check's result sits beside it for the same reason
-and on the same sweep, because an override arriving after the batch that held it has been dropped
-needs something to amend. We added no seam for elegance, and the seam we have not
-built is named as missing: no rule can yet say "this applies whatever the beverage is", which is why a
-label filed with no application is read and not checked.
+interface with two implementations because the agency's outbound traffic is blocked — what ships
+must run with no key, and what reads harder images must be replaceable inside the agency's boundary.
+The image and each result are files on disk because a clone and the deployed container are the same
+application. The seam we did not build is named as missing: no rule can say "this applies whatever
+the beverage is", which is why a label filed with no application is read and not checked.
 
-**Rules are data, not code.** Every check is an entry naming the regulation section it enforces, and
-the build fails if a check tries to carry that citation in code instead. A compliance officer can
-read what the app checks without reading a programming language, and a regulation change is an edit
-to data rather than a release.
+**Three outcomes, and the third is a real answer.** Pass, fail, and needs review, the third used
+wherever the app can see an element but cannot honestly settle it. Each result carries what was
+read, the application's value beside it, the rules that ran with their citations and a confidence
+level, next to the label image so a reviewer checks the answer rather than trusting it. The
+interface deliberately does not draw the region a reading came from: that box was measured in the
+frame the reader worked in, not the photograph the page shows.
 
-**Three outcomes, and the third is a real answer.** Pass, fail, and needs review. Needs review is
-used wherever the app can see an element but cannot honestly settle it, and it is the destination for
-every uncertainty rather than a fallback. Each result carries what was read, the application's value
-beside it, the rules that ran with their citations, and a confidence level, laid out next to the
-label image itself, so a reviewer checks the answer against the label rather than trusting it. The
-reading also records which part of the image it came from, and the interface deliberately does not
-draw that region on the label: the box is measured in the frame the reader worked in, which is the
-photograph after it has been shrunk to fit and sometimes turned upright, not the photograph the page
-shows. A box drawn from it would point confidently at the wrong place. Finding the spot on the label
-is still the reviewer's own work.
-
-**The regulation itself is in the product, and it was not typed in.** A finding's citation opens a
-column beside it holding the wording of the section — reserved, so it fills in place rather than
-covering the finding it explains, and reached from a chip that is a button so keyboard and pointer
-reach it alike. We had refused this once (`docs/decisions.md#0034`): the rules name 43 citations and
-the product held the wording of one, and filling the rest meant typing regulation text into a
-compliance tool with no test that could check it. What changed is that the eCFR publishes an API
-this machine can reach, so the wording is fetched from the government's own copy, committed with its
-issue date and a hash, and re-checked against that copy by a test.
-
-The part the API did not solve is the part that shaped the work. Our rules cite in prose —
-`27 CFR §4.32(a)(1), §4.33`, `27 CFR §5 Subpart I`, `27 CFR §4.35(e), 19 CFR §134.45` — and the eCFR
-is addressed by title, part and section, so something has to read one into the other. 0034 had
-rejected linking the chips for exactly this: heterogeneous strings "would mislink some, and a
-compliance tool showing the wrong regulation is worse than one showing none". So the parser refuses
-rather than guesses. A citation it cannot read whole yields nothing and the panel says the text is
-not held; a reference it cannot cover fails the whole string rather than showing the reviewer the
-parts that parsed, which would tell them the rule rests on less than it does. Every shape the rule
-pack uses is asserted against the sections a reader of that string would turn to, and ten strings
-that invite a guess are asserted to yield nothing (`docs/decisions.md#0046`).
-
-**Whether the record would answer a producer who contests a rejection.** It would not, and that is
-worth saying because everything above makes it sound as though it would. What survives is short —
-a check's result keeps for seven days so an override has something to amend, and then it is
-gone. What survives is also emptied on purpose: to keep no applicant material on disk, the kept copy
-blanks the value read off the artwork and the value the application declared, so it records that a
-field was rejected without recording what it said. That is the right privacy answer and it makes the
-kept copy useless as evidence — the two goals are in real conflict here, and we chose privacy. What survives is half-labelled: the trail attached to each verdict now names the rule set that
-produced it, by version and content hash, but it names the reader not at all — so a kept copy can
-say which rules judged that label and not what read it. The full record is in the result page's
-own source, but the interface offers no save, no print and no download, and the drawer that would
-display it is a developer's switch that is off by default — so getting the record means calling the
-service directly, which a developer does and a reviewing agent does not. Every rule that fired on an
-element is counted into that element's verdict and every citation is shown, but only the first
-finding's explanation is written out, so a label failing the fifth of the warning's seven rules says
-so without saying which one. And an override carries a made-up session number rather than a name,
-because nothing signs anyone in.
-
-**That gap is the cost of keeping almost nothing, and closing it is not a coding problem.** The same
-constraint that makes this safe to run — no database, two directories of files that empty themselves
-after a week, almost nothing for a privacy reviewer to ask about — is what leaves a contested
-rejection with no record to answer it. A
-deployment that must stand behind its verdicts needs three things we did not build: a retention
-period set by the agency's records schedule, a sign-in so an override names a person, and real
-versions on the trail. We would rather name the gap than fit a cheap version of it: a record that filled the reader's name
-with a placeholder would be worse than no record, because it would look like evidence.
+**The regulation itself is in the product, and it was not typed in.** A citation opens a column
+holding that section's wording, fetched from the eCFR's API, committed with its issue date and a
+hash, and re-checked by a test. We had refused this once, because filling 43 citations meant typing
+regulation text into a compliance tool with no test that could check it (`docs/decisions.md#0034`).
+The parser now refuses rather than guesses — a citation it cannot read whole yields nothing, and a
+reference it cannot cover fails the whole string (`docs/decisions.md#0046`).
 
 **We designed around the error that costs more.** A false rejection sends a compliant applicant back
-round a process that takes weeks, and it is the error that would end a pilot. A false pass is caught
+round a process that takes weeks, and it is the error that would end a pilot; a false pass is caught
 downstream by the agent, who rules on every finding anyway. That asymmetry is why anything
 unmeasurable goes to review rather than to rejection.
 
-**The numbers, and which of them we can defend.** Three numbers shape this product and they are not
-equally well founded. The
-tolerance that lets a net contents figure in millilitres match one in fluid ounces is one percent,
-derived rather than picked: above the 0.633 percent that rounding needs across every container size
-the regulations authorise, below the 1.216 percent at which an authorised size stops being
-distinguishable from the customary figure printed for the size next to it — and a test recomputes
-both bounds on every run, so the number cannot drift from its reason. One label at a time per
-running copy is a choice about the machine rather than a measured threshold: a read is sized to use
-all four of the service's processor cores, so a second read beside it would compete with the first
-rather than add to it.
-The brand-matching thresholds — 0.92 to pass, 0.85 to send to a person — rest on published
-record-matching work and on an argument about which error costs more, not on this project's own
-labels. That is the weaker evidence, and we would rather say so than present all three as equally
-settled.
+**The record would not answer a producer who contests a rejection.** To keep no applicant material
+on disk, the result kept for seven days blanks both what was read and what the application declared,
+the trail names the rule set but not the reader, and an override carries a session number because
+nothing signs anyone in. That is the right privacy answer and it makes the kept copy useless as
+evidence. Closing the gap needs a records schedule, a sign-in and real versions on the trail rather
+than code.
 
-Each of the three breaks differently in each direction, and each would be re-tuned differently.
-Tighten the tolerance and a compliant metric label mismatches on rounding alone; loosen it and an
-authorised container size passes as the size next to it — so re-tuning it is not a judgement call
-but a recomputation from the authorised-sizes table, which the test already does. Raise the one
-label at a time and the slowest five percent degrades the way the measurement showed; it cannot go
-below one, so the only direction is worse, and re-tuning means re-measuring on the core count the
-deployment actually has, because the figure is a property of the processor rather than of the code.
-Raise the brand thresholds and punctuation differences start going to a person, which is work
-without a finding; lower them and a genuinely different brand passes, which is the error this
-product cannot have — and re-tuning them needs the corpus sweep the next paragraph describes.
-
-Three more numbers are set and are not thresholds anybody tuned. The four upload caps are derived,
-and the derivation for each sits beside it in the code, as described above. The seven-day retention
-window is a convenience, named as one, and a real deployment takes its period from the agency's
-records schedule instead. The 1600-pixel long edge the reader downscales to before reading is the
-one of the three that could cost accuracy, and nothing here measures what it costs.
-
-**A larger set of numbers has no recorded reason at all.** The bands that turn a confidence score
-into low, medium or high. The confidence floor each rule demands before returning a verdict. The
-per-field multipliers for how sure the reader is it picked the right text — a note explains why a
-field found by a text pattern keeps more confidence than one found by type size, but nothing
-explains why the figure is 0.75 rather than 0.8. Both surviving image-quality gates. And the
-stroke-width ratio deciding whether the warning's heading is bold, which matters most, because the
-code says it is uncalibrated and it still drives a rule that can reject a label. Being wrong here is
-not symmetrical — too strict sends compliant labels to a person, too loose lets a doubtful one reach
-the agent who is reading it anyway — which is why they were safe to ship unargued, and is no reason
-to leave them so. Re-tuning every one needs the same thing: a wider corpus of real labels with a
-human verdict on each, swept against the thresholds. That has not been done.
+**The thresholds are not equally well founded, and the gap is on the record.** The one percent that
+lets millilitres match fluid ounces is derived — above the 0.633 percent rounding needs across every
+authorised container size, below the 1.216 percent at which one authorised size stops being
+distinguishable from the next — with a test recomputing both bounds on every run. The brand
+thresholds, 0.92 to pass and 0.85 to send to a person, rest on published record-matching work rather
+than on this project's labels. A larger set has no recorded reason at all: the confidence bands, the
+floor each rule demands, the per-field multipliers, both image-quality gates, and the stroke-width
+ratio deciding whether the heading is bold, which matters most because the code says it is
+uncalibrated and it still drives a rule that can reject a label. Being wrong is not symmetrical —
+too strict sends compliant labels to a person, too loose lets a doubtful one reach the agent reading
+it anyway — so they were safe to ship unargued. Re-tuning them needs a wider corpus with a human
+verdict on each, and that has not been done.
 
 **One label is checked first, then the rest run behind it.** The reviewer gets a real result in
-seconds instead of a progress bar, and starts working while the remainder runs. The batch then paces
-itself against how fast they are actually reading, rather than racing ahead to compute results nobody
-has asked for. Measured over twelve labels on the development box, that is
-what a batch buys and it is all it buys: the first result lands at 1.49 seconds, about what one
-label costs on its own, and the rest arrive roughly 1.12 seconds apart. Per label a batch is no
-dearer than a check alone — 1.16 seconds against 1.23 — and the engine's own time per label is the
-same either way, 1164 ms alone against 1179 ms inside the batch. A batch is a queue of the same
-work rather than a cheaper way to do it, and what it buys a reviewer is starting after one label
-instead of after twelve (`docs/evidence/2026-09-20-batch-latency-run1.json`; the seconds belong to
-that box, not to the deployed service).
+seconds instead of a progress bar, and the batch paces itself against how fast they are reading.
+Over twelve labels that is all a batch buys: per label it is no cheaper than a single check, 1.16
+seconds against 1.23, so it is a queue of the same work
+(`docs/evidence/2026-09-20-batch-latency-run1.json`, taken on the development box).
 
-**What it refuses to take.** An upload is identified by its own first bytes, and anything that is
-not a PNG or a JPEG is turned away before the reader sees it; what the browser declares the file to
-be is never consulted, because that is whatever the client chose to send. An image the app hands
-back later can only be asked for by a restricted set of characters, so no request can name a path
-outside the store. One bad file in a batch is refused by name and every other file still runs —
-ending a 300-label submission because one was a spreadsheet would punish the reviewer for the
-uploader's mistake. Size and count are bounded as well, and every bound is checked before the bytes
-behind it are read: 31.5 MB in one request, 1.5 MB for any single image, 100 images in a batch, and a
-refusal for any image whose header declares more than fifty million pixels — the decompression bomb
-that no byte cap catches, since a few kilobytes of PNG can declare a canvas of fifty thousand pixels
-square. Each number is derived rather than picked, and the file that defines them states the
-derivation beside each one: the request cap sits under the host's own body limit, so a refusal comes
-from this service naming the file that was too big rather than from the platform naming nothing, and
-the per-image cap is TTB's own, since COLAs Online refuses a label image over 1.5 MB and nothing
-larger can ever have been filed. A batch refused for size names every file that caused it, not the
-first alone.
-The hundred-image count is worth reading next to the request cap rather than on its own, because the
-two only agree while the images are small: a hundred files fit one request only if they average under
-322.3 KB. At the 1.5 MB per-image cap 20 fit, at the largest label in our own corpus — 547 KB — 59,
-and at the corpus median of about 184 KB all hundred. So the count is a fairness limit and the bytes
-are the real one, and a reviewer sending a hundred large files is refused by the request cap with
-every offending file named. `files_that_fit()` in `app/api/limits.py` derives those numbers from the
-caps; this paragraph does not carry its own arithmetic.
-Memory is bounded by one batch. The service checks one batch at a time and refuses a second while
-the first runs, keeps a finished batch only until the next one starts, and lets go of each image
-once its label is checked, so what it holds at once is one upload, shrinking as it is checked. There
-is no login, so the limit is per running copy of the service rather than per person: whoever uploads
-while a batch runs is told how far it has got and asked to wait (`docs/decisions.md#0041`).
+**What it refuses to take.** An upload is identified by its own first bytes, never by what the
+browser declares it to be, and an image can only be asked for by a restricted set of characters, so
+no request names a path outside the store. One bad file in a batch is refused by name and the rest
+still run. Size and count are bounded before the bytes behind them are read, and memory by one batch
+at a time (`docs/decisions.md#0041`).
+
+The hundred-image count only agrees with the request cap while the images are small: a hundred files
+fit one request only if they average under **322.3 KB**. At the 1.5 MB per-image cap **20** fit; at
+the largest label in our own corpus, 547 KB, **59**. So the count is a fairness limit and the bytes
+are the real one, and `files_that_fit()` derives both from the caps rather than restating them.
 
 **What a log is allowed to contain.** Logging is an allow-list rather than a filter: a line carries
-only the fields named in advance, anything else attached is dropped without comment, and the fields
-that could hold applicant material — the application's contents, the image bytes, the text read off
-the label — are blanked by a second pass. Both halves have tests. What the allow-list does not
-govern is a line's message text, which the formatter writes before the allow-list runs, so the
-discipline it enforces is that nothing carrying applicant material may reach a message at all. One
-thing did. The name of the file the uploader sent was also the identifier every line correlated on,
-so an uploader who named a file after a person put that person in the log — the allow-list had been
-built to make exactly that impossible, and a string that was on it by design walked around it. The
-two are now separated by what they are for: the filename is display text that reaches the page and
-the refusal sentence, and the identifier a line correlates on is minted by the app. The test that
-holds it runs a person-named file through both the refusal path and the ordinary path and reads
-what the real handler emits.
+only the fields named in advance, and fields that could hold applicant material are blanked by a
+second pass. What it does not govern is a line's message text, and one thing walked around it — the
+uploaded file's name was also the identifier every line correlated on, so naming a file after a
+person put that person in the log. Display text and the correlating identifier are now separate, the
+second minted by the app.
 
 ## Tools, and why each
 
