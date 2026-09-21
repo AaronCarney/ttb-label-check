@@ -400,48 +400,27 @@ figure here.
 
 ## How the work was run
 
-Every fork is recorded where it was decided, with what was rejected and what settled it. The record
-is `docs/decisions.md`, one numbered entry per fork, and it is how a line of code traces back to its
-reason: a module that exists because of an argument cites that argument's number in a comment beside
-the code it explains, and a check names the regulation section it enforces in the rule file rather
-than in code. Eighteen modules carry such a citation today, naming thirteen decisions, alongside the
-requirement ids the same comments use — so the trace works where somebody wrote it and there is no
-index that guarantees it everywhere. What is guaranteed is the other direction: a test walks every
-`docs/decisions.md#NNNN` reference in the repository and fails if one names an entry that does not
-exist, so a citation cannot rot into a dead link even when the code around it moves.
+Every fork is recorded where it was decided, with what was rejected and why. The record is
+`docs/decisions.md`, one numbered entry per fork, and it is what a line of code traces back to: a
+module that exists because of an argument cites that argument's number in a comment beside the
+code. Eighteen modules carry such a citation today, naming thirteen decisions — so the trace works
+where somebody wrote it; no index guarantees it everywhere. What is guaranteed is the other
+direction: a test walks every `docs/decisions.md#NNNN` reference in the repository and fails if
+one names an entry that does not exist, so a citation cannot rot into a dead link when the code
+around it moves.
 
-That record governs nothing on purpose — it says why, and anything meant to bind future work goes
-into the requirements or the rules instead. A decision that was later reversed is marked and left
-standing rather than edited away, so the host reversal above can be read as it happened rather than
-as it was later rationalised.
+**How a change gets released.** Versions follow the usual three-part convention; the running
+service reads its own from the installed package rather than a constant in the source — that
+constant went stale, still saying 0.1.0 after the release that cut 0.2.0, which made the one field
+identifying a running build the one field that lied. The deploy builds from an export of the
+committed revision rather than the working tree, so nothing uncommitted can reach the image.
 
-Where a convention could be replaced by a check, we replaced it. The README's own claims are tested:
-every document path it names must resolve, and its accuracy section is forbidden from containing a
-percentage. The rule set fails the build if a rule has no implementation. Each of those started as a
-convention somebody broke.
-
-**How a change gets released.** Versions follow the usual three-part convention, and the running
-service reads its own from the installed package rather than a constant in the source — the constant
-went stale, still saying 0.1.0 after the release that cut 0.2.0, which made the one field
-identifying a running build the one field that lied. A changelog records each release, and there is
-one tagged release so far. The deploy builds from an export of the committed revision rather than
-the working tree, so nothing uncommitted on a developer's machine can reach the image, and it runs
-five checks first: the container file is present, the port the service is told to use is the one the
-container opens, the built interface bundle is committed, every path the build copies exists, and
-the working tree is clean. Every push runs the rest. Until a pipeline existed the suite ran only
-when somebody typed the command, which is how seven browser tests failed unnoticed for days; the
-pipeline now runs the three commands the README documents — lint, formatting, types — and then the
-whole suite on an image that installs pnpm and Playwright, so the browser group actually runs
-instead of skipping itself green. No job may be allowed to fail, and a test reads the pipeline file
-and fails if one is, because a job that cannot fail the pipeline is the same defect as a test that
-cannot fail. Origin is GitLab and that is where it runs; the GitHub remote is a mirror and runs
-nothing. The pipeline also gates the deploy. `scripts/deploy.sh` reads GitLab for the pipeline
-belonging to the exact commit it is about to ship and refuses unless that pipeline says `success`: a
-commit that was never pushed has no pipeline and is refused, one still running is refused, and one
-that failed is refused. `TTB_SKIP_PIPELINE_CHECK=1` is the escape hatch for a deploy that has to go
-out while GitLab is unreachable, and it prints on the terminal that nothing has tested what is being
-shipped. So a proven commit and a deployed image are no longer two separate acts of remembering;
-what is still a person's own act is typing the deploy command at all.
+**The pipeline gates the deploy.** Until one existed, seven browser tests failed unnoticed for
+days; every push now runs the lint, the formatter, the types and the whole suite, and no job may
+be allowed to fail — a test reads the pipeline file and fails if one is, because a job that cannot
+fail the pipeline is the same defect as a test that cannot fail. `scripts/deploy.sh` reads that
+verdict for the exact commit it is about to ship and refuses anything short of a pass, so a proven
+commit and a deployed image are no longer two separate acts of remembering.
 
 ## Assumptions we made
 
