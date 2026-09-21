@@ -270,47 +270,11 @@ clone and the deployed service are the same thing.
 ## What we can prove, and what we cannot
 
 **Our answer key is real labels.** We assembled 30 approved labels from TTB's public registry across
-all three beverage types, 14 of them imports, plus 8 deliberately flawed variants. The brief suggested
-generating test labels; we used real ones because a generated label proves the reader can read what
-we drew, and a real one proves it can read what a producer actually printed. Each carries a
-transcription of what it prints and the expected result for each check, so the key is independent of
-the reader being tested.
-
-**The same corpus is what a reviewer downloads, and it is meant to be run rather than read
-about.** `/batches/sample.zip` ships ten of those thirty labels at random, both faces of each where
-both were filed, and `applications.csv` beside them carrying the application really filed for each
-one. Unzipped and dropped whole into the batch form, it exercises the product's actual claim —
-every label checked against its own application — rather than a demonstration of it. What the pack
-puts in front of a reviewer, from the thirty it draws on:
-
-- **All three beverage types in one batch**, which is why a row's own `beverage_type` overrides the
-  form's single select: fourteen distilled spirits, eight wines and eight malt beverages, each
-  judged by the rule pack for its own class.
-- **Labels that are more than one photograph.** Twenty-six of the thirty were filed with a back, and
-  twenty of them print their GOVERNMENT WARNING there. A batch that read fronts only would fail the
-  warning check on labels that carry it, so pairing the faces is not a convenience — it is the
-  difference between the corpus passing and the corpus failing.
-- **Passes that are not literal matches**, which is most of what a reviewer's judgement is spent on:
-  a label printing `CHARDONNAY` against an application declaring `TABLE WHITE WINE`, a brand matched
-  on the fanciful name the same application declares, two differently worded quantities reduced to
-  one figure.
-- **The country-of-origin check actually running**, because fourteen of the thirty are imports and
-  the check does not apply to the rest.
-- **What the product refuses to decide.** A label whose photographs do not show a bottler's name and
-  address comes back as *"The reader did not find a name and address on this label, so this check
-  was not made"* — not as a finding that the label lacks it. That distinction is the product's
-  central honesty and the pack demonstrates it on a real label.
-
-**Eight deliberately flawed variants are not in the pack, and that is deliberate.** They are real
-labels with one thing altered — one word of a GOVERNMENT WARNING repainted from *impairs* to *may
-impair*, a warning heading dropped into title case, an application's alcohol content set to 45%
-where the label prints 40% — and they exist in the test corpus to prove the checks can fail. What
-ships in the batch pack is thirty approved labels, because a demonstration built out of planted
-failures proves the plant rather than the product. Nothing in the app offers a variant to click:
-they live in the repository, under `tests/fixtures/labels/`, and the tests are what exercise them. A
-reviewer holding the pack who wants to watch a check fail has the honest version of the same thing
-available — change one value in `applications.csv` and re-upload, which is exactly the mismatch
-between a filing and a label that this product exists to catch.
+all three beverage types, 14 of them imports, plus 8 deliberately flawed variants. The brief
+suggested generating test labels; we used real ones because a generated label proves the reader can
+read what we drew, and a real one proves it can read what a producer actually printed. Each carries
+a transcription of what it prints and the expected result for each check, so the key is independent
+of the reader being tested.
 
 **That corpus caught four failures that unit tests called green.** A class-and-type rule that failed
 thirteen genuinely approved labels. A format check that matched a string it had built itself. An
@@ -319,71 +283,79 @@ none. A tolerance rule that could never report a match for any label, because th
 compared against comes from a laboratory and this app never sees one. Every one was found by running
 the product against real labels, which is the argument for having the corpus at all.
 
-**We publish reading accuracy as counts, not percentages.** Thirty of thirty on the warning being
-present, twenty of thirty on it being word for word, seventeen of thirty on brand. A percentage drawn
-from thirty labels reads as a precision this corpus does not carry. The figures are not flattering
-and they are the honest state of a processor-only reader on display typefaces.
+**The same corpus is what a reviewer downloads, and it is meant to be run rather than read about.**
+`/batches/sample.zip` ships ten of the thirty at random, both faces where both were filed, and
+`applications.csv` beside them carrying the application really filed for each. Dropped whole into
+the batch form it exercises the product's actual claim — every label checked against its own
+application — across all three beverage types, over passes that are not literal matches, with the
+country-of-origin check actually running on the imports, and including a label whose photographs
+show no bottler's name and address, which comes back as a check that was not made rather than as a
+finding that the label lacks it. That distinction is the product's central honesty.
 
-**The five-second requirement is measured on the deployed service, and it is missed.** It belongs
-to the deployed hardware, so we measure it there rather than on a developer's machine. Measured
-2026-09-20, with both faces of each label: 18 of 37 checks inside five seconds in one run and 21 of
-37 in a second run minutes later, against a requirement of 95 percent. Medians of 5.01 and 4.38
-seconds; slowest 9.01. Nothing was stopped early and nothing came out of the cache in either run,
-so these are slow checks rather than blank ones.
+**The eight flawed variants are not in the pack, and that is deliberate.** They are real labels with
+one thing altered — a word of the warning repainted, a heading dropped into title case, an
+application's alcohol content set to 45% where the label prints 40% — and they exist in the test
+corpus to prove the checks can fail. A demonstration built out of planted failures proves the plant
+rather than the product, so the pack ships approved labels only. A reviewer who wants to watch a
+check fail changes one value in `applications.csv` and re-uploads, which is exactly the mismatch
+between a filing and a label that this product exists to catch.
+
+**We publish reading accuracy as counts, not percentages.** Thirty of thirty on the warning being
+present, twenty of thirty on it being word for word, seventeen of thirty on brand. A percentage
+drawn from thirty labels reads as a precision this corpus does not carry. The figures are not
+flattering and they are the honest state of a processor-only reader on display typefaces.
+
+**The five-second requirement is measured on the deployed service, and it is missed.** It belongs to
+the deployed hardware, so we measure it there rather than on a developer's machine: 18 of 37 checks
+inside five seconds in one run and 21 of 37 in a second minutes later, against a requirement of 95
+percent, with medians of 5.01 and 4.38 seconds. Nothing was stopped early and nothing came out of
+the cache, so these are slow checks rather than blank ones.
 
 **The cost is the second face, and it bought a correct answer.** Until 2026-09-19 the page took one
-image, and the same set measured 35 of 37 inside five seconds — but the government warning is on
-the back of 20 of the 30 corpus labels, so those fast answers reported a warning missing that the
-label carries. The page now takes a front and a back, the faces are read one after another, and the
-submissions carrying a back came in at a median of 5.55 and 4.95 seconds against 2.39 and 2.74 for
-the four that have only a front. We took the trade knowingly and we publish the number it cost.
+image and the same set measured 35 of 37 inside five seconds — but the warning is on the back of 20
+of the 30 corpus labels, so those fast answers reported a warning missing that the label carries.
+The page now takes a front and a back, read one after the other, and the submissions carrying a back
+came in at a median of 5.55 and 4.95 seconds against 2.39 and 2.74 for the four that have only a
+front. We took the trade knowingly and we publish the number it cost.
 
 **Reading the faces concurrently was the untried lever, and it has now been tried on the bench
 rather than in the product.** A running copy holds one reader and takes one image at a time behind a
 lock, so the change is lifting that lock and not merely asking for both faces together; we measured
 each shape it could take, in-process at the four threads the service runs, before building any of
 it. The cores turn out to be spoken for already. A single read keeps 3.69 of 4 cores busy, and the
-thread ladder says why: 1.198, 0.693 and 0.535 seconds per image at one, two and four engine
-threads is close to linear, so four cores are genuinely working and nothing is idle for a second
-read to take. Read at once, one label's two faces took 1.60 seconds where reading them in turn took
-1.38, and kept only 2.4 cores busy against 3.74 — the Python half of a read does not run alongside
-itself, so the concurrent shape loses more to contention than it wins. For the one check a reviewer
-is waiting on, the lever lengthens the wait it was meant to shorten, by about 16 percent.
+thread ladder says why: 1.198, 0.693 and 0.535 seconds per image at one, two and four engine threads
+is close to linear, so four cores are genuinely working and nothing is idle for a second read to
+take. Read at once, one label's two faces took 1.60 seconds where reading them in turn took 1.38,
+and kept only 2.4 cores busy against 3.74 — the Python half of a read does not run alongside itself,
+so the concurrent shape loses more to contention than it wins. For the one check a reviewer is
+waiting on, the lever lengthens the wait it was meant to shorten, by about 16 percent.
 
-**Over a queue the sign flips, and the price is what decided it.** Twelve faces cost 0.535 seconds per
-image as built, 0.475 with two engines of two threads and 0.450 with four engines of one — 11 to 16
-percent better. The slowest single image goes from 1.10 seconds to 1.92 and then 3.45, and resident
-memory from 658 MB to 911 and 1267 MB against the service's 4 GiB. That is throughput bought with
-the wait of whichever label a reviewer happens to be watching, and with the headroom of a 4 GiB
-instance. The smallest version of the change is the worst of the lot: lifting the lock and leaving
-one shared engine gave 0.734 seconds per image, 37 percent worse than doing nothing. So the
+**Over a queue the sign flips, and the price is what decided it.** Twelve faces cost 0.535 seconds
+per image as built, 0.475 with two engines of two threads and 0.450 with four engines of one — 11 to
+16 percent better. The slowest single image goes from 1.10 seconds to 1.92 and then 3.45, and
+resident memory from 658 MB to 911 and 1267 MB against the service's 4 GiB. That is throughput
+bought with the wait of whichever label a reviewer happens to be watching, and with the headroom of
+a 4 GiB instance. The smallest version of the change is the worst of the lot: lifting the lock and
+leaving one shared engine gave 0.734 seconds per image, 37 percent worse than doing nothing. So the
 serialisation stays ([decision 0047](decisions.md#0047)), and the shapes compare on this box even
 though the seconds do not compare to the deployed service
 (`docs/evidence/2026-09-20-read-scaling.json`).
 
-**Three levers have been tried now, and none of them closes the requirement.** More processor
-cores moved one check of thirty-eight. Reading both faces at once costs the single check more than
-it saves. The reading path itself has been tuned three times — most recently by reading a label's
+**Three levers have been tried now, and none of them closes the requirement.** More processor cores
+moved one check of thirty-eight. Reading both faces at once costs the single check more than it
+saves. The reading path itself has been tuned three times, most recently by reading a label's
 sideways strips before reading the whole label again, which took the slowest corpus read from
-1345 ms to 463 ms on the development box ([decision 0036](decisions.md#0036)). Earlier published
-shares of 87, 89, 71 and 92 percent stand as history only: they predate that tuning and a harness
-that could not tell a check the evaluation guard had blanked from a slow one
-([decision 0035](decisions.md#0035)).
+1345 ms to 463 ms ([decision 0036](decisions.md#0036)). Earlier published shares of 87, 89, 71 and
+92 percent stand as history only: they predate that tuning and a harness that could not tell a check
+the evaluation guard had blanked from a slow one ([decision 0035](decisions.md#0035)).
 
 **Two things we did not prove.** A reader cannot tell an unmeasured claim from a measured one by
-looking, so each is named:
-
-- The ten-minute target for a 300-label batch has no instrument at all — no test and no figure.
-- Accessibility past what a machine can check. The automated scan now covers all three screens and
-  the batch table both empty and populated. Whether it passes is the result of a run rather than a
-  property of the build, and the last run we made was green. One check axe cannot decide by itself
-  is recorded with the review that settled it rather than discarded, so an undecidable check no
-  longer reads as a pass. The manual review the requirement really asks for has not been run, and
-  an automated pass is the floor of an accessibility claim rather than the whole of one.
-
-The first is a missing measurement. The second is a limit on the proof rather than a gap in the
-build: the requirement was written, the mechanism was built, the half a machine can check is met,
-and the half that needs a person is the half a week-long build ran out of time for.
+looking, so each is named. The ten-minute target for a 300-label batch has no instrument at all — no
+test and no figure. And accessibility past what a machine can check: the automated scan covers all
+three screens and the batch table both empty and populated, and the last run was green, but whether
+it passes is the result of a run rather than a property of the build. The manual review the
+requirement really asks for has not been run. The first is a missing measurement; the second is a
+limit on the proof rather than a gap in the build, and it is the half that needs a person.
 
 ## What changed, and what would change next
 
