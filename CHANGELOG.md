@@ -88,6 +88,15 @@ date: the release's git tag records when it was cut. Versions follow
 
 ### Fixed
 
+- A spirits label's stated proof is checked against its own ABV. The brief requires a proof to be
+  twice the alcohol by volume, and nothing checked it: the local reader dropped the proof, no rule
+  named it, and joining a label's faces kept one alcohol reading, so a proof on the other face was
+  lost too. Both readers now find every proof figure on the label with one deterministic finder, and
+  the figures from all faces are kept. Only a proof on the ABV statement's line or the next can
+  reject; a figure elsewhere, one that looks rounded ("86" beside 42.8%), one above 200, or a proof
+  with no ABV read goes to a reviewer. A range in a class name ("80-89 PROOF") and a strength at
+  distillation or barrel entry are not read as the bottle's proof. See `docs/decisions.md#0050`.
+
 - A brand that differs from the application only in punctuation or spacing is a match whatever its
   length, and the finding says what differs. It was scored, so the answer depended on how long the
   name was: "Stones Throw" against "Stone's Throw" passed, and "Os" against "O's" was rejected as a

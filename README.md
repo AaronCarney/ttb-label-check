@@ -433,7 +433,7 @@ on its own.
 |---|---|---|---|
 | Brand name | Checked — scored against the application's brand, fanciful and trade names | §4.32(a)(1), §4.33 | `rules/wine/wine.yaml`, `rules/spirits/spirits.yaml`, `rules/malt/malt.yaml` |
 | Class/type designation | Checked — matched against the application and against the designation tables; for spirits, also against the standards of identity | §4.32(a)(2), §4.34; spirits Subpart I | `rules/tables/wine_designations.yaml`, `rules/tables/malt_designations.yaml`, `rules/spirits-deep.yaml` |
-| Alcohol content | Checked — format, and the figure against the application. Required-or-not follows the beverage class | §4.32(b)(1), §4.36 | the three class packs |
+| Alcohol content | Checked — format, and the figure against the application; for spirits, a stated proof against twice the label's own ABV. Required-or-not follows the beverage class | §4.32(b)(1), §4.36; proof §5.1, §5.65(b)(1)(i) | the three class packs |
 | Net contents | Checked — compared as a quantity, with units converted before comparing | §4.32(b)(2), §4.37 | `rules/tables/volume_units.yaml` |
 | Name and address | Checked — applicant or declared trade name, plus city and state | §4.32(a)(3), §4.35 | the three class packs |
 | Country of origin | Checked for imports, against the application's English country name. The other forms customs accepts are a named limitation | §4.35(e), 19 CFR §134.45 | the three class packs |
