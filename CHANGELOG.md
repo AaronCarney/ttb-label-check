@@ -102,7 +102,8 @@ date: the release's git tag records when it was cut. Versions follow
   and batch forms three of its five checks failed against a working service. It now posts a label's
   faces as one label and times the check to the result arriving on the batch's stream. Its summary
   no longer counts a submission the service refused as a check inside the budget. The published
-  figure is re-measured on it: 13 of 37 checks inside five seconds, median 6.60 seconds.
+  figure is re-measured on it: 23 of 37 and 33 of 37 checks inside five seconds across two runs,
+  medians 4.19 and 3.73 seconds, against a requirement of 95 percent.
 
 - A reviewer can send the back of the label. `POST /` had accepted a second image since the
   multi-face work, but the page offered one file input, so no reviewer could send one — and the

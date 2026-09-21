@@ -72,13 +72,20 @@ publishing what that cost.
 The same measurement as the two runs above, repeated on the deployed service at `1d8a9e0`, after one
 page replaced the single-label and batch forms. A check is now a one-label batch: `POST /` answers
 303 and the result reaches the page as the `label-result` event on `/batches/{id}/stream`, so each
-row is timed from before the upload to that event's arrival. `-run1.json` is the figure the README
-quotes: all 37 checks answered. `-run3.json`, minutes later, is kept for what it shows about the
-service rather than about speed: 34 of its 37 checks got no result, because the service had started
-a second instance and a stream request reaching the instance that did not hold the batch was
-answered 404. A second run between the two failed the same way and is not kept. Produced by
-`TTB_DEPLOY_URL=<url> TTB_LATENCY_RECORD_DIR=<dir> uv run pytest tests/test_deploy_healthz.py -k
-five_second`. Cited by the README's five-second section.
+row is timed from before the upload to that event's arrival. `-run1.json` answered all 37 checks and
+was the README's figure until the service moved to one instance. `-run3.json`, minutes later, is
+kept for what it shows about the service rather than about speed: 34 of its 37 checks got no result,
+because the service had started a second instance and a stream request reaching the instance that
+did not hold the batch was answered 404. A second run between the two failed the same way and is not
+kept. Produced by `TTB_DEPLOY_URL=<url> TTB_LATENCY_RECORD_DIR=<dir> uv run pytest
+tests/test_deploy_healthz.py -k five_second`. Cited by decision 0048.
+
+### `2026-09-21-five-second-one-instance-run1.json` and `-run2.json`
+
+The same measurement again, minutes apart, on the deployed service at `34cc275` — one instance
+taking several requests ([decision 0048](../decisions.md#0048)), after the one-page runs above
+showed checks lost to a second instance. Both runs answered all 37 checks. These are the figures the
+README quotes. Produced the same way as the one-page runs.
 
 ### `2026-09-20-batch-latency-run1.json` and `-run2.json`
 
