@@ -15,7 +15,7 @@ import json
 
 from app.schemas.extracted import FieldObservation
 from app.schemas.label import Label
-from eval.read_accuracy import LABELS_ROOT, _read_faces, _read_one_face
+from eval.read_accuracy import LABELS_ROOT, _has_reading, _read_faces, _read_one_face
 
 
 class _StandInReader:
@@ -87,3 +87,14 @@ def test_a_face_replayed_from_a_recording_is_not_followed_by_a_pause(monkeypatch
 
     assert pauses == []
     assert replayed == len(entry["images"])
+
+
+def test_an_empty_proof_list_is_not_a_reading() -> None:
+    """A face with no alcohol statement still carries its proof list, empty.
+
+    The harness keeps the first face that has a reading of a field, so an empty
+    list counted as one kept a front with no ABV and dropped the back's.
+    """
+    empty = {"abv_pct": None, "unit": "", "alc_text": "", "confidence": 0.0, "proof": []}
+    assert not _has_reading(empty)
+    assert _has_reading({**empty, "proof": [{"value": "80", "text": "80 PROOF"}]})

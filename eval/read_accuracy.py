@@ -168,11 +168,15 @@ def _build_reader(kind: str):
 
 
 def _has_reading(payload: dict | None) -> bool:
-    """True when the payload carries a value, not just an empty shape."""
+    """True when the payload carries a value, not just an empty shape.
+
+    An empty list is an empty shape: every face carries its proof list, empty
+    where it prints none.
+    """
     if not payload:
         return False
     return any(
-        v not in (None, "", 0.0, False)
+        v not in (None, "", 0.0, False, [])
         for k, v in payload.items()
         if k != "confidence" and not k.startswith("heading_bold_")
     )
