@@ -41,14 +41,14 @@ ahead to compute results nobody has asked for yet.
 
 **https://ttb.aaroncarney.me**
 
-Google Cloud Run, 4 vCPU and 4 GiB, one request at a time, scaling to zero
-([decision 0025](docs/decisions.md#0025)). That address is this project's own hostname, not the one
-Cloud Run issues: a Cloudflare Worker in `edge/` answers it, signs each request with a Google ID
-token and forwards it, and the Cloud Run URL itself answers an uncredentialed request with 403, so
-the hostname is the only way in ([decision 0028](docs/decisions.md#0028)). The same Worker pings
-`/api/health` every five minutes, which keeps the instance holding the loaded OCR models from being
-reclaimed and a visitor from paying the 36-second cold start
-([decision 0042](docs/decisions.md#0042)).
+Google Cloud Run, 4 vCPU and 4 GiB, one instance reading one image at a time, scaling to zero
+([decisions 0025](docs/decisions.md#0025) and [0048](docs/decisions.md#0048)). That address is this
+project's own hostname, not the one Cloud Run issues: a Cloudflare Worker in `edge/` answers it,
+signs each request with a Google ID token and forwards it, and the Cloud Run URL itself answers an
+uncredentialed request with 403, so the hostname is the only way in
+([decision 0028](docs/decisions.md#0028)). The same Worker pings `/api/health` every five minutes,
+which keeps the instance holding the loaded OCR models from being reclaimed and a visitor from
+paying the 36-second cold start ([decision 0042](docs/decisions.md#0042)).
 
 The deploy is one command, and it builds from an export of the committed revision rather than from
 anyone's working tree:

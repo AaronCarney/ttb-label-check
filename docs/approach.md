@@ -154,7 +154,7 @@ up accuracy on hard images, named under what we can prove rather than left to be
 deployment is free on an allowance that covers TTB's volume about three times over, though not a
 peak-season burst. The exposure is the absence of a stop rather than the meter: budgets alert rather
 than cut off, so what bounds the bill is the invoker check, which refuses every caller but our own
-front door before a request is billed, the two-instance cap and the request timeout
+front door before a request is billed, the one-instance cap and the request timeout
 ([decision 0025](decisions.md#0025); the figures are in `operations.md`).
 
 **The people who would use it.** Four people, answered individually rather than in aggregate —

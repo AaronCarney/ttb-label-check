@@ -116,8 +116,8 @@ MAX_BATCH_FILES = 100
 
 The owner's number, kept because it survives the two constraints that could have
 broken it. NFR-2 asks for 300 submissions inside 10 minutes; at 100 per batch
-that is three batches, which the 900-second request timeout and the
-two-instance cap in `scripts/deploy.sh` are already sized for. And 100 real
+that is three batches, run one after another, which the 900-second request
+timeout in `scripts/deploy.sh` is already sized for. And 100 real
 labels fit in one request: the corpus median is about 184 KB, so a full batch of
 label-sized images is roughly 18 MiB, inside `MAX_REQUEST_BYTES`.
 
@@ -268,26 +268,35 @@ def declared_pixels(image_bytes: bytes) -> int | None:
     `None` when the bytes are not an image whose header can be read at all —
     that is the MIME check's answer to give, not this one's.
 
-    Pillow's own bomb guard is switched off around this one call. The guard
-    fires inside `Image.open`, which would stop us reading the very number we
-    want to refuse on, and would leave the user with Pillow's exception instead
-    of a sentence naming their file. `Image.open` reads the header and decodes
-    nothing, so no pixels are allocated either way.
+    Pillow's bomb guard fires inside `Image.open`, which would stop us reading
+    the very number we want to refuse on, and would leave the user with Pillow's
+    exception instead of a sentence naming their file. So this does what
+    `Image.open` does up to that point — finds the format whose signature the
+    bytes carry and has its plugin read the header — and stops there. A plugin
+    reads the header and decodes nothing, so no pixels are allocated.
 
-    The guard is a Pillow-wide global, so this is safe because the service runs
-    one request at a time (`CONCURRENCY=1` in `scripts/deploy.sh`). If that ever
-    changes, this has to become a lock or a hand-written header read.
+    It used to switch the guard off around an `Image.open` instead. The guard is
+    a Pillow-wide global, so that was safe only while the service took one
+    request at a time, and it takes several now (`CONCURRENCY` in
+    `scripts/deploy.sh`): a decode in another request during that window would
+    have run unguarded.
     """
-    guard = Image.MAX_IMAGE_PIXELS
-    Image.MAX_IMAGE_PIXELS = None
-    try:
-        with Image.open(io.BytesIO(image_bytes)) as img:
+    Image.init()
+    prefix = image_bytes[:16]
+    for name in Image.ID:
+        factory, accept = Image.OPEN[name]
+        # Pillow's own rule: a string is a warning about the format, not a match.
+        result = accept(prefix) if accept else True
+        if isinstance(result, str) or not result:
+            continue
+        try:
+            img = factory(io.BytesIO(image_bytes), "")
+        except Exception:
+            continue
+        with img:
             width, height = img.size
         return width * height
-    except Exception:
-        return None
-    finally:
-        Image.MAX_IMAGE_PIXELS = guard
+    return None
 
 
 def bomb_refusal(filename: str, image_bytes: bytes) -> tuple[str, int] | None:

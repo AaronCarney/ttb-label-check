@@ -71,12 +71,20 @@ SERVICE="${TTB_SERVICE:-ttb-label-check}"
 # and the preflight below is what holds the two together.
 SERVICE_PORT=8000
 
-# One request at a time, because the reader's own measurements show concurrent
-# reads contending for the same cores: eight at once moved the 95th percentile
-# from 2.26 seconds to 10.02 seconds (decision 0005). Serving one at a time is
-# what the five-second requirement needs, and it caps the meter as a side
-# effect. Two instances is the ceiling on what traffic can spend; 900 seconds is
-# the batch requirement of 300 submissions inside 10 minutes, plus headroom.
+# One instance, because a check's results live in the memory of the instance
+# that took it: a second instance answers the results stream with 404 and the
+# reviewer is shown nothing (decision 0048). It is also the ceiling on what
+# traffic can spend.
+#
+# Sixteen requests at a time, because a check holds its results stream open
+# until it finishes, and at one request that stream filled the instance and
+# sent the page's other fetches, the keep-warm ping and the next check to a
+# second one. Concurrent reads still contend for the same cores - eight at once
+# moved the 95th percentile from 2.26 seconds to 10.02 seconds (decision 0005) -
+# but reads are serialised in the process (_read_lock in app/vision/local.py)
+# and one batch runs at a time, so what runs beside a read is milliseconds of
+# work. 900 seconds is the batch requirement of 300 submissions inside 10
+# minutes, plus headroom.
 #
 # Four vCPU and 4 GiB, because CPU is what the free allowance runs out of first
 # and memory is therefore free headroom (decision 0025). The reader's working
@@ -84,8 +92,8 @@ SERVICE_PORT=8000
 # set at roughly double the top of that range.
 CPU=4
 MEMORY=4Gi
-CONCURRENCY=1
-MAX_INSTANCES=2
+CONCURRENCY=16
+MAX_INSTANCES=1
 TIMEOUT=900
 
 # Hold traffic off an instance until its models are loaded.
@@ -95,8 +103,8 @@ TIMEOUT=900
 # pushed the evaluation past the evaluator's five-second SLA, so the first
 # person to click got ENGINE.SLA.TIMEOUT and an empty result: no findings, no
 # explanation of why. Observed on the live service, and it is not a
-# first-boot-only fault - CONCURRENCY is 1, so every scale-up makes another
-# instance that would do the same.
+# first-boot-only fault - every scale-up from zero makes an instance that
+# would do the same.
 #
 # /healthz is the probe because loading the models is already what it does: it
 # builds the same evaluator a submission builds and answers 503 until that
@@ -324,7 +332,7 @@ gcloud run deploy "$SERVICE" \
     ${ACCESS_FLAG:+"$ACCESS_FLAG"}
 
 if [ "${TTB_PUBLIC:-0}" = "1" ]; then
-    echo "Deployed open: the service URL answers anyone. The two-instance cap is"
+    echo "Deployed open: the service URL answers anyone. The one-instance cap is"
     echo "the only bound on the meter. Delete the service when the review is done."
     exit 0
 fi

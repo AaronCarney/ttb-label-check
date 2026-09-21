@@ -20,7 +20,7 @@
 //
 // It also calls a rate limit (0029), which denies nothing, as the measurement at
 // the limit() call below records. So what bounds the meter is the invoker check
-// above and the two-instance cap in scripts/deploy.sh; the rate limit is left in
+// above and the one-instance cap in scripts/deploy.sh; the rate limit is left in
 // place, inert. A Free zone's own WAF rule cannot match a hostname, so
 // it cannot be scoped to this project alone; the Worker can, because it runs
 // for this hostname only.

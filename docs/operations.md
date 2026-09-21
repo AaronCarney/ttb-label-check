@@ -7,7 +7,8 @@ instead of about its hosting.
 
 ## What the service runs on
 
-Cloud Run, **4 vCPU and 4 GiB, one request at a time**, scaling to zero behind a two-instance cap.
+Cloud Run, **4 vCPU and 4 GiB, one instance reading one image at a time**, scaling to zero
+([decision 0048](decisions.md#0048)).
 Startup CPU boost doubles the allocation to eight cores for the first ten seconds of a container
 start, so the start a keep-warm ping pays for is the shortest the platform offers. Inside the
 container one uvicorn worker holds one OCR reader, and that reader is allowed **four threads**:
@@ -59,7 +60,7 @@ This has moved during the project — the service was deployed open with `TTB_PU
 could reach it, and `scripts/deploy.sh` will reopen or reclose it depending on the access flag it is
 given, so treat this as a measurement rather than a fixed property. The rate limit denies nothing
 and is left in place inert. What bounds the meter is the invoker check, since a request it refuses
-is never billed, and the two-instance cap in `scripts/deploy.sh`. The Worker comment in
+is never billed, and the one-instance cap in `scripts/deploy.sh`. The Worker comment in
 `edge/src/index.js` carries both measurements.
 
 ## The same Worker holds the service warm

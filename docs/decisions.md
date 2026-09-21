@@ -3073,3 +3073,48 @@ The product's own latency figures are the deployed ones in `README.md` and [0044
 change available makes that wait longer while buying throughput nobody has asked for. What is left
 is making a single read cheaper, which is where the reading path's three tunings already went
 ([0036](#0036)).
+
+<a id="0048"></a>
+## 0048. One instance taking several requests: a check's results live on the instance that took it
+
+**Evidence:** `scripts/deploy.sh` (`CONCURRENCY`, `MAX_INSTANCES`); `app/batch/admission.py`;
+`app/vision/local.py` (`_read_lock`); `app/api/limits.py` (`declared_pixels`);
+`docs/evidence/2026-09-21-five-second-one-page-run1.json` and
+`docs/evidence/2026-09-21-five-second-one-page-run3.json`; [0025](#0025), [0042](#0042),
+[0045](#0045).
+
+**What was found.** Re-measuring the five-second requirement after [0045](#0045) made every check a
+batch, two runs minutes after a clean one lost 25 and 34 of their 37 checks. The service ran one
+request at a time on up to two instances ([0025](#0025)), and since [0045](#0045) a check is a
+`POST /` followed by a stream that stays open until its results have arrived. Cloud Run counts that
+open stream as the instance's one request, so anything arriving meanwhile — the keep-warm ping of
+[0042](#0042), the page's own assets, the next check — is sent to a second instance. Each instance
+holds its batches in its own memory, so a check submitted to one and streamed from the other is
+answered 404 and the reviewer is shown nothing. The logs showed two instances serving through the
+failed runs. [0042](#0042) had accepted the second instance as a few idle seconds; that was true
+before results arrived over a stream held by the instance that took the check.
+
+**Chosen.** `MAX_INSTANCES=1` and `CONCURRENCY=16`. Every request reaches the instance holding the
+batch. The owner's ruling that one reviewer at a time can be assumed removes the only cost: a second
+reviewer arriving mid-batch is told to wait, which admission already did within an instance.
+
+**The reason for one request at a time still holds, and is kept by other means.** [0025](#0025)
+chose it so a read has all four cores, because concurrent reads contend for them. A running copy
+reads one image at a time behind `_read_lock` and starts one batch at a time
+(`app/batch/admission.py`), so the requests now allowed beside a read are the ping, the stream, and
+page and image fetches, each milliseconds of work. Sixteen is enough for a results page's stream and
+its fetches not to queue behind one another; it does not admit a second read.
+
+**One place depended on one request at a time and was changed with it.** `declared_pixels` switched
+Pillow's process-wide decompression-bomb guard off around a header read, which was safe only while
+no other request could decode in that window. It now reads the header through the format's plugin
+without touching the guard.
+
+**What it costs.** Nothing on the meter: one instance halves the ceiling [0025](#0025) set on spend.
+A scale-up now happens only from zero, so the startup probe still holds traffic off a cold instance.
+
+**Rejected.** *Session affinity* — best-effort by Cloud Run's own description, and the requests
+reach the service through the Worker's proxy ([0028](#0028)), so a lost affinity cookie would bring
+the defect back unannounced. *Holding batches in a shared store* — a database for a service that
+serves one reviewer at a time. *Two cores reserved for the keep-warm ping* — the ping holds no
+cores; it was one of several requests sent to the second instance, not their cause.

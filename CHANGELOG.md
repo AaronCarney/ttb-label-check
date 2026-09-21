@@ -88,6 +88,15 @@ date: the release's git tag records when it was cut. Versions follow
 
 ### Fixed
 
+- A check no longer loses its results to a second instance. The service took one request at a
+  time on up to two instances, and a check's results stream held its instance for as long as the
+  check ran, so the next request — the keep-warm ping, the page's own fetches, the next check —
+  started a second instance, which answered the results stream with 404 because the batch was held
+  by the first. The reviewer was shown nothing. The service now runs one instance taking up to
+  sixteen requests at a time; reads stay one at a time behind the reader's lock. The upload size
+  check no longer switches Pillow's process-wide decompression-bomb guard off while it reads a
+  header, which was safe only at one request at a time. See `docs/decisions.md#0048`.
+
 - The deploy latency test measures the page as it now is. It still posted the old single-label
   form and read the result out of the response page, so after one page replaced the single-label
   and batch forms three of its five checks failed against a working service. It now posts a label's

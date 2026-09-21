@@ -138,3 +138,24 @@ def test_the_upload_form_names_the_bomb_among_several(client, deterministic_seam
     )
     assert response.status_code == 413
     assert "bomb.png" in response.text
+
+
+def test_reading_the_declared_size_leaves_the_process_wide_guard_alone(monkeypatch) -> None:
+    """The service takes several requests at once, so switching Pillow's guard
+    off to read a header would leave every other request's decode unguarded for
+    that moment. Reading the size must not write the guard at all."""
+
+    class _Watched:
+        def __init__(self) -> None:
+            object.__setattr__(self, "writes", [])
+
+        def __getattr__(self, name: str):
+            return getattr(Image, name)
+
+        def __setattr__(self, name: str, value) -> None:
+            self.writes.append(name)
+
+    watched = _Watched()
+    monkeypatch.setattr(limits, "Image", watched)
+    assert limits.declared_pixels(_bomb_png(30_000, 30_000)) == 30_000 * 30_000
+    assert watched.writes == []

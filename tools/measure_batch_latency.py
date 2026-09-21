@@ -5,7 +5,7 @@ Run against a service that is already up, from the repository root:
     uv run python -m tools.measure_batch_latency --url http://127.0.0.1:8123 --labels 8
 
 The service has to be running under the shape it is being measured for. The
-deployed service is 4 vCPU with `OCR_NUM_THREADS=4`, one request at a time
+deployed service is 4 vCPU with `OCR_NUM_THREADS=4`, reading one image at a time
 (`README.md`), so a local run that is going to be read against it is started the
 same way:
 
