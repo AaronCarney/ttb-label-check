@@ -54,10 +54,15 @@ the decision; the product exists to take the routine matching off them.
 `Because` — COLA integration carries its own authorization requirements, and the prototype is meant
 to inform a procurement decision before any integration is attempted.
 
-**C-2** — The product retains no label image or application data on its server once it has returned
-the results for them.
+**C-2** — The product writes no application data to disk. It keeps a batch's results in memory
+until the next batch starts, and writes two things to disk, each swept at the first upload after
+it is seven days old: the uploaded label
+image, so a result page can show the label it describes, and each result stripped of every value
+read from the label or declared in the application, so a reviewer's override has something to
+amend (`docs/decisions.md#0018`).
 `Because` — production use brings PII and document-retention obligations that a prototype is not
-built to meet, and holding nothing keeps it clear of them.
+built to meet, and the exercise holds nothing sensitive; keeping only what a result page and an
+override need, for a bounded time, keeps it clear of both.
 
 **C-3** — The product is used through a web browser, with nothing to install on the agent's computer.
 `Because` — agents' comfort with technology varies widely, and a tool that needs installing is one
@@ -76,10 +81,13 @@ applies to the submission's beverage type.
 
 **FR-2** — The product checks each of these label elements that the application states against the
 label: brand name, class/type designation, alcohol content, net contents, name and address, and
-country of origin. This list is complete; it was read from the brief's Additional Context.
+country of origin. These are the common elements the brief's Additional Context lists; which of them
+a label must carry is set by the regulations for its beverage type (FR-3).
 
-**FR-3** — If a label element that is mandatory for the submission's beverage type is absent from
-its label images, the product reports a mismatch for that element. For every beverage type, brand
+**FR-3** — If a label element that is mandatory for the submission's beverage type is not found on
+its label images, the product reports it. A missing warning, and a missing country of origin on an
+import, are reported as a mismatch. Any other mandatory element is reported as needs review,
+because the reader not finding an element does not show that the label lacks it. For every beverage type, brand
 name, class/type designation, name and address, net contents and the warning are mandatory, and
 country of origin is mandatory on imports. Alcohol content is mandatory on distilled spirits, and on
 wine unless the wine is 14% alcohol by volume or less and its label says "table wine" or "light
@@ -126,8 +134,9 @@ value.
 **FR-9** — If the product cannot read an element from the label images with confidence, it reports
 needs review for that check.
 
-**FR-10** — If a label image is skewed, poorly lit or has glare, the product names the image problem
-on each check it reports as needs review for that reason.
+**FR-10** — If a label image is too low in resolution or too blurred by camera movement to read,
+the product checks nothing on that label, names which of the two problems it found, and says in
+plain words what a better photograph needs.
 
 **FR-11** — The product gives each submission an overall result: match when every check matches,
 mismatch when any check mismatches, and needs review otherwise.
@@ -139,7 +148,9 @@ submission's overall result, with that submission's check results one step away.
 product names the file or field at fault and says in plain words what to do, and checks the rest of
 the batch.
 
-**FR-14** — The product offers sample submissions that anyone can check without supplying files.
+**FR-14** — The start page offers a sample pack to download — label images together with the
+applications filed for them — that anyone can check through the same form as their own labels,
+with no account.
 
 ## 6. Non-functional requirements
 

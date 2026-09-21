@@ -19,7 +19,7 @@ that answers it. Complete, read from both documents.
 | Results in about 5 seconds | Sarah Chen | NFR-1 |
 | Batch uploads of 200-300 applications | Sarah Chen | FR-12, NFR-2 |
 | Usable by a 73-year-old; "no hunting for buttons" | Sarah Chen | NFR-3, NFR-4, FR-8 |
-| Imperfect photos: angle, lighting, glare | Jenny Park | FR-9, FR-10 |
+| Imperfect photos: angle, lighting, glare (hedged by her as maybe out of scope) | Jenny Park | FR-9, FR-10 |
 | The agent keeps the judgement | Dave Morrison | SC-1 |
 | Firewall blocks outbound traffic | Marcus Williams | C-4 |
 | Standalone, no COLA integration | Marcus Williams | C-1 |
@@ -59,10 +59,14 @@ and country of origin are each compared with the application where the applicati
 
 ### R3: Missing mandatory element
 **Implements**: FR-3
-**Description**: A mandatory element absent from the label is reported.
+**Description**: A mandatory element not found on the label is reported.
 **Acceptance criteria**:
-- Given a submission whose label images lack an element mandatory for its beverage type, when it is
-  checked, then that element is reported as a mismatch.
+- Given a submission whose label images carry no warning, when it is checked, then the warning is
+  reported as a mismatch.
+- Given an import whose label images carry no country of origin, when it is checked, then country
+  of origin is reported as a mismatch.
+- Given a submission whose label images lack any other element mandatory for its beverage type,
+  when it is checked, then that element is reported as needs review.
 **Priority**: P1
 
 ## The warning
@@ -142,10 +146,11 @@ match or mismatch.
 
 ### R10: Image problems named
 **Implements**: FR-10
-**Description**: A needs-review result caused by glare, skew or poor light says so.
+**Description**: A photograph too low in resolution or too blurred to read is named as such, with
+what a better photograph needs, and nothing on it is checked.
 **Acceptance criteria**:
-- Given the glare, skew and low-light variants, when each is checked, then any needs-review result
-  names the image problem.
+- Given the blurred variant, when it is checked, then no field is checked and the result names the
+  image problem and says in plain words what to change.
 **Priority**: P2
 
 ### R11: Overall result
@@ -180,10 +185,11 @@ the batch still runs.
 
 ### R14: Sample submissions
 **Implements**: FR-14
-**Description**: Sample submissions can be checked without supplying any file.
+**Description**: A sample pack of labels and their applications can be downloaded from the start
+page and checked through the upload form, with no account.
 **Acceptance criteria**:
-- Given a first visit to the start page, when a sample is chosen and checked, then its results are
-  shown.
+- Given a first visit to the start page, when the sample pack is downloaded and its files are
+  uploaded through the form, then every label in it has results.
 **Priority**: P0
 
 ## How well
