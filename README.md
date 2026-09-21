@@ -32,10 +32,10 @@ app can see the element but cannot honestly decide it.
 There is one way in and one way it works: a form that takes one label or three hundred, and a
 results page that streams verdicts back as each label finishes. A submission of one label is a batch
 of one, checked by the same path as a submission of three hundred. The first label is checked on its
-own and the rest run behind it, which is the ordering rather than an accident of it: the reviewer gets a real result in
-seconds instead of a progress bar, and starts working while the remainder runs. The batch then paces
-itself against how fast they are actually reading, rather than racing ahead to compute results
-nobody has asked for yet.
+own and the rest run behind it, which is the ordering rather than an accident of it: the reviewer
+gets a real result in seconds instead of a progress bar, and starts working while the remainder
+runs. The batch then paces itself against how fast they are actually reading, rather than racing
+ahead to compute results nobody has asked for yet.
 
 ## Deployed URL
 
@@ -66,50 +66,33 @@ needed to run the app; [Getting started](#getting-started) is.
 
 R15 in [the requirements](specs/0001-label-verification/requirements.md) and NFR-1 in
 [the PRD](docs/PRD.md) are one promise, and both mark it P0: 95 percent of single checks show
-results within five seconds. Measured on the deployed service on 2026-09-20, sending every face of
-each label the way the page now sends them: **18 of 37 checks inside five seconds in one run and 21
-of 37 in a second run minutes later** — 49% and 57% against a requirement of 95%. The median check
-took 5.01 and 4.38 seconds; the slowest took 9.01. The requirement is missed by a wide margin, and
-the margin is the back of the label.
+results within five seconds. Measured on the deployed service, sending every face of each label the
+way the page now sends them: **18 of 37 checks inside five seconds in one run and 21 of 37 in a
+second run minutes later** — 49% and 57% against a requirement of 95%. The median check took 5.01
+and 4.38 seconds; the slowest took 9.01. Nothing was stopped early, nothing was answered out of the
+cache, and every check returned all seven fields, so these are slow checks rather than blank ones.
 
-**What changed.** Until 2026-09-19 the page offered one file input, so the measurement posted one
-image. The government warning is printed on the back of 20 of the 30 corpus labels, so a front-only
-check reported a warning missing that the label carries — a fast wrong answer. The page now takes a
-front and a back, the measurement sends both, and the faces are read one after another, so the
-second face costs roughly what the first one costs.
+**The margin is the back of the label.** The page used to offer one file input, so a check read one
+image — and the government warning is printed on the back of 20 of the 30 corpus labels, so a
+front-only check reported a warning missing that the label carries. The page now takes a front and a
+back and reads them one after the other, so the second face costs roughly what the first one costs.
+The 33 submissions carrying a back came in 14 and 17 inside the budget, median 5.55 and 4.95
+seconds; the four that have only a front came in 4 of 4, median 2.39 and 2.74. Against the previous
+deployed commit, which could only be sent fronts, the same set measured 35 of 37 — a faster answer
+that was wrong about the warning on 19 of 29 real labels.
 
-Both halves of that are visible inside the same runs. The 33 submissions carrying a back came in 14
-and 17 inside the budget, median 5.55 and 4.95 seconds. The four that have only a front came in 4
-of 4, median 2.39 and 2.74 seconds. Against the previous deployed commit, which could only be sent
-fronts, the whole set measured 35 of 37 inside five seconds — 94.6%, median 2.90. That number was
-real and it is not a number about this product: it describes a submission the page no longer makes
-and an answer that was wrong about the warning on 19 of 29 real labels.
-
-Nothing was stopped early, nothing was answered out of the cache, and every check returned all
-seven fields, in both runs. These are slow checks, not blank ones.
-
-**Reading both faces at once will not close it, and that is measured rather than assumed.** The
-two faces are read one after another, and a running copy reads one image at a time: it holds a
-single OCR engine, and a second read waits for the first to finish (`app/vision/local.py`). Reading
-both faces at once therefore means lifting that serialisation rather than merely asking for both
-together. One read already keeps 3.7 of 4 cores busy, so there is nothing idle for a second read to
-take. One label's two faces read at once took **16% longer** than read one after the other: it
-lengthens the wait it was meant to shorten. Over a queue of labels it is 11 to 16% faster per
-image, and it buys that with the slowest single image — 1.10 seconds as built against 1.92 or 3.45
-— and with memory, 658 MB against 911 or 1267 MB of the service's 4 GiB. The serialisation stays
-([decision 0047](docs/decisions.md#0047)). What is left is making a single read cheaper. Those
-figures were taken on the development box, which is about four times faster than the deployed
-service: the comparison between shapes carries over, the seconds do not
-(`docs/evidence/2026-09-20-read-scaling.json`).
+**Three levers have been tried, and none of them closes it.** Doubling the service to eight cores
+moved one check of thirty-eight, so it is back at the four cores
+[decision 0025](docs/decisions.md#0025) argued from the free tier's limits. Reading both faces at
+once was measured rather than assumed: one read already keeps 3.7 of 4 cores busy, and reading a
+label's two faces at once took **16% longer** than reading them in turn, so the serialisation stays
+([decision 0047](docs/decisions.md#0047)). The reading path itself has been tuned three times
+already. What is left is making a single read cheaper.
 
 **Nothing here is tuned to make the number look better.** The earlier runs of 87%, 89%, 71% and 92%
-were taken on superseded code and on a harness that counted a check the evaluation guard had
-blanked as a slow one, which is why they are quoted as history rather than as figures
+were taken on superseded code and on a harness that counted a check the evaluation guard had blanked
+as a slow one, which is why they are quoted as history rather than as figures
 ([decision 0035](docs/decisions.md#0035)).
-
-**Cores are not the lever.** Doubling the service to eight cores moved one check of thirty-eight,
-which is smaller than the spread between two runs at the same size. The service is back at the four
-cores [decision 0025](docs/decisions.md#0025) argued from the free tier's limits.
 
 The measurement runs against whatever URL it is given, and skips when there is none:
 
