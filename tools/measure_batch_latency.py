@@ -189,7 +189,12 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     client = httpx.Client(base_url=args.url)
-    health = client.get("/healthz", timeout=60.0).json()
+    # `/api/health`, not `/healthz`: Cloud Run's own front end answers
+    # `/healthz` before the request reaches the container, so a run against
+    # the deployed service gets the platform's 404 page rather than this
+    # service's readiness (`app/api/healthz.py` says so where it registers
+    # both paths). The container serves both, so this works locally too.
+    health = client.get("/api/health", timeout=60.0).json()
     images, applications = _sample_pack(client)
     # The first N by TTB ID, so a second run reads the same labels as the first
     # and the difference between them is the machine.
