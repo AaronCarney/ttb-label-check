@@ -320,3 +320,14 @@ def test_a_boldness_nobody_measured_is_absent_from_both_readers() -> None:
     local = _reader_payloads("26240001000454/front.jpg")["gov_warning"]
     assert local["heading_bold_measured_confident"] is False
     assert "heading_bold" not in local
+
+
+def test_the_cloud_reader_lists_the_proof_its_alcohol_statement_states() -> None:
+    """The model is asked for the statement as printed, not for its proof. The
+    proof is read out of that statement by the same finder the local reader
+    uses, so both readers hand the proof rule the same list with no further
+    model call."""
+    statement = {"abv_pct": 45.0, "unit": "%", "alc_text": "45% Alc./Vol. (90 Proof)"}
+    cloud, _evidence, _sent = _cloud_payloads(_full_response(abv={**statement, "confidence": 0.9}))
+    assert [(p["value"], p["beside_abv"]) for p in cloud["abv"]["proof"]] == [("90", True)]
+    assert cloud["abv"]["proof"][0]["confidence"] == 0.9

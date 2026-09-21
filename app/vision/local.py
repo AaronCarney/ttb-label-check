@@ -49,6 +49,7 @@ from PIL import Image
 
 from app.config import Settings
 from app.rules._validators._helpers import normalize_words, word_run_present
+from app.rules.proof import find_proofs
 from app.rules.units import UnitTable, millilitres, millilitres_from_text, shipped_table
 from app.schemas.calls import CallRecord
 from app.schemas.expected import BeverageClass
@@ -1617,12 +1618,23 @@ def _parse(
                 "unit": "%",
                 "alc_text": alc_text,
                 "confidence": _confidence("abv", [abv_box]),
+                "proof": _proofs(body, abv_box),
             },
             abv_box.as_bbox(),
             alc_text,
         )
     else:
-        out["abv"] = ({"abv_pct": None, "unit": "", "alc_text": "", "confidence": 0.0}, None, None)
+        out["abv"] = (
+            {
+                "abv_pct": None,
+                "unit": "",
+                "alc_text": "",
+                "confidence": 0.0,
+                "proof": _proofs(body, None),
+            },
+            None,
+            None,
+        )
 
     # -- net contents -----------------------------------------------------
     net = _net_contents(body)
@@ -1719,6 +1731,72 @@ def _parse(
     # -- name and address -------------------------------------------------
     out["name_address"] = _name_address(body, joined)
     return out
+
+
+def _same_line(a: _Box, b: _Box) -> bool:
+    return abs(a.cy - b.cy) < max(a.height, b.height) * 0.7
+
+
+def _lines(boxes: list[_Box]) -> list[list[_Box]]:
+    """The boxes grouped into the lines a reader would see, left to right.
+
+    The engine sometimes returns one line as several boxes — "80" and "PROOF"
+    apart — so a statement is looked for across a line, not inside one box. A
+    box joins a line when it sits level with the line's last box and close
+    enough after it to be the next word.
+    """
+    lines: list[list[_Box]] = []
+    for box in sorted(boxes, key=lambda b: b.x0):
+        for line in lines:
+            last = line[-1]
+            size = max(last.height, box.height)
+            if _same_line(last, box) and -size <= box.x0 - last.x1 <= size * 2.5:
+                line.append(box)
+                break
+        else:
+            lines.append([box])
+    return lines
+
+
+def _beside(statement: _Box, box: _Box) -> bool:
+    """Is `box` on the alcohol statement's line, or the line next to it?"""
+    if box is statement or _same_line(statement, box):
+        return True
+    size = max(statement.height, box.height)
+    across = max(statement.x0, box.x0) - min(statement.x1, box.x1)
+    between = max(statement.y0, box.y0) - min(statement.y1, box.y1)
+    return between <= size and across <= size
+
+
+def _proofs(boxes: list[_Box], abv_box: _Box | None) -> list[dict]:
+    """Every proof figure the label states, for the proof rule to compare.
+
+    The whole label is searched, because 27 CFR §5.65(b)(1)(i) allows a proof
+    statement away from the alcohol statement as well as beside it. Each figure
+    carries the confidence of the boxes it was read from and whether it sits on
+    the alcohol statement's line or the next: only such a figure can reject the
+    label (`docs/decisions.md#0050`).
+    """
+    found: list[dict] = []
+    for line in _lines(boxes):
+        spans: list[tuple[int, int, _Box]] = []
+        text = ""
+        for box in line:
+            if text:
+                text += " "
+            spans.append((len(text), len(text) + len(box.text), box))
+            text += box.text
+        for proof in find_proofs(text):
+            parts = [b for start, end, b in spans if start < proof.end and proof.start < end]
+            found.append(
+                {
+                    "value": proof.value,
+                    "text": proof.text,
+                    "confidence": min(b.score for b in parts),
+                    "beside_abv": abv_box is not None and any(_beside(abv_box, b) for b in parts),
+                }
+            )
+    return found
 
 
 def _alcohol_statement(text: str, figure: str) -> str:

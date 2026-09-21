@@ -47,6 +47,10 @@ def test_a_percentage_inside_a_larger_number_is_not_a_figure() -> None:
     )
     assert payload["abv_pct"] == 40.0
     assert payload["alc_text"] == "40% ALC/VOL"
+    # The proof in its own box on the same line is kept beside the statement,
+    # which is left as it was read.
+    assert [(p["value"], p["beside_abv"]) for p in payload["proof"]] == [("80", True)]
+    assert payload["proof"][0]["confidence"] == 0.9993
 
 
 def test_a_percentage_printed_with_the_alcohol_words_wins_over_one_printed_without() -> None:
@@ -66,3 +70,97 @@ def test_a_bare_percentage_is_still_read_where_no_statement_carries_the_words() 
     payload = _abv(_box(0.0, 0.0, 400.0, 40.0, "12.5%", 0.99))
     assert payload["abv_pct"] == 12.5
     assert payload["alc_text"] == "12.5%"
+
+
+# ---------------------------------------------------------------------------
+# Proof, which 27 CFR §5.65(b)(1)(i) lets a label state beside its ABV
+# ---------------------------------------------------------------------------
+
+
+def _proofs(*boxes: _Box) -> list[tuple[str, bool]]:
+    return [(p["value"], p["beside_abv"]) for p in _abv(*boxes)["proof"]]
+
+
+def test_a_proof_inside_the_alcohol_statement_is_kept_beside_it() -> None:
+    # The brief's own example.
+    assert _proofs(_box(0.0, 0.0, 500.0, 40.0, "45% Alc./Vol. (90 Proof)", 0.98)) == [("90", True)]
+
+
+def test_a_proof_printed_before_the_statement_on_the_same_line_is_beside_it() -> None:
+    assert _proofs(
+        _box(0.0, 0.0, 120.0, 30.0, "80 PROOF", 0.99),
+        _box(140.0, 0.0, 300.0, 30.0, "40% ALC/VOL", 0.99),
+    ) == [("80", True)]
+
+
+def test_the_reversed_form_is_read() -> None:
+    assert _proofs(
+        _box(0.0, 0.0, 200.0, 30.0, "40% ALC/VOL", 0.99),
+        _box(0.0, 36.0, 200.0, 66.0, "PROOF 80", 0.99),
+    ) == [("80", True)]
+
+
+def test_a_proof_on_the_line_below_the_statement_is_beside_it() -> None:
+    # ttb-26218001000369: "Alc. 42.8% by vol." over "85.6 US PROOF".
+    assert _proofs(
+        _box(0.0, 0.0, 260.0, 30.0, "Alc. 42.8% by vol.", 0.99),
+        _box(10.0, 36.0, 250.0, 66.0, "85.6 US PROOF", 0.99),
+    ) == [("85.6", True)]
+
+
+def test_a_figure_and_the_word_in_separate_boxes_on_one_line_are_one_proof() -> None:
+    assert _proofs(
+        _box(0.0, 0.0, 200.0, 30.0, "40% ALC/VOL", 0.99),
+        _box(220.0, 0.0, 260.0, 30.0, "80", 0.97),
+        _box(270.0, 0.0, 380.0, 30.0, "PROOF", 0.99),
+    ) == [("80", True)]
+
+
+def test_the_corpus_run_on_statement_gives_its_proof() -> None:
+    # tests/fixtures/labels/manifest.json: "40%ALC/VOL/80 PROOF".
+    assert _proofs(_box(0.0, 0.0, 400.0, 30.0, "40%ALC/VOL/80 PROOF", 0.99)) == [("80", True)]
+
+
+def test_a_proof_far_from_the_statement_is_kept_but_not_beside_it() -> None:
+    assert _proofs(
+        _box(0.0, 0.0, 200.0, 30.0, "40% ALC/VOL", 0.99),
+        _box(0.0, 600.0, 200.0, 630.0, "90 PROOF", 0.99),
+    ) == [("90", False)]
+
+
+def test_a_class_range_is_not_a_proof() -> None:
+    assert (
+        _proofs(
+            _box(0.0, 0.0, 300.0, 30.0, "VODKA 80-89 PROOF", 0.99),
+            _box(0.0, 36.0, 200.0, 66.0, "40% ALC/VOL", 0.99),
+        )
+        == []
+    )
+
+
+def test_a_distillation_proof_beside_the_statement_is_not_the_bottles() -> None:
+    assert (
+        _proofs(
+            _box(0.0, 0.0, 200.0, 30.0, "40% ALC/VOL", 0.99),
+            _box(0.0, 36.0, 300.0, 66.0, "DISTILLED AT 160 PROOF", 0.99),
+        )
+        == []
+    )
+
+
+def test_an_impossible_figure_is_kept_as_printed() -> None:
+    # "860" is an OCR "86°"; the rule records it as unreadable, never compares it.
+    assert _proofs(
+        _box(0.0, 0.0, 200.0, 30.0, "43% ALC/VOL", 0.99),
+        _box(0.0, 36.0, 200.0, 66.0, "860 PROOF", 0.99),
+    ) == [("860", True)]
+
+
+def test_a_label_with_no_proof_gives_an_empty_list() -> None:
+    assert _proofs(_box(0.0, 0.0, 200.0, 30.0, "40% ALC/VOL", 0.99)) == []
+
+
+def test_a_proof_with_no_alcohol_statement_is_kept_and_not_beside_one() -> None:
+    payload = _abv(_box(0.0, 0.0, 200.0, 30.0, "90 PROOF", 0.99))
+    assert payload["abv_pct"] is None
+    assert [(p["value"], p["beside_abv"]) for p in payload["proof"]] == [("90", False)]

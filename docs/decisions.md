@@ -3190,3 +3190,57 @@ $200 a month against a free-tier service ([0025](#0025)). *Running the batch ins
 the page would show nothing until the last label was read, which for a hundred images is minutes,
 and it would lose the results arriving one by one that [0045](#0045) built. *Measuring the guard in
 CPU time* — the batch would no longer time out, but it would still crawl between polls.
+
+<a id="0050"></a>
+## 0050. A stated proof is checked against the label's own ABV, and only a proof beside the ABV can reject
+
+**Evidence:** `docs/PRD.md` FR-7; 27 CFR §5.1 and §5.65(b)(1)(i) (`assets/cfr/`); `app/rules/proof.py`;
+`app/rules/_validators/proof_agreement.py`; `_proofs` in `app/vision/local.py`; `merge_readings` in
+`app/vision/faces.py`; `tests/test_proof_finder.py`; `tests/rules/_validators/test_proof_agreement.py`;
+`tests/rules/test_proof_rule.py`.
+
+**What was found.** FR-7 requires a stated proof to equal twice the alcohol by volume, and nothing
+checked it. The local reader kept the percentage and dropped the proof, no rule mentioned proof, and
+the face merge kept one alcohol reading per label, so a proof printed on another face was lost too.
+
+**Chosen.** Rule `spirits.alcohol.proof_agrees`. §5.1 defines proof as "twice the percentage of
+ethyl alcohol by volume", so the rule compares the label's proof with the label's own ABV; the
+application's figure never decides it. Every step is deterministic: a regular expression finds the
+figures, and `Decimal` arithmetic built from the printed strings compares them.
+
+- **The whole label is searched, but only a proof on the ABV statement's line, or the line next to
+  it, can reject.** §5.65(b)(1)(i) allows further proof statements anywhere on the label, so they
+  are read; but a number away from the statement that reads as a proof may be something the reader
+  could not tell apart from one. A disagreeing figure there goes to a reviewer.
+- **A figure off by less than one unit of its own printed precision goes to a reviewer.** Twice
+  42.8% is 85.6, and a label printing "86" has rounded it. The regulation neither permits nor
+  forbids that in words, so the product does not decide it. A whole unit or more is a mismatch:
+  "91" beside 45% is not a rounding of 90.
+- **Some numbers followed by "proof" are not the bottle's proof, and are not read as one.** A range
+  ("VODKA 80-89 PROOF") is the registry's class shorthand. A figure the words just before it tie to
+  distillation or barrel entry ("distilled at 160 proof", "entered the barrel at 125 proof") is the
+  spirit's strength before bottling. "Barrel Proof 124.6" is read: it says the bottle holds the
+  spirit at barrel strength, and 124.6 is the bottle's proof.
+- **A figure above 200 is unreadable.** No proof can exceed pure alcohol; an "860" is an OCR "86°".
+  It goes to a reviewer and is never compared.
+- **The label's ABV unread, a proof present:** a reviewer decides, with the application's figure
+  quoted for them but not used.
+- **Each figure keeps its own OCR confidence**, and the finding's confidence is the lowest of them
+  and the alcohol reading's, so the engine's confidence floor sends a verdict resting on a poor
+  reading to a reviewer.
+- **The cloud reader is unchanged.** Where a reading carries no list of proof figures, the rule reads
+  them out of the alcohol statement with the same finder, so both readers get the same check with no
+  further model call.
+
+**Wine and malt get no rule.** Part 7 does not mention proof. §4.36(b) requires a wine's alcohol
+content "in terms of percentage of alcohol by volume, and not otherwise", which arguably makes a
+proof on a wine label non-compliant. That is a different check, the PRD does not ask for it, and it
+is not built.
+
+**Rejected.** *Asking a model for the proof* — reading it after the OCR is a regular expression, and
+a second model call adds cost and a non-deterministic step for nothing the expression cannot do.
+*Rejecting on any disagreeing proof on the label* — a stray number read as a proof would reject a
+compliant label. *Checking only the proof inside the ABV statement's own box* — the engine often
+returns the proof as a separate box, or on the next line, and those would never be checked.
+*Allowing rounding to a whole proof* — it would pass "86" against 42.8% with no one looking, on a
+reading of the regulation it does not state.

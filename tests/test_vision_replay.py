@@ -474,6 +474,20 @@ def test_the_alcohol_statement_is_returned_as_the_label_prints_it() -> None:
         )
 
 
+def test_no_recorded_face_that_prints_no_proof_is_read_as_stating_one() -> None:
+    """None of the recorded faces prints a proof statement, and every number,
+    percentage and "100%" on them is read as something other than a proof.
+
+    A figure read as a proof beside the ABV can reject a label
+    (`spirits.alcohol.proof_agrees`), so a stray one here is the regression
+    that matters. Every face still carries the list, empty, so the rule reports
+    that it does not apply rather than finding no reading at all.
+    """
+    for image in sorted(COVERED_IMAGES):
+        payload = parse_reading(thaw_reading(json.loads(_recording(image).read_text())))["abv"]
+        assert payload["proof"] == [], (image, payload["proof"])
+
+
 def test_the_statement_is_cut_out_of_a_box_that_carries_other_text() -> None:
     """Three real boxes carry the statement alongside something else, and the
     statement returned is the statement rather than the box."""

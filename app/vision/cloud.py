@@ -18,6 +18,7 @@ from datetime import UTC, datetime
 import httpx
 
 from app.config import Settings
+from app.rules.proof import proofs_in_statement
 from app.schemas.calls import CallRecord
 from app.schemas.expected import BeverageClass
 from app.schemas.extracted import Evidence, EvidenceSource, FieldObservation, MatchKind
@@ -374,6 +375,17 @@ class CloudVisionExtractor:
         )
         observations: list[FieldObservation] = []
         for fname, content in zip(_FIELD_NAMES, contents, strict=True):
+            if fname == "abv" and isinstance(content, dict):
+                # The model is asked for the statement as printed, not for its
+                # proof. The proof is read out of the statement here by the
+                # finder the local reader uses, so the proof rule gets the same
+                # list from both readers with no further model call.
+                content = {
+                    **content,
+                    "proof": proofs_in_statement(
+                        str(content.get("alc_text") or ""), _extract_confidence(content)
+                    ),
+                }
             if fname == "gov_warning" and isinstance(content, dict):
                 # Override the model's self-reported bold with a deterministic
                 # stroke-width measurement on the heading bbox. The LLM's

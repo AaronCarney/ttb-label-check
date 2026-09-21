@@ -87,6 +87,14 @@ codes:
     description: "Label or application alcohol content yields no single number to compare; a reviewer decides."
     cfr_anchors: []
     severity: warn
+  ALCOHOL_CONTENT.PROOF.DISAGREES:
+    description: "The proof the label states beside its alcohol content is not twice that alcohol content."
+    cfr_anchors: ["27 CFR §5.1", "27 CFR §5.65(b)(1)(i)"]
+    severity: reject
+  ALCOHOL_CONTENT.PROOF.NEEDS_REVIEW:
+    description: "A proof on the label could not be settled against its alcohol content; a reviewer decides."
+    cfr_anchors: ["27 CFR §5.1", "27 CFR §5.65(b)(1)(i)"]
+    severity: warn
 
   # ---- NAME_ADDRESS / NET_CONTENTS ----
   NAME_ADDRESS.PRESENCE.MISSING:

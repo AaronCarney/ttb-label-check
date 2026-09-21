@@ -106,6 +106,29 @@ rules:
     effective_date: "2022-02-09"
     test_fixtures: [F-SPIRITS-ALC-FORMAT-PASS-01, F-SPIRITS-ALC-FORMAT-REVIEW-01]
 
+  - rule_id: spirits.alcohol.proof_agrees
+    cfr_citation: "27 CFR §5.65(b)(1)(i), §5.1"
+    applies_to_classes: [spirits]
+    # §5.65(b)(1)(i) lets a label state proof beside its alcohol content, and
+    # §5.1 defines proof as twice the percentage of alcohol by volume. So a
+    # proof the label states must be twice the ABV the same label states; the
+    # application's figure does not enter into it. The whole label is searched
+    # for proof figures, but only one on the ABV statement's line or the line
+    # next to it can reject: a disagreeing figure anywhere else, one that
+    # differs by less than its own printed precision ("86" against 42.8%), and
+    # one no proof can be (above 200) go to a reviewer.
+    # docs/decisions.md#0050 carries the reasoning.
+    reason_code: ALCOHOL_CONTENT.PROOF.DISAGREES
+    severity: reject
+    match_policy: exact
+    validator: proof_agreement
+    parameters:
+      needs_review_reason_code: ALCOHOL_CONTENT.PROOF.NEEDS_REVIEW
+      disagreement_reason_code: ALCOHOL_CONTENT.PROOF.DISAGREES
+    evidence_required: [abv]
+    effective_date: "2022-02-09"
+    test_fixtures: [F-SPIRITS-ALC-PROOF-AGREES-01, F-SPIRITS-ALC-PROOF-DISAGREES-01]
+
   - rule_id: spirits.same_field_of_vision
     cfr_citation: "27 CFR §5.63(a)"
     applies_to_classes: [spirits]

@@ -2,7 +2,7 @@
   "title-19-section-134.45": {
     "heading": "\u00a7 134.45 Approved markings of country name.",
     "path": "assets/cfr/title-19-section-134.45.txt",
-    "retrieved": "2026-09-20",
+    "retrieved": "2026-09-21",
     "sha256": "029bacd751108803037c03d2096c946f220792e1f1600c500caade8f320f0edc",
     "source_url": "https://www.ecfr.gov/api/versioner/v1/full/2026-08-26/title-19.xml?part=134&section=134.45",
     "version_date": "2026-08-26"
@@ -10,7 +10,7 @@
   "title-27-part-5-subpart-I": {
     "heading": "Subpart I\u2014Standards of Identity for Distilled Spirits",
     "path": "assets/cfr/title-27-part-5-subpart-I.txt",
-    "retrieved": "2026-09-20",
+    "retrieved": "2026-09-21",
     "sha256": "4a4328519f91b412a43bd02fbbeab310734a8fe3c2db47142ecefe022aaf502f",
     "source_url": "https://www.ecfr.gov/api/versioner/v1/full/2026-09-16/title-27.xml?part=5&subpart=I",
     "version_date": "2026-09-16"
@@ -18,7 +18,7 @@
   "title-27-part-7-subpart-I": {
     "heading": "Subpart I\u2014Classes and Types of Malt Beverages",
     "path": "assets/cfr/title-27-part-7-subpart-I.txt",
-    "retrieved": "2026-09-20",
+    "retrieved": "2026-09-21",
     "sha256": "9186426d5a77bc3489ef1a3d558469bc1374601a836b5fd83b4e46b3387f53f0",
     "source_url": "https://www.ecfr.gov/api/versioner/v1/full/2026-09-16/title-27.xml?part=7&subpart=I",
     "version_date": "2026-09-16"
@@ -26,7 +26,7 @@
   "title-27-section-16.21": {
     "heading": "\u00a7 16.21 Mandatory label information.",
     "path": "assets/cfr/title-27-section-16.21.txt",
-    "retrieved": "2026-09-20",
+    "retrieved": "2026-09-21",
     "sha256": "453396b887cd8addee14626cc81a99e915dffeb128f06a732f5134a273fa0591",
     "source_url": "https://www.ecfr.gov/api/versioner/v1/full/2026-09-16/title-27.xml?part=16&section=16.21",
     "version_date": "2026-09-16"
@@ -34,7 +34,7 @@
   "title-27-section-16.22": {
     "heading": "\u00a7 16.22 General requirements.",
     "path": "assets/cfr/title-27-section-16.22.txt",
-    "retrieved": "2026-09-20",
+    "retrieved": "2026-09-21",
     "sha256": "91b6c15c96f9ac6ca2c7e9c4dc5eb049ee9636f16058d4c7020cfc5b53750174",
     "source_url": "https://www.ecfr.gov/api/versioner/v1/full/2026-09-16/title-27.xml?part=16&section=16.22",
     "version_date": "2026-09-16"
@@ -42,7 +42,7 @@
   "title-27-section-4.32": {
     "heading": "\u00a7 4.32 Mandatory label information.",
     "path": "assets/cfr/title-27-section-4.32.txt",
-    "retrieved": "2026-09-20",
+    "retrieved": "2026-09-21",
     "sha256": "bd3343aac028b373a50607c2f48948d4b4650be82324b984966e3a1dc39b3a7f",
     "source_url": "https://www.ecfr.gov/api/versioner/v1/full/2026-09-16/title-27.xml?part=4&section=4.32",
     "version_date": "2026-09-16"
@@ -50,7 +50,7 @@
   "title-27-section-4.33": {
     "heading": "\u00a7 4.33 Brand names.",
     "path": "assets/cfr/title-27-section-4.33.txt",
-    "retrieved": "2026-09-20",
+    "retrieved": "2026-09-21",
     "sha256": "a1e6681a17e51399a3d57b700381fe717ba35901693703ff4fb88a608c3f7a89",
     "source_url": "https://www.ecfr.gov/api/versioner/v1/full/2026-09-16/title-27.xml?part=4&section=4.33",
     "version_date": "2026-09-16"
@@ -58,7 +58,7 @@
   "title-27-section-4.34": {
     "heading": "\u00a7 4.34 Class and type.",
     "path": "assets/cfr/title-27-section-4.34.txt",
-    "retrieved": "2026-09-20",
+    "retrieved": "2026-09-21",
     "sha256": "3451f6811b03f90a2be3e3c6e443dfd2a22cf4dcf248b308a2fc98266b56751f",
     "source_url": "https://www.ecfr.gov/api/versioner/v1/full/2026-09-16/title-27.xml?part=4&section=4.34",
     "version_date": "2026-09-16"
@@ -66,7 +66,7 @@
   "title-27-section-4.35": {
     "heading": "\u00a7 4.35 Name and address.",
     "path": "assets/cfr/title-27-section-4.35.txt",
-    "retrieved": "2026-09-20",
+    "retrieved": "2026-09-21",
     "sha256": "cc4a9a00e975c7e630e08645fe32f396eafb757ead001d6cc36c2c6355e9d20d",
     "source_url": "https://www.ecfr.gov/api/versioner/v1/full/2026-09-16/title-27.xml?part=4&section=4.35",
     "version_date": "2026-09-16"
@@ -74,7 +74,7 @@
   "title-27-section-4.36": {
     "heading": "\u00a7 4.36 Alcoholic content.",
     "path": "assets/cfr/title-27-section-4.36.txt",
-    "retrieved": "2026-09-20",
+    "retrieved": "2026-09-21",
     "sha256": "8c2e54058cab2b3844da31c0c25a6c24dc760b84360428e7c675e2d5ff1eae2c",
     "source_url": "https://www.ecfr.gov/api/versioner/v1/full/2026-09-16/title-27.xml?part=4&section=4.36",
     "version_date": "2026-09-16"
@@ -82,15 +82,23 @@
   "title-27-section-4.37": {
     "heading": "\u00a7 4.37 Net contents.",
     "path": "assets/cfr/title-27-section-4.37.txt",
-    "retrieved": "2026-09-20",
+    "retrieved": "2026-09-21",
     "sha256": "f8739a3d4c19ab07d123ec861821f81cac7d21ad3728f344ca8f76283fee19d8",
     "source_url": "https://www.ecfr.gov/api/versioner/v1/full/2026-09-16/title-27.xml?part=4&section=4.37",
+    "version_date": "2026-09-16"
+  },
+  "title-27-section-5.1": {
+    "heading": "\u00a7 5.1 Definitions.",
+    "path": "assets/cfr/title-27-section-5.1.txt",
+    "retrieved": "2026-09-21",
+    "sha256": "21ccf34d7056bed37897ab1fa7224a1965146a6ac561bc00277241bc45f3825e",
+    "source_url": "https://www.ecfr.gov/api/versioner/v1/full/2026-09-16/title-27.xml?part=5&section=5.1",
     "version_date": "2026-09-16"
   },
   "title-27-section-5.63": {
     "heading": "\u00a7 5.63 Mandatory label information.",
     "path": "assets/cfr/title-27-section-5.63.txt",
-    "retrieved": "2026-09-20",
+    "retrieved": "2026-09-21",
     "sha256": "c881bc39c6b2df6ab6a3446e814f2941e1276b95fa2e1a742a3384052d276a73",
     "source_url": "https://www.ecfr.gov/api/versioner/v1/full/2026-09-16/title-27.xml?part=5&section=5.63",
     "version_date": "2026-09-16"
@@ -98,7 +106,7 @@
   "title-27-section-5.64": {
     "heading": "\u00a7 5.64 Brand name.",
     "path": "assets/cfr/title-27-section-5.64.txt",
-    "retrieved": "2026-09-20",
+    "retrieved": "2026-09-21",
     "sha256": "303d7af303057504240f0722b765e4ace18084af0acb4a19a1e9d15f06e96020",
     "source_url": "https://www.ecfr.gov/api/versioner/v1/full/2026-09-16/title-27.xml?part=5&section=5.64",
     "version_date": "2026-09-16"
@@ -106,7 +114,7 @@
   "title-27-section-5.65": {
     "heading": "\u00a7 5.65 Alcohol content.",
     "path": "assets/cfr/title-27-section-5.65.txt",
-    "retrieved": "2026-09-20",
+    "retrieved": "2026-09-21",
     "sha256": "4dd671f7403df3f9a1202223076c9ed5b20795d53f6284397e89ae7bcb5c254f",
     "source_url": "https://www.ecfr.gov/api/versioner/v1/full/2026-09-16/title-27.xml?part=5&section=5.65",
     "version_date": "2026-09-16"
@@ -114,7 +122,7 @@
   "title-27-section-5.66": {
     "heading": "\u00a7 5.66 Name and address for domestically bottled distilled spirits that were wholly made in the United States.",
     "path": "assets/cfr/title-27-section-5.66.txt",
-    "retrieved": "2026-09-20",
+    "retrieved": "2026-09-21",
     "sha256": "f3b5481717fba7048ba5133911b0c75971e3e890e369ea8d8d50470fb8404da1",
     "source_url": "https://www.ecfr.gov/api/versioner/v1/full/2026-09-16/title-27.xml?part=5&section=5.66",
     "version_date": "2026-09-16"
@@ -122,7 +130,7 @@
   "title-27-section-5.69": {
     "heading": "\u00a7 5.69 Country of origin.",
     "path": "assets/cfr/title-27-section-5.69.txt",
-    "retrieved": "2026-09-20",
+    "retrieved": "2026-09-21",
     "sha256": "ca2f73aecd1a61b46ed4da279f57dbed4b1fa5639aa4ec6d8725e256ef4fb5b6",
     "source_url": "https://www.ecfr.gov/api/versioner/v1/full/2026-09-16/title-27.xml?part=5&section=5.69",
     "version_date": "2026-09-16"
@@ -130,7 +138,7 @@
   "title-27-section-5.70": {
     "heading": "\u00a7 5.70 Net contents.",
     "path": "assets/cfr/title-27-section-5.70.txt",
-    "retrieved": "2026-09-20",
+    "retrieved": "2026-09-21",
     "sha256": "2b9a1bf99906be9bc74ac62cf76f431587d1996100177f466a7604ba7bf93500",
     "source_url": "https://www.ecfr.gov/api/versioner/v1/full/2026-09-16/title-27.xml?part=5&section=5.70",
     "version_date": "2026-09-16"
@@ -138,7 +146,7 @@
   "title-27-section-5.74": {
     "heading": "\u00a7 5.74 Statements of age, storage, and percentage.",
     "path": "assets/cfr/title-27-section-5.74.txt",
-    "retrieved": "2026-09-20",
+    "retrieved": "2026-09-21",
     "sha256": "25575fec22e43c077e71af7d1b6969a3517e38d8acc40e4f4ef5a05b106408db",
     "source_url": "https://www.ecfr.gov/api/versioner/v1/full/2026-09-16/title-27.xml?part=5&section=5.74",
     "version_date": "2026-09-16"
@@ -146,7 +154,7 @@
   "title-27-section-7.63": {
     "heading": "\u00a7 7.63 Mandatory label information.",
     "path": "assets/cfr/title-27-section-7.63.txt",
-    "retrieved": "2026-09-20",
+    "retrieved": "2026-09-21",
     "sha256": "f0531e231e0d8158ecc0aa00c859e479efdba2da3b751511ba6941d9d87e8d14",
     "source_url": "https://www.ecfr.gov/api/versioner/v1/full/2026-09-16/title-27.xml?part=7&section=7.63",
     "version_date": "2026-09-16"
@@ -154,7 +162,7 @@
   "title-27-section-7.64": {
     "heading": "\u00a7 7.64 Brand name.",
     "path": "assets/cfr/title-27-section-7.64.txt",
-    "retrieved": "2026-09-20",
+    "retrieved": "2026-09-21",
     "sha256": "53fef0903dca15842e6a3b13a678cc740224e1eae477c5c8db26676513609606",
     "source_url": "https://www.ecfr.gov/api/versioner/v1/full/2026-09-16/title-27.xml?part=7&section=7.64",
     "version_date": "2026-09-16"
@@ -162,7 +170,7 @@
   "title-27-section-7.65": {
     "heading": "\u00a7 7.65 Alcohol content.",
     "path": "assets/cfr/title-27-section-7.65.txt",
-    "retrieved": "2026-09-20",
+    "retrieved": "2026-09-21",
     "sha256": "de221ac145f1d9ab4ed9c4f81695b059bf7fac288560a126ad4e98c7b120ba67",
     "source_url": "https://www.ecfr.gov/api/versioner/v1/full/2026-09-16/title-27.xml?part=7&section=7.65",
     "version_date": "2026-09-16"
@@ -170,7 +178,7 @@
   "title-27-section-7.66": {
     "heading": "\u00a7 7.66 Name and address for domestically bottled malt beverages that were wholly fermented in the United States.",
     "path": "assets/cfr/title-27-section-7.66.txt",
-    "retrieved": "2026-09-20",
+    "retrieved": "2026-09-21",
     "sha256": "492cd2f99ca5c3be6635d08a535718f1283619a47d70a4b98bc895cd2c76f886",
     "source_url": "https://www.ecfr.gov/api/versioner/v1/full/2026-09-16/title-27.xml?part=7&section=7.66",
     "version_date": "2026-09-16"
@@ -178,7 +186,7 @@
   "title-27-section-7.69": {
     "heading": "\u00a7 7.69 Country of origin.",
     "path": "assets/cfr/title-27-section-7.69.txt",
-    "retrieved": "2026-09-20",
+    "retrieved": "2026-09-21",
     "sha256": "e773f84197e27a1b645931a7b61c92cf78cb9856fea354eb185001a238f30bbe",
     "source_url": "https://www.ecfr.gov/api/versioner/v1/full/2026-09-16/title-27.xml?part=7&section=7.69",
     "version_date": "2026-09-16"
@@ -186,7 +194,7 @@
   "title-27-section-7.70": {
     "heading": "\u00a7 7.70 Net contents.",
     "path": "assets/cfr/title-27-section-7.70.txt",
-    "retrieved": "2026-09-20",
+    "retrieved": "2026-09-21",
     "sha256": "3fd2f43410fd5c5e896badba9943b4cf8d3afbd2d1b3b9f75464a7eaf9b3b449",
     "source_url": "https://www.ecfr.gov/api/versioner/v1/full/2026-09-16/title-27.xml?part=7&section=7.70",
     "version_date": "2026-09-16"

@@ -27,6 +27,9 @@ from app.schemas.extracted import FieldObservation
 # and this module have to agree on it.
 QUALITY_FIELD_ID = "quality"
 
+# The field_id both readers give the alcohol content reading.
+ALCOHOL_FIELD_ID = "abv"
+
 
 def is_unreadable(reading: Sequence[FieldObservation]) -> bool:
     """Whether a face's reading is a refusal to read rather than a reading.
@@ -60,6 +63,11 @@ def merge_readings(readings: Sequence[Sequence[FieldObservation]]) -> list[Field
 
     Field order follows first appearance across the faces, so a field only the
     back shows sorts after the ones the front does.
+
+    One part of one field is gathered from every face instead: the proof
+    figures on the alcohol reading. A label may print its proof on a face that
+    does not carry the ABV statement, and taking the alcohol reading from one
+    face would drop it. The proof rule compares every figure the label states.
     """
     best: dict[str, FieldObservation] = {}
     for reading in readings:
@@ -67,4 +75,34 @@ def merge_readings(readings: Sequence[Sequence[FieldObservation]]) -> list[Field
             incumbent = best.get(observation.field_id)
             if incumbent is None or _confidence(observation) > _confidence(incumbent):
                 best[observation.field_id] = observation
+    alcohol = best.get(ALCOHOL_FIELD_ID)
+    if alcohol is not None:
+        best[ALCOHOL_FIELD_ID] = _with_every_proof(alcohol, readings)
     return list(best.values())
+
+
+def _with_every_proof(
+    alcohol: FieldObservation, readings: Sequence[Sequence[FieldObservation]]
+) -> FieldObservation:
+    """The chosen alcohol reading, carrying every face's proof figures once.
+
+    A reader that returns no proof list leaves the reading as it was, so the
+    proof rule still reads the figure out of the statement itself.
+    """
+    if not isinstance(alcohol.observed_value, dict):
+        return alcohol
+    proofs: list[dict] = []
+    listed = False
+    for reading in readings:
+        for observation in reading:
+            value = observation.observed_value
+            if observation.field_id != ALCOHOL_FIELD_ID or not isinstance(value, dict):
+                continue
+            if isinstance(value.get("proof"), list):
+                listed = True
+                proofs.extend(p for p in value["proof"] if p not in proofs)
+    if not listed:
+        return alcohol
+    return alcohol.model_copy(
+        update={"observed_value": {**alcohol.observed_value, "proof": proofs}}
+    )

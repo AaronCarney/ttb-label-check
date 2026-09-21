@@ -116,3 +116,50 @@ def test_a_refused_face_is_recognised_as_a_refusal():
     ]
     assert is_unreadable(refusal)
     assert not is_unreadable([_obs("brand_name", panel="front", confidence=0.0)])
+
+
+def _abv(*, panel: str, confidence: float, abv_pct: float | None, proof: list[dict]):
+    return FieldObservation(
+        field_id="abv",
+        beverage_class=BeverageClass.SPIRITS,
+        observed_value={
+            "abv_pct": abv_pct,
+            "unit": "%" if abv_pct is not None else "",
+            "alc_text": "" if abv_pct is None else f"{abv_pct:g}% ALC/VOL",
+            "confidence": confidence,
+            "proof": proof,
+        },
+        evidence=(
+            Evidence(
+                field_id="abv",
+                source=EvidenceSource.OCR,
+                panel=panel,
+                match_kind=MatchKind.NONE,
+                confidence=confidence,
+            ),
+        ),
+    )
+
+
+def test_a_proof_on_another_face_reaches_the_alcohol_reading():
+    """The alcohol reading comes from the face that read the ABV, but a proof
+    printed only on the other face is still part of the label."""
+    back_proof = {"value": "90", "text": "90 PROOF", "confidence": 0.97, "beside_abv": False}
+    front = [_abv(panel="front", confidence=0.95, abv_pct=45.0, proof=[])]
+    back = [_abv(panel="back", confidence=0.0, abv_pct=None, proof=[back_proof])]
+
+    (merged,) = merge_readings([front, back])
+
+    assert merged.evidence[0].panel == "front"
+    assert merged.observed_value["abv_pct"] == 45.0
+    assert merged.observed_value["proof"] == [back_proof]
+
+
+def test_the_same_proof_read_on_two_faces_is_kept_once():
+    proof = {"value": "90", "text": "90 PROOF", "confidence": 0.97, "beside_abv": True}
+    front = [_abv(panel="front", confidence=0.95, abv_pct=45.0, proof=[proof])]
+    back = [_abv(panel="back", confidence=0.9, abv_pct=45.0, proof=[dict(proof)])]
+
+    (merged,) = merge_readings([front, back])
+
+    assert merged.observed_value["proof"] == [proof]
