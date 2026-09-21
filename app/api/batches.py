@@ -7,7 +7,7 @@ import logging
 from datetime import UTC
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from sse_starlette.sse import EventSourceResponse
 
 from app.api import limits
@@ -119,7 +119,19 @@ async def post_batches(
 
 
 @router.get("/batches/{batch_id}")
-async def get_batch_snapshot(batch_id: str, request: Request) -> dict[str, Any]:
+async def get_batch_snapshot(
+    batch_id: str,
+    request: Request,
+    wait: float | None = Query(default=None, ge=0),
+    settings: Settings = Depends(_get_settings),
+) -> dict[str, Any]:
+    """The batch's state, once it is checked.
+
+    The request is held open until every label has a result, for at most
+    `wait` seconds and never longer than the service's cap; `wait=0` answers
+    at once. The service gets CPU only while a request is open, so a caller
+    that asked and hung up left the batch with none (`docs/decisions.md#0049`).
+    """
     in_flight = request.app.state.batches.get(batch_id)
     if in_flight is None:
         _logger.warning(
@@ -127,6 +139,10 @@ async def get_batch_snapshot(batch_id: str, request: Request) -> dict[str, Any]:
             extra={"batch_id": batch_id, "reason_code": "ENGINE.BATCH.NOT_FOUND"},
         )
         raise HTTPException(status_code=404, detail=f"batch_id {batch_id} not found")
+    cap = settings.snapshot_wait_seconds
+    await admission.wait_until_checked(
+        request.app, in_flight, timeout=cap if wait is None else min(wait, cap)
+    )
     return in_flight.snapshot().model_dump(mode="json")
 
 

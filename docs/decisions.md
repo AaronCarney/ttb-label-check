@@ -3135,3 +3135,42 @@ reach the service through the Worker's proxy ([0028](#0028)), so a lost affinity
 the defect back unannounced. *Holding batches in a shared store* — a database for a service that
 serves one reviewer at a time. *Two cores reserved for the keep-warm ping* — the ping holds no
 cores; it was one of several requests sent to the second instance, not their cause.
+
+<a id="0049"></a>
+## 0049. A batch is worked while someone waits on it: the snapshot request holds until the batch is checked
+
+**Evidence:** Cloud Run request and application logs for 2026-09-21 17:40–18:25 UTC; the live
+service's revision settings; `app/api/batches.py` (`get_batch_snapshot`); `app/batch/admission.py`
+(`wait_until_checked`); `tests/test_batch_snapshot_waits.py`; [0025](#0025), [0042](#0042),
+[0045](#0045), [0048](#0048).
+
+**What was found.** Twelve labels in three batches all came back `ENGINE.SLA.TIMEOUT`. The service
+runs on request-based billing, under which an instance is allocated CPU only while a request is
+open, and a batch is worked after the `POST` that started it has returned. The client polled
+`GET /batches/{batch_id}`, which answered at once, every 6–11 seconds, and never opened the stream.
+Between polls the worker had no CPU, so a 30-second evaluation guard measured on the wall clock ran
+out while the read made no progress. Results were logged at 88 s and 132 s, each in the second an
+unrelated request woke the instance. The keep-warm ping of [0042](#0042) reached the one instance
+every five minutes throughout, and no instance started or stopped: the instance was warm and
+starved. The results page is not affected, because it opens the stream, which is held until the
+batch ends, within half a second of the `POST`; a page check in the same hour took 3.4 s. The runs
+that verified [0048](#0048) held the stream too, which is why they did not show it.
+
+**Chosen.** `GET /batches/{batch_id}` holds its request open until every label has a result or the
+worker has ended, at most `SNAPSHOT_WAIT_SECONDS` (600 s by default, under the 900 s request
+timeout), and then answers. `?wait=<seconds>` shortens the hold and `?wait=0` answers at once. Every
+way of reading a batch's results now keeps a request open while the batch is worked.
+
+**What it costs.** Nothing on the meter: CPU is billed for the time a request is open, which is the
+time the batch is being read either way. A caller that wants progress rather than the finished
+batch uses the stream or `?wait=0`.
+
+**What it does not cover.** A caller that starts a batch and opens nothing for thirty seconds still
+runs the first label into the guard. No client in the repository does that.
+
+**Rejected.** *CPU always allocated* (`--no-cpu-throttling`) — it makes background work reliable for
+any caller, but with the keep-warm ping holding the one 4-vCPU instance up all month it is about
+$200 a month against a free-tier service ([0025](#0025)). *Running the batch inside the `POST`* —
+the page would show nothing until the last label was read, which for a hundred images is minutes,
+and it would lose the results arriving one by one that [0045](#0045) built. *Measuring the guard in
+CPU time* — the batch would no longer time out, but it would still crawl between polls.

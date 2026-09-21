@@ -13,6 +13,9 @@ copy of the service, and whoever uploads while one runs is told to wait.
 
 from __future__ import annotations
 
+import asyncio
+import time
+
 from app.api import _background
 from app.api._sse_bus import SSEBus
 from app.batch.state import InFlightBatch
@@ -60,3 +63,22 @@ def start(app, in_flight: InFlightBatch, bus: SSEBus, worker) -> None:
     app.state.batches[in_flight.batch_id] = in_flight
     app.state.buses[in_flight.batch_id] = bus
     _background.spawn(app, worker.run(), name=f"batch-worker:{in_flight.batch_id}")
+
+
+def _checked(app, in_flight: InFlightBatch) -> bool:
+    """Whether the batch has every result, or its worker has ended without them."""
+    if len(in_flight.results) >= len(in_flight.items):
+        return True
+    name = f"batch-worker:{in_flight.batch_id}"
+    return not any(task.get_name() == name and not task.done() for task in app.state.batch_tasks)
+
+
+async def wait_until_checked(app, in_flight: InFlightBatch, *, timeout: float) -> None:
+    """Return once the batch is checked, or after `timeout` seconds.
+
+    The caller's request stays open for as long as this runs, and an open
+    request is what keeps the service allocated CPU (`docs/decisions.md#0049`).
+    """
+    deadline = time.monotonic() + timeout
+    while not _checked(app, in_flight) and time.monotonic() < deadline:
+        await asyncio.sleep(min(0.25, max(0.0, deadline - time.monotonic())))

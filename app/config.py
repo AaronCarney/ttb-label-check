@@ -64,6 +64,13 @@ class Settings(BaseSettings):
     # 30 s as the point past which a check has not finished at all.
     evaluation_guard_seconds: float = Field(default=30.0, gt=0, alias="EVALUATION_GUARD_SECONDS")
 
+    # How long `GET /batches/{batch_id}` holds its request open waiting for the
+    # batch to finish. The service is allocated CPU only while a request is
+    # open, so a batch nobody is waiting on gets none (decision 0049). 600 s
+    # covers the largest batch the form admits, 100 images at under 4 s each,
+    # and stays under Cloud Run's 900 s request timeout (`scripts/deploy.sh`).
+    snapshot_wait_seconds: float = Field(default=600.0, ge=0, alias="SNAPSHOT_WAIT_SECONDS")
+
     # How many CPU threads the local OCR reader is allowed. The default is the
     # deploy target's core count — the Cloud Run service is 4 vCPU (decision
     # 0025) — so a developer's machine reads a label the way the deployed
