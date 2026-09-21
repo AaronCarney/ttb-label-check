@@ -85,9 +85,13 @@ country of origin. These are the common elements the brief's Additional Context 
 a label must carry is set by the regulations for its beverage type (FR-3).
 
 **FR-3** — If a label element that is mandatory for the submission's beverage type is not found on
-its label images, the product reports it. A missing warning, and a missing country of origin on an
-import, are reported as a mismatch. Any other mandatory element is reported as needs review,
-because the reader not finding an element does not show that the label lacks it. For every beverage type, brand
+its label images, the product reports it. A missing warning is reported as a mismatch where the
+product read the label's faces and found neither the heading "GOVERNMENT WARNING" nor the
+statement's own wording; 27 CFR 16.30 bars approval of a label without it. Any other mandatory
+element, including country of origin on an import, is reported as needs review, because the reader
+not finding an element does not show that the label lacks it. For country of origin this is also
+because the product reads only the English name, and cannot tell a label with no origin statement
+from one that states it in another form 19 CFR 134.45 accepts. For every beverage type, brand
 name, class/type designation, name and address, net contents and the warning are mandatory, and
 country of origin is mandatory on imports. Alcohol content is mandatory on distilled spirits, and on
 wine unless the wine is 14% alcohol by volume or less and its label says "table wine" or "light
@@ -120,8 +124,11 @@ approved label change the punctuation of its words without a new approval; the f
 change must not alter the meaning, which the product does not judge. A mark that stands for a word or
 a thing — "&", "#", "@", "%" — is part of the name, and so is a mark between two digits. Any other
 difference is scored, and a match needs 0.92. Brand is also compared against every name the
-application says the label may carry, not its brand-name field alone. See `docs/decisions.md#0017`
-and `docs/decisions.md#0015`.
+application says the label may carry, not its brand-name field alone. The product looks for those
+names on the label; where it does not find one, it reports needs review and shows the text it
+takes to be the brand. It does not report a brand mismatch, because nothing printed on a label marks
+which text is its brand, so the product cannot be confident it compared the right text (FR-9).
+See `docs/decisions.md#0017` and `docs/decisions.md#0015`.
 
 Country of origin is read only as the English name the application declares, appearing as whole
 words inside the label's wording. The abbreviations, adjectival forms, other-language names and
@@ -135,8 +142,13 @@ the product reports needs review.
 **FR-8** — For every check, the product shows the value it read from the label beside the application
 value.
 
-**FR-9** — If the product cannot read an element from the label images with confidence, it reports
-needs review for that check.
+**FR-9** — For every check, the product establishes two things: that it read the text correctly, and
+that the text it read is the element being checked. It reports a mismatch only where it is confident
+of both. Where either falls short, it reports needs review, and the result says which of the two fell
+short and for which element. A match may rest on the value itself: finding the application's value
+on the label shows both. This is the three-way split of record linkage, where only a confident
+comparison is decided and the rest goes to clerical review (Fellegi and Sunter, "A Theory for Record
+Linkage", 1969); a reading's OCR score measures only the first of the two.
 
 **FR-10** — If a label image is too low in resolution or too blurred by camera movement to read,
 the product checks nothing on that label, names which of the two problems it found, and says in
