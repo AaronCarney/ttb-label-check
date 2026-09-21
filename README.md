@@ -8,6 +8,35 @@ look. The decision to approve or reject stays with the agent.
 How the requirements were derived from a brief that supplied none, the constraints nobody chose,
 what is proven and what is not, and what changed while it was being built.
 
+## What it is
+
+TTB's compliance agents review roughly 150,000 label applications a year, and most of each review is
+matching: does the brand name printed on the artwork say what the application says, is the alcohol
+content the declared one, is the Government Health Warning present and word for word. A simple
+application takes five to ten minutes by eye. In peak season importers file hundreds at once.
+
+The requirements came from the four people in the brief, answered one at a time rather than
+averaged. The agent with 28 years in the job said "you need judgment", so nothing auto-rejects and
+anything the app cannot settle comes back labelled unsettled. The reviewer eight months in said it
+has to be exact, so the warning is compared word for word and a check that cannot be measured is
+visibly switched off rather than silently skipped. The deputy director wanted speed and batches, so
+results stream back as each one finishes. IT said don't do anything crazy, and the answer was to
+build nothing they have to operate.
+
+This app does the matching. You give it an application's declared values and the label images filed
+with it; it reads the label, compares the two, and returns one verdict per element with the rule and
+the regulation behind it. Three outcomes only — **match**, **mismatch**, or **needs review**, which
+the interface labels Pass, Fail and Needs review — and the third is a real answer, used wherever the
+app can see the element but cannot honestly decide it.
+
+There is one way in and one way it works: a form that takes one label or three hundred, and a
+results page that streams verdicts back as each label finishes. A submission of one label is a batch
+of one, checked by the same path as a submission of three hundred. The first label is checked on its
+own and the rest run behind it, which is the ordering rather than an accident of it: the reviewer gets a real result in
+seconds instead of a progress bar, and starts working while the remainder runs. The batch then paces
+itself against how fast they are actually reading, rather than racing ahead to compute results
+nobody has asked for yet.
+
 ## Deployed URL
 
 **https://ttb.aaroncarney.me**
@@ -92,35 +121,6 @@ TTB_DEPLOY_URL=https://ttb.aaroncarney.me uv run pytest tests/test_deploy_health
 `artifacts/deploy-latency/`, naming for every check what came back as well as how long it took.
 
 Everything below runs today from a clone, which is the other half of the same deliverable.
-
-## What it is
-
-TTB's compliance agents review roughly 150,000 label applications a year, and most of each review is
-matching: does the brand name printed on the artwork say what the application says, is the alcohol
-content the declared one, is the Government Health Warning present and word for word. A simple
-application takes five to ten minutes by eye. In peak season importers file hundreds at once.
-
-The requirements came from the four people in the brief, answered one at a time rather than
-averaged. The agent with 28 years in the job said "you need judgment", so nothing auto-rejects and
-anything the app cannot settle comes back labelled unsettled. The reviewer eight months in said it
-has to be exact, so the warning is compared word for word and a check that cannot be measured is
-visibly switched off rather than silently skipped. The deputy director wanted speed and batches, so
-results stream back as each one finishes. IT said don't do anything crazy, and the answer was to
-build nothing they have to operate.
-
-This app does the matching. You give it an application's declared values and the label images filed
-with it; it reads the label, compares the two, and returns one verdict per element with the rule and
-the regulation behind it. Three outcomes only — **match**, **mismatch**, or **needs review**, which
-the interface labels Pass, Fail and Needs review — and the third is a real answer, used wherever the
-app can see the element but cannot honestly decide it.
-
-There is one way in and one way it works: a form that takes one label or three hundred, and a
-results page that streams verdicts back as each label finishes. A submission of one label is a batch
-of one, checked by the same path as a submission of three hundred. The first label is checked on its
-own and the rest run behind it, which is the ordering rather than an accident of it: the reviewer gets a real result in
-seconds instead of a progress bar, and starts working while the remainder runs. The batch then paces
-itself against how fast they are actually reading, rather than racing ahead to compute results
-nobody has asked for yet.
 
 ## Getting started
 
