@@ -1402,6 +1402,12 @@ form collects, exists for the life of the request and is never stored or written
 The README currently states the opposite — that nothing is stored — which was true before this
 entry and is not true now. Correcting it is outstanding.
 
+**Amended — C-2 now describes what is kept.** The PRD's C-2 was rewritten to state the seven-day
+image store, a second disk write (the value-stripped result store of [0033](#0033)), and the batch
+held in memory until the next one (`docs/PRD-decisions.md`). The README states the same. The
+paragraphs above that say C-2 stays unchanged, that the image is the one disk write, and that the
+README is outstanding describe the record before that change.
+
 <a id="0019"></a>
 ## 0019. The browser-facing surface is one module per job, behind one router
 
@@ -2115,6 +2121,10 @@ nothing, but it withdraws a capability the requirements ask for to avoid keeping
   narrower store this argues for is one holding only what an override needs to amend: the evaluation
   id, the per-field dispositions, and the audit trail. That was not built, and the whole envelope is
   what is written.
+
+**Amended — the narrower store was built.** `app/api/ui/results.py` now blanks every value read from
+the label or declared in the application before the file is written (`_forget_applicant_material`),
+so the store holds only what an override amends.
 
 <a id="0034"></a>
 ## 0034. The bbox overlay and the evidence panel are removed, because neither can be fed truthfully

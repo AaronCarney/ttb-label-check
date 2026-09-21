@@ -69,3 +69,47 @@ as a mismatch".
 **What made it necessary.** The product rejects nothing and every label reaches the agent: SC-1 says
 "The decision to approve or reject stays with the agent", and FR-11 names the three results the
 product reports. The old wording described a product that decides.
+
+## FR-2, FR-3, FR-10, FR-14 and C-2, the product as built
+
+**What moved.** Five statements that described a product other than the one built were rewritten to
+describe it. `specs/0001-label-verification/requirements.md` R3, R10 and R14 follow.
+
+1. **FR-2** said its list of six elements "is complete; it was read from the brief's Additional
+   Context". The brief introduces that list as "common elements include", and the regulations for
+   each beverage type decide which elements a label must carry. The new text says so and points to
+   FR-3.
+2. **FR-3** said any mandatory element absent from the label images is a mismatch. It now says a
+   missing warning, and a missing country of origin on an import, are a mismatch, and any other
+   mandatory element the reader does not find is needs review, because the reader not finding an
+   element does not show that the label lacks it.
+3. **FR-10** said the product names skew, poor light or glare on each check it sends to review for
+   that reason. It now says a photograph too low in resolution or too blurred by camera movement is
+   not checked at all, and the result names which of the two it is and says what a better photograph
+   needs.
+4. **FR-14** said sample submissions can be checked without supplying files. It now says the start
+   page offers a sample pack to download, label images with the applications filed for them, checked
+   through the same form as any other upload.
+5. **C-2** said the product retains no label image or application data once it has returned the
+   results. It now says what is kept: a batch's results in memory until the next batch starts, and on
+   disk for seven days the uploaded image and each result stripped of every value read or declared.
+
+**What made it necessary.** Each was the PRD describing a product the code does not build, settled
+by a later decision the PRD never caught up with.
+
+- FR-2: `docs/approach.md` already said the regulations, not the brief's list, set the checks; the
+  PRD sentence contradicted it. The rule packs select by beverage type ([decision 0010](decisions.md#0010)).
+- FR-3: every validator sends an element the reader did not locate to needs review
+  (`app/rules/_validators/_helpers.py`, `not_read_result`), and only the warning rule sets
+  `unlocated_is_absent` (`rules/common/health_warning.yaml`). An import with no origin statement is
+  rejected under `ORIGIN.PRESENCE.MISSING` ([decision 0016](decisions.md#0016)). A reader miss
+  treated as absence rejected labels that carry the element.
+- FR-10: the glare gate was removed because it turned away readable labels, and nothing measures
+  skew or light ([decision 0026](decisions.md#0026)). The gates that remain, low resolution and camera
+  blur (`app/vision/quality.py`), stop the whole label before any rule runs.
+- FR-14: the sample buttons were retired when the batch began to carry its applications as a CSV,
+  and the sample pack ships both halves ([decision 0043](decisions.md#0043)).
+- C-2: the image store ([decision 0018](decisions.md#0018)), the value-stripped result store an
+  override amends ([decision 0033](decisions.md#0033)) and one batch held until the next
+  ([decision 0041](decisions.md#0041)). The old text was stricter than the brief asks — "We're not
+  storing anything sensitive for this exercise" — and the README already stated the seven days.
