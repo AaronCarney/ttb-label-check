@@ -359,62 +359,44 @@ limit on the proof rather than a gap in the build, and it is the half that needs
 
 ## What changed, and what would change next
 
-**The deploy host moved, and not for the reason it looks like.** We first put the service on a
-fixed-price host at nine dollars a month, on one argument: a public demo URL is open to anyone, so the
-cost had to be bounded by a plan rather than by traffic, and we had no way to bound a
-pay-per-use host. We later moved to a pay-per-use service. No fact had changed and the nine-dollar
-figure still stood. What changed is that a mechanism appeared — we already had our own domain, and a
-proxy in front of the service could carry a rate limit. With the meter bounded at the edge, the plan
-fee bought nothing the free tier did not already give. The constraint never moved; the instrument
-that satisfied it did. Deployed, the rate limit turned out to deny nothing, and what bounds the meter
-is the other half of that proxy: the service answers no caller but it, and a request it refuses is
-never billed.
+**The deploy host moved, and not for the reason it looks like.** We first took a fixed-price host
+at nine dollars a month: a public demo URL is open to anyone, so cost had to be bounded by a plan
+rather than by traffic, and we could not bound a pay-per-use host. We moved to one anyway. No fact
+had changed; what changed is that a mechanism appeared — we already had our own domain, and a
+proxy in front of the service could carry a rate limit. The constraint never moved; the instrument
+that satisfied it did.
 
-**We corrected a requirement rather than the code.** Our specification said a brand differing only in
-punctuation should go to a reviewer. TTB's own form permits punctuation changes with no new approval,
-and the research behind the requirement contradicted itself. "Stones Throw" against "Stone's Throw"
-is exactly the case the senior agent complains about by name. So we amended the requirement and
-logged the change, rather than making the product do the wrong thing consistently.
+**We corrected a requirement rather than the code.** Our specification said a brand differing only
+in punctuation should go to a reviewer. TTB's own form permits punctuation changes with no new
+approval, and the research behind the requirement contradicted itself — "Stones Throw" against
+"Stone's Throw" is the case the senior agent complains about by name. So we amended the
+requirement rather than making the product do the wrong thing consistently.
 
 **We stopped explaining the product inside the product.** The landing page had carried four
-curated labels as buttons, each with a sentence saying what checking it would show, and the batch
-page had offered a starter pack of images with no applications. Two things were wrong with that. The
-smaller: one of those sentences asserted an outcome the engine explicitly refuses to assert, telling
-a reader that a beer's photographs show no bottler's name and address *"and the check says so"*,
-where the check says only that it could not make the finding — so the tour contradicted the product
-it was touring. The larger: a demo is only worth anything if it is the product with data supplied,
-and a page of curated buttons is a different artifact from the one an agency would run. So the
-buttons and their sentences are gone, the sample pack carries the applications too, and the
-demonstration is now a reviewer unzipping that pack into the same form their own labels go through.
-What the sentences explained lives here and in `README.md`, which is where a reader can be told
-things the product itself has no business claiming.
+curated labels as buttons, each with a sentence saying what checking it would show. One asserted
+an outcome the engine refuses to assert — that a beer's photographs show no bottler's name and
+address *"and the check says so"*, where the check says only that it could not make the finding.
+The larger fault was the tour itself: a demo is worth something only if it is the product with
+data supplied. The buttons are gone, the sample pack carries applications alongside its images,
+and what those sentences explained lives in `README.md`.
 
 **We deleted work that could not earn its place.** The second-opinion layer described above. An
 image-quality gate that turned out to be measuring how light the label stock is. A rule that could
-never pass, deleted — while a different rule in a similar state was switched off instead, because one
-was unbuildable and the other merely unbuilt.
+never pass, deleted — while a different rule in a similar state was switched off instead, because
+one was unbuildable and the other merely unbuilt.
 
-**Who would run it, and what they would watch.** The agency's own IT would, and their interview was
-explicit that they take on nothing new to operate — so the product had to be operable by someone who
-did not write it. One readiness check answers whether the service is up and doubles as the warm-up
-that loads the reading models, so a copy that cannot load them announces itself as not ready rather
-than failing the first real label. Logs carry the identifiers needed to follow one submission
-through, with applicant material kept out, and every check leaves one line with its outcome, the
-reason code behind it and what it cost. That is where the operability stops: nobody is told when
-those lines go wrong — no metrics endpoint, no alerting, no dashboard — and nothing records what the
-service did beyond those lines and the results it keeps for a week so an override has
-something to amend. An operator can find out whether it is right only by reading the logs. Those are prerequisites before this ran inside the agency, not improvements: a compliance
-service nobody is watching is one nobody can vouch for. What bounds the cost is the invoker check,
-which refuses every caller but our own front door before a request is billed, and the two-instance
-cap. The rate limit at the edge denies nothing — measured on the deployed service rather than
-inferred from the code, and recorded in `edge/src/index.js` beside the call — and is left in place
-inert.
+**Who would run it, and what they would watch.** The agency's own IT would, and their interview
+was explicit that they take on nothing new to operate, so the product had to be operable by
+someone who did not write it. Logs carry the identifiers needed to follow one submission through,
+with applicant material kept out, and every check leaves a line with its outcome, its reason code
+and what it cost. That is where operability stops: no metrics endpoint, no alerting, no dashboard,
+and a compliance service nobody is watching is one nobody can vouch for.
 
 **What we would do next, in order.** Run a real accessibility review rather than an automated one,
-which is the half of that requirement a machine cannot do for us; bound the memory a batch holds,
-which is the one way a caller can still make this service fall over; instrument the batch timing,
-which is the one requirement with no measurement at all; then widen the corpus, which is the work
-that makes every figure above more trustworthy.
+the half of that requirement a machine cannot do for us; bound the memory a batch holds, the one
+way a caller can still make this service fall over; instrument the batch timing, the one
+requirement with no measurement at all; then widen the corpus, which firms up every accuracy
+figure here.
 
 ## How the work was run
 
