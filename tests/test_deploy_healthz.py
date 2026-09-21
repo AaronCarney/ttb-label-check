@@ -2,7 +2,6 @@
 
 import json
 import os
-import re
 import statistics
 import time
 from datetime import UTC, datetime
@@ -28,7 +27,7 @@ def test_deployed_healthz_200(deploy_url):
 
 
 def test_deployed_ui_shell_200(deploy_url):
-    """The single-label UI shell route returns HTML."""
+    """The check page returns HTML."""
     r = httpx.get(f"{deploy_url}/", timeout=10.0)
     assert r.status_code == 200
     # The shell is rendered Jinja2 + island bundle reference.
@@ -36,8 +35,8 @@ def test_deployed_ui_shell_200(deploy_url):
 
 
 def test_deployed_static_island_bundle_200(deploy_url):
-    """The island bundle is served from /static/island/."""
-    r = httpx.get(f"{deploy_url}/static/island/single.js", timeout=10.0)
+    """The island bundle the results page loads is served from /static/island/."""
+    r = httpx.get(f"{deploy_url}/static/island/app.js", timeout=10.0)
     assert r.status_code == 200
     # JS content-type or any reasonable text/JS detection
     ct = r.headers.get("content-type", "").lower()
@@ -90,10 +89,10 @@ def _submissions() -> list[tuple[str, list[Path], dict[str, str]]]:
     them, which is what R15 measures against — not a synthetic image, because
     reading time depends on what is actually on the label.
 
-    Every face the manifest lists travels, because that is now what the page
-    sends: `app/ui/templates/single.html` offers a front and an optional back,
-    and 34 of the 38 test labels have a back. Measuring a front-only submission
-    would be measuring something no reviewer posts, and the back is not free —
+    Every face the manifest lists travels, because that is what a reviewer
+    checking one label sends, and 34 of the 38 test labels have a back.
+    Measuring a front-only submission would be measuring something no reviewer
+    posts, and the back is not free —
     the faces are read one after another (`app/vision/local.py`), so a second
     face costs roughly a second read.
     """
@@ -136,11 +135,6 @@ def _submissions() -> list[tuple[str, list[Path], dict[str, str]]]:
 # no way to tell those apart. Every run now leaves a file behind saying what
 # each check answered.
 
-# The result page embeds the envelope it rendered — `app/ui/templates/single.html`,
-# `<script id="envelope" type="application/json">`. It is the same envelope the
-# API returns, so reading it here measures what the reviewer was actually shown.
-_ENVELOPE_TAG = re.compile(r'<script id="envelope" type="application/json">(.*?)</script>', re.S)
-
 # The evaluation guard stopping a check before it finished
 # (`app/services/evaluator.py`). Such a check returns HTTP 200 and an incomplete
 # answer, so nothing but the audit trail distinguishes it from a slow one.
@@ -151,19 +145,8 @@ _STOPPED_EARLY_CODE = "ENGINE.SLA.TIMEOUT"
 _RECORD_DIR = Path(os.environ.get("TTB_LATENCY_RECORD_DIR", "artifacts/deploy-latency"))
 
 
-def _envelope_from_page(html: str) -> dict | None:
-    """The envelope the result page carries, or None if it carries none."""
-    match = _ENVELOPE_TAG.search(html)
-    if match is None:
-        return None
-    try:
-        return json.loads(match.group(1))
-    except json.JSONDecodeError:
-        return None
-
-
-def _row_from_page(
-    label_id: str, status: int | None, wall_seconds: float, html: str, faces: int
+def _row_from_result(
+    label_id: str, status: int | None, wall_seconds: float, envelope: dict | None, faces: int
 ) -> dict:
     """One check, as the record keeps it.
 
@@ -184,7 +167,6 @@ def _row_from_page(
         "stopped_early": None,
         "trace": None,
     }
-    envelope = _envelope_from_page(html)
     if envelope is None:
         return row
     metrics = envelope.get("metrics") or {}
@@ -207,7 +189,14 @@ def _row_from_page(
 def _summarise(rows: list[dict]) -> dict:
     """The figures a run is quoted for, worked out once and written down."""
     walls = [row["wall_seconds"] for row in rows]
-    inside = [w for w in walls if w <= _LATENCY_BUDGET_SECONDS]
+    # Only a check that showed a result can be inside the budget. A submission
+    # the service refused comes back in well under a second, and counting it
+    # would turn a busy service into a fast one.
+    inside = [
+        row["wall_seconds"]
+        for row in rows
+        if row["status"] == 200 and row["wall_seconds"] <= _LATENCY_BUDGET_SECONDS
+    ]
     return {
         "checked": len(rows),
         "two_faced": sum(1 for row in rows if (row.get("faces") or 1) > 1),
@@ -241,31 +230,60 @@ def _write_record(deploy_url: str, rows: list[dict]) -> Path:
 
 
 def _check_once(
-    deploy_url: str, faces: list[Path], form: dict[str, str]
-) -> tuple[int | None, float, str]:
-    """Post one submission the way the page does, and time the round trip.
+    deploy_url: str,
+    faces: list[Path],
+    form: dict[str, str],
+    transport: httpx.BaseTransport | None = None,
+) -> tuple[int | None, float, dict | None]:
+    """Post one submission the way the page does, and time it to the result shown.
 
-    The first face goes as `label` and the second as `label_back`, which are
-    the two field names `app/ui/templates/single.html` offers; a label with
-    only a front posts only the front, exactly as the page would.
+    Every face goes in the repeatable `labels` field with `one_label` set, which
+    is what the page posts when a reviewer ticks *These images are all faces of
+    one label* (`app/api/ui/submit.py`). The typed application travels as form
+    fields, which apply because the submission is one label.
 
-    Returns the status code, the seconds the reviewer waited, and the page they
-    were shown. A timeout comes back as no status and the full timeout, because
-    that is what it cost.
+    `POST /` answers 303 to the batch's page, and the result reaches the page as
+    the `label-result` event on `/batches/{id}/stream` (`app/batch/worker.py`),
+    so that event's arrival is when the reviewer is shown the result. The clock
+    starts before the upload, because uploading is part of the wait.
+
+    Returns 200 and the envelope when a result arrived, the status `POST /`
+    answered when it refused, or no status when nothing arrived inside the
+    timeout — which comes back as the full timeout, because that is what it cost.
+    `transport` stands in for the network in `tests/test_deploy_latency_record.py`.
     """
-    front, *rest = faces
-    files = {"label": (front.name, front.read_bytes(), "image/jpeg")}
-    if rest:
-        back = rest[0]
-        files["label_back"] = (back.name, back.read_bytes(), "image/jpeg")
+    files = [("labels", (face.name, face.read_bytes(), "image/jpeg")) for face in faces]
     started = time.monotonic()
     try:
-        response = httpx.post(
-            f"{deploy_url}/", files=files, data=form, timeout=_REQUEST_TIMEOUT_SECONDS
-        )
+        with httpx.Client(
+            base_url=deploy_url, timeout=_REQUEST_TIMEOUT_SECONDS, transport=transport
+        ) as client:
+            response = client.post(
+                "/", files=files, data={**form, "one_label": "1"}, follow_redirects=False
+            )
+            if response.status_code != 303:
+                return response.status_code, time.monotonic() - started, None
+            batch_id = response.headers["location"].rstrip("/").rsplit("/", 1)[-1]
+            # Read on to `stream-end` after the result, untimed: the service
+            # takes one batch at a time and answers 409 to the next submission
+            # until this one has finished.
+            shown: tuple[float, dict | None] | None = None
+            with client.stream("GET", f"/batches/{batch_id}/stream") as stream:
+                event = ""
+                for line in stream.iter_lines():
+                    if line.startswith("event:"):
+                        event = line.split(":", 1)[1].strip()
+                        if event == "stream-end":
+                            break
+                    elif line.startswith("data:") and event == "label-result" and shown is None:
+                        elapsed = time.monotonic() - started
+                        payload = json.loads(line.split(":", 1)[1].strip())
+                        shown = (elapsed, payload.get("envelope"))
     except httpx.TimeoutException:
-        return None, _REQUEST_TIMEOUT_SECONDS, ""
-    return response.status_code, time.monotonic() - started, response.text
+        return None, _REQUEST_TIMEOUT_SECONDS, None
+    if shown is None:
+        return None, time.monotonic() - started, None
+    return 200, shown[0], shown[1]
 
 
 def test_deployed_single_check_meets_the_five_second_budget(deploy_url):
@@ -311,8 +329,8 @@ def test_deployed_single_check_meets_the_five_second_budget(deploy_url):
 
     measured: list[dict] = []
     for label_id, faces, form in submissions[1:]:
-        status, elapsed, page = _check_once(deploy_url, faces, form)
-        measured.append(_row_from_page(label_id, status, elapsed, page, len(faces)))
+        status, elapsed, envelope = _check_once(deploy_url, faces, form)
+        measured.append(_row_from_result(label_id, status, elapsed, envelope, len(faces)))
 
     record = _write_record(deploy_url, measured)
     summary = _summarise(measured)
