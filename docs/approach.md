@@ -253,17 +253,17 @@ second minted by the app.
 Plain Python for the service. No other language was weighed, and that is the honest account: the
 reading and rules libraries live in Python, so any other choice would have put a foreign-function
 call under the one component whose accuracy the whole product rests on, and the brief's priority is
-a working core rather than a novel stack. A conventional server-rendered interface with
-a small interactive layer, rather than a full client-side application, because the parts that need
-real interactivity are few — the keyboard path an agent uses to overrule a finding, and the batch
-page that fills in as each result streams back — and requiring a build step on the reviewer's
-machine is a barrier to running this at all. No database: a directory of files beat both an embedded database, which
-answers no question the files do not, and object storage, which needs an account, a key and an
-outbound call the clone cannot make. A processor-only reader that ships with the code, over a
-design that only calls a hosted model — which cannot run where this product is for — and over
-picking a reader per image at run time, which adds moving parts for an accuracy gain nobody has
-measured. A container as the unit of deployment, over the cheaper runtimes that are not containers:
-the edge-worker tier we costed runs under WebAssembly and caps processor time at ten milliseconds a
+a working core rather than a novel stack. A conventional server-rendered interface with a small
+interactive layer, rather than a full client-side application, because the parts that need real
+interactivity are few — the keyboard path an agent uses to overrule a finding, and the batch page
+that fills in as each result streams back — and requiring a build step on the reviewer's machine is
+a barrier to running this at all. No database: a directory of files beat both an embedded database,
+which answers no question the files do not, and object storage, which needs an account, a key and an
+outbound call the clone cannot make. A processor-only reader that ships with the code, over a design
+that only calls a hosted model — which cannot run where this product is for — and over picking a
+reader per image at run time, which adds moving parts for an accuracy gain nobody has measured. A
+container as the unit of deployment, over the cheaper runtimes that are not containers: the
+edge-worker tier we costed runs under WebAssembly and caps processor time at ten milliseconds a
 request, which a reader that takes two seconds cannot use at any price. The container also means the
 clone and the deployed service are the same thing.
 
