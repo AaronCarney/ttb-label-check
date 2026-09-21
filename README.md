@@ -275,109 +275,47 @@ uv run task demo
 
 ## How it works
 
-Three stages, and the split between them is the design:
+Three stages. `ARCHITECTURE.md` maps the directories; `app/services/evaluator.py` is the eight steps
+one check runs, in order.
 
-**1. Read.** An OCR engine finds text and its position on the image, and a parsing layer turns that
-into seven fields — brand name, class/type, alcohol content, net contents, name and address, country
-of origin, and the health warning — each carrying the box on the image it came from. The reader is
-an interface with two implementations behind it, so the local engine and the hosted model are
-swappable without anything downstream knowing which ran.
+**1. Read.** An OCR engine finds text and its position; a parsing layer turns that into seven fields,
+each carrying the box it came from. Every face of a label is read and the readings are merged into
+one set of fields, each taken from the face that read it best — a COLA is filed with every face, and
+the government warning is usually on the back. Two files whose names end `-front` and `-back` on one
+stem are one label; the applications arrive as one CSV joined to the images by the same filename
+([decision 0043](docs/decisions.md#0043)).
 
-A label is every photograph of it, not one. A COLA is filed with every face of a label, and a
-label's mandatory elements are spread across its panels: the government warning is most often
-printed on the back. So every face supplied is read, and the readings are merged into one set of
-seven fields — for each field, the reading from the face that read it best. Merging rather than
-concatenating is what makes one verdict possible: the rules run over every reading they are handed,
-so two readings of the brand would fail the brand check on the strength of a back label that never
-carried one. Each field keeps the face it was read from, so a finding can be shown against the
-photograph it came from.
+**2. Compare.** A rule pack decides, in YAML, across a common pack and one per beverage class. A rule
+names the validator it calls, the regulation it comes from, and what outcome each result maps to.
+Adding a check is a YAML edit, and the tables the rules read are data files rather than code.
 
-**How a batch says two files are one label.** A browser's file picker returns a flat list of names
-and no folders, so the only thing an uploader controls is what the files are called. Two files whose
-names end `-front` and `-back` on the same stem — `lucy-front.jpg` and `lucy-back.jpg` — are checked
-together as one label. Every other filename is one label on its own, so nothing changes for an
-uploader who names their files differently. The downloadable sample set is named that way already.
+**3. Report.** Each check returns a verdict, a reason code and a citation, so a reviewer sees why and
+not just what. The citation opens: pressing it fills a column beside the finding with the wording of
+the section, which the product holds for all 24 sections its rules cite, fetched once from the eCFR
+and committed with a hash. Nothing is fetched while the service runs
+([decision 0046](docs/decisions.md#0046)).
 
-**How a batch knows which application belongs to which label.** By that same filename. The
-applications travel as one CSV, `applications.csv`, a row per label carrying the ten fields the
-form asks for, and a row joins to a label on the image name. A CSV is what a reviewer
-holding 300 filings already has, which the JSON body `POST /batches` accepts is not; a sidecar file
-per label was rejected for spending the 100-file cap on paperwork. The brief rules out integrating
-with COLAs Online, so a file the reviewer supplies stands in for the feed a real deployment would
-read from the system of record. See `docs/decisions.md#0043`.
-Without this, a bourbon sent as two files came back as two answers, neither of them about the
-product: a front that fails the warning check the back satisfies, and a back with no brand and no
-class on it.
+**No model decides a verdict.** A model may read a label — no deterministic code can — but the
+comparison is rules over the text it produced, so the same label and application give the same
+answer every time. A layer that sent finished results to a language model for a second opinion was
+removed for that reason ([decision 0009](docs/decisions.md#0009)).
 
-**2. Compare.** A rule pack decides. The rules are YAML, across a common pack and one per beverage
-class, and each names a validator by string from a registry. A rule says what it checks, which
-regulation it comes from, and what outcome each result maps to. Adding a check is a YAML edit, and
-the reference tables the rules read (volume units, class/type designations, characters-per-inch
-limits) are data files rather than code.
+**What an upload may be.** **31.5 MB** in one request, **1.5 MB** per image, **100** images in a
+batch, and nothing whose header declares more than **50,000,000** pixels. Each is derived rather
+than picked, beside its derivation in `app/api/limits.py`: the request cap sits under Cloud Run's
+32 MiB limit so the refusal names the file; the per-image cap is TTB's own, since COLAs Online
+refuses a label image over 1.5 MB; the pixel ceiling catches a decompression bomb no byte cap does.
 
-**3. Report.** Each check returns a verdict, a reason code, and a citation to the regulation it came
-from, so a reviewer can see why and not just what — and the citation opens. Pressing it fills a
-column beside the finding with the wording of the section itself, which the product holds for every
-section its rules cite: 24 sections across 27 CFR and 19 CFR, fetched from the eCFR and committed
-with the issue date, the retrieval date and a hash. Nothing is fetched while the service runs. See
-`docs/decisions.md#0046`. The result also carries the region of the image
-the reading was taken from, and the interface deliberately does not draw it on the label: that box
-is measured in the frame the reader worked in — the photograph shrunk to fit and sometimes turned
-upright — and not in the photograph the page displays.
+**What 100 per batch is worth in practice.** A hundred files fit one request only if they
+average under **322.3 KB**. At the 1.5 MB per-image cap **20** fit; at the largest label in this
+project's corpus, 547 KB, **59** fit. A reviewer sending a hundred large files is refused by name and should
+send fewer. `tests/test_readme_content.py` holds this paragraph to `files_that_fit()`.
 
-**No model decides a verdict.** A model may read a label — that is the part no deterministic code
-can do — but the comparison is rules over the text it produced. The same label and the same
-application give the same answer every time, with a citation attached. An earlier layer that sent
-finished results to a language model for a second opinion was removed for exactly this reason
-([decision 0009](docs/decisions.md#0009)).
-
-**What an upload may be.** The service accepts **31.5 MB** in one request, **1.5 MB** for any single
-image, **100** images in one batch, and refuses any image whose header declares more than
-**50,000,000** pixels. Each number is derived from a constraint rather than picked, and
-`app/api/limits.py` states the derivation beside it: the request cap sits just under Cloud Run's 32
-MiB HTTP/1 request limit ([Cloud Run quotas and
-limits](https://docs.cloud.google.com/run/quotas)) so the refusal comes from this service with a
-message naming the file, rather than from Google with a message naming nothing; the per-image cap is TTB's own, since COLAs Online
-refuses a label image over 1.5 MB and nothing larger can ever have been filed; 100 images of label
-size is about 18 MB, inside the request cap, and the PRD's 300 submissions in ten minutes is three
-such batches.
-
-**What 100 images per batch is worth in practice.** The file count and the request cap only agree
-while the images are small. A hundred files fit one request only if they average under **322.3 KB**;
-above that the request cap is the real limit and the hundred is unreachable. At the 1.5 MB per-image
-cap **20** fit one request — 21 of them come to 31.5 MB exactly, and the multipart framing around
-each file is what tips it over. At the largest label in this project's own corpus, 547 KB, **59**
-fit. The corpus median of about 184 KB is why a batch of ordinary labels does fit, and is where the
-18 MB above comes from. A reviewer sending a hundred large files is refused by the request cap, by
-name, and should send fewer. The arithmetic is `files_that_fit()` in `app/api/limits.py`; this
-paragraph is held to it by `tests/test_readme_content.py`, not written out by hand. The pixel ceiling is the guard against a decompression bomb — a few kilobytes of PNG
-can declare a 50,000 × 50,000 canvas, which no byte cap catches — and it is checked against the
-file's header before anything is decoded. A refusal carries a reason code and a sentence saying
-which file was refused and what the limit is.
-
-**Almost nothing is kept, and what is kept is named.** There is no database and no COLA
-integration. Batch state lives in the process and is dropped when the next batch starts or the
-server stops, and nothing the form collects reaches a log. Two things are written to a directory on
-disk and swept after seven days. The uploaded label image, so the result page can still show it
-after a restart or on a second worker. And every check's result — because an override has to have
-something to amend, and the batch that held it is dropped as soon as the next one starts. That second file is stripped before it is written: the value read off the artwork, the
-value the application declared, each finding's explanation, any model prose and the uploaded file's
-name are blanked, leaving what an override actually amends — the dispositions, the confidences, the
-rule ids, the CFR citations, the reason codes, the evidence boxes and the audit trail. One piece of
-free text survives, a reviewer's own justification for an override, which is the agency's record of
-its decision rather than the applicant's material. The PRD's C-2 asks for no retention at all; two
-files on disk is still not that, and [decision 0018](docs/decisions.md#0018) says why and what a
-real deployment would do instead.
-
-**What a log may contain.** Log lines are an allow-list: only named fields are written, anything
-else attached to a line is dropped, and the fields that could carry applicant material — the
-application's contents, the image bytes, the text read off the label — are blanked by a second
-pass. Both have tests. The name of the uploaded file counts as applicant material too, because it
-is whatever the uploader typed and a file named after a person names that person. It reaches the
-page as display text under its own name, and the identifier a log line correlates on is minted by
-the app rather than built from it, so the two are never the same string. A test runs a person-named
-file through both the refusal path and the ordinary path and reads what the real log handler
-emits.
+**Almost nothing is kept.** No database and no COLA integration. Batch state lives in the process
+and is dropped when the next batch starts. Two things reach disk and are swept after seven days —
+the uploaded image, and each result stripped of everything an override does not amend
+([decision 0018](docs/decisions.md#0018)). Log lines are an allow-list with applicant material
+blanked by a second pass, and both have tests.
 
 ## Tools, and why each one
 
