@@ -3080,7 +3080,9 @@ is making a single read cheaper, which is where the reading path's three tunings
 **Evidence:** `scripts/deploy.sh` (`CONCURRENCY`, `MAX_INSTANCES`); `app/batch/admission.py`;
 `app/vision/local.py` (`_read_lock`); `app/api/limits.py` (`declared_pixels`);
 `docs/evidence/2026-09-21-five-second-one-page-run1.json` and
-`docs/evidence/2026-09-21-five-second-one-page-run3.json`; [0025](#0025), [0042](#0042),
+`docs/evidence/2026-09-21-five-second-one-page-run3.json`;
+`docs/evidence/2026-09-21-five-second-one-instance-run1.json` and
+`docs/evidence/2026-09-21-five-second-one-instance-run2.json`; [0025](#0025), [0042](#0042),
 [0045](#0045).
 
 **What was found.** Re-measuring the five-second requirement after [0045](#0045) made every check a
@@ -3097,6 +3099,11 @@ before results arrived over a stream held by the instance that took the check.
 **Chosen.** `MAX_INSTANCES=1` and `CONCURRENCY=16`. Every request reaches the instance holding the
 batch. The owner's ruling that one reviewer at a time can be assumed removes the only cost: a second
 reviewer arriving mid-batch is told to wait, which admission already did within an instance.
+
+**Verified.** Two runs of all 37 checks against the deployed change, minutes apart, answered every
+check: no result was missing in either (`no_result` 0), where the last run before the change was
+missing 34. They put 23 and 33 of the 37 inside five seconds; that spread is the reads' own, not
+this defect's.
 
 **The reason for one request at a time still holds, and is kept by other means.** [0025](#0025)
 chose it so a read has all four cores, because concurrent reads contend for them. A running copy
