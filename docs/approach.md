@@ -17,25 +17,23 @@ The brief's technical requirements are a single sentence: use whatever languages
 prefer, we want to see what decisions you make. There was no requirements list to implement. So the
 first real decision was how to build one.
 
-**What the brief actually asks for is short, and most of what it says is not an ask.** It asks for
-two things: a source repository carrying all the code, a README with setup and run instructions, and
-brief documentation of approach, tools and assumptions; and a deployed URL where a working prototype
-can be accessed and tested. It also asks that the app handle labels carrying information like the
-one worked example it gives. Everything else is context, and reading it as a specification would
-have been the first mistake available. The seven-element list arrives under the words "For
-reference" and "common elements include", with the brief itself noting the exact requirements vary
-by beverage type — which is why the regulations, and not that list, set the checks. The pointer to
-ttb.gov is an encouragement to read. So is the suggestion to generate test labels, which we
-declined for a reason given later. And the one wish about photographs shot at bad angles and in bad
-light is marked out of scope by the person asking for it, in the same sentence. We treated each of
-those as what it was, and the requirements came from elsewhere.
+**What the brief actually asks for is short, and most of what it says is not an ask.** Two
+deliverables: a source repository with a README carrying setup and run instructions and brief
+documentation of approach, tools and assumptions; and a deployed URL where a working prototype can
+be accessed and tested. It also asks that the app handle labels carrying information like the one
+worked example it gives. Everything else is context, and reading it as a specification would have
+been the first mistake available. The seven-element list arrives under "For reference" and "common
+elements include", with the brief itself noting that exact requirements vary by beverage type —
+which is why the regulations, and not that list, set the checks. The pointer to ttb.gov is an
+encouragement to read, as is the suggestion to generate test labels, which we declined for a reason
+given later. The one wish about photographs shot at bad angles and in bad light is marked out of
+scope by the person asking for it, in the same sentence.
 
-**We took the requirements from the interviews, not from the field list.** The list of seven label
-elements is the only part of the brief that looks like a specification, and it says nothing about
-speed, batches, error handling, or who uses this. The four people in the transcripts say all of it.
-Every requirement we built against traces back to a person or a passage, and the one ask we met with
-no requirement at all is recorded as such — so an ask nobody answered cannot later be mistaken for
-one nobody noticed.
+**We took the requirements from the interviews, not from the field list.** The list of seven
+elements says nothing about speed, batches, error handling, or who uses this; the four people in the
+transcripts say all of it. Every requirement traces back to a person or a passage, and the one ask
+we met with no requirement at all is recorded as such, so an ask nobody answered cannot later be
+mistaken for one nobody noticed.
 
 **When the four of them wanted different things, we ranked them, and the ranking changes with the
 phase.** For a prototype the deputy director decides, then the senior agent whose adoption it lives
@@ -44,26 +42,25 @@ agents do not. Weighting all four equally would have hidden whose answer actuall
 disagreement.
 
 **Two numbers come from the brief. Every other number is ours, and is marked as ours.** Five seconds
-for a single check and 200 to 300 labels in a peak batch are stated. The rest — the percentile the
-five seconds applies to, the ten-minute batch target, the accessibility level, the matching
-thresholds — we inferred. Naming them costs the appearance of certainty and buys something better: if
-Treasury's real standard is different, that is a line of a requirements document to change, not a
-redesign.
+for a single check and 200 to 300 labels in a peak batch are stated. The percentile the five seconds
+applies to, the ten-minute batch target, the accessibility level and the matching thresholds we
+inferred. Naming them costs the appearance of certainty and buys something better: if Treasury's
+real standard is different, that is a line of a requirements document to change, not a redesign.
 
 **We cut three checks before writing any code.** Conditional fields like sulfite and organic
 declarations, the several-hundred-entry list of approved wine appellations, and an audit of
-permissible changes to an already-approved label. The last is the one that needed the argument,
-because it is the most impressive-looking of the three — and it is a different problem from the one
-we were asked to solve. The brief prefers a working core to ambitious incompleteness, and these are
-the cuts that preference bought.
+permissible changes to an already-approved label. The last needed the argument, because it is the
+most impressive-looking of the three and it is a different problem from the one we were asked to
+solve. The brief prefers a working core to ambitious incompleteness, and these are the cuts that
+preference bought.
 
-**We built the answer key before the thing it grades.** The labels were collected and transcribed the
-day before there was an application to read them — 30 approved labels from the public register, each
-with what it prints and the verdict each check should return — and the rule pack came before the code
-that runs it. Writing the tests after the code is the usual order and it was the live alternative; it
-produces tests that agree with the code, and a transcription of what a bottle actually prints does
-not. The cost is that the key was written blind, and several entries in it had to be corrected once
-real readings arrived — two of them settled by measuring the image rather than by eye.
+**We built the answer key before the thing it grades.** The labels were collected and transcribed
+the day before there was an application to read them — 30 approved labels from the public register,
+each with what it prints and the verdict each check should return — and the rule pack came before
+the code that runs it. Writing the tests after the code is the usual order and it was the live
+alternative; it produces tests that agree with the code, and a transcription of what a bottle
+actually prints does not. The cost is that the key was written blind, and several entries had to be
+corrected once real readings arrived.
 
 ## What we looked up before we chose
 
@@ -72,8 +69,7 @@ electronic code, the hosting limits and prices from each vendor's own documentat
 summary of it, each recorded with the page and the day it was read, so a change in a vendor's terms
 shows up as a difference rather than a surprise. What we could not confirm that way we wrote down as
 unconfirmed rather than filling it in from general knowledge, and a marketing claim is marked as the
-vendor's claim, not as a fact. Where a study rests on general knowledge instead of a live source, it
-says so at the top. The rule cost us answers: the hosting study ends with a list of the questions it
+vendor's claim. The rule cost us answers: the hosting study ends with a list of the questions it
 could not settle.
 
 **The reading corrected us before the code could.** The spirits alcohol tolerance we started from
@@ -84,10 +80,9 @@ failed a test we wrote ourselves.
 
 **The gaps we could not close, we designed around.** Most hosts, the one we deployed to among them,
 do not publish how long it takes to wake a sleeping service, so the speed figures here come from
-measuring the running deployment and not from a page. TTB puts every approved label on the public
-record but serves them one at a time, with nothing to download in bulk, so each test label was found
-and transcribed by hand. Widening the corpus, the work that would firm up every accuracy figure
-here, is bounded by that hand work and not by permission.
+measuring the running deployment. TTB puts every approved label on the public record but serves them
+one at a time, so each test label was found and transcribed by hand. Widening the corpus, the work
+that would firm up every accuracy figure here, is bounded by that hand work and not by permission.
 
 **What we inferred about the four people is marked as inferred.** Their words and their roles are on
 the record; what they want, and what would make them refuse to adopt this, is our reading, labelled
@@ -95,140 +90,78 @@ as ours wherever the design leans on it.
 
 ## The constraints nobody chose
 
-Federal work has rules that outrank engineering preference. These shaped more of the product than any
-technical taste did.
+Federal work has rules that outrank engineering preference. These shaped more of the product than
+any technical taste did.
 
 **The regulation the product enforces.** The checks come from the parts of the alcohol regulations
 covering wine, spirits, malt beverages and the health warning, plus the Customs rule on
-country-of-origin marking, which is where an importer's label most often turns. We pulled each text
-from the official source on a dated day and committed it, rather than working from memory. The health
-warning goes further: its exact wording is stored as a fixed asset and compared by fingerprint, so a
-change to the regulation's text is a deliberate act and not a silent drift.
+country-of-origin marking, which is where an importer's label most often turns. Each text was pulled
+from the official source on a dated day and committed rather than worked from memory, and the
+warning's wording is a fixed asset compared by fingerprint, so a change to the regulation is a
+deliberate act rather than a silent drift.
 
-**Some rules cannot be checked from a photograph, and we switched them off rather than guess.** Three
-of the warning's typographic requirements — contrasting background, characters per inch, type height
-— need the physical scale of the label or the colour of the ink. An uploaded image carries neither.
-Each rule stays visible with its citation and the reason it does not run. TTB's own form instructions
-confirmed the judgement: the agency does not routinely review labels for those either. A check that
-reports a verdict it has not earned is the one failure this product cannot have, so a switched-off
-rule produces no finding at all rather than a quiet pass.
+**Where a rule cannot be checked from a photograph, we switched it off rather than guess.** Three of
+the warning's typographic requirements need the label's physical scale or the colour of its ink, and
+an uploaded image carries neither. The alternative was a threshold we invented, applied to a real
+producer as though the regulation said it. So a switched-off rule produces no finding at all rather
+than a quiet pass, and stays visible with its citation and its reason.
 
-**Part of the regulation is a standard, not a measurement.** Several requirements are written as a
-test a person applies rather than a figure a machine can compare: an import's origin marking counts
-if an abbreviation unmistakably indicates the country, the warning has to stand separate and apart
-from the rest of the label, mandatory wording has to be readily legible, and the words of a spirits
-designation have to be similarly conspicuous. Nothing lists which abbreviations qualify, or how far
-apart is apart. We could have picked a number for each and shipped it as the rule — the version that
-demonstrates as complete — and did not, because a threshold we invented would be applied to a real
-producer as though the regulation said it. So each goes to a person: the origin check reads the
-country's plain English name, passes on a match, and sends every other form to review rather than
-rejecting it. That costs coverage, not correctness — a compliant Spanish-marked import lands in the
-reviewer's pile, which is work rather than a wrong answer. The check still rejects a label carrying
-no origin statement at all, because an absence is a fact rather than a judgement.
+**Part of the regulation is a standard, not a measurement, and those go to a person.** An
+abbreviation that unmistakably indicates a country, a warning standing separate and apart, wording
+readily legible, a designation similarly conspicuous — each is a test a person applies, and nothing
+says which abbreviations qualify or how far apart is apart. So the origin check passes the plain
+English name and sends every other form to review, which costs coverage rather than correctness: a
+compliant Spanish-marked import becomes work for a reviewer, not a wrong answer. A label carrying no
+origin statement at all is still rejected, because an absence is a fact rather than a judgement.
 
-**Two sets of requirements are not covered at all, and were not on the record as choices.** The rule
-that the warning's letters must not be so compressed that it stops being legible has no entry
-anywhere. Neither do the legibility, separateness, conspicuousness and minimum-type-height
-requirements the wine, spirits and malt parts place on a label's mandatory wording — the regulation
-texts we pulled carry all of them, and no check and no limitation names one. Most would have ended
-where the rules above did, with a person or switched off, so no verdict is wrong because of this.
-What is wrong is the record: a requirement we decided not to check and one we never noticed look
-identical from outside, and only the first was written down. We found these while writing this
-account, and name them rather than leave the list looking complete.
+**Two sets of requirements are not covered at all, and were not on the record as choices.** Most
+would have ended where the rules above did, so no verdict is wrong because of this. What is wrong is
+the record: a requirement we decided not to check and one we never noticed look identical from
+outside, and only the first was written down. We found them while writing this account, and
+`README.md`'s *Limitations* now names them.
 
-**The regulation that governs the product itself.** Nothing in the brief asks for accessibility, but a
-federal application is bound by Section 508 regardless, and that standard is binding regulation
-rather than agency policy. We built to the level it makes binding, WCAG 2.0 A and AA, and the check
-page, the result page and the batch-list page are all scanned against it automatically on each run,
-which is every screen the product serves. **The scan is built not to flatter us:** a check the
+**The regulation that governs the product itself.** Nothing in the brief asks for accessibility, but
+a federal application is bound by Section 508 regardless, and that standard is binding regulation
+rather than agency policy. We built to the level it makes binding, WCAG 2.0 A and AA, and every
+screen the product serves is scanned on each run. The scan is built not to flatter us: a check the
 scanner cannot decide fails it rather than passing, so an undecidable result cannot read as a clean
-one. One check stands as reviewed rather than decided — the empty batch table renders column headers
-with no rows beneath them — and the reasoning sits beside the test.
+one.
 
-Sharpening that scan kept turning up real defects. Six result-page cases once reported text whose
-colour contrast sat below the AA threshold; the test that holds the layout to a 320-pixel viewport
-once failed on a 27-pixel overflow; and widening the scan to measure every visible button, hovered
-as well as at rest, caught three painting white text on a white or near-white background. Tracing
-their cause found two more the scan cannot reach, both behind a development-only flag. All were
-ours and all are fixed. The last five shared one cause: a base stylesheet set a button's background
-and its text colour in the same rule, so a component that overrode only the background kept a white
-label it never asked for. So the claim we can make is that we built the mechanism and, on every
-page the product serves, met the part of the standard a machine can judge. Section 508 asks for a
-conformance review as well as an automated scan, and that review has not been run. A disposition is
-never carried by colour alone, which has its own passing test. We stopped short of claiming a newer conformance level for a different reason: of the two criteria
-that would have justified one, axe-core runs no rule for either at the tags this gate requests, and
-for one of them it has no rule at any tag at all. A claim the product cannot test is the kind of promise this build refuses to
-make anywhere else.
+Sharpening it kept turning up real defects — six result-page cases below the AA contrast threshold,
+a 27-pixel overflow at a 320-pixel viewport, three buttons painting white text on a near-white
+background when hovered, and two more behind a development-only flag. All were ours and all are
+fixed. So what we can claim is the mechanism, and the part of the standard a machine can judge, on
+every page; the conformance review by a person has not been run, and we did not claim a newer
+conformance level because axe-core runs no rule for either criterion that would justify one.
 
-The heavier federal gates are real and none of them is met here. Each is named with what it would
-actually require:
-
-- **An authority to operate.** Nothing runs on an agency network without one, and the assessment
-  behind it is where a prototype's shortcuts surface. Its effect on this build was to rule out
-  anything designed to be hard to assess. The rules are readable data carrying their own citations,
-  every choice has a recorded reason, and the system can enumerate every verdict it is capable of
-  producing. An assessor's questions have answers that do not depend on asking us.
-- **FedRAMP.** It governs which hosted services a federal system may call at all, and it is why the
-  reader that runs by default runs on the machine rather than in someone's cloud.
-- **Federal AI use governance.** An AI system that decides against a member of the public draws the
-  heaviest version of that review. Our answer is structural rather than procedural: **the model never
-  decides.** It reads, and rules with regulatory citations decide what the reading means. What an
-  AI use-case account would have to describe here is a reader whose output is evidence, not a
-  judgement that has to be defended on its own authority.
-- **A privacy review and a records schedule.** Anything holding applicant material needs both. This
-  prototype keeps two things for seven days: an uploaded image, so a result page survives a restart,
-  and every check's result, so a reviewer can overrule a finding on it. That second one used to
-  restate what the application declared, the applicant's name and address included; it no longer
-  does. Every value it read and every value the application declared is blanked before the file is
-  written, and what stays is what an override amends — the dispositions, the citations, the reason
-  codes and the trail. Seven days is still a convenience rather than a retention policy, and a real
-  deployment needs a period set by the agency's records schedule rather than by a constant in the
-  code. Our own requirements say the product should keep nothing; two files on disk is not nothing,
-  so we left the requirement standing rather than quietly lowering the bar to what we built.
+**The heavier federal gates are real, and none of them is met here.** An authority to operate, the
+FedRAMP rules on which hosted services a federal system may call, federal AI use governance, and a
+privacy review with a records schedule would each have to be satisfied before this ran on an agency
+network. Two shaped the build anyway: the default reader runs on the machine rather than in
+someone's cloud, and **the model never decides** — it reads, and rules carrying citations decide
+what the reading means.
 
 **The agency's own plumbing.** The IT interview sets three constraints and none is negotiable: no
-integration with TTB's existing systems, outbound traffic blocked at the firewall, and nothing new to
-operate. They decided the architecture more than any preference did. No integration means the
-application's values arrive with the submission and there is no database anywhere in the product.
-Blocked outbound traffic is why the default reader ships its own models, needs no key, and makes no
-network call. Nothing new to operate is why a clone and the deployed service are the same
-application, and why the app holds no state a restart cannot rebuild.
+integration with TTB's existing systems, outbound traffic blocked at the firewall, and nothing new
+to operate. They decided the architecture more than any preference did: the application's values
+arrive with the submission and there is no database anywhere in the product; the default reader
+ships its own models, needs no key and makes no network call; and a clone and the deployed service
+are the same application, holding no state a restart cannot rebuild.
 
 **What it costs to run.** Cost was our last criterion on purpose — it cannot buy back a failure on
-any of the others. Two choices here were free, and each gave up something different.
+any of the others. The reader is free because it costs processor time rather than money, and it gave
+up accuracy on hard images, named under what we can prove rather than left to be found. The
+deployment is free on an allowance that covers TTB's volume about three times over, though not a
+peak-season burst. The exposure is the absence of a stop rather than the meter: budgets alert rather
+than cut off, so what bounds the bill is the invoker check, which refuses every caller but our own
+front door before a request is billed, the two-instance cap and the request timeout
+([decision 0025](decisions.md#0025); the figures are in `operations.md`).
 
-The default reader is free because it costs processor time rather than money: no per-call charge, no
-account, and it runs where outbound traffic is blocked. What it gave up is accuracy on hard images —
-the display-type and split-box limits named under what we can prove are the price of that choice,
-not incidental defects. The hosted alternative would run a few hundred dollars a year of inference
-at TTB's volume, computed from published rates rather than measured by us, and the money is not why
-it is off: it is off because a reviewer must be able to clone this and run it without an account,
-and because the firewall the brief describes would refuse the call anyway.
-
-The deployment is free because it moved from a nine-dollar monthly plan into a free tier, and what
-that gave up is a brake on the bill. The allowance is 180,000 processor-seconds a month, which at
-the service's four cores is twelve and a half hours of request handling, or roughly 38,000 label
-checks at the reader's measured 1.18-second median. TTB's 150,000 applications a year is about
-12,500 a month, so on volume alone the allowance covers the agency about three times over; what it
-does not cover is a peak-season burst, because each running copy reads one label at a time and
-hundreds filed at once queue rather than fan out. The real exposure is not the meter but the
-absence of a stop: the provider's budgets alert rather than cut off, so what bounds the bill is the
-invoker check, which refuses every caller but our own front door before a request is billed, the
-two-instance cap and the request timeout. The rate limit at the edge denies nothing, measured, and
-is left in place inert. Storage is the one
-line that is not zero — the image exceeds the half-gigabyte grant, at ten cents per gigabyte per
-month — and it is small change rather than nothing.
-
-Every one of those is a figure a reviewer can check rather than a claim that the choice was costless.
-
-**The people who would use it.** Four people in the brief, answered individually rather than in
-aggregate. The agent with 28 years in the job said "you need judgment", so nothing auto-rejects,
-every finding carries the rule behind it, and anything the app cannot settle goes to him labelled
-unsettled rather than resolved by a guess. The reviewer eight months in said it has to be exact, so
-the warning is compared word for word and the parts that cannot be measured are visibly switched off
-rather than silently skipped. The deputy director wanted speed, no hunting for buttons, and batches,
-so results stream back as each finishes rather than making her wait for the last one. IT said don't
-do anything crazy, and we answered by building nothing that needs them.
+**The people who would use it.** Four people, answered individually rather than in aggregate —
+`README.md`'s *What it is* gives each answer. What belongs here is that answering them one at a time
+is itself a constraint: the senior agent's "you need judgment" and the junior reviewer's demand for
+exactness pull against the deputy director's demand for speed, and every place this product declines
+to decide is a place the first two won.
 
 ## How we built it
 
