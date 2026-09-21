@@ -108,8 +108,8 @@ Everything below runs today from a clone, which is the other half of the same de
 ## Getting started
 
 You need [uv](https://docs.astral.sh/uv/) and Python 3.12 or newer. Nothing else — **no API key, no
-account, and no outbound network call.** The reader that turns a photograph into text runs inside the
-process, and its models are installed with the dependencies.
+account, and no outbound network call.** The reader that turns a photograph into text runs inside
+the process, and its models are installed with the dependencies.
 
 ```bash
 git clone https://github.com/AaronCarney/ttb-label-check.git
@@ -120,39 +120,27 @@ uv run task demo
 
 Then open <http://localhost:8000>. Upload the front of a label and, if the label has one, its back
 — the government warning is usually printed on the back, so a front on its own is checked for a
-warning that is not on it. Fill in the application fields beside the images and submit.
+warning that is not on it. Fill in the application fields beside the images and submit. The first
+label is slower than the rest: the OCR models are read off disk once, on first use, and kept for the
+life of the process.
 
 **To try it with no labels of your own**, follow the **Download a 10-label sample** link on the
-entry page. It is built from real approved labels shipped in this repository, and
-it carries `applications.csv` beside the images: one row per label, holding the application that was
-actually filed for it. Unzip the pack and select the whole unzipped folder in the label-images
-picker — the CSV among the images is read as the applications, so nothing has to be typed and no
-second gesture is needed. Every label then comes back checked against its own application, which is
-what the product is for; a batch of images with no CSV is still read and still checked for what
-every label must carry, and says so.
+entry page. It carries real approved labels and `applications.csv` beside them, one row per label
+holding the application actually filed for it. Unzip it and select the whole folder in the
+label-images picker: the CSV among the images is read as the applications, so nothing has to be
+typed and every label comes back checked against its own application. A batch with no CSV is still
+read and still checked for what every label must carry, and says so.
 
 **To supply your own applications**, write the same CSV: a `filename` column, then
 `beverage_type`, `brand_name`, `fanciful_name`, `class_type`, `alcohol_content`, `net_contents`,
 `applicant_name_address`, `source_of_product`, `origin` and `wine_appellation` — the same ten fields
-the form asks for. `filename` joins on the image name, with or without its extension
-and with or without a `-front`/`-back` suffix, so one row covers both faces of a label. Columns of
-your own are ignored rather than refused. Two rows naming one label are refused: at 300 labels the
-failure you cannot see from the page is not a missing application but the wrong one.
+the form asks for. `filename` joins on the image name, with or without its extension and with or
+without a `-front`/`-back` suffix, so one row covers both faces of a label. Columns of your own are
+ignored rather than refused. Two rows naming one label are refused: at 300 labels the failure you
+cannot see from the page is not a missing application but the wrong one.
 
-The first label is slower than the rest: the OCR models are read off disk once, on first use, and
-kept for the life of the process.
-
-**What an upload may be, and why the request cap is the size it is.** One request may carry
-**31.5 MB** in total, any single image up to **1.5 MB**, and a batch up to **100** images. The request
-total is the host's constraint rather than this service's choice: Cloud Run refuses an HTTP/1
-request larger than 32 MiB before the application is reached, and when Google refuses it the reply
-is Google's own error page, which names neither the limit nor the file that broke it. This
-service's cap therefore sits just under the platform's, so the refusal you get is ours and it tells
-you which file to fix. Google's published quota is *"Maximum HTTP/1 request size: 32 MiB per
-request. Limit applies if using HTTP/1 server. No limit if using HTTP/2 server"* — [Cloud Run
-quotas and limits](https://docs.cloud.google.com/run/quotas), under *Request limits for Cloud Run*.
-Running locally there is no Cloud Run in the way, but the caps are enforced by the
-application in both places, so a local run refuses exactly what the deployed one refuses.
+What one upload may carry, and where each cap comes from, is in [How it works](#how-it-works). The
+application enforces the caps itself, so a local run refuses exactly what the deployed one refuses.
 
 ### Running the tests
 
@@ -161,22 +149,17 @@ uv run pytest
 ```
 
 **Two groups skip themselves rather than fail, and a clean run does not mean they ran.** The
-accessibility, keyboard and reflow tests drive a real browser: they need
-[pnpm](https://pnpm.io/) on `PATH` to build the front-end island and Playwright's browsers
-installed (`uv run playwright install chromium`). Without pnpm the whole group skips, silently, and
-the suite still reports green — so a run on a machine without it proves nothing about the
-interface. The deploy measurement skips the same way without `TTB_DEPLOY_URL`, as the section above
-says. Everything else runs from a clone with nothing but `uv sync`.
+accessibility, keyboard and reflow tests drive a real browser: they need [pnpm](https://pnpm.io/) on
+`PATH` to build the front-end island and Playwright's browsers installed
+(`uv run playwright install chromium`). Without pnpm the whole group skips, silently, and the suite
+still reports green — so a run on a machine without it proves nothing about the interface. The
+deploy measurement skips the same way without `TTB_DEPLOY_URL`. Everything else runs from a clone
+with nothing but `uv sync`.
 
-**With pnpm and Playwright installed, that group runs and holds the accessibility scan.** It covers
-every screen the product serves, and it treats a check the scanner could not decide as a failure rather than a pass, so an undecidable
-result cannot read as a clean one. One check is exempt, and only because somebody reviewed it and
-wrote down what they found; an undecided check nobody has looked at still fails. Six result-page cases once
-failed it on colour contrast below the AA threshold, and the layout test once failed at a 320-pixel
-viewport on a 27-pixel overflow; both were ours and both are fixed. What a machine cannot settle it
-does not settle: Section 508 asks for a conformance review as well as an automated scan, and that
-review has not been run. `docs/approach.md` says what the scan does and does not settle for the
-Section 508 claim.
+With pnpm and Playwright installed, that group runs the accessibility scan over every screen the
+product serves, and treats a check the scanner could not decide as a failure rather than a pass.
+Section 508 also asks for a conformance review by a person, and that has not been run;
+`docs/approach.md` says what the scan settles and what it does not.
 
 ### Linting, formatting and type checking
 
@@ -189,7 +172,9 @@ uv run mypy                # types, over app/
 ```
 
 `uv run ruff format` without `--check` writes the formatting instead of reporting it, and
-`uv run ruff check --fix` applies the fixes ruff considers safe.
+`uv run ruff check --fix` applies the fixes ruff considers safe. Each tool's configuration lives in
+`pyproject.toml` with the reasoning next to it. mypy checks `app/`; tightening it is separate, later
+work.
 
 Coverage comes with the suite:
 
@@ -197,22 +182,10 @@ Coverage comes with the suite:
 uv run pytest --cov            # branch coverage over app/
 ```
 
-**The measured figure is 93% branch coverage over `app/`**, measured from a run of the
-whole suite bar the two slow performance tests. It is reported, not gated: no `fail_under` is set,
-because a threshold chosen before anyone had measured the real number is how a suite gets shaped to
-the threshold rather than to the product. The lowest-covered module is the rule-pack loader at 82%.
-
-Two modules used to report 0% and neither was untested: `app/rules/__main__.py` and
-`app/vision/__main__.py` are command-line entry points, the suite drives both in a subprocess, and
-coverage measures only the process it starts in. That made the figure wrong in the direction that
-does harm — a 0% reads as "nobody tests this" and points effort at the one place that does not need
-it. The suite now turns on coverage's subprocess measurement for whoever runs it, so the two report
-82% and 87% from the tests that were always exercising them.
-
-Each tool's configuration lives in `pyproject.toml` with the reasoning next to it: which lint rules
-are switched on beyond ruff's default and what each one has already caught here, why the line length
-is 100 rather than ruff's 88, why markdown is excluded from both the linter and the formatter, and
-why the type checker starts permissive. mypy checks `app/`; tightening it is separate, later work.
+**The measured figure is 93% branch coverage over `app/`**, from a run of the whole suite bar the
+two slow performance tests; the lowest-covered module is the rule-pack loader at 82%. It is reported
+rather than gated, because a threshold set before anyone had measured the real number shapes the
+suite to the threshold rather than to the product.
 
 ### The container path
 
@@ -226,12 +199,10 @@ It serves the same <http://localhost:8000> and needs no secrets either.
 
 ### What is pinned, and what is not
 
-Every Python dependency resolves from `uv.lock`, which carries a hash for every artefact it pins,
-and the container installs from it frozen — nothing is re-resolved at build time, so the image gets the versions this
-repository was tested against. The built front-end bundle is committed, and
-`tests/test_island_build_clean.py` rebuilds it and fails if the result differs from the committed
-copy. That test is in the pnpm-gated group above, so it is the pipeline rather than a local run that
-holds the bundle to its source. The OCR models ship inside the
+Every Python dependency resolves from `uv.lock`, hash for hash, and the container installs from it
+frozen. The built front-end bundle is committed, and `tests/test_island_build_clean.py` rebuilds it
+and fails if the result differs — that test is in the pnpm-gated group above, so it is the pipeline
+rather than a local run that holds the bundle to its source. The OCR models ship inside the
 installed package; nothing is downloaded when the app runs.
 
 Two things are **not** pinned, and you should see them named rather than find them: the container's
@@ -241,12 +212,8 @@ layer underneath it is not.
 
 ### Using a hosted reader instead
 
-There is a second reader that sends label crops to a hosted vision model. It is expected to read
-harder images more accurately, and that expectation is the vendor's rather than ours — every
-accuracy figure in this README came from a run of the on-machine reader, and the hosted one has
-never been scored against the corpus, though `eval.read_accuracy --reader cloud` would do it. Its
-cost is a few hundred dollars a year of inference at TTB's volume, computed from published rates
-rather than measured here. It is off by default and is not needed for anything in this README:
+There is a second reader that sends label crops to a hosted vision model. It is off by default and
+is not needed for anything in this README:
 
 ```bash
 export VISION_MODE=cloud
@@ -254,7 +221,11 @@ export OPENAI_API_KEY=sk-...
 uv run task demo
 ```
 
-`.env.example` lists every environment variable the app reads, with what each one does.
+It is expected to read harder images more accurately, and that expectation is the vendor's rather
+than ours: every accuracy figure here came from the on-machine reader, and the hosted one has never
+been scored against the corpus, though `eval.read_accuracy --reader cloud` would do it. It costs a
+few hundred dollars a year of inference at TTB's volume, computed from published rates rather than
+measured. `.env.example` lists every environment variable the app reads.
 
 ## How it works
 

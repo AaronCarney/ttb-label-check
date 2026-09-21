@@ -23,6 +23,21 @@ has nothing left to use is measured rather than assumed ([decision 0047](decisio
 Every figure here was read back from the deployed service on 2026-09-19 rather than copied from the
 deploy script.
 
+## Why the request cap is 31.5 MB
+
+The application refuses a request over **31.5 MB** (`app/api/limits.py`), and the figure is the
+host's constraint rather than this service's choice. Cloud Run rejects an HTTP/1 request larger
+than 32 MiB before the application is reached, and when Google rejects it the reply is Google's own
+error page, which names neither the limit nor the file that broke it. Our cap therefore sits just
+under the platform's, so the refusal a reviewer gets is ours and it tells them which file to fix.
+Google's published quota is *"Maximum HTTP/1 request size: 32 MiB per request. Limit applies if
+using HTTP/1 server. No limit if using HTTP/2 server"* — [Cloud Run quotas and
+limits](https://docs.cloud.google.com/run/quotas), under *Request limits for Cloud Run*.
+
+The other caps — 1.5 MB per image, 100 images per batch, 50,000,000 pixels — are the product's own
+and are stated in `README.md`. All four are enforced by the application in both places, so a local
+run refuses exactly what the deployed one refuses.
+
 ## The address, and why the Cloud Run URL will not answer
 
 `https://ttb.aaroncarney.me` is this project's own hostname rather than the one Cloud Run issues. A
