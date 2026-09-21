@@ -19,7 +19,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import NamedTuple
 
-from app.cfr.citations import Section, parse_citation
+from app.cfr.citations import Section, Target, parse_citation
 
 MANIFEST_PATH = Path("assets/cfr/manifest.json")
 
@@ -59,7 +59,7 @@ def _read(path: str) -> str | None:
     return file.read_text(encoding="utf-8")
 
 
-def _key_for(target: Section | object) -> str:
+def _key_for(target: Target) -> str:
     """The manifest key a target is stored under.
 
     Kept in step with `tools.fetch_cfr.asset_key` by

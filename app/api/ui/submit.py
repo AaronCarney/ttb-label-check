@@ -197,7 +197,9 @@ def launch_batch(
     label_lookup: dict[str, LabelModel] = {}
     app_lookup: dict[str, Application] = {}
     refusals: dict[str, tuple[str, str]] = {}
-    named = [(name, faces, declared) for name, faces, declared in labels]
+    named: list[tuple[str, tuple, dict[str, str] | None]] = [
+        (name, faces, declared) for name, faces, declared in labels
+    ]
     named += [(name, (), None) for name, _message in refused]
 
     for idx, (name, faces, declared) in enumerate(named):
