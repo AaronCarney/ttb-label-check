@@ -466,109 +466,63 @@ it and reproduces every figure in Reading accuracy above.
 
 ## Limitations
 
-Checks this app does not make, and why. The first five each name the decision record that settled
-them, and in each the app reports no verdict it has not earned.
-The sixth is different: those requirements were never decided on at all, which is the point of the
-entry, so it cites nothing and nothing in the pack switches them off.
+Checks this app does not make, and what each costs the agent using it. Where a decision record
+settled the limit it is cited; in all of these the app reports no verdict it has not earned.
 
-The next two are different again. They are not checks the app declines to make, but two places where
-it stops short of judging a label and the envelope does not fully say so. Both are in the reading,
-before any rule is reached.
+- **An upload with no application is read but not checked.** The declared beverage is what decides
+  which rules apply, so a label submitted alone is read and reported and nothing is checked against
+  it — the government-warning checks included (`docs/decisions.md#0010`). The app is no use for a
+  quick look at a label on its own.
 
-The last one is different from all of them: it is not about a check at all, but about an endpoint
-that cannot check anything.
+- **An alcohol statement in a form the regulations do not print is reported as needs review.** No
+  pattern can list every phrasing 27 CFR §4.36(b), §5.65(b) and §7.65(b) permit, so a statement
+  outside the printed forms is reported as needs review rather than as a mismatch
+  (`docs/decisions.md#0011`). Three of the 30 approved corpus labels land there. A compliant label
+  can reach the review pile over its wording.
 
-- **An upload with no application is read but not checked.** The beverage the application declares
-  is what decides which rules apply, so a label submitted on its own is read and reported, and no
-  check runs against it — including the government-warning checks, which every beverage shares but
-  which are still written per beverage class. See `docs/decisions.md#0010`. For an agent this means
-  the app is no use for a quick look at a label on its own: the application's values have to be
-  entered before anything is checked.
+- **A country of origin is read only as the application's English name.** Customs marking rules
+  also accept the country's own language, an unmistakable abbreviation and the adjectival form
+  (19 CFR §134.45(b), (c)); the app reads none of them and reports needs review
+  (`docs/decisions.md#0016`). On a batch of imports this is the main source of extra manual work,
+  and none of it means anything is wrong with the label.
 
-- **An alcohol statement in a form the regulations do not print is reported as needs review.** The app passes
-  a statement in one of the forms 27 CFR §4.36(b), §5.65(b) and §7.65(b) give for its beverage
-  class, and reports needs review for any other statement rather than a mismatch: no pattern can list
-  every phrasing those sections permit, and none of them says how the figure is written. Of the 30
-  approved labels in the fixture corpus, 3 print a statement reported as needs review — two malt
-  labels that leave out the colon §7.65(b) prints in "Alcohol by volume: percent", and one wine
-  label that writes its figure with a decimal comma. A label whose statement the reader does not
-  return in full is reported as needs review too. See `docs/decisions.md#0011`. For an agent this means a
-  compliant label can land in the review pile over its alcohol wording.
+- **The health warning's typography and placement are not checked.** Contrasting background,
+  characters per inch, type height and standing separate and apart (27 CFR §16.22(a)(1), (a)(4),
+  (b), and §16.21) need ink colour or physical scale, which a photograph does not carry. Each stays
+  in the pack switched off with its citation, and a switched-off rule produces no finding, so no
+  label is passed or failed on one (`docs/decisions.md#0006`, `docs/decisions.md#0013`). TTB says it
+  does not routinely review labels for these either.
 
-- **A country of origin is read only as the application's English name.** Customs marking rules also
-  accept the country's name in the language of the country, an abbreviation that unmistakably
-  indicates it, and the adjectival form — "HECHO EN MEXICO", "U.K.", "Irish" (19 CFR §134.45(b),
-  (c)). The app does not read those, so an import that writes its origin one of those ways is
-  reported as needs review rather than as a match or a mismatch. See `docs/decisions.md#0016`. On a batch of
-  imports this is the main source of extra manual work — a compliant label lands in the review pile
-  because the app cannot read the form it used, not because anything is wrong with it.
+- **Bold type in the warning's heading is reported, never decided.** §16.22(a)(2) requires it. A
+  sweep of all 38 corpus labels found the stroke-width measurement not good enough to fail anything
+  on: every one is TTB-approved and so required to be bold, yet the ratio ran 0.111 to 0.508, and
+  one label measured 0.111 clean against 0.261 from a blurred copy of the same printing. So a
+  heading that does not measure as bold is reported as needs review, which here is most of them
+  (`docs/decisions.md#0037`).
 
-- **The health warning's typography and placement are not checked.** The app checks the warning's
-  words, that "GOVERNMENT WARNING" is present, and that those two words are in capitals. It does not
-  check that the warning sits on a contrasting background (27 CFR §16.22(a)(1)), its characters per
-  inch (§16.22(a)(4)), its type height (§16.22(b)), or that it stands separate and apart from other
-  information (§16.21). The first three need the colour of the ink or the physical scale of the
-  label, and a photograph carries neither; separateness is visible in a photograph but no reader
-  measures it yet. Each of those rules stays in the pack with its citation and the reason it is
-  switched off, and a switched-off rule produces no finding at all, so no label is reported as a
-  match or a mismatch on one. TTB says it does not routinely review
-  labels for type size, characters per inch or contrasting background either. So the agent's eye is
-  the only check on warning typography, exactly as it is today — the app neither helps here nor
-  claims to. See `docs/decisions.md#0006` and `docs/decisions.md#0013`.
+- **Five more requirements have no check at all, disabled or otherwise.** Mandatory wording must be
+  readily legible on a contrasting background, stand separate and apart, be similarly conspicuous
+  across a designation's words, and meet a minimum type height (27 CFR §§4.38, 5.52, 5.53, 5.141(d),
+  7.52, 7.53); and the warning's letters must not be compressed past ready legibility
+  (§16.22(a)(3)). None appears in any rule pack. Most would have been switched off like the
+  typography above, but they were absent rather than decided, and this entry is the record of that.
+  A label can come back with every check passed and none of these five looked at.
 
-- **Bold type in the warning's heading is reported, never decided.** §16.22(a)(2) requires the
-  heading in bold as well as in capitals. Bold weight is a stroke-width measurement on the heading's
-  own region of the image, and a sweep of all 38 corpus labels
-  (`eval/heading_bold_ratios.py`) found the measurement is not good enough to call any label a mismatch on. The
-  labels are all TTB-approved and so all required to be bold, yet the ratio ran 0.111 to 0.508 across
-  them, and one label measured 0.111 from a clean photograph and 0.261 from a blurred copy of the
-  same printing. At the 0.25 cut, 18 of the 28 labels it measured confidently came out "not bold".
-  So a heading that does not measure as bold is reported as needs review rather than a mismatch,
-  whether the measurement failed or simply came back low. The capitals are read from the heading's
-  text and are still decided: a heading not in capitals is a mismatch. The cost is a large share of review items on
-  labels that are very likely fine — on this corpus, most of them. See `docs/decisions.md#0037` and
-  `docs/decisions.md#0013`.
+- **A photo the app refuses to read is checked against nothing.** Detail below a Laplacian variance
+  of **50.0** reads as too low a resolution and a high-frequency ratio below **0.3** as motion blur;
+  either ends the evaluation before any rule, so **no compliance rule runs** and the result comes
+  back carrying the legibility reason code and no field readings. Both numbers are this project's
+  own line, set against this corpus and derived from nothing TTB publishes.
 
-- **Five more requirements have no check at all, disabled or otherwise.** A label's mandatory
-  wording must be readily legible on a contrasting background, must stand separate and apart from
-  other information, must be similarly conspicuous across the words of a designation, and must meet
-  a minimum type height (27 CFR §§4.38, 5.52, 5.53, 5.141(d), 7.52, 7.53); and the health
-  warning's letters must not be compressed so far that it stops being readily legible
-  (§16.22(a)(3)). None of those appears in any rule pack. Most would have ended up switched off
-  like the typography above — legibility and conspicuousness are judgements rather than
-  measurements, and type height needs the label's physical scale, which a photograph does not carry
-  — but they were absent rather than decided, and this entry is where that is put on the record.
-  For an agent the consequence is the same as for the typography above, and it is silent: a label
-  can come back with every check passed and none of these five looked at, so the agent's own eye is
-  the only thing standing between a badly set label and an approval.
-
-- **A photo the app refuses to read is checked against nothing.** Before any rule runs, the app
-  measures the image and can turn it away: detail below a Laplacian variance of **50.0** reads as too
-  low a resolution, and a high-frequency ratio below **0.3** reads as motion blur. Either one ends
-  the evaluation there — **no compliance rule runs** against that label, and the result comes back
-  as a review item carrying the legibility reason code and no field readings at all. The refusal
-  itself is on the record: the reason code reaches the audit trail as its own entry. What is not on
-  the record is that both numbers are this project's own line, set against this corpus, derived from
-  nothing TTB publishes. So for an agent, *needs a better photo* is as much a statement about where
-  this app stops as about the photograph — a label just the wrong side of either number has not been
-  judged by anything, and the only way to find out whether it is compliant is to look at it.
-
-- **A rotated re-read can decline to fire, and nothing records that it did.** A government warning
-  printed sideways is found by reading the label again at 90° and 270°. That second read is the
-  expensive part of a reading, so it runs only when three things are true at once: no heading was
-  found in the upright pass, the box shapes look sideways, and the sideways strips themselves read
-  like the warning. When either of the last two declines, the label is read upright only and reported
-  as carrying no government warning — and no part of the result says a re-read was considered and
-  turned down. Since a missing warning became a §16.21 mismatch rather than needs review, that
-  silence now decides labels rather than just delaying them. A label photographed fully upside down
-  is a known gap of the same kind: no rotation covers 180°, and its boxes are horizontal, so the
-  sideways test does not fire for it either.
+- **A rotated re-read can decline to fire, and nothing records that it did.** A sideways government
+  warning is found by reading the label again at 90° and 270°, and that read is the expensive part,
+  so it runs only when no heading was found upright, the box shapes look sideways, and the sideways
+  strips read like the warning. When either of the last two declines, the label is reported as
+  carrying no warning and nothing says a re-read was turned down. A missing warning is a §16.21
+  mismatch, so that silence decides labels. A label photographed upside down is the same gap.
 
 - **Every item of a JSON `POST /batches` request is refused, so that endpoint checks nothing.** It
-  takes references to labels — a `label_id` and the application's values — and says the server will
-  find the image. There is no image store for it to find one in, so every item comes back as a
-  refusal carrying `ENGINE.INPUT.LABEL_IMAGE_MISSING` and the batch reports zero labels checked. The
-  alternative to refusing was to run the reader and the rules over a stand-in and report a verdict
-  about something that is not the label, which would be worse. The path that works is `POST /`,
-  which carries the files themselves, and it is what the form uses. See `docs/decisions.md#0020`. For an agent this means the JSON endpoint is usable only for
-  its shape — the batch id, the queue, the SSE stream — and never for an answer about a label.
+  expects the server to find an image from a `label_id`, and there is no image store, so every item
+  returns `ENGINE.INPUT.LABEL_IMAGE_MISSING` and the batch reports zero labels checked
+  (`docs/decisions.md#0020`). The path that works is `POST /`, which carries the files and is what
+  the form uses.
