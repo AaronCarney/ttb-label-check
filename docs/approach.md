@@ -26,8 +26,8 @@ been the first mistake available. The seven-element list arrives under "For refe
 elements include", with the brief itself noting that exact requirements vary by beverage type —
 which is why the regulations, and not that list, set the checks. The pointer to ttb.gov is an
 encouragement to read, as is the suggestion to generate test labels, which we declined for a reason
-given later. The one wish about photographs shot at bad angles and in bad light is marked out of
-scope by the person asking for it, in the same sentence.
+given later. The one wish about photographs shot at bad angles and in bad light is one the person
+asking for it hedged as maybe out of scope, in the same sentence.
 
 **We took the requirements from the interviews, not from the field list.** The list of seven
 elements says nothing about speed, batches, error handling, or who uses this; the four people in the
@@ -372,7 +372,8 @@ that satisfied it did.
 **We corrected a requirement rather than the code.** Our specification said a brand differing only
 in punctuation should go to a reviewer. TTB's own form permits punctuation changes with no new
 approval, and the research behind the requirement contradicted itself — "Stones Throw" against
-"Stone's Throw" is the case the senior agent complains about by name. So we amended the
+"Stone's Throw" is a punctuation-only difference of the kind the senior agent calls "obviously the
+same thing" in the STONE'S THROW example. So we amended the
 requirement rather than making the product do the wrong thing consistently.
 
 **We stopped explaining the product inside the product.** The landing page had carried four
