@@ -88,6 +88,13 @@ date: the release's git tag records when it was cut. Versions follow
 
 ### Fixed
 
+- The deploy latency test measures the page as it now is. It still posted the old single-label
+  form and read the result out of the response page, so after one page replaced the single-label
+  and batch forms three of its five checks failed against a working service. It now posts a label's
+  faces as one label and times the check to the result arriving on the batch's stream. Its summary
+  no longer counts a submission the service refused as a check inside the budget. The published
+  figure is re-measured on it: 13 of 37 checks inside five seconds, median 6.60 seconds.
+
 - A reviewer can send the back of the label. `POST /` had accepted a second image since the
   multi-face work, but the page offered one file input, so no reviewer could send one — and the
   government warning is printed on the back of 20 of the 30 corpus labels, so the product's one

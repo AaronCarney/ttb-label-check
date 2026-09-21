@@ -306,17 +306,19 @@ drawn from thirty labels reads as a precision this corpus does not carry. The fi
 flattering and they are the honest state of a processor-only reader on display typefaces.
 
 **The five-second requirement is measured on the deployed service, and it is missed.** It belongs to
-the deployed hardware, so we measure it there rather than on a developer's machine: 18 of 37 checks
-inside five seconds in one run and 21 of 37 in a second minutes later, against a requirement of 95
-percent, with medians of 5.01 and 4.38 seconds. Nothing was stopped early and nothing came out of
-the cache, so these are slow checks rather than blank ones.
+the deployed hardware, so we measure it there rather than on a developer's machine, from submitting
+a check to its result reaching the page: 13 of 37 checks inside five seconds, against a requirement
+of 95 percent, with a median of 6.60 seconds, of which reading the images is 5.26. Nothing was
+stopped early and nothing came out of the cache, so these are slow checks rather than blank ones.
+Repeating the run found a defect rather than a second figure: a second instance of the service does
+not know the first one's batches, so a check can be shown no result at all.
 
 **The cost is the second face, and it bought a correct answer.** Until 2026-09-19 the page took one
 image and the same set measured 35 of 37 inside five seconds — but the warning is on the back of 20
 of the 30 corpus labels, so those fast answers reported a warning missing that the label carries.
 The page now takes a front and a back, read one after the other, and the submissions carrying a back
-came in at a median of 5.55 and 4.95 seconds against 2.39 and 2.74 for the four that have only a
-front. We took the trade knowingly and we publish the number it cost.
+came in at a median of 6.74 seconds against 3.76 for the four that have only a front. We took the
+trade knowingly and we publish the number it cost.
 
 **Reading the faces concurrently was the untried lever, and it has now been tried on the bench
 rather than in the product.** A running copy holds one reader and takes one image at a time behind a

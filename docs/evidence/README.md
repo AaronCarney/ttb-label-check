@@ -67,6 +67,19 @@ tests/test_deploy_healthz.py -k five_second`, whose record was copied here.
 Cited by decision 0044, which is about the page taking the back of the label and
 publishing what that cost.
 
+### `2026-09-21-five-second-one-page-run1.json` and `-run3.json`
+
+The same measurement as the two runs above, repeated on the deployed service at `1d8a9e0`, after one
+page replaced the single-label and batch forms. A check is now a one-label batch: `POST /` answers
+303 and the result reaches the page as the `label-result` event on `/batches/{id}/stream`, so each
+row is timed from before the upload to that event's arrival. `-run1.json` is the figure the README
+quotes: all 37 checks answered. `-run3.json`, minutes later, is kept for what it shows about the
+service rather than about speed: 34 of its 37 checks got no result, because the service had started
+a second instance and a stream request reaching the instance that did not hold the batch was
+answered 404. A second run between the two failed the same way and is not kept. Produced by
+`TTB_DEPLOY_URL=<url> TTB_LATENCY_RECORD_DIR=<dir> uv run pytest tests/test_deploy_healthz.py -k
+five_second`. Cited by the README's five-second section.
+
 ### `2026-09-20-batch-latency-run1.json` and `-run2.json`
 
 The two numbers a reviewer feels, measured twice over the same twelve corpus

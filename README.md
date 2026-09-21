@@ -66,20 +66,26 @@ needed to run the app; [Getting started](#getting-started) is.
 
 R15 in [the requirements](specs/0001-label-verification/requirements.md) and NFR-1 in
 [the PRD](docs/PRD.md) are one promise, and both mark it P0: 95 percent of single checks show
-results within five seconds. Measured on the deployed service, sending every face of each label the
-way the page now sends them: **18 of 37 checks inside five seconds in one run and 21 of 37 in a
-second run minutes later** — 49% and 57% against a requirement of 95%. The median check took 5.01
-and 4.38 seconds; the slowest took 9.01. Nothing was stopped early, nothing was answered out of the
-cache, and every check returned all seven fields, so these are slow checks rather than blank ones.
+results within five seconds of pressing check. Measured on the deployed service on 2026-09-21, from
+the moment a check is submitted to the moment its result reaches the page, sending every face of
+each label: **13 of 37 checks inside five seconds** — 35% against a requirement of 95%. The median
+check took 6.60 seconds and the slowest 11.22. Nothing was stopped early and nothing was answered
+out of the cache. Thirty-six checks returned all seven fields; the thirty-seventh is the
+deliberately blurred sample, which the quality gate turns away.
 
-**The margin is the back of the label.** The page used to offer one file input, so a check read one
-image — and the government warning is printed on the back of 20 of the 30 corpus labels, so a
-front-only check reported a warning missing that the label carries. The page now takes a front and a
-back and reads them one after the other, so the second face costs roughly what the first one costs.
-The 33 submissions carrying a back came in 14 and 17 inside the budget, median 5.55 and 4.95
-seconds; the four that have only a front came in 4 of 4, median 2.39 and 2.74. Against the previous
-deployed commit, which could only be sent fronts, the same set measured 35 of 37 — a faster answer
-that was wrong about the warning on 19 of 29 real labels.
+**Most of the wait is reading the images.** Of the median check's 6.60 seconds, reading its images
+took 5.26, the rest of the engine half a second, and submitting, opening the results page and
+receiving the result over its stream 0.76. The 33 submissions carrying a back made 9 of 33 inside
+the budget at a median of 6.74 seconds; the four with only a front made 4 of 4 at 3.76. The back is
+still worth its cost: the government warning is printed on the back of 20 of the 30 corpus labels,
+so a check that skipped it would be faster and wrong. The previous figure, 18 and 21 of 37 on
+2026-09-20, was taken before one page replaced the single-label and batch forms, on the same labels,
+and its reads were about a second faster (medians 4.15 and 3.59 seconds); this run does not say why.
+
+**There is one run, because repeating it found a defect.** The service can start a second instance,
+and each instance keeps its batches in its own memory, so a check submitted to one instance can have
+its results asked for from the other, which answers that the batch does not exist. The reviewer is
+shown no result. Two runs minutes after the first lost 25 and 34 of their 37 checks this way.
 
 **Three levers have been tried, and none of them closes it.** Doubling the service to eight cores
 moved one check of thirty-eight, so it is back at the four cores
