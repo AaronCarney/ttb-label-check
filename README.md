@@ -414,9 +414,10 @@ call we made in it, stated as our call rather than as a finding.
   a result page that cannot show the label it is describing is not a result page, and a single
   label's result, because an override has to have something to amend. Both are kept for seven days
   and no longer ([decision 0018](docs/decisions.md#0018)).
-- **Scored brand matching rather than exact matching.** A punctuation difference scores just below
-  identical and passes, with the score shown, rather than sending every dropped apostrophe to a
-  person. What it buys and what it costs are argued in
+- **A brand differing only in punctuation or spacing is a match, not a question.** "Os" against
+  "O's" passes at any length, with the difference named in the finding, rather than sending every
+  dropped apostrophe to a person. It cannot tell the rare punctuation change that alters a name's
+  meaning. Any other difference is scored. What it buys and what it costs are argued in
   [decision 0017](docs/decisions.md#0017).
 
 ## What the brief asked for

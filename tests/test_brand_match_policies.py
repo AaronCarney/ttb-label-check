@@ -69,11 +69,11 @@ def test_kentucky_bourbon_caps_mix_is_the_same_name() -> None:
     assert _verdict("KENTUCKY BOURBON", "KEntucky bourbon").outcome is Outcome.PASS
 
 
-def test_a_dropped_apostrophe_passes_on_score_and_shows_it() -> None:
+def test_a_dropped_apostrophe_passes_and_says_what_differs() -> None:
     res = _verdict("Lucky Lucy's", "Lucky Lucys")
     assert res.outcome is Outcome.PASS
-    assert res.message and "0.98" in res.message, (
-        f"the reviewer is told this was a scored near match, not an exact one: {res.message!r}"
+    assert res.message and "differ only in punctuation" in res.message, (
+        f"the reviewer is told the two are not identical, and how: {res.message!r}"
     )
 
 

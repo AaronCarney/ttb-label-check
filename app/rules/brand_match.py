@@ -9,6 +9,13 @@
 
   stage_a_normalized — True iff two values are equal once canonicalized.
 
+  stage_a_punctuation_only
+                     — True iff two values are the same once punctuation and
+                       spacing are taken out of both. Unicode collation's
+                       "ignore punctuation" setting (UTS #10, alternate=shifted)
+                       makes the same equivalence: "De Anza", "De-Anza" and
+                       "DeAnza" compare equal.
+
   stage_a_word_run   — True iff one value's whole words appear inside the
                        other's as a consecutive run. A brand mark carrying the
                        declared brand with a word missing or added is the same
@@ -65,6 +72,52 @@ def canonicalize(s: str) -> str:
     s = unicodedata.normalize("NFKD", s)
     s = "".join(ch for ch in s if not unicodedata.combining(ch))
     return re.sub(r"\s+", " ", s).strip().casefold()
+
+
+# Marks that stand for something are part of the name even though Unicode files
+# them as punctuation: "A&W" is not "AW", "#7" is not "7", and "7%" is not "7".
+_SIGNIFICANT_MARKS = frozenset("&#@%")
+# Characters labels and readers print for an apostrophe or a prime that Unicode
+# does not file as punctuation: the grave and acute accents stand alone, the
+# modifier-letter apostrophe, and the prime. They are the same mark to a reader.
+_APOSTROPHE_LIKE = frozenset(
+    "`\N{ACUTE ACCENT}\N{MODIFIER LETTER APOSTROPHE}\N{PRIME}\N{DOUBLE PRIME}"
+)
+
+
+def _ignorable(s: str, i: int) -> bool:
+    """Whether the character at `i` is punctuation or spacing a name can lose.
+
+    A mark between two digits is not: it is part of a number, and "1.5",
+    "24/7" and "12-3" are not "15", "247" and "123".
+    """
+    ch = s[i]
+    if ch.isspace():
+        return True
+    if ch in _SIGNIFICANT_MARKS:
+        return False
+    if not (unicodedata.category(ch).startswith("P") or ch in _APOSTROPHE_LIKE):
+        return False
+    between_digits = 0 < i < len(s) - 1 and s[i - 1].isdigit() and s[i + 1].isdigit()
+    return not between_digits
+
+
+def _skeleton(s: str) -> str:
+    """The canonical form with its punctuation and spacing taken out."""
+    c = canonicalize(s)
+    return "".join(ch for i, ch in enumerate(c) if not _ignorable(c, i))
+
+
+def stage_a_punctuation_only(observed: str, expected: str) -> bool:
+    """True when the two differ only in punctuation and spacing.
+
+    Kept apart from the score, which is where a misread belongs: a letter the
+    reader got wrong is a different kind of difference from a mark the label
+    left out, and folding the two together would let a changed letter pass as
+    "only punctuation".
+    """
+    a, b = _skeleton(observed), _skeleton(expected)
+    return bool(a) and a == b and any(ch.isalnum() for ch in a)
 
 
 def _run_words(s: str) -> tuple[str, ...]:

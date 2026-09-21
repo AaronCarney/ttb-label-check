@@ -14,6 +14,12 @@ them before the next route starts:
   Whole words  — one value's words sit inside the other's as a consecutive run.
                  A mark that drops or adds a word is the same brand written
                  shorter or longer ("THE UGLY" against "UGLY SWEATER").
+  Punctuation  — the two are the same once punctuation and spacing are taken
+                 out ("O'S" against "Os", "FIRESTONE" against "Fire Stone"). A
+                 match at any length, and the finding says what differs. Form
+                 TTB F 5100.31, allowable revisions item 3.b, lets an approved
+                 label change the punctuation of its words without a new
+                 approval (`docs/decisions.md#0017`).
   Score        — Jaro-Winkler similarity. At or above `pass_threshold` the two
                  spellings are the same name; between that and
                  `needs_review_threshold` they are too close to call and a
@@ -40,6 +46,7 @@ from app.rules._validators._helpers import (
 )
 from app.rules.brand_match import (
     stage_a_normalized,
+    stage_a_punctuation_only,
     stage_a_word_run,
     stage_b_first_letter_variant,
     stage_b_fuzzy,
@@ -171,6 +178,18 @@ def fuzzy_brand(
                 f'The label shows "{observed}". Its words and those of {source}, '
                 f'"{value}", carry one inside the other in order, so the label '
                 "states that name with a word added or left off.",
+                matched=None if source == _DECLARED else value,
+            )
+
+    for value, source in admissible:
+        if stage_a_punctuation_only(observed, value):
+            return result(
+                Outcome.PASS,
+                rule.severity,
+                None,
+                f'The label shows "{observed}" against {source}, "{value}". They '
+                "differ only in punctuation or spacing, which TTB's allowable "
+                "revisions let a label change without a new approval.",
                 matched=None if source == _DECLARED else value,
             )
 

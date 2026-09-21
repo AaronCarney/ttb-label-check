@@ -23,9 +23,12 @@ stage_b_first_letter_variant(observed, expected) -> float
 
 from __future__ import annotations
 
+import pytest
+
 from app.rules.brand_match import (
     canonicalize,
     stage_a_normalized,
+    stage_a_punctuation_only,
     stage_a_word_run,
     stage_b_first_letter_variant,
     stage_b_fuzzy,
@@ -139,3 +142,62 @@ def test_the_first_letter_variant_is_zero_when_the_first_letters_agree() -> None
 
 def test_the_first_letter_variant_does_not_rescue_a_different_name() -> None:
     assert stage_b_first_letter_variant("Zebra", "Cobra") < 0.85
+
+
+# ---------------------------------------------------------------------------
+# stage_a_punctuation_only: the same name once punctuation and spacing go
+# ---------------------------------------------------------------------------
+#
+# The equivalence Unicode collation calls "ignore punctuation" (UTS #10,
+# alternate=shifted): a space, a hyphen and a dropped mark are one class, so
+# "De Anza", "De-Anza" and "DeAnza" are the same. Symbols that stand for
+# something are not in that class, and nor is a mark between two digits.
+
+
+@pytest.mark.parametrize(
+    ("label", "declared"),
+    [
+        ("O'S", "Os"),
+        ("AL'S", "Als"),
+        ("STONE'S THROW", "Stones Throw"),
+        ("D.O.M.", "DOM"),
+        ("Fire-Stone", "Firestone"),
+        ("Fire Stone", "Firestone"),
+        ("Fire–Stone", "Fire Stone"),
+        ("JOLLY!", "Jolly"),
+        ("St. Elmo", "St Elmo"),
+        ("O`S", "O'S"),
+        ("O\N{ACUTE ACCENT}S", "Os"),
+        ("O\N{MODIFIER LETTER APOSTROPHE}s", "Os"),
+        ("O\N{PRIME}S", "Os"),
+        ("Château d'Yquem", "CHATEAU DYQUEM"),
+        ("\N{FULLWIDTH LATIN CAPITAL LETTER O}\N{FULLWIDTH LATIN CAPITAL LETTER S}", "O.S."),
+    ],
+)
+def test_a_punctuation_or_spacing_difference_is_the_same_name(label, declared) -> None:
+    assert stage_a_punctuation_only(label, declared) is True
+
+
+@pytest.mark.parametrize(
+    ("label", "declared"),
+    [
+        # A symbol that stands for a word or a thing is part of the name.
+        ("A&W", "AW"),
+        ("#7", "7"),
+        ("7%", "7"),
+        ("A+", "A"),
+        ("@Home", "Home"),
+        # A mark between two digits is part of the number.
+        ("Bin 1.5", "Bin 15"),
+        ("24/7", "247"),
+        ("12-3", "123"),
+        # Letters that differ are not punctuation.
+        ("O'S", "Oz"),
+        ("Gin", "Din"),
+        # Nothing but punctuation is no name to compare.
+        ("...", "-"),
+        ("", ""),
+    ],
+)
+def test_anything_more_than_punctuation_is_not_this_route(label, declared) -> None:
+    assert stage_a_punctuation_only(label, declared) is False

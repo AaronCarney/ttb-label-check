@@ -112,12 +112,16 @@ of origin also ignore punctuation. Class/type also treats "whisky" and "whiskey"
 and address also ignores a "Bottled by"-style phrase, street, ZIP code, phone and website, and a
 State name against its postal code.
 
-Brand name is the exception: it keeps punctuation and scores the difference rather than ignoring it,
-so the answer depends on how much of the name the punctuation is. "Stones Throw" against an
-application's "Stone's Throw" scores 0.9846 where a match needs 0.92, and reports a match; the same
-dropped character in a short name falls into the review band on its own. Brand is also compared
-against every name the application says the label may carry, not its brand-name field alone. See
-`docs/decisions.md#0017` and `docs/decisions.md#0015`.
+Brand name is the exception: it does not ignore punctuation silently. Where the label's brand differs
+from a name the application allows only in punctuation or spacing — "Os" against "O'S", "Stones Throw"
+against "Stone's Throw", "Firestone" against "Fire Stone" — the product reports a match at any length,
+and the finding names the difference. Form TTB F 5100.31, allowable revisions item 3.b, lets an
+approved label change the punctuation of its words without a new approval; the form adds that the
+change must not alter the meaning, which the product does not judge. A mark that stands for a word or
+a thing — "&", "#", "@", "%" — is part of the name, and so is a mark between two digits. Any other
+difference is scored, and a match needs 0.92. Brand is also compared against every name the
+application says the label may carry, not its brand-name field alone. See `docs/decisions.md#0017`
+and `docs/decisions.md#0015`.
 
 Country of origin is read only as the English name the application declares, appearing as whole
 words inside the label's wording. The abbreviations, adjectival forms, other-language names and

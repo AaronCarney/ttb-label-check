@@ -72,6 +72,27 @@ the TTB guidance pages linked in the next section; the brief, <https://github.co
   (last updated January 8, 2026), <https://www.ttb.gov/regulated-commodities/beverage-alcohol/beer/beverage-alcohol-manual>
   (last updated January 6, 2026). These rules therefore rest on the CFR, not the BAM.
 
+## How software decides two names differ only in punctuation
+
+- **Unicode collation, "ignore punctuation".** UTS #10 treats spaces, punctuation and symbols as
+  "variable" collation elements; ICU's `alternate=shifted` setting ignores them at primary strength,
+  and ICU's own example is "De Anza" = "De-Anza" = "DeAnza". A space, a hyphen and a dropped mark are
+  one class, not three fixes. <https://www.unicode.org/reports/tr10/>,
+  <https://unicode-org.github.io/icu/userguide/collation/customization/ignorepunct.html>
+- **Normalise first.** NFKC folds full-width forms and typographic variants to their base forms
+  (UAX #15), and full case folding rather than lower-casing is Unicode's recommendation for
+  comparing strings. <https://www.unicode.org/reports/tr15/>,
+  <http://www.unicode.org/faq/casemap_charprop.html>
+- **Record linkage.** OpenRefine's key-collision "fingerprint" removes punctuation outright rather
+  than replacing it with a space, and its documentation calls this the method least likely to
+  produce false positives. <https://openrefine.org/docs/technical-reference/clustering-in-depth>
+- **Keep misreads separate.** OCR confuses punctuation with letters and digits (an apostrophe read
+  as a comma, `l` with `1`); no source treats a misread and a punctuation difference as the same
+  thing, and folding them together lets a changed letter pass as punctuation.
+- **Not found.** No source gives a general rule for symbols that carry meaning ("&", "+", "#",
+  "@"), and no USPTO or TMEP text was found saying punctuation in a word mark is disregarded. The
+  symbols are kept as part of the name here because each stands for a word or a thing.
+
 ## Normalisation used below
 
 "Normalised" means, in this order: Unicode NFKC; curly quotes and apostrophes (’ ‘ “ ”) to straight

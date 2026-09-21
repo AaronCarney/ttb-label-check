@@ -371,10 +371,11 @@ that satisfied it did.
 
 **We corrected a requirement rather than the code.** Our specification said a brand differing only
 in punctuation should go to a reviewer. TTB's own form permits punctuation changes with no new
-approval, and the research behind the requirement contradicted itself — "Stones Throw" against
-"Stone's Throw" is a punctuation-only difference of the kind the senior agent calls "obviously the
-same thing" in the STONE'S THROW example. So we amended the
-requirement rather than making the product do the wrong thing consistently.
+approval, and the research behind the requirement contradicted itself. So we amended the
+requirement rather than making the product do the wrong thing consistently. Scoring the difference
+then made the answer depend on the name's length — "Stones Throw" against "Stone's Throw" passed,
+"Os" against "O's" was rejected — so a punctuation-only difference is now a match at any length,
+with the difference named in the finding.
 
 **We stopped explaining the product inside the product.** The landing page had carried four
 curated labels as buttons, each with a sentence saying what checking it would show. One asserted

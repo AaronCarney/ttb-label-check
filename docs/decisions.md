@@ -1077,6 +1077,22 @@ product built against the list.
   `specs/0001-label-verification/requirements.md` R7 were amended rather than the code; the amendment is
   logged in `docs/PRD-decisions.md`, which had no entries before this one.
 
+**Amended — a punctuation-only difference is a match at any length, and says so.** Scoring made the
+answer depend on the name's length, and at the short end it did worse than review: "Os" against "O's"
+scores 0.6111, below the review floor, and was rejected, while "Stones Throw" against "Stone's Throw"
+passed at 0.9846. The same dropped mark cannot be a match in one brand and a different name in
+another, and item 3.b does not grade the change by length. The comparison now has a route between
+whole words and the score: the two values are compared with punctuation and spacing taken out, the
+equivalence Unicode collation calls "ignore punctuation" (sources in
+`docs/research/2026-09-15-matching-rules.md`). Equal there is a match, and the finding says the two
+differ only in punctuation or spacing, so the difference is shown rather than erased — the objection
+[0015](#0015) raised against a silent exact match. A mark that stands for a word or a thing ("&", "#",
+"@", "%") is part of the name, and so is a mark between two digits ("1.5" is not "15"). Characters
+labels print for an apostrophe that Unicode does not file as punctuation (`` ` ``, ´, ʼ, ′) are treated
+as punctuation. A misread letter still goes to the score. The cost that grading by length carried is
+gone; the other stays: the route cannot detect the rare punctuation change that alters meaning, which
+item 3.b's comment forbids. `docs/PRD.md` FR-7 and R7 were amended with it (`docs/PRD-decisions.md`).
+
 <a id="0022"></a>
 ## 0022. The reason-code registry states which of its codes nothing emits, and a test holds both halves
 

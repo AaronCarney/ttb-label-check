@@ -88,6 +88,12 @@ date: the release's git tag records when it was cut. Versions follow
 
 ### Fixed
 
+- A brand that differs from the application only in punctuation or spacing is a match whatever its
+  length, and the finding says what differs. It was scored, so the answer depended on how long the
+  name was: "Stones Throw" against "Stone's Throw" passed, and "Os" against "O's" was rejected as a
+  different brand. A mark that stands for a word or a thing ("&", "#", "@", "%"), and a mark between
+  two digits, stay part of the name. See `docs/decisions.md#0017`.
+
 - A check no longer loses its results to a second instance. The service took one request at a
   time on up to two instances, and a check's results stream held its instance for as long as the
   check ran, so the next request — the keep-warm ping, the page's own fetches, the next check —

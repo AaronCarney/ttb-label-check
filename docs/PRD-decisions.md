@@ -113,3 +113,22 @@ by a later decision the PRD never caught up with.
   override amends ([decision 0033](decisions.md#0033)) and one batch held until the next
   ([decision 0041](decisions.md#0041)). The old text was stricter than the brief asks — "We're not
   storing anything sensitive for this exercise" — and the README already stated the seven days.
+
+## FR-7, a brand that differs only in punctuation
+
+**What moved.** FR-7's brand paragraph said brand keeps punctuation and scores the difference, so "the
+same dropped character in a short name falls into the review band". It now says a brand differing from
+an allowed name only in punctuation or spacing is a match at any length and the finding names the
+difference; that a mark standing for a word or a thing, or sitting between two digits, is part of the
+name; and that the form's condition that a change not alter the meaning is not judged by the product.
+`specs/0001-label-verification/requirements.md` R7 follows, and gains a criterion for the marks that
+are part of the name. R7's first criterion also said Dave Morrison's "STONE'S THROW" against "Stone's
+Throw" differs "in case and punctuation"; both keep the apostrophe, so it now says case.
+
+**What made it necessary.** The old text described a result that depended on the name's length, and
+the shipped comparison did worse than it said: "Os" against "O's" scored below the review floor and
+was rejected. Form TTB F 5100.31, allowable revisions item 3.b, lets an approved label change "the
+spelling (including punctuation marks …)" of its words without a new approval, with no condition on
+length. It governs revisions to an approved label and is applied here by analogy, as the regulator's
+own statement of which spelling differences are not a different label. The brief itself does not
+decide punctuation; its example differs in case only. See [decision 0017](decisions.md#0017).

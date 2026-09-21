@@ -138,7 +138,8 @@ def test_a_blank_name_in_the_application_matches_nothing() -> None:
 
 
 def test_a_near_spelling_above_the_threshold_matches() -> None:
-    res = _verdict("Stones Throw Bourbon", "Stone's Throw Bourbon")
+    # One letter misread; a punctuation-only pair would take the route above.
+    res = _verdict("Stones Thraw Bourbon", "Stones Throw Bourbon")
     assert res.outcome is Outcome.PASS
     assert res.message and "0.9" in res.message
 
@@ -198,6 +199,51 @@ def test_the_first_letter_route_does_not_rescue_a_different_name() -> None:
     res = _verdict("Zebra", "Cobra")
     assert res.outcome is Outcome.FAIL
     assert res.reason_code == "BRAND.NAME.MISMATCH"
+
+
+# ---------------------------------------------------------------------------
+# A difference of punctuation or spacing alone
+# ---------------------------------------------------------------------------
+#
+# Scored, a punctuation difference depends on how long the name is: "Stones
+# Throw" against "Stone's Throw" scores 0.9846 and passes, "Os" against "O's"
+# scores 0.6111 and is rejected. The same dropped apostrophe cannot be a match
+# in one brand and a different name in another, so this is decided by what
+# differs, not by a score, and the finding says what differs.
+
+
+@pytest.mark.parametrize(
+    ("label", "declared"),
+    [
+        ("O'S", "Os"),  # a mismatch by score
+        ("D.O.M.", "DOM"),  # needs review by score
+        ("AL'S", "Als"),  # a match by score, and now by what differs
+        ("Stones Throw", "Stone's Throw"),
+        ("FIRESTONE", "Fire Stone"),
+    ],
+)
+def test_a_difference_only_of_punctuation_or_spacing_is_a_match_that_says_so(
+    label, declared
+) -> None:
+    res = _verdict(label, declared)
+    assert res.outcome is Outcome.PASS
+    assert res.message == (
+        f'The label shows "{label}" against the brand the application declares, '
+        f'"{declared}". They differ only in punctuation or spacing, which TTB\'s '
+        "allowable revisions let a label change without a new approval."
+    )
+
+
+def test_the_punctuation_route_names_the_admissible_value_it_matched() -> None:
+    res = _verdict("O'S", "Harbor Spirits", fanciful_name="Os")
+    assert res.outcome is Outcome.PASS
+    assert res.matched_value == "Os"
+    assert "the fanciful name the application declares" in (res.message or "")
+
+
+def test_a_symbol_that_stands_for_a_word_is_not_punctuation() -> None:
+    res = _verdict("A&W", "AW")
+    assert "differ only in punctuation" not in (res.message or "")
 
 
 # ---------------------------------------------------------------------------

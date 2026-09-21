@@ -102,13 +102,15 @@ and country of origin are each compared with the application where the applicati
 **Implements**: FR-7
 **Description**: Differences the matching rules treat as the same value are reported as a match.
 **Acceptance criteria**:
-- Given the variant whose application brand differs from the label only in case and punctuation
+- Given the variant whose application brand differs from the label only in case
   ("STONE'S THROW" against "Stone's Throw"), when it is checked, then the brand is a match.
 - Given a brand of "Stones Throw" against an application's "Stone's Throw", when it is checked, then
-  the brand is a match, and the finding carries the similarity score the two reached (0.9846) so the
-  reviewer sees the difference. The dropped apostrophe is a spelling change Form TTB F 5100.31
-  item 3.b permits without a new approval; it is scored rather than ignored, so the same dropped
-  character in a short name reaches the review band instead. See `docs/decisions.md#0017`.
+  the brand is a match, and the finding says the two differ only in punctuation or spacing. The same
+  holds at any length: "Os" against "O'S" is a match. The dropped apostrophe is a spelling change
+  Form TTB F 5100.31 item 3.b permits without a new approval. See `docs/decisions.md#0017`.
+- Given a brand of "A&W" against an application's "AW", or "Bin 1.5" against "Bin 15", when it is
+  checked, then the brand is not matched as a punctuation-only difference: the ampersand stands for a
+  word and the point is part of a number.
 - Given a brand mark of "BONEFISH" against an application whose brand-name field says "TACONIC
   DISTILLERY" and whose applicant block lists "BONEFISH (Used on label)", when it is checked, then
   the brand is a match and the finding names which declared value matched.
