@@ -9,6 +9,12 @@ date: the release's git tag records when it was cut. Versions follow
 
 ### Added
 
+- `uv run python -m eval.fetch_registry_corpus` fetches an application's record and every label image
+  from the Public COLA Registry, for a list of TTB IDs, into `eval/data/` (not committed). The registry
+  now answers plain HTTP with a bot-defence challenge, so it drives a real browser and fetches each
+  image from inside the record's page, one record at a time with a pause between them. A stopped run
+  resumes where it stopped.
+
 - The regulation a finding rests on is in the product, beside the finding. Pressing a citation fills
   a column with the wording of the section it names — reserved, so it fills in place rather than
   covering what a reviewer is comparing it against, and reached from a chip that is a button, so

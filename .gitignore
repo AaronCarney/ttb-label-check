@@ -60,3 +60,6 @@ mutants/
 # (tests/test_deploy_healthz.py). A measurement of a service at a moment, not
 # source; the figures worth keeping are quoted in README.md and docs/.
 artifacts/
+
+# Label images fetched from the Public COLA Registry for evaluation
+eval/data/
