@@ -1,6 +1,6 @@
 {
  "image": "26231001000333/back.jpg",
- "schema_version": 1,
+ "schema_version": 2,
  "frame_size": [
   581,
   831
@@ -832,9 +832,12 @@
  ],
  "heading_measurement": {
   "is_bold": false,
-  "mean_stroke_width": 2.087,
-  "mean_character_height": 9.4412,
-  "width_height_ratio": 0.2211,
-  "confident": true
+  "relative_weight": 0.0,
+  "heading_stroke_width": 2.3439,
+  "body_stroke_width": 0.0,
+  "letter_height": 10.0,
+  "sharpness": 0.0,
+  "confident": false,
+  "unmeasured_reason": "letters_too_small"
  }
 }

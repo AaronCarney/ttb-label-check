@@ -77,8 +77,8 @@
    "disposition": "needs_review",
    "rules": {
     "common.warning.heading_caps_bold": [
-     "needs_review",
-     "WARNING.STYLE.BOLD_NOT_MEASURED"
+     "pass",
+     ""
     ],
     "common.warning.present": [
      "pass",
@@ -150,8 +150,8 @@
    "disposition": "fail",
    "rules": {
     "common.warning.heading_caps_bold": [
-     "needs_review",
-     "WARNING.STYLE.BOLD_NOT_MEASURED"
+     "pass",
+     ""
     ],
     "common.warning.present": [
      "pass",
@@ -223,8 +223,8 @@
    "disposition": "needs_review",
    "rules": {
     "common.warning.heading_caps_bold": [
-     "needs_review",
-     "WARNING.STYLE.BOLD_NOT_MEASURED"
+     "pass",
+     ""
     ],
     "common.warning.present": [
      "pass",
@@ -296,8 +296,8 @@
    "disposition": "needs_review",
    "rules": {
     "common.warning.heading_caps_bold": [
-     "needs_review",
-     "WARNING.STYLE.BOLD_NOT_MEASURED"
+     "pass",
+     ""
     ],
     "common.warning.present": [
      "pass",
@@ -362,7 +362,7 @@
    "rules": {
     "common.warning.heading_caps_bold": [
      "needs_review",
-     "WARNING.STYLE.BOLD_NOT_MEASURED"
+     "WARNING.STYLE.BOLD_NOT_CLEAR"
     ],
     "common.warning.present": [
      "pass",
@@ -507,8 +507,8 @@
    "disposition": "needs_review",
    "rules": {
     "common.warning.heading_caps_bold": [
-     "needs_review",
-     "WARNING.STYLE.BOLD_NOT_MEASURED"
+     "pass",
+     ""
     ],
     "common.warning.present": [
      "pass",
@@ -580,8 +580,8 @@
    "disposition": "needs_review",
    "rules": {
     "common.warning.heading_caps_bold": [
-     "needs_review",
-     "WARNING.STYLE.BOLD_NOT_MEASURED"
+     "pass",
+     ""
     ],
     "common.warning.present": [
      "pass",
@@ -653,8 +653,8 @@
    "disposition": "needs_review",
    "rules": {
     "common.warning.heading_caps_bold": [
-     "needs_review",
-     "WARNING.STYLE.BOLD_NOT_MEASURED"
+     "pass",
+     ""
     ],
     "common.warning.present": [
      "pass",
@@ -726,8 +726,8 @@
    "disposition": "needs_review",
    "rules": {
     "common.warning.heading_caps_bold": [
-     "needs_review",
-     "WARNING.STYLE.BOLD_NOT_MEASURED"
+     "pass",
+     ""
     ],
     "common.warning.present": [
      "pass",
@@ -929,8 +929,8 @@
    "disposition": "needs_review",
    "rules": {
     "common.warning.heading_caps_bold": [
-     "needs_review",
-     "WARNING.STYLE.BOLD_NOT_MEASURED"
+     "pass",
+     ""
     ],
     "common.warning.present": [
      "pass",
@@ -1002,8 +1002,8 @@
    "disposition": "needs_review",
    "rules": {
     "common.warning.heading_caps_bold": [
-     "needs_review",
-     "WARNING.STYLE.BOLD_NOT_MEASURED"
+     "pass",
+     ""
     ],
     "common.warning.present": [
      "pass",
@@ -1068,7 +1068,7 @@
    "rules": {
     "common.warning.heading_caps_bold": [
      "needs_review",
-     "WARNING.STYLE.BOLD_NOT_MEASURED"
+     "WARNING.STYLE.BOLD_NOT_CLEAR"
     ],
     "common.warning.present": [
      "pass",
@@ -1133,7 +1133,7 @@
    "rules": {
     "common.warning.heading_caps_bold": [
      "needs_review",
-     "WARNING.STYLE.BOLD_NOT_MEASURED"
+     "WARNING.STYLE.BOLD_NOT_CLEAR"
     ],
     "common.warning.present": [
      "pass",
@@ -1271,7 +1271,7 @@
    "rules": {
     "common.warning.heading_caps_bold": [
      "needs_review",
-     "WARNING.STYLE.BOLD_NOT_MEASURED"
+     "WARNING.STYLE.BOLD_NOT_CLEAR"
     ],
     "common.warning.present": [
      "pass",
@@ -1335,8 +1335,8 @@
    "disposition": "needs_review",
    "rules": {
     "common.warning.heading_caps_bold": [
-     "needs_review",
-     "WARNING.STYLE.BOLD_NOT_MEASURED"
+     "pass",
+     ""
     ],
     "common.warning.present": [
      "pass",
@@ -1408,8 +1408,8 @@
    "disposition": "needs_review",
    "rules": {
     "common.warning.heading_caps_bold": [
-     "needs_review",
-     "WARNING.STYLE.BOLD_NOT_MEASURED"
+     "pass",
+     ""
     ],
     "common.warning.present": [
      "pass",
@@ -1481,8 +1481,8 @@
    "disposition": "needs_review",
    "rules": {
     "common.warning.heading_caps_bold": [
-     "needs_review",
-     "WARNING.STYLE.BOLD_NOT_MEASURED"
+     "pass",
+     ""
     ],
     "common.warning.present": [
      "pass",
@@ -1547,7 +1547,7 @@
    "rules": {
     "common.warning.heading_caps_bold": [
      "needs_review",
-     "WARNING.STYLE.BOLD_NOT_MEASURED"
+     "WARNING.STYLE.BOLD_NOT_CLEAR"
     ],
     "common.warning.present": [
      "pass",
@@ -1612,7 +1612,7 @@
    "rules": {
     "common.warning.heading_caps_bold": [
      "needs_review",
-     "WARNING.STYLE.BOLD_NOT_MEASURED"
+     "WARNING.STYLE.BOLD_NOT_CLEAR"
     ],
     "common.warning.present": [
      "pass",
@@ -1741,8 +1741,8 @@
    "disposition": "needs_review",
    "rules": {
     "common.warning.heading_caps_bold": [
-     "needs_review",
-     "WARNING.STYLE.BOLD_NOT_MEASURED"
+     "pass",
+     ""
     ],
     "common.warning.present": [
      "pass",
@@ -1871,8 +1871,8 @@
    "disposition": "needs_review",
    "rules": {
     "common.warning.heading_caps_bold": [
-     "pass",
-     ""
+     "needs_review",
+     "WARNING.STYLE.BOLD_NOT_MEASURED"
     ],
     "common.warning.present": [
      "pass",
@@ -1936,8 +1936,8 @@
    "disposition": "needs_review",
    "rules": {
     "common.warning.heading_caps_bold": [
-     "pass",
-     ""
+     "needs_review",
+     "WARNING.STYLE.BOLD_NOT_MEASURED"
     ],
     "common.warning.present": [
      "pass",
@@ -2001,8 +2001,8 @@
    "disposition": "needs_review",
    "rules": {
     "common.warning.heading_caps_bold": [
-     "needs_review",
-     "WARNING.STYLE.BOLD_NOT_MEASURED"
+     "pass",
+     ""
     ],
     "common.warning.present": [
      "pass",
@@ -2066,11 +2066,11 @@
  "scoreboard": {
   "check_outcomes": {
    "fail": 3,
-   "needs_review": 102,
-   "pass": 350
+   "needs_review": 89,
+   "pass": 363
   },
   "checks": 455,
-  "decided_without_a_person": 0.776,
+  "decided_without_a_person": 0.804,
   "label_outcomes": {
    "fail": 3,
    "needs_review": 27
@@ -2092,7 +2092,8 @@
    "NAME_ADDRESS.MATCH.NEEDS_REVIEW": 14,
    "NET_CONTENTS.MATCH.NEEDS_REVIEW": 7,
    "ORIGIN.MATCH.APPLICATION_LABEL_DISAGREE": 2,
-   "WARNING.STYLE.BOLD_NOT_MEASURED": 27,
+   "WARNING.STYLE.BOLD_NOT_CLEAR": 6,
+   "WARNING.STYLE.BOLD_NOT_MEASURED": 8,
    "WARNING.VERBATIM.NOT_CONFIRMED": 11
   }
  }

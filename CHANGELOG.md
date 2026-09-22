@@ -71,6 +71,16 @@ date: the release's git tag records when it was cut. Versions follow
 
 ### Changed
 
+- The bold check measures the heading's strokes against the warning's own body, which 27 CFR
+  16.22(a)(2) requires to be regular, instead of against a fixed cut that followed the photograph
+  rather than the type. A heading at least 1.125 times as heavy as its body passes. One measured and
+  not clearly heavier goes to a reviewer under a new code, `WARNING.STYLE.BOLD_NOT_CLEAR`, and
+  `WARNING.STYLE.BOLD_NOT_MEASURED` now means only that the weight could not be measured: the type
+  too small, the photo too blurred, or too little of the warning read. A measured weight still never
+  rejects a label. Checks settled without a person rise from 77.6% to 80.4% on the corpus and from
+  72.4% to 75.2% on the held-out registry labels, where 6 labels now match; no check moves toward a
+  mismatch (`docs/decisions.md#0058`).
+
 - The brand check now searches every line read on every face for the application's brand and the
   trade names it marks as used on the label, instead of comparing only the text set in the largest
   type. A name found is a match, and the result card shows the line it was found on, with its box

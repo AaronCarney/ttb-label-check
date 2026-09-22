@@ -38,7 +38,7 @@ OBSERVED_VALUE_AUDIT_KEYS: frozenset[str] = frozenset(
         "heading_bold_llm",
         "heading_bold_measured",
         "heading_bold_measured_confident",
-        "heading_bold_width_height_ratio",
+        "heading_bold_relative_weight",
     }
 )
 
@@ -391,6 +391,10 @@ class CloudVisionExtractor:
                 # stroke-width measurement on the heading bbox. The LLM's
                 # value is preserved as `heading_bold_llm` in upstream_meta so
                 # the audit trail captures what each source claimed.
+                # The model returns one box for the whole warning and none
+                # for its lines, so there is no body to measure the heading
+                # against: the measurement reports it was not taken, and the
+                # rule sends the weight to a reviewer.
                 bbox = bbox_by_id.get("gov_warning")
                 measurement = measure_heading_bold(face.image_bytes, bbox)
                 content = {
@@ -398,7 +402,7 @@ class CloudVisionExtractor:
                     "heading_bold_llm": bool(content.get("heading_bold", False)),
                     "heading_bold_measured": measurement.is_bold,
                     "heading_bold_measured_confident": measurement.confident,
-                    "heading_bold_width_height_ratio": measurement.width_height_ratio,
+                    "heading_bold_relative_weight": measurement.relative_weight,
                 }
                 if measurement.confident:
                     content["heading_bold"] = measurement.is_bold

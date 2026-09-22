@@ -13,18 +13,16 @@ of them from any readable image and the third not at all:
 Words or capitals wrong is a rejection: the label is not compliant and the
 image was good enough to show it.
 
-**A measured weight never rejects a label.** It used to, when the measurement
-was confident. A sweep of the 38-label corpus
-(`eval/heading_bold_ratios.py`) showed it cannot carry that: the stroke-width
-ratio ran from 0.111 to 0.508 across labels that are all TTB-approved and
-therefore all required to be bold, and one label measured 0.111 from a clean
-photograph and 0.261 from a blurred copy of the same printing. The number moves
-with the photograph, not with the typeface, and at the 0.25 cut it called 18 of
-28 approved labels not bold. So a measured weight that does not satisfy the
-rule — whether the measurement failed, was never taken, or came back low —
-returns insufficient evidence at warn severity under the code the rule declares
-in `unmeasured_weight_reason_code`, and the label goes to a reviewer on that
-point alone. `docs/decisions.md#0037` carries the argument.
+**A measured weight never rejects a label.** The reader measures the
+heading's strokes against the statement's own body (`app/vision/heading_measure.py`),
+and a heading clearly heavier than its body passes. One that is not clearly
+heavier may still be bold: some approved labels print a heading that measures
+no heavier than its body. So a measured weight that does not satisfy the rule
+returns insufficient evidence at warn severity, under
+`unclear_weight_reason_code` where it was measured and
+`unmeasured_weight_reason_code` where it was not, and the label goes to a
+reviewer on that point alone. `docs/decisions.md#0037` and `#0058` carry the
+argument.
 
 A weight the payload *states* rather than measures is different, and still
 rejects: the legacy `heading_styles` sub-object used by hand-built fixtures
@@ -214,12 +212,17 @@ def heading_style_check(
         return result(Outcome.PASS, rule.severity, None)
 
     # Nothing here may reject the label unless the payload *stated* a weight.
-    # The rule pack names the code this branch reports; without one there is no
+    # A weight measured and found not clearly heavier than the body is told
+    # apart from one that was never measured, so the reviewer's sentence says
+    # which happened. The rule pack names both codes; without one there is no
     # sentence to hand a reviewer, so the check falls through to the weight the
     # payload carries rather than reporting a needs-review with no reason.
     if reading.weight is None or reading.weight_from_measurement:
+        measured = reading.weight is not None and reading.weight_confident
+        unclear_code = rule.parameters.get("unclear_weight_reason_code")
         unmeasured_code = rule.parameters.get("unmeasured_weight_reason_code")
-        if unmeasured_code:
-            return result(Outcome.INSUFFICIENT_EVIDENCE, Severity.WARN, unmeasured_code)
+        code = (unclear_code if measured else None) or unmeasured_code
+        if code:
+            return result(Outcome.INSUFFICIENT_EVIDENCE, Severity.WARN, code)
 
     return result(Outcome.FAIL, rule.severity, rule.reason_code)

@@ -74,15 +74,16 @@ rules:
       required_case: upper
       required_weight: bold
       # The capitals are read from the heading's own text and are decided
-      # here, at the reject severity above. Bold weight is not: it is a
-      # stroke-width measurement on the heading's region of the image, and a
-      # sweep of the label corpus found it moves with the
-      # photograph rather than the typeface -- 18 of 28 confidently-measured
-      # TTB-approved labels came out below the cut. So no measured weight
-      # rejects a label. Where the measurement fails, was never taken, or
-      # comes back low, the rule reports this code and the label goes to a
-      # reviewer on that point. See docs/decisions.md#0037.
+      # here, at the reject severity above. Bold weight is not: it is the
+      # heading's stroke width measured against the statement's own body,
+      # which 16.22(a)(2) requires to be regular. A heading clearly heavier
+      # than its body passes. No measured weight rejects a label, because
+      # some approved labels print a heading that measures no heavier than
+      # its body (docs/decisions.md#0037, #0058). A weight that could not be
+      # measured, and one measured but not clearly heavier, each go to a
+      # reviewer under their own code.
       unmeasured_weight_reason_code: WARNING.STYLE.BOLD_NOT_MEASURED
+      unclear_weight_reason_code: WARNING.STYLE.BOLD_NOT_CLEAR
       heading_not_read_reason_code: WARNING.HEADING.NOT_READ
     evidence_required: [warning_block]
     confidence_floor: 0.50

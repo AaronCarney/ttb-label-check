@@ -1,6 +1,6 @@
 {
  "image": "variants/var-heading-title-case-front.jpg",
- "schema_version": 1,
+ "schema_version": 2,
  "frame_size": [
   1600,
   1014
@@ -391,10 +391,13 @@
   }
  ],
  "heading_measurement": {
-  "is_bold": false,
-  "mean_stroke_width": 3.3527,
-  "mean_character_height": 24.4054,
-  "width_height_ratio": 0.1374,
-  "confident": true
+  "is_bold": true,
+  "relative_weight": 1.3937,
+  "heading_stroke_width": 3.9708,
+  "body_stroke_width": 2.8491,
+  "letter_height": 21.0,
+  "sharpness": 0.3179,
+  "confident": true,
+  "unmeasured_reason": null
  }
 }

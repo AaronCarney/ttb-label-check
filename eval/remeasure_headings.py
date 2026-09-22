@@ -19,7 +19,12 @@ import argparse
 import json
 from pathlib import Path
 
-from app.vision.local import freeze_reading, remeasure_heading, thaw_reading
+from app.vision.local import (
+    FROZEN_SCHEMA_VERSION,
+    freeze_reading,
+    remeasure_heading,
+    thaw_reading,
+)
 from eval.corpus_check import LABELS_ROOT, RECORDINGS_ROOT, REGISTRY_READINGS
 
 
@@ -40,13 +45,23 @@ def remeasure(roots: list[Path], write: bool) -> tuple[int, list[Path]]:
             if "heading_measurement" not in data:
                 continue
             seen += 1
-            reading = remeasure_heading(_image_of(recording, data).read_bytes(), thaw_reading(data))
+            # A reading frozen before the measurement's current shape is
+            # brought up to it: only the measurement differs between versions,
+            # and it is about to be taken again.
+            current = {**data, "schema_version": FROZEN_SCHEMA_VERSION, "heading_measurement": None}
+            reading = remeasure_heading(
+                _image_of(recording, data).read_bytes(), thaw_reading(current)
+            )
             fresh = freeze_reading(reading)["heading_measurement"]
-            if fresh == data["heading_measurement"]:
+            if (
+                fresh == data["heading_measurement"]
+                and data["schema_version"] == FROZEN_SCHEMA_VERSION
+            ):
                 continue
             changed.append(recording)
             print(f"{recording}: {data['heading_measurement']} -> {fresh}")
             if write:
+                data["schema_version"] = FROZEN_SCHEMA_VERSION
                 data["heading_measurement"] = fresh
                 recording.write_text(json.dumps(data, indent=1))
     return seen, changed

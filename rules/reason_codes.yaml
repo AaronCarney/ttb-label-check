@@ -192,7 +192,11 @@ codes:
     cfr_anchors: ["27 CFR §16.21", "27 CFR §16.22(a)(2)"]
     severity: warn
   WARNING.STYLE.BOLD_NOT_MEASURED:
-    description: "Heading capitals were checked; its bold weight could not be measured from this image, so a reviewer decides whether §16.22(a)(2) is met."
+    description: "Heading capitals were checked; its bold weight could not be measured from this image (the type is too small, the photo too blurred, or too little of the warning was read to compare against), so a reviewer decides whether §16.22(a)(2) is met."
+    cfr_anchors: ["27 CFR §16.22(a)(2)"]
+    severity: warn
+  WARNING.STYLE.BOLD_NOT_CLEAR:
+    description: "Heading capitals were checked; its strokes were measured against the rest of the warning and are not clearly heavier, so a reviewer decides whether the heading is bold and the statement below it is not, as §16.22(a)(2) requires."
     cfr_anchors: ["27 CFR §16.22(a)(2)"]
     severity: warn
   WARNING.LEGIBILITY.CONTRAST_NOT_MEASURED:

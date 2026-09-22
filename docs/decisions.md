@@ -2345,6 +2345,8 @@ of a box.
 <a id="0037"></a>
 ## 0037. A measured heading boldness may send a label to a reviewer and may never reject it
 
+**Superseded in part by** [0058](#0058), which replaces the method and the fixed cut; the ruling
+that a measured weight never rejects a label stands.
 **Evidence:** `eval/heading_bold_ratios.py` and the run it produced over
 all 38 labels in `tests/fixtures/labels/manifest.json`, measured on the development box
 under the six-thread OCR budget; `app/vision/heading_measure.py`;
@@ -3613,3 +3615,84 @@ mismatch.
 **What it leaves.** Every approved label now goes to a reviewer on the bold check. The fixed cut of
 `#0037` was only letting some through by measuring the wrong pixels. The next decision replaces the
 fixed cut.
+
+<a id="0058"></a>
+## 0058. The heading's weight is measured against the warning's own body
+
+**Evidence:** `app/vision/heading_measure.py` (`measure_heading_bold` and its constants);
+`app/rules/_validators/heading_style_check.py`; `rules/common/health_warning.yaml`;
+`rules/reason_codes.yaml`; `eval/heading_bold_ratios.py`, with and without `--synthetic`;
+`tests/test_heading_measurement.py`; `eval/corpus_check.py`, on the corpus and with `--registry`.
+
+**What was found.** `#0037` measured the heading's stroke width against its letter height and
+compared the ratio to a fixed cut. The ratio followed the photograph rather than the type, so
+`#0037` let no measured weight reject a label. `#0057` then showed the fixed cut had passed some
+approved labels only by measuring the wrong pixels; with that fixed, every approved label went to a
+reviewer on the bold check. `#0037` rejected normalising the measurement because the product had no
+scale reference. 27 CFR 16.22(a)(2) supplies one: it requires the heading in bold and forbids bold
+in the rest of the statement, so every compliant label carries regular type of the same statement,
+on the same photograph, under the same blur, glare and resolution.
+
+**Chosen.** The heading's median stroke width is divided by the median stroke width of the
+warning's body lines. At 1.125 or above, the heading is bold and the check passes. The measurement
+is taken only where three floors are met, and otherwise says which was not:
+
+- the heading's letters are at least 12 px tall;
+- at least two body lines of at least three letters each were measured;
+- the body lines are sharp enough: at most 0.8 mid-grey pixels per ink pixel, after stretching
+  each crop's own contrast.
+
+A relative weight under the cut does not make a mismatch. It goes to a reviewer under a new code,
+`WARNING.STYLE.BOLD_NOT_CLEAR` ("measured, not clearly heavier"). `WARNING.STYLE.BOLD_NOT_MEASURED`
+now means only that the weight could not be measured, and its words say why that happens. The
+never-reject ruling of `#0037` stands; its method and its fixed cut are replaced.
+
+**Measured.** All of it through the production `measure_heading_bold`. The cut and the floors were
+set on rendered warnings and the 30 corpus labels. The held-out labels are reported, not tuned on.
+
+- *Rendered warnings.* 2688 of them: two DejaVu faces, sizes 10 to 34, a bold heading, a regular
+  heading, or the whole statement bold; upper and lower case; blur 0 to 3; light on dark; and no
+  loss, JPEG at quality 20, half resolution, or both. Bold headings: 78 measured, all bold, 1.170 to
+  1.518. Regular headings: 78 measured, none bold, 0.957 to 1.083. The cut sits in the gap between
+  the two. All bold: 130 measured, 2 called bold at 1.141, both with a lower-case body, where bold
+  capitals measure heavier than bold lower case. The heading is bold in both, so the call is right.
+- *The letter-height floor.* With no floor, bold headings under 8 px measured 1.027 to 1.036 and at
+  8 to 10 px 1.052 to 1.068, inside the regular range. At 10 to 12 px they cleared the cut by as
+  little as 0.015; at 12 px and above, by 0.045.
+- *The sharpness floor.* Without it, blur 2 to 3 gave regular headings up to 1.126, over the cut,
+  and bold headings as low as 0.932.
+- *Real labels.* On the corpus, 32 warning faces carry a heading (30 labels and 2 variants); 24
+  were measured and 18 called bold, at 1.006 to 1.468, median 1.274. On the held-out labels, 86
+  faces, 61 measured, 49 called bold, at 0.988 to 1.952, median 1.242. 459 body lines, each measured
+  against the statement's other lines, ran 0.906 to 1.075: none reached the cut.
+- *Worse copies of the same corpus images.* Blurred at 1, 2 and 3 px, no heading moved from bold to
+  "measured, not bold"; each stayed where it was or became "could not be measured". JPEG at quality
+  20 moved one approved label from 1.122 to 1.126, from not bold to bold.
+- *Scoreboards.* Only the bold rule changed on either set, no check moved toward a mismatch, and
+  reason codes that contradict their outcome stay at 0 on both.
+
+| | Corpus, before | Corpus, after | Held-out, before | Held-out, after |
+|---|---|---|---|---|
+| Labels: mismatch / needs review / match | 3 / 27 / 0 | 3 / 27 / 0 | 28 / 70 / 0 | 28 / 64 / 6 |
+| Checks needing review | 102 | 89 | 405 | 363 |
+| Checks settled without a person | 77.6% | 80.4% | 72.4% | 75.2% |
+| Bold checks, review to pass | | 15 | | 48 |
+| Bold checks, pass to review | | 2 | | 6 |
+| Bold checks now "not clearly heavier" | | 6 | | 10 |
+
+**Rejected.**
+
+- *A heading no heavier than its body as a mismatch, at high confidence.* The plan allowed it. The
+  evidence does not: approved headings measure as low as 1.006 (`26230001000540`) and 0.988 on the
+  held-out set, inside the range of regular type measured against regular type.
+- *A letter-height floor of 10 px.* It also separates rendered bold from regular, but by 0.015,
+  and one JPEG pass moved a real label by 0.004.
+- *No sharpness floor.* Blur alone put regular headings over the cut and bold ones under it.
+
+**What it leaves.**
+
+- The cloud reader returns one box for the whole warning and none for its lines, so it has no body
+  to measure against and always reports "could not be measured". It is off by default.
+- 16.22(a)(2) also forbids bold in the rest of the statement. A body as heavy as the heading comes
+  out as "not clearly heavier" and goes to a reviewer, but nothing checks the body's own weight,
+  before this decision or after it.

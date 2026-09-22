@@ -3,11 +3,11 @@ and does not treat them alike.
 
 The words and the capitals are read from the heading's own text, so getting
 them wrong is the label's fault and §16.22(a)(2) makes it a rejection. Bold
-weight is a stroke-width measurement taken on the heading's region of the
-image, and the corpus sweep showed it moves with the photograph
-rather than the typeface. So no measured weight rejects a label: where it does
-not satisfy the rule the answer is insufficient evidence at warn severity under
-the code the rule declares, and a reviewer decides.
+weight is the heading's stroke width measured against the statement's own
+body, and approved labels print headings that measure no heavier than their
+body. So no measured weight rejects a label: where it does not satisfy the rule
+the answer is insufficient evidence at warn severity, under one code where the
+weight was measured and another where it could not be, and a reviewer decides.
 
 Two payload shapes reach the validator, and the difference decides what each
 may do. The reader emits `heading_all_caps` / `heading_bold` /
@@ -25,9 +25,12 @@ from app.schemas.rules import MatchPolicy
 from tests.rules.fixtures import make_context, make_expected, make_obs, make_rule
 
 UNMEASURED_CODE = "WARNING.STYLE.BOLD_NOT_MEASURED"
+UNCLEAR_CODE = "WARNING.STYLE.BOLD_NOT_CLEAR"
 
 
-def _rule(*, unmeasured_code: str | None = UNMEASURED_CODE):
+def _rule(
+    *, unmeasured_code: str | None = UNMEASURED_CODE, unclear_code: str | None = UNCLEAR_CODE
+):
     parameters = {
         "target_phrase": "GOVERNMENT WARNING",
         "required_case": "upper",
@@ -35,6 +38,8 @@ def _rule(*, unmeasured_code: str | None = UNMEASURED_CODE):
     }
     if unmeasured_code:
         parameters["unmeasured_weight_reason_code"] = unmeasured_code
+    if unclear_code:
+        parameters["unclear_weight_reason_code"] = unclear_code
     return make_rule(
         rule_id="common.warning.heading_caps_bold",
         cfr_citation="27 CFR §16.22(a)(2)",
@@ -139,16 +144,12 @@ def test_unmeasured_weight_does_not_excuse_wrong_capitals() -> None:
 def test_a_confident_measurement_of_not_bold_goes_to_a_reviewer() -> None:
     """A measured weight never rejects, even when the reader was confident.
 
-    This test used to assert the opposite, on the reasoning that a
-    weight which *was* measured and came out regular is the label's fault. The
-    corpus sweep in `eval/heading_bold_ratios.py` withdrew the premise: over the
-    38 labels, all TTB-approved and so all required to be bold, the stroke-width
-    ratio ran 0.111 to 0.508, and `ttb-26232001000404` measured 0.111 from a
-    clean photograph and 0.261 from a blurred copy of the same printing. The
-    measurement moves with the photograph, not the typeface, and the 0.25 cut
-    called 18 of 28 approved labels not bold. A signal that wrong cannot carry a
-    reject-severity verdict, so it carries a reviewer instead.
-    See `docs/decisions.md#0037`.
+    The reader measures the heading against the statement's own body, and a
+    heading that is not clearly heavier may still be bold: approved labels in
+    the corpus print headings that measure no heavier than their body. So the
+    measurement can pass a heading and can never fail one. The reviewer is told
+    it was measured, which is a different thing to check from a weight nobody
+    could measure. See `docs/decisions.md#0037` and `#0058`.
     """
     res = _check(
         {
@@ -160,6 +161,41 @@ def test_a_confident_measurement_of_not_bold_goes_to_a_reviewer() -> None:
     )
     assert res.outcome is Outcome.INSUFFICIENT_EVIDENCE
     assert res.severity is Severity.WARN
+    assert res.reason_code == UNCLEAR_CODE
+
+
+def test_a_weight_that_could_not_be_measured_says_so() -> None:
+    """The reader reports the measurement was not taken and leaves the weight out.
+
+    The code the reviewer sees is the one saying it could not be measured, not
+    the one saying it was measured and came out unclear.
+    """
+    res = _check(
+        {
+            "heading_text": "GOVERNMENT WARNING:",
+            "heading_all_caps": True,
+            "heading_bold_measured": False,
+            "heading_bold_measured_confident": False,
+        }
+    )
+    assert res.outcome is Outcome.INSUFFICIENT_EVIDENCE
+    assert res.severity is Severity.WARN
+    assert res.reason_code == UNMEASURED_CODE
+
+
+def test_a_pack_naming_only_the_unmeasured_code_uses_it_for_both() -> None:
+    """A rule pack that declares no separate code for an unclear measurement
+    still sends it to a reviewer, under the one code it did declare."""
+    res = _check(
+        {
+            "heading_text": "GOVERNMENT WARNING:",
+            "heading_all_caps": True,
+            "heading_bold": False,
+            "heading_bold_measured_confident": True,
+        },
+        rule=_rule(unclear_code=None),
+    )
+    assert res.outcome is Outcome.INSUFFICIENT_EVIDENCE
     assert res.reason_code == UNMEASURED_CODE
 
 

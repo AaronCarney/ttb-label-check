@@ -224,7 +224,15 @@ def test_the_two_readers_describe_a_field_with_the_same_keys() -> None:
     """
     from app.vision.heading_measure import HeadingMeasurement
 
-    measured = HeadingMeasurement(True, 3.0, 12.0, 0.25, confident=True)
+    measured = HeadingMeasurement(
+        is_bold=True,
+        relative_weight=1.3,
+        heading_stroke_width=3.0,
+        body_stroke_width=2.3,
+        letter_height=14.0,
+        sharpness=0.4,
+        confident=True,
+    )
     cloud, _evidence, _sent = _cloud_payloads(_full_response(), measurement=measured)
     # A local reading whose heading was measured, so the same branch of the
     # boldness override is being compared on both sides.
@@ -317,9 +325,9 @@ def test_a_boldness_nobody_measured_is_absent_from_both_readers() -> None:
     looks at the weight, so no verdict moves — what moves is what the envelope
     says the product knows.
     """
-    from app.vision.heading_measure import HeadingMeasurement
+    from app.vision.heading_measure import unmeasured as not_measured
 
-    unmeasured = HeadingMeasurement(False, 0.0, 0.0, 0.0, confident=False)
+    unmeasured = not_measured("too_few_body_lines")
     cloud, _evidence, _sent = _cloud_payloads(_full_response(), measurement=unmeasured)
     warning = cloud["gov_warning"]
     assert warning["heading_bold_measured_confident"] is False

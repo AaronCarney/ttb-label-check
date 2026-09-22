@@ -1,29 +1,33 @@
-"""Stroke-width measurement for the §16.22(a)(2) bold-heading check.
+"""Stroke-weight measurement for the §16.22(a)(2) bold-heading check.
 
-The measurement is deterministic: it runs on `label.image_bytes` once the layout
-call has returned a bbox, and produces a real `is_bold` signal that owes nothing
-to a model's judgment.
+27 CFR 16.22(a)(2) requires "GOVERNMENT WARNING" in bold and forbids bold in
+the rest of the statement. So every compliant label carries its own
+reference: regular type of the same statement, on the same photograph, under
+the same blur, glare and resolution. The heading's stroke width is measured
+as a ratio to the body's, not against a fixed cut.
 
-Algorithm (Otsu + distance-transform + width:height ratio):
+Algorithm, run the same way on the heading's crop and on each body line's:
 
-  1. Open the heading bbox crop in grayscale.
-  2. Otsu's threshold → binary foreground mask of stroke pixels.
-  3. Connected components: per-component bounding box gives character height.
-  4. Distance transform: per foreground pixel, distance to nearest background;
-     mean of positive distances * 2 ≈ mean stroke width per component.
-  5. Aggregate: mean(stroke_width) / mean(char_height). Bold when ratio
-     exceeds WIDTH_HEIGHT_RATIO_BOLD_MIN.
+  1. Grayscale crop; Otsu's threshold gives the ink mask, inverted where the
+     crop's edges run through the dark side (light type on a dark panel).
+  2. Connected components give each letter's height.
+  3. A distance transform gives each letter's stroke width: twice the mean
+     distance from its ink pixels to the nearest ground.
+  4. The heading's median stroke width over the body's is the relative weight.
 
-The measurement is deterministic and repeatable. What it is *not* is a reliable
-reading of stroke weight: the corpus sweep below found the ratio
-varies more with a photograph's resolution and focus than with the typeface, so
-nothing here may reject a label. `WIDTH_HEIGHT_RATIO_BOLD_MIN` carries the
-measurement and `docs/decisions.md#0037` carries what was done about it.
+The measurement is taken only where it can be trusted, and says why where it
+was not (`HeadingMeasurement.unmeasured_reason`). A relative weight at or
+above `RELATIVE_WEIGHT_BOLD_MIN` is bold. Below it, the measurement cannot
+say the heading is regular: some approved labels print a heading that
+measures no heavier than its body. `docs/decisions.md#0058` carries the
+measurements behind every constant here.
 """
 
 from __future__ import annotations
 
 import logging
+import statistics
+from collections.abc import Sequence
 from dataclasses import dataclass
 from io import BytesIO
 
@@ -33,211 +37,227 @@ from PIL import Image
 
 _logger = logging.getLogger("app.vision.heading_measure")
 
+Bbox = tuple[int, int, int, int]
 
-WIDTH_HEIGHT_RATIO_BOLD_MIN = 0.25
-"""Stroke-width-to-character-height ratio above which the heading is bold.
+RELATIVE_WEIGHT_BOLD_MIN = 1.125
+"""Heading stroke width over body stroke width at or above which the heading
+is bold. The midpoint of the gap on rendered warnings that pass the other
+floors here: bold headings measured 1.170 and above, regular headings 1.083
+and below. On real photographs, a body line measured against the statement's
+other lines reached 1.075."""
 
-Set at 0.25 on PIL's default bitmap font, where dilation-merged bold blobs
-produce ~0.28 and regular text lands at ~0.22. The re-tune against a labeled
-corpus that this comment used to promise has now been run, and it did not
-produce a better number -- it showed that no number works.
+LETTER_HEIGHT_MIN_PX = 12.0
+"""The heading's median letter height, in pixels of the frame the boxes came
+from, below which the weight is not judged. On rendered warnings, bold
+headings under 10 px measured no heavier than regular ones; from 10 px to
+this floor they cleared the cut by as little as 0.015; at and above it, by
+0.045."""
 
-**Measured over all 38 labels in `tests/fixtures/labels`**, by
-`eval/heading_bold_ratios.py`, on the warning-carrying face of each. Every
-label in that corpus is TTB-approved, and §16.22(a)(2) requires the heading in
-bold, so the whole population should sit above whatever the cut is. It does
-not. Of the 30 real labels, 28 measured confidently, and those 28 ran from
-0.111 to 0.508 with a median of 0.1995 -- a 4.6x spread across labels that are
-all bold, where the difference between bold and regular type is nearer 1.5x.
-At 0.25, 18 of the 28 came out below the cut.
+SHARPNESS_MAX = 0.8
+"""Mid-grey pixels per ink pixel in the body lines, after stretching each
+crop's own contrast, above which the photograph is too blurred to judge.
+Blur spreads a stroke's edge into grey on both weights and closes the gap
+between them; on rendered warnings at or below this figure the gap held."""
 
-The corpus also shows why, without needing the approvals to be taken on trust:
-`ttb-26232001000404` measures 0.111, and `var-blur` -- the same printing,
-Gaussian-blurred at 2.5 px -- measures 0.261. Same label, same type, 2.3x
-apart. `var-glare` measures 0.555, the highest in the corpus. The ratio tracks
-resolution, focus and lighting, not stroke weight.
+_MIN_LETTERS = 3
+"""Components a crop must hold before its median means anything."""
 
-So this number is **no longer a compliance gate**: `heading_style_check` sends
-a heading measured below it to a reviewer and never rejects on it
-(`docs/decisions.md#0037`). It is kept at 0.25 rather than lowered because,
-once it can only choose between passing a label and reviewing it, a low cut
-buys a quieter queue by passing headings nobody checked. Raising the reviewer
-load is the safe side of a measurement this noisy. Making the ratio mean
-something would take normalising it against resolution and print scale, which
-is a different piece of work from choosing a threshold."""
+_MIN_BODY_LINES = 2
+"""Body lines the reference must span, so one odd line cannot set it."""
+
+_MIN_COMPONENT_HEIGHT_PX = 4
+"""Components shorter than this are specks and punctuation, not letters."""
 
 
 @dataclass(frozen=True)
 class HeadingMeasurement:
-    """Measurement-grade signal for §16.22(a)(2).
+    """The heading's weight against the warning's own body.
 
-    `confident` is False when there was no heading region to measure, or when
-    the region held too little ink to produce a meaningful stroke width. The
-    other fields are then zero and mean nothing: `is_bold=False` here says
-    "not measured", never "measured as not bold". A caller that treats it as
-    the latter rejects labels for the reader's blindness."""
+    `confident` is True only when every floor was met. Otherwise
+    `unmeasured_reason` says which was not, `is_bold` is False and means
+    "not measured", and the widths are whatever was measured before the
+    measurement stopped (zero where nothing was).
+
+    With `confident` True, `is_bold` False means "measured, not clearly
+    heavier than the body". It is not a finding that the heading is regular.
+    """
 
     is_bold: bool
-    mean_stroke_width: float
-    mean_character_height: float
-    width_height_ratio: float
+    relative_weight: float
+    heading_stroke_width: float
+    body_stroke_width: float
+    letter_height: float
+    sharpness: float
     confident: bool
+    unmeasured_reason: str | None = None
+
+
+def unmeasured(reason: str, **measured: float) -> HeadingMeasurement:
+    """A measurement that was not taken, and why."""
+    fields = {
+        "relative_weight": 0.0,
+        "heading_stroke_width": 0.0,
+        "body_stroke_width": 0.0,
+        "letter_height": 0.0,
+        "sharpness": 0.0,
+        **measured,
+    }
+    return HeadingMeasurement(is_bold=False, confident=False, unmeasured_reason=reason, **fields)
 
 
 def measure_heading_bold(
     image_bytes: bytes,
-    bbox: tuple[int, int, int, int] | None,
+    heading_bbox: Bbox | None,
+    body_bboxes: Sequence[Bbox] = (),
 ) -> HeadingMeasurement:
-    """Run the SWT-style measurement on the heading region of encoded bytes.
+    """The measurement over encoded image bytes.
 
-    `bbox` is `(x0, y0, x1, y1)` in pixel coordinates produced by the layout
-    call. It is the heading's own region, and there is no substitute for it:
-    with no usable bbox the measurement is not taken, and the result reports
-    `confident=False` so the caller knows the boldness was never measured.
-
-    **The bbox and the image must be in the same pixel space.** Nothing here
-    rescales: a bbox measured on a downscaled copy, applied to the original,
-    crops the wrong part of the label and reports a real stroke width about the
-    wrong pixels. A caller that already holds the image the bbox came from
-    should pass it to `measure_heading_bold_image` instead of re-encoding it.
+    The boxes and the image must be in the same pixel space; nothing here
+    rescales. A caller that already holds the image the boxes came from should
+    pass it to `measure_heading_bold_image` instead of re-encoding it.
     """
     try:
         full = Image.open(BytesIO(image_bytes))
     except Exception:
-        return HeadingMeasurement(False, 0.0, 0.0, 0.0, confident=False)
-
-    return measure_heading_bold_image(full, bbox)
+        return unmeasured("image_unreadable")
+    return measure_heading_bold_image(full, heading_bbox, body_bboxes)
 
 
 def measure_heading_bold_image(
     image: Image.Image,
-    bbox: tuple[int, int, int, int] | None,
+    heading_bbox: Bbox | None,
+    body_bboxes: Sequence[Bbox] = (),
 ) -> HeadingMeasurement:
-    """The same measurement over an image already in memory.
+    """The heading's weight relative to the body lines, over an image in memory.
 
-    The reader computes its boxes on a downscaled copy of the label, so this is
-    the entry point that keeps the measurement in the pixel space the bbox was
-    measured in. Encoding that copy back to bytes only to decode it again would
-    cost a PNG round trip per read and buy nothing.
+    `heading_bbox` is the heading's own characters; `body_bboxes` are the
+    statement's lines below it. With no body there is no reference, and the
+    weight is not measured.
     """
     try:
         full = image.convert("L")
     except Exception:
-        return HeadingMeasurement(False, 0.0, 0.0, 0.0, confident=False)
+        return unmeasured("image_unreadable")
 
-    crop = _resolve_crop(full, bbox)
-    if crop is None:
-        return HeadingMeasurement(False, 0.0, 0.0, 0.0, confident=False)
-
-    return _swt_on_crop(crop)
-
-
-def _resolve_crop(
-    full: Image.Image,
-    bbox: tuple[int, int, int, int] | None,
-) -> Image.Image | None:
-    """The heading's own crop, or None when there is no usable region.
-
-    There is deliberately no fallback region. An earlier version measured the
-    lower half of the whole image whenever the bbox was missing or degenerate,
-    and reported `confident=True` on the result. That crop is most of the
-    label: body copy, the mandated statement itself, and whatever else is
-    printed down there. Its stroke-width-to-height ratio is a real number
-    about the wrong pixels, and a caller told the measurement was confident
-    has no way to tell the difference. Since the heading rule now sends an
-    unmeasured boldness to a reviewer rather than rejecting the label, the
-    honest answer costs nothing and the guess costs a wrong verdict.
-    """
-    if bbox is None:
-        _logger.info(
-            "heading_measurement_skipped",
-            extra={"reason": "missing_layout_bbox", "image_height": full.height},
+    heading_crop = _crop(full, heading_bbox)
+    if heading_crop is None:
+        return unmeasured("no_heading_region")
+    heading = _letters(heading_crop)
+    if len(heading) < _MIN_LETTERS:
+        return unmeasured("too_few_heading_letters")
+    heading_width = statistics.median(w for w, _h in heading)
+    letter_height = statistics.median(h for _w, h in heading)
+    if letter_height < LETTER_HEIGHT_MIN_PX:
+        return unmeasured(
+            "letters_too_small", heading_stroke_width=heading_width, letter_height=letter_height
         )
-        return None
-    x0, y0, x1, y1 = bbox
-    if x1 <= x0 or y1 <= y0:
-        _logger.info(
-            "heading_measurement_skipped",
-            extra={"reason": "degenerate_layout_bbox", "bbox": bbox},
-        )
-        return None
-    try:
-        crop = full.crop((x0, y0, x1, y1))
-    except Exception:
-        return None
-    if crop.width < 8 or crop.height < 8:
-        _logger.debug(
-            "heading_measurement_skipped",
-            extra={
-                "reason": "crop_too_small",
-                "crop_width": crop.width,
-                "crop_height": crop.height,
-            },
-        )
-        return None
-    return crop
 
-
-def _swt_on_crop(crop: Image.Image) -> HeadingMeasurement:
-    gray = np.asarray(crop)
-    _, binary = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
-    # The threshold takes the dark side as ink. A label printing its warning
-    # light on dark puts the ground on that side. The ground is what the
-    # crop's edges run through, so the side holding most of the edge pixels is
-    # the ground whichever way round the label is printed. Counting the whole
-    # crop instead fails on heavy capitals cropped tight, where the letters do
-    # cover more than half the box.
-    edges = np.concatenate([binary[0], binary[-1], binary[:, 0], binary[:, -1]])
-    if np.count_nonzero(edges) * 2 > edges.size:
-        binary = cv2.bitwise_not(binary)
-    n_labels, _, stats, _ = cv2.connectedComponentsWithStats(binary, connectivity=8)
-    dist = cv2.distanceTransform(binary, cv2.DIST_L2, 5)
-
-    widths: list[float] = []
-    heights: list[float] = []
-    for i in range(1, n_labels):
-        x, y, w, h, _area = stats[i]
-        comp_dist = dist[y : y + h, x : x + w]
-        comp_pixels = comp_dist[comp_dist > 0]
-        if comp_pixels.size == 0:
+    body: list[tuple[float, float]] = []
+    sharpness: list[float] = []
+    lines = 0
+    for bbox in body_bboxes:
+        crop = _crop(full, bbox)
+        if crop is None:
             continue
-        widths.append(float(comp_pixels.mean()) * 2.0)
-        heights.append(float(h))
-
-    # Component-count floor: blank crops produce zero. Dilated bold text
-    # merges into 1-2 blobs, so the floor is 1 (the plan's ≥4 breaks
-    # bold+dilation cases). Noise rejection happens via the height floor below.
-    if not widths:
-        _logger.debug(
-            "heading_measurement_unconfident",
-            extra={"reason": "no_components", "crop_width": crop.width, "crop_height": crop.height},
+        letters = _letters(crop)
+        if len(letters) < _MIN_LETTERS:
+            continue
+        lines += 1
+        body.extend(letters)
+        line_sharpness = _sharpness(crop)
+        if line_sharpness is not None:
+            sharpness.append(line_sharpness)
+    if lines < _MIN_BODY_LINES or not sharpness:
+        return unmeasured(
+            "too_few_body_lines", heading_stroke_width=heading_width, letter_height=letter_height
         )
-        return HeadingMeasurement(False, 0.0, 0.0, 0.0, confident=False)
 
-    mean_w = float(np.mean(widths))
-    mean_h = float(np.mean(heights))
-
-    # Height floor: a single dust speck (3-4px tall) can pass the component-
-    # count floor but produces a meaningless ratio. Real heading text — even
-    # at the lowest fixture resolution we ship — has mean character height
-    # ≥ 4px. Below that, defer to the LLM rather than emit a confident
-    # measurement on noise.
-    if mean_h < 4:
-        _logger.debug(
-            "heading_measurement_unconfident",
-            extra={
-                "reason": "mean_height_below_floor",
-                "mean_h": round(mean_h, 2),
-                "n_components": len(widths),
-            },
-        )
-        return HeadingMeasurement(False, 0.0, 0.0, 0.0, confident=False)
-
-    ratio = mean_w / mean_h if mean_h > 0 else 0.0
+    body_width = statistics.median(w for w, _h in body)
+    relative = heading_width / body_width
+    blur = statistics.median(sharpness)
+    measured = {
+        "relative_weight": relative,
+        "heading_stroke_width": heading_width,
+        "body_stroke_width": body_width,
+        "letter_height": letter_height,
+        "sharpness": blur,
+    }
+    if blur > SHARPNESS_MAX:
+        return unmeasured("too_blurred", **measured)
     return HeadingMeasurement(
-        is_bold=ratio > WIDTH_HEIGHT_RATIO_BOLD_MIN,
-        mean_stroke_width=mean_w,
-        mean_character_height=mean_h,
-        width_height_ratio=ratio,
+        is_bold=relative >= RELATIVE_WEIGHT_BOLD_MIN,
+        relative_weight=relative,
+        heading_stroke_width=heading_width,
+        body_stroke_width=body_width,
+        letter_height=letter_height,
+        sharpness=blur,
         confident=True,
     )
+
+
+def _crop(full: Image.Image, bbox: Bbox | None) -> np.ndarray | None:
+    """A box's pixels, or None where there is no usable region.
+
+    There is deliberately no fallback region: a measurement of the wrong
+    pixels is a real number a caller cannot tell from the right one.
+    """
+    if bbox is None:
+        return None
+    x0, y0, x1, y1 = bbox
+    if x1 - x0 < 8 or y1 - y0 < 8:
+        _logger.debug("heading_measurement_crop_skipped", extra={"bbox": bbox})
+        return None
+    return np.asarray(full.crop((x0, y0, x1, y1)))
+
+
+def _ink(gray: np.ndarray) -> tuple[np.ndarray, bool]:
+    """The ink mask, and whether the crop was light type on a dark ground.
+
+    The threshold takes the dark side as ink. A label printing its warning
+    light on dark puts the ground on that side. The ground is what the crop's
+    edges run through, so the side holding most of the edge pixels is the
+    ground whichever way round the label is printed. Counting the whole crop
+    instead fails on heavy capitals cropped tight, where the letters do cover
+    more than half the box.
+    """
+    _, binary = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
+    edges = np.concatenate([binary[0], binary[-1], binary[:, 0], binary[:, -1]])
+    inverted = np.count_nonzero(edges) * 2 > edges.size
+    return (cv2.bitwise_not(binary) if inverted else binary), bool(inverted)
+
+
+def _letters(gray: np.ndarray) -> list[tuple[float, float]]:
+    """Each letter's stroke width and height, in pixels."""
+    binary, _inverted = _ink(gray)
+    count, _, stats, _ = cv2.connectedComponentsWithStats(binary, connectivity=8)
+    distance = cv2.distanceTransform(binary, cv2.DIST_L2, 5)
+    letters = []
+    for i in range(1, count):
+        x, y, w, h, _area = stats[i]
+        if h < _MIN_COMPONENT_HEIGHT_PX:
+            continue
+        inside = distance[y : y + h, x : x + w]
+        inside = inside[inside > 0]
+        if inside.size:
+            letters.append((float(inside.mean()) * 2.0, float(h)))
+    return letters
+
+
+def _sharpness(gray: np.ndarray) -> float | None:
+    """Mid-grey pixels per ink pixel, after stretching the crop's own contrast.
+
+    A sharp print is ink and ground with little between; blur spreads each
+    edge into grey. Stretching first makes a faded or low-contrast print read
+    by its edges rather than by its ink colour. None where the crop is flat.
+    """
+    low, high = np.percentile(gray, 2), np.percentile(gray, 98)
+    if high - low < 1:
+        return None
+    stretched = np.clip((gray.astype(float) - low) * 255.0 / (high - low), 0, 255)
+    _binary, inverted = _ink(gray)
+    if inverted:
+        stretched = 255.0 - stretched
+    ink = np.count_nonzero(stretched <= 128)
+    if not ink:
+        return None
+    return float(np.count_nonzero((stretched > 64) & (stretched < 192)) / ink)

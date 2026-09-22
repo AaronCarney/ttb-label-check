@@ -1,6 +1,6 @@
 {
  "image": "26239001000331/front.jpg",
- "schema_version": 1,
+ "schema_version": 2,
  "frame_size": [
   852,
   1002
@@ -331,10 +331,13 @@
   }
  ],
  "heading_measurement": {
-  "is_bold": false,
-  "mean_stroke_width": 2.9606,
-  "mean_character_height": 20.4865,
-  "width_height_ratio": 0.1445,
-  "confident": true
+  "is_bold": true,
+  "relative_weight": 1.2894,
+  "heading_stroke_width": 3.326,
+  "body_stroke_width": 2.5795,
+  "letter_height": 23.0,
+  "sharpness": 0.4863,
+  "confident": true,
+  "unmeasured_reason": null
  }
 }

@@ -510,12 +510,13 @@ def test_every_heading_box_lies_inside_its_own_frame() -> None:
         if measurement is not None and measurement.confident:
             # A crop taken from a differently-scaled image would measure
             # characters that have nothing to do with this box's height.
-            assert 0 < measurement.mean_character_height <= heading.height + 1, (
+            assert 0 < measurement.letter_height <= heading.height + 1, (
                 data["image"],
-                measurement.mean_character_height,
+                measurement.letter_height,
                 heading.height,
             )
-            assert 0 < measurement.mean_stroke_width <= measurement.mean_character_height
+            assert 0 < measurement.heading_stroke_width <= measurement.letter_height
+            assert 0 < measurement.body_stroke_width <= measurement.letter_height
 
 
 def test_a_rotated_reading_keeps_the_frame_it_was_read_from() -> None:

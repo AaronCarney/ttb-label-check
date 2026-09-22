@@ -5,7 +5,7 @@ dict carries:
   - per-field self-reported `confidence` (used by the engine to set
     Evidence.confidence; not user-facing).
   - on `gov_warning` only: heading_bold_llm, heading_bold_measured,
-    heading_bold_measured_confident, heading_bold_width_height_ratio
+    heading_bold_measured_confident, heading_bold_relative_weight
     — internal records of the LLM-vs-measurement comparison.
 
 The wire `extracted_value` must omit those keys.
@@ -106,7 +106,7 @@ def test_extracted_value_strips_heading_audit_keys():
                     "heading_bold_llm": True,
                     "heading_bold_measured": True,
                     "heading_bold_measured_confident": True,
-                    "heading_bold_width_height_ratio": 0.42,
+                    "heading_bold_relative_weight": 1.31,
                 },
             )
         ],
@@ -118,7 +118,7 @@ def test_extracted_value_strips_heading_audit_keys():
         "heading_bold_llm",
         "heading_bold_measured",
         "heading_bold_measured_confident",
-        "heading_bold_width_height_ratio",
+        "heading_bold_relative_weight",
     )
     for key in leaked:
         assert key not in target.extracted_value, f"leaked audit key: {key}"

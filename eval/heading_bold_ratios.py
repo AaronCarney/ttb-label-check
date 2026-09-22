@@ -1,211 +1,349 @@
-"""Measure what `WIDTH_HEIGHT_RATIO_BOLD_MIN` does to the label corpus.
+"""Measure the warning heading's weight against its body, on real and rendered labels.
 
-What it answers: over the labels TTB approved, how bold does the reader measure
-the GOVERNMENT WARNING heading, and how many approved labels does the current
-cut call *not bold*?
+What it answers: does `RELATIVE_WEIGHT_BOLD_MIN` (`app/vision/heading_measure.py`)
+separate a bold heading from a regular one, on labels TTB approved and on
+warnings rendered with a known weight, and does a worse photograph ever move a
+heading to the wrong side of it?
 
-    OCR_NUM_THREADS=6 OPENBLAS_NUM_THREADS=6 \\
-      nice -n 19 taskset -c 0-5 uv run python -m eval.heading_bold_ratios
+    nice -n 19 taskset -c 0-3 uv run python -m eval.heading_bold_ratios
+    nice -n 19 taskset -c 0-3 uv run python -m eval.heading_bold_ratios --synthetic
 
-`WIDTH_HEIGHT_RATIO_BOLD_MIN` (`app/vision/heading_measure.py`) was, when this
-was written, the only corpus-fitted number in the product that could reject a
-label outright: a heading measured below it was reported as not bold, and
-`common.warning.heading_caps_bold` is a `reject`-severity rule. Its comment said
-the value was set on PIL's default bitmap font -- bold blobs at ~0.28, regular
-text at ~0.22 -- and that "empirical re-tune against a labeled corpus is still
-to come". This is that re-tune's measurement, and what it found is why a
-measured weight no longer rejects anything (`docs/decisions.md#0037`). The
-script is kept so the measurement can be repeated, against a changed corpus or
-a changed reader.
+No OCR runs. The boxes come from frozen readings (`tests/recordings/reader/`,
+and `eval/data/registry-readings/` where it has been fetched), and each
+measurement is taken again from the image through the reader's own
+`remeasure_heading`, so the crop is the frame production measures.
 
-**The ground truth is the approval, not a transcription.** Every label in
-`tests/fixtures/labels/manifest.json` carries `registry.status: APPROVED`, and
-§16.22(a)(2) requires the heading to appear in bold type. So a real approved
-label whose heading the reader measures *confidently* below the cut is a label
-this product would reject and TTB did not. That is a one-sided test and it is
-the one that matters: it cannot prove the cut is not too low, but it is the only
-evidence that says whether it is too high.
+**Real labels.** Every label here is TTB-approved, and §16.22(a)(2) requires
+its heading in bold, so a real label is never evidence of a regular heading.
+It is evidence of how often the measurement can say "bold" at all, and of
+what a worse photograph does: each warning face is measured again after a
+Gaussian blur of 1, 2 and 3 pixels and after JPEG compression at quality 20,
+from the same boxes.
 
-The eight `kind: variant` labels are reported apart from the thirty real ones.
-Four of them (glare, skew, low light, blur) degrade the image without touching
-the printing, so their heading is as bold as the label they derive from: they
-are the test of whether a degraded image produces a *confident* wrong answer
-rather than the `confident=False` that sends the label to a reviewer. One
-(`var-heading-title-case`) repaints the heading, so what it measures is not the
-original label's printing and is excluded from the bold population.
-
-Only the warning-carrying face of each label is read -- the heading is on one
-face, and the other is a front the measurement never sees.
-
-The run is held to the CPU budget in CLAUDE.local.md -- six threads, and a
-two-second pause between images -- because this machine has a thermal fault and
-a corpus read is the heaviest thing here. The pause is applied here rather than
-left to the caller so that running the documented command is enough.
+**Rendered warnings** (`--synthetic`) are the only place the weight is known
+both ways. The statement is set in the DejaVu faces opencv-python ships, with
+the heading bold over a regular body, regular over regular, and all of it
+bold, across type sizes, blur, light-on-dark, lower case, JPEG quality 20 and
+half resolution. The cut and the letter-height floor are set on these.
 """
 
 from __future__ import annotations
 
 import argparse
-import asyncio
 import json
 import statistics
-import time
-from collections import deque
+from collections import Counter
+from collections.abc import Iterator
+from dataclasses import dataclass
+from io import BytesIO
 from pathlib import Path
-from typing import Any
 
-from app.config import Settings
-from app.vision.heading_measure import WIDTH_HEIGHT_RATIO_BOLD_MIN
-from app.vision.local import LocalVisionExtractor
+import cv2
+from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
-CORPUS = Path("tests/fixtures/labels")
-MANIFEST = CORPUS / "manifest.json"
+from app.vision import heading_measure
+from app.vision.heading_measure import (
+    LETTER_HEIGHT_MIN_PX,
+    RELATIVE_WEIGHT_BOLD_MIN,
+    SHARPNESS_MAX,
+    HeadingMeasurement,
+    measure_heading_bold_image,
+)
+from app.vision.local import (
+    _Box,
+    _find_heading,
+    _frame,
+    _measure_heading,
+    _warning_block,
+    remeasure_heading,
+    thaw_reading,
+)
+from eval.corpus_check import LABELS_ROOT, RECORDINGS_ROOT, REGISTRY_READINGS
 
-# The pause between images, in seconds. The owner set this budget:
-# "it is safe to run the OCR on six threads and with a two second
-# pause between each image."
-PAUSE_SECONDS = 2.0
+FONTS = Path(cv2.__file__).parent / "qt" / "fonts"
+FACES = {
+    "dejavu": ("DejaVuSans.ttf", "DejaVuSans-Bold.ttf"),
+    "dejavu-condensed": ("DejaVuSansCondensed.ttf", "DejaVuSansCondensed-Bold.ttf"),
+}
+SIZES = (10, 12, 14, 16, 20, 26, 34)
+BLURS = (0.0, 1.0, 2.0, 3.0)
+DEGRADES = ("none", "jpeg20", "half", "half+jpeg20")
+KINDS = {"bold-heading": (True, False), "regular-heading": (False, False), "all-bold": (True, True)}
 
-# The heading of this variant is repainted, so its stroke width is the
-# repainting's and not the approved label's. It is measured and printed like
-# the rest, and left out of the population the cut is judged against.
-_REPAINTED_HEADING = {"var-heading-title-case"}
-
-
-def _warning_faces() -> list[dict[str, Any]]:
-    """One row per label: which face carries the warning, and what the manifest
-    says about the label it came from."""
-    manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
-    rows: list[dict[str, Any]] = []
-    for label in manifest["labels"]:
-        which = label.get("warning_image")
-        images = label.get("images", {})
-        if not which or which not in images:
-            continue
-        rows.append(
-            {
-                "id": label["id"],
-                "kind": label.get("kind"),
-                "face": which,
-                "image": images[which],
-                "status": (label.get("registry") or {}).get("status"),
-            }
-        )
-    return rows
+HEADING = "GOVERNMENT WARNING:"
+FIRST = " (1) ACCORDING TO THE SURGEON GENERAL,"
+BODY = (
+    "WOMEN SHOULD NOT DRINK ALCOHOLIC BEVERAGES DURING",
+    "PREGNANCY BECAUSE OF THE RISK OF BIRTH DEFECTS.",
+    "(2) CONSUMPTION OF ALCOHOLIC BEVERAGES IMPAIRS YOUR",
+    "ABILITY TO DRIVE A CAR OR OPERATE MACHINERY, AND",
+)
 
 
-def _measure(extractor: LocalVisionExtractor, path: Path) -> dict[str, Any]:
-    """Run the reader's own `look` and keep the heading measurement it took.
+@dataclass(frozen=True)
+class RenderedWarning:
+    """One rendered warning: how it was set, and what it went through."""
 
-    `look` is used rather than a re-implementation because the measurement is
-    taken on the frame the boxes were computed from -- downscaled to
-    `MAX_EDGE_PX`, and rotated where the warning is printed up an edge. A
-    sweep that opened the image itself would measure a different pixel space
-    from the one production measures, and report a real number about it.
+    face: str = "dejavu"
+    size: int = 20
+    kind: str = "bold-heading"
+    lower: bool = False
+    blur: float = 0.0
+    invert: bool = False
+    degrade: str = "none"
+
+
+def render(w: RenderedWarning) -> tuple[Image.Image, list[_Box]]:
+    """The warning as a frame, and the boxes an OCR engine would return for it.
+
+    Each line is one box drawn tight around its ink, and the heading shares
+    its box with the start of the statement, as the engine usually returns it.
     """
-    reading = extractor.look(path.read_bytes())
-    measurement = reading.heading_measurement
-    if measurement is None:
-        return {"heading_found": False, "confident": False, "ratio": None, "is_bold": None}
-    return {
-        "heading_found": True,
-        "confident": measurement.confident,
-        "ratio": round(measurement.width_height_ratio, 4) if measurement.confident else None,
-        "is_bold": measurement.is_bold if measurement.confident else None,
-        "stroke_width": round(measurement.mean_stroke_width, 3),
-        "char_height": round(measurement.mean_character_height, 3),
-    }
+    regular, bold = (ImageFont.truetype(str(FONTS / name), w.size) for name in FACES[w.face])
+    heading_bold, body_bold = KINDS[w.kind]
+    heading_font = bold if heading_bold else regular
+    body_font = bold if body_bold else regular
+    first = FIRST.lower() if w.lower else FIRST
+    body = [line.capitalize() for line in BODY] if w.lower else list(BODY)
 
-
-def _cut_table(ratios: list[float]) -> list[tuple[float, int]]:
-    """How many of these confident measurements each candidate cut calls bold."""
-    cuts = [0.10, 0.15, 0.20, 0.22, 0.25, 0.28, 0.30, 0.35, 0.40]
-    return [(cut, sum(1 for r in ratios if r > cut)) for cut in cuts]
-
-
-async def _run(json_out: Path | None) -> int:
-    faces = _warning_faces()
-    if not faces:
-        print(f"no warning faces in {MANIFEST}")
-        return 1
-
-    extractor = LocalVisionExtractor(settings=Settings(), ring_buffer=deque(maxlen=8))
-    await extractor.ensure_loaded()
-
-    rows: list[dict[str, Any]] = []
-    started = time.monotonic()
-    for index, face in enumerate(faces):
-        if index:
-            time.sleep(PAUSE_SECONDS)
-        path = CORPUS / face["image"]
-        row = {**face, **_measure(extractor, path)}
-        rows.append(row)
-        ratio = "-" if row["ratio"] is None else f"{row['ratio']:.4f}"
-        verdict = "not measured" if not row["confident"] else ("BOLD" if row["is_bold"] else "not")
-        print(
-            f"{row['id']:<28} {row['kind']:<8} {row['face']:<6} ratio={ratio:>7}  {verdict}",
-            flush=True,
-        )
-
-    elapsed = time.monotonic() - started
-
-    real = [r for r in rows if r["kind"] == "real"]
-    variants = [r for r in rows if r["kind"] != "real"]
-    judged = [r for r in real if r["confident"]]
-    ratios = sorted(r["ratio"] for r in judged)
-    rejected = [r for r in judged if not r["is_bold"]]
-    unconfident = [r for r in real if not r["confident"]]
-
-    print(f"\n{len(rows)} warning faces read in {elapsed:.1f}s")
-    print(f"current cut: WIDTH_HEIGHT_RATIO_BOLD_MIN = {WIDTH_HEIGHT_RATIO_BOLD_MIN}")
-    print(
-        f"\n{len(real)} real approved labels: {len(judged)} measured confidently, "
-        f"{len(unconfident)} not measured (those go to a reviewer, not a rejection)"
+    step = int(w.size * 1.35)
+    image = Image.new("L", (w.size * 40, step * (len(body) + 2)), 255)
+    draw = ImageDraw.Draw(image)
+    x, y = w.size, w.size // 2
+    draw.text((x, y), HEADING, font=heading_font, fill=0)
+    after = x + draw.textlength(HEADING, font=heading_font)
+    draw.text((after, y), first, font=body_font, fill=0)
+    h0, h1 = (
+        draw.textbbox((x, y), HEADING, font=heading_font),
+        draw.textbbox((after, y), first, font=body_font),
     )
-    if ratios:
-        print(
-            f"  confident ratios: min {ratios[0]:.4f}  "
-            f"median {statistics.median(ratios):.4f}  max {ratios[-1]:.4f}"
-        )
-        print(f"  full sorted list: {', '.join(f'{r:.3f}' for r in ratios)}")
-        print(
-            f"\n  *** at {WIDTH_HEIGHT_RATIO_BOLD_MIN}, {len(rejected)} of {len(judged)} "
-            f"confidently-measured approved labels are called NOT BOLD "
-            f"and would be rejected ***"
-        )
-        for row in sorted(rejected, key=lambda r: r["ratio"]):
-            print(f"      {row['id']:<28} ratio={row['ratio']:.4f}")
-        print("\n  how many of the confident approved labels each cut calls bold:")
-        for cut, kept in _cut_table(ratios):
-            mark = "  <- current" if cut == WIDTH_HEIGHT_RATIO_BOLD_MIN else ""
-            print(f"      cut {cut:<5} -> {kept:>2}/{len(judged)} bold{mark}")
+    boxes = [(min(h0[0], h1[0]), min(h0[1], h1[1]), max(h0[2], h1[2]), max(h0[3], h1[3]))]
+    texts = [HEADING + first]
+    for i, line in enumerate(body, start=1):
+        draw.text((x, y + step * i), line, font=body_font, fill=0)
+        boxes.append(draw.textbbox((x, y + step * i), line, font=body_font))
+        texts.append(line)
 
-    if variants:
-        print(f"\n{len(variants)} variants, reported apart:")
-        for row in variants:
-            note = (
-                "  (heading repainted, excluded above)" if row["id"] in _REPAINTED_HEADING else ""
-            )
-            ratio = "-" if row["ratio"] is None else f"{row['ratio']:.4f}"
-            verdict = (
-                "not measured"
-                if not row["confident"]
-                else ("BOLD" if row["is_bold"] else "NOT BOLD")
-            )
-            print(f"    {row['id']:<28} ratio={ratio:>7}  {verdict}{note}")
+    if w.blur:
+        image = image.filter(ImageFilter.GaussianBlur(w.blur))
+    if w.invert:
+        image = Image.eval(image, lambda v: 255 - v)
+    scale = 1.0
+    if "half" in w.degrade:
+        scale = 0.5
+        image = image.resize((image.width // 2, image.height // 2), Image.Resampling.BILINEAR)
+    if "jpeg20" in w.degrade:
+        buffer = BytesIO()
+        image.save(buffer, format="JPEG", quality=20)
+        image = Image.open(BytesIO(buffer.getvalue()))
+    frame = image.convert("RGB")
+    return frame, [
+        _Box(b[0] * scale, b[1] * scale, b[2] * scale, b[3] * scale, text=t, score=0.95)
+        for b, t in zip(boxes, texts, strict=True)
+    ]
 
-    if json_out is not None:
-        json_out.parent.mkdir(parents=True, exist_ok=True)
-        json_out.write_text(json.dumps(rows, indent=2) + "\n", encoding="utf-8")
-        print(f"\nper-label rows written to {json_out}")
-    return 0
+
+def measure(w: RenderedWarning) -> HeadingMeasurement:
+    """The production measurement of one rendered warning."""
+    frame, boxes = render(w)
+    measurement = _measure_heading(frame, boxes)
+    if measurement is None:
+        raise AssertionError(f"the reader found no heading in {w}")
+    return measurement
+
+
+def warnings(
+    faces: tuple[str, ...] = tuple(FACES),
+    sizes: tuple[int, ...] = SIZES,
+    kinds: tuple[str, ...] = tuple(KINDS),
+    blurs: tuple[float, ...] = BLURS,
+    degrades: tuple[str, ...] = DEGRADES,
+) -> Iterator[RenderedWarning]:
+    for face in faces:
+        for size in sizes:
+            for kind in kinds:
+                for lower in (False, True):
+                    for blur in blurs:
+                        for invert in (False, True):
+                            for degrade in degrades:
+                                yield RenderedWarning(
+                                    face, size, kind, lower, blur, invert, degrade
+                                )
+
+
+def _span(values: list[float]) -> str:
+    return f"{min(values):.3f} to {max(values):.3f}" if values else "none"
+
+
+def report_synthetic() -> None:
+    rows = [(w, measure(w)) for w in warnings()]
+    print(f"{len(rows)} rendered warnings, cut {RELATIVE_WEIGHT_BOLD_MIN}\n")
+    for kind in KINDS:
+        of_kind = [(w, m) for w, m in rows if w.kind == kind]
+        measured = [(w, m) for w, m in of_kind if m.confident]
+        reasons = Counter(m.unmeasured_reason for _w, m in of_kind if not m.confident)
+        bold = sum(m.is_bold for _w, m in measured)
+        weights = _span([m.relative_weight for _w, m in measured])
+        print(
+            f"{kind:<16} {len(of_kind)} rendered, {len(measured)} measured, "
+            f"{bold} called bold; relative weight {weights}"
+        )
+        print(f"{'':<16} not measured: {dict(reasons)}")
+        for degrade in DEGRADES:
+            sub = [m.relative_weight for w, m in measured if w.degrade == degrade]
+            print(f"{'':<16}   {degrade:<12} {_span(sub)}")
+    # The floors' own evidence: the same warnings with the letter-height floor
+    # switched off, so each floor's effect shows on its own.
+    heading_measure.LETTER_HEIGHT_MIN_PX = 0.0
+    try:
+        open_rows = [(w, measure(w)) for w in warnings(kinds=("bold-heading", "regular-heading"))]
+    finally:
+        heading_measure.LETTER_HEIGHT_MIN_PX = LETTER_HEIGHT_MIN_PX
+    print("\nwith no letter-height floor, headings that pass the sharpness floor:")
+    for low, high in (
+        (0.0, 8.0),
+        (8.0, 10.0),
+        (10.0, LETTER_HEIGHT_MIN_PX),
+        (LETTER_HEIGHT_MIN_PX, 1e9),
+    ):
+        spans = {
+            kind: _span(
+                [
+                    m.relative_weight
+                    for w, m in open_rows
+                    if w.kind == kind and m.confident and low <= m.letter_height < high
+                ]
+            )
+            for kind in ("bold-heading", "regular-heading")
+        }
+        print(
+            f"  letters {low:>4.0f} to {min(high, 999):>3.0f} px: bold {spans['bold-heading']}; "
+            f"regular {spans['regular-heading']}"
+        )
+    print("\nwith no sharpness floor, letters at or above the height floor:")
+    heading_measure.SHARPNESS_MAX = float("inf")
+    try:
+        for kind in ("bold-heading", "regular-heading"):
+            blurred = [
+                (w.blur, measure(w))
+                for w in warnings(kinds=(kind,), blurs=(2.0, 3.0), degrades=("none",))
+            ]
+            for blur in (2.0, 3.0):
+                ratios = [m.relative_weight for b, m in blurred if b == blur and m.confident]
+                print(f"  {kind:<16} blur {blur}: {_span(ratios)}")
+    finally:
+        heading_measure.SHARPNESS_MAX = SHARPNESS_MAX
+
+
+def _frozen() -> Iterator[tuple[str, Path, dict]]:
+    """Every frozen warning face: which set it is from, its file, its data."""
+    for group, root in (("corpus", RECORDINGS_ROOT), ("held-out", REGISTRY_READINGS)):
+        for path in sorted(root.rglob("*.json")):
+            data = json.loads(path.read_text())
+            if data.get("heading_measurement") is not None:
+                yield group, path, data
+
+
+def _image(data: dict) -> Path:
+    named = Path(data["image"])
+    return named if named.exists() else LABELS_ROOT / named
+
+
+def _degraded(image_bytes: bytes, how: str) -> bytes:
+    image = Image.open(BytesIO(image_bytes)).convert("RGB")
+    if how.startswith("blur"):
+        image = image.filter(ImageFilter.GaussianBlur(float(how[4:])))
+    buffer = BytesIO()
+    if how == "jpeg20":
+        image.save(buffer, format="JPEG", quality=20)
+    else:
+        image.save(buffer, format="PNG")
+    return buffer.getvalue()
+
+
+def report_real() -> None:
+    faces = list(_frozen())
+    for group in ("corpus", "held-out"):
+        rows = [(p, d) for g, p, d in faces if g == group]
+        if not rows:
+            print(f"{group}: no frozen readings")
+            continue
+        found = [d["heading_measurement"] for _p, d in rows]
+        measured = [m for m in found if m["confident"]]
+        bold = [m for m in measured if m["is_bold"]]
+        reasons = Counter(m["unmeasured_reason"] for m in found if not m["confident"])
+        print(
+            f"{group}: {len(found)} warning faces with a heading; {len(measured)} measured, "
+            f"{len(bold)} called bold"
+        )
+        print(f"  not measured: {dict(reasons)}")
+        if measured:
+            weights = sorted(m["relative_weight"] for m in measured)
+            below = [f"{w:.3f}" for w in weights if w < RELATIVE_WEIGHT_BOLD_MIN]
+            print(
+                f"  relative weight {_span(weights)}, median {statistics.median(weights):.3f}; "
+                f"not bold: {', '.join(below)}"
+            )
+
+    # The only regular-against-regular evidence a real photograph gives: each
+    # body line of the warning measured as if it were the heading, against the
+    # statement's other lines.
+    lines: list[float] = []
+    for _group, _path, data in faces:
+        reading = thaw_reading(data)
+        block = _warning_block(reading.warning_boxes)
+        heading = _find_heading(reading.warning_boxes)
+        if block is None or heading is None:
+            continue
+        body = [b for b in block[3] if all(b is not h for h in heading[1])]
+        if len(body) < 3:
+            continue
+        frame = _frame(_image(data).read_bytes())
+        if reading.rotation:
+            frame = frame.rotate(reading.rotation, expand=True)
+        for line in body:
+            others = [b.as_bbox() for b in body if b is not line]
+            m = measure_heading_bold_image(frame, line.as_bbox(), others)
+            if m.confident:
+                lines.append(m.relative_weight)
+    print(
+        f"\none body line against the others, both sets: {len(lines)} measured, "
+        f"{_span(lines)}, {sum(w >= RELATIVE_WEIGHT_BOLD_MIN for w in lines)} at or above the cut"
+    )
+
+    print("\ncorpus warning faces measured again from worse copies of the same image:")
+    for how in ("blur1", "blur2", "blur3", "jpeg20"):
+        moved: Counter[str] = Counter()
+        for group, path, data in faces:
+            if group != "corpus":
+                continue
+            before = data["heading_measurement"]
+            degraded = _degraded(_image(data).read_bytes(), how)
+            after = remeasure_heading(degraded, thaw_reading(data)).heading_measurement
+            assert after is not None
+            key = (
+                "bold" if before["is_bold"] else "not bold" if before["confident"] else "unmeasured"
+            )
+            new = "bold" if after.is_bold else "not bold" if after.confident else "unmeasured"
+            moved[f"{key} -> {new}"] += 1
+            if key != new:
+                print(
+                    f"    {how}: {path}: {key} ({before['relative_weight']:.3f}) -> {new} "
+                    f"({after.relative_weight:.3f}, {after.unmeasured_reason})"
+                )
+        print(f"  {how:<7} {dict(sorted(moved.items()))}")
+    print(f"\ncut {RELATIVE_WEIGHT_BOLD_MIN}, letters at least {LETTER_HEIGHT_MIN_PX} px")
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--json", type=Path, default=None, help="write per-label rows here")
+    parser.add_argument("--synthetic", action="store_true", help="rendered warnings only")
     args = parser.parse_args()
-    return asyncio.run(_run(args.json))
+    if args.synthetic:
+        report_synthetic()
+    else:
+        report_real()
+    return 0
 
 
 if __name__ == "__main__":

@@ -57,7 +57,11 @@ from app.schemas.extracted import Evidence, EvidenceSource, FieldObservation, Ma
 from app.schemas.label import Face, Label
 from app.vision import quality
 from app.vision.faces import QUALITY_FIELD_ID, is_unreadable, merge_readings
-from app.vision.heading_measure import HeadingMeasurement, measure_heading_bold_image
+from app.vision.heading_measure import (
+    HeadingMeasurement,
+    measure_heading_bold_image,
+    unmeasured,
+)
 
 _logger = logging.getLogger("app.vision.local")
 
@@ -182,7 +186,7 @@ class _Reading:
     frame_size: tuple[int, int]
 
 
-FROZEN_SCHEMA_VERSION = 1
+FROZEN_SCHEMA_VERSION = 2
 
 
 def freeze_reading(reading: _Reading) -> dict:
@@ -208,10 +212,13 @@ def freeze_reading(reading: _Reading) -> dict:
         if measurement is None
         else {
             "is_bold": measurement.is_bold,
-            "mean_stroke_width": round(measurement.mean_stroke_width, 4),
-            "mean_character_height": round(measurement.mean_character_height, 4),
-            "width_height_ratio": round(measurement.width_height_ratio, 4),
+            "relative_weight": round(measurement.relative_weight, 4),
+            "heading_stroke_width": round(measurement.heading_stroke_width, 4),
+            "body_stroke_width": round(measurement.body_stroke_width, 4),
+            "letter_height": round(measurement.letter_height, 4),
+            "sharpness": round(measurement.sharpness, 4),
             "confident": measurement.confident,
+            "unmeasured_reason": measurement.unmeasured_reason,
         },
     }
 
@@ -233,15 +240,7 @@ def thaw_reading(data: dict) -> _Reading:
         boxes=[box(b) for b in data["boxes"]],
         warning_boxes=[box(b) for b in data["warning_boxes"]],
         rotation=int(data["rotation_deg"]),
-        heading_measurement=None
-        if measurement is None
-        else HeadingMeasurement(
-            is_bold=measurement["is_bold"],
-            mean_stroke_width=measurement["mean_stroke_width"],
-            mean_character_height=measurement["mean_character_height"],
-            width_height_ratio=measurement["width_height_ratio"],
-            confident=measurement["confident"],
-        ),
+        heading_measurement=None if measurement is None else HeadingMeasurement(**measurement),
         frame_size=tuple(data["frame_size"]),
     )
 
@@ -1176,13 +1175,57 @@ def _frame(image_bytes: bytes) -> Image.Image:
     return image
 
 
+_HEADING_SPAN_RE = re.compile(r"GOV\w*(?:\W*WARNING)?|WARNING", re.I)
+
+
+def _heading_bbox(heading_boxes: list[_Box]) -> tuple[int, int, int, int] | None:
+    """The part of the heading's boxes that holds the heading's own letters.
+
+    The engine often returns the heading and the start of the statement as one
+    box ("GOVERNMENT WARNING: (1) According to…"), and the statement is set
+    regular, so a crop of the whole box measures some of the body as the
+    heading. Each box is cut to the heading words' share of its characters,
+    and the right edge is pulled in by a twentieth so the cut falls short of
+    the colon rather than past it into the next word.
+    """
+    parts = []
+    for box in heading_boxes:
+        text = _fold(box.text)
+        match = _HEADING_SPAN_RE.search(text)
+        if match is None or not text:
+            continue
+        width = box.x1 - box.x0
+        x0 = box.x0 + width * match.start() / len(text)
+        x1 = box.x0 + width * min(1.0, match.end() / len(text) * 0.95)
+        parts.append((x0, box.y0, x1, box.y1))
+    if not parts:
+        return None
+    return (
+        int(min(p[0] for p in parts)),
+        int(min(p[1] for p in parts)),
+        int(max(p[2] for p in parts)),
+        int(max(p[3] for p in parts)),
+    )
+
+
 def _measure_heading(
     warning_image: Image.Image, warning_boxes: list[_Box]
 ) -> HeadingMeasurement | None:
-    """The heading's weight, measured on the frame its boxes came from, or None
-    where no heading was found."""
+    """The heading's weight against the statement's body, measured on the frame
+    the boxes came from, or None where no heading was found.
+
+    The body is the warning block's other lines: §16.22(a)(2) forbids bold in
+    them, so on a compliant label they are the same statement's regular type.
+    """
     found = _find_heading(warning_boxes)
-    return measure_heading_bold_image(warning_image, found[0].as_bbox()) if found else None
+    if found is None:
+        return None
+    block = _warning_block(warning_boxes)
+    heading_boxes = found[1]
+    body = [] if block is None else [b for b in block[3] if all(b is not h for h in heading_boxes)]
+    return measure_heading_bold_image(
+        warning_image, _heading_bbox(heading_boxes), [b.as_bbox() for b in body]
+    )
 
 
 def remeasure_heading(image_bytes: bytes, reading: _Reading) -> _Reading:
@@ -1769,9 +1812,7 @@ def _parse(
     else:
         text, heading_text, heading_box, block_boxes = block
         letters = [c for c in heading_text if c.isalpha()]
-        measurement = heading_measurement or HeadingMeasurement(
-            False, 0.0, 0.0, 0.0, confident=False
-        )
+        measurement = heading_measurement or unmeasured("no_heading_region")
         factor = _ROTATED_FRAME_PENALTY if rotation else 1.0
         payload = {
             "text": text,
@@ -1784,7 +1825,7 @@ def _parse(
             "confidence": _confidence("gov_warning", block_boxes, factor=factor),
             "heading_bold_measured": measurement.is_bold,
             "heading_bold_measured_confident": measurement.confident,
-            "heading_bold_width_height_ratio": measurement.width_height_ratio,
+            "heading_bold_relative_weight": measurement.relative_weight,
         }
         # A boldness that could not be measured is absent, not false. Writing
         # `False` here stated a measurement nobody took: a heading the reader

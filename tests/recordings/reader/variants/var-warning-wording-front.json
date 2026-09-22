@@ -1,6 +1,6 @@
 {
  "image": "variants/var-warning-wording-front.jpg",
- "schema_version": 1,
+ "schema_version": 2,
  "frame_size": [
   1600,
   1014
@@ -391,10 +391,13 @@
   }
  ],
  "heading_measurement": {
-  "is_bold": false,
-  "mean_stroke_width": 3.473,
-  "mean_character_height": 27.1667,
-  "width_height_ratio": 0.1278,
-  "confident": true
+  "is_bold": true,
+  "relative_weight": 1.4676,
+  "heading_stroke_width": 4.1469,
+  "body_stroke_width": 2.8257,
+  "letter_height": 28.0,
+  "sharpness": 0.3031,
+  "confident": true,
+  "unmeasured_reason": null
  }
 }

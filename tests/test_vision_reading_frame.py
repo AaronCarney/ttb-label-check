@@ -15,64 +15,68 @@ from __future__ import annotations
 
 from collections import deque
 from io import BytesIO
+from pathlib import Path
 
-import numpy as np
+import cv2
 from PIL import Image, ImageDraw, ImageFont
 
 from app.config import Settings
 from app.vision.heading_measure import measure_heading_bold
 from app.vision.local import MAX_EDGE_PX, LocalVisionExtractor, _Box
 
+FONTS = Path(cv2.__file__).parent / "qt" / "fonts"
+
 _HEADING = "GOVERNMENT WARNING:"
+_BODY = (
+    "(1) ACCORDING TO THE SURGEON GENERAL, WOMEN SHOULD NOT",
+    "DRINK ALCOHOLIC BEVERAGES DURING PREGNANCY BECAUSE",
+)
+_ORIGINAL = (1800, 2400)
 
 
-def _label_with_heading_low_on_the_image() -> bytes:
-    """A label wider than the reader's cap, its heading printed low down.
+def _label_with_warning_low_on_the_image() -> tuple[bytes, list[tuple[str, tuple]]]:
+    """A label wider than the reader's cap, its warning printed low down, and
+    each line's text with where it sits in the original's pixels.
 
     Low down is what makes the two pixel spaces tell different stories: a box
     at y≈0.75 of a 1600px-tall copy is at y≈0.5 of the 2400px original, where
-    this label prints nothing at all.
+    this label prints nothing at all. The heading is bold over a regular body,
+    because the weight is measured against the body.
     """
-    image = Image.new("RGB", (1800, 2400), color=(255, 255, 255))
+    regular, bold = (
+        ImageFont.truetype(str(FONTS / name), 56)
+        for name in ("DejaVuSans.ttf", "DejaVuSans-Bold.ttf")
+    )
+    image = Image.new("RGB", _ORIGINAL, color=(255, 255, 255))
     draw = ImageDraw.Draw(image)
-    try:
-        font = ImageFont.load_default(90)
-    except TypeError:  # pragma: no cover — older PIL, fixed size only
-        font = ImageFont.load_default()
-    draw.text(
-        (120, 1800), _HEADING, fill=(0, 0, 0), font=font, stroke_width=12
-    )  # bold enough to read as bold
+    lines = [(_HEADING, (60, 1800), bold)] + [
+        (text, (60, 1800 + 80 * i), regular) for i, text in enumerate(_BODY, start=1)
+    ]
+    placed = []
+    for text, at, font in lines:
+        draw.text(at, text, fill=(0, 0, 0), font=font)
+        placed.append((text, draw.textbbox(at, text, font=font)))
     buffer = BytesIO()
     image.save(buffer, format="PNG")
-    return buffer.getvalue()
+    return buffer.getvalue(), placed
 
 
-def _ink_bbox(image: Image.Image) -> tuple[int, int, int, int]:
-    """Where the ink sits in the image handed in, with a little margin."""
-    ink = np.asarray(image.convert("L")) < 128
-    ys, xs = np.nonzero(ink)
-    return (int(xs.min()) - 4, int(ys.min()) - 4, int(xs.max()) + 4, int(ys.max()) + 4)
+def _scaled(bbox: tuple, scale: float) -> tuple[int, int, int, int]:
+    return tuple(int(v * scale) for v in bbox)  # type: ignore[return-value]
 
 
-def _thumbnail(image_bytes: bytes) -> Image.Image:
-    image = Image.open(BytesIO(image_bytes)).convert("RGB")
-    if max(image.size) > MAX_EDGE_PX:
-        image.thumbnail((MAX_EDGE_PX, MAX_EDGE_PX))
-    return image
-
-
-def _reader_returning(box: _Box) -> LocalVisionExtractor:
+def _reader_returning(boxes: list[_Box]) -> LocalVisionExtractor:
     reader = LocalVisionExtractor(settings=Settings(), ring_buffer=deque())
-    reader._boxes = lambda image: [box]  # type: ignore[method-assign]
+    reader._boxes = lambda image: boxes  # type: ignore[method-assign]
     return reader
 
 
 def test_heading_boldness_is_measured_where_the_box_actually_is() -> None:
-    image_bytes = _label_with_heading_low_on_the_image()
-    bbox = _ink_bbox(_thumbnail(image_bytes))
-    box = _Box(x0=bbox[0], y0=bbox[1], x1=bbox[2], y1=bbox[3], text=_HEADING, score=0.95)
+    image_bytes, placed = _label_with_warning_low_on_the_image()
+    scale = MAX_EDGE_PX / max(_ORIGINAL)
+    boxes = [_Box(*_scaled(bbox, scale), text=text, score=0.95) for text, bbox in placed]
 
-    payloads, _meta = _reader_returning(box)._read(image_bytes)
+    payloads, _meta = _reader_returning(boxes)._read(image_bytes)
     warning = payloads["gov_warning"][0]
 
     assert warning["heading_bold_measured_confident"] is True
@@ -82,14 +86,15 @@ def test_heading_boldness_is_measured_where_the_box_actually_is() -> None:
 def test_the_same_box_against_the_original_measures_the_wrong_pixels() -> None:
     """The defect this closes, kept as a test so it cannot come back quietly.
 
-    The box is in the downscaled copy's pixel space. Against the original it
-    lands on blank paper, and the answer is not "we could not measure" — it is
-    a measurement of nothing.
+    The boxes are in the downscaled copy's pixel space. Against the original
+    they land on blank paper, and the answer is not "we could not measure" — it
+    is a measurement of nothing.
     """
-    image_bytes = _label_with_heading_low_on_the_image()
-    bbox = _ink_bbox(_thumbnail(image_bytes))
+    image_bytes, placed = _label_with_warning_low_on_the_image()
+    scale = MAX_EDGE_PX / max(_ORIGINAL)
+    heading, *body = (_scaled(bbox, scale) for _text, bbox in placed)
 
-    against_the_original = measure_heading_bold(image_bytes, bbox)
+    against_the_original = measure_heading_bold(image_bytes, heading, body)
     assert not against_the_original.confident
 
 
