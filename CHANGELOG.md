@@ -17,6 +17,14 @@ date: the release's git tag records when it was cut. Versions follow
   labels' warnings differ from 27 CFR 16.21 by a word. `tests/test_corpus_outcomes.py` pins every
   outcome and lists each of the other 9 with its cause.
 
+- `uv run python -m eval.corpus_check --registry` runs the fetched Public COLA Registry records through
+  the same production path, from each record's front and back images, and `--freeze` first runs the
+  OCR on every image with no frozen reading. On 98 bourbon records nothing was tuned on: 0 match, 63
+  mismatch, 35 needs review; 74.1% of checks settled without a person. Of the 88 mismatched checks, 3
+  are warnings that genuinely differ from 27 CFR 16.21, 8 are warnings printed only on an image the
+  upload does not take, and 77 are the product reading the label wrong, including a new cause: a
+  mash-bill grain percentage read as the alcohol content (`docs/decisions.md#0051`).
+
 - `uv run python -m eval.fetch_registry_corpus` fetches an application's record and every label image
   from the Public COLA Registry, for a list of TTB IDs, into `eval/data/` (not committed). The registry
   now answers plain HTTP with a bot-defence challenge, so it drives a real browser and fetches each

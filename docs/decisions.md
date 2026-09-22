@@ -3244,3 +3244,56 @@ compliant label. *Checking only the proof inside the ABV statement's own box* �
 returns the proof as a separate box, or on the next line, and those would never be checked.
 *Allowing rounding to a whole proof* — it would pass "86" against 42.8% with no one looking, on a
 reading of the regulation it does not state.
+
+<a id="0051"></a>
+## 0051. Registry labels nobody tuned on are checked on the same path, and reported apart
+
+**Evidence:** `eval/corpus_check.py` (`registry_record`, `registry_cases`, `freeze_missing`,
+`--registry`, `--freeze`); `tests/test_registry_cases.py`; `eval/fetch_registry_corpus.py`.
+
+**What was found.** The 30 corpus labels are the labels every reader and rule change has been
+measured on, so their figures cannot say whether a change generalises. 98 bourbon records fetched
+from the Public COLA Registry (53 approved, 42 surrendered, 3 expired) were set aside for that and
+never tuned on. Checked on the production path they give 0 match, 63 mismatch and 35 needs review
+by label; of 1,465 checks that applied, 998 match, 88 mismatch and 379 need review, so 74.1% are
+settled without a person (79.3% on the corpus).
+
+Every one of the 88 mismatches was read against the label images by eye:
+
+| Cause | Checks |
+|---|---|
+| The label's warning differs from 27 CFR 16.21 ("may also cause"; "because the risk", "impair"; "alcohol beverages") | 3 |
+| Brand guessed as the largest type, which was not the brand | 41 |
+| Warning read wrong: lookalike glyphs, words run together, text after the statement swept in | 12 |
+| Warning printed on a front or back the reader was given, rotated, tiny or low in contrast, and not found | 11 |
+| Warning printed only on a strip or second brand image, which the upload does not take | 8 |
+| Heading in capitals and visibly bold, measured as not bold | 3 |
+| A grain percentage in the mash bill ("75% CORN", "WHEAT: 30%") read as the alcohol content | 6 |
+| A barrel count read as the proof; "117" read as "17"; "15 gallons" in a history paragraph read as the net contents | 4 |
+
+So 3 of 88 mismatches are genuine and 77 are the product reading an approved label wrong. The
+mash-bill confusion is a picker fault the corpus never showed: no corpus label prints a grain
+percentage.
+
+**Chosen.**
+- **The same runner, a second case builder.** A registry record becomes the same `LabelCase` a corpus
+  label does, and goes through `Evaluator.evaluate` with only the OCR stood in for by a frozen
+  reading, so the two sets are measured by one piece of code.
+- **The front and the back, and nothing else.** The upload takes a label's front and back
+  (`app/api/ui/_faces.py`), so a case carries the record's first brand image and its back image.
+  Neck, strip and other images are left out, as they would be for an agent using the app. The 8
+  warnings found only on those images are counted as that limit, not as reading faults.
+- **Alcohol content and net contents read off the images.** The current registry form carries
+  neither, so each was transcribed by eye from the label images into `eval/data/registry/declared.json`,
+  with the image it was read from. One record prints no net contents anywhere and is left empty.
+- **Readings frozen outside the repository.** `--freeze` runs the production reader's OCR on every
+  image with no reading, one at a time with a pause, into `eval/data/registry-readings/`. The
+  records, images and readings are not committed, so the tests build their own small records.
+- **Only domestic spirits are mapped.** All 98 are domestic bourbon. A record of another kind is
+  refused rather than half-built, until a builder maps origin and the wine and malt fields.
+
+**Rejected.** *Pinning the registry outcomes in a test* — the records are not in the repository, so a
+test on them would pass or skip depending on the machine. *Sending every image as a face* — the
+product's upload does not, and a figure measured on inputs the product never receives would describe
+a different product. *Leaving alcohol content and net contents empty* — the two checks most often
+wrong on the corpus would then not be measured at all.

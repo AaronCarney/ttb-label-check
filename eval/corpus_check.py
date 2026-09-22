@@ -5,6 +5,7 @@ mismatch or needs review, per check and per label — and why?
 
     uv run python -m eval.corpus_check              # the 30 real corpus labels
     uv run python -m eval.corpus_check --json out.json
+    uv run python -m eval.corpus_check --registry   # the held-out registry labels
 
 The path is the running app's. Each label's faces go through
 `LocalVisionExtractor.extract`, the quality gate, the face merge, the rule pack
@@ -21,6 +22,15 @@ scoreboard says how many of each outcome there were, why each review was
 sent to a person, and how many checks the product settled without one — the
 figure that shows whether a change cut mismatches by sending everything to
 review.
+
+The held-out labels are Public COLA Registry records fetched by
+`eval/fetch_registry_corpus.py` into `eval/data/registry/`, which is not in
+the repository. Nothing is tuned on them, and their figures are reported
+apart from the corpus's. Each becomes a case from its form fields; alcohol
+content and net contents are not on the current form, so they come from
+`declared.json` beside the records, read off the label images by eye. Their
+readings are frozen under `eval/data/registry-readings/` by `--freeze`, which
+runs the production reader's OCR on every image that has no reading yet.
 """
 
 from __future__ import annotations
@@ -28,10 +38,11 @@ from __future__ import annotations
 import argparse
 import asyncio
 import json
+import time
 from collections import Counter, deque
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, cast
+from typing import Any, Protocol, cast
 
 from app.config import Settings
 from app.rules import build_rule_engine
@@ -40,10 +51,13 @@ from app.schemas.application_record import ApplicationRecord, DeclaredQuantity
 from app.schemas.label import Face, FaceTag, Label
 from app.services.application_mapper import expected_values_from
 from app.services.evaluator import Evaluator
-from app.vision.local import LocalVisionExtractor, _Reading, thaw_reading
+from app.vision.local import LocalVisionExtractor, _Reading, freeze_reading, thaw_reading
 
 LABELS_ROOT = Path("tests/fixtures/labels")
 RECORDINGS_ROOT = Path("tests/recordings/reader")
+REGISTRY_ROOT = Path("eval/data/registry")
+REGISTRY_READINGS = Path("eval/data/registry-readings")
+REGISTRY_DECLARED = REGISTRY_ROOT / "declared.json"
 
 # The order the upload puts a label's faces in (`app/api/ui/_faces.py`).
 _FACE_ORDER = ("front", "back", "neck", "side")
@@ -111,6 +125,98 @@ def corpus_cases(
         )
         cases.append(LabelCase(entry["id"], faces, application_record(entry)))
     return cases
+
+
+def registry_record(record: dict[str, Any], declared: dict[str, Any] | None) -> ApplicationRecord:
+    """The application a fetched registry record was filed under.
+
+    `declared` holds what the form does not: the alcohol content and net
+    contents as read off the label images, or None where nobody read them.
+    """
+    if record.get("beverage_type") != "spirits" or record.get("source") != "domestic":
+        # Origin and the wine and malt rules need fields this builder does not
+        # map yet, so a record they would apply to is refused, not half-built.
+        raise ValueError(
+            f"{record.get('ttbid')}: only domestic spirits records are mapped, "
+            f"not {record.get('source')} {record.get('beverage_type')}"
+        )
+    declared = declared or {}
+    alcohol = declared.get("alcohol_content")
+    net = declared.get("net_contents")
+    return ApplicationRecord(
+        beverage_type="distilled_spirits",
+        brand_name=record.get("brand"),
+        fanciful_name=record.get("fanciful_name"),
+        class_type=record.get("class_type_description"),
+        alcohol_content=(
+            DeclaredQuantity(text=alcohol.get("text"), amount=alcohol.get("percent"))
+            if alcohol
+            else None
+        ),
+        net_contents=(
+            DeclaredQuantity(text=net.get("text"), amount=net.get("ml")) if net else None
+        ),
+        # The registry prints the block one line per part, in the order
+        # `ApplicationRecord.trade_names_used_on_label` reads.
+        applicant_name_address=" ".join(record.get("applicant_name_address") or []) or None,
+        source_of_product="domestic",
+    )
+
+
+def registry_cases(
+    root: Path = REGISTRY_ROOT,
+    readings_root: Path = REGISTRY_READINGS,
+    declared_path: Path = REGISTRY_DECLARED,
+) -> list[LabelCase]:
+    """The fetched registry records, in TTB ID order.
+
+    A case carries the record's first brand image as its front and its back
+    image as its back. The upload takes those two faces and no others
+    (`app/api/ui/_faces.py`), so neck, strip and other images are left out,
+    as they would be for an agent using the app.
+    """
+    declared = json.loads(declared_path.read_text()) if declared_path.exists() else {}
+    cases = []
+    for path in sorted(root.glob("*/record.json")):
+        record = json.loads(path.read_text())
+        ttbid = record["ttbid"]
+        faces: list[tuple[FaceTag, Path, Path]] = []
+        for tag, prefix in (("front", "Brand"), ("back", "Back")):
+            image = next((i for i in record["images"] if i["type"].startswith(prefix)), None)
+            if image is not None:
+                file = path.parent / image["file"]
+                reading = (readings_root / ttbid / image["file"]).with_suffix(".json")
+                faces.append((cast(FaceTag, tag), file, reading))
+        cases.append(
+            LabelCase(f"ttb-{ttbid}", tuple(faces), registry_record(record, declared.get(ttbid)))
+        )
+    return cases
+
+
+class _Looks(Protocol):
+    def look(self, image_bytes: bytes) -> Any: ...
+
+
+def freeze_missing(cases: list[LabelCase], reader: _Looks, pause: float) -> int:
+    """Run the OCR on every face with no frozen reading, and freeze it.
+
+    One image at a time, with `pause` seconds after each one read. A face that
+    already has a reading is not read again, so a stopped run resumes where it
+    stopped. Returns how many images were read.
+    """
+    read = 0
+    for case in cases:
+        for _tag, image, reading in case.faces:
+            if reading.exists():
+                continue
+            frozen = freeze_reading(reader.look(image.read_bytes()))
+            reading.parent.mkdir(parents=True, exist_ok=True)
+            reading.write_text(json.dumps({"image": str(image), **frozen}, indent=1))
+            read += 1
+            print(f"read {read}: {image}", flush=True)
+            if pause:
+                time.sleep(pause)
+    return read
 
 
 def frozen_reader(readings: dict[bytes, Path]) -> LocalVisionExtractor:
@@ -237,8 +343,26 @@ def _print(outcomes: list[LabelOutcome]) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     parser.add_argument("--json", type=Path, help="also write every outcome to this file")
+    parser.add_argument(
+        "--registry", action="store_true", help="check the held-out registry labels instead"
+    )
+    parser.add_argument(
+        "--freeze",
+        action="store_true",
+        help="with --registry, first OCR and freeze every image that has no reading",
+    )
+    parser.add_argument(
+        "--sleep", type=float, default=2.0, help="seconds to wait after each image --freeze reads"
+    )
     args = parser.parse_args()
-    outcomes = asyncio.run(check(corpus_cases()))
+    if args.freeze and not args.registry:
+        parser.error("--freeze applies to --registry; the corpus's readings are in the repository")
+    cases = registry_cases() if args.registry else corpus_cases()
+    if args.freeze:
+        reader = LocalVisionExtractor(settings=Settings(), ring_buffer=deque(maxlen=500))
+        asyncio.run(reader.ensure_loaded())
+        print(f"{freeze_missing(cases, reader, args.sleep)} images read")
+    outcomes = asyncio.run(check(cases))
     _print(outcomes)
     if args.json:
         args.json.write_text(json.dumps(_as_json(outcomes), indent=1, sort_keys=True) + "\n")
