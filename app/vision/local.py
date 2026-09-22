@@ -286,6 +286,39 @@ def parse_reading(reading: _Reading) -> dict[str, dict]:
     }
 
 
+def face_observations(
+    payloads: dict, *, face_tag: str, meta: dict | None = None
+) -> list[FieldObservation]:
+    """One face's parsed fields, as the observations the rules are run over.
+
+    What `extract` merges across faces. Kept apart from the read so a replay of
+    a frozen reading reaches the rules by the same step a live read does.
+    """
+    observations: list[FieldObservation] = []
+    for field_name in _FIELD_NAMES:
+        payload, bbox, text = payloads[field_name]
+        observations.append(
+            FieldObservation(
+                field_id=field_name,
+                beverage_class=BeverageClass.SPIRITS,
+                observed_value=payload,
+                evidence=(
+                    Evidence(
+                        field_id=field_name,
+                        source=EvidenceSource.OCR,
+                        panel=face_tag,
+                        bbox=bbox,
+                        extracted_text=text,
+                        match_kind=MatchKind.NONE,
+                        confidence=float(payload.get("confidence", 0.0)),
+                    ),
+                ),
+                upstream_meta={"bbox": bbox, "face_tag": face_tag, **(meta or {})},
+            )
+        )
+    return observations
+
+
 def _fold(text: str) -> str:
     """One string reduced for matching only: accents dropped, case folded.
 
@@ -668,29 +701,7 @@ class LocalVisionExtractor:
                 )
             ]
 
-        observations: list[FieldObservation] = []
-        for field_name in _FIELD_NAMES:
-            payload, bbox, text = payloads[field_name]
-            observations.append(
-                FieldObservation(
-                    field_id=field_name,
-                    beverage_class=BeverageClass.SPIRITS,
-                    observed_value=payload,
-                    evidence=(
-                        Evidence(
-                            field_id=field_name,
-                            source=EvidenceSource.OCR,
-                            panel=face.face_tag,
-                            bbox=bbox,
-                            extracted_text=text,
-                            match_kind=MatchKind.NONE,
-                            confidence=float(payload.get("confidence", 0.0)),
-                        ),
-                    ),
-                    upstream_meta={"bbox": bbox, "face_tag": face.face_tag, **meta},
-                )
-            )
-        return observations
+        return face_observations(payloads, face_tag=face.face_tag, meta=meta)
 
     def _record(
         self, *, label: Label, face: Face, payloads: dict, meta: dict, elapsed_ms: int
