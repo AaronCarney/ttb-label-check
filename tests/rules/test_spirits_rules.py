@@ -185,6 +185,22 @@ def test_same_field_of_vision_neg(ruleset) -> None:
     assert res.outcome is Outcome.FAIL
 
 
+def test_same_field_of_vision_leaves_net_contents_anywhere(ruleset) -> None:
+    # 27 CFR 5.63(a) puts brand, class or type and alcohol content in one field
+    # of vision; 5.63(b)(2) lets net contents go anywhere on the container.
+    rule = _r(ruleset, "spirits.same_field_of_vision")
+    assert "net_contents" not in rule.parameters["required_fields"]
+    obs = make_obs(
+        field_id="layout",
+        value={"panels": {"front": ["brand", "class_type", "abv"], "back": ["net_contents"]}},
+        beverage_class=BeverageClass.SPIRITS,
+    )
+    res = VALIDATOR_REGISTRY[rule.validator](
+        obs, make_expected(field_id="layout"), rule, _ctx(ruleset)
+    )
+    assert res.outcome is Outcome.PASS
+
+
 def test_name_address_pos(ruleset) -> None:
     rule = _r(ruleset, "spirits.name_address.present")
     obs = make_obs(

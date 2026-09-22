@@ -252,3 +252,39 @@ def test_an_approved_label_s_statement_passes_or_goes_to_a_reviewer(
 ) -> None:
     expected = Outcome.INSUFFICIENT_EVIDENCE if label_id in _CORPUS_REVIEWS else Outcome.PASS
     assert _judge(ruleset, cls, statement).outcome is expected
+
+
+def _judge_undeclared(ruleset, cls: str, statement: str):
+    """The format rule on an application that declares no alcohol content."""
+    reading = {"abv_pct": None, "unit": "", "alc_text": statement, "confidence": 0.0}
+    obs = make_obs(field_id="abv", value=reading, beverage_class=CLASSES[cls])
+    exp = make_expected(field_id="abv", parameters={"abv_required": False})
+    return regex_match(obs, exp, _rule(ruleset, cls), make_context())
+
+
+@pytest.mark.parametrize("cls", ["wine", "malt"])
+def test_no_statement_where_the_application_declares_none_does_not_apply(ruleset, cls) -> None:
+    # A wine at or under 14% or a malt beverage may carry no alcohol statement
+    # at all (27 CFR 4.36(a), 7.63(a)(3)); a label without one can still match.
+    res = _judge_undeclared(ruleset, cls, "")
+    assert res.outcome is Outcome.NOT_APPLICABLE
+    assert res.reason_code is None
+
+
+@pytest.mark.parametrize("cls", ["wine", "malt"])
+def test_a_statement_printed_where_none_is_declared_is_still_judged(ruleset, cls) -> None:
+    # A statement the label chooses to print must still take a permitted form.
+    assert _judge_undeclared(ruleset, cls, PERMITTED[cls][0]).outcome is Outcome.PASS
+    unrecognised = _judge_undeclared(ruleset, cls, UNRECOGNISED[cls][0])
+    assert unrecognised.outcome is Outcome.INSUFFICIENT_EVIDENCE
+    assert unrecognised.reason_code == "ALCOHOL_CONTENT.FORMAT.NEEDS_REVIEW"
+
+
+@pytest.mark.parametrize("cls", ["wine", "malt"])
+def test_no_statement_where_the_application_declares_one_goes_to_a_reviewer(ruleset, cls) -> None:
+    reading = {"abv_pct": None, "unit": "", "alc_text": "", "confidence": 0.0}
+    obs = make_obs(field_id="abv", value=reading, beverage_class=CLASSES[cls])
+    exp = make_expected(field_id="abv", parameters={"abv_required": True})
+    res = regex_match(obs, exp, _rule(ruleset, cls), make_context())
+    assert res.outcome is Outcome.INSUFFICIENT_EVIDENCE
+    assert res.reason_code == "LEGIBILITY.FIELD.NOT_READ"

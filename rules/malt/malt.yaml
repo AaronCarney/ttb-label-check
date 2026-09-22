@@ -82,6 +82,7 @@ rules:
     match_policy: regex
     validator: regex_match
     parameters:
+      required_when: abv_required
       # §7.65(b)(4): "alc" for alcohol, "%" for percent, "/" for "by", "vol"
       # for volume. §7.65(b)(3)(ii): any word or symbol may sit in parentheses,
       # and an abbreviation may carry a period or not.

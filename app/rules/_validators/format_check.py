@@ -57,6 +57,25 @@ def regex_match(
     ignore_case = bool(rule.parameters.get("ignore_case", False))
     flags = re.IGNORECASE if ignore_case else 0
     observed = _project_alc_text(obs.observed_value)
+    # Where the application declares no alcohol content the label may carry
+    # none, as the presence rules allow through the same parameter, and no
+    # statement read is nothing to judge. One the label prints anyway is still
+    # judged: whatever it says must take a permitted form.
+    key = rule.parameters.get("required_when")
+    if key and not exp.parameters.get(key, False) and unlocated(obs, observed):
+        return ValidationResult(
+            rule_id=rule.rule_id,
+            cfr_citation=rule.cfr_citation,
+            beverage_class=obs.beverage_class,
+            outcome=Outcome.NOT_APPLICABLE,
+            severity=rule.severity,
+            reason_code=None,
+            aggregated_confidence=_conf(obs),
+            evidence=obs.evidence,
+            expected=exp,
+            observed=obs,
+            engine_meta=_build_meta(rule, ctx),
+        )
     if unlocated(obs, observed) and not unlocated_is_absent(rule):
         return not_read_result(obs, exp, rule, ctx, element="the statement this rule checks")
 

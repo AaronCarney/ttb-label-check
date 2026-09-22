@@ -3771,3 +3771,28 @@ set. Reason codes that contradict their outcome stay at 0 on both.
 
 **What it leaves.** A statement split across three lines, or across two lines with other text on
 either, is still not read, and goes to a reviewer as [0059](#0059) sets out.
+
+<a id="0061"></a>
+## 0061. The alcohol format rule follows the application, and net contents leaves the field of vision
+
+**Evidence:** `app/rules/_validators/format_check.py`; `wine.alcohol.format` and
+`malt.alcohol.format` in `rules/`; `spirits.same_field_of_vision` in `rules/spirits/spirits.yaml`;
+`tests/rules/_validators/test_format_check.py`; `tests/rules/test_spirits_rules.py`.
+
+**What was found.** A wine at or under 14% alcohol, or a malt beverage, may carry no alcohol
+statement (27 CFR 4.36(a), 7.63(a)(3)). The presence rules already say so through `required_when`,
+but the format rule did not read it, so a label with no statement went to review under
+`LEGIBILITY.FIELD.NOT_READ` and could never match. Separately, `spirits.same_field_of_vision` listed
+net contents among the elements that must share a side, which 5.63(a) does not; 5.63(b)(2) lets net
+contents go anywhere on the container.
+
+**Chosen.** The format rule takes the same `required_when` parameter. Where the application declares
+no alcohol content and none is read, the rule does not apply. A statement the label prints anyway is
+still judged, because whatever it says must take a permitted form. Net contents is taken out of the
+field-of-vision list.
+
+**Rejected.** *Not applicable whenever the application declares none, as the presence rule does.*
+That would pass over a printed statement in a form the regulation does not give.
+
+**Measured.** Nothing moves on the corpus or the held-out set: no label there declares no alcohol
+content, and no reader yet produces the layout reading the field-of-vision rule judges.

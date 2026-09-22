@@ -88,6 +88,7 @@ rules:
     match_policy: regex
     validator: regex_match
     parameters:
+      required_when: abv_required
       # §4.36(b)(1) and (b)(2) give "Alcohol __ % by volume" and "Alcohol __ %
       # to __ % by volume", "or similar appropriate phrase", with "alc." (alc)
       # and "vol." (vol) as the only abbreviations. The similar phrases taken

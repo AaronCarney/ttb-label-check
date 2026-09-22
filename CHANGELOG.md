@@ -144,6 +144,12 @@ date: the release's git tag records when it was cut. Versions follow
 
 ### Fixed
 
+- A wine or malt beverage whose application declares no alcohol content can match without an
+  alcohol statement on its label; the format check used to send it to review for want of one. A
+  statement the label prints anyway is still checked for its form. The spirits field-of-vision rule
+  no longer counts net contents among the elements that must share a side, which 27 CFR 5.63(a)
+  does not. See `docs/decisions.md#0061`.
+
 - A country-of-origin statement set on two lines of its own, such as "DISTILLED" over
   "IN IRELAND", is read. The reader took each line on its own and never saw the statement whole.
   Two lines of running prose are not joined this way. On the corpus one origin check moves from
