@@ -526,7 +526,7 @@ settled the limit it is cited; in all of these the app reports no verdict it has
 - **A rotated re-read can decline to fire, and nothing records that it did.** A sideways government
   warning is found by reading the label again at 90° and 270°, and that read is the expensive part,
   so it runs only when no heading was found upright, the box shapes look sideways, and the sideways
-  strips read like the warning. When either of the last two declines, the label is reported as
+  strips read like the warning or read too poorly to rule it out. When either of the last two declines, the label is reported as
   carrying no warning and nothing says a re-read was turned down. A missing warning is a §16.21
   mismatch, so that silence decides labels. A label photographed upside down is the same gap.
 

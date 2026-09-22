@@ -191,3 +191,35 @@ def test_a_re_read_that_goes_ahead_is_not_recorded_as_declined(caplog: Any) -> N
         reader.look(_blank_label())
 
     assert _declined(caplog) == []
+
+
+class _ScoringEngine:
+    """Answers a recognition-only call with one text at a set score."""
+
+    def __init__(self, text: str, score: float) -> None:
+        self.text, self.score = text, score
+
+    def __call__(self, image, use_det=None, use_cls=None, use_rec=None):
+        return type("R", (), {"txts": [self.text], "scores": [self.score]})()
+
+
+def _strip_read_at(score: float) -> str | None:
+    reader = LocalVisionExtractor(settings=Settings(), ring_buffer=deque())
+    reader._engine = _ScoringEngine("GOANN ON OHNONOOI", score)  # type: ignore[assignment]
+    strip = _Box(x0=100, y0=20, x1=140, y1=260, text="", score=0.9)
+    return reader._read_strip(Image.new("RGB", (400, 300)), strip)
+
+
+def test_a_strip_read_as_noise_cannot_rule_the_warning_out() -> None:
+    """Small condensed type read strip by strip comes back as noise with no
+    warning word in it, at a low recognition score — on seven held-out faces
+    whose rotated pass reads the whole warning. A read that poor says nothing
+    about what the strip is, so it counts as no read at all."""
+    assert _strip_read_at(0.35) is None
+
+
+def test_a_strip_read_cleanly_is_kept() -> None:
+    """A strip read cleanly — a barcode, "750 ML" — is what lets the screen
+    spare a label the two rotated passes, and a noisy but confident read of a
+    non-warning line (0.567 on a corpus back label) is kept too."""
+    assert _strip_read_at(0.567) == "GOANN ON OHNONOOI"

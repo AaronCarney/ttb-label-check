@@ -583,9 +583,10 @@ class LocalVisionExtractor:
         measured on ttb-26212001000085, the strips read the same words at 90°
         and at 270° (`docs/decisions.md#0036`).
 
-        `None` means the strip could not be read — no engine loaded, or nothing
-        recognised. Both are "this strip cannot rule the warning out", which is
-        the answer the caller acts on.
+        `None` means the strip could not be read — no engine loaded, nothing
+        recognised, or a read scored below `_SCREEN_READ_FLOOR`. All three are
+        "this strip cannot rule the warning out", which is the answer the caller
+        acts on.
         """
         engine = self._engine
         if engine is None:
@@ -600,6 +601,9 @@ class LocalVisionExtractor:
         ).rotate(90, expand=True)
         result = engine(np.array(crop), use_det=False, use_cls=True, use_rec=True)
         if result is None or not result.txts:
+            return None
+        scores = getattr(result, "scores", None)
+        if scores and float(scores[0]) < _SCREEN_READ_FLOOR:
             return None
         return str(result.txts[0])
 
@@ -788,13 +792,26 @@ class LocalVisionExtractor:
             # under `## Limitations` for the reader who is not reading logs.
             sideways = _has_sideways_text(boxes)
             if sideways and self._sideways_may_be_the_warning(image, boxes):
+                # A frame that finds the heading is final only when its block
+                # reaches the statement's last words. A 90° frame can find the
+                # heading line and nothing under it while the 270° frame reads
+                # the whole statement, so short of the end the other angle is
+                # read too and the block holding more of the statement is kept.
+                # A tie keeps the first angle. This never costs more than the
+                # two passes a frame with no heading already paid for.
+                best: tuple[bool, int] | None = None
                 for angle in (90, 270):
                     rotated = image.rotate(angle, expand=True)
                     candidate = self._boxes(rotated)
                     candidate_heading = _find_heading(candidate)
-                    if candidate_heading is not None:
+                    if candidate_heading is None:
+                        continue
+                    reach = _warning_reach(candidate)
+                    if best is None or reach > best:
+                        best = reach
                         warning_boxes, rotation, warning_image = candidate, angle, rotated
                         found = candidate_heading
+                    if reach[0]:
                         break
             else:
                 # `has_sideways_text` tells the two apart on its own: false
@@ -910,6 +927,16 @@ _SIDEWAYS_LONE_RATIO = 3.0
 _SCREEN_TALL_RATIO = 1.5
 _SCREEN_PAD_PX = 4
 
+# A strip read below this recognition score cannot rule the warning out.
+# Small condensed type, read strip by strip with recognition alone, comes back
+# as noise with no warning word in it, so a screen that asks only for the
+# warning's words declines the re-read on the very labels it exists for.
+# Measured on the corpus (`docs/decisions.md#0054`): the one sideways warning's
+# noisiest strip scores 0.441, and the lowest strip on a face with no warning
+# scores 0.567, a back label whose re-read `#0036` was built to spare. The floor
+# sits between them.
+_SCREEN_READ_FLOOR = 0.50
+
 # The §16.21 warning's own content words, which is what the screen asks each
 # strip for. Function words are left out — "the" on a label says nothing — and
 # so is anything the warning shares with ordinary label copy.
@@ -975,6 +1002,22 @@ def _has_sideways_text(boxes: list[_Box]) -> bool:
 # ---------------------------------------------------------------------------
 # Cutting the text into fields
 # ---------------------------------------------------------------------------
+
+
+def _warning_reach(boxes: list[_Box]) -> tuple[bool, int]:
+    """How far into the statement a frame's warning block reads.
+
+    Whether the block reaches the statement's last words, then how many of the
+    statement's content words it holds, so two frames compare in that order.
+    """
+    block = _warning_block(boxes)
+    if block is None:
+        return False, 0
+    text = block[0]
+    return (
+        _BLOCK_END_RE.search(text) is not None,
+        len(_WARNING_SCREEN_WORDS.intersection(normalize_words(text))),
+    )
 
 
 def _find_heading(boxes: list[_Box]) -> tuple[_Box, list[_Box]] | None:

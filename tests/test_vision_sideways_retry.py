@@ -98,17 +98,34 @@ def test_one_very_tall_box_is_enough_to_re_read() -> None:
     assert len(calls) == 3, f"expected the two rotated passes, got {len(calls) - 1}"
 
 
+def _statement(y0: float, *lines: str) -> list[_Box]:
+    """The warning as a rotated frame reads it: one upright line per box."""
+    return [
+        _Box(x0=20, y0=y0 + 50 * i, x1=600, y1=y0 + 50 * i + 46, text=line, score=0.98)
+        for i, line in enumerate(lines)
+    ]
+
+
+_WHOLE = (
+    _HEADING,
+    "GENERAL, WOMEN SHOULD NOT DRINK ALCOHOLIC BEVERAGES DURING PREGNANCY",
+    "BECAUSE OF THE RISK OF BIRTH DEFECTS. (2) CONSUMPTION OF ALCOHOLIC",
+    "BEVERAGES IMPAIRS YOUR ABILITY TO DRIVE A CAR OR OPERATE MACHINERY,",
+    "AND MAY CAUSE HEALTH PROBLEMS.",
+)
+
+
 def test_the_warning_the_re_read_recovers_is_still_recovered() -> None:
     """The case the whole retry exists for, end to end: nothing upright, tall
     strips present, and the heading found once the frame is turned. The reading
     records the angle, and the warning is read from that frame's boxes."""
     upright = [_wide(100), _tall(700), _tall(780)]
-    rotated = [_Box(x0=20, y0=190, x1=600, y1=236, text=_HEADING, score=0.98)]
+    rotated = _statement(190, *_WHOLE)
     reader, calls = _reader_returning(upright, rotated)
 
     reading = reader.look(_blank_label())
 
-    assert len(calls) == 2, "the first angle found it; the second must not run"
+    assert len(calls) == 2, "the first angle read the whole statement; the second must not run"
     assert reading.rotation == 90
     assert reading.warning_boxes == rotated
     # The other six fields are cut from the upright pass, untouched by the turn.
@@ -124,3 +141,40 @@ def test_a_label_lying_on_its_side_is_still_turned() -> None:
     reader.look(_blank_label())
 
     assert len(calls) == 3, f"expected the two rotated passes, got {len(calls) - 1}"
+
+
+def test_a_heading_alone_does_not_stop_the_other_angle() -> None:
+    """A 90° frame can find the heading line and nothing under it, while the
+    270° frame reads the whole statement: on four held-out labels the loop
+    stopped at the heading and the warning was checked against one line of it.
+    A frame is final only when its block reaches the statement's last words;
+    otherwise the other angle is read and the more complete block is kept."""
+    upright = [_wide(100), _tall(700), _tall(780)]
+    heading_only = _statement(190, _HEADING)
+    whole = _statement(190, *_WHOLE)
+    reader, calls = _reader_returning(upright, heading_only, whole)
+
+    reading = reader.look(_blank_label())
+
+    assert len(calls) == 3, "the 270° pass must run when 90° read only the heading"
+    assert reading.rotation == 270
+    assert reading.warning_boxes == whole
+
+
+def test_neither_angle_complete_keeps_the_one_that_read_more() -> None:
+    """Where neither frame reaches the end, the block holding more of the
+    statement's words is kept, and a tie keeps the first angle tried, so the
+    same boxes always give the same frame."""
+    upright = [_wide(100), _tall(700), _tall(780)]
+    more = _statement(190, *_WHOLE[:3])
+    less = _statement(190, _HEADING)
+    reader, calls = _reader_returning(upright, more, less)
+
+    reading = reader.look(_blank_label())
+
+    assert len(calls) == 3
+    assert reading.rotation == 90
+    assert reading.warning_boxes == more
+
+    reader, _ = _reader_returning(upright, less, less)
+    assert reader.look(_blank_label()).rotation == 90, "a tie keeps the first angle"

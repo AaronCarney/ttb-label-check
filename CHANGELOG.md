@@ -126,6 +126,13 @@ date: the release's git tag records when it was cut. Versions follow
 
 ### Fixed
 
+- A government warning printed sideways in small type is read again on its side instead of being
+  reported missing. The check that decides whether to read a label again on its side counted a strip
+  read as noise as proof the strip was not the warning; a strip read that poorly now counts as unread.
+  And where the first rotation reads only the warning's heading, the other rotation is read too and
+  the more complete warning is kept. The corpus does not move; on the 98 held-out labels seven faces
+  now read their warning, and mismatched checks fall from 38 to 33. See `docs/decisions.md#0054`.
+
 - The alcohol content and net contents are no longer read from a volume or percentage that is about
   something else. A percentage followed by an ingredient ("75% CORN", "at least 30% wheat") or set as
   a labelled row ("WHEAT: 30%") is not read as the alcohol content, and when two faces are joined a

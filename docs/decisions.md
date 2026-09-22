@@ -3427,3 +3427,48 @@ statement. *Taking only a volume that stands alone in its clause.* The OCR joins
 statements into one box ("750 ML I117 Proof I 58.5% Alc/vol"), so the true statement would be lost.
 *Excluding every percentage followed by a word, with no look ahead.* It lost a correct reading on a
 held-out label.
+
+<a id="0054"></a>
+## 0054. A strip read as noise cannot rule the sideways warning out, and a rotated frame is kept by how much of the warning it reads
+
+**Evidence:** `app/vision/local.py` (`_read_strip`, `_SCREEN_READ_FLOOR`, `look`, `_warning_reach`);
+`tests/test_vision_warning_screen.py`, `tests/test_vision_sideways_retry.py`.
+
+**What was found.** On seven held-out faces the warning is printed sideways, and the 270° pass reads
+all of it with its heading, yet each was reported as carrying no warning, a §16.21 mismatch on an
+approved label. Two faults stacked. The screen of `#0036` declined the re-read: small condensed type,
+read strip by strip with recognition alone, comes back as noise with no warning word in it ("GOANN ON
+OHNONOOI", "BEEAGBGGAHISK"), and the screen asked only for the warning's words. And on four of the
+seven, the 90° frame finds the heading line and nothing under it, and the loop stopped at the first
+frame with a heading, before the 270° frame that reads the whole statement.
+
+**Chosen.**
+- **A strip read below a recognition score of 0.50 counts as unread**, and an unread strip already
+  sends the re-read ahead: it cannot rule the warning out. On the corpus the one sideways warning's
+  noisiest strip scores 0.441 and the lowest strip on a face with no warning scores 0.567, a wine back
+  label whose re-read `#0036` was built to spare; the floor sits between them. Clean strips that are
+  not the warning, a barcode or "750 ML", score 0.95 to 1.0.
+- **A rotated frame is final only when its warning block reaches the statement's last words.**
+  Otherwise the other angle is read too, and the frame whose block holds more of the statement's
+  content words is kept; a tie keeps the first angle, so the same boxes always give the same frame.
+  This never costs more than the two passes a face with no heading at either angle already paid.
+
+**Measured.** Re-read under the OCR budget, the four corpus faces that reach the screen read exactly
+as before, and the corpus scoreboard does not move. On the held-out labels, which nobody tuned on,
+all seven faces now read their warning from the 270° frame; the upright boxes, from which the other
+six fields are read, are unchanged on every face. Mismatched checks fall from 38 to 33 and labels
+with a mismatch from 37 to 32. On all seven the warning is found and the heading reads as bold
+capitals, and the word-for-word check becomes a match on one, needs review on four, and a mismatch on
+two whose labels were already mismatched for a missing warning. Those two are the reader's errors,
+not the labels': one reads "CONSUMPTIONOF ALCOHOUC", words run together and a misread glyph, and one
+reads a two-column warning out of order.
+
+**Cost.** Of 162 held-out faces, 12 now pay for the rotated passes where 4 did before: the seven
+above and one face with no warning, whose single strip reads as "Y" at 0.298. A whole read of one of
+these faces took 0.8 to 2.0 s on the development box. On the corpus the face whose needless re-read
+took it past five seconds on the deployed service is still spared: its strip reads at 1.0.
+
+**Rejected.** *Dropping the screen.* It brings back the re-read on every face with a strip of vertical
+type, including the one `#0036` was added for. *Retrying unless every strip reads cleanly.* Noisy
+strips that are not the warning score 0.54 to 0.75, so it re-reads the wine back label above.
+*Keeping the first frame with a heading.* It is the fault found.
