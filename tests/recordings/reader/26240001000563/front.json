@@ -1,0 +1,520 @@
+{
+ "image": "26240001000563/front.jpg",
+ "schema_version": 1,
+ "frame_size": [
+  1500,
+  937
+ ],
+ "rotation_deg": 0,
+ "boxes": [
+  {
+   "box": [
+    465.0,
+    10.0,
+    716.0,
+    43.0
+   ],
+   "text": "DRINK FRESH.",
+   "score": 0.9995
+  },
+  {
+   "box": [
+    774.0,
+    8.0,
+    1030.0,
+    45.0
+   ],
+   "text": "DRINK LOCAL.",
+   "score": 0.9893
+  },
+  {
+   "box": [
+    73.0,
+    66.0,
+    87.0,
+    127.0
+   ],
+   "text": "KEYWOR",
+   "score": 0.9999
+  },
+  {
+   "box": [
+    405.0,
+    90.0,
+    1091.0,
+    365.0
+   ],
+   "text": "OKTOBERFEST",
+   "score": 0.9519
+  },
+  {
+   "box": [
+    71.0,
+    120.0,
+    88.0,
+    210.0
+   ],
+   "text": "TH_BREWING",
+   "score": 0.9984
+  },
+  {
+   "box": [
+    158.0,
+    201.0,
+    172.0,
+    238.0
+   ],
+   "text": "COM",
+   "score": 0.9983
+  },
+  {
+   "box": [
+    231.0,
+    223.0,
+    278.0,
+    237.0
+   ],
+   "text": "LIULU",
+   "score": 0.5121
+  },
+  {
+   "box": [
+    355.0,
+    223.0,
+    400.0,
+    237.0
+   ],
+   "text": "LOULU",
+   "score": 0.759
+  },
+  {
+   "box": [
+    1054.0,
+    350.0,
+    1346.0,
+    406.0
+   ],
+   "text": "KEYWORTH",
+   "score": 1.0
+  },
+  {
+   "box": [
+    1064.0,
+    404.0,
+    1343.0,
+    430.0
+   ],
+   "text": "BREWING COMPANY\u2014",
+   "score": 0.992
+  },
+  {
+   "box": [
+    808.0,
+    599.0,
+    834.0,
+    627.0
+   ],
+   "text": "B",
+   "score": 0.5479
+  },
+  {
+   "box": [
+    43.0,
+    802.0,
+    141.0,
+    821.0
+   ],
+   "text": "GOVERNMENT WARNING:",
+   "score": 0.9992
+  },
+  {
+   "box": [
+    592.0,
+    791.0,
+    909.0,
+    828.0
+   ],
+   "text": "GERMAN STYLE",
+   "score": 0.9901
+  },
+  {
+   "box": [
+    45.0,
+    819.0,
+    241.0,
+    835.0
+   ],
+   "text": "(1) ACCORDING TO THE SURGEON GENERAL. WOMEN",
+   "score": 0.9701
+  },
+  {
+   "box": [
+    1140.0,
+    820.0,
+    1400.0,
+    846.0
+   ],
+   "text": "BREWED AND CANNED BY",
+   "score": 0.9985
+  },
+  {
+   "box": [
+    44.0,
+    831.0,
+    242.0,
+    851.0
+   ],
+   "text": "SHOULD NOT ORINK ALCOHOLIC BEVERAGES DURING",
+   "score": 0.9853
+  },
+  {
+   "box": [
+    45.0,
+    848.0,
+    251.0,
+    864.0
+   ],
+   "text": "PREGNANCY BECAUSE OF THE RISK OF BIRTH DEFECTS.",
+   "score": 0.9931
+  },
+  {
+   "box": [
+    588.0,
+    835.0,
+    912.0,
+    880.0
+   ],
+   "text": "M\u00c4RZEN LAGER",
+   "score": 0.992
+  },
+  {
+   "box": [
+    1107.0,
+    843.0,
+    1433.0,
+    869.0
+   ],
+   "text": "KEYWORTH BREWING COMPANY",
+   "score": 0.994
+  },
+  {
+   "box": [
+    43.0,
+    874.0,
+    258.0,
+    896.0
+   ],
+   "text": "YOUR ABILITY TO DRIVE A CAR OR OPERATE MACHINERY,",
+   "score": 0.9632
+  },
+  {
+   "box": [
+    45.0,
+    862.0,
+    252.0,
+    879.0
+   ],
+   "text": "(2) CONSUMPTION OF ALCOHOLIC BEVERAGES IMPAIRS",
+   "score": 0.9892
+  },
+  {
+   "box": [
+    1131.0,
+    868.0,
+    1410.0,
+    892.0
+   ],
+   "text": "NORTH RICHLAND HILLS, TX",
+   "score": 0.9626
+  },
+  {
+   "box": [
+    45.0,
+    892.0,
+    186.0,
+    909.0
+   ],
+   "text": "AND MAY CAUSE HEALTH PROBLEMS.",
+   "score": 0.9969
+  },
+  {
+   "box": [
+    526.0,
+    890.0,
+    732.0,
+    917.0
+   ],
+   "text": "1 PINT (16 FL OZ)",
+   "score": 0.982
+  },
+  {
+   "box": [
+    746.0,
+    890.0,
+    959.0,
+    916.0
+   ],
+   "text": "6% ALC/VOL 19 IBU",
+   "score": 0.9782
+  }
+ ],
+ "warning_boxes": [
+  {
+   "box": [
+    465.0,
+    10.0,
+    716.0,
+    43.0
+   ],
+   "text": "DRINK FRESH.",
+   "score": 0.9995
+  },
+  {
+   "box": [
+    774.0,
+    8.0,
+    1030.0,
+    45.0
+   ],
+   "text": "DRINK LOCAL.",
+   "score": 0.9893
+  },
+  {
+   "box": [
+    73.0,
+    66.0,
+    87.0,
+    127.0
+   ],
+   "text": "KEYWOR",
+   "score": 0.9999
+  },
+  {
+   "box": [
+    405.0,
+    90.0,
+    1091.0,
+    365.0
+   ],
+   "text": "OKTOBERFEST",
+   "score": 0.9519
+  },
+  {
+   "box": [
+    71.0,
+    120.0,
+    88.0,
+    210.0
+   ],
+   "text": "TH_BREWING",
+   "score": 0.9984
+  },
+  {
+   "box": [
+    158.0,
+    201.0,
+    172.0,
+    238.0
+   ],
+   "text": "COM",
+   "score": 0.9983
+  },
+  {
+   "box": [
+    231.0,
+    223.0,
+    278.0,
+    237.0
+   ],
+   "text": "LIULU",
+   "score": 0.5121
+  },
+  {
+   "box": [
+    355.0,
+    223.0,
+    400.0,
+    237.0
+   ],
+   "text": "LOULU",
+   "score": 0.759
+  },
+  {
+   "box": [
+    1054.0,
+    350.0,
+    1346.0,
+    406.0
+   ],
+   "text": "KEYWORTH",
+   "score": 1.0
+  },
+  {
+   "box": [
+    1064.0,
+    404.0,
+    1343.0,
+    430.0
+   ],
+   "text": "BREWING COMPANY\u2014",
+   "score": 0.992
+  },
+  {
+   "box": [
+    808.0,
+    599.0,
+    834.0,
+    627.0
+   ],
+   "text": "B",
+   "score": 0.5479
+  },
+  {
+   "box": [
+    43.0,
+    802.0,
+    141.0,
+    821.0
+   ],
+   "text": "GOVERNMENT WARNING:",
+   "score": 0.9992
+  },
+  {
+   "box": [
+    592.0,
+    791.0,
+    909.0,
+    828.0
+   ],
+   "text": "GERMAN STYLE",
+   "score": 0.9901
+  },
+  {
+   "box": [
+    45.0,
+    819.0,
+    241.0,
+    835.0
+   ],
+   "text": "(1) ACCORDING TO THE SURGEON GENERAL. WOMEN",
+   "score": 0.9701
+  },
+  {
+   "box": [
+    1140.0,
+    820.0,
+    1400.0,
+    846.0
+   ],
+   "text": "BREWED AND CANNED BY",
+   "score": 0.9985
+  },
+  {
+   "box": [
+    44.0,
+    831.0,
+    242.0,
+    851.0
+   ],
+   "text": "SHOULD NOT ORINK ALCOHOLIC BEVERAGES DURING",
+   "score": 0.9853
+  },
+  {
+   "box": [
+    45.0,
+    848.0,
+    251.0,
+    864.0
+   ],
+   "text": "PREGNANCY BECAUSE OF THE RISK OF BIRTH DEFECTS.",
+   "score": 0.9931
+  },
+  {
+   "box": [
+    588.0,
+    835.0,
+    912.0,
+    880.0
+   ],
+   "text": "M\u00c4RZEN LAGER",
+   "score": 0.992
+  },
+  {
+   "box": [
+    1107.0,
+    843.0,
+    1433.0,
+    869.0
+   ],
+   "text": "KEYWORTH BREWING COMPANY",
+   "score": 0.994
+  },
+  {
+   "box": [
+    43.0,
+    874.0,
+    258.0,
+    896.0
+   ],
+   "text": "YOUR ABILITY TO DRIVE A CAR OR OPERATE MACHINERY,",
+   "score": 0.9632
+  },
+  {
+   "box": [
+    45.0,
+    862.0,
+    252.0,
+    879.0
+   ],
+   "text": "(2) CONSUMPTION OF ALCOHOLIC BEVERAGES IMPAIRS",
+   "score": 0.9892
+  },
+  {
+   "box": [
+    1131.0,
+    868.0,
+    1410.0,
+    892.0
+   ],
+   "text": "NORTH RICHLAND HILLS, TX",
+   "score": 0.9626
+  },
+  {
+   "box": [
+    45.0,
+    892.0,
+    186.0,
+    909.0
+   ],
+   "text": "AND MAY CAUSE HEALTH PROBLEMS.",
+   "score": 0.9969
+  },
+  {
+   "box": [
+    526.0,
+    890.0,
+    732.0,
+    917.0
+   ],
+   "text": "1 PINT (16 FL OZ)",
+   "score": 0.982
+  },
+  {
+   "box": [
+    746.0,
+    890.0,
+    959.0,
+    916.0
+   ],
+   "text": "6% ALC/VOL 19 IBU",
+   "score": 0.9782
+  }
+ ],
+ "heading_measurement": {
+  "is_bold": true,
+  "mean_stroke_width": 2.2768,
+  "mean_character_height": 6.6111,
+  "width_height_ratio": 0.3444,
+  "confident": true
+ }
+}

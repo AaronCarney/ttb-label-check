@@ -1,0 +1,74 @@
+{
+ "image": "26233001000566/back.jpg",
+ "schema_version": 1,
+ "frame_size": [
+  943,
+  1261
+ ],
+ "rotation_deg": 0,
+ "boxes": [
+  {
+   "box": [
+    263.0,
+    516.0,
+    682.0,
+    604.0
+   ],
+   "text": "\u533a\uff1a\u533a\u6c49\u533a\u6ee9",
+   "score": 0.5566
+  },
+  {
+   "box": [
+    304.0,
+    1058.0,
+    652.0,
+    1196.0
+   ],
+   "text": "BigRed",
+   "score": 0.9864
+  },
+  {
+   "box": [
+    268.0,
+    1169.0,
+    676.0,
+    1209.0
+   ],
+   "text": "CALIFORNIA",
+   "score": 0.9985
+  }
+ ],
+ "warning_boxes": [
+  {
+   "box": [
+    263.0,
+    516.0,
+    682.0,
+    604.0
+   ],
+   "text": "\u533a\uff1a\u533a\u6c49\u533a\u6ee9",
+   "score": 0.5566
+  },
+  {
+   "box": [
+    304.0,
+    1058.0,
+    652.0,
+    1196.0
+   ],
+   "text": "BigRed",
+   "score": 0.9864
+  },
+  {
+   "box": [
+    268.0,
+    1169.0,
+    676.0,
+    1209.0
+   ],
+   "text": "CALIFORNIA",
+   "score": 0.9985
+  }
+ ],
+ "heading_measurement": null
+}

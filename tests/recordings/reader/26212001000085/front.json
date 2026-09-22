@@ -5,7 +5,7 @@
   901,
   638
  ],
- "rotation_deg": 90,
+ "rotation_deg": 270,
  "boxes": [
   {
    "box": [
@@ -39,23 +39,13 @@
   },
   {
    "box": [
-    778.0,
-    16.0,
-    833.0,
-    513.0
-   ],
-   "text": "MPTION OF ALCOHOLIC BEVERAGE IMPAIRS YOUR",
-   "score": 0.9867
-  },
-  {
-   "box": [
     816.0,
     54.0,
     868.0,
     515.0
    ],
-   "text": "DRIVE A CAR OR OPERATE MACHINERY, AND",
-   "score": 0.9713
+   "text": "DAEMENAE  AAND",
+   "score": 0.5844
   },
   {
    "box": [
@@ -161,150 +151,160 @@
  "warning_boxes": [
   {
    "box": [
-    365.0,
-    0.0,
-    627.0,
-    40.0
+    163.0,
+    20.0,
+    219.0,
+    672.0
    ],
-   "text": "CAUSE HEALTH PROBLEMS.",
-   "score": 0.996
+   "text": "IMPORTED BY WINE WINE SITUATION LLC-SIGNAC HILL, CA",
+   "score": 0.9896
   },
   {
    "box": [
-    15.0,
-    31.0,
-    627.0,
-    79.0
+    207.0,
+    21.0,
+    256.0,
+    273.0
    ],
-   "text": "ABILITY TO DRIVE A CAR OR OPERATE MACHINERY, AND MAY",
-   "score": 0.9944
+   "text": "PRODUCT OF FRANCE",
+   "score": 0.9996
   },
   {
    "box": [
-    16.0,
-    110.0,
-    627.0,
-    153.0
+    250.0,
+    18.0,
+    300.0,
+    667.0
    ],
-   "text": "DUR B  R    B CTS.",
-   "score": 0.6091
+   "text": "PRODUCED BY COGNAC LHERAUD -16120 ANGEAC CHARENTE -FRANCE",
+   "score": 0.9722
   },
   {
    "box": [
-    12.0,
-    147.0,
+    427.0,
+    38.0,
+    637.0,
+    697.0
+   ],
+   "text": "Lerve t Drifprradiere",
+   "score": 0.7395
+  },
+  {
+   "box": [
+    299.0,
+    56.0,
+    329.0,
+    551.0
+   ],
+   "text": "APPELLAT'ON COGNAC PETITE CHAMPAGNE CONTR\u00d3L\u00c9E",
+   "score": 0.9953
+  },
+  {
+   "box": [
+    331.0,
+    64.0,
+    414.0,
+    504.0
+   ],
+   "text": "Cognae Pefite Chompagne",
+   "score": 0.9295
+  },
+  {
+   "box": [
+    394.0,
+    127.0,
+    486.0,
+    446.0
+   ],
+   "text": "Cognac XO",
+   "score": 0.9295
+  },
+  {
+   "box": [
+    23.0,
+    334.0,
+    64.0,
+    622.0
+   ],
+   "text": "1015638031",
+   "score": 0.9992
+  },
+  {
+   "box": [
+    207.0,
+    364.0,
+    254.0,
+    611.0
+   ],
+   "text": "40%ALC.BY VOL-700mL",
+   "score": 0.9587
+  },
+  {
+   "box": [
+    11.0,
+    666.0,
     626.0,
-    193.0
+    713.0
    ],
-   "text": "GEN A L D DS D GES",
-   "score": 0.5947
+   "text": "GOVERNMENT WARNING: (1) ACCORDING TO THE SURGEON",
+   "score": 0.9847
   },
   {
    "box": [
     10.0,
-    186.0,
+    705.0,
     625.0,
-    233.0
+    752.0
    ],
-   "text": "GOVERNMENT WARNING: (1) ACCORDING TO THE SURGEON",
-   "score": 0.9952
+   "text": "GENERAL, WOMEN SHOULD NOT DRINK ALCOHOLIC BEVERAGES",
+   "score": 0.9957
   },
   {
    "box": [
-    428.0,
-    233.0,
-    466.0,
-    272.0
+    10.0,
+    744.0,
+    621.0,
+    789.0
    ],
-   "text": "CA",
-   "score": 0.7138
+   "text": "DURING PREGNANCY BECAUSE OF THE RISK OF BIRTH DEFECTS.",
+   "score": 0.9987
   },
   {
    "box": [
-    583.0,
-    248.0,
-    610.0,
-    277.0
+    10.0,
+    781.0,
+    624.0,
+    828.0
    ],
-   "text": "0",
-   "score": 0.9956
+   "text": "(2) CONSUMPTION OF ALCOHOLIC BEVERAGE IMPAIRS YOUR",
+   "score": 0.9865
   },
   {
    "box": [
-    417.0,
-    268.0,
-    472.0,
-    878.0
-   ],
-   "text": "IMPORTED BY WINE WINE SITUATION LLC-SIGNAC HILL,",
-   "score": 0.992
-  },
-  {
-   "box": [
-    378.0,
-    283.0,
-    432.0,
-    536.0
-   ],
-   "text": "40%ALC. BY VOL-700mL",
-   "score": 0.9552
-  },
-  {
-   "box": [
-    309.0,
-    348.0,
-    336.0,
-    844.0
-   ],
-   "text": "AP GC C C LE",
-   "score": 0.6388
-  },
-  {
-   "box": [
-    226.0,
-    396.0,
-    311.0,
-    837.0
-   ],
-   "text": "Cognae Pefite Chompagne",
-   "score": 0.9532
-  },
-  {
-   "box": [
-    156.0,
-    453.0,
-    239.0,
-    764.0
-   ],
-   "text": "Cognac XO",
-   "score": 0.9745
-  },
-  {
-   "box": [
-    576.0,
-    605.0,
-    609.0,
-    634.0
-   ],
-   "text": "8",
-   "score": 0.9926
-  },
-  {
-   "box": [
-    381.0,
+    10.0,
+    819.0,
     622.0,
-    427.0,
-    877.0
+    867.0
    ],
-   "text": "PRODUCT OF FRANCE",
-   "score": 0.9729
+   "text": "ABILITY TO DRIVE A CAR OR OPERATE MACHINERY, AND MAY",
+   "score": 0.9886
+  },
+  {
+   "box": [
+    10.0,
+    858.0,
+    275.0,
+    900.0
+   ],
+   "text": "CAUSE HEALTH PROBLEMS.",
+   "score": 0.9957
   }
  ],
  "heading_measurement": {
   "is_bold": false,
-  "mean_stroke_width": 2.4155,
-  "mean_character_height": 15.1818,
-  "width_height_ratio": 0.1591,
+  "mean_stroke_width": 2.5527,
+  "mean_character_height": 24.9804,
+  "width_height_ratio": 0.1022,
   "confident": true
  }
 }

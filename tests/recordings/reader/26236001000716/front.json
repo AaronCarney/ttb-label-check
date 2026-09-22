@@ -1,0 +1,154 @@
+{
+ "image": "26236001000716/front.jpg",
+ "schema_version": 1,
+ "frame_size": [
+  1059,
+  1329
+ ],
+ "rotation_deg": 0,
+ "boxes": [
+  {
+   "box": [
+    91.0,
+    292.0,
+    993.0,
+    437.0
+   ],
+   "text": "BEARPATH",
+   "score": 1.0
+  },
+  {
+   "box": [
+    310.0,
+    540.0,
+    760.0,
+    578.0
+   ],
+   "text": "GEWURZTRAMINER",
+   "score": 0.9987
+  },
+  {
+   "box": [
+    347.0,
+    601.0,
+    725.0,
+    634.0
+   ],
+   "text": "ANDERSON VALLEY",
+   "score": 0.9965
+  },
+  {
+   "box": [
+    469.0,
+    666.0,
+    635.0,
+    711.0
+   ],
+   "text": "2025-",
+   "score": 0.9651
+  },
+  {
+   "box": [
+    386.0,
+    1156.0,
+    672.0,
+    1183.0
+   ],
+   "text": "BEAR PATH VINEYARDS",
+   "score": 0.9963
+  },
+  {
+   "box": [
+    338.0,
+    1209.0,
+    720.0,
+    1232.0
+   ],
+   "text": "MENDOCINO COUNTY, CALIFORNIA",
+   "score": 0.99
+  },
+  {
+   "box": [
+    413.0,
+    1259.0,
+    647.0,
+    1288.0
+   ],
+   "text": "ALC. 12.8% BY VOL.",
+   "score": 0.9874
+  }
+ ],
+ "warning_boxes": [
+  {
+   "box": [
+    91.0,
+    292.0,
+    993.0,
+    437.0
+   ],
+   "text": "BEARPATH",
+   "score": 1.0
+  },
+  {
+   "box": [
+    310.0,
+    540.0,
+    760.0,
+    578.0
+   ],
+   "text": "GEWURZTRAMINER",
+   "score": 0.9987
+  },
+  {
+   "box": [
+    347.0,
+    601.0,
+    725.0,
+    634.0
+   ],
+   "text": "ANDERSON VALLEY",
+   "score": 0.9965
+  },
+  {
+   "box": [
+    469.0,
+    666.0,
+    635.0,
+    711.0
+   ],
+   "text": "2025-",
+   "score": 0.9651
+  },
+  {
+   "box": [
+    386.0,
+    1156.0,
+    672.0,
+    1183.0
+   ],
+   "text": "BEAR PATH VINEYARDS",
+   "score": 0.9963
+  },
+  {
+   "box": [
+    338.0,
+    1209.0,
+    720.0,
+    1232.0
+   ],
+   "text": "MENDOCINO COUNTY, CALIFORNIA",
+   "score": 0.99
+  },
+  {
+   "box": [
+    413.0,
+    1259.0,
+    647.0,
+    1288.0
+   ],
+   "text": "ALC. 12.8% BY VOL.",
+   "score": 0.9874
+  }
+ ],
+ "heading_measurement": null
+}

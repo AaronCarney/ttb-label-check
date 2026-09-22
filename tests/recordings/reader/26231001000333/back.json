@@ -1,0 +1,840 @@
+{
+ "image": "26231001000333/back.jpg",
+ "schema_version": 1,
+ "frame_size": [
+  581,
+  831
+ ],
+ "rotation_deg": 0,
+ "boxes": [
+  {
+   "box": [
+    62.0,
+    121.0,
+    522.0,
+    147.0
+   ],
+   "text": "Held close and aged to perfection, our Single Malt Scotch Whisky",
+   "score": 0.9945
+  },
+  {
+   "box": [
+    68.0,
+    147.0,
+    516.0,
+    170.0
+   ],
+   "text": "releases are never rushed or hurried \u2014 they're bottled when the",
+   "score": 0.9813
+  },
+  {
+   "box": [
+    64.0,
+    172.0,
+    518.0,
+    198.0
+   ],
+   "text": "right time arrives. We understand the importance of this moment,",
+   "score": 0.9924
+  },
+  {
+   "box": [
+    79.0,
+    197.0,
+    504.0,
+    220.0
+   ],
+   "text": "when the true character of the spirit is ready to be celebrated.",
+   "score": 0.997
+  },
+  {
+   "box": [
+    69.0,
+    244.0,
+    154.0,
+    271.0
+   ],
+   "text": "NO.66",
+   "score": 0.9911
+  },
+  {
+   "box": [
+    161.0,
+    242.0,
+    502.0,
+    268.0
+   ],
+   "text": "SINGLE MALT SCOTCH WHISKY",
+   "score": 0.9995
+  },
+  {
+   "box": [
+    70.0,
+    277.0,
+    153.0,
+    295.0
+   ],
+   "text": "DISTILLED AT",
+   "score": 0.9987
+  },
+  {
+   "box": [
+    300.0,
+    277.0,
+    363.0,
+    298.0
+   ],
+   "text": "CASK NO.",
+   "score": 0.9968
+  },
+  {
+   "box": [
+    433.0,
+    277.0,
+    507.0,
+    296.0
+   ],
+   "text": "BOTTLE NO.",
+   "score": 0.9999
+  },
+  {
+   "box": [
+    70.0,
+    297.0,
+    206.0,
+    321.0
+   ],
+   "text": "ISLE OF JURA",
+   "score": 0.9959
+  },
+  {
+   "box": [
+    301.0,
+    297.0,
+    360.0,
+    322.0
+   ],
+   "text": "#229",
+   "score": 0.9997
+  },
+  {
+   "box": [
+    452.0,
+    296.0,
+    497.0,
+    323.0
+   ],
+   "text": "/221",
+   "score": 0.9987
+  },
+  {
+   "box": [
+    72.0,
+    331.0,
+    319.0,
+    353.0
+   ],
+   "text": "2ND FILL EX SHERRY TAMDHU HHD",
+   "score": 0.9835
+  },
+  {
+   "box": [
+    387.0,
+    331.0,
+    493.0,
+    352.0
+   ],
+   "text": "NATURAL COLOUR",
+   "score": 0.9847
+  },
+  {
+   "box": [
+    388.0,
+    351.0,
+    507.0,
+    369.0
+   ],
+   "text": "NON-CHILL FILTERED",
+   "score": 0.9997
+  },
+  {
+   "box": [
+    69.0,
+    378.0,
+    103.0,
+    398.0
+   ],
+   "text": "AGE",
+   "score": 1.0
+  },
+  {
+   "box": [
+    178.0,
+    379.0,
+    241.0,
+    397.0
+   ],
+   "text": "BOTTLED",
+   "score": 1.0
+  },
+  {
+   "box": [
+    303.0,
+    379.0,
+    373.0,
+    397.0
+   ],
+   "text": "DISTILLED",
+   "score": 1.0
+  },
+  {
+   "box": [
+    420.0,
+    379.0,
+    474.0,
+    397.0
+   ],
+   "text": "REGION",
+   "score": 0.9992
+  },
+  {
+   "box": [
+    69.0,
+    396.0,
+    155.0,
+    420.0
+   ],
+   "text": "15 YEARS",
+   "score": 0.9981
+  },
+  {
+   "box": [
+    179.0,
+    397.0,
+    269.0,
+    419.0
+   ],
+   "text": "07/09/2026",
+   "score": 1.0
+  },
+  {
+   "box": [
+    303.0,
+    397.0,
+    386.0,
+    419.0
+   ],
+   "text": "02/02/2011",
+   "score": 0.9981
+  },
+  {
+   "box": [
+    421.0,
+    397.0,
+    512.0,
+    419.0
+   ],
+   "text": "HIGHLAND",
+   "score": 0.9999
+  },
+  {
+   "box": [
+    69.0,
+    446.0,
+    514.0,
+    469.0
+   ],
+   "text": "Immediately that nutty signature note of Jura followed by dry hay in the sun, reminding",
+   "score": 0.9912
+  },
+  {
+   "box": [
+    69.0,
+    467.0,
+    517.0,
+    490.0
+   ],
+   "text": "us of sweetgrass baskets from Charleston. There is a malty background, with hints of oak,",
+   "score": 0.9979
+  },
+  {
+   "box": [
+    69.0,
+    490.0,
+    508.0,
+    511.0
+   ],
+   "text": "clover honey, pine nuts and creamy toffe with milk chocolate. A very nice dram with a",
+   "score": 0.9907
+  },
+  {
+   "box": [
+    69.0,
+    512.0,
+    489.0,
+    532.0
+   ],
+   "text": "sweet finish like digestive biscuits with honey. Not too complex, but nicely balanced",
+   "score": 0.9907
+  },
+  {
+   "box": [
+    69.0,
+    532.0,
+    172.0,
+    553.0
+   ],
+   "text": "and very accessible.",
+   "score": 0.9982
+  },
+  {
+   "box": [
+    71.0,
+    580.0,
+    517.0,
+    598.0
+   ],
+   "text": "THE SALTIRE RARE MALT COLLECTION IS CURATED BY 'THE WHISKY COUPLE'",
+   "score": 0.9817
+  },
+  {
+   "box": [
+    215.0,
+    596.0,
+    373.0,
+    611.0
+   ],
+   "text": "saltireraremalt.com",
+   "score": 0.9999
+  },
+  {
+   "box": [
+    82.0,
+    610.0,
+    505.0,
+    626.0
+   ],
+   "text": "Bottled by: Saltire Rare Malt Whisky, The Old Town House, Falkland, Fife, Scotland KYI5 7BU",
+   "score": 0.9854
+  },
+  {
+   "box": [
+    281.0,
+    622.0,
+    530.0,
+    675.0
+   ],
+   "text": "CA CRV, I , T 15, ME 15c",
+   "score": 0.8048
+  },
+  {
+   "box": [
+    283.0,
+    665.0,
+    392.0,
+    715.0
+   ],
+   "text": "48.8%Al.NOol.",
+   "score": 0.8371
+  },
+  {
+   "box": [
+    433.0,
+    667.0,
+    523.0,
+    714.0
+   ],
+   "text": "700mle",
+   "score": 0.995
+  },
+  {
+   "box": [
+    286.0,
+    711.0,
+    521.0,
+    727.0
+   ],
+   "text": "GOVERNMENT WARNING:(1)ACCORDING TO THE SURGEON GENERAL,",
+   "score": 0.9925
+  },
+  {
+   "box": [
+    284.0,
+    723.0,
+    523.0,
+    743.0
+   ],
+   "text": "WOMEN SHOULD NOT DRINK ALCOHOLIC BEVERAGES DURING PREG-",
+   "score": 0.9948
+  },
+  {
+   "box": [
+    284.0,
+    737.0,
+    522.0,
+    755.0
+   ],
+   "text": "NANCY BECAUSE OF THE RISK OF BIRTH DEFECTS. (2) CONSUMPTION",
+   "score": 0.9942
+  },
+  {
+   "box": [
+    286.0,
+    752.0,
+    521.0,
+    768.0
+   ],
+   "text": "OF ALCOHOLIC BEVERAGES IMPAIRS YOUR ABILITY TO DRIVE A CAR",
+   "score": 0.9675
+  },
+  {
+   "box": [
+    66.0,
+    773.0,
+    280.0,
+    796.0
+   ],
+   "text": "5\"065027\"927100\">",
+   "score": 0.975
+  },
+  {
+   "box": [
+    285.0,
+    766.0,
+    522.0,
+    781.0
+   ],
+   "text": "OR OPERATE MACHINERY, AND MAY CAUSE HEALTH PROBLEMS.",
+   "score": 0.9926
+  },
+  {
+   "box": [
+    285.0,
+    784.0,
+    520.0,
+    800.0
+   ],
+   "text": "IMPORTED BY: Park Street Imports, Miami, FL",
+   "score": 0.987
+  }
+ ],
+ "warning_boxes": [
+  {
+   "box": [
+    62.0,
+    121.0,
+    522.0,
+    147.0
+   ],
+   "text": "Held close and aged to perfection, our Single Malt Scotch Whisky",
+   "score": 0.9945
+  },
+  {
+   "box": [
+    68.0,
+    147.0,
+    516.0,
+    170.0
+   ],
+   "text": "releases are never rushed or hurried \u2014 they're bottled when the",
+   "score": 0.9813
+  },
+  {
+   "box": [
+    64.0,
+    172.0,
+    518.0,
+    198.0
+   ],
+   "text": "right time arrives. We understand the importance of this moment,",
+   "score": 0.9924
+  },
+  {
+   "box": [
+    79.0,
+    197.0,
+    504.0,
+    220.0
+   ],
+   "text": "when the true character of the spirit is ready to be celebrated.",
+   "score": 0.997
+  },
+  {
+   "box": [
+    69.0,
+    244.0,
+    154.0,
+    271.0
+   ],
+   "text": "NO.66",
+   "score": 0.9911
+  },
+  {
+   "box": [
+    161.0,
+    242.0,
+    502.0,
+    268.0
+   ],
+   "text": "SINGLE MALT SCOTCH WHISKY",
+   "score": 0.9995
+  },
+  {
+   "box": [
+    70.0,
+    277.0,
+    153.0,
+    295.0
+   ],
+   "text": "DISTILLED AT",
+   "score": 0.9987
+  },
+  {
+   "box": [
+    300.0,
+    277.0,
+    363.0,
+    298.0
+   ],
+   "text": "CASK NO.",
+   "score": 0.9968
+  },
+  {
+   "box": [
+    433.0,
+    277.0,
+    507.0,
+    296.0
+   ],
+   "text": "BOTTLE NO.",
+   "score": 0.9999
+  },
+  {
+   "box": [
+    70.0,
+    297.0,
+    206.0,
+    321.0
+   ],
+   "text": "ISLE OF JURA",
+   "score": 0.9959
+  },
+  {
+   "box": [
+    301.0,
+    297.0,
+    360.0,
+    322.0
+   ],
+   "text": "#229",
+   "score": 0.9997
+  },
+  {
+   "box": [
+    452.0,
+    296.0,
+    497.0,
+    323.0
+   ],
+   "text": "/221",
+   "score": 0.9987
+  },
+  {
+   "box": [
+    72.0,
+    331.0,
+    319.0,
+    353.0
+   ],
+   "text": "2ND FILL EX SHERRY TAMDHU HHD",
+   "score": 0.9835
+  },
+  {
+   "box": [
+    387.0,
+    331.0,
+    493.0,
+    352.0
+   ],
+   "text": "NATURAL COLOUR",
+   "score": 0.9847
+  },
+  {
+   "box": [
+    388.0,
+    351.0,
+    507.0,
+    369.0
+   ],
+   "text": "NON-CHILL FILTERED",
+   "score": 0.9997
+  },
+  {
+   "box": [
+    69.0,
+    378.0,
+    103.0,
+    398.0
+   ],
+   "text": "AGE",
+   "score": 1.0
+  },
+  {
+   "box": [
+    178.0,
+    379.0,
+    241.0,
+    397.0
+   ],
+   "text": "BOTTLED",
+   "score": 1.0
+  },
+  {
+   "box": [
+    303.0,
+    379.0,
+    373.0,
+    397.0
+   ],
+   "text": "DISTILLED",
+   "score": 1.0
+  },
+  {
+   "box": [
+    420.0,
+    379.0,
+    474.0,
+    397.0
+   ],
+   "text": "REGION",
+   "score": 0.9992
+  },
+  {
+   "box": [
+    69.0,
+    396.0,
+    155.0,
+    420.0
+   ],
+   "text": "15 YEARS",
+   "score": 0.9981
+  },
+  {
+   "box": [
+    179.0,
+    397.0,
+    269.0,
+    419.0
+   ],
+   "text": "07/09/2026",
+   "score": 1.0
+  },
+  {
+   "box": [
+    303.0,
+    397.0,
+    386.0,
+    419.0
+   ],
+   "text": "02/02/2011",
+   "score": 0.9981
+  },
+  {
+   "box": [
+    421.0,
+    397.0,
+    512.0,
+    419.0
+   ],
+   "text": "HIGHLAND",
+   "score": 0.9999
+  },
+  {
+   "box": [
+    69.0,
+    446.0,
+    514.0,
+    469.0
+   ],
+   "text": "Immediately that nutty signature note of Jura followed by dry hay in the sun, reminding",
+   "score": 0.9912
+  },
+  {
+   "box": [
+    69.0,
+    467.0,
+    517.0,
+    490.0
+   ],
+   "text": "us of sweetgrass baskets from Charleston. There is a malty background, with hints of oak,",
+   "score": 0.9979
+  },
+  {
+   "box": [
+    69.0,
+    490.0,
+    508.0,
+    511.0
+   ],
+   "text": "clover honey, pine nuts and creamy toffe with milk chocolate. A very nice dram with a",
+   "score": 0.9907
+  },
+  {
+   "box": [
+    69.0,
+    512.0,
+    489.0,
+    532.0
+   ],
+   "text": "sweet finish like digestive biscuits with honey. Not too complex, but nicely balanced",
+   "score": 0.9907
+  },
+  {
+   "box": [
+    69.0,
+    532.0,
+    172.0,
+    553.0
+   ],
+   "text": "and very accessible.",
+   "score": 0.9982
+  },
+  {
+   "box": [
+    71.0,
+    580.0,
+    517.0,
+    598.0
+   ],
+   "text": "THE SALTIRE RARE MALT COLLECTION IS CURATED BY 'THE WHISKY COUPLE'",
+   "score": 0.9817
+  },
+  {
+   "box": [
+    215.0,
+    596.0,
+    373.0,
+    611.0
+   ],
+   "text": "saltireraremalt.com",
+   "score": 0.9999
+  },
+  {
+   "box": [
+    82.0,
+    610.0,
+    505.0,
+    626.0
+   ],
+   "text": "Bottled by: Saltire Rare Malt Whisky, The Old Town House, Falkland, Fife, Scotland KYI5 7BU",
+   "score": 0.9854
+  },
+  {
+   "box": [
+    281.0,
+    622.0,
+    530.0,
+    675.0
+   ],
+   "text": "CA CRV, I , T 15, ME 15c",
+   "score": 0.8048
+  },
+  {
+   "box": [
+    283.0,
+    665.0,
+    392.0,
+    715.0
+   ],
+   "text": "48.8%Al.NOol.",
+   "score": 0.8371
+  },
+  {
+   "box": [
+    433.0,
+    667.0,
+    523.0,
+    714.0
+   ],
+   "text": "700mle",
+   "score": 0.995
+  },
+  {
+   "box": [
+    286.0,
+    711.0,
+    521.0,
+    727.0
+   ],
+   "text": "GOVERNMENT WARNING:(1)ACCORDING TO THE SURGEON GENERAL,",
+   "score": 0.9925
+  },
+  {
+   "box": [
+    284.0,
+    723.0,
+    523.0,
+    743.0
+   ],
+   "text": "WOMEN SHOULD NOT DRINK ALCOHOLIC BEVERAGES DURING PREG-",
+   "score": 0.9948
+  },
+  {
+   "box": [
+    284.0,
+    737.0,
+    522.0,
+    755.0
+   ],
+   "text": "NANCY BECAUSE OF THE RISK OF BIRTH DEFECTS. (2) CONSUMPTION",
+   "score": 0.9942
+  },
+  {
+   "box": [
+    286.0,
+    752.0,
+    521.0,
+    768.0
+   ],
+   "text": "OF ALCOHOLIC BEVERAGES IMPAIRS YOUR ABILITY TO DRIVE A CAR",
+   "score": 0.9675
+  },
+  {
+   "box": [
+    66.0,
+    773.0,
+    280.0,
+    796.0
+   ],
+   "text": "5\"065027\"927100\">",
+   "score": 0.975
+  },
+  {
+   "box": [
+    285.0,
+    766.0,
+    522.0,
+    781.0
+   ],
+   "text": "OR OPERATE MACHINERY, AND MAY CAUSE HEALTH PROBLEMS.",
+   "score": 0.9926
+  },
+  {
+   "box": [
+    285.0,
+    784.0,
+    520.0,
+    800.0
+   ],
+   "text": "IMPORTED BY: Park Street Imports, Miami, FL",
+   "score": 0.987
+  }
+ ],
+ "heading_measurement": {
+  "is_bold": false,
+  "mean_stroke_width": 2.087,
+  "mean_character_height": 9.4412,
+  "width_height_ratio": 0.2211,
+  "confident": true
+ }
+}

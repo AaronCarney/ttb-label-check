@@ -1,0 +1,600 @@
+{
+ "image": "26239001000217/back.jpg",
+ "schema_version": 1,
+ "frame_size": [
+  709,
+  922
+ ],
+ "rotation_deg": 0,
+ "boxes": [
+  {
+   "box": [
+    195.0,
+    13.0,
+    510.0,
+    85.0
+   ],
+   "text": "FREISINGER",
+   "score": 0.9998
+  },
+  {
+   "box": [
+    38.0,
+    27.0,
+    193.0,
+    121.0
+   ],
+   "text": "BAVARIA",
+   "score": 0.9998
+  },
+  {
+   "box": [
+    138.0,
+    83.0,
+    217.0,
+    119.0
+   ],
+   "text": "TRD",
+   "score": 0.9999
+  },
+  {
+   "box": [
+    194.0,
+    78.0,
+    576.0,
+    130.0
+   ],
+   "text": "LAGER\u2192MRK",
+   "score": 0.931
+  },
+  {
+   "box": [
+    47.0,
+    131.0,
+    663.0,
+    179.0
+   ],
+   "text": "Forget what you think you know about Germany, and",
+   "score": 0.9911
+  },
+  {
+   "box": [
+    39.0,
+    174.0,
+    668.0,
+    203.0
+   ],
+   "text": "forget what you think you know about beer. Beer is not",
+   "score": 0.9853
+  },
+  {
+   "box": [
+    79.0,
+    207.0,
+    627.0,
+    236.0
+   ],
+   "text": "a hobby, beer is an art form. Some try, most fail.",
+   "score": 0.987
+  },
+  {
+   "box": [
+    41.0,
+    241.0,
+    667.0,
+    270.0
+   ],
+   "text": "At Freising, we do not try, we perfect. Excellence is not",
+   "score": 0.9995
+  },
+  {
+   "box": [
+    49.0,
+    275.0,
+    656.0,
+    303.0
+   ],
+   "text": "optional, it's what defines us. No additives. Real hops.",
+   "score": 0.9867
+  },
+  {
+   "box": [
+    94.0,
+    307.0,
+    615.0,
+    335.0
+   ],
+   "text": "Water from our own Bavarian well. Fermented",
+   "score": 0.9816
+  },
+  {
+   "box": [
+    67.0,
+    341.0,
+    640.0,
+    370.0
+   ],
+   "text": "and slow brewed to perfection in the land of beer.",
+   "score": 0.9994
+  },
+  {
+   "box": [
+    135.0,
+    380.0,
+    572.0,
+    407.0
+   ],
+   "text": "PERFECTED SINCE 116O",
+   "score": 0.9886
+  },
+  {
+   "box": [
+    226.0,
+    413.0,
+    481.0,
+    445.0
+   ],
+   "text": "PRODUCT OF GERMANY",
+   "score": 0.9998
+  },
+  {
+   "box": [
+    18.0,
+    458.0,
+    690.0,
+    490.0
+   ],
+   "text": "GOVERNMENT WARNING: (1) ACCORDING TO THE SURGEON",
+   "score": 0.9745
+  },
+  {
+   "box": [
+    19.0,
+    485.0,
+    688.0,
+    514.0
+   ],
+   "text": "GENERAL, WOMEN SHOULD NOT DRINK ALCOHOLIC",
+   "score": 0.9635
+  },
+  {
+   "box": [
+    17.0,
+    509.0,
+    689.0,
+    541.0
+   ],
+   "text": "BEVERAGES DURING PREGNANCY BECAUSE OF THE RISK OF",
+   "score": 0.9979
+  },
+  {
+   "box": [
+    18.0,
+    535.0,
+    688.0,
+    567.0
+   ],
+   "text": "BIRTH DEFECTS. (2) CONSUMPTION OF ALCOHOLIC",
+   "score": 0.9719
+  },
+  {
+   "box": [
+    19.0,
+    563.0,
+    688.0,
+    592.0
+   ],
+   "text": "BEVERAGES IMPAIRSYOUR ABILITY TO DRIVE A CAR OR",
+   "score": 0.9987
+  },
+  {
+   "box": [
+    19.0,
+    589.0,
+    672.0,
+    618.0
+   ],
+   "text": "OPERATE MACHINERY, AND MAY CAUSE HEALTH PROBLEMS.",
+   "score": 0.9968
+  },
+  {
+   "box": [
+    17.0,
+    642.0,
+    116.0,
+    668.0
+   ],
+   "text": "BEST BEFORE",
+   "score": 0.9998
+  },
+  {
+   "box": [
+    227.0,
+    698.0,
+    518.0,
+    739.0
+   ],
+   "text": "52964\"00789",
+   "score": 0.9982
+  },
+  {
+   "box": [
+    511.0,
+    705.0,
+    539.0,
+    736.0
+   ],
+   "text": "8",
+   "score": 0.9999
+  },
+  {
+   "box": [
+    29.0,
+    738.0,
+    678.0,
+    766.0
+   ],
+   "text": "ME, VT, CT, MA, DE, NY, IA, OR, HI: 5\u00a2 - MI: 1OC \u2013 OK+CA CRV - PUERTO RICO DO NOT LITTER",
+   "score": 0.962
+  },
+  {
+   "box": [
+    195.0,
+    769.0,
+    512.0,
+    798.0
+   ],
+   "text": "FREISINGER LAGERBEER",
+   "score": 0.9997
+  },
+  {
+   "box": [
+    23.0,
+    802.0,
+    676.0,
+    834.0
+   ],
+   "text": "BREWED BY: GR\u00c4FLICHES HOFBRAUHAUS FREISING GMBH, MAINBURGER",
+   "score": 0.9986
+  },
+  {
+   "box": [
+    23.0,
+    831.0,
+    351.0,
+    860.0
+   ],
+   "text": "STR. 26, 85356 FREISING, GERMANY",
+   "score": 0.9727
+  },
+  {
+   "box": [
+    23.0,
+    855.0,
+    461.0,
+    886.0
+   ],
+   "text": "IMPORTED BY: PARK STREET IMPORTS MIAMI, FL",
+   "score": 0.9824
+  },
+  {
+   "box": [
+    24.0,
+    883.0,
+    291.0,
+    911.0
+   ],
+   "text": "WWW.DRINKFREISINGER.COM",
+   "score": 0.9999
+  },
+  {
+   "box": [
+    624.0,
+    880.0,
+    688.0,
+    915.0
+   ],
+   "text": "PS01",
+   "score": 0.9985
+  }
+ ],
+ "warning_boxes": [
+  {
+   "box": [
+    195.0,
+    13.0,
+    510.0,
+    85.0
+   ],
+   "text": "FREISINGER",
+   "score": 0.9998
+  },
+  {
+   "box": [
+    38.0,
+    27.0,
+    193.0,
+    121.0
+   ],
+   "text": "BAVARIA",
+   "score": 0.9998
+  },
+  {
+   "box": [
+    138.0,
+    83.0,
+    217.0,
+    119.0
+   ],
+   "text": "TRD",
+   "score": 0.9999
+  },
+  {
+   "box": [
+    194.0,
+    78.0,
+    576.0,
+    130.0
+   ],
+   "text": "LAGER\u2192MRK",
+   "score": 0.931
+  },
+  {
+   "box": [
+    47.0,
+    131.0,
+    663.0,
+    179.0
+   ],
+   "text": "Forget what you think you know about Germany, and",
+   "score": 0.9911
+  },
+  {
+   "box": [
+    39.0,
+    174.0,
+    668.0,
+    203.0
+   ],
+   "text": "forget what you think you know about beer. Beer is not",
+   "score": 0.9853
+  },
+  {
+   "box": [
+    79.0,
+    207.0,
+    627.0,
+    236.0
+   ],
+   "text": "a hobby, beer is an art form. Some try, most fail.",
+   "score": 0.987
+  },
+  {
+   "box": [
+    41.0,
+    241.0,
+    667.0,
+    270.0
+   ],
+   "text": "At Freising, we do not try, we perfect. Excellence is not",
+   "score": 0.9995
+  },
+  {
+   "box": [
+    49.0,
+    275.0,
+    656.0,
+    303.0
+   ],
+   "text": "optional, it's what defines us. No additives. Real hops.",
+   "score": 0.9867
+  },
+  {
+   "box": [
+    94.0,
+    307.0,
+    615.0,
+    335.0
+   ],
+   "text": "Water from our own Bavarian well. Fermented",
+   "score": 0.9816
+  },
+  {
+   "box": [
+    67.0,
+    341.0,
+    640.0,
+    370.0
+   ],
+   "text": "and slow brewed to perfection in the land of beer.",
+   "score": 0.9994
+  },
+  {
+   "box": [
+    135.0,
+    380.0,
+    572.0,
+    407.0
+   ],
+   "text": "PERFECTED SINCE 116O",
+   "score": 0.9886
+  },
+  {
+   "box": [
+    226.0,
+    413.0,
+    481.0,
+    445.0
+   ],
+   "text": "PRODUCT OF GERMANY",
+   "score": 0.9998
+  },
+  {
+   "box": [
+    18.0,
+    458.0,
+    690.0,
+    490.0
+   ],
+   "text": "GOVERNMENT WARNING: (1) ACCORDING TO THE SURGEON",
+   "score": 0.9745
+  },
+  {
+   "box": [
+    19.0,
+    485.0,
+    688.0,
+    514.0
+   ],
+   "text": "GENERAL, WOMEN SHOULD NOT DRINK ALCOHOLIC",
+   "score": 0.9635
+  },
+  {
+   "box": [
+    17.0,
+    509.0,
+    689.0,
+    541.0
+   ],
+   "text": "BEVERAGES DURING PREGNANCY BECAUSE OF THE RISK OF",
+   "score": 0.9979
+  },
+  {
+   "box": [
+    18.0,
+    535.0,
+    688.0,
+    567.0
+   ],
+   "text": "BIRTH DEFECTS. (2) CONSUMPTION OF ALCOHOLIC",
+   "score": 0.9719
+  },
+  {
+   "box": [
+    19.0,
+    563.0,
+    688.0,
+    592.0
+   ],
+   "text": "BEVERAGES IMPAIRSYOUR ABILITY TO DRIVE A CAR OR",
+   "score": 0.9987
+  },
+  {
+   "box": [
+    19.0,
+    589.0,
+    672.0,
+    618.0
+   ],
+   "text": "OPERATE MACHINERY, AND MAY CAUSE HEALTH PROBLEMS.",
+   "score": 0.9968
+  },
+  {
+   "box": [
+    17.0,
+    642.0,
+    116.0,
+    668.0
+   ],
+   "text": "BEST BEFORE",
+   "score": 0.9998
+  },
+  {
+   "box": [
+    227.0,
+    698.0,
+    518.0,
+    739.0
+   ],
+   "text": "52964\"00789",
+   "score": 0.9982
+  },
+  {
+   "box": [
+    511.0,
+    705.0,
+    539.0,
+    736.0
+   ],
+   "text": "8",
+   "score": 0.9999
+  },
+  {
+   "box": [
+    29.0,
+    738.0,
+    678.0,
+    766.0
+   ],
+   "text": "ME, VT, CT, MA, DE, NY, IA, OR, HI: 5\u00a2 - MI: 1OC \u2013 OK+CA CRV - PUERTO RICO DO NOT LITTER",
+   "score": 0.962
+  },
+  {
+   "box": [
+    195.0,
+    769.0,
+    512.0,
+    798.0
+   ],
+   "text": "FREISINGER LAGERBEER",
+   "score": 0.9997
+  },
+  {
+   "box": [
+    23.0,
+    802.0,
+    676.0,
+    834.0
+   ],
+   "text": "BREWED BY: GR\u00c4FLICHES HOFBRAUHAUS FREISING GMBH, MAINBURGER",
+   "score": 0.9986
+  },
+  {
+   "box": [
+    23.0,
+    831.0,
+    351.0,
+    860.0
+   ],
+   "text": "STR. 26, 85356 FREISING, GERMANY",
+   "score": 0.9727
+  },
+  {
+   "box": [
+    23.0,
+    855.0,
+    461.0,
+    886.0
+   ],
+   "text": "IMPORTED BY: PARK STREET IMPORTS MIAMI, FL",
+   "score": 0.9824
+  },
+  {
+   "box": [
+    24.0,
+    883.0,
+    291.0,
+    911.0
+   ],
+   "text": "WWW.DRINKFREISINGER.COM",
+   "score": 0.9999
+  },
+  {
+   "box": [
+    624.0,
+    880.0,
+    688.0,
+    915.0
+   ],
+   "text": "PS01",
+   "score": 0.9985
+  }
+ ],
+ "heading_measurement": {
+  "is_bold": false,
+  "mean_stroke_width": 2.4144,
+  "mean_character_height": 17.0,
+  "width_height_ratio": 0.142,
+  "confident": true
+ }
+}

@@ -22,10 +22,9 @@ and a suite that passes over sixty-two print the same green line, so the count
 and the image list are asserted outright. When the corpus grows, this file fails
 until somebody looks at what grew.
 
-The twenty-four are a first slice of the corpus and every label that prints a
-proof statement, both faces of each. The proof labels are here because a proof
-read beside the ABV can reject a label, so how the reader finds one on real
-boxes is worth pinning without an OCR run.
+The fifty-eight are every face of every real label in the corpus and the two
+variant fronts drawn from real labels. A label's faces are merged by the
+product's own step, so what is scored here is the reading the rules are given.
 """
 
 from __future__ import annotations
@@ -38,6 +37,7 @@ import pytest
 
 from app.rules.proof import find_proofs
 from app.rules.units import unit_key
+from app.vision.faces import merge_readings
 from app.vision.local import (
     MAX_EDGE_PX,
     _Box,
@@ -46,64 +46,120 @@ from app.vision.local import (
     _net_re,
     _parse,
     _units,
+    face_observations,
     parse_reading,
     thaw_reading,
 )
-from eval.read_accuracy import CHECKS, LABELS_ROOT, WARNING_ASSET, _has_reading, _score
+from eval.read_accuracy import CHECKS, LABELS_ROOT, WARNING_ASSET, _score
 
 RECORDINGS = Path("tests/recordings/reader")
 
-# A first slice of the corpus, then the seven labels that print a proof.
-# Written out rather than globbed so that a recording appearing or disappearing
-# is a failure and not a silent change of subject.
+# Every real label in the corpus, both faces where it has two, and the two
+# variants whose front is an image of its own. Written out rather than globbed
+# so that a recording appearing or disappearing is a failure and not a silent
+# change of subject. The corpus's other four images are variant copies of real
+# faces made to test the photo gate, and are read by the live harness only.
 COVERED_IMAGES = frozenset(
     {
+        "26231001000662/front.jpg",
+        "26231001000662/back.jpg",
+        "26230001000540/front.jpg",
+        "26230001000540/back.jpg",
+        "26239001000079/front.jpg",
+        "26239001000079/back.jpg",
+        "26236001000448/front.jpg",
+        "26236001000448/back.jpg",
+        "26239001000081/front.jpg",
+        "26239001000081/back.jpg",
+        "26229001000513/front.jpg",
+        "26229001000513/back.jpg",
+        "26233001000189/front.jpg",
+        "26233001000189/back.jpg",
+        "26237001000107/front.jpg",
+        "26237001000107/back.jpg",
+        "26232001000404/front.jpg",
+        "26232001000404/back.jpg",
+        "26231001000333/front.jpg",
+        "26231001000333/back.jpg",
         "26212001000085/front.jpg",
         "26212001000085/back.jpg",
         "26229001000034/front.jpg",
         "26229001000034/back.jpg",
-        "26230001000420/front.jpg",
-        "26230001000420/back.jpg",
-        "26237001000107/back.jpg",
-        "26239001000132/back.jpg",
-        "26240001000454/front.jpg",
-        "variants/var-heading-title-case-front.jpg",
-        "variants/var-warning-wording-front.jpg",
+        "26236001000210/front.jpg",
+        "26236001000210/back.jpg",
         "26218001000369/front.jpg",
         "26218001000369/back.jpg",
-        "26230001000540/front.jpg",
-        "26230001000540/back.jpg",
-        "26231001000662/front.jpg",
-        "26231001000662/back.jpg",
-        "26232001000404/front.jpg",
-        "26232001000404/back.jpg",
-        "26237001000107/front.jpg",
-        "26239001000079/front.jpg",
-        "26239001000079/back.jpg",
-        "26239001000081/front.jpg",
-        "26239001000081/back.jpg",
+        "26233001000569/front.jpg",
+        "26233001000569/back.jpg",
+        "26233001000566/front.jpg",
+        "26233001000566/back.jpg",
+        "26236001000716/front.jpg",
+        "26236001000716/back.jpg",
+        "26236001000652/front.jpg",
+        "26236001000652/back.jpg",
+        "26239001000132/front.jpg",
+        "26239001000132/back.jpg",
+        "26237001000196/front.jpg",
+        "26237001000196/back.jpg",
+        "26230001000420/front.jpg",
+        "26230001000420/back.jpg",
+        "26242001000088/front.jpg",
+        "26242001000088/back.jpg",
+        "26239001000217/front.jpg",
+        "26239001000217/back.jpg",
+        "26239001000279/front.jpg",
+        "26240001000563/front.jpg",
+        "26240001000454/front.jpg",
+        "26240001000573/front.jpg",
+        "26238001000795/front.jpg",
+        "26238001000795/back.jpg",
+        "26239001000239/front.jpg",
+        "26239001000239/back.jpg",
+        "26239001000331/front.jpg",
+        "26239001000331/back.jpg",
+        "variants/var-heading-title-case-front.jpg",
+        "variants/var-warning-wording-front.jpg",
     }
 )
 
-# The thirteen manifest entries those images belong to. Two are variants:
-# `eval/read_accuracy.py` records them and does not score them, because they
-# exercise the rules rather than the reader. Here they are scored, because a
-# variant's `label_observed` is transcribed from the variant's own image and the
-# reader is being asked what it can read off that image.
+# The thirty-two manifest entries those images belong to: every real label, and
+# two variants. `eval/read_accuracy.py` records the variants and does not score
+# them, because they exercise the rules rather than the reader. Here they are
+# scored, because a variant's `label_observed` is transcribed from the variant's
+# own image and the reader is being asked what it can read off that image.
 ENTRIES = (
+    "ttb-26231001000662",
+    "ttb-26230001000540",
+    "ttb-26239001000079",
+    "ttb-26236001000448",
+    "ttb-26239001000081",
+    "ttb-26229001000513",
+    "ttb-26233001000189",
+    "ttb-26237001000107",
+    "ttb-26232001000404",
+    "ttb-26231001000333",
     "ttb-26212001000085",
     "ttb-26229001000034",
+    "ttb-26236001000210",
+    "ttb-26218001000369",
+    "ttb-26233001000569",
+    "ttb-26233001000566",
+    "ttb-26236001000716",
+    "ttb-26236001000652",
+    "ttb-26239001000132",
+    "ttb-26237001000196",
     "ttb-26230001000420",
-    "ttb-26237001000107",
+    "ttb-26242001000088",
+    "ttb-26239001000217",
+    "ttb-26239001000279",
+    "ttb-26240001000563",
     "ttb-26240001000454",
+    "ttb-26240001000573",
+    "ttb-26238001000795",
+    "ttb-26239001000239",
+    "ttb-26239001000331",
     "var-heading-title-case",
     "var-warning-wording",
-    "ttb-26218001000369",
-    "ttb-26230001000540",
-    "ttb-26231001000662",
-    "ttb-26232001000404",
-    "ttb-26239001000079",
-    "ttb-26239001000081",
 )
 
 # The proof each label prints, for the labels that print one.
@@ -120,32 +176,60 @@ PRINTED_PROOF = {
 # What the reader gets wrong today, one line per check it misses, with the cause
 # beside it. Every pair not named here must be correct, and every pair named here
 # must still be wrong — so a fix cannot land quietly and a regression cannot hide
-# behind a line that was already red. **When R6 fixes one, delete its line.**
+# behind a line that was already red. **When a fix lands, delete its line.**
 #
-# It was thirty lines when this suite was written. The causes that remain:
+# The causes, by letter:
 #
-#   (B) brand is "the largest box that is not another field", which on a label
-#       whose warning is set large returns a fragment of the warning. It is the
-#       single largest cause left, and it is in none of R6's rows.
-#   (C) class/type is "the largest box carrying a designation", which returns a
-#       retailer's name where one is printed larger than the designation.
+#   (B) brand is "the largest type that is not another field". Nothing on a
+#       label marks which text is the brand, so where a fanciful name, an origin
+#       line or a class designation is set larger, that is what comes back.
+#   (C) class/type is "the largest box carrying a designation", which returns
+#       part of the designation, or a line that merely mentions one.
 #   (D) the engine never read the characters at all, so no parsing change can
-#       reach it. `26229001000034/front.jpg` returned three boxes — `CRÈME DE
-#       CASSIS`, `LIQUEUR`, `AEV` — and the label's `375mL` and its alcohol
-#       statement are in neither face's box list.
-#
-# The cause that is gone: the warning block used to keep boxes past its own
-# text, so a mandatory element printed under the statement was read correctly by
-# the engine and then thrown away before any field could match it. Nine lines
-# closed when `_warning_block` began trimming its boxes where it trims its text.
+#       reach it.
+#   (M) the engine misread characters in the right text.
+#   (N) net contents: the merge keeps the face whose reading scored highest,
+#       and on these labels that is a barrel size or the Serving Facts panel,
+#       not the bottle's size on the front.
+#   (A) name and address returns the producer or bottler, not the importer the
+#       label names with its address.
+#   (W) the warning is read with a character or mark the label does not print;
+#       the label itself prints the statement exactly.
 KNOWN_MISSES: dict[tuple[str, str], str] = {
+    ("ttb-26231001000662", "brand"): "M — read 'Lucky Lucy's' as 'L3 Jucky Lucy's'",
+    ("ttb-26231001000662", "class_type"): "C — returned 'BOURBON' for 'BOURBON WHISKEY'",
+    ("ttb-26230001000540", "brand"): "M — read 'BENT 301' as 'ENT 301'",
+    ("ttb-26230001000540", "net_contents"): "N — '53 GALLON', a barrel size, beat '750 mL'",
+    ("ttb-26239001000079", "warning_exact"): "W — no comma after 'GENERAL'; 'DRIVE' read 'DRIVÉ'",
+    ("ttb-26236001000448", "net_contents"): "N — Serving Facts '44 ml' beat '750 mL'",
+    ("ttb-26239001000081", "warning_exact"): "W — '(1).', 'ACCORDING_TO', 'DRIVÉ'",
+    ("ttb-26229001000513", "net_contents"): "M — read '1 LITRE' as 'I LITRE'",
+    ("ttb-26229001000513", "name_address"): "A — returned the producer 'AMOR AERIS S.A. DE C.V'",
+    (
+        "ttb-26229001000513",
+        "origin",
+    ): "returned 'HEART OF JALISCO' from a 'DISTILLED IN' line over 'PRODUCT OF MEXICO'",
+    (
+        "ttb-26233001000189",
+        "class_type",
+    ): "C — returned the cask line 'Ex-Bourbon and Ex-Port' for 'FINE BARBADOS RUM'",
+    ("ttb-26233001000189", "net_contents"): "'700' and 'mL' were read as two separate boxes",
+    ("ttb-26233001000189", "origin"): "D — 'Product of Barbados' is in no box; only 'Barbados'",
+    ("ttb-26233001000189", "warning_exact"): "W — 'BEVERAGES' read 'BEVERÁGES'",
+    ("ttb-26237001000107", "warning_exact"): "W — '(1)' read '(I)'",
+    ("ttb-26232001000404", "class_type"): "M — read 'Scotch' as 'Sootch'",
+    ("ttb-26232001000404", "net_contents"): "N — Serving Facts '44 ml' beat '700 mL'",
+    ("ttb-26231001000333", "net_contents"): "M — read '700ml' as '700mle' on both faces",
+    ("ttb-26231001000333", "name_address"): "A — returned the bottler, Saltire Rare Malt Whisky",
+    (
+        "ttb-26231001000333",
+        "origin",
+    ): "the only statement is 'Scotland' inside the bottler's address, with no lead-in",
     (
         "ttb-26212001000085",
         "brand",
-    ): (
-        "B — returned 'MPTION OF ALCOHOLIC BEVERAGE IMPAIRS YOUR', a warning "
-        "fragment, for 'Terre et Bois de Pradière'"
-    ),
+    ): "B — returned the garbled appellation line for 'Terre et Bois de Pradière'",
+    ("ttb-26212001000085", "class_type"): "M — read 'Cognac' as 'Cognae'",
     (
         "ttb-26229001000034",
         "brand",
@@ -157,64 +241,95 @@ KNOWN_MISSES: dict[tuple[str, str], str] = {
     (
         "ttb-26229001000034",
         "abv",
-    ): (
-        "D — the front's alcohol statement came back as the three letters `AEV` "
-        "and the back prints none"
-    ),
+    ): "D — the front returned three boxes, none of them the alcohol statement",
+    ("ttb-26229001000034", "net_contents"): "D — neither face's '375mL' is in any box",
+    ("ttb-26236001000210", "brand"): "M — read 'LOST LANTERN' as '[OST] ANTERN'",
     (
-        "ttb-26229001000034",
-        "net_contents",
-    ): (
-        "D — the engine read neither face's `375mL`; the front returned three "
-        "boxes and none of them is it"
-    ),
-    ("ttb-26230001000420", "brand"): "B — returned the fragment 'TE OLLECTION' for 'The Bruery'",
-    (
-        "ttb-26230001000420",
+        "ttb-26236001000210",
         "class_type",
-    ): "C — returned the retailer 'Total Wine & More' for 'BARREL-AGED IMPERIAL STOUT'",
-    ("ttb-26237001000107", "brand"): "B — returned 'LOBO BLUE AG' for 'JUAN LOBO'",
-    ("ttb-26237001000107", "warning_exact"): "the back's warning is not read word for word",
-    (
-        "ttb-26240001000454",
-        "class_type",
-    ): "C — returned nothing; 'Double India Pale Ale' is handwritten on a keg collar",
-    ("ttb-26240001000454", "abv"): "the keg collar's '8%' is not matched",
-    (
-        "var-heading-title-case",
-        "brand",
-    ): "B — returned the fanciful name 'ROSSASTRO' for the brand 'FABIO SIGNORELLI'",
-    ("var-warning-wording", "brand"): "B — as the other variant; same image but for the warning",
+    ): "C — returned a marketing sentence that mentions whiskies",
+    ("ttb-26236001000210", "abv"): "'ALC BY VOL 60.0 %' is not matched by the statement pattern",
+    ("ttb-26236001000210", "warning_exact"): "W — 'WOMEN' read 'WOMÈN'",
     (
         "ttb-26218001000369",
         "brand",
     ): "B — returned the origin line 'DISTILLED IN IRELAND IRISH' for the brand 'AODH'",
     ("ttb-26218001000369", "class_type"): "C — returned 'WHISKEY' for 'IRISH WHISKEY'",
-    (
-        "ttb-26218001000369",
-        "name_address",
-    ): "returned the distiller, not the importer the label names with its address",
+    ("ttb-26218001000369", "name_address"): "A — returned the distiller",
     (
         "ttb-26218001000369",
         "origin",
     ): "returned nothing; 'DISTILLED IN IRELAND' was taken as the brand",
-    ("ttb-26230001000540", "brand"): "the engine read 'BENT 301' as 'ENT 301'",
-    ("ttb-26231001000662", "brand"): "the engine read 'Lucky Lucy's' as 'L3 Jucky Lucy's'",
-    ("ttb-26231001000662", "class_type"): "C — returned 'BOURBON' for 'BOURBON WHISKEY'",
+    ("ttb-26233001000569", "warning_exact"): "W — 'WOMEN' read 'WOMÈN'",
+    ("ttb-26233001000566", "brand"): "B — 'Red Blend' is set larger than 'THE UGLY'",
+    ("ttb-26233001000566", "net_contents"): "M — read '750ML' as '75OML'",
     (
-        "ttb-26232001000404",
+        "ttb-26233001000566",
+        "origin",
+    ): "'PRODUCT OF THE U.S.A.' shares a box with the web address before it",
+    ("ttb-26233001000566", "warning_exact"): "W — 'IMPAIRS' read 'ÍMPAIRS'",
+    ("ttb-26236001000716", "brand"): "M — read 'BEAR PATH' as 'BEARPATH'",
+    ("ttb-26236001000716", "class_type"): "C — returned a food-pairing sentence that says 'wine'",
+    (
+        "ttb-26239001000132",
+        "brand",
+    ): "B — returned the fanciful name 'Rossastro' for the brand 'FABIO SIGNORELLI'",
+    ("ttb-26239001000132", "name_address"): "A — returned the producer",
+    (
+        "ttb-26230001000420",
+        "brand",
+    ): "B — returned the product line 'BLACK TUESDAY PRIVATEBARREL' for 'The Bruery'",
+    (
+        "ttb-26242001000088",
+        "origin",
+    ): "returned 'LIDA SINCE' from 'BREWED IN LIDA SINCE 1940' over 'PRODUCT OF BELARUS'",
+    ("ttb-26239001000279", "name_address"): "returned 'HOP', the first word of the brewer's name",
+    (
+        "ttb-26240001000563",
         "class_type",
-    ): "the engine read 'Scotch' as 'Sootch'",
-    ("ttb-26239001000079", "warning_exact"): "the warning is not read word for word",
-    ("ttb-26239001000081", "warning_exact"): "the warning is not read word for word",
+    ): "C — returned 'MÄRZEN LAGER' for 'GERMAN STYLE MÄRZEN LAGER'",
+    ("ttb-26240001000563", "warning_exact"): "W — 'GENERAL.' for 'GENERAL,'; 'DRINK' read 'ORINK'",
+    (
+        "ttb-26240001000454",
+        "class_type",
+    ): "D — 'Double India Pale Ale' is handwritten on a keg collar and not read",
+    ("ttb-26240001000454", "abv"): "the keg collar's '8%' is not matched",
+    ("ttb-26240001000573", "brand"): "B — returned 'EKSTRA 178' for 'ŠVYTURYS'",
+    ("ttb-26240001000573", "name_address"): "A — returned the brewer, UAB Svyturys-Utenos",
+    (
+        "ttb-26240001000573",
+        "warning_exact",
+    ): "W — 'HEALTH' read 'HEAILTH', and the importer's line was swept into the block",
+    ("ttb-26238001000795", "class_type"): "C — returned 'BEER' for 'LAYER PREMIUM BEER'",
+    ("ttb-26238001000795", "net_contents"): "D — '350 ML / 12 FL OZ' is in no box",
+    ("ttb-26238001000795", "name_address"): "A — returned 'Cervecería', the brewer",
+    ("ttb-26239001000239", "warning_exact"): "W — a comma read after 'DRIVE'",
+    ("ttb-26239001000331", "brand"): "B — returned the fanciful name 'ÉMOTION' for 'GAIFFE-BRUN'",
+    ("ttb-26239001000331", "class_type"): "C — returned 'CHAMPAGNE' for 'Champagne Premier Cru'",
+    (
+        "var-heading-title-case",
+        "brand",
+    ): "B — returned the importer 'WhitServe' for the brand 'FABIO SIGNORELLI'",
+    ("var-warning-wording", "brand"): "B — as the other variant; same image but for the warning",
 }
 
 # Alcohol statements the reader returns other than as printed, with the cause.
 # As with KNOWN_MISSES, a fixed one fails until its line is deleted.
 STATEMENT_MISSES = {
+    "ttb-26236001000448": (
+        "the merge keeps the back's Serving Facts line 'Alcohol by volume: 40%', "
+        "which scored higher than the front's '40% ALC BY VOL'"
+    ),
+    "ttb-26229001000513": "the engine read the statement as '46% ALC' and cut it off there",
+    "ttb-26233001000189": "'58%' and 'alc./vol.' were read as two separate boxes",
     "ttb-26232001000404": (
-        "the engine read 'alc./vol.' as 'al./vol.', which the statement pattern "
-        "does not take, so only '40%' is kept"
+        "the merge keeps the back's Serving Facts line 'Alcohol by volume: 40%' "
+        "over the front's statement"
+    ),
+    "ttb-26231001000333": "the engine read 'Alc./Vol.' as 'Alc.Nol.' and 'Al.NOol.'",
+    "ttb-26230001000420": (
+        "the merge keeps the back's 'ALC. 20.3%', whose 'by vol.' is a box of its "
+        "own, over the front's whole statement"
     ),
 }
 
@@ -236,29 +351,26 @@ def _recording(relative: str) -> Path:
 def _replay(entry: dict) -> dict[str, dict]:
     """One label's merged payloads, from its recordings alone.
 
-    The merge is the reader harness's: faces front first, and the first face
-    reporting a value for a field is the one that holds it, because a label's
-    elements are spread over its faces and the front carries the ones the
-    regulations put in the same field of vision.
+    The merge is the product's: each face's fields become observations by
+    `face_observations` and `merge_readings` keeps, per field, the face that
+    read it with the highest confidence. Faces go in front first, the order the
+    upload puts them in, so a tie goes to the front as it does in the app.
     """
-    merged: dict[str, dict] = {}
     faces = sorted(
         entry["images"],
         key=lambda f: _FACE_ORDER.index(f) if f in _FACE_ORDER else 9,
     )
+    readings = []
     for face in faces:
-        recording = _recording(entry["images"][face])
-        if not recording.exists():
-            continue
-        payloads = parse_reading(thaw_reading(json.loads(recording.read_text())))
-        for field_id, payload in payloads.items():
-            if _has_reading(merged.get(field_id)):
-                continue
-            if _has_reading(payload):
-                merged[field_id] = payload
-            else:
-                merged.setdefault(field_id, payload)
-    return merged
+        reading = thaw_reading(json.loads(_recording(entry["images"][face]).read_text()))
+        payloads = _parse(
+            boxes=reading.boxes,
+            warning_boxes=reading.warning_boxes,
+            rotation=reading.rotation,
+            heading_measurement=reading.heading_measurement,
+        )
+        readings.append(face_observations(payloads, face_tag=face))
+    return {o.field_id: o.observed_value for o in merge_readings(readings)}
 
 
 def _scored(label_id: str) -> dict[str, bool | None]:
@@ -272,10 +384,10 @@ def _scored(label_id: str) -> dict[str, bool | None]:
 
 
 def test_the_suite_covers_exactly_the_recordings_that_exist() -> None:
-    """Twenty-four images, named. Another appearing is a failure until read."""
+    """Fifty-eight images, named. Another appearing is a failure until read."""
     on_disk = {json.loads(p.read_text())["image"] for p in RECORDINGS.rglob("*.json")}
     assert on_disk == COVERED_IMAGES
-    assert len(on_disk) == 24
+    assert len(on_disk) == 58
 
 
 def test_the_covered_images_are_the_corpus_slice_they_claim_to_be() -> None:
@@ -291,11 +403,11 @@ def test_the_covered_images_are_the_corpus_slice_they_claim_to_be() -> None:
 
 def test_the_slice_is_a_fraction_of_the_corpus_and_says_so() -> None:
     """The denominator, asserted rather than assumed: 62 images in the corpus,
-    twenty-four replayed here. R8's accuracy figure is the 62 one and this is not it."""
+    fifty-eight replayed here. The other four are the photo-gate variants."""
     entries = _entries()
     corpus = {rel for e in entries.values() for rel in e["images"].values()}
     assert len(corpus) == 62
-    assert len(COVERED_IMAGES) == 24
+    assert len(COVERED_IMAGES) == 58
 
 
 # ---------------------------------------------------------------------------
@@ -333,7 +445,7 @@ def test_the_known_misses_table_names_only_real_pairs() -> None:
 
 
 def test_the_warning_is_found_on_every_label_that_prints_one() -> None:
-    """The product's first-priority element, on all seven: `warning_present` is
+    """The product's first-priority element, on every label: `warning_present` is
     the one check with no negative case in the corpus, so it is the one that
     would go quietly wrong."""
     for label_id in ENTRIES:
@@ -414,13 +526,13 @@ def test_every_heading_box_lies_inside_its_own_frame() -> None:
 
 def test_a_rotated_reading_keeps_the_frame_it_was_read_from() -> None:
     """`26212001000085/front.jpg` is photographed on its side: the upright pass
-    finds no heading and the 90° pass does. The recording keeps both box lists,
+    finds no heading and the 270° pass does. The recording keeps both box lists,
     and the warning is parsed out of the rotated one — which is the whole reason
     `_Reading` carries `warning_boxes` separately."""
     data = json.loads(_recording("26212001000085/front.jpg").read_text())
     reading = thaw_reading(data)
 
-    assert reading.rotation == 90
+    assert reading.rotation == 270
     assert reading.boxes != reading.warning_boxes
     assert _find_heading(reading.boxes) is None
     assert _find_heading(reading.warning_boxes) is not None

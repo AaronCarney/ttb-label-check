@@ -1,0 +1,114 @@
+{
+ "image": "26239001000239/back.jpg",
+ "schema_version": 1,
+ "frame_size": [
+  882,
+  694
+ ],
+ "rotation_deg": 0,
+ "boxes": [
+  {
+   "box": [
+    135.0,
+    397.0,
+    725.0,
+    465.0
+   ],
+   "text": "Domaine du Grand Tinel",
+   "score": 0.9862
+  },
+  {
+   "box": [
+    210.0,
+    474.0,
+    651.0,
+    532.0
+   ],
+   "text": "Ch\u00e2teauneuf du Pape",
+   "score": 0.9963
+  },
+  {
+   "box": [
+    267.0,
+    525.0,
+    597.0,
+    556.0
+   ],
+   "text": "Appellation Ch\u00e1teauneuf du Pape Contr\u00f4l\u00e9e",
+   "score": 0.9801
+  },
+  {
+   "box": [
+    380.0,
+    568.0,
+    484.0,
+    607.0
+   ],
+   "text": "2025",
+   "score": 0.9997
+  },
+  {
+   "box": [
+    314.0,
+    623.0,
+    550.0,
+    648.0
+   ],
+   "text": "Mis en bouteille au Domaine",
+   "score": 0.9803
+  }
+ ],
+ "warning_boxes": [
+  {
+   "box": [
+    135.0,
+    397.0,
+    725.0,
+    465.0
+   ],
+   "text": "Domaine du Grand Tinel",
+   "score": 0.9862
+  },
+  {
+   "box": [
+    210.0,
+    474.0,
+    651.0,
+    532.0
+   ],
+   "text": "Ch\u00e2teauneuf du Pape",
+   "score": 0.9963
+  },
+  {
+   "box": [
+    267.0,
+    525.0,
+    597.0,
+    556.0
+   ],
+   "text": "Appellation Ch\u00e1teauneuf du Pape Contr\u00f4l\u00e9e",
+   "score": 0.9801
+  },
+  {
+   "box": [
+    380.0,
+    568.0,
+    484.0,
+    607.0
+   ],
+   "text": "2025",
+   "score": 0.9997
+  },
+  {
+   "box": [
+    314.0,
+    623.0,
+    550.0,
+    648.0
+   ],
+   "text": "Mis en bouteille au Domaine",
+   "score": 0.9803
+  }
+ ],
+ "heading_measurement": null
+}

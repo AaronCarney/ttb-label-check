@@ -1,0 +1,194 @@
+{
+ "image": "26233001000569/front.jpg",
+ "schema_version": 1,
+ "frame_size": [
+  556,
+  425
+ ],
+ "rotation_deg": 0,
+ "boxes": [
+  {
+   "box": [
+    106.0,
+    22.0,
+    448.0,
+    127.0
+   ],
+   "text": "Portalupi",
+   "score": 1.0
+  },
+  {
+   "box": [
+    167.0,
+    138.0,
+    389.0,
+    187.0
+   ],
+   "text": "{SANGIOVESE}",
+   "score": 0.9971
+  },
+  {
+   "box": [
+    65.0,
+    194.0,
+    494.0,
+    218.0
+   ],
+   "text": "\"Known as Brunello in Italy, this is a highly celebrated wine",
+   "score": 0.9929
+  },
+  {
+   "box": [
+    65.0,
+    218.0,
+    493.0,
+    239.0
+   ],
+   "text": "with remarkable depth. It is very complex, yet elegant in both",
+   "score": 0.9957
+  },
+  {
+   "box": [
+    65.0,
+    240.0,
+    494.0,
+    260.0
+   ],
+   "text": "bouquet and flavor. Rich cherry, vibrant raspberry, and red",
+   "score": 0.9953
+  },
+  {
+   "box": [
+    62.0,
+    260.0,
+    492.0,
+    284.0
+   ],
+   "text": "plum are complemented by balanced acidity and fine tannins,",
+   "score": 0.9869
+  },
+  {
+   "box": [
+    63.0,
+    283.0,
+    495.0,
+    305.0
+   ],
+   "text": "giving the fruit an evolving palate. Best enjoyed with meat and",
+   "score": 0.9957
+  },
+  {
+   "box": [
+    61.0,
+    304.0,
+    233.0,
+    328.0
+   ],
+   "text": "fowl dishes.\"Tim Borges",
+   "score": 0.9951
+  },
+  {
+   "box": [
+    99.0,
+    340.0,
+    456.0,
+    364.0
+   ],
+   "text": "Stone Wall Ranch, Sonoma Valley 2025",
+   "score": 0.9899
+  }
+ ],
+ "warning_boxes": [
+  {
+   "box": [
+    106.0,
+    22.0,
+    448.0,
+    127.0
+   ],
+   "text": "Portalupi",
+   "score": 1.0
+  },
+  {
+   "box": [
+    167.0,
+    138.0,
+    389.0,
+    187.0
+   ],
+   "text": "{SANGIOVESE}",
+   "score": 0.9971
+  },
+  {
+   "box": [
+    65.0,
+    194.0,
+    494.0,
+    218.0
+   ],
+   "text": "\"Known as Brunello in Italy, this is a highly celebrated wine",
+   "score": 0.9929
+  },
+  {
+   "box": [
+    65.0,
+    218.0,
+    493.0,
+    239.0
+   ],
+   "text": "with remarkable depth. It is very complex, yet elegant in both",
+   "score": 0.9957
+  },
+  {
+   "box": [
+    65.0,
+    240.0,
+    494.0,
+    260.0
+   ],
+   "text": "bouquet and flavor. Rich cherry, vibrant raspberry, and red",
+   "score": 0.9953
+  },
+  {
+   "box": [
+    62.0,
+    260.0,
+    492.0,
+    284.0
+   ],
+   "text": "plum are complemented by balanced acidity and fine tannins,",
+   "score": 0.9869
+  },
+  {
+   "box": [
+    63.0,
+    283.0,
+    495.0,
+    305.0
+   ],
+   "text": "giving the fruit an evolving palate. Best enjoyed with meat and",
+   "score": 0.9957
+  },
+  {
+   "box": [
+    61.0,
+    304.0,
+    233.0,
+    328.0
+   ],
+   "text": "fowl dishes.\"Tim Borges",
+   "score": 0.9951
+  },
+  {
+   "box": [
+    99.0,
+    340.0,
+    456.0,
+    364.0
+   ],
+   "text": "Stone Wall Ranch, Sonoma Valley 2025",
+   "score": 0.9899
+  }
+ ],
+ "heading_measurement": null
+}

@@ -94,8 +94,8 @@
     245.0,
     253.0
    ],
-   "text": "Breery",
-   "score": 0.717
+   "text": "Brewery",
+   "score": 0.9998
   },
   {
    "box": [
@@ -296,6 +296,16 @@
    ],
    "text": "THIS KEG MAY RUPTURE AND CAUSE",
    "score": 0.9992
+  },
+  {
+   "box": [
+    279.0,
+    272.0,
+    411.0,
+    286.0
+   ],
+   "text": "INJURY IF OVER-PRESSURIZED WITH",
+   "score": 0.9942
   },
   {
    "box": [
@@ -776,8 +786,8 @@
     245.0,
     253.0
    ],
-   "text": "Breery",
-   "score": 0.717
+   "text": "Brewery",
+   "score": 0.9998
   },
   {
    "box": [
@@ -978,6 +988,16 @@
    ],
    "text": "THIS KEG MAY RUPTURE AND CAUSE",
    "score": 0.9992
+  },
+  {
+   "box": [
+    279.0,
+    272.0,
+    411.0,
+    286.0
+   ],
+   "text": "INJURY IF OVER-PRESSURIZED WITH",
+   "score": 0.9942
   },
   {
    "box": [

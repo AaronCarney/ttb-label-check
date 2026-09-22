@@ -1,0 +1,480 @@
+{
+ "image": "26236001000716/back.jpg",
+ "schema_version": 1,
+ "frame_size": [
+  1093,
+  1038
+ ],
+ "rotation_deg": 0,
+ "boxes": [
+  {
+   "box": [
+    270.0,
+    18.0,
+    853.0,
+    102.0
+   ],
+   "text": "BEAR PATH",
+   "score": 0.9989
+  },
+  {
+   "box": [
+    271.0,
+    110.0,
+    849.0,
+    141.0
+   ],
+   "text": "ANDERSON VALLEY GEWURZTRAMINER",
+   "score": 0.9931
+  },
+  {
+   "box": [
+    33.0,
+    173.0,
+    1046.0,
+    210.0
+   ],
+   "text": "Bear Path Gew\u00fcrztraminer is a delightfully refreshing wine. On",
+   "score": 0.9928
+  },
+  {
+   "box": [
+    34.0,
+    216.0,
+    1065.0,
+    252.0
+   ],
+   "text": "the nose, it offers enticing aromas of apricot and rose petals. On",
+   "score": 0.984
+  },
+  {
+   "box": [
+    35.0,
+    257.0,
+    1047.0,
+    294.0
+   ],
+   "text": "the palate, ripe stone fruit is complemented by layers of ginger,",
+   "score": 0.9981
+  },
+  {
+   "box": [
+    34.0,
+    299.0,
+    988.0,
+    336.0
+   ],
+   "text": "cinnamon, and clove, creating a beautifully balanced finish.",
+   "score": 0.9912
+  },
+  {
+   "box": [
+    32.0,
+    380.0,
+    958.0,
+    418.0
+   ],
+   "text": "Pair this Anderson Valley wine with mild cheeses, roasted",
+   "score": 0.9952
+  },
+  {
+   "box": [
+    32.0,
+    422.0,
+    985.0,
+    460.0
+   ],
+   "text": "chicken or turkey, or seafood that is enhanced by its bright,",
+   "score": 0.9887
+  },
+  {
+   "box": [
+    33.0,
+    464.0,
+    327.0,
+    504.0
+   ],
+   "text": "refreshingacidity.",
+   "score": 1.0
+  },
+  {
+   "box": [
+    142.0,
+    536.0,
+    948.0,
+    570.0
+   ],
+   "text": "VINTED, CELLARED AND BOTTLED BY PROSPECT VINEYARDS",
+   "score": 0.9891
+  },
+  {
+   "box": [
+    417.0,
+    581.0,
+    681.0,
+    611.0
+   ],
+   "text": "UKIAH,CALIFORNIA",
+   "score": 0.9995
+  },
+  {
+   "box": [
+    1033.0,
+    622.0,
+    1063.0,
+    649.0
+   ],
+   "text": "3",
+   "score": 0.9991
+  },
+  {
+   "box": [
+    32.0,
+    644.0,
+    871.0,
+    684.0
+   ],
+   "text": "GOVERNMENT WARNING: (1) According to the Surgeon",
+   "score": 0.9794
+  },
+  {
+   "box": [
+    34.0,
+    692.0,
+    813.0,
+    729.0
+   ],
+   "text": "General, women should not drink alcoholic beverages",
+   "score": 0.994
+  },
+  {
+   "box": [
+    31.0,
+    736.0,
+    851.0,
+    778.0
+   ],
+   "text": "during pregnancy because of the risk of birth defects. (2)",
+   "score": 0.9984
+  },
+  {
+   "box": [
+    32.0,
+    782.0,
+    875.0,
+    823.0
+   ],
+   "text": "Consumption of alcoholic beverages impairs your ability to",
+   "score": 0.9936
+  },
+  {
+   "box": [
+    1032.0,
+    807.0,
+    1064.0,
+    890.0
+   ],
+   "text": "91451",
+   "score": 0.9996
+  },
+  {
+   "box": [
+    31.0,
+    828.0,
+    842.0,
+    869.0
+   ],
+   "text": "drive a car or operate machinery, and may cause health",
+   "score": 0.9933
+  },
+  {
+   "box": [
+    29.0,
+    873.0,
+    181.0,
+    917.0
+   ],
+   "text": "problems.",
+   "score": 1.0
+  },
+  {
+   "box": [
+    1031.0,
+    922.0,
+    1065.0,
+    951.0
+   ],
+   "text": "8",
+   "score": 0.9994
+  },
+  {
+   "box": [
+    31.0,
+    959.0,
+    752.0,
+    998.0
+   ],
+   "text": "ALC. 12.8% BY VOL. CONTAINS SULFITES750ML",
+   "score": 0.9885
+  },
+  {
+   "box": [
+    880.0,
+    953.0,
+    994.0,
+    991.0
+   ],
+   "text": "CA CRV",
+   "score": 0.9848
+  },
+  {
+   "box": [
+    819.0,
+    995.0,
+    1084.0,
+    1029.0
+   ],
+   "text": "IA 5\u00a2ME 15\u00a2VT 5\u00a2",
+   "score": 0.9108
+  }
+ ],
+ "warning_boxes": [
+  {
+   "box": [
+    270.0,
+    18.0,
+    853.0,
+    102.0
+   ],
+   "text": "BEAR PATH",
+   "score": 0.9989
+  },
+  {
+   "box": [
+    271.0,
+    110.0,
+    849.0,
+    141.0
+   ],
+   "text": "ANDERSON VALLEY GEWURZTRAMINER",
+   "score": 0.9931
+  },
+  {
+   "box": [
+    33.0,
+    173.0,
+    1046.0,
+    210.0
+   ],
+   "text": "Bear Path Gew\u00fcrztraminer is a delightfully refreshing wine. On",
+   "score": 0.9928
+  },
+  {
+   "box": [
+    34.0,
+    216.0,
+    1065.0,
+    252.0
+   ],
+   "text": "the nose, it offers enticing aromas of apricot and rose petals. On",
+   "score": 0.984
+  },
+  {
+   "box": [
+    35.0,
+    257.0,
+    1047.0,
+    294.0
+   ],
+   "text": "the palate, ripe stone fruit is complemented by layers of ginger,",
+   "score": 0.9981
+  },
+  {
+   "box": [
+    34.0,
+    299.0,
+    988.0,
+    336.0
+   ],
+   "text": "cinnamon, and clove, creating a beautifully balanced finish.",
+   "score": 0.9912
+  },
+  {
+   "box": [
+    32.0,
+    380.0,
+    958.0,
+    418.0
+   ],
+   "text": "Pair this Anderson Valley wine with mild cheeses, roasted",
+   "score": 0.9952
+  },
+  {
+   "box": [
+    32.0,
+    422.0,
+    985.0,
+    460.0
+   ],
+   "text": "chicken or turkey, or seafood that is enhanced by its bright,",
+   "score": 0.9887
+  },
+  {
+   "box": [
+    33.0,
+    464.0,
+    327.0,
+    504.0
+   ],
+   "text": "refreshingacidity.",
+   "score": 1.0
+  },
+  {
+   "box": [
+    142.0,
+    536.0,
+    948.0,
+    570.0
+   ],
+   "text": "VINTED, CELLARED AND BOTTLED BY PROSPECT VINEYARDS",
+   "score": 0.9891
+  },
+  {
+   "box": [
+    417.0,
+    581.0,
+    681.0,
+    611.0
+   ],
+   "text": "UKIAH,CALIFORNIA",
+   "score": 0.9995
+  },
+  {
+   "box": [
+    1033.0,
+    622.0,
+    1063.0,
+    649.0
+   ],
+   "text": "3",
+   "score": 0.9991
+  },
+  {
+   "box": [
+    32.0,
+    644.0,
+    871.0,
+    684.0
+   ],
+   "text": "GOVERNMENT WARNING: (1) According to the Surgeon",
+   "score": 0.9794
+  },
+  {
+   "box": [
+    34.0,
+    692.0,
+    813.0,
+    729.0
+   ],
+   "text": "General, women should not drink alcoholic beverages",
+   "score": 0.994
+  },
+  {
+   "box": [
+    31.0,
+    736.0,
+    851.0,
+    778.0
+   ],
+   "text": "during pregnancy because of the risk of birth defects. (2)",
+   "score": 0.9984
+  },
+  {
+   "box": [
+    32.0,
+    782.0,
+    875.0,
+    823.0
+   ],
+   "text": "Consumption of alcoholic beverages impairs your ability to",
+   "score": 0.9936
+  },
+  {
+   "box": [
+    1032.0,
+    807.0,
+    1064.0,
+    890.0
+   ],
+   "text": "91451",
+   "score": 0.9996
+  },
+  {
+   "box": [
+    31.0,
+    828.0,
+    842.0,
+    869.0
+   ],
+   "text": "drive a car or operate machinery, and may cause health",
+   "score": 0.9933
+  },
+  {
+   "box": [
+    29.0,
+    873.0,
+    181.0,
+    917.0
+   ],
+   "text": "problems.",
+   "score": 1.0
+  },
+  {
+   "box": [
+    1031.0,
+    922.0,
+    1065.0,
+    951.0
+   ],
+   "text": "8",
+   "score": 0.9994
+  },
+  {
+   "box": [
+    31.0,
+    959.0,
+    752.0,
+    998.0
+   ],
+   "text": "ALC. 12.8% BY VOL. CONTAINS SULFITES750ML",
+   "score": 0.9885
+  },
+  {
+   "box": [
+    880.0,
+    953.0,
+    994.0,
+    991.0
+   ],
+   "text": "CA CRV",
+   "score": 0.9848
+  },
+  {
+   "box": [
+    819.0,
+    995.0,
+    1084.0,
+    1029.0
+   ],
+   "text": "IA 5\u00a2ME 15\u00a2VT 5\u00a2",
+   "score": 0.9108
+  }
+ ],
+ "heading_measurement": {
+  "is_bold": false,
+  "mean_stroke_width": 2.5386,
+  "mean_character_height": 21.1591,
+  "width_height_ratio": 0.12,
+  "confident": true
+ }
+}

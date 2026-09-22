@@ -1,0 +1,460 @@
+{
+ "image": "26237001000196/back.jpg",
+ "schema_version": 1,
+ "frame_size": [
+  505,
+  463
+ ],
+ "rotation_deg": 0,
+ "boxes": [
+  {
+   "box": [
+    110.0,
+    22.0,
+    395.0,
+    64.0
+   ],
+   "text": "MARK WEST.",
+   "score": 0.9765
+  },
+  {
+   "box": [
+    74.0,
+    65.0,
+    434.0,
+    111.0
+   ],
+   "text": "Sonoma County Reserve",
+   "score": 0.9977
+  },
+  {
+   "box": [
+    194.0,
+    118.0,
+    309.0,
+    137.0
+   ],
+   "text": "PINOT NOIR",
+   "score": 0.9934
+  },
+  {
+   "box": [
+    15.0,
+    143.0,
+    490.0,
+    161.0
+   ],
+   "text": "Mark West Winery has been devoted to perfecting one varietal, Pinot Noir, since 1978. For Mark",
+   "score": 0.9909
+  },
+  {
+   "box": [
+    15.0,
+    160.0,
+    490.0,
+    179.0
+   ],
+   "text": "West Reserve, we sourced grapes from the cool and foggy Sonoma County \u2013 where our winery",
+   "score": 0.988
+  },
+  {
+   "box": [
+    15.0,
+    177.0,
+    490.0,
+    195.0
+   ],
+   "text": "started \u2013 to create a bright and vibrant flavor. Each glass has notes of black cherry and ripe",
+   "score": 0.989
+  },
+  {
+   "box": [
+    15.0,
+    193.0,
+    494.0,
+    212.0
+   ],
+   "text": "raspberry with light oak. Our balanced Pinot Noir pairs well with ribs, pulled pork, or grilled vegetables.",
+   "score": 0.9833
+  },
+  {
+   "box": [
+    15.0,
+    215.0,
+    225.0,
+    233.0
+   ],
+   "text": "MARKWESTWINES.COM\u00b7(855) 293-9905",
+   "score": 0.9895
+  },
+  {
+   "box": [
+    340.0,
+    216.0,
+    489.0,
+    233.0
+   ],
+   "text": "750mL \u2022 CONTAINS SULFITES",
+   "score": 0.9624
+  },
+  {
+   "box": [
+    16.0,
+    232.0,
+    215.0,
+    250.0
+   ],
+   "text": "VINTED&BOTTLED BY MARKWESTWINERY,",
+   "score": 0.9742
+  },
+  {
+   "box": [
+    369.0,
+    233.0,
+    490.0,
+    250.0
+   ],
+   "text": "ALC. 14.5% BY VOLUME",
+   "score": 0.9825
+  },
+  {
+   "box": [
+    15.0,
+    249.0,
+    82.0,
+    267.0
+   ],
+   "text": "MODESTO, CA",
+   "score": 0.9685
+  },
+  {
+   "box": [
+    14.0,
+    268.0,
+    491.0,
+    286.0
+   ],
+   "text": "GOVERNMENT WARNING: (1) ACCORDING TO THE SURGEON GENERAL, WOMEN SHOULD NOT DRINK",
+   "score": 0.9852
+  },
+  {
+   "box": [
+    15.0,
+    283.0,
+    492.0,
+    301.0
+   ],
+   "text": "ALCOHOLIC BEVERAGES DURING PREGNANCY BECAUSE OF THE RISK OF BIRTH DEFECTS. (2) CON-",
+   "score": 0.9848
+  },
+  {
+   "box": [
+    15.0,
+    298.0,
+    491.0,
+    316.0
+   ],
+   "text": "SUMPTION OF ALCOHOLIC BEVERAGES IMPAIRS YOUR ABILITY TO DRIVE A CAR OR OPERATE",
+   "score": 0.9818
+  },
+  {
+   "box": [
+    15.0,
+    314.0,
+    251.0,
+    330.0
+   ],
+   "text": "MACHINERY, AND MAY CAUSE HEALTH PROBLEMS.",
+   "score": 0.9938
+  },
+  {
+   "box": [
+    47.0,
+    334.0,
+    203.0,
+    399.0
+   ],
+   "text": "FPO",
+   "score": 0.9984
+  },
+  {
+   "box": [
+    169.0,
+    326.0,
+    300.0,
+    389.0
+   ],
+   "text": "IA 5C, M 15e",
+   "score": 0.6006
+  },
+  {
+   "box": [
+    423.0,
+    317.0,
+    476.0,
+    330.0
+   ],
+   "text": "Learn More",
+   "score": 0.9909
+  },
+  {
+   "box": [
+    45.0,
+    388.0,
+    170.0,
+    407.0
+   ],
+   "text": "000000000",
+   "score": 0.5433
+  },
+  {
+   "box": [
+    295.0,
+    389.0,
+    341.0,
+    401.0
+   ],
+   "text": "210117549",
+   "score": 1.0
+  },
+  {
+   "box": [
+    295.0,
+    399.0,
+    403.0,
+    415.0
+   ],
+   "text": "\u00a92026 Mark West Winery",
+   "score": 0.9836
+  }
+ ],
+ "warning_boxes": [
+  {
+   "box": [
+    110.0,
+    22.0,
+    395.0,
+    64.0
+   ],
+   "text": "MARK WEST.",
+   "score": 0.9765
+  },
+  {
+   "box": [
+    74.0,
+    65.0,
+    434.0,
+    111.0
+   ],
+   "text": "Sonoma County Reserve",
+   "score": 0.9977
+  },
+  {
+   "box": [
+    194.0,
+    118.0,
+    309.0,
+    137.0
+   ],
+   "text": "PINOT NOIR",
+   "score": 0.9934
+  },
+  {
+   "box": [
+    15.0,
+    143.0,
+    490.0,
+    161.0
+   ],
+   "text": "Mark West Winery has been devoted to perfecting one varietal, Pinot Noir, since 1978. For Mark",
+   "score": 0.9909
+  },
+  {
+   "box": [
+    15.0,
+    160.0,
+    490.0,
+    179.0
+   ],
+   "text": "West Reserve, we sourced grapes from the cool and foggy Sonoma County \u2013 where our winery",
+   "score": 0.988
+  },
+  {
+   "box": [
+    15.0,
+    177.0,
+    490.0,
+    195.0
+   ],
+   "text": "started \u2013 to create a bright and vibrant flavor. Each glass has notes of black cherry and ripe",
+   "score": 0.989
+  },
+  {
+   "box": [
+    15.0,
+    193.0,
+    494.0,
+    212.0
+   ],
+   "text": "raspberry with light oak. Our balanced Pinot Noir pairs well with ribs, pulled pork, or grilled vegetables.",
+   "score": 0.9833
+  },
+  {
+   "box": [
+    15.0,
+    215.0,
+    225.0,
+    233.0
+   ],
+   "text": "MARKWESTWINES.COM\u00b7(855) 293-9905",
+   "score": 0.9895
+  },
+  {
+   "box": [
+    340.0,
+    216.0,
+    489.0,
+    233.0
+   ],
+   "text": "750mL \u2022 CONTAINS SULFITES",
+   "score": 0.9624
+  },
+  {
+   "box": [
+    16.0,
+    232.0,
+    215.0,
+    250.0
+   ],
+   "text": "VINTED&BOTTLED BY MARKWESTWINERY,",
+   "score": 0.9742
+  },
+  {
+   "box": [
+    369.0,
+    233.0,
+    490.0,
+    250.0
+   ],
+   "text": "ALC. 14.5% BY VOLUME",
+   "score": 0.9825
+  },
+  {
+   "box": [
+    15.0,
+    249.0,
+    82.0,
+    267.0
+   ],
+   "text": "MODESTO, CA",
+   "score": 0.9685
+  },
+  {
+   "box": [
+    14.0,
+    268.0,
+    491.0,
+    286.0
+   ],
+   "text": "GOVERNMENT WARNING: (1) ACCORDING TO THE SURGEON GENERAL, WOMEN SHOULD NOT DRINK",
+   "score": 0.9852
+  },
+  {
+   "box": [
+    15.0,
+    283.0,
+    492.0,
+    301.0
+   ],
+   "text": "ALCOHOLIC BEVERAGES DURING PREGNANCY BECAUSE OF THE RISK OF BIRTH DEFECTS. (2) CON-",
+   "score": 0.9848
+  },
+  {
+   "box": [
+    15.0,
+    298.0,
+    491.0,
+    316.0
+   ],
+   "text": "SUMPTION OF ALCOHOLIC BEVERAGES IMPAIRS YOUR ABILITY TO DRIVE A CAR OR OPERATE",
+   "score": 0.9818
+  },
+  {
+   "box": [
+    15.0,
+    314.0,
+    251.0,
+    330.0
+   ],
+   "text": "MACHINERY, AND MAY CAUSE HEALTH PROBLEMS.",
+   "score": 0.9938
+  },
+  {
+   "box": [
+    47.0,
+    334.0,
+    203.0,
+    399.0
+   ],
+   "text": "FPO",
+   "score": 0.9984
+  },
+  {
+   "box": [
+    169.0,
+    326.0,
+    300.0,
+    389.0
+   ],
+   "text": "IA 5C, M 15e",
+   "score": 0.6006
+  },
+  {
+   "box": [
+    423.0,
+    317.0,
+    476.0,
+    330.0
+   ],
+   "text": "Learn More",
+   "score": 0.9909
+  },
+  {
+   "box": [
+    45.0,
+    388.0,
+    170.0,
+    407.0
+   ],
+   "text": "000000000",
+   "score": 0.5433
+  },
+  {
+   "box": [
+    295.0,
+    389.0,
+    341.0,
+    401.0
+   ],
+   "text": "210117549",
+   "score": 1.0
+  },
+  {
+   "box": [
+    295.0,
+    399.0,
+    403.0,
+    415.0
+   ],
+   "text": "\u00a92026 Mark West Winery",
+   "score": 0.9836
+  }
+ ],
+ "heading_measurement": {
+  "is_bold": true,
+  "mean_stroke_width": 2.1039,
+  "mean_character_height": 6.0455,
+  "width_height_ratio": 0.348,
+  "confident": true
+ }
+}

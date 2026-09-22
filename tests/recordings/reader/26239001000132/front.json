@@ -1,0 +1,440 @@
+{
+ "image": "26239001000132/front.jpg",
+ "schema_version": 1,
+ "frame_size": [
+  1600,
+  1014
+ ],
+ "rotation_deg": 0,
+ "boxes": [
+  {
+   "box": [
+    92.0,
+    108.0,
+    468.0,
+    160.0
+   ],
+   "text": "FABIO SIGNORELLI",
+   "score": 0.983
+  },
+  {
+   "box": [
+    741.0,
+    105.0,
+    1046.0,
+    171.0
+   ],
+   "text": "ROSSASTRO",
+   "score": 0.9999
+  },
+  {
+   "box": [
+    1198.0,
+    108.0,
+    1323.0,
+    178.0
+   ],
+   "text": "2024",
+   "score": 1.0
+  },
+  {
+   "box": [
+    296.0,
+    234.0,
+    529.0,
+    277.0
+   ],
+   "text": "PRODUCED BY:",
+   "score": 0.999
+  },
+  {
+   "box": [
+    1052.0,
+    227.0,
+    1316.0,
+    279.0
+   ],
+   "text": "IMPORTED BY:",
+   "score": 0.999
+  },
+  {
+   "box": [
+    167.0,
+    282.0,
+    657.0,
+    327.0
+   ],
+   "text": "AZIENDA AGRICOLA SIGNORELLI",
+   "score": 0.9774
+  },
+  {
+   "box": [
+    1041.0,
+    276.0,
+    1324.0,
+    326.0
+   ],
+   "text": "WHITSERVELLC",
+   "score": 0.9999
+  },
+  {
+   "box": [
+    171.0,
+    329.0,
+    652.0,
+    381.0
+   ],
+   "text": "PIEDIMONTE ETNEO (CT) - ITALY",
+   "score": 0.9742
+  },
+  {
+   "box": [
+    946.0,
+    327.0,
+    1420.0,
+    376.0
+   ],
+   "text": "STAMFORD, CONNECTICUT",
+   "score": 0.9897
+  },
+  {
+   "box": [
+    1189.0,
+    426.0,
+    1411.0,
+    605.0
+   ],
+   "text": "U",
+   "score": 0.6457
+  },
+  {
+   "box": [
+    132.0,
+    452.0,
+    1115.0,
+    504.0
+   ],
+   "text": "GOVERNMENT WARNING: (1) ACCORDING TO THE",
+   "score": 0.9847
+  },
+  {
+   "box": [
+    130.0,
+    497.0,
+    1114.0,
+    550.0
+   ],
+   "text": "SURGEON GENERAL, WOMEN SHOULD NOT DRINK",
+   "score": 0.9719
+  },
+  {
+   "box": [
+    130.0,
+    543.0,
+    1114.0,
+    595.0
+   ],
+   "text": "ALCOHOLIC BEVERAGES DURING PREGNANCY",
+   "score": 0.9806
+  },
+  {
+   "box": [
+    132.0,
+    587.0,
+    977.0,
+    640.0
+   ],
+   "text": "BECAUSE OF THE RISK OF BIRTH DEFECTS.",
+   "score": 0.9889
+  },
+  {
+   "box": [
+    1053.0,
+    591.0,
+    1109.0,
+    643.0
+   ],
+   "text": "(2)",
+   "score": 0.7824
+  },
+  {
+   "box": [
+    1137.0,
+    590.0,
+    1465.0,
+    681.0
+   ],
+   "text": "WhitServe",
+   "score": 1.0
+  },
+  {
+   "box": [
+    132.0,
+    633.0,
+    1114.0,
+    685.0
+   ],
+   "text": "CONSUMPTION OF ALCOHOLIC BEVERAGES IMPAIRS",
+   "score": 0.9848
+  },
+  {
+   "box": [
+    132.0,
+    678.0,
+    1115.0,
+    731.0
+   ],
+   "text": "YOUR ABILITY TO DRIVE A CAR OR OPERATE",
+   "score": 0.9885
+  },
+  {
+   "box": [
+    132.0,
+    723.0,
+    1113.0,
+    776.0
+   ],
+   "text": "MACHINERY, AND MAY CAUSE HEALTH PROBLEMS.",
+   "score": 0.9967
+  },
+  {
+   "box": [
+    407.0,
+    817.0,
+    1232.0,
+    872.0
+   ],
+   "text": "ROSE WINE| ITALY | PRODUCT OF ITALY | 750 ML",
+   "score": 0.9506
+  },
+  {
+   "box": [
+    479.0,
+    885.0,
+    1158.0,
+    937.0
+   ],
+   "text": "12% ALC. BY VOL.| CONTAINS SULFITES",
+   "score": 0.974
+  }
+ ],
+ "warning_boxes": [
+  {
+   "box": [
+    92.0,
+    108.0,
+    468.0,
+    160.0
+   ],
+   "text": "FABIO SIGNORELLI",
+   "score": 0.983
+  },
+  {
+   "box": [
+    741.0,
+    105.0,
+    1046.0,
+    171.0
+   ],
+   "text": "ROSSASTRO",
+   "score": 0.9999
+  },
+  {
+   "box": [
+    1198.0,
+    108.0,
+    1323.0,
+    178.0
+   ],
+   "text": "2024",
+   "score": 1.0
+  },
+  {
+   "box": [
+    296.0,
+    234.0,
+    529.0,
+    277.0
+   ],
+   "text": "PRODUCED BY:",
+   "score": 0.999
+  },
+  {
+   "box": [
+    1052.0,
+    227.0,
+    1316.0,
+    279.0
+   ],
+   "text": "IMPORTED BY:",
+   "score": 0.999
+  },
+  {
+   "box": [
+    167.0,
+    282.0,
+    657.0,
+    327.0
+   ],
+   "text": "AZIENDA AGRICOLA SIGNORELLI",
+   "score": 0.9774
+  },
+  {
+   "box": [
+    1041.0,
+    276.0,
+    1324.0,
+    326.0
+   ],
+   "text": "WHITSERVELLC",
+   "score": 0.9999
+  },
+  {
+   "box": [
+    171.0,
+    329.0,
+    652.0,
+    381.0
+   ],
+   "text": "PIEDIMONTE ETNEO (CT) - ITALY",
+   "score": 0.9742
+  },
+  {
+   "box": [
+    946.0,
+    327.0,
+    1420.0,
+    376.0
+   ],
+   "text": "STAMFORD, CONNECTICUT",
+   "score": 0.9897
+  },
+  {
+   "box": [
+    1189.0,
+    426.0,
+    1411.0,
+    605.0
+   ],
+   "text": "U",
+   "score": 0.6457
+  },
+  {
+   "box": [
+    132.0,
+    452.0,
+    1115.0,
+    504.0
+   ],
+   "text": "GOVERNMENT WARNING: (1) ACCORDING TO THE",
+   "score": 0.9847
+  },
+  {
+   "box": [
+    130.0,
+    497.0,
+    1114.0,
+    550.0
+   ],
+   "text": "SURGEON GENERAL, WOMEN SHOULD NOT DRINK",
+   "score": 0.9719
+  },
+  {
+   "box": [
+    130.0,
+    543.0,
+    1114.0,
+    595.0
+   ],
+   "text": "ALCOHOLIC BEVERAGES DURING PREGNANCY",
+   "score": 0.9806
+  },
+  {
+   "box": [
+    132.0,
+    587.0,
+    977.0,
+    640.0
+   ],
+   "text": "BECAUSE OF THE RISK OF BIRTH DEFECTS.",
+   "score": 0.9889
+  },
+  {
+   "box": [
+    1053.0,
+    591.0,
+    1109.0,
+    643.0
+   ],
+   "text": "(2)",
+   "score": 0.7824
+  },
+  {
+   "box": [
+    1137.0,
+    590.0,
+    1465.0,
+    681.0
+   ],
+   "text": "WhitServe",
+   "score": 1.0
+  },
+  {
+   "box": [
+    132.0,
+    633.0,
+    1114.0,
+    685.0
+   ],
+   "text": "CONSUMPTION OF ALCOHOLIC BEVERAGES IMPAIRS",
+   "score": 0.9848
+  },
+  {
+   "box": [
+    132.0,
+    678.0,
+    1115.0,
+    731.0
+   ],
+   "text": "YOUR ABILITY TO DRIVE A CAR OR OPERATE",
+   "score": 0.9885
+  },
+  {
+   "box": [
+    132.0,
+    723.0,
+    1113.0,
+    776.0
+   ],
+   "text": "MACHINERY, AND MAY CAUSE HEALTH PROBLEMS.",
+   "score": 0.9967
+  },
+  {
+   "box": [
+    407.0,
+    817.0,
+    1232.0,
+    872.0
+   ],
+   "text": "ROSE WINE| ITALY | PRODUCT OF ITALY | 750 ML",
+   "score": 0.9506
+  },
+  {
+   "box": [
+    479.0,
+    885.0,
+    1158.0,
+    937.0
+   ],
+   "text": "12% ALC. BY VOL.| CONTAINS SULFITES",
+   "score": 0.974
+  }
+ ],
+ "heading_measurement": {
+  "is_bold": false,
+  "mean_stroke_width": 4.1744,
+  "mean_character_height": 35.9444,
+  "width_height_ratio": 0.1161,
+  "confident": true
+ }
+}

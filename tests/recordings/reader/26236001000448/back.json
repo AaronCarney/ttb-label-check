@@ -1,0 +1,620 @@
+{
+ "image": "26236001000448/back.jpg",
+ "schema_version": 1,
+ "frame_size": [
+  556,
+  964
+ ],
+ "rotation_deg": 0,
+ "boxes": [
+  {
+   "box": [
+    28.0,
+    12.0,
+    527.0,
+    131.0
+   ],
+   "text": "AVIATION",
+   "score": 0.9976
+  },
+  {
+   "box": [
+    506.0,
+    105.0,
+    533.0,
+    123.0
+   ],
+   "text": "TMI",
+   "score": 0.9897
+  },
+  {
+   "box": [
+    60.0,
+    158.0,
+    490.0,
+    216.0
+   ],
+   "text": ": AMERICAN VODKA :",
+   "score": 0.9323
+  },
+  {
+   "box": [
+    51.0,
+    225.0,
+    501.0,
+    257.0
+   ],
+   "text": "Aviation American Vodka is made for great drinks",
+   "score": 0.9999
+  },
+  {
+   "box": [
+    41.0,
+    252.0,
+    510.0,
+    285.0
+   ],
+   "text": "with great company. Crafted from California grapes",
+   "score": 0.9905
+  },
+  {
+   "box": [
+    65.0,
+    282.0,
+    486.0,
+    309.0
+   ],
+   "text": "for a subtle touch of sweetness and American",
+   "score": 0.9951
+  },
+  {
+   "box": [
+    49.0,
+    307.0,
+    502.0,
+    336.0
+   ],
+   "text": "Wheat for a clean finish, Aviation American Vodka",
+   "score": 0.9987
+  },
+  {
+   "box": [
+    46.0,
+    335.0,
+    504.0,
+    365.0
+   ],
+   "text": "is versatile and effortlessly mixable. Mix into long",
+   "score": 0.9999
+  },
+  {
+   "box": [
+    84.0,
+    360.0,
+    467.0,
+    394.0
+   ],
+   "text": "drinks, your favorite cocktails, and enjoy!",
+   "score": 0.9991
+  },
+  {
+   "box": [
+    23.0,
+    394.0,
+    521.0,
+    428.0
+   ],
+   "text": "Serving Facts: Serving Size: 1.5 fl oz (44 ml); Servings per",
+   "score": 0.9942
+  },
+  {
+   "box": [
+    26.0,
+    424.0,
+    517.0,
+    453.0
+   ],
+   "text": "container: 17; Alcohol by volume: 40%; Fl. oz. of alcohol: 0.6;",
+   "score": 0.9907
+  },
+  {
+   "box": [
+    24.0,
+    450.0,
+    449.0,
+    485.0
+   ],
+   "text": "Calories: 100; Carbohydrates: Og; Fat: Og; Protein: Og",
+   "score": 0.9852
+  },
+  {
+   "box": [
+    42.0,
+    489.0,
+    511.0,
+    521.0
+   ],
+   "text": "GOVERNMENT WARNING: (1) ACCORDING TO THE",
+   "score": 0.9887
+  },
+  {
+   "box": [
+    42.0,
+    516.0,
+    509.0,
+    546.0
+   ],
+   "text": "SURGEON GENERAL, WOMEN SHOULD NOT DRINK",
+   "score": 0.985
+  },
+  {
+   "box": [
+    41.0,
+    541.0,
+    510.0,
+    574.0
+   ],
+   "text": "ALCOHOLIC BEVERAGES DURING PREGNANCY",
+   "score": 0.9812
+  },
+  {
+   "box": [
+    41.0,
+    569.0,
+    508.0,
+    601.0
+   ],
+   "text": "BECAUSE OF THE RISK OF BIRTH DEFECTS. (2)",
+   "score": 0.9781
+  },
+  {
+   "box": [
+    42.0,
+    596.0,
+    508.0,
+    626.0
+   ],
+   "text": "CONSUMPTION OF ALCOHOLIC BEVERAGES IMPAIRS",
+   "score": 0.9804
+  },
+  {
+   "box": [
+    42.0,
+    622.0,
+    509.0,
+    652.0
+   ],
+   "text": "YOUR ABILITY TO DRIVE A CAR OR OPERATE",
+   "score": 0.9975
+  },
+  {
+   "box": [
+    42.0,
+    649.0,
+    486.0,
+    679.0
+   ],
+   "text": "MACHINERY, AND MAY CAUSE HEALTH PROBLEMS.",
+   "score": 0.9996
+  },
+  {
+   "box": [
+    41.0,
+    682.0,
+    454.0,
+    712.0
+   ],
+   "text": "BOTTLED BY AVIATION VODKA, PLAINFIELD, IL.",
+   "score": 0.9987
+  },
+  {
+   "box": [
+    42.0,
+    706.0,
+    454.0,
+    734.0
+   ],
+   "text": "DISTILLED FROM CALIFORNIA GRAPES AND WHEAT",
+   "score": 0.9859
+  },
+  {
+   "box": [
+    41.0,
+    727.0,
+    399.0,
+    808.0
+   ],
+   "text": "IA 5C, ME, VT 15C CA CRV",
+   "score": 0.9051
+  },
+  {
+   "box": [
+    443.0,
+    740.0,
+    500.0,
+    786.0
+   ],
+   "text": "21+",
+   "score": 0.8743
+  },
+  {
+   "box": [
+    320.0,
+    801.0,
+    437.0,
+    824.0
+   ],
+   "text": "DRINK RESPONSIBLY",
+   "score": 0.9999
+  },
+  {
+   "box": [
+    507.0,
+    798.0,
+    537.0,
+    939.0
+   ],
+   "text": "003105540142",
+   "score": 0.995
+  },
+  {
+   "box": [
+    318.0,
+    820.0,
+    431.0,
+    853.0
+   ],
+   "text": "DRINKiQ.com",
+   "score": 0.9924
+  },
+  {
+   "box": [
+    398.0,
+    857.0,
+    494.0,
+    900.0
+   ],
+   "text": "PLEASE",
+   "score": 0.9998
+  },
+  {
+   "box": [
+    16.0,
+    906.0,
+    44.0,
+    938.0
+   ],
+   "text": "0",
+   "score": 0.9943
+  },
+  {
+   "box": [
+    65.0,
+    899.0,
+    319.0,
+    938.0
+   ],
+   "text": "82000\"814894",
+   "score": 0.9645
+  },
+  {
+   "box": [
+    400.0,
+    895.0,
+    509.0,
+    938.0
+   ],
+   "text": "RECYCLE",
+   "score": 0.9999
+  }
+ ],
+ "warning_boxes": [
+  {
+   "box": [
+    28.0,
+    12.0,
+    527.0,
+    131.0
+   ],
+   "text": "AVIATION",
+   "score": 0.9976
+  },
+  {
+   "box": [
+    506.0,
+    105.0,
+    533.0,
+    123.0
+   ],
+   "text": "TMI",
+   "score": 0.9897
+  },
+  {
+   "box": [
+    60.0,
+    158.0,
+    490.0,
+    216.0
+   ],
+   "text": ": AMERICAN VODKA :",
+   "score": 0.9323
+  },
+  {
+   "box": [
+    51.0,
+    225.0,
+    501.0,
+    257.0
+   ],
+   "text": "Aviation American Vodka is made for great drinks",
+   "score": 0.9999
+  },
+  {
+   "box": [
+    41.0,
+    252.0,
+    510.0,
+    285.0
+   ],
+   "text": "with great company. Crafted from California grapes",
+   "score": 0.9905
+  },
+  {
+   "box": [
+    65.0,
+    282.0,
+    486.0,
+    309.0
+   ],
+   "text": "for a subtle touch of sweetness and American",
+   "score": 0.9951
+  },
+  {
+   "box": [
+    49.0,
+    307.0,
+    502.0,
+    336.0
+   ],
+   "text": "Wheat for a clean finish, Aviation American Vodka",
+   "score": 0.9987
+  },
+  {
+   "box": [
+    46.0,
+    335.0,
+    504.0,
+    365.0
+   ],
+   "text": "is versatile and effortlessly mixable. Mix into long",
+   "score": 0.9999
+  },
+  {
+   "box": [
+    84.0,
+    360.0,
+    467.0,
+    394.0
+   ],
+   "text": "drinks, your favorite cocktails, and enjoy!",
+   "score": 0.9991
+  },
+  {
+   "box": [
+    23.0,
+    394.0,
+    521.0,
+    428.0
+   ],
+   "text": "Serving Facts: Serving Size: 1.5 fl oz (44 ml); Servings per",
+   "score": 0.9942
+  },
+  {
+   "box": [
+    26.0,
+    424.0,
+    517.0,
+    453.0
+   ],
+   "text": "container: 17; Alcohol by volume: 40%; Fl. oz. of alcohol: 0.6;",
+   "score": 0.9907
+  },
+  {
+   "box": [
+    24.0,
+    450.0,
+    449.0,
+    485.0
+   ],
+   "text": "Calories: 100; Carbohydrates: Og; Fat: Og; Protein: Og",
+   "score": 0.9852
+  },
+  {
+   "box": [
+    42.0,
+    489.0,
+    511.0,
+    521.0
+   ],
+   "text": "GOVERNMENT WARNING: (1) ACCORDING TO THE",
+   "score": 0.9887
+  },
+  {
+   "box": [
+    42.0,
+    516.0,
+    509.0,
+    546.0
+   ],
+   "text": "SURGEON GENERAL, WOMEN SHOULD NOT DRINK",
+   "score": 0.985
+  },
+  {
+   "box": [
+    41.0,
+    541.0,
+    510.0,
+    574.0
+   ],
+   "text": "ALCOHOLIC BEVERAGES DURING PREGNANCY",
+   "score": 0.9812
+  },
+  {
+   "box": [
+    41.0,
+    569.0,
+    508.0,
+    601.0
+   ],
+   "text": "BECAUSE OF THE RISK OF BIRTH DEFECTS. (2)",
+   "score": 0.9781
+  },
+  {
+   "box": [
+    42.0,
+    596.0,
+    508.0,
+    626.0
+   ],
+   "text": "CONSUMPTION OF ALCOHOLIC BEVERAGES IMPAIRS",
+   "score": 0.9804
+  },
+  {
+   "box": [
+    42.0,
+    622.0,
+    509.0,
+    652.0
+   ],
+   "text": "YOUR ABILITY TO DRIVE A CAR OR OPERATE",
+   "score": 0.9975
+  },
+  {
+   "box": [
+    42.0,
+    649.0,
+    486.0,
+    679.0
+   ],
+   "text": "MACHINERY, AND MAY CAUSE HEALTH PROBLEMS.",
+   "score": 0.9996
+  },
+  {
+   "box": [
+    41.0,
+    682.0,
+    454.0,
+    712.0
+   ],
+   "text": "BOTTLED BY AVIATION VODKA, PLAINFIELD, IL.",
+   "score": 0.9987
+  },
+  {
+   "box": [
+    42.0,
+    706.0,
+    454.0,
+    734.0
+   ],
+   "text": "DISTILLED FROM CALIFORNIA GRAPES AND WHEAT",
+   "score": 0.9859
+  },
+  {
+   "box": [
+    41.0,
+    727.0,
+    399.0,
+    808.0
+   ],
+   "text": "IA 5C, ME, VT 15C CA CRV",
+   "score": 0.9051
+  },
+  {
+   "box": [
+    443.0,
+    740.0,
+    500.0,
+    786.0
+   ],
+   "text": "21+",
+   "score": 0.8743
+  },
+  {
+   "box": [
+    320.0,
+    801.0,
+    437.0,
+    824.0
+   ],
+   "text": "DRINK RESPONSIBLY",
+   "score": 0.9999
+  },
+  {
+   "box": [
+    507.0,
+    798.0,
+    537.0,
+    939.0
+   ],
+   "text": "003105540142",
+   "score": 0.995
+  },
+  {
+   "box": [
+    318.0,
+    820.0,
+    431.0,
+    853.0
+   ],
+   "text": "DRINKiQ.com",
+   "score": 0.9924
+  },
+  {
+   "box": [
+    398.0,
+    857.0,
+    494.0,
+    900.0
+   ],
+   "text": "PLEASE",
+   "score": 0.9998
+  },
+  {
+   "box": [
+    16.0,
+    906.0,
+    44.0,
+    938.0
+   ],
+   "text": "0",
+   "score": 0.9943
+  },
+  {
+   "box": [
+    65.0,
+    899.0,
+    319.0,
+    938.0
+   ],
+   "text": "82000\"814894",
+   "score": 0.9645
+  },
+  {
+   "box": [
+    400.0,
+    895.0,
+    509.0,
+    938.0
+   ],
+   "text": "RECYCLE",
+   "score": 0.9999
+  }
+ ],
+ "heading_measurement": {
+  "is_bold": false,
+  "mean_stroke_width": 2.4801,
+  "mean_character_height": 21.1944,
+  "width_height_ratio": 0.117,
+  "confident": true
+ }
+}

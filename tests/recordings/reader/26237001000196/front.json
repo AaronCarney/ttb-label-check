@@ -1,0 +1,94 @@
+{
+ "image": "26237001000196/front.jpg",
+ "schema_version": 1,
+ "frame_size": [
+  284,
+  222
+ ],
+ "rotation_deg": 0,
+ "boxes": [
+  {
+   "box": [
+    54.0,
+    93.0,
+    229.0,
+    120.0
+   ],
+   "text": "MARK WEST",
+   "score": 0.9968
+  },
+  {
+   "box": [
+    47.0,
+    132.0,
+    236.0,
+    159.0
+   ],
+   "text": "Sonoma County Reserve",
+   "score": 0.9637
+  },
+  {
+   "box": [
+    91.0,
+    164.0,
+    197.0,
+    177.0
+   ],
+   "text": "2025 PINOT NOIR",
+   "score": 0.9959
+  },
+  {
+   "box": [
+    271.0,
+    187.0,
+    281.0,
+    215.0
+   ],
+   "text": "895110012",
+   "score": 0.5986
+  }
+ ],
+ "warning_boxes": [
+  {
+   "box": [
+    54.0,
+    93.0,
+    229.0,
+    120.0
+   ],
+   "text": "MARK WEST",
+   "score": 0.9968
+  },
+  {
+   "box": [
+    47.0,
+    132.0,
+    236.0,
+    159.0
+   ],
+   "text": "Sonoma County Reserve",
+   "score": 0.9637
+  },
+  {
+   "box": [
+    91.0,
+    164.0,
+    197.0,
+    177.0
+   ],
+   "text": "2025 PINOT NOIR",
+   "score": 0.9959
+  },
+  {
+   "box": [
+    271.0,
+    187.0,
+    281.0,
+    215.0
+   ],
+   "text": "895110012",
+   "score": 0.5986
+  }
+ ],
+ "heading_measurement": null
+}

@@ -1,0 +1,420 @@
+{
+ "image": "26238001000795/back.jpg",
+ "schema_version": 1,
+ "frame_size": [
+  1004,
+  1063
+ ],
+ "rotation_deg": 0,
+ "boxes": [
+  {
+   "box": [
+    385.0,
+    239.0,
+    634.0,
+    337.0
+   ],
+   "text": "Gallo",
+   "score": 0.9907
+  },
+  {
+   "box": [
+    459.0,
+    312.0,
+    572.0,
+    347.0
+   ],
+   "text": "CERVEZA LACER",
+   "score": 0.8114
+  },
+  {
+   "box": [
+    415.0,
+    354.0,
+    588.0,
+    378.0
+   ],
+   "text": "Product of Guatemala",
+   "score": 0.998
+  },
+  {
+   "box": [
+    282.0,
+    403.0,
+    703.0,
+    431.0
+   ],
+   "text": "INGREDIENTS: Water, Corn, Barley Malt,",
+   "score": 0.9869
+  },
+  {
+   "box": [
+    406.0,
+    427.0,
+    580.0,
+    456.0
+   ],
+   "text": "Sugar and Hops.",
+   "score": 0.9999
+  },
+  {
+   "box": [
+    311.0,
+    451.0,
+    677.0,
+    479.0
+   ],
+   "text": "Produced and bottled by Cervecer\u00eda",
+   "score": 0.9978
+  },
+  {
+   "box": [
+    261.0,
+    476.0,
+    727.0,
+    502.0
+   ],
+   "text": "Centroamericana S.A., 3\u00aa Avenida Norte Final,",
+   "score": 0.999
+  },
+  {
+   "box": [
+    346.0,
+    501.0,
+    643.0,
+    527.0
+   ],
+   "text": "interior Finca El Zapote, Z. 2.",
+   "score": 0.9889
+  },
+  {
+   "box": [
+    290.0,
+    525.0,
+    698.0,
+    552.0
+   ],
+   "text": "Imported by Latin American Traders LLC",
+   "score": 0.9894
+  },
+  {
+   "box": [
+    310.0,
+    549.0,
+    679.0,
+    575.0
+   ],
+   "text": "8859 NW 102nd Ct, Doral, FL 33178",
+   "score": 0.9858
+  },
+  {
+   "box": [
+    352.0,
+    598.0,
+    639.0,
+    624.0
+   ],
+   "text": "GOVERNMENT WARNING:",
+   "score": 0.9998
+  },
+  {
+   "box": [
+    208.0,
+    622.0,
+    782.0,
+    651.0
+   ],
+   "text": "(1) According to the Surgeon General, women should",
+   "score": 0.9963
+  },
+  {
+   "box": [
+    235.0,
+    647.0,
+    752.0,
+    676.0
+   ],
+   "text": "not drink alcoholic beverages during pregnancy",
+   "score": 0.9957
+  },
+  {
+   "box": [
+    303.0,
+    672.0,
+    685.0,
+    699.0
+   ],
+   "text": "because of the risk of birth defects.",
+   "score": 0.9994
+  },
+  {
+   "box": [
+    208.0,
+    696.0,
+    782.0,
+    725.0
+   ],
+   "text": "(2) Consumption of alcoholic beverages impairs your",
+   "score": 1.0
+  },
+  {
+   "box": [
+    217.0,
+    720.0,
+    770.0,
+    750.0
+   ],
+   "text": "ability to drive a car or operate machinery, and may",
+   "score": 0.9986
+  },
+  {
+   "box": [
+    365.0,
+    745.0,
+    622.0,
+    771.0
+   ],
+   "text": "cause health problems.",
+   "score": 0.9752
+  },
+  {
+   "box": [
+    214.0,
+    789.0,
+    775.0,
+    818.0
+   ],
+   "text": "Distributed by: SOS Distributors, Westminster, CO",
+   "score": 0.9955
+  },
+  {
+   "box": [
+    436.0,
+    898.0,
+    493.0,
+    916.0
+   ],
+   "text": "401000",
+   "score": 1.0
+  },
+  {
+   "box": [
+    510.0,
+    898.0,
+    567.0,
+    916.0
+   ],
+   "text": "702056",
+   "score": 1.0
+  }
+ ],
+ "warning_boxes": [
+  {
+   "box": [
+    385.0,
+    239.0,
+    634.0,
+    337.0
+   ],
+   "text": "Gallo",
+   "score": 0.9907
+  },
+  {
+   "box": [
+    459.0,
+    312.0,
+    572.0,
+    347.0
+   ],
+   "text": "CERVEZA LACER",
+   "score": 0.8114
+  },
+  {
+   "box": [
+    415.0,
+    354.0,
+    588.0,
+    378.0
+   ],
+   "text": "Product of Guatemala",
+   "score": 0.998
+  },
+  {
+   "box": [
+    282.0,
+    403.0,
+    703.0,
+    431.0
+   ],
+   "text": "INGREDIENTS: Water, Corn, Barley Malt,",
+   "score": 0.9869
+  },
+  {
+   "box": [
+    406.0,
+    427.0,
+    580.0,
+    456.0
+   ],
+   "text": "Sugar and Hops.",
+   "score": 0.9999
+  },
+  {
+   "box": [
+    311.0,
+    451.0,
+    677.0,
+    479.0
+   ],
+   "text": "Produced and bottled by Cervecer\u00eda",
+   "score": 0.9978
+  },
+  {
+   "box": [
+    261.0,
+    476.0,
+    727.0,
+    502.0
+   ],
+   "text": "Centroamericana S.A., 3\u00aa Avenida Norte Final,",
+   "score": 0.999
+  },
+  {
+   "box": [
+    346.0,
+    501.0,
+    643.0,
+    527.0
+   ],
+   "text": "interior Finca El Zapote, Z. 2.",
+   "score": 0.9889
+  },
+  {
+   "box": [
+    290.0,
+    525.0,
+    698.0,
+    552.0
+   ],
+   "text": "Imported by Latin American Traders LLC",
+   "score": 0.9894
+  },
+  {
+   "box": [
+    310.0,
+    549.0,
+    679.0,
+    575.0
+   ],
+   "text": "8859 NW 102nd Ct, Doral, FL 33178",
+   "score": 0.9858
+  },
+  {
+   "box": [
+    352.0,
+    598.0,
+    639.0,
+    624.0
+   ],
+   "text": "GOVERNMENT WARNING:",
+   "score": 0.9998
+  },
+  {
+   "box": [
+    208.0,
+    622.0,
+    782.0,
+    651.0
+   ],
+   "text": "(1) According to the Surgeon General, women should",
+   "score": 0.9963
+  },
+  {
+   "box": [
+    235.0,
+    647.0,
+    752.0,
+    676.0
+   ],
+   "text": "not drink alcoholic beverages during pregnancy",
+   "score": 0.9957
+  },
+  {
+   "box": [
+    303.0,
+    672.0,
+    685.0,
+    699.0
+   ],
+   "text": "because of the risk of birth defects.",
+   "score": 0.9994
+  },
+  {
+   "box": [
+    208.0,
+    696.0,
+    782.0,
+    725.0
+   ],
+   "text": "(2) Consumption of alcoholic beverages impairs your",
+   "score": 1.0
+  },
+  {
+   "box": [
+    217.0,
+    720.0,
+    770.0,
+    750.0
+   ],
+   "text": "ability to drive a car or operate machinery, and may",
+   "score": 0.9986
+  },
+  {
+   "box": [
+    365.0,
+    745.0,
+    622.0,
+    771.0
+   ],
+   "text": "cause health problems.",
+   "score": 0.9752
+  },
+  {
+   "box": [
+    214.0,
+    789.0,
+    775.0,
+    818.0
+   ],
+   "text": "Distributed by: SOS Distributors, Westminster, CO",
+   "score": 0.9955
+  },
+  {
+   "box": [
+    436.0,
+    898.0,
+    493.0,
+    916.0
+   ],
+   "text": "401000",
+   "score": 1.0
+  },
+  {
+   "box": [
+    510.0,
+    898.0,
+    567.0,
+    916.0
+   ],
+   "text": "702056",
+   "score": 1.0
+  }
+ ],
+ "heading_measurement": {
+  "is_bold": false,
+  "mean_stroke_width": 2.7436,
+  "mean_character_height": 14.6316,
+  "width_height_ratio": 0.1875,
+  "confident": true
+ }
+}

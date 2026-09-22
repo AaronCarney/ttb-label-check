@@ -1,0 +1,320 @@
+{
+ "image": "26233001000569/back.jpg",
+ "schema_version": 1,
+ "frame_size": [
+  371,
+  397
+ ],
+ "rotation_deg": 0,
+ "boxes": [
+  {
+   "box": [
+    70.0,
+    19.0,
+    301.0,
+    57.0
+   ],
+   "text": "Portalupi Wines",
+   "score": 0.9967
+  },
+  {
+   "box": [
+    87.0,
+    59.0,
+    283.0,
+    81.0
+   ],
+   "text": "2025 SANGIOVESE",
+   "score": 0.9822
+  },
+  {
+   "box": [
+    68.0,
+    84.0,
+    303.0,
+    105.0
+   ],
+   "text": "STONE WALL RANCH",
+   "score": 0.9992
+  },
+  {
+   "box": [
+    11.0,
+    108.0,
+    359.0,
+    131.0
+   ],
+   "text": "SONOMA VALLEY, SONOMA COUNTY",
+   "score": 0.9961
+  },
+  {
+   "box": [
+    38.0,
+    137.0,
+    330.0,
+    162.0
+   ],
+   "text": "PRODUCED AND BOTTLED BY PORTALUPI WINES,",
+   "score": 0.9883
+  },
+  {
+   "box": [
+    70.0,
+    159.0,
+    300.0,
+    181.0
+   ],
+   "text": "SEBASTOPOL, CA CONTAINS SULFITES",
+   "score": 0.9986
+  },
+  {
+   "box": [
+    94.0,
+    179.0,
+    276.0,
+    201.0
+   ],
+   "text": "750ML ALC 14.0% BY VOLUME",
+   "score": 0.9878
+  },
+  {
+   "box": [
+    33.0,
+    211.0,
+    337.0,
+    234.0
+   ],
+   "text": "GOVERNMENT WARNING: (1) ACCORDING TO THE",
+   "score": 0.9853
+  },
+  {
+   "box": [
+    34.0,
+    229.0,
+    337.0,
+    251.0
+   ],
+   "text": "SURGEON GENERAL, WOM\u00c8N SHOULD NOT DRINK",
+   "score": 0.9774
+  },
+  {
+   "box": [
+    34.0,
+    247.0,
+    337.0,
+    268.0
+   ],
+   "text": "ALCOHOLIC BEVERAGES DURING PREGNANCY",
+   "score": 0.9883
+  },
+  {
+   "box": [
+    33.0,
+    263.0,
+    336.0,
+    288.0
+   ],
+   "text": "BECAUSE OF THE RISK OF BIRTH DEFECTS. (2)",
+   "score": 0.9851
+  },
+  {
+   "box": [
+    34.0,
+    284.0,
+    336.0,
+    304.0
+   ],
+   "text": "CONSUMPTION OF ALCOHOLIC BEVERAGES IMPAIRS",
+   "score": 0.9951
+  },
+  {
+   "box": [
+    34.0,
+    301.0,
+    337.0,
+    322.0
+   ],
+   "text": "YOUR ABILITY TO DRIVE A CAR OR OPERATE",
+   "score": 0.9912
+  },
+  {
+   "box": [
+    33.0,
+    318.0,
+    329.0,
+    340.0
+   ],
+   "text": "MACHINERY, AND MAY CAUSE HEALTH PROBLEMS.",
+   "score": 0.9987
+  },
+  {
+   "box": [
+    130.0,
+    341.0,
+    241.0,
+    390.0
+   ],
+   "text": "CA CRV",
+   "score": 0.9986
+  }
+ ],
+ "warning_boxes": [
+  {
+   "box": [
+    70.0,
+    19.0,
+    301.0,
+    57.0
+   ],
+   "text": "Portalupi Wines",
+   "score": 0.9967
+  },
+  {
+   "box": [
+    87.0,
+    59.0,
+    283.0,
+    81.0
+   ],
+   "text": "2025 SANGIOVESE",
+   "score": 0.9822
+  },
+  {
+   "box": [
+    68.0,
+    84.0,
+    303.0,
+    105.0
+   ],
+   "text": "STONE WALL RANCH",
+   "score": 0.9992
+  },
+  {
+   "box": [
+    11.0,
+    108.0,
+    359.0,
+    131.0
+   ],
+   "text": "SONOMA VALLEY, SONOMA COUNTY",
+   "score": 0.9961
+  },
+  {
+   "box": [
+    38.0,
+    137.0,
+    330.0,
+    162.0
+   ],
+   "text": "PRODUCED AND BOTTLED BY PORTALUPI WINES,",
+   "score": 0.9883
+  },
+  {
+   "box": [
+    70.0,
+    159.0,
+    300.0,
+    181.0
+   ],
+   "text": "SEBASTOPOL, CA CONTAINS SULFITES",
+   "score": 0.9986
+  },
+  {
+   "box": [
+    94.0,
+    179.0,
+    276.0,
+    201.0
+   ],
+   "text": "750ML ALC 14.0% BY VOLUME",
+   "score": 0.9878
+  },
+  {
+   "box": [
+    33.0,
+    211.0,
+    337.0,
+    234.0
+   ],
+   "text": "GOVERNMENT WARNING: (1) ACCORDING TO THE",
+   "score": 0.9853
+  },
+  {
+   "box": [
+    34.0,
+    229.0,
+    337.0,
+    251.0
+   ],
+   "text": "SURGEON GENERAL, WOM\u00c8N SHOULD NOT DRINK",
+   "score": 0.9774
+  },
+  {
+   "box": [
+    34.0,
+    247.0,
+    337.0,
+    268.0
+   ],
+   "text": "ALCOHOLIC BEVERAGES DURING PREGNANCY",
+   "score": 0.9883
+  },
+  {
+   "box": [
+    33.0,
+    263.0,
+    336.0,
+    288.0
+   ],
+   "text": "BECAUSE OF THE RISK OF BIRTH DEFECTS. (2)",
+   "score": 0.9851
+  },
+  {
+   "box": [
+    34.0,
+    284.0,
+    336.0,
+    304.0
+   ],
+   "text": "CONSUMPTION OF ALCOHOLIC BEVERAGES IMPAIRS",
+   "score": 0.9951
+  },
+  {
+   "box": [
+    34.0,
+    301.0,
+    337.0,
+    322.0
+   ],
+   "text": "YOUR ABILITY TO DRIVE A CAR OR OPERATE",
+   "score": 0.9912
+  },
+  {
+   "box": [
+    33.0,
+    318.0,
+    329.0,
+    340.0
+   ],
+   "text": "MACHINERY, AND MAY CAUSE HEALTH PROBLEMS.",
+   "score": 0.9987
+  },
+  {
+   "box": [
+    130.0,
+    341.0,
+    241.0,
+    390.0
+   ],
+   "text": "CA CRV",
+   "score": 0.9986
+  }
+ ],
+ "heading_measurement": {
+  "is_bold": true,
+  "mean_stroke_width": 2.5693,
+  "mean_character_height": 8.7,
+  "width_height_ratio": 0.2953,
+  "confident": true
+ }
+}

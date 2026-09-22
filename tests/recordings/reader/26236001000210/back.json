@@ -1,0 +1,760 @@
+{
+ "image": "26236001000210/back.jpg",
+ "schema_version": 1,
+ "frame_size": [
+  972,
+  1600
+ ],
+ "rotation_deg": 0,
+ "boxes": [
+  {
+   "box": [
+    161.0,
+    264.0,
+    404.0,
+    414.0
+   ],
+   "text": "[OST]",
+   "score": 0.8779
+  },
+  {
+   "box": [
+    400.0,
+    275.0,
+    824.0,
+    402.0
+   ],
+   "text": "ANTERN",
+   "score": 0.9953
+  },
+  {
+   "box": [
+    156.0,
+    422.0,
+    816.0,
+    448.0
+   ],
+   "text": "SHINING A LIGHT ON THE INDEPENDENT SPIRIT",
+   "score": 0.9638
+  },
+  {
+   "box": [
+    161.0,
+    481.0,
+    812.0,
+    507.0
+   ],
+   "text": "AN AMERICAN INDEPENDENT BOTTLER, LOST LANTERN SOURCES RARE",
+   "score": 0.9932
+  },
+  {
+   "box": [
+    147.0,
+    508.0,
+    824.0,
+    534.0
+   ],
+   "text": "AND SPECIAL WHISKIES ONLY FROM DISTILLERIES WE PERSONALLY VISIT.",
+   "score": 0.9899
+  },
+  {
+   "box": [
+    144.0,
+    534.0,
+    828.0,
+    560.0
+   ],
+   "text": "WE SHINE A LIGHT ON THESE DISCOVERIES THROUGH OUR UNIQUE BLENDS",
+   "score": 0.9885
+  },
+  {
+   "box": [
+    202.0,
+    561.0,
+    766.0,
+    587.0
+   ],
+   "text": "AND OUR METICULOUSLY CURATED LINEUP OF SINGLE CASKS.",
+   "score": 0.9949
+  },
+  {
+   "box": [
+    280.0,
+    606.0,
+    692.0,
+    632.0
+   ],
+   "text": "MCCARTHY'S PEATED OREGON",
+   "score": 0.9924
+  },
+  {
+   "box": [
+    250.0,
+    631.0,
+    722.0,
+    657.0
+   ],
+   "text": "AMERICAN SINGLE MALT WHISKEY",
+   "score": 0.9996
+  },
+  {
+   "box": [
+    201.0,
+    713.0,
+    776.0,
+    742.0
+   ],
+   "text": "LOST LANTERN HAND-SELECTED THIS CASK OF MCCARTHY'S",
+   "score": 0.9938
+  },
+  {
+   "box": [
+    201.0,
+    744.0,
+    776.0,
+    774.0
+   ],
+   "text": "AMERICAN SINGLE MALT FROM CLEAR CREEK DISTILLERY IN",
+   "score": 0.9927
+  },
+  {
+   "box": [
+    200.0,
+    777.0,
+    775.0,
+    806.0
+   ],
+   "text": "HOOD RIVER, OREGON. MCCARTHY'S IS THE FIRST AMERICAN",
+   "score": 0.9846
+  },
+  {
+   "box": [
+    200.0,
+    808.0,
+    773.0,
+    837.0
+   ],
+   "text": "SINGLE MALT, AND THE FIRST ONE WE FELL IN LOVE WITH.",
+   "score": 0.9865
+  },
+  {
+   "box": [
+    200.0,
+    840.0,
+    775.0,
+    869.0
+   ],
+   "text": "CLEAR CREEK HAS NOW MADE THIS EXCEPTIONAL PEATED",
+   "score": 0.9979
+  },
+  {
+   "box": [
+    236.0,
+    872.0,
+    738.0,
+    901.0
+   ],
+   "text": "AMERICAN SINGLE MALT FOR OVER THREE DECADES.",
+   "score": 0.9973
+  },
+  {
+   "box": [
+    201.0,
+    934.0,
+    775.0,
+    964.0
+   ],
+   "text": "THIS IS THE OLDEST SINGLE CASK OF MCCARTHY'S EVER",
+   "score": 0.9909
+  },
+  {
+   "box": [
+    200.0,
+    967.0,
+    775.0,
+    996.0
+   ],
+   "text": "RELEASED. MADE FROM HEAVILY PEATED MALT, IT WAS AGED",
+   "score": 0.9919
+  },
+  {
+   "box": [
+    200.0,
+    998.0,
+    775.0,
+    1027.0
+   ],
+   "text": "FOR TEN YEARS IN A REFILL CASK. IT HAS DARK, INKY SMOKE",
+   "score": 0.9878
+  },
+  {
+   "box": [
+    200.0,
+    1030.0,
+    773.0,
+    1060.0
+   ],
+   "text": "ON THE NOSE, WITH NOTES OF LAVENDER, BLUEBERRY,",
+   "score": 0.9969
+  },
+  {
+   "box": [
+    199.0,
+    1060.0,
+    774.0,
+    1091.0
+   ],
+   "text": "HEATHER HONEY, AND BALANCED OAK ON THE PALATE. DEEPLY",
+   "score": 0.9986
+  },
+  {
+   "box": [
+    231.0,
+    1094.0,
+    743.0,
+    1123.0
+   ],
+   "text": "SMOKY YET SURPRISINGLY FRESH, WITH GREAT DEPTH.",
+   "score": 0.9947
+  },
+  {
+   "box": [
+    282.0,
+    1157.0,
+    691.0,
+    1186.0
+   ],
+   "text": "HANDPICKED BY BINNY'S BEVERAGE DEPOT.",
+   "score": 0.9953
+  },
+  {
+   "box": [
+    196.0,
+    1216.0,
+    778.0,
+    1242.0
+   ],
+   "text": "SELECTED AND BOTTLED BY LOST LANTERN SPIRITS, VERGENNES, VT.",
+   "score": 0.9887
+  },
+  {
+   "box": [
+    197.0,
+    1239.0,
+    778.0,
+    1262.0
+   ],
+   "text": "DISTILLED BY CLEAR CREEK DISTILLERY, HOOD RIVER, OR. 1 OF 200 BOTTLES.",
+   "score": 0.9933
+  },
+  {
+   "box": [
+    197.0,
+    1260.0,
+    640.0,
+    1283.0
+   ],
+   "text": "10 YEARS OLD. NON-CHILL-FILTERED AND CASK STRENGTH.",
+   "score": 0.984
+  },
+  {
+   "box": [
+    641.0,
+    1261.0,
+    782.0,
+    1309.0
+   ],
+   "text": "CA CRV",
+   "score": 0.9974
+  },
+  {
+   "box": [
+    514.0,
+    1282.0,
+    634.0,
+    1306.0
+   ],
+   "text": "IA 5\u00a2 VT 15\u00a2",
+   "score": 0.9449
+  },
+  {
+   "box": [
+    190.0,
+    1328.0,
+    777.0,
+    1357.0
+   ],
+   "text": "LEARN MORE AT LOSTLANTERNWHISKEY.COM",
+   "score": 0.9835
+  },
+  {
+   "box": [
+    198.0,
+    1388.0,
+    569.0,
+    1405.0
+   ],
+   "text": "GOVERNMENT WARNING: (1) ACCORDING TO THE",
+   "score": 0.9875
+  },
+  {
+   "box": [
+    197.0,
+    1403.0,
+    570.0,
+    1423.0
+   ],
+   "text": "SURGEON GENERAL, WOM\u00c8N SHOULD NOT DRINK",
+   "score": 0.9854
+  },
+  {
+   "box": [
+    197.0,
+    1421.0,
+    569.0,
+    1441.0
+   ],
+   "text": "ALCOHOLIC BEVERAGES DURING PREGNANCY",
+   "score": 0.9882
+  },
+  {
+   "box": [
+    197.0,
+    1439.0,
+    569.0,
+    1459.0
+   ],
+   "text": "BECAUSE OF THE RISK OF BIRTH DEFECTS. (2)",
+   "score": 0.9949
+  },
+  {
+   "box": [
+    198.0,
+    1458.0,
+    569.0,
+    1475.0
+   ],
+   "text": "CONSUMPTION OF ALCOHOLIC BEVERAGES IMPAIRS",
+   "score": 0.9996
+  },
+  {
+   "box": [
+    683.0,
+    1463.0,
+    753.0,
+    1488.0
+   ],
+   "text": "FPO",
+   "score": 0.9991
+  },
+  {
+   "box": [
+    197.0,
+    1493.0,
+    556.0,
+    1510.0
+   ],
+   "text": "MACHINERY, AND MAY CAUSE HEALTH PROBLEMS.",
+   "score": 0.9941
+  },
+  {
+   "box": [
+    198.0,
+    1475.0,
+    569.0,
+    1492.0
+   ],
+   "text": "YOUR ABILITY TO DRIVE A CAR OR OPERATE",
+   "score": 0.9872
+  },
+  {
+   "box": [
+    641.0,
+    1482.0,
+    773.0,
+    1507.0
+   ],
+   "text": "50010\"98003 ",
+   "score": 0.9281
+  }
+ ],
+ "warning_boxes": [
+  {
+   "box": [
+    161.0,
+    264.0,
+    404.0,
+    414.0
+   ],
+   "text": "[OST]",
+   "score": 0.8779
+  },
+  {
+   "box": [
+    400.0,
+    275.0,
+    824.0,
+    402.0
+   ],
+   "text": "ANTERN",
+   "score": 0.9953
+  },
+  {
+   "box": [
+    156.0,
+    422.0,
+    816.0,
+    448.0
+   ],
+   "text": "SHINING A LIGHT ON THE INDEPENDENT SPIRIT",
+   "score": 0.9638
+  },
+  {
+   "box": [
+    161.0,
+    481.0,
+    812.0,
+    507.0
+   ],
+   "text": "AN AMERICAN INDEPENDENT BOTTLER, LOST LANTERN SOURCES RARE",
+   "score": 0.9932
+  },
+  {
+   "box": [
+    147.0,
+    508.0,
+    824.0,
+    534.0
+   ],
+   "text": "AND SPECIAL WHISKIES ONLY FROM DISTILLERIES WE PERSONALLY VISIT.",
+   "score": 0.9899
+  },
+  {
+   "box": [
+    144.0,
+    534.0,
+    828.0,
+    560.0
+   ],
+   "text": "WE SHINE A LIGHT ON THESE DISCOVERIES THROUGH OUR UNIQUE BLENDS",
+   "score": 0.9885
+  },
+  {
+   "box": [
+    202.0,
+    561.0,
+    766.0,
+    587.0
+   ],
+   "text": "AND OUR METICULOUSLY CURATED LINEUP OF SINGLE CASKS.",
+   "score": 0.9949
+  },
+  {
+   "box": [
+    280.0,
+    606.0,
+    692.0,
+    632.0
+   ],
+   "text": "MCCARTHY'S PEATED OREGON",
+   "score": 0.9924
+  },
+  {
+   "box": [
+    250.0,
+    631.0,
+    722.0,
+    657.0
+   ],
+   "text": "AMERICAN SINGLE MALT WHISKEY",
+   "score": 0.9996
+  },
+  {
+   "box": [
+    201.0,
+    713.0,
+    776.0,
+    742.0
+   ],
+   "text": "LOST LANTERN HAND-SELECTED THIS CASK OF MCCARTHY'S",
+   "score": 0.9938
+  },
+  {
+   "box": [
+    201.0,
+    744.0,
+    776.0,
+    774.0
+   ],
+   "text": "AMERICAN SINGLE MALT FROM CLEAR CREEK DISTILLERY IN",
+   "score": 0.9927
+  },
+  {
+   "box": [
+    200.0,
+    777.0,
+    775.0,
+    806.0
+   ],
+   "text": "HOOD RIVER, OREGON. MCCARTHY'S IS THE FIRST AMERICAN",
+   "score": 0.9846
+  },
+  {
+   "box": [
+    200.0,
+    808.0,
+    773.0,
+    837.0
+   ],
+   "text": "SINGLE MALT, AND THE FIRST ONE WE FELL IN LOVE WITH.",
+   "score": 0.9865
+  },
+  {
+   "box": [
+    200.0,
+    840.0,
+    775.0,
+    869.0
+   ],
+   "text": "CLEAR CREEK HAS NOW MADE THIS EXCEPTIONAL PEATED",
+   "score": 0.9979
+  },
+  {
+   "box": [
+    236.0,
+    872.0,
+    738.0,
+    901.0
+   ],
+   "text": "AMERICAN SINGLE MALT FOR OVER THREE DECADES.",
+   "score": 0.9973
+  },
+  {
+   "box": [
+    201.0,
+    934.0,
+    775.0,
+    964.0
+   ],
+   "text": "THIS IS THE OLDEST SINGLE CASK OF MCCARTHY'S EVER",
+   "score": 0.9909
+  },
+  {
+   "box": [
+    200.0,
+    967.0,
+    775.0,
+    996.0
+   ],
+   "text": "RELEASED. MADE FROM HEAVILY PEATED MALT, IT WAS AGED",
+   "score": 0.9919
+  },
+  {
+   "box": [
+    200.0,
+    998.0,
+    775.0,
+    1027.0
+   ],
+   "text": "FOR TEN YEARS IN A REFILL CASK. IT HAS DARK, INKY SMOKE",
+   "score": 0.9878
+  },
+  {
+   "box": [
+    200.0,
+    1030.0,
+    773.0,
+    1060.0
+   ],
+   "text": "ON THE NOSE, WITH NOTES OF LAVENDER, BLUEBERRY,",
+   "score": 0.9969
+  },
+  {
+   "box": [
+    199.0,
+    1060.0,
+    774.0,
+    1091.0
+   ],
+   "text": "HEATHER HONEY, AND BALANCED OAK ON THE PALATE. DEEPLY",
+   "score": 0.9986
+  },
+  {
+   "box": [
+    231.0,
+    1094.0,
+    743.0,
+    1123.0
+   ],
+   "text": "SMOKY YET SURPRISINGLY FRESH, WITH GREAT DEPTH.",
+   "score": 0.9947
+  },
+  {
+   "box": [
+    282.0,
+    1157.0,
+    691.0,
+    1186.0
+   ],
+   "text": "HANDPICKED BY BINNY'S BEVERAGE DEPOT.",
+   "score": 0.9953
+  },
+  {
+   "box": [
+    196.0,
+    1216.0,
+    778.0,
+    1242.0
+   ],
+   "text": "SELECTED AND BOTTLED BY LOST LANTERN SPIRITS, VERGENNES, VT.",
+   "score": 0.9887
+  },
+  {
+   "box": [
+    197.0,
+    1239.0,
+    778.0,
+    1262.0
+   ],
+   "text": "DISTILLED BY CLEAR CREEK DISTILLERY, HOOD RIVER, OR. 1 OF 200 BOTTLES.",
+   "score": 0.9933
+  },
+  {
+   "box": [
+    197.0,
+    1260.0,
+    640.0,
+    1283.0
+   ],
+   "text": "10 YEARS OLD. NON-CHILL-FILTERED AND CASK STRENGTH.",
+   "score": 0.984
+  },
+  {
+   "box": [
+    641.0,
+    1261.0,
+    782.0,
+    1309.0
+   ],
+   "text": "CA CRV",
+   "score": 0.9974
+  },
+  {
+   "box": [
+    514.0,
+    1282.0,
+    634.0,
+    1306.0
+   ],
+   "text": "IA 5\u00a2 VT 15\u00a2",
+   "score": 0.9449
+  },
+  {
+   "box": [
+    190.0,
+    1328.0,
+    777.0,
+    1357.0
+   ],
+   "text": "LEARN MORE AT LOSTLANTERNWHISKEY.COM",
+   "score": 0.9835
+  },
+  {
+   "box": [
+    198.0,
+    1388.0,
+    569.0,
+    1405.0
+   ],
+   "text": "GOVERNMENT WARNING: (1) ACCORDING TO THE",
+   "score": 0.9875
+  },
+  {
+   "box": [
+    197.0,
+    1403.0,
+    570.0,
+    1423.0
+   ],
+   "text": "SURGEON GENERAL, WOM\u00c8N SHOULD NOT DRINK",
+   "score": 0.9854
+  },
+  {
+   "box": [
+    197.0,
+    1421.0,
+    569.0,
+    1441.0
+   ],
+   "text": "ALCOHOLIC BEVERAGES DURING PREGNANCY",
+   "score": 0.9882
+  },
+  {
+   "box": [
+    197.0,
+    1439.0,
+    569.0,
+    1459.0
+   ],
+   "text": "BECAUSE OF THE RISK OF BIRTH DEFECTS. (2)",
+   "score": 0.9949
+  },
+  {
+   "box": [
+    198.0,
+    1458.0,
+    569.0,
+    1475.0
+   ],
+   "text": "CONSUMPTION OF ALCOHOLIC BEVERAGES IMPAIRS",
+   "score": 0.9996
+  },
+  {
+   "box": [
+    683.0,
+    1463.0,
+    753.0,
+    1488.0
+   ],
+   "text": "FPO",
+   "score": 0.9991
+  },
+  {
+   "box": [
+    197.0,
+    1493.0,
+    556.0,
+    1510.0
+   ],
+   "text": "MACHINERY, AND MAY CAUSE HEALTH PROBLEMS.",
+   "score": 0.9941
+  },
+  {
+   "box": [
+    198.0,
+    1475.0,
+    569.0,
+    1492.0
+   ],
+   "text": "YOUR ABILITY TO DRIVE A CAR OR OPERATE",
+   "score": 0.9872
+  },
+  {
+   "box": [
+    641.0,
+    1482.0,
+    773.0,
+    1507.0
+   ],
+   "text": "50010\"98003 ",
+   "score": 0.9281
+  }
+ ],
+ "heading_measurement": {
+  "is_bold": false,
+  "mean_stroke_width": 2.0659,
+  "mean_character_height": 10.6111,
+  "width_height_ratio": 0.1947,
+  "confident": true
+ }
+}

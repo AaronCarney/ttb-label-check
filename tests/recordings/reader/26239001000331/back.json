@@ -1,0 +1,114 @@
+{
+ "image": "26239001000331/back.jpg",
+ "schema_version": 1,
+ "frame_size": [
+  741,
+  760
+ ],
+ "rotation_deg": 0,
+ "boxes": [
+  {
+   "box": [
+    244.0,
+    159.0,
+    495.0,
+    202.0
+   ],
+   "text": "CHAMPAGNE",
+   "score": 0.9999
+  },
+  {
+   "box": [
+    226.0,
+    212.0,
+    514.0,
+    264.0
+   ],
+   "text": "GAIFFE-BRUN",
+   "score": 0.9999
+  },
+  {
+   "box": [
+    97.0,
+    346.0,
+    645.0,
+    503.0
+   ],
+   "text": "\u00c9MOTION",
+   "score": 0.9985
+  },
+  {
+   "box": [
+    180.0,
+    653.0,
+    556.0,
+    700.0
+   ],
+   "text": "\u00c0 AVENAY-VAL-D'OR",
+   "score": 0.9948
+  },
+  {
+   "box": [
+    200.0,
+    702.0,
+    538.0,
+    743.0
+   ],
+   "text": "\u2014PREMIER CRU\u2014",
+   "score": 0.9773
+  }
+ ],
+ "warning_boxes": [
+  {
+   "box": [
+    244.0,
+    159.0,
+    495.0,
+    202.0
+   ],
+   "text": "CHAMPAGNE",
+   "score": 0.9999
+  },
+  {
+   "box": [
+    226.0,
+    212.0,
+    514.0,
+    264.0
+   ],
+   "text": "GAIFFE-BRUN",
+   "score": 0.9999
+  },
+  {
+   "box": [
+    97.0,
+    346.0,
+    645.0,
+    503.0
+   ],
+   "text": "\u00c9MOTION",
+   "score": 0.9985
+  },
+  {
+   "box": [
+    180.0,
+    653.0,
+    556.0,
+    700.0
+   ],
+   "text": "\u00c0 AVENAY-VAL-D'OR",
+   "score": 0.9948
+  },
+  {
+   "box": [
+    200.0,
+    702.0,
+    538.0,
+    743.0
+   ],
+   "text": "\u2014PREMIER CRU\u2014",
+   "score": 0.9773
+  }
+ ],
+ "heading_measurement": null
+}

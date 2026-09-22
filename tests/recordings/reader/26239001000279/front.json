@@ -1,0 +1,800 @@
+{
+ "image": "26239001000279/front.jpg",
+ "schema_version": 1,
+ "frame_size": [
+  1280,
+  873
+ ],
+ "rotation_deg": 0,
+ "boxes": [
+  {
+   "box": [
+    95.0,
+    80.0,
+    231.0,
+    191.0
+   ],
+   "text": "Hop",
+   "score": 0.9836
+  },
+  {
+   "box": [
+    569.0,
+    116.0,
+    815.0,
+    207.0
+   ],
+   "text": "SATURATION",
+   "score": 0.9994
+  },
+  {
+   "box": [
+    63.0,
+    153.0,
+    295.0,
+    248.0
+   ],
+   "text": "Butcher",
+   "score": 0.9931
+  },
+  {
+   "box": [
+    134.0,
+    217.0,
+    249.0,
+    254.0
+   ],
+   "text": "FOR THE WORLD",
+   "score": 0.9968
+  },
+  {
+   "box": [
+    126.0,
+    262.0,
+    248.0,
+    286.0
+   ],
+   "text": "TASTING NOTES:",
+   "score": 0.9812
+  },
+  {
+   "box": [
+    132.0,
+    454.0,
+    219.0,
+    497.0
+   ],
+   "text": "WRATE",
+   "score": 0.7508
+  },
+  {
+   "box": [
+    94.0,
+    494.0,
+    256.0,
+    514.0
+   ],
+   "text": "WWW.HOPBUTCHER.COM",
+   "score": 0.9999
+  },
+  {
+   "box": [
+    99.0,
+    551.0,
+    249.0,
+    568.0
+   ],
+   "text": "ARTWORK BY DAN GRZECA",
+   "score": 0.9782
+  },
+  {
+   "box": [
+    37.0,
+    570.0,
+    252.0,
+    590.0
+   ],
+   "text": "BREWED AND CANNED BY HOP",
+   "score": 0.9842
+  },
+  {
+   "box": [
+    253.0,
+    570.0,
+    317.0,
+    590.0
+   ],
+   "text": "BUTCHER",
+   "score": 0.9999
+  },
+  {
+   "box": [
+    36.0,
+    585.0,
+    187.0,
+    605.0
+   ],
+   "text": "FOR THE WORLD IN",
+   "score": 0.9883
+  },
+  {
+   "box": [
+    184.0,
+    586.0,
+    249.0,
+    606.0
+   ],
+   "text": "CHICAGO,",
+   "score": 0.99
+  },
+  {
+   "box": [
+    254.0,
+    586.0,
+    317.0,
+    606.0
+   ],
+   "text": "ILLINOIS",
+   "score": 0.9991
+  },
+  {
+   "box": [
+    37.0,
+    602.0,
+    70.0,
+    621.0
+   ],
+   "text": "AND",
+   "score": 0.9999
+  },
+  {
+   "box": [
+    93.0,
+    602.0,
+    159.0,
+    622.0
+   ],
+   "text": "BEDFORD",
+   "score": 0.9997
+  },
+  {
+   "box": [
+    185.0,
+    601.0,
+    227.0,
+    622.0
+   ],
+   "text": "PARK,",
+   "score": 0.9991
+  },
+  {
+   "box": [
+    254.0,
+    602.0,
+    317.0,
+    622.0
+   ],
+   "text": "ILLINOIS",
+   "score": 0.999
+  },
+  {
+   "box": [
+    35.0,
+    619.0,
+    318.0,
+    644.0
+   ],
+   "text": "GOVERNMENT WARNING: (1) ACCORDING TO",
+   "score": 0.9952
+  },
+  {
+   "box": [
+    36.0,
+    639.0,
+    317.0,
+    659.0
+   ],
+   "text": "THE SURGEON GENERAL, WOMEN SHOULD",
+   "score": 0.9913
+  },
+  {
+   "box": [
+    36.0,
+    654.0,
+    316.0,
+    674.0
+   ],
+   "text": "NOT DRINK ALCOHOLIC BEVERAGES DURING",
+   "score": 0.9998
+  },
+  {
+   "box": [
+    38.0,
+    672.0,
+    316.0,
+    689.0
+   ],
+   "text": "PREGNANCY BECAUSE OF THE RISK OF BIRTH",
+   "score": 0.99
+  },
+  {
+   "box": [
+    37.0,
+    686.0,
+    317.0,
+    706.0
+   ],
+   "text": "DEFECTS. (2) CONSUMPTION OF ALCOHOLIC",
+   "score": 0.9937
+  },
+  {
+   "box": [
+    37.0,
+    702.0,
+    116.0,
+    722.0
+   ],
+   "text": "BEVERAGES",
+   "score": 0.9992
+  },
+  {
+   "box": [
+    106.0,
+    702.0,
+    180.0,
+    722.0
+   ],
+   "text": "IMPAIRS",
+   "score": 0.996
+  },
+  {
+   "box": [
+    170.0,
+    702.0,
+    317.0,
+    722.0
+   ],
+   "text": "YOUR ABILITY TO",
+   "score": 0.9849
+  },
+  {
+   "box": [
+    644.0,
+    702.0,
+    980.0,
+    731.0
+   ],
+   "text": "CITRA, NELSON SAUVIN, KRUSH CRYO,",
+   "score": 0.9815
+  },
+  {
+   "box": [
+    37.0,
+    718.0,
+    177.0,
+    739.0
+   ],
+   "text": "DRIVE A CAR OR",
+   "score": 0.9951
+  },
+  {
+   "box": [
+    172.0,
+    719.0,
+    235.0,
+    737.0
+   ],
+   "text": "OPERATE",
+   "score": 0.9996
+  },
+  {
+   "box": [
+    233.0,
+    718.0,
+    316.0,
+    739.0
+   ],
+   "text": "MACHINERY,",
+   "score": 0.9997
+  },
+  {
+   "box": [
+    38.0,
+    735.0,
+    70.0,
+    753.0
+   ],
+   "text": "AND",
+   "score": 0.9999
+  },
+  {
+   "box": [
+    77.0,
+    735.0,
+    112.0,
+    753.0
+   ],
+   "text": "MAY",
+   "score": 0.9997
+  },
+  {
+   "box": [
+    121.0,
+    735.0,
+    169.0,
+    753.0
+   ],
+   "text": "CAUSE",
+   "score": 0.9996
+  },
+  {
+   "box": [
+    180.0,
+    735.0,
+    232.0,
+    753.0
+   ],
+   "text": "HEALTH",
+   "score": 0.9999
+  },
+  {
+   "box": [
+    243.0,
+    735.0,
+    316.0,
+    755.0
+   ],
+   "text": "PROBLEMS.",
+   "score": 0.9997
+  },
+  {
+   "box": [
+    665.0,
+    729.0,
+    964.0,
+    755.0
+   ],
+   "text": "CITRA CRYO, CITRA HYPERBOOST",
+   "score": 0.9786
+  },
+  {
+   "box": [
+    680.0,
+    753.0,
+    947.0,
+    779.0
+   ],
+   "text": "& CITRA DYNABOOST-HOPPED",
+   "score": 0.9951
+  },
+  {
+   "box": [
+    702.0,
+    779.0,
+    925.0,
+    802.0
+   ],
+   "text": "DOUBLE INDIA PALE ALE",
+   "score": 0.9814
+  },
+  {
+   "box": [
+    77.0,
+    804.0,
+    183.0,
+    824.0
+   ],
+   "text": "9448537325",
+   "score": 0.996
+  },
+  {
+   "box": [
+    696.0,
+    804.0,
+    930.0,
+    830.0
+   ],
+   "text": "ALC. 8.0% BYVOL.|ONE PINT(16 FLOZ)",
+   "score": 0.9659
+  }
+ ],
+ "warning_boxes": [
+  {
+   "box": [
+    95.0,
+    80.0,
+    231.0,
+    191.0
+   ],
+   "text": "Hop",
+   "score": 0.9836
+  },
+  {
+   "box": [
+    569.0,
+    116.0,
+    815.0,
+    207.0
+   ],
+   "text": "SATURATION",
+   "score": 0.9994
+  },
+  {
+   "box": [
+    63.0,
+    153.0,
+    295.0,
+    248.0
+   ],
+   "text": "Butcher",
+   "score": 0.9931
+  },
+  {
+   "box": [
+    134.0,
+    217.0,
+    249.0,
+    254.0
+   ],
+   "text": "FOR THE WORLD",
+   "score": 0.9968
+  },
+  {
+   "box": [
+    126.0,
+    262.0,
+    248.0,
+    286.0
+   ],
+   "text": "TASTING NOTES:",
+   "score": 0.9812
+  },
+  {
+   "box": [
+    132.0,
+    454.0,
+    219.0,
+    497.0
+   ],
+   "text": "WRATE",
+   "score": 0.7508
+  },
+  {
+   "box": [
+    94.0,
+    494.0,
+    256.0,
+    514.0
+   ],
+   "text": "WWW.HOPBUTCHER.COM",
+   "score": 0.9999
+  },
+  {
+   "box": [
+    99.0,
+    551.0,
+    249.0,
+    568.0
+   ],
+   "text": "ARTWORK BY DAN GRZECA",
+   "score": 0.9782
+  },
+  {
+   "box": [
+    37.0,
+    570.0,
+    252.0,
+    590.0
+   ],
+   "text": "BREWED AND CANNED BY HOP",
+   "score": 0.9842
+  },
+  {
+   "box": [
+    253.0,
+    570.0,
+    317.0,
+    590.0
+   ],
+   "text": "BUTCHER",
+   "score": 0.9999
+  },
+  {
+   "box": [
+    36.0,
+    585.0,
+    187.0,
+    605.0
+   ],
+   "text": "FOR THE WORLD IN",
+   "score": 0.9883
+  },
+  {
+   "box": [
+    184.0,
+    586.0,
+    249.0,
+    606.0
+   ],
+   "text": "CHICAGO,",
+   "score": 0.99
+  },
+  {
+   "box": [
+    254.0,
+    586.0,
+    317.0,
+    606.0
+   ],
+   "text": "ILLINOIS",
+   "score": 0.9991
+  },
+  {
+   "box": [
+    37.0,
+    602.0,
+    70.0,
+    621.0
+   ],
+   "text": "AND",
+   "score": 0.9999
+  },
+  {
+   "box": [
+    93.0,
+    602.0,
+    159.0,
+    622.0
+   ],
+   "text": "BEDFORD",
+   "score": 0.9997
+  },
+  {
+   "box": [
+    185.0,
+    601.0,
+    227.0,
+    622.0
+   ],
+   "text": "PARK,",
+   "score": 0.9991
+  },
+  {
+   "box": [
+    254.0,
+    602.0,
+    317.0,
+    622.0
+   ],
+   "text": "ILLINOIS",
+   "score": 0.999
+  },
+  {
+   "box": [
+    35.0,
+    619.0,
+    318.0,
+    644.0
+   ],
+   "text": "GOVERNMENT WARNING: (1) ACCORDING TO",
+   "score": 0.9952
+  },
+  {
+   "box": [
+    36.0,
+    639.0,
+    317.0,
+    659.0
+   ],
+   "text": "THE SURGEON GENERAL, WOMEN SHOULD",
+   "score": 0.9913
+  },
+  {
+   "box": [
+    36.0,
+    654.0,
+    316.0,
+    674.0
+   ],
+   "text": "NOT DRINK ALCOHOLIC BEVERAGES DURING",
+   "score": 0.9998
+  },
+  {
+   "box": [
+    38.0,
+    672.0,
+    316.0,
+    689.0
+   ],
+   "text": "PREGNANCY BECAUSE OF THE RISK OF BIRTH",
+   "score": 0.99
+  },
+  {
+   "box": [
+    37.0,
+    686.0,
+    317.0,
+    706.0
+   ],
+   "text": "DEFECTS. (2) CONSUMPTION OF ALCOHOLIC",
+   "score": 0.9937
+  },
+  {
+   "box": [
+    37.0,
+    702.0,
+    116.0,
+    722.0
+   ],
+   "text": "BEVERAGES",
+   "score": 0.9992
+  },
+  {
+   "box": [
+    106.0,
+    702.0,
+    180.0,
+    722.0
+   ],
+   "text": "IMPAIRS",
+   "score": 0.996
+  },
+  {
+   "box": [
+    170.0,
+    702.0,
+    317.0,
+    722.0
+   ],
+   "text": "YOUR ABILITY TO",
+   "score": 0.9849
+  },
+  {
+   "box": [
+    644.0,
+    702.0,
+    980.0,
+    731.0
+   ],
+   "text": "CITRA, NELSON SAUVIN, KRUSH CRYO,",
+   "score": 0.9815
+  },
+  {
+   "box": [
+    37.0,
+    718.0,
+    177.0,
+    739.0
+   ],
+   "text": "DRIVE A CAR OR",
+   "score": 0.9951
+  },
+  {
+   "box": [
+    172.0,
+    719.0,
+    235.0,
+    737.0
+   ],
+   "text": "OPERATE",
+   "score": 0.9996
+  },
+  {
+   "box": [
+    233.0,
+    718.0,
+    316.0,
+    739.0
+   ],
+   "text": "MACHINERY,",
+   "score": 0.9997
+  },
+  {
+   "box": [
+    38.0,
+    735.0,
+    70.0,
+    753.0
+   ],
+   "text": "AND",
+   "score": 0.9999
+  },
+  {
+   "box": [
+    77.0,
+    735.0,
+    112.0,
+    753.0
+   ],
+   "text": "MAY",
+   "score": 0.9997
+  },
+  {
+   "box": [
+    121.0,
+    735.0,
+    169.0,
+    753.0
+   ],
+   "text": "CAUSE",
+   "score": 0.9996
+  },
+  {
+   "box": [
+    180.0,
+    735.0,
+    232.0,
+    753.0
+   ],
+   "text": "HEALTH",
+   "score": 0.9999
+  },
+  {
+   "box": [
+    243.0,
+    735.0,
+    316.0,
+    755.0
+   ],
+   "text": "PROBLEMS.",
+   "score": 0.9997
+  },
+  {
+   "box": [
+    665.0,
+    729.0,
+    964.0,
+    755.0
+   ],
+   "text": "CITRA CRYO, CITRA HYPERBOOST",
+   "score": 0.9786
+  },
+  {
+   "box": [
+    680.0,
+    753.0,
+    947.0,
+    779.0
+   ],
+   "text": "& CITRA DYNABOOST-HOPPED",
+   "score": 0.9951
+  },
+  {
+   "box": [
+    702.0,
+    779.0,
+    925.0,
+    802.0
+   ],
+   "text": "DOUBLE INDIA PALE ALE",
+   "score": 0.9814
+  },
+  {
+   "box": [
+    77.0,
+    804.0,
+    183.0,
+    824.0
+   ],
+   "text": "9448537325",
+   "score": 0.996
+  },
+  {
+   "box": [
+    696.0,
+    804.0,
+    930.0,
+    830.0
+   ],
+   "text": "ALC. 8.0% BYVOL.|ONE PINT(16 FLOZ)",
+   "score": 0.9659
+  }
+ ],
+ "heading_measurement": {
+  "is_bold": false,
+  "mean_stroke_width": 0.0,
+  "mean_character_height": 0.0,
+  "width_height_ratio": 0.0,
+  "confident": false
+ }
+}

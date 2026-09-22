@@ -1,0 +1,660 @@
+{
+ "image": "26233001000566/front.jpg",
+ "schema_version": 1,
+ "frame_size": [
+  1050,
+  1275
+ ],
+ "rotation_deg": 0,
+ "boxes": [
+  {
+   "box": [
+    294.0,
+    34.0,
+    790.0,
+    196.0
+   ],
+   "text": "Red Blend",
+   "score": 0.9998
+  },
+  {
+   "box": [
+    881.0,
+    66.0,
+    913.0,
+    91.0
+   ],
+   "text": "m",
+   "score": 0.5471
+  },
+  {
+   "box": [
+    852.0,
+    81.0,
+    914.0,
+    200.0
+   ],
+   "text": "\u4e00",
+   "score": 0.98
+  },
+  {
+   "box": [
+    926.0,
+    122.0,
+    954.0,
+    144.0
+   ],
+   "text": "MW",
+   "score": 0.5994
+  },
+  {
+   "box": [
+    375.0,
+    193.0,
+    705.0,
+    239.0
+   ],
+   "text": "RED TABLE WINE",
+   "score": 0.997
+  },
+  {
+   "box": [
+    844.0,
+    202.0,
+    867.0,
+    223.0
+   ],
+   "text": "\u7c73",
+   "score": 0.6966
+  },
+  {
+   "box": [
+    164.0,
+    230.0,
+    187.0,
+    250.0
+   ],
+   "text": "\u7c73",
+   "score": 0.9586
+  },
+  {
+   "box": [
+    895.0,
+    231.0,
+    915.0,
+    249.0
+   ],
+   "text": "\u7c73",
+   "score": 0.8664
+  },
+  {
+   "box": [
+    280.0,
+    248.0,
+    800.0,
+    274.0
+   ],
+   "text": "THIS RED BLEND PROVIDES THE COMPLEXITY TO",
+   "score": 0.9826
+  },
+  {
+   "box": [
+    255.0,
+    276.0,
+    826.0,
+    305.0
+   ],
+   "text": "ENJOY WITH ANY FOOD SERVED DURING THE SEASON",
+   "score": 0.995
+  },
+  {
+   "box": [
+    262.0,
+    321.0,
+    797.0,
+    475.0
+   ],
+   "text": "THE UGLY",
+   "score": 0.999
+  },
+  {
+   "box": [
+    728.0,
+    465.0,
+    946.0,
+    492.0
+   ],
+   "text": "IS A TIME HONORED",
+   "score": 0.9897
+  },
+  {
+   "box": [
+    712.0,
+    502.0,
+    946.0,
+    529.0
+   ],
+   "text": "TRADITION DESIGNED",
+   "score": 0.9999
+  },
+  {
+   "box": [
+    690.0,
+    540.0,
+    945.0,
+    567.0
+   ],
+   "text": "AROUND SHARING WITH",
+   "score": 0.9976
+  },
+  {
+   "box": [
+    446.0,
+    570.0,
+    592.0,
+    645.0
+   ],
+   "text": "\u6bcf\u8f66\u8f66\u8f66",
+   "score": 0.5762
+  },
+  {
+   "box": [
+    712.0,
+    576.0,
+    948.0,
+    606.0
+   ],
+   "text": "FAMILY AND FRIENDS.",
+   "score": 0.9999
+  },
+  {
+   "box": [
+    734.0,
+    615.0,
+    946.0,
+    641.0
+   ],
+   "text": "THE ONCE SERIOUS",
+   "score": 0.9996
+  },
+  {
+   "box": [
+    716.0,
+    652.0,
+    945.0,
+    679.0
+   ],
+   "text": "GIFT THAT GRANDMA",
+   "score": 0.9748
+  },
+  {
+   "box": [
+    736.0,
+    688.0,
+    947.0,
+    718.0
+   ],
+   "text": "SPENT MUCH TIME",
+   "score": 0.9947
+  },
+  {
+   "box": [
+    720.0,
+    726.0,
+    948.0,
+    756.0
+   ],
+   "text": "ON, HAS BECOME AN",
+   "score": 0.9743
+  },
+  {
+   "box": [
+    408.0,
+    764.0,
+    946.0,
+    793.0
+   ],
+   "text": "ENGAGING PART OF EVERYONE'S HOLIDAY SEASON.",
+   "score": 0.997
+  },
+  {
+   "box": [
+    86.0,
+    831.0,
+    964.0,
+    867.0
+   ],
+   "text": "CELLARED AND BOTTLED BY UGLY SWEATER HEALDSBURG, CA",
+   "score": 0.9878
+  },
+  {
+   "box": [
+    154.0,
+    873.0,
+    897.0,
+    908.0
+   ],
+   "text": "WWW.THEUGLYWINE.COM PRODUCT OF THE U.S.A.",
+   "score": 0.9972
+  },
+  {
+   "box": [
+    115.0,
+    922.0,
+    709.0,
+    958.0
+   ],
+   "text": "GOVERNMENT WARNING: (1) ACCORDING TO THE",
+   "score": 0.9824
+  },
+  {
+   "box": [
+    115.0,
+    958.0,
+    708.0,
+    991.0
+   ],
+   "text": "SURGEON GENERAL, WOMEN SHOULD NOT DRINK",
+   "score": 0.9825
+  },
+  {
+   "box": [
+    114.0,
+    991.0,
+    709.0,
+    1027.0
+   ],
+   "text": "ALCOHOLIC BEVERAGES DURING PREGNANCY",
+   "score": 0.9841
+  },
+  {
+   "box": [
+    114.0,
+    1027.0,
+    708.0,
+    1063.0
+   ],
+   "text": "BECAUSE OF THE RISK OF BIRTH DEFECTS.",
+   "score": 0.9973
+  },
+  {
+   "box": [
+    114.0,
+    1061.0,
+    710.0,
+    1100.0
+   ],
+   "text": "(2) CONSUMPTION OF ALCOHOLIC BEVERAGES",
+   "score": 0.9807
+  },
+  {
+   "box": [
+    114.0,
+    1097.0,
+    709.0,
+    1133.0
+   ],
+   "text": "\u00cdMPAIRS YOUR ABILITYTO DRIVE A CAR OR OPERATE",
+   "score": 0.9916
+  },
+  {
+   "box": [
+    114.0,
+    1133.0,
+    707.0,
+    1168.0
+   ],
+   "text": "MACHINERY, AND MAY CAUSE HEALTH PROBLEMS.",
+   "score": 0.9965
+  },
+  {
+   "box": [
+    61.0,
+    1190.0,
+    442.0,
+    1233.0
+   ],
+   "text": "ALC. 14% BY VOLUME",
+   "score": 0.9703
+  },
+  {
+   "box": [
+    465.0,
+    1188.0,
+    990.0,
+    1234.0
+   ],
+   "text": "75OML CONTAINSSULFITES",
+   "score": 0.9624
+  }
+ ],
+ "warning_boxes": [
+  {
+   "box": [
+    294.0,
+    34.0,
+    790.0,
+    196.0
+   ],
+   "text": "Red Blend",
+   "score": 0.9998
+  },
+  {
+   "box": [
+    881.0,
+    66.0,
+    913.0,
+    91.0
+   ],
+   "text": "m",
+   "score": 0.5471
+  },
+  {
+   "box": [
+    852.0,
+    81.0,
+    914.0,
+    200.0
+   ],
+   "text": "\u4e00",
+   "score": 0.98
+  },
+  {
+   "box": [
+    926.0,
+    122.0,
+    954.0,
+    144.0
+   ],
+   "text": "MW",
+   "score": 0.5994
+  },
+  {
+   "box": [
+    375.0,
+    193.0,
+    705.0,
+    239.0
+   ],
+   "text": "RED TABLE WINE",
+   "score": 0.997
+  },
+  {
+   "box": [
+    844.0,
+    202.0,
+    867.0,
+    223.0
+   ],
+   "text": "\u7c73",
+   "score": 0.6966
+  },
+  {
+   "box": [
+    164.0,
+    230.0,
+    187.0,
+    250.0
+   ],
+   "text": "\u7c73",
+   "score": 0.9586
+  },
+  {
+   "box": [
+    895.0,
+    231.0,
+    915.0,
+    249.0
+   ],
+   "text": "\u7c73",
+   "score": 0.8664
+  },
+  {
+   "box": [
+    280.0,
+    248.0,
+    800.0,
+    274.0
+   ],
+   "text": "THIS RED BLEND PROVIDES THE COMPLEXITY TO",
+   "score": 0.9826
+  },
+  {
+   "box": [
+    255.0,
+    276.0,
+    826.0,
+    305.0
+   ],
+   "text": "ENJOY WITH ANY FOOD SERVED DURING THE SEASON",
+   "score": 0.995
+  },
+  {
+   "box": [
+    262.0,
+    321.0,
+    797.0,
+    475.0
+   ],
+   "text": "THE UGLY",
+   "score": 0.999
+  },
+  {
+   "box": [
+    728.0,
+    465.0,
+    946.0,
+    492.0
+   ],
+   "text": "IS A TIME HONORED",
+   "score": 0.9897
+  },
+  {
+   "box": [
+    712.0,
+    502.0,
+    946.0,
+    529.0
+   ],
+   "text": "TRADITION DESIGNED",
+   "score": 0.9999
+  },
+  {
+   "box": [
+    690.0,
+    540.0,
+    945.0,
+    567.0
+   ],
+   "text": "AROUND SHARING WITH",
+   "score": 0.9976
+  },
+  {
+   "box": [
+    446.0,
+    570.0,
+    592.0,
+    645.0
+   ],
+   "text": "\u6bcf\u8f66\u8f66\u8f66",
+   "score": 0.5762
+  },
+  {
+   "box": [
+    712.0,
+    576.0,
+    948.0,
+    606.0
+   ],
+   "text": "FAMILY AND FRIENDS.",
+   "score": 0.9999
+  },
+  {
+   "box": [
+    734.0,
+    615.0,
+    946.0,
+    641.0
+   ],
+   "text": "THE ONCE SERIOUS",
+   "score": 0.9996
+  },
+  {
+   "box": [
+    716.0,
+    652.0,
+    945.0,
+    679.0
+   ],
+   "text": "GIFT THAT GRANDMA",
+   "score": 0.9748
+  },
+  {
+   "box": [
+    736.0,
+    688.0,
+    947.0,
+    718.0
+   ],
+   "text": "SPENT MUCH TIME",
+   "score": 0.9947
+  },
+  {
+   "box": [
+    720.0,
+    726.0,
+    948.0,
+    756.0
+   ],
+   "text": "ON, HAS BECOME AN",
+   "score": 0.9743
+  },
+  {
+   "box": [
+    408.0,
+    764.0,
+    946.0,
+    793.0
+   ],
+   "text": "ENGAGING PART OF EVERYONE'S HOLIDAY SEASON.",
+   "score": 0.997
+  },
+  {
+   "box": [
+    86.0,
+    831.0,
+    964.0,
+    867.0
+   ],
+   "text": "CELLARED AND BOTTLED BY UGLY SWEATER HEALDSBURG, CA",
+   "score": 0.9878
+  },
+  {
+   "box": [
+    154.0,
+    873.0,
+    897.0,
+    908.0
+   ],
+   "text": "WWW.THEUGLYWINE.COM PRODUCT OF THE U.S.A.",
+   "score": 0.9972
+  },
+  {
+   "box": [
+    115.0,
+    922.0,
+    709.0,
+    958.0
+   ],
+   "text": "GOVERNMENT WARNING: (1) ACCORDING TO THE",
+   "score": 0.9824
+  },
+  {
+   "box": [
+    115.0,
+    958.0,
+    708.0,
+    991.0
+   ],
+   "text": "SURGEON GENERAL, WOMEN SHOULD NOT DRINK",
+   "score": 0.9825
+  },
+  {
+   "box": [
+    114.0,
+    991.0,
+    709.0,
+    1027.0
+   ],
+   "text": "ALCOHOLIC BEVERAGES DURING PREGNANCY",
+   "score": 0.9841
+  },
+  {
+   "box": [
+    114.0,
+    1027.0,
+    708.0,
+    1063.0
+   ],
+   "text": "BECAUSE OF THE RISK OF BIRTH DEFECTS.",
+   "score": 0.9973
+  },
+  {
+   "box": [
+    114.0,
+    1061.0,
+    710.0,
+    1100.0
+   ],
+   "text": "(2) CONSUMPTION OF ALCOHOLIC BEVERAGES",
+   "score": 0.9807
+  },
+  {
+   "box": [
+    114.0,
+    1097.0,
+    709.0,
+    1133.0
+   ],
+   "text": "\u00cdMPAIRS YOUR ABILITYTO DRIVE A CAR OR OPERATE",
+   "score": 0.9916
+  },
+  {
+   "box": [
+    114.0,
+    1133.0,
+    707.0,
+    1168.0
+   ],
+   "text": "MACHINERY, AND MAY CAUSE HEALTH PROBLEMS.",
+   "score": 0.9965
+  },
+  {
+   "box": [
+    61.0,
+    1190.0,
+    442.0,
+    1233.0
+   ],
+   "text": "ALC. 14% BY VOLUME",
+   "score": 0.9703
+  },
+  {
+   "box": [
+    465.0,
+    1188.0,
+    990.0,
+    1234.0
+   ],
+   "text": "75OML CONTAINSSULFITES",
+   "score": 0.9624
+  }
+ ],
+ "heading_measurement": {
+  "is_bold": true,
+  "mean_stroke_width": 4.0476,
+  "mean_character_height": 15.9,
+  "width_height_ratio": 0.2546,
+  "confident": true
+ }
+}

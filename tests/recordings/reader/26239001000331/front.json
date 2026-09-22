@@ -1,0 +1,340 @@
+{
+ "image": "26239001000331/front.jpg",
+ "schema_version": 1,
+ "frame_size": [
+  852,
+  1002
+ ],
+ "rotation_deg": 0,
+ "boxes": [
+  {
+   "box": [
+    271.0,
+    121.0,
+    580.0,
+    165.0
+   ],
+   "text": "GAIFFE-BRUN",
+   "score": 0.9969
+  },
+  {
+   "box": [
+    327.0,
+    200.0,
+    525.0,
+    240.0
+   ],
+   "text": "EMOTION",
+   "score": 0.9999
+  },
+  {
+   "box": [
+    290.0,
+    393.0,
+    558.0,
+    433.0
+   ],
+   "text": "Sparkling Wine",
+   "score": 0.9863
+  },
+  {
+   "box": [
+    279.0,
+    448.0,
+    573.0,
+    482.0
+   ],
+   "text": "Champagne Premier Cru",
+   "score": 0.9739
+  },
+  {
+   "box": [
+    234.0,
+    491.0,
+    616.0,
+    526.0
+   ],
+   "text": "Appellation d'Origine Contr\u00f4l\u00e9e",
+   "score": 0.9988
+  },
+  {
+   "box": [
+    60.0,
+    577.0,
+    783.0,
+    615.0
+   ],
+   "text": "GOVERNMENT WARNING: (1) According to the",
+   "score": 0.9785
+  },
+  {
+   "box": [
+    62.0,
+    616.0,
+    783.0,
+    653.0
+   ],
+   "text": "Surgeon General, women should not drink alcoholic",
+   "score": 0.9998
+  },
+  {
+   "box": [
+    63.0,
+    651.0,
+    781.0,
+    690.0
+   ],
+   "text": "beverages during pregnancy because of the risk of",
+   "score": 0.9955
+  },
+  {
+   "box": [
+    63.0,
+    690.0,
+    780.0,
+    726.0
+   ],
+   "text": "birth defects. (2) Consumption of alcoholic beverages",
+   "score": 0.9993
+  },
+  {
+   "box": [
+    62.0,
+    727.0,
+    782.0,
+    764.0
+   ],
+   "text": "impairs your ability to drive a car or operate",
+   "score": 0.9947
+  },
+  {
+   "box": [
+    59.0,
+    763.0,
+    784.0,
+    801.0
+   ],
+   "text": "machinery, and may cause health problems.",
+   "score": 0.9777
+  },
+  {
+   "box": [
+    27.0,
+    827.0,
+    312.0,
+    865.0
+   ],
+   "text": "ALC. 12,5% BY VOL.",
+   "score": 0.9952
+  },
+  {
+   "box": [
+    498.0,
+    826.0,
+    799.0,
+    863.0
+   ],
+   "text": "CONTAINS SULFITES",
+   "score": 0.9971
+  },
+  {
+   "box": [
+    24.0,
+    874.0,
+    137.0,
+    916.0
+   ],
+   "text": "750ml",
+   "score": 0.9999
+  },
+  {
+   "box": [
+    497.0,
+    875.0,
+    805.0,
+    915.0
+   ],
+   "text": "PRODUCT OF France",
+   "score": 0.9821
+  },
+  {
+   "box": [
+    55.0,
+    926.0,
+    796.0,
+    968.0
+   ],
+   "text": "IMPORTED BY: WINERY DIRECT, STUDIO CITY, CA",
+   "score": 0.9841
+  }
+ ],
+ "warning_boxes": [
+  {
+   "box": [
+    271.0,
+    121.0,
+    580.0,
+    165.0
+   ],
+   "text": "GAIFFE-BRUN",
+   "score": 0.9969
+  },
+  {
+   "box": [
+    327.0,
+    200.0,
+    525.0,
+    240.0
+   ],
+   "text": "EMOTION",
+   "score": 0.9999
+  },
+  {
+   "box": [
+    290.0,
+    393.0,
+    558.0,
+    433.0
+   ],
+   "text": "Sparkling Wine",
+   "score": 0.9863
+  },
+  {
+   "box": [
+    279.0,
+    448.0,
+    573.0,
+    482.0
+   ],
+   "text": "Champagne Premier Cru",
+   "score": 0.9739
+  },
+  {
+   "box": [
+    234.0,
+    491.0,
+    616.0,
+    526.0
+   ],
+   "text": "Appellation d'Origine Contr\u00f4l\u00e9e",
+   "score": 0.9988
+  },
+  {
+   "box": [
+    60.0,
+    577.0,
+    783.0,
+    615.0
+   ],
+   "text": "GOVERNMENT WARNING: (1) According to the",
+   "score": 0.9785
+  },
+  {
+   "box": [
+    62.0,
+    616.0,
+    783.0,
+    653.0
+   ],
+   "text": "Surgeon General, women should not drink alcoholic",
+   "score": 0.9998
+  },
+  {
+   "box": [
+    63.0,
+    651.0,
+    781.0,
+    690.0
+   ],
+   "text": "beverages during pregnancy because of the risk of",
+   "score": 0.9955
+  },
+  {
+   "box": [
+    63.0,
+    690.0,
+    780.0,
+    726.0
+   ],
+   "text": "birth defects. (2) Consumption of alcoholic beverages",
+   "score": 0.9993
+  },
+  {
+   "box": [
+    62.0,
+    727.0,
+    782.0,
+    764.0
+   ],
+   "text": "impairs your ability to drive a car or operate",
+   "score": 0.9947
+  },
+  {
+   "box": [
+    59.0,
+    763.0,
+    784.0,
+    801.0
+   ],
+   "text": "machinery, and may cause health problems.",
+   "score": 0.9777
+  },
+  {
+   "box": [
+    27.0,
+    827.0,
+    312.0,
+    865.0
+   ],
+   "text": "ALC. 12,5% BY VOL.",
+   "score": 0.9952
+  },
+  {
+   "box": [
+    498.0,
+    826.0,
+    799.0,
+    863.0
+   ],
+   "text": "CONTAINS SULFITES",
+   "score": 0.9971
+  },
+  {
+   "box": [
+    24.0,
+    874.0,
+    137.0,
+    916.0
+   ],
+   "text": "750ml",
+   "score": 0.9999
+  },
+  {
+   "box": [
+    497.0,
+    875.0,
+    805.0,
+    915.0
+   ],
+   "text": "PRODUCT OF France",
+   "score": 0.9821
+  },
+  {
+   "box": [
+    55.0,
+    926.0,
+    796.0,
+    968.0
+   ],
+   "text": "IMPORTED BY: WINERY DIRECT, STUDIO CITY, CA",
+   "score": 0.9841
+  }
+ ],
+ "heading_measurement": {
+  "is_bold": false,
+  "mean_stroke_width": 2.9606,
+  "mean_character_height": 20.4865,
+  "width_height_ratio": 0.1445,
+  "confident": true
+ }
+}

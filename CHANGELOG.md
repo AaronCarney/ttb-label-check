@@ -55,6 +55,13 @@ date: the release's git tag records when it was cut. Versions follow
 
 ### Changed
 
+- The reader's replay suite now covers every real label in the corpus, 58 of its 62 images, and
+  merges a label's faces with the product's own merge instead of a front-first merge of its own.
+  With the product's merge it shows what the old merge hid: on three labels the net contents come
+  from a barrel size or the Serving Facts panel, not the bottle's size on the front. Four frozen
+  readings had drifted from what today's reader returns on the same image; all 56 are re-frozen
+  from the current reader, and every check the reader misses is listed with its cause.
+
 - One system, and a check of one label is a batch of one. The product had two ways in — a page for a
   single label and a page for a folder of them — which meant two upload forms, two result layouts
   and two paths through the engine for the same job, and a reviewer had to decide which one their

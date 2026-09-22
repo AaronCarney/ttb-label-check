@@ -1,0 +1,34 @@
+{
+ "image": "26236001000652/back.jpg",
+ "schema_version": 1,
+ "frame_size": [
+  1600,
+  1161
+ ],
+ "rotation_deg": 0,
+ "boxes": [
+  {
+   "box": [
+    858.0,
+    1002.0,
+    904.0,
+    1040.0
+   ],
+   "text": "4",
+   "score": 0.9999
+  }
+ ],
+ "warning_boxes": [
+  {
+   "box": [
+    858.0,
+    1002.0,
+    904.0,
+    1040.0
+   ],
+   "text": "4",
+   "score": 0.9999
+  }
+ ],
+ "heading_measurement": null
+}
