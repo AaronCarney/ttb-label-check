@@ -3552,3 +3552,31 @@ comparison. *Accepting any single-character difference as a reading error.* That
 changed word through. The thin-glyph kind is limited to a narrow glyph between two letters.
 *Recording the reason-code row under the rule's id instead of the code.* The trace entry names the
 code verbatim, and the scoreboard and existing readers of the trail depend on that.
+
+<a id="0056"></a>
+## 0056. A finding's reason code must say what its outcome says
+
+**Evidence:** `eval/corpus_check.py` (`code_outcome_faults`, `registry_severities`);
+`tests/test_reason_code_matches_outcome.py`; `rules/reason_codes.yaml`.
+
+**What was found.** The reviewer reads two things about a check: its verdict and the sentence its
+reason code carries. The verdict comes from the finding's own severity, and the code's meaning comes
+from the registry, and nothing held the two together. A mismatch could carry a code whose words say
+the product could not decide. A review could carry no code at all. The second happened on 76 checks
+until `#0055`.
+
+**Chosen.** The registry's existing `severity` is the declaration of which outcome a code belongs
+with: a `reject` code goes only with a mismatch, and a `warn` code only with a needs review. Every
+mismatch and every needs review must carry a registered code. `eval/corpus_check.py` reports every
+check that breaks this, on both label sets. The corpus test holds it at zero, and planted cases
+show that each kind of fault is caught.
+
+**Measured.** Zero faults on the 30 corpus labels and on the 98 held-out labels.
+
+**Rejected.** *A separate list of permitted outcomes on each registry entry.* It would restate the
+severity in other words, and the two could then disagree.
+
+**Left for later steps.** The check cannot tell whether a code's words describe what happened.
+`WARNING.STYLE.BOLD_NOT_MEASURED` says the weight "could not be measured" even when it was measured
+and came back low; the bold step splits it. `ENGINE.EVIDENCE.BELOW_CONFIDENCE_FLOOR` names no
+element; the confidence gate replaces it with a code for each element.

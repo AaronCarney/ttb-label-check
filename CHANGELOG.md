@@ -126,6 +126,11 @@ date: the release's git tag records when it was cut. Versions follow
 
 ### Fixed
 
+- Every mismatch and every needs review now carries a reason code, and the code agrees with the
+  outcome: a code for a label defect arrives only with a mismatch, and a code for a question the
+  product could not settle only with a needs review. `uv run python -m eval.corpus_check` reports any
+  check that breaks this, and the corpus test holds it at zero. See `docs/decisions.md#0056`.
+
 - A government warning the reader misread is no longer reported as a wrong warning. Where the
   statement's words are read but its "GOVERNMENT WARNING" heading is not, the three warning checks
   go to a reviewer under `WARNING.HEADING.NOT_READ` instead of reporting the warning missing. A thin

@@ -44,6 +44,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Protocol, cast
 
+import yaml
+
 from app.config import Settings
 from app.rules import build_rule_engine
 from app.schemas.application import Application
@@ -306,6 +308,39 @@ def scoreboard(outcomes: list[LabelOutcome]) -> dict[str, Any]:
     }
 
 
+# The registry's word for the verdict a code belongs with.
+_VERDICT_SEVERITY = {"fail": "reject", "needs_review": "warn"}
+
+
+def registry_severities(path: Path = Path("rules/reason_codes.yaml")) -> dict[str, str]:
+    """Each registered reason code and its severity."""
+    codes = yaml.safe_load(path.read_text(encoding="utf-8"))["codes"]
+    return {code: str(entry.get("severity", "")) for code, entry in codes.items()}
+
+
+def code_outcome_faults(outcomes: list[LabelOutcome], severities: dict[str, str]) -> list[str]:
+    """Every check whose reason code contradicts its outcome, or that has none.
+
+    A mismatch must carry a code the registry marks `reject`, and a needs
+    review a code it marks `warn`: the code is the sentence the reviewer
+    reads, and it has to say what the verdict says.
+    """
+    faults = []
+    for o in outcomes:
+        for rule_id, r in sorted(o.rules.items()):
+            want = _VERDICT_SEVERITY.get(r.disposition)
+            if want is None:
+                continue
+            where = f"{o.label_id} {rule_id}: {r.disposition}"
+            if not r.reason_code:
+                faults.append(f"{where} with no reason code")
+            elif r.reason_code not in severities:
+                faults.append(f"{where} with {r.reason_code}, a code the registry has not got")
+            elif severities[r.reason_code] != want:
+                faults.append(f"{where} with {r.reason_code}, a {severities[r.reason_code]} code")
+    return faults
+
+
 def _as_json(outcomes: list[LabelOutcome]) -> dict[str, Any]:
     return {
         "scoreboard": scoreboard(outcomes),
@@ -333,6 +368,10 @@ def _print(outcomes: list[LabelOutcome]) -> None:
         print(f"Reason codes, {title}:")
         for code, count in board[key].items():
             print(f"  {count:>3}  {code or '(no code)'}")
+    faults = code_outcome_faults(outcomes, registry_severities())
+    print(f"Reason codes that contradict their outcome: {len(faults)}")
+    for fault in faults:
+        print(f"  {fault}")
     print("Mismatches, by label:")
     for o in outcomes:
         for rule_id, r in sorted(o.rules.items()):
