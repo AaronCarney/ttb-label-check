@@ -71,6 +71,14 @@ date: the release's git tag records when it was cut. Versions follow
 
 ### Changed
 
+- `README.md` publishes what a reviewer receives on the corpus and on the held-out registry labels,
+  before and after the reader and rules were reworked, in a new *Outcomes on real labels* section:
+  held-out mismatches fell from 88 to 28, and the ones the product caused from 77 to 17. The
+  statements those changes overtook are corrected in `README.md` and `docs/approach.md`: 8 of the 30
+  corpus labels, not 3, go to review over their alcohol wording; brand and an unread origin never
+  report a mismatch; bold is measured against the warning's own body; a photo with no text stops
+  the label; and `origin` reads 25 of 30.
+
 - An import on which no country-of-origin statement was read goes to a reviewer under
   `ORIGIN.PRESENCE.NOT_READ`, which says the reader may have missed it or the label may state the
   country in a form 19 CFR 134.45 accepts and the check does not read. It used to fail, and reached

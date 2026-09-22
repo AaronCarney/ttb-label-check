@@ -327,7 +327,7 @@ the checks fail in different ways and an average hides that.
 | `abv` | the stated alcohol content | 27 of 30 |
 | `net_contents` | the stated net contents | 23 of 29 |
 | `name_address` | the bottler's or importer's name and address | 22 of 30 |
-| `origin` | the country of origin | 24 of 30 |
+| `origin` | the country of origin | 25 of 30 |
 | `warning_present` | that the health warning is on the label at all | 30 of 30 |
 | `warning_exact` | that the warning reads word for word as the regulation sets it | 20 of 30 |
 | `warning_heading_caps` | that `GOVERNMENT WARNING:` is capitalised as required | 30 of 30 |
@@ -338,23 +338,61 @@ the label itself cannot settle is left out rather than counted against the reade
 is a small denominator, and a percentage drawn from it would read as a precision this corpus does
 not carry. See `docs/decisions.md#0027`.
 
-**These figures are in-sample, and there is no held-out set.** The reader's heuristics — the
-box-merge ratios, the gate and screen that decide when to re-read a label rotated, the field
-patterns — were
-tuned against these same 30 labels, and the table above scores them on the same 30. So each figure
-is an upper bound on what the reader does with a label it has never seen, not an estimate of it.
-Reserving a held-out split from 30 labels was judged worse than not having one: a ten-label test set
-would leave both halves too small to measure anything, and the corpus is the whole of what this
-project could source. The figure this matters most for is `warning_present`, 30 of 30, because that
-is what licenses the one rule in the pack allowed to report a mismatch because the reader found nothing —
-`rules/common/health_warning.yaml` says so where the licence is granted. A reviewer weighing these
-numbers should read them as what the reader does on labels like the ones it was built against.
+**These figures are in-sample.** The reader's heuristics — the box-merge ratios, the gate and
+screen that decide when to re-read a label rotated, the field patterns — were tuned against these
+same 30 labels, and the table above scores them on the same 30. So each figure is an upper bound on
+what the reader does with a label it has never seen, not an estimate of it. The held-out labels in
+[Outcomes on real labels](#outcomes-on-real-labels) carry no transcription to score a reader
+against, so they measure verdicts rather than this table. The figure this matters most for is
+`warning_present`, 30 of 30, because that is what licenses the one rule in the pack allowed to
+report a mismatch because the reader found nothing — `rules/common/health_warning.yaml` says so
+where the licence is granted. On the held-out labels the reader missed a warning printed on a face
+it was given 3 times in 98, and each of those came back a mismatch.
 
 None of this is a verdict. The reader's output goes to a human reviewer who approves or rejects
 every finding, so a reading the reader is unsure of is returned as unsure rather than guessed at.
 The largest remaining gaps are recognition limits on display type — handwritten script brands and
 stylised capitals — and elements the detector splits across several text boxes, which truncates a
 designation like `BOURBON WHISKEY` to `BOURBON`.
+
+## Outcomes on real labels
+
+What a reviewer receives, measured on the production path: the real face merge, rule engine and
+verdict, with only the OCR replayed from recorded readings. Two sets, reported apart. The corpus is
+the 30 labels above, which every change was measured on. The held-out set is 98 bourbon records from
+TTB's public COLA Registry (53 approved, 42 surrendered, 3 expired) that nothing was tuned on
+([decision 0051](docs/decisions.md#0051)). Every one was accepted by TTB, so each mismatch the
+product reports was read against the label images by eye.
+
+```bash
+uv run python -m eval.corpus_check              # the corpus
+uv run python -m eval.corpus_check --registry   # the held-out set
+```
+
+The held-out records, their readings and the alcohol content and net contents read off their images
+are not in the repository, so that second figure cannot be reproduced from a clone;
+`eval/fetch_registry_corpus.py` fetches the records.
+
+| | Corpus, before | Corpus, now | Held-out, before | Held-out, now |
+|---|---|---|---|---|
+| Labels: match / mismatch / needs review | 0 / 9 / 21 | 0 / 3 / 27 | 0 / 63 / 35 | 6 / 28 / 64 |
+| Checks: match / mismatch / needs review | 350 / 11 / 94 | 364 / 3 / 88 | 998 / 88 / 379 | 1,074 / 28 / 363 |
+| Checks settled without a person | 79.3% | 80.7% | 74.1% | 75.2% |
+
+"Before" is the product until the reader and rules were reworked to tell a reading error from a
+label defect ([decisions 0052 to 0062](docs/decisions.md#0052)). On the held-out set that took the
+mismatches the product caused from 77 to 17. The 28 held-out mismatches now are 3 warnings that
+genuinely differ from 27 CFR 16.21, 8 warnings printed only on a neck or strip image the upload does
+not take, and 17 product faults: 13 warnings misread, 3 warnings on a face the app was given and not
+found, and one proof statement, "117 Proof", read as "17". On the corpus, 2 of the 3 mismatches are
+genuine warning differences; the third, a class designation handwritten on a keg collar, is an
+approved label the product fails and is not yet explained.
+
+The share settled without a person barely moved because a wrong mismatch counts as settled too: most
+of them became matches, so what changed is how many settled checks are right. The most common
+reasons a check goes to a person are a field the reader did not find, a name and address it could
+not match, a class designation it could not confirm, and a heading whose bold weight it could not
+establish.
 
 ## Assumptions
 
@@ -363,7 +401,9 @@ sizes, error handling, retention or who uses this. Each item below is a gap the 
 call we made in it, stated as our call rather than as a finding.
 
 - **The application is right and the label is what is being checked.** Where the two disagree, the
-  app reports a mismatch on the label; it never assumes the application is the error.
+  app reports a mismatch on the label; it never assumes the application is the error. Two checks
+  never report a mismatch, because the reader cannot show which text is the element: a brand not
+  found on the label, and an import whose origin statement was not read. Both go to a person.
 - **The application names the beverage type**, and that is what selects the rule pack. A label
   submitted with no application is read but not checked, because nothing says which rules apply.
 - **A submitted photograph is meant to be legible.** Making a poor photograph readable is out of
@@ -417,8 +457,11 @@ call we made in it, stated as our call rather than as a finding.
 - **A brand differing only in punctuation or spacing is a match, not a question.** "Os" against
   "O's" passes at any length, with the difference named in the finding, rather than sending every
   dropped apostrophe to a person. It cannot tell the rare punctuation change that alters a name's
-  meaning. Any other difference is scored. What it buys and what it costs are argued in
-  [decision 0017](docs/decisions.md#0017).
+  meaning. Any other difference sends the app searching every line it read for the declared name,
+  and a name it cannot find goes to a person. What it buys and what it costs are argued in
+  [decision 0017](docs/decisions.md#0017) and [decision 0052](docs/decisions.md#0052). The search
+  has a cost of its own: a brand that is a common phrase, such as "CASK STRENGTH", is found wherever
+  the phrase is printed.
 
 ## What the brief asked for
 
@@ -431,7 +474,7 @@ on its own.
 
 | Element | Status | Regulation | Where the check lives |
 |---|---|---|---|
-| Brand name | Checked — scored against the application's brand, fanciful and trade names | §4.32(a)(1), §4.33 | `rules/wine/wine.yaml`, `rules/spirits/spirits.yaml`, `rules/malt/malt.yaml` |
+| Brand name | Checked — the label is searched for the application's brand and trade names; found is a match, not found goes to a person, never a mismatch | §4.32(a)(1), §4.33 | `rules/wine/wine.yaml`, `rules/spirits/spirits.yaml`, `rules/malt/malt.yaml` |
 | Class/type designation | Checked — matched against the application and against the designation tables; for spirits, also against the standards of identity | §4.32(a)(2), §4.34; spirits Subpart I | `rules/tables/wine_designations.yaml`, `rules/tables/malt_designations.yaml`, `rules/spirits-deep.yaml` |
 | Alcohol content | Checked — format, and the figure against the application; for spirits, a stated proof against twice the label's own ABV. Required-or-not follows the beverage class | §4.32(b)(1), §4.36; proof §5.1, §5.65(b)(1)(i) | the three class packs |
 | Net contents | Checked — compared as a quantity, with units converted before comparing | §4.32(b)(2), §4.37 | `rules/tables/volume_units.yaml` |
@@ -486,14 +529,15 @@ settled the limit it is cited; in all of these the app reports no verdict it has
 - **An alcohol statement in a form the regulations do not print is reported as needs review.** No
   pattern can list every phrasing 27 CFR §4.36(b), §5.65(b) and §7.65(b) permit, so a statement
   outside the printed forms is reported as needs review rather than as a mismatch
-  (`docs/decisions.md#0011`). Three of the 30 approved corpus labels land there. A compliant label
+  (`docs/decisions.md#0011`). Eight of the 30 approved corpus labels land there. A compliant label
   can reach the review pile over its wording.
 
 - **A country of origin is read only as the application's English name.** Customs marking rules
   also accept the country's own language, an unmistakable abbreviation and the adjectival form
   (19 CFR §134.45(b), (c)); the app reads none of them and reports needs review
-  (`docs/decisions.md#0016`). On a batch of imports this is the main source of extra manual work,
-  and none of it means anything is wrong with the label.
+  (`docs/decisions.md#0016`). An import on which no origin statement is read at all also goes to a
+  person, under a code of its own, rather than failing (`docs/decisions.md#0059`). None of it means
+  anything is wrong with the label.
 
 - **The health warning's typography and placement are not checked.** Contrasting background,
   characters per inch, type height and standing separate and apart (27 CFR §16.22(a)(1), (a)(4),
@@ -502,12 +546,13 @@ settled the limit it is cited; in all of these the app reports no verdict it has
   label is passed or failed on one (`docs/decisions.md#0006`, `docs/decisions.md#0013`). TTB says it
   does not routinely review labels for these either.
 
-- **Bold type in the warning's heading is reported, never decided.** §16.22(a)(2) requires it. A
-  sweep of all 38 corpus labels found the stroke-width measurement not good enough to fail anything
-  on: every one is TTB-approved and so required to be bold, yet the ratio ran 0.111 to 0.508, and
-  one label measured 0.111 clean against 0.261 from a blurred copy of the same printing. So a
-  heading that does not measure as bold is reported as needs review, which here is most of them
-  (`docs/decisions.md#0037`).
+- **Bold type in the warning's heading can pass or go to a person, never fail.** §16.22(a)(2)
+  requires the heading bold and the rest of the statement not, so the app measures the heading's
+  stroke against the statement's own body on the same photo; 1.125 times as heavy or more is bold.
+  Approved headings measured as low as 0.988, inside the range of regular type, so a heading not
+  clearly heavier goes to a person rather than failing, as does one too small or too blurred to
+  measure. On the corpus 16 headings pass and 14 go to a person (`docs/decisions.md#0058`). A body
+  printed bold, which the same section forbids, is not checked.
 
 - **Five more requirements have no check at all, disabled or otherwise.** Mandatory wording must be
   readily legible on a contrasting background, stand separate and apart, be similarly conspicuous
@@ -521,14 +566,18 @@ settled the limit it is cited; in all of these the app reports no verdict it has
   of **50.0** reads as too low a resolution and a high-frequency ratio below **0.3** as motion blur;
   either ends the evaluation before any rule, so **no compliance rule runs** and the result comes
   back carrying the legibility reason code and no field readings. Both numbers are this project's
-  own line, set against this corpus and derived from nothing TTB publishes.
+  own line, set against this corpus and derived from nothing TTB publishes. A photo on which the
+  reader finds no text at all stops the label the same way, and the result names the photo to
+  retake (`docs/decisions.md#0062`).
 
-- **A rotated re-read can decline to fire, and nothing records that it did.** A sideways government
-  warning is found by reading the label again at 90° and 270°, and that read is the expensive part,
-  so it runs only when no heading was found upright, the box shapes look sideways, and the sideways
-  strips read like the warning or read too poorly to rule it out. When either of the last two declines, the label is reported as
-  carrying no warning and nothing says a re-read was turned down. A missing warning is a §16.21
-  mismatch, so that silence decides labels. A label photographed upside down is the same gap.
+- **A rotated re-read can decline to fire, and the result does not say that it did.** A sideways
+  government warning is found by reading the label again at 90° and 270°, and that read is the
+  expensive part, so it runs only when no heading was found upright, the box shapes look sideways,
+  and the sideways strips read like the warning or read too poorly to rule it out
+  (`docs/decisions.md#0054`). When it declines and none of the warning's wording was read either,
+  the label is reported as carrying no warning, and only the server log says a re-read was turned
+  down. A missing warning is a §16.21 mismatch, so that silence decides labels. A label photographed
+  upside down is the same gap.
 
 - **Every item of a JSON `POST /batches` request is refused, so that endpoint checks nothing.** It
   expects the server to find an image from a `label_id`, and there is no image store, so every item

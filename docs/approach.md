@@ -81,8 +81,9 @@ failed a test we wrote ourselves.
 **The gaps we could not close, we designed around.** Most hosts, the one we deployed to among them,
 do not publish how long it takes to wake a sleeping service, so the speed figures here come from
 measuring the running deployment. TTB puts every approved label on the public record but serves them
-one at a time, so each test label was found and transcribed by hand. Widening the corpus, the work
-that would firm up every accuracy figure here, is bounded by that hand work and not by permission.
+one at a time, so each corpus label was found and transcribed by hand. A second set, fetched by a
+script and never tuned on, measures verdicts; what it cannot give is a transcription to score the
+reader against, so the reading figures stay bounded by that hand work and not by permission.
 
 **What we inferred about the four people is marked as inferred.** Their words and their roles are on
 the record; what they want, and what would make them refuse to adopt this, is our reading, labelled
@@ -218,12 +219,13 @@ authorised container size, below the 1.216 percent at which one authorised size 
 distinguishable from the next — with a test recomputing both bounds on every run. The brand
 thresholds, 0.92 to pass and 0.85 to send to a person, rest on published record-matching work rather
 than on this project's labels. A larger set has no recorded reason at all: the confidence bands, the
-floor each rule demands, the per-field multipliers, both image-quality gates, and the stroke-width
-ratio deciding whether the heading is bold, which matters most because the code says it is
-uncalibrated and it still drives a rule that can reject a label. Being wrong is not symmetrical —
-too strict sends compliant labels to a person, too loose lets a doubtful one reach the agent reading
-it anyway — so they were safe to ship unargued. Re-tuning them needs a wider corpus with a human
-verdict on each, and that has not been done.
+floor each rule demands, the per-field multipliers and both image-quality gates. Being wrong is not
+symmetrical — too strict sends compliant labels to a person, too loose lets a doubtful one reach the
+agent reading it anyway — so they were safe to ship unargued. Re-tuning them needs a wider corpus
+with a human verdict on each, and that has not been done. The bold cut is the exception: it
+compares the heading's stroke with the warning's own body on the same photo, was set on 2,688
+rendered warnings and the corpus, and can pass a heading or send it to a person but never fail it
+([decision 0058](decisions.md#0058)).
 
 **One label is checked first, then the rest run behind it.** The reviewer gets a real result in
 seconds instead of a progress bar, and the batch paces itself against how fast they are reading.
@@ -276,6 +278,16 @@ suggested generating test labels; we used real ones because a generated label pr
 read what we drew, and a real one proves it can read what a producer actually printed. Each carries
 a transcription of what it prints and the expected result for each check, so the key is independent
 of the reader being tested.
+
+**Every change was measured on those 30, so a second set tests whether it generalises.** 98 bourbon
+records from the same registry, never tuned on, go through the same merge, engine and verdict, and
+their figures are published apart ([decision 0051](decisions.md#0051)). TTB accepted every one, so
+each mismatch the product reported was read against the images by eye. The first run found 88
+mismatches and 77 of them were the product's fault, most of them a brand guessed from the largest
+type rather than searched for. The reader and rules were reworked against that list until the
+product's own mismatches fell to 17 of 28; the README's *Outcomes on real labels* has the figures
+before and after. The set is one beverage class, so it tests photo variety, not wine, malt or
+imports.
 
 **That corpus caught four failures that unit tests called green.** A class-and-type rule that failed
 thirteen genuinely approved labels. A format check that matched a string it had built itself. An
@@ -401,8 +413,8 @@ and a compliance service nobody is watching is one nobody can vouch for.
 **What we would do next, in order.** Run a real accessibility review rather than an automated one,
 the half of that requirement a machine cannot do for us; bound the memory a batch holds, the one
 way a caller can still make this service fall over; instrument the batch timing, the one
-requirement with no measurement at all; then widen the corpus, which firms up every accuracy
-figure here.
+requirement with no measurement at all; then widen the held-out set past bourbon to wine, malt and
+imports, which is what would show whether the verdict figures hold across the classes.
 
 ## How the work was run
 

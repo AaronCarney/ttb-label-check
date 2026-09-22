@@ -178,14 +178,16 @@ def test_readme_records_the_measured_latency_and_the_shortfall() -> None:
     )
 
 
-def test_readme_says_there_is_no_held_out_set() -> None:
+def test_readme_says_the_reading_figures_are_in_sample() -> None:
     """The accuracy figures were measured on the labels the reader was tuned on.
 
     Every heuristic in `app/vision/local.py` — the box-merge ratios, the
     sideways-text gate, the field regexes — was tuned against this same
     30-label corpus, and the table above is scored on it. That makes the
     figures in-sample: an upper bound on what the reader does with a label it
-    has never seen, not an estimate of it.
+    has never seen, not an estimate of it. The held-out registry labels of
+    decision 0051 carry no transcription, so they measure verdicts and not
+    this table, and the section has to say so.
 
     Publishing them without that reads as a measurement of general
     performance, which is the claim this project cannot support and does not
@@ -194,7 +196,7 @@ def test_readme_says_there_is_no_held_out_set() -> None:
     the reader found nothing — see `tests/rules/test_rule_pack_citations.py`.
     """
     accuracy = _section(_readme(), "## Reading accuracy")
-    assert "held-out" in accuracy, "accuracy section does not say there is no held-out set"
+    assert "held-out" in accuracy, "accuracy section does not say what the held-out set measures"
     assert "in-sample" in accuracy, "accuracy section does not say the figures are in-sample"
 
 
