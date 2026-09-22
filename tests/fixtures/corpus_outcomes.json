@@ -32,8 +32,8 @@
      ""
     ],
     "spirits.brand.matches_application": [
-     "fail",
-     "BRAND.NAME.MISMATCH"
+     "needs_review",
+     "BRAND.IDENTIFY.UNCERTAIN"
     ],
     "spirits.brand.present": [
      "pass",
@@ -74,7 +74,7 @@
    }
   },
   "ttb-26218001000369": {
-   "disposition": "fail",
+   "disposition": "needs_review",
    "rules": {
     "common.warning.heading_caps_bold": [
      "needs_review",
@@ -105,8 +105,8 @@
      ""
     ],
     "spirits.brand.matches_application": [
-     "fail",
-     "BRAND.NAME.MISMATCH"
+     "needs_review",
+     "BRAND.IDENTIFY.UNCERTAIN"
     ],
     "spirits.brand.present": [
      "pass",
@@ -535,8 +535,8 @@
      ""
     ],
     "spirits.brand.matches_application": [
-     "needs_review",
-     "BRAND.NAME.NEEDS_REVIEW"
+     "pass",
+     ""
     ],
     "spirits.brand.present": [
      "pass",
@@ -723,7 +723,7 @@
    }
   },
   "ttb-26233001000566": {
-   "disposition": "fail",
+   "disposition": "needs_review",
    "rules": {
     "common.warning.heading_caps_bold": [
      "pass",
@@ -750,8 +750,8 @@
      ""
     ],
     "wine.brand.matches_application": [
-     "fail",
-     "BRAND.NAME.MISMATCH"
+     "pass",
+     ""
     ],
     "wine.brand.present": [
      "pass",
@@ -884,8 +884,8 @@
      ""
     ],
     "spirits.brand.matches_application": [
-     "needs_review",
-     "BRAND.NAME.NEEDS_REVIEW"
+     "pass",
+     ""
     ],
     "spirits.brand.present": [
      "pass",
@@ -2065,19 +2065,18 @@
  },
  "scoreboard": {
   "check_outcomes": {
-   "fail": 11,
+   "fail": 8,
    "needs_review": 94,
-   "pass": 350
+   "pass": 353
   },
   "checks": 455,
   "decided_without_a_person": 0.793,
   "label_outcomes": {
-   "fail": 9,
-   "needs_review": 21
+   "fail": 7,
+   "needs_review": 23
   },
   "labels": 30,
   "mismatch_causes": {
-   "BRAND.NAME.MISMATCH": 3,
    "CLASS_TYPE.MATCH.APPLICATION_LABEL_DISAGREE": 1,
    "NET_CONTENTS.MATCH.APPLICATION_LABEL_DISAGREE": 3,
    "WARNING.STYLE.HEADING_NOT_BOLD_CAPS": 1,
@@ -2087,7 +2086,8 @@
    "": 4,
    "ALCOHOL_CONTENT.FORMAT.NEEDS_REVIEW": 8,
    "ALCOHOL_CONTENT.MATCH.NEEDS_REVIEW": 3,
-   "BRAND.NAME.NEEDS_REVIEW": 3,
+   "BRAND.IDENTIFY.UNCERTAIN": 2,
+   "BRAND.NAME.NEEDS_REVIEW": 1,
    "CLASS_TYPE.MATCH.NEEDS_REVIEW": 6,
    "CLASS_TYPE.SOI.NO_MATCH": 4,
    "ENGINE.EVIDENCE.BELOW_CONFIDENCE_FLOOR": 4,

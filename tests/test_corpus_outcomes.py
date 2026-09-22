@@ -56,18 +56,6 @@ WRONG_MISMATCHES = {
         "spirits.net_contents.matches_application",
     ): "the merge keeps the back's Serving Facts '44 ml' over the front's '700 mL'",
     (
-        "ttb-26212001000085",
-        "spirits.brand.matches_application",
-    ): "the brand is guessed as the largest type, here a garbled appellation line",
-    (
-        "ttb-26218001000369",
-        "spirits.brand.matches_application",
-    ): "the brand is guessed as the largest type, here 'DISTILLED IN IRELAND IRISH'",
-    (
-        "ttb-26233001000566",
-        "wine.brand.matches_application",
-    ): "the brand is guessed as the largest type, and 'Red Blend' is set larger than 'THE UGLY'",
-    (
         "ttb-26240001000454",
         "malt.class_type.matches_application",
     ): "'Double India Pale Ale' is handwritten and not read; another collar line is picked",

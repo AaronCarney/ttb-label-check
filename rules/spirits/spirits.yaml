@@ -22,17 +22,23 @@ rules:
     # curly quotes, the trademark glyphs and accents fold away first;
     # punctuation is kept, because dropping it can change a name. A mark that
     # equals a declared name once folded, or carries one as a run of whole
-    # words, is that brand. Otherwise the two spellings are scored and a near
-    # miss goes to a reviewer rather than being called a mismatch.
-    # docs/decisions.md#0015 carries the reasoning.
-    reason_code: BRAND.NAME.MISMATCH
-    severity: reject
+    # words, is that brand. Otherwise the two spellings are scored, and a pick
+    # that is not the name sends the check to search every other line read for
+    # the declared brand and trade names. A name found nowhere goes to a
+    # reviewer, never to a mismatch: the pick is a guess at which line is the
+    # brand. docs/decisions.md#0015 and #0052 carry the reasoning.
+    reason_code: BRAND.IDENTIFY.UNCERTAIN
+    severity: warn
     match_policy: fuzzy
     validator: fuzzy_brand
+    decision_table_ref: brand_trailing_words
     parameters:
       pass_threshold: 0.92
       needs_review_threshold: 0.85
       needs_review_reason_code: BRAND.NAME.NEEDS_REVIEW
+      search_min_length: 3
+      search_within_min_length: 5
+      search_misread_min_length: 8
     evidence_required: [brand]
     effective_date: "2022-02-09"
     test_fixtures: [F-SPIRITS-BRAND-APP-MATCH-01, F-SPIRITS-BRAND-APP-MISMATCH-01]

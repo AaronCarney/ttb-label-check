@@ -99,6 +99,16 @@ CLOUD_ONLY_KEYS = frozenset(
     }
 )
 
+LOCAL_ONLY_KEYS = frozenset(
+    {
+        # Every line the local reader read, listed beside its brand pick for the
+        # brand rule to search. A model answers fields and returns no lines, so
+        # the cloud path has none; the rule then compares the pick alone, and a
+        # pick that is not the name still goes to a reviewer, never a mismatch.
+        "candidates",
+    }
+)
+
 
 def _reader_payloads(relative: str) -> dict[str, dict]:
     """One frozen local reading, parsed. No model, no image, no network."""
@@ -221,7 +231,9 @@ def test_the_two_readers_describe_a_field_with_the_same_keys() -> None:
     local = _reader_payloads("26230001000420/back.jpg")
 
     for field_id in EXPECTED_FIELD_IDS:
-        assert set(cloud[field_id]) - CLOUD_ONLY_KEYS == set(local[field_id]), field_id
+        assert set(cloud[field_id]) - CLOUD_ONLY_KEYS == set(local[field_id]) - LOCAL_ONLY_KEYS, (
+            field_id
+        )
 
 
 def test_a_number_neither_reader_could_read_is_absent_from_both() -> None:

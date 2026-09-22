@@ -3297,3 +3297,73 @@ test on them would pass or skip depending on the machine. *Sending every image a
 product's upload does not, and a figure measured on inputs the product never receives would describe
 a different product. *Leaving alcohol content and net contents empty* — the two checks most often
 wrong on the corpus would then not be measured at all.
+
+<a id="0052"></a>
+## 0052. The brand check searches the label for the application's brand, and never reports a mismatch
+
+**Evidence:** `app/rules/_validators/fuzzy_brand.py`; `app/rules/brand_match.py` (`search_route`,
+`shortened`); `app/vision/local.py` (`_brand_candidates`); `app/vision/faces.py`
+(`_with_every_candidate`); `app/services/envelope_builder.py` (`_located_line`);
+`rules/tables/brand_trailing_words.yaml`; `tests/rules/_validators/test_brand_search.py`,
+`tests/test_reader_brand_candidates.py`, `tests/test_envelope_shows_the_line_found.py`.
+
+**What was found.** Nothing on a label marks which text is the brand, so the reader guessed: the text
+set in the largest type that no other field claims. On many labels that is a statutory line or a
+class designation ("DISTILLED IN IRELAND IRISH", "Red Blend"), and the brand rule then compared the
+guess against the application and reported a mismatch. That was 3 of the 11 mismatches on the 30
+corpus labels and 41 of the 88 on the 98 held-out registry labels (#0051), every one on an approved
+label. A wrong guess at which line is the brand is not evidence that the label names another brand.
+The application states the brand, so the question the check can answer is whether the label shows
+it (PRD FR-7).
+
+**Chosen.**
+- **The reader lists every line beside its pick.** The brand payload carries `candidates`: every
+  box on the face, runs of up to four neighbouring boxes on one line, and runs of lines set as one
+  display block, each with its face, box and OCR score. The face merge joins every face's list, the
+  way it already joins every face's proof figures, because the brand may be on a face whose pick lost
+  the merge. The reader only lists; whether a line shows the brand is the rule pack's question.
+- **The rule searches the list when its pick is not the name.** It searches for the declared brand
+  and the trade names the application marks as used on the label, by five routes, strongest first:
+  the line is the name; the line is the name once punctuation and spacing are out; the name's whole
+  words sit inside the line (for a name of two words or at least five letters); the line is the name
+  less its trailing business or class words (`VIKRE DISTILLERY` as `Vikre`), as a line of its own;
+  the line is the name with one character read differently (for a name of at least eight letters).
+  The lengths and the trailing words are rule-pack parameters and a decision table.
+- **Found is a match, and the card shows the line found**: its text, its box and its face, so the
+  box is drawn round the brand and not round the pick.
+- **Not found goes to a reviewer under `BRAND.IDENTIFY.UNCERTAIN`**, with the pick shown. The rule
+  never reports a mismatch. `BRAND.NAME.MISMATCH` stays in the registry as reviewer vocabulary: a
+  reviewer who sees a different brand on the label can still say so.
+- **No cap on the list.** Across the 128 labels' faces the list runs to a median of about 50 lines
+  and at most 548, built in about a millisecond per face. It stays inside the reading; the wire
+  envelope and the audit trail carry only the single value shown.
+
+**Measured.** On the corpus the three wrong brand mismatches are gone: one label now matches and two
+go to a reviewer; two borderline brand reviews now match. By label, 9 mismatch and 21 needs review
+become 7 and 23. On the held-out labels, which nobody tuned on, the 41 brand mismatches become 33
+matches and 8 reviews, and 5 borderline reviews become matches. By label, 0 match, 63 mismatch and 35
+needs review become 5, 39 and 54: the first held-out labels to match on every check. No check other
+than the brand moved on either set. The share of checks settled without a person moves from 74.1% to
+73.9% on the held-out set, because 8 checks that were settled wrongly as mismatches now go to a
+person.
+
+Of the 2 corpus brands still not found, the reader never read one, and the other is a short single
+word that sits inside a longer line ("AODH IRISH WHISKEY"). A single word under five letters is not
+searched for inside a longer line, because it is a word in any sentence, so that label goes to a
+reviewer. The 8 held-out brands still not found have not yet been traced.
+
+**How safe a match is.** Each label's declared names were searched, by the production routes and
+parameters, on every other label's lines. On the corpus the only hits were between two labels of the
+same brand. On the held-out set, 19 hits fell between labels declaring different names. Five are the
+same brand family, where the name really is printed on the other label (a distillery's name on a
+label it bottles for another brand, a brand under two spellings). The other 14 are one brand that is
+itself a common phrase, "CASK STRENGTH", which 14 other labels print. A label submitted under
+such a brand could be matched on the phrase alone. That is recorded as a limitation, not guarded
+against: guarding it needs a list of phrases no brand may be, and nothing in the registry supplies one.
+
+**Rejected.** *Searching for the fanciful name* — it describes the product, and "BARREL PROOF" is on
+labels of many brands. *The Jaro-Winkler score as a search route* — searching hundreds of lines,
+"SOUTHERN" passes against "SOUTHERN CROSS", because the score rewards a shared start. *A service step
+between reading and rules that rewrites the brand observation* — it puts a comparison decision in
+service code. *Giving every validator the whole reading* — the widest change for the narrowest need,
+where the list in the brand payload also serves the net-contents and alcohol pickers.

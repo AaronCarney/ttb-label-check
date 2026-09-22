@@ -212,7 +212,9 @@ def test_a_label_that_agrees_with_its_application_is_reported_as_agreeing(client
 
 def test_a_brand_no_name_the_application_declares_carries_is_reported(client):
     """The comparison is real: change every name the application declares and
-    the check that passed a moment ago reports a disagreement.
+    the check that passed a moment ago no longer passes. It sends the label to a
+    reviewer rather than reporting a mismatch, because the name the reader took
+    for the brand is a guess at which line is the brand (`docs/decisions.md#0052`).
 
     All three have to change together. The application declares a brand, a
     fanciful name, and the trade name inside its applicant line marked "(Used
@@ -227,7 +229,7 @@ def test_a_brand_no_name_the_application_declares_carries_is_reported(client):
         fanciful_name="",
         applicant_name_address="DRNK, DRNK LLC 3637 FREI RD Sebastopol CA 95472",
     )
-    assert _rule_outcomes(envelope)["wine.brand.matches_application"] == "fail"
+    assert _rule_outcomes(envelope)["wine.brand.matches_application"] == "needs_review"
     assert envelope["disposition"] != "pass"
 
 

@@ -1,0 +1,43 @@
+# Words a declared brand may end in that its label often leaves off.
+#
+# An application declares "VIKRE DISTILLERY" or "THREE DOCTORS BOURBON" and the
+# label's mark reads "VIKRE" or "THREE DOCTORS": the business word or the class
+# word sits in the bottler's line or the designation instead. The brand search
+# in app/rules/_validators/fuzzy_brand.py drops these words from the end of a
+# declared name, and only from its end, so a name is never cut in its middle.
+#
+# A shortened name is often a place or a common word, so the search accepts it
+# only as a whole line of its own, never inside a longer one. That is what keeps
+# this list safe to grow, and it is still kept short: every word here is one
+# more way for a short line to count as the brand.
+#
+# "SPIRIT" in the singular is left out. It ends names such as "FREE SPIRIT",
+# where it is part of the brand rather than a description of the business.
+#
+# Words are compared the way names are: case, accents and punctuation fold
+# away first, so "Co." and "CO" are one entry.
+interpolation: none
+entries:
+  # Business words.
+  - words:
+      - distillery
+      - distilleries
+      - distilling
+      - distillers
+      - distiller
+      - spirits
+      - company
+      - co
+      - inc
+      - llc
+      - ltd
+      - brewing
+      - brewery
+      - winery
+      - vineyards
+      - cellars
+  # Class words.
+  - words:
+      - bourbon
+      - whiskey
+      - whisky

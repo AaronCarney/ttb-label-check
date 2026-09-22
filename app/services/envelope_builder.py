@@ -12,10 +12,10 @@ from collections.abc import Iterable
 from app.schemas.application import Application
 from app.schemas.audit import AuditRecord, PerRuleTraceEntry
 from app.schemas.expected import ExpectedValue
-from app.schemas.extracted import FieldObservation
+from app.schemas.extracted import Evidence, FieldObservation
 from app.schemas.label import Label
 from app.schemas.metrics import Metrics
-from app.schemas.rejection import ValidationResult
+from app.schemas.rejection import Outcome, ValidationResult
 from app.schemas.wire.disposition import (
     AISuggestionWire,
     ConfidenceBand,
@@ -81,6 +81,22 @@ def _strip_audit_keys(value):
     return {k: v for k, v in value.items() if k not in OBSERVED_VALUE_AUDIT_KEYS}
 
 
+def _located_line(results: Iterable[ValidationResult]) -> Evidence | None:
+    """The line a passing rule found its value on, where it names one.
+
+    A line is named by its text and its box together. The first passing rule
+    in the slot's order that names one wins, so the same results always give
+    the same card.
+    """
+    for vr in results:
+        if vr.outcome is not Outcome.PASS or not vr.evidence:
+            continue
+        found = vr.evidence[0]
+        if found.extracted_text and found.bbox is not None:
+            return found
+    return None
+
+
 def build_field_findings(
     *,
     results: Iterable[ValidationResult],
@@ -123,16 +139,25 @@ def build_field_findings(
             # Per the contract: needs_review trace entry handled in audit;
             # skip the wire entry to keep the wire surface tight.
             continue
+        slot_results = [vr for i in slot_ids for vr in results_by_field.get(i, [])]
         ev = obs.evidence[0]
+        # A rule that found its value on a line of its own passes with that
+        # line as its evidence: the brand rule searches every line read, and
+        # the name may sit on another face from the reader's pick. The card
+        # shows what matched, so the box is drawn round the right text on the
+        # right photograph. A rule that passes on the reader's own evidence
+        # gives back the same line, and one that did not pass leaves the pick.
+        located = _located_line(slot_results)
+        shown = ev if located is None else located
         evidence_wire = FieldEvidenceWire(
-            bbox=ev.bbox if ev.bbox is not None else (0, 0, 0, 0),
-            crop_ref=ev.image_uri or "",
-            extraction_confidence=ev.confidence,
+            bbox=shown.bbox if shown.bbox is not None else (0, 0, 0, 0),
+            crop_ref=shown.image_uri or "",
+            extraction_confidence=shown.confidence,
             # `Evidence.panel` is the face the reader took this from. The merge
             # in `app/vision/faces.py` already picked one observation per field
             # from the face that actually found it, so one tag per card is the
             # whole answer.
-            face_tag=ev.panel or "",
+            face_tag=shown.panel or "",
         )
         # What the card says a rule found comes from `rule_disposition`, the
         # one mapping the audit trail and the overall result also use. Reading
@@ -150,7 +175,6 @@ def build_field_findings(
         # measured nothing, so excluding it keeps the aggregate honest.
         rule_findings: list[RuleFindingWire] = []
         confidences: list[float] = []
-        slot_results = [vr for i in slot_ids for vr in results_by_field.get(i, [])]
         for vr in slot_results:
             verdict = rule_disposition(vr)
             if verdict == "not_applicable":
@@ -177,8 +201,10 @@ def build_field_findings(
                 # on the payload put `{'brand_name': 'Patria'}` on the result
                 # page beside an application saying `PATRIA`, which a reviewer
                 # cannot compare against anything.
-                extracted_value=reading_for_display(
-                    wire_slot, _strip_audit_keys(obs.observed_value)
+                extracted_value=(
+                    reading_for_display(wire_slot, _strip_audit_keys(obs.observed_value))
+                    if located is None
+                    else (located.extracted_text or "").strip()
                 ),
                 expected_value=_coerce_str(exp.value if exp else None),
                 evidence=evidence_wire,

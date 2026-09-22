@@ -6,6 +6,9 @@ name the application marks "(Used on label)". Four routes run in order —
 exact, whole words, score, and the review-only first-letter route — and the
 result names which admissible value matched, so a reviewer looking at a label
 whose mark is not the brand field's wording is told where that name came from.
+A mark none of them settles goes to a reviewer, never to a mismatch: the mark
+is the reader's guess at which line is the brand (docs/decisions.md#0052).
+Searching the label's other lines is tested in test_brand_search.py.
 
 The first-letter route is the one design here that must not be simplified: it
 can reach a reviewer and never a match. Folding it into one score and taking
@@ -33,7 +36,8 @@ def _rule():
         rule_id="brand.match",
         cfr_citation="27 CFR §4.33",
         validator="fuzzy_brand",
-        reason_code="BRAND.NAME.MISMATCH",
+        reason_code="BRAND.IDENTIFY.UNCERTAIN",
+        severity=Severity.WARN,
         match_policy=MatchPolicy.FUZZY,
         parameters={
             "pass_threshold": PASS_THRESHOLD,
@@ -99,8 +103,8 @@ def test_a_mark_that_is_a_word_run_of_the_declared_brand_is_a_match() -> None:
 
 def test_a_trade_name_does_not_rescue_an_unrelated_mark() -> None:
     res = _verdict("Bizmark", "Acme", trade_names_used_on_label=("Acme Spirits",))
-    assert res.outcome is Outcome.FAIL
-    assert res.reason_code == "BRAND.NAME.MISMATCH"
+    assert res.outcome is Outcome.INSUFFICIENT_EVIDENCE
+    assert res.reason_code == "BRAND.IDENTIFY.UNCERTAIN"
 
 
 def test_a_trade_name_repeating_the_brand_leaves_the_finding_on_the_brand() -> None:
@@ -128,8 +132,8 @@ def test_a_blank_name_in_the_application_matches_nothing() -> None:
         parameters={"fanciful_name": "  ", "trade_names_used_on_label": (" ",)},
     )
     res = fuzzy_brand(obs, exp, _rule(), make_context())
-    assert res.outcome is Outcome.FAIL
-    assert res.reason_code == "BRAND.NAME.MISMATCH"
+    assert res.outcome is Outcome.INSUFFICIENT_EVIDENCE
+    assert res.reason_code == "BRAND.IDENTIFY.UNCERTAIN"
 
 
 # ---------------------------------------------------------------------------
@@ -163,10 +167,15 @@ def test_the_borderline_band_reports_needs_review() -> None:
     assert res.reason_code == "BRAND.NAME.NEEDS_REVIEW"
 
 
-def test_a_different_name_below_the_floor_fails() -> None:
+def test_a_different_name_below_the_floor_goes_to_a_reviewer() -> None:
+    """The mark is not the declared name, and nothing else read shows it. That
+    is a reviewer's question and never a mismatch: the mark is a guess at which
+    line is the brand. The finding shows the mark the reader took."""
     res = _verdict("Acme", "Bizmark")
-    assert res.outcome is Outcome.FAIL
-    assert res.reason_code == "BRAND.NAME.MISMATCH"
+    assert res.outcome is Outcome.INSUFFICIENT_EVIDENCE
+    assert res.severity is Severity.WARN
+    assert res.reason_code == "BRAND.IDENTIFY.UNCERTAIN"
+    assert res.message and '"Acme"' in res.message and '"Bizmark"' in res.message
 
 
 # ---------------------------------------------------------------------------
@@ -197,8 +206,8 @@ def test_the_first_letter_route_can_never_report_a_match() -> None:
 
 def test_the_first_letter_route_does_not_rescue_a_different_name() -> None:
     res = _verdict("Zebra", "Cobra")
-    assert res.outcome is Outcome.FAIL
-    assert res.reason_code == "BRAND.NAME.MISMATCH"
+    assert res.outcome is Outcome.INSUFFICIENT_EVIDENCE
+    assert res.reason_code == "BRAND.IDENTIFY.UNCERTAIN"
 
 
 # ---------------------------------------------------------------------------

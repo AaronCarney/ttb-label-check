@@ -44,7 +44,33 @@ def test_brand_neg(ruleset) -> None:
     obs = make_obs(field_id="brand", value="Acme", beverage_class=BeverageClass.SPIRITS)
     exp = make_expected(field_id="brand", value="Bizmark")
     res = VALIDATOR_REGISTRY[rule.validator](obs, exp, rule, _ctx(ruleset))
-    assert res.outcome is Outcome.FAIL
+    # A different name the search finds nowhere goes to a reviewer, never to a
+    # mismatch (docs/decisions.md#0052).
+    assert res.outcome is Outcome.INSUFFICIENT_EVIDENCE
+    assert res.reason_code == "BRAND.IDENTIFY.UNCERTAIN"
+
+
+def test_brand_found_by_the_packs_search(ruleset) -> None:
+    """The pack carries the search parameters and the trailing-words table:
+    the declared name, less its business word, is found on a line the reader
+    listed beside a pick that is not the brand."""
+    rule = _r(ruleset, "spirits.brand.matches_application")
+    obs = make_obs(
+        field_id="brand",
+        value={
+            "brand_name": "STRAIGHT BOURBON WHISKEY",
+            "confidence": 0.9,
+            "candidates": [
+                {"text": "STRAIGHT BOURBON WHISKEY", "bbox": [0, 0, 400, 80], "confidence": 0.9},
+                {"text": "Vikre", "bbox": [40, 300, 160, 340], "confidence": 0.9},
+            ],
+        },
+        beverage_class=BeverageClass.SPIRITS,
+    )
+    exp = make_expected(field_id="brand", value="VIKRE DISTILLERY")
+    res = VALIDATOR_REGISTRY[rule.validator](obs, exp, rule, _ctx(ruleset))
+    assert res.outcome is Outcome.PASS
+    assert res.evidence[0].extracted_text == "Vikre"
 
 
 def test_class_type_pos(ruleset) -> None:

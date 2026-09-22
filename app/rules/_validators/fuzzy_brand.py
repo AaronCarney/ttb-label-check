@@ -125,10 +125,10 @@ def _best(
 # What each search route found, in the words a reviewer reads after 'The
 # label's <face> shows "<line>", which'.
 _FOUND_AS = {
-    SEARCH_PUNCTUATION: "differs from {source}, \"{value}\", only in punctuation or "
+    SEARCH_PUNCTUATION: 'differs from {source}, "{value}", only in punctuation or '
     "spacing, which TTB's allowable revisions let a label change without a new approval",
-    SEARCH_WITHIN: "carries {source}, \"{value}\"",
-    SEARCH_MISREAD: "is {source}, \"{value}\", with one character read differently",
+    SEARCH_WITHIN: 'carries {source}, "{value}"',
+    SEARCH_MISREAD: 'is {source}, "{value}", with one character read differently',
 }
 
 
@@ -193,8 +193,7 @@ def _found_message(
     if route == SEARCH_SHORTENED:
         dropped = value.split()[len(shortened(value, trailing)) :]
         return (
-            f'{where} shows "{line}", which is {source}, "{value}", without '
-            f'"{" ".join(dropped)}".'
+            f'{where} shows "{line}", which is {source}, "{value}", without "{" ".join(dropped)}".'
         )
     template = _FOUND_AS.get(route)
     if template is None:
@@ -204,12 +203,17 @@ def _found_message(
 
 def _found_evidence(obs: FieldObservation, route: str, candidate: dict, value: str) -> Evidence:
     """The line the name was found in, as the evidence a reviewer is shown."""
-    bbox = candidate.get("bbox")
+    listed = candidate.get("bbox")
+    bbox = (
+        (int(listed[0]), int(listed[1]), int(listed[2]), int(listed[3]))
+        if listed and len(listed) == 4
+        else None
+    )
     return Evidence(
         field_id=obs.evidence[0].field_id if obs.evidence else obs.field_id,
         source=EvidenceSource.OCR,
         panel=candidate.get("face"),
-        bbox=tuple(int(v) for v in bbox) if bbox else None,
+        bbox=bbox,
         extracted_text=str(candidate["text"]).strip(),
         matched_against_value=value,
         match_kind=MatchKind.FUZZY if route == SEARCH_MISREAD else MatchKind.NORMALIZED,

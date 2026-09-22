@@ -42,7 +42,10 @@ def test_brand_neg(ruleset) -> None:
     obs = make_obs(field_id="brand", value="Acme", beverage_class=BeverageClass.MALT)
     exp = make_expected(field_id="brand", value="Bizmark")
     res = VALIDATOR_REGISTRY[rule.validator](obs, exp, rule, _ctx(ruleset))
-    assert res.outcome is Outcome.FAIL
+    # A different name the search finds nowhere goes to a reviewer, never to a
+    # mismatch (docs/decisions.md#0052).
+    assert res.outcome is Outcome.INSUFFICIENT_EVIDENCE
+    assert res.reason_code == "BRAND.IDENTIFY.UNCERTAIN"
 
 
 def test_class_type_pos(ruleset) -> None:

@@ -30,7 +30,7 @@ import pytest
 import app.rules._validators.fuzzy_brand  # noqa: F401
 from app.rules._validators import VALIDATOR_REGISTRY
 from app.rules.brand_match import stage_b_fuzzy
-from app.schemas.rejection import Outcome
+from app.schemas.rejection import Outcome, Severity
 from app.schemas.rules import MatchPolicy
 from tests.rules.fixtures import make_context, make_expected, make_obs, make_rule
 
@@ -43,7 +43,8 @@ def _rule():
         rule_id="brand.match",
         cfr_citation="27 CFR §4.33",
         validator="fuzzy_brand",
-        reason_code="BRAND.NAME.MISMATCH",
+        reason_code="BRAND.IDENTIFY.UNCERTAIN",
+        severity=Severity.WARN,
         match_policy=MatchPolicy.FUZZY,
         parameters={
             "pass_threshold": PASS_THRESHOLD,
@@ -83,10 +84,10 @@ def test_a_name_with_a_word_added_is_the_same_name() -> None:
     assert res.message and "Stone's Throw Distilling Co." in res.message
 
 
-def test_substantively_different_brand_below_floor_emits_mismatch() -> None:
+def test_substantively_different_brand_below_floor_goes_to_a_reviewer() -> None:
     res = _verdict("Acme", "Bizmark")
-    assert res.outcome is Outcome.FAIL
-    assert res.reason_code == "BRAND.NAME.MISMATCH"
+    assert res.outcome is Outcome.INSUFFICIENT_EVIDENCE
+    assert res.reason_code == "BRAND.IDENTIFY.UNCERTAIN"
 
 
 def test_borderline_brand_emits_needs_review_code() -> None:

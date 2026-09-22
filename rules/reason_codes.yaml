@@ -29,11 +29,17 @@ codes:
     cfr_anchors: ["27 CFR §4.32(a)(1)", "27 CFR §5.63(a)", "27 CFR §7.63(a)(1)"]
     severity: reject
   BRAND.NAME.MISMATCH:
-    description: "Label brand fails fuzzy match against the application brand."
+    # Nothing emits this; the reason it stays is in `reviewer_vocabulary:` at
+    # the foot of this file, which is checked. See docs/decisions.md#0052.
+    description: "Reviewer judged the label's brand to differ from the application brand."
     cfr_anchors: ["27 CFR §4.33", "27 CFR §5.64", "27 CFR §7.64"]
     severity: reject
   BRAND.NAME.NEEDS_REVIEW:
     description: "Brand match falls in the borderline band — a reviewer decides."
+    cfr_anchors: ["27 CFR §4.33", "27 CFR §5.64", "27 CFR §7.64"]
+    severity: warn
+  BRAND.IDENTIFY.UNCERTAIN:
+    description: "No line read on the label shows the application brand; the reader's largest text is shown and a reviewer decides."
     cfr_anchors: ["27 CFR §4.33", "27 CFR §5.64", "27 CFR §7.64"]
     severity: warn
 
@@ -351,6 +357,13 @@ reviewer_vocabulary:
     "A reviewer holding a laboratory figure the application does not carry can
      still override the label with it. The engine compares two declared values
      and has no third number to compare against. See docs/decisions.md#0008."
+  BRAND.NAME.MISMATCH:
+    "The brand check searches every line read for the application brand and,
+     where it finds none, sends the label to a reviewer under
+     BRAND.IDENTIFY.UNCERTAIN: the reader's pick is a guess at which line is
+     the brand, not evidence the label names another. A reviewer who looks at
+     the label and sees a different brand has this code to say so. See
+     docs/decisions.md#0052."
   CLASS_TYPE.INPUT.UNKNOWN:
     "The engine reports an application that names no beverage as
      ENGINE.RULE_PACK.NOT_SELECTED, which says the same thing from the rule

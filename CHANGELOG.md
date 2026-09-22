@@ -71,6 +71,15 @@ date: the release's git tag records when it was cut. Versions follow
 
 ### Changed
 
+- The brand check now searches every line read on every face for the application's brand and the
+  trade names it marks as used on the label, instead of comparing only the text set in the largest
+  type. A name found is a match, and the result card shows the line it was found on, with its box
+  and face. A name found nowhere goes to a reviewer under `BRAND.IDENTIFY.UNCERTAIN`, and the check
+  never reports a brand mismatch; `BRAND.NAME.MISMATCH` stays as a code a reviewer can apply. On the
+  corpus, labels move from 9 mismatch and 21 needs review to 7 and 23. On the 98 held-out registry
+  labels the 41 brand mismatches become 33 matches and 8 reviews, and labels move from 0 match, 63
+  mismatch and 35 needs review to 5, 39 and 54 (`docs/decisions.md#0052`).
+
 - The reader's replay suite now covers every real label in the corpus, 58 of its 62 images, and
   merges a label's faces with the product's own merge instead of a front-first merge of its own.
   With the product's merge it shows what the old merge hid: on three labels the net contents come
