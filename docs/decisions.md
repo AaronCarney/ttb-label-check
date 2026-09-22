@@ -3367,3 +3367,63 @@ labels of many brands. *The Jaro-Winkler score as a search route* — searching 
 between reading and rules that rewrites the brand observation* — it puts a comparison decision in
 service code. *Giving every validator the whole reading* — the widest change for the narrowest need,
 where the list in the brand payload also serves the net-contents and alcohol pickers.
+
+<a id="0053"></a>
+## 0053. A number is read as the alcohol content or net contents only where its words allow it
+
+**Evidence:** `app/vision/local.py` (`_names_an_ingredient`, `_not_the_bottles_contents`,
+`_net_contents`); `app/vision/faces.py` (`_rank`); `app/rules/proof.py` (`_PROOF_RE`);
+`tests/test_reader_alcohol_statement.py`, `tests/test_reader_net_contents.py`,
+`tests/test_vision_face_merge.py`, `tests/test_proof_finder.py`.
+
+**What was found.** A label prints more numbers than its alcohol content and net contents, and the
+reader took the first that fitted. On a face with no alcohol statement it took a bare percentage,
+which on a bourbon's back is usually the mash bill: "75% CORN", "at least 30% wheat", "MASH BILL OF
+68% CORN". Joining the faces then kept whichever reading scored higher, so the back's "75%" beat the
+front's "56% ALC. BY VOL.". Net contents failed the same way: "IN 53 GALLON CHARRED" (a barrel),
+"Serving Size: 1.5 fl oz (44 ml)" from a Serving Facts panel, and "any quantity under 15 gallons"
+from a history paragraph each beat the front's "750 mL". A grain table printed as rows, "PROD: 80
+PROOF: 96", gave 80 as the proof. That was 3 of the corpus mismatches and 9 of the held-out
+mismatched checks, every one on an approved label. The OCR score measures how cleanly characters
+were read, not which text is the field, so it cannot settle these.
+
+**Chosen.** Each wrong number is excluded by the words around it, in the reader, and the search
+carries on past it.
+- **A percentage is an ingredient's share** when a word follows it and no alcohol word ("alc",
+  "vol", "abv", "proof") comes within the next three words, or when it is the value of a labelled row
+  ("WHEAT: 30%"). This applies only to a percentage printed without the alcohol words. The three-word
+  reach keeps a statement whose "Alc." the OCR misread: "45% Akc. by Vol.".
+- **A statement printed with the alcohol words outranks a bare percentage when faces are joined**,
+  whatever the scores. Between two readings of the same kind the higher score still wins.
+- **A volume is not the bottle's contents** when "serving" comes before it on its line, when "of
+  alcohol" follows it, when it is the object of a preposition ("in", "under", "of", "from", "at" and
+  the like, which is how a sentence mentions a volume), or when a vessel word (barrel, cask, charred,
+  oak, hogshead, vat, still and the like) follows within three words. "BARREL PROOF" and "CASK
+  STRENGTH" name the bottle's strength, so "750 ML BARREL PROOF" is still read. The line is the
+  boxes level with the figure, so a "Serving Size" read as a box of its own still counts.
+- **"PROOF:" with a figure after it heads that figure**, so a figure before it is not read as the
+  proof.
+
+**Measured.** On the corpus the three wrong net-contents mismatches become matches; labels with a
+mismatch go from 7 to 4 and no other check moved. On the held-out labels, which nobody tuned on,
+mismatched checks go from 47 to 38: four alcohol-content and three proof mismatches become matches,
+the net-contents mismatch becomes a match, and one label whose only percentage is its mash bill goes
+to a reviewer, since its alcohol statement was never read. Four alcohol-format reviews also become
+matches, because the statement now read is the worded one. By label, 39 mismatch and 54 needs
+review become 37 and 56. No check on either set moved toward a mismatch. One held-out statement,
+"45% Akc. by Vol.", was lost by the first version of the ingredient test and is why it looks three
+words ahead.
+
+**Left as it is.** The held-out label that reads "(117 Proof)" as "(17 Proof)" still reports a proof
+mismatch. That is the OCR misreading the right text, not the wrong text picked, and it belongs to the
+confidence gate of PRD FR-9, not to a picker.
+
+**Rejected.** *Ranking candidates by the sizes 27 CFR 5.203 and 4.72 authorise.* It needs the
+application's class, which the reader does not have, and the exclusions cleared every case on both
+sets without it. Whether a size is authorised is a judgement about the reading, so it belongs with
+the rule pack, where the class is known, as one of the identification signals of FR-9. *Excluding a
+figure in parentheses after another quantity.* "750 mL (25.4 FL OZ)" is the usual form of a real
+statement. *Taking only a volume that stands alone in its clause.* The OCR joins neighbouring
+statements into one box ("750 ML I117 Proof I 58.5% Alc/vol"), so the true statement would be lost.
+*Excluding every percentage followed by a word, with no look ahead.* It lost a correct reading on a
+held-out label.

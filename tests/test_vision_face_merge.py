@@ -163,3 +163,31 @@ def test_the_same_proof_read_on_two_faces_is_kept_once():
     (merged,) = merge_readings([front, back])
 
     assert merged.observed_value["proof"] == [proof]
+
+
+def test_a_statement_with_the_alcohol_words_outranks_a_bare_percentage():
+    """A face whose only percentage is bare loses to a face that printed the
+    alcohol words, however cleanly the bare one was read: the words are what say
+    the figure is the alcohol content (ttb-17123001000355, where the back's
+    "75% CORN" outscored the front's "56% ALC. BY VOL.")."""
+    front = [_abv(panel="front", confidence=0.918, abv_pct=56.0, proof=[])]
+    bare = _abv(panel="back", confidence=0.932, abv_pct=75.0, proof=[])
+    back = [bare.model_copy(update={"observed_value": {**bare.observed_value, "alc_text": "75%"}})]
+
+    (merged,) = merge_readings([front, back])
+
+    assert merged.evidence[0].panel == "front"
+    assert merged.observed_value["abv_pct"] == 56.0
+
+
+def test_between_two_bare_percentages_the_better_read_one_wins():
+    first = _abv(panel="front", confidence=0.80, abv_pct=40.0, proof=[])
+    second = _abv(panel="back", confidence=0.90, abv_pct=41.0, proof=[])
+    bare = [
+        [o.model_copy(update={"observed_value": {**o.observed_value, "alc_text": f"{p:g}%"}})]
+        for o, p in ((first, 40.0), (second, 41.0))
+    ]
+
+    (merged,) = merge_readings(bare)
+
+    assert merged.evidence[0].panel == "back"

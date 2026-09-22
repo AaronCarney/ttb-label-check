@@ -38,8 +38,12 @@ _FIGURE = r"\d{2,3}(?:[.,]\d)?(?!\d)"
 _WORD = r"\bPR[O0]{2}F\b"
 
 _PROOF_RE = re.compile(
-    # "90 PROOF", "86° PROOF", "90 US PROOF", "90-proof", "124.6 BARREL PROOF"
+    # "90 PROOF", "86° PROOF", "90 US PROOF", "90-proof", "124.6 BARREL PROOF".
+    # Not a figure before "PROOF:" with a figure after it: in a table of
+    # "LABEL: value" rows, "PROD: 80 PROOF: 96", the colon says the word heads
+    # the figure that follows, and 80 is some other row's value.
     rf"(?<![\d.,])(?P<before>{_FIGURE})\s*°?\s*(?:-\s*)?(?:(?:U\.?\s?S\.?|BARREL)\s*)?{_WORD}"
+    rf"(?!\s*:\s*{_FIGURE})"
     r"|"
     # "PROOF 90", "Proof: 124.6", "Barrel Proof 124.6"
     rf"{_WORD}\s*:?\s*(?P<after>{_FIGURE})",

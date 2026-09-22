@@ -126,6 +126,17 @@ date: the release's git tag records when it was cut. Versions follow
 
 ### Fixed
 
+- The alcohol content and net contents are no longer read from a volume or percentage that is about
+  something else. A percentage followed by an ingredient ("75% CORN", "at least 30% wheat") or set as
+  a labelled row ("WHEAT: 30%") is not read as the alcohol content, and when two faces are joined a
+  statement printed with the alcohol words is kept over a bare percentage, however cleanly the bare
+  one was read. A volume in a Serving Facts panel, one a sentence mentions ("IN 53 GALLON CHARRED",
+  "under 15 gallons"), or the size of a barrel or cask is not read as the net contents. A table row
+  "PROOF: 96" is no longer read as the figure before it. On the 30 corpus labels the three wrong
+  net-contents mismatches are gone (7 labels with a mismatch become 4); on the 98 held-out labels
+  mismatched checks fall from 47 to 38 and no check moved toward a mismatch. See
+  `docs/decisions.md#0053`.
+
 - A spirits label's stated proof is checked against its own ABV. The brief requires a proof to be
   twice the alcohol by volume, and nothing checked it: the local reader dropped the proof, no rule
   named it, and joining a label's faces kept one alcohol reading, so a proof on the other face was

@@ -18,6 +18,7 @@ instead of two labels sharing an id.
 
 from __future__ import annotations
 
+import re
 from collections.abc import Sequence
 
 from app.schemas.extracted import FieldObservation
@@ -54,11 +55,35 @@ def _confidence(observation: FieldObservation) -> float:
     return max((e.confidence for e in observation.evidence), default=0.0)
 
 
+# What makes a percentage an alcohol statement rather than a bare figure: the
+# words 27 CFR §5.65(b) and §7.65(b) print with it.
+_ALCOHOL_WORDS_RE = re.compile(r"ALC|VOL", re.I)
+
+
+def _rank(observation: FieldObservation) -> tuple[bool, float]:
+    """How strongly a face's reading of a field claims to be the label's.
+
+    The confidence, except for the alcohol content, where a statement printed
+    with the alcohol words ranks first: the words are what say the figure is
+    the alcohol content, and a bare percentage on another face — a mash bill's
+    "75% CORN" read more cleanly than "56% ALC. BY VOL." — says nothing of the
+    kind. The OCR score measures how cleanly characters were read, not which
+    text is the field.
+    """
+    value = observation.observed_value
+    worded = (
+        observation.field_id == ALCOHOL_FIELD_ID
+        and isinstance(value, dict)
+        and bool(_ALCOHOL_WORDS_RE.search(str(value.get("alc_text") or "")))
+    )
+    return worded, _confidence(observation)
+
+
 def merge_readings(readings: Sequence[Sequence[FieldObservation]]) -> list[FieldObservation]:
     """Every face's reading, reduced to one reading of the label.
 
     One observation per field, taken from the face that actually found it —
-    the highest-confidence reading of that field, with ties going to the
+    the highest-ranked reading of that field (`_rank`), with ties going to the
     earlier face, which is the order the faces were submitted in. A field no
     face found survives as the absent reading it is, so a government warning
     printed on none of the submitted faces still reaches the rules as missing
@@ -80,7 +105,7 @@ def merge_readings(readings: Sequence[Sequence[FieldObservation]]) -> list[Field
     for reading in readings:
         for observation in reading:
             incumbent = best.get(observation.field_id)
-            if incumbent is None or _confidence(observation) > _confidence(incumbent):
+            if incumbent is None or _rank(observation) > _rank(incumbent):
                 best[observation.field_id] = observation
     alcohol = best.get(ALCOHOL_FIELD_ID)
     if alcohol is not None:

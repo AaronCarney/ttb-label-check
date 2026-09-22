@@ -1305,18 +1305,70 @@ def _net_reading(text: str) -> tuple[re.Match, float] | None:
     return None
 
 
+# A label prints volumes that are not what the bottle holds. Each of these says
+# the figure beside it is one of them, and the search carries on past it:
+#
+# - a Serving Facts panel (TTB Ruling 2013-2): a figure after "serving" on its
+#   line, or one followed by "of alcohol";
+# - a figure that is the object of a preposition — "IN 53 GALLON CHARRED",
+#   "aged in 200 L casks", "any quantity under 15 gallons" — which is how a
+#   sentence mentions a volume, where a declaration states it;
+# - a figure followed within three words by the vessel the spirit was made or
+#   aged in. "BARREL PROOF" and "CASK STRENGTH" name the bottle's strength, not
+#   a vessel, so "750 ML BARREL PROOF" is still the bottle's contents.
+_SERVING_BEFORE_RE = re.compile(r"\bSERV", re.I)
+_PREPOSITION_BEFORE_RE = re.compile(
+    r"\b(?:IN|INTO|UNDER|OVER|THAN|OF|FROM|PER|AT|ABOUT|LEAST)\W*$", re.I
+)
+_NOT_CONTENTS_AFTER_RE = re.compile(
+    r"\W*(?:OF\s+ALC"
+    r"|(?:[^\W\d_]+\W+){0,2}"
+    r"(?:BARRELS?(?!\W*PROOF)|CASKS?(?!\W*STRENGTH)|CHARRED|OAK|HOGSHEADS?|PUNCHEONS?"
+    r"|BUTTS?|DRUMS?|VATS?|TUNS?|STILLS?|TANKS?)\b)",
+    re.I,
+)
+
+
+def _not_the_bottles_contents(before: str, after: str) -> bool:
+    """Whether the words around a volume say it is not the bottle's contents.
+
+    `before` and `after` are the text of its line on either side of it.
+    """
+    return bool(
+        _SERVING_BEFORE_RE.search(before)
+        or _PREPOSITION_BEFORE_RE.search(before)
+        or _NOT_CONTENTS_AFTER_RE.match(after)
+    )
+
+
 def _net_contents(boxes: list[_Box]) -> tuple[_Box, re.Match, float] | None:
     """The first line in reading order that declares one net-contents figure.
 
     A line that names a figure this reader cannot resolve to one quantity is
     passed over rather than ending the search, the same way `_first_match`
-    carries on past a match its `reject` turns down.
+    carries on past a match its `reject` turns down. So is a figure whose line
+    says it is some other volume (`_not_the_bottles_contents`). Its line is the
+    boxes level with it, so a "Serving Size" read as a box of its own still
+    marks the figure beside it.
     """
+    around: dict[int, tuple[str, str]] = {}
+    for line in _lines(boxes):
+        for i, box in enumerate(line):
+            around[id(box)] = (
+                " ".join(b.text for b in line[:i]),
+                " ".join(b.text for b in line[i + 1 :]),
+            )
     for box in _reading_order(boxes):
         found = _net_reading(box.text)
-        if found is not None:
-            match, amount = found
-            return box, match, amount
+        if found is None:
+            continue
+        match, amount = found
+        left, right = around.get(id(box), ("", ""))
+        before = f"{left} {box.text[: match.start()]}"
+        after = f"{box.text[match.end() :]} {right}"
+        if _not_the_bottles_contents(before, after):
+            continue
+        return box, match, amount
     return None
 
 
@@ -1622,7 +1674,7 @@ def _parse(
     # percentage is the reading only where no statement carries them.
     abv_box, abv_match = _first_match(body, _ABV_RE, reject=_lacks_alcohol_words)
     if abv_match is None:
-        abv_box, abv_match = _first_match(body, _ABV_RE)
+        abv_box, abv_match = _first_match(body, _ABV_RE, reject=_names_an_ingredient)
     if abv_match:
         raw = next(g for g in abv_match.groups() if g)
         # The label's own wording, alongside the number. The format rules judge
@@ -1844,6 +1896,31 @@ def _lacks_alcohol_words(match: re.Match) -> bool:
     """Whether the statement around this figure carries no "alc" or "vol"."""
     figure = next(g for g in match.groups() if g)
     return not re.search(r"ALC|VOL", _alcohol_statement(match.string, figure), re.I)
+
+
+# A bare percentage says how much of something the drink holds when a word
+# follows it — "75% CORN", "at least 30% wheat", "85% Cabernet Sauvignon" — or
+# when it is the value of a labelled row, "WHEAT: 30%". It is still the alcohol
+# content when an alcohol word comes within the next three words, which keeps
+# a statement whose "Alc." the OCR misread: "45% Akc. by Vol.".
+_WORD_AFTER_RE = re.compile(r"\s*[^\W\d_]")
+_ALCOHOL_AFTER_RE = re.compile(r"\W*(?:[^\W\d_]+\W+){0,2}(?:ALC|ALK|VOL|ABV|A\.B\.V|PROOF)", re.I)
+_ROW_LABEL_BEFORE_RE = re.compile(r"[^\W\d_]\s*:\s*$")
+
+
+def _names_an_ingredient(match: re.Match) -> bool:
+    """Whether a percentage printed without the alcohol words is a share of an
+    ingredient rather than the alcohol content.
+
+    A mash bill or a grape blend is printed as percentages, and on a face with
+    no alcohol statement the first of them used to be read as the ABV: "75%
+    CORN" on the back of a bourbon labelled 56% ALC. BY VOL.
+    """
+    text, end = match.string, match.end()
+    return bool(
+        (_WORD_AFTER_RE.match(text, end) and not _ALCOHOL_AFTER_RE.match(text, end))
+        or _ROW_LABEL_BEFORE_RE.search(text, 0, match.start())
+    )
 
 
 def _names_a_state(match: re.Match) -> bool:

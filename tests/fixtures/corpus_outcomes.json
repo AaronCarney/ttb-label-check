@@ -358,7 +358,7 @@
    }
   },
   "ttb-26230001000540": {
-   "disposition": "fail",
+   "disposition": "needs_review",
    "rules": {
     "common.warning.heading_caps_bold": [
      "needs_review",
@@ -417,8 +417,8 @@
      ""
     ],
     "spirits.net_contents.matches_application": [
-     "fail",
-     "NET_CONTENTS.MATCH.APPLICATION_LABEL_DISAGREE"
+     "pass",
+     ""
     ],
     "spirits.net_contents.present": [
      "pass",
@@ -577,7 +577,7 @@
    }
   },
   "ttb-26232001000404": {
-   "disposition": "fail",
+   "disposition": "needs_review",
    "rules": {
     "common.warning.heading_caps_bold": [
      "needs_review",
@@ -636,8 +636,8 @@
      ""
     ],
     "spirits.net_contents.matches_application": [
-     "fail",
-     "NET_CONTENTS.MATCH.APPLICATION_LABEL_DISAGREE"
+     "pass",
+     ""
     ],
     "spirits.net_contents.present": [
      "pass",
@@ -926,7 +926,7 @@
    }
   },
   "ttb-26236001000448": {
-   "disposition": "fail",
+   "disposition": "needs_review",
    "rules": {
     "common.warning.heading_caps_bold": [
      "needs_review",
@@ -985,8 +985,8 @@
      ""
     ],
     "spirits.net_contents.matches_application": [
-     "fail",
-     "NET_CONTENTS.MATCH.APPLICATION_LABEL_DISAGREE"
+     "pass",
+     ""
     ],
     "spirits.net_contents.present": [
      "pass",
@@ -2065,20 +2065,19 @@
  },
  "scoreboard": {
   "check_outcomes": {
-   "fail": 8,
+   "fail": 5,
    "needs_review": 94,
-   "pass": 353
+   "pass": 356
   },
   "checks": 455,
   "decided_without_a_person": 0.793,
   "label_outcomes": {
-   "fail": 7,
-   "needs_review": 23
+   "fail": 4,
+   "needs_review": 26
   },
   "labels": 30,
   "mismatch_causes": {
    "CLASS_TYPE.MATCH.APPLICATION_LABEL_DISAGREE": 1,
-   "NET_CONTENTS.MATCH.APPLICATION_LABEL_DISAGREE": 3,
    "WARNING.STYLE.HEADING_NOT_BOLD_CAPS": 1,
    "WARNING.VERBATIM.MISMATCH": 3
   },

@@ -44,18 +44,6 @@ GENUINE_MISMATCHES = {
 # label wrong. Each line names the cause. When a fix lands, delete its line.
 WRONG_MISMATCHES = {
     (
-        "ttb-26230001000540",
-        "spirits.net_contents.matches_application",
-    ): "the merge keeps '53 GALLON', a barrel size on the back, over the front's '750 mL'",
-    (
-        "ttb-26236001000448",
-        "spirits.net_contents.matches_application",
-    ): "the merge keeps the back's Serving Facts '44 ml' over the front's '750 mL'",
-    (
-        "ttb-26232001000404",
-        "spirits.net_contents.matches_application",
-    ): "the merge keeps the back's Serving Facts '44 ml' over the front's '700 mL'",
-    (
         "ttb-26240001000454",
         "malt.class_type.matches_application",
     ): "'Double India Pale Ale' is handwritten and not read; another collar line is picked",

@@ -188,9 +188,6 @@ PRINTED_PROOF = {
 #   (D) the engine never read the characters at all, so no parsing change can
 #       reach it.
 #   (M) the engine misread characters in the right text.
-#   (N) net contents: the merge keeps the face whose reading scored highest,
-#       and on these labels that is a barrel size or the Serving Facts panel,
-#       not the bottle's size on the front.
 #   (A) name and address returns the producer or bottler, not the importer the
 #       label names with its address.
 #   (W) the warning is read with a character or mark the label does not print;
@@ -199,9 +196,7 @@ KNOWN_MISSES: dict[tuple[str, str], str] = {
     ("ttb-26231001000662", "brand"): "M — read 'Lucky Lucy's' as 'L3 Jucky Lucy's'",
     ("ttb-26231001000662", "class_type"): "C — returned 'BOURBON' for 'BOURBON WHISKEY'",
     ("ttb-26230001000540", "brand"): "M — read 'BENT 301' as 'ENT 301'",
-    ("ttb-26230001000540", "net_contents"): "N — '53 GALLON', a barrel size, beat '750 mL'",
     ("ttb-26239001000079", "warning_exact"): "W — no comma after 'GENERAL'; 'DRIVE' read 'DRIVÉ'",
-    ("ttb-26236001000448", "net_contents"): "N — Serving Facts '44 ml' beat '750 mL'",
     ("ttb-26239001000081", "warning_exact"): "W — '(1).', 'ACCORDING_TO', 'DRIVÉ'",
     ("ttb-26229001000513", "net_contents"): "M — read '1 LITRE' as 'I LITRE'",
     ("ttb-26229001000513", "name_address"): "A — returned the producer 'AMOR AERIS S.A. DE C.V'",
@@ -218,7 +213,6 @@ KNOWN_MISSES: dict[tuple[str, str], str] = {
     ("ttb-26233001000189", "warning_exact"): "W — 'BEVERAGES' read 'BEVERÁGES'",
     ("ttb-26237001000107", "warning_exact"): "W — '(1)' read '(I)'",
     ("ttb-26232001000404", "class_type"): "M — read 'Scotch' as 'Sootch'",
-    ("ttb-26232001000404", "net_contents"): "N — Serving Facts '44 ml' beat '700 mL'",
     ("ttb-26231001000333", "net_contents"): "M — read '700ml' as '700mle' on both faces",
     ("ttb-26231001000333", "name_address"): "A — returned the bottler, Saltire Rare Malt Whisky",
     (

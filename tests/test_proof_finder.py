@@ -81,3 +81,9 @@ def test_the_match_records_where_it_sits_in_the_text() -> None:
 
 def test_two_statements_on_one_line_give_two_figures() -> None:
     assert _values("90 PROOF / PROOF 91") == ["90", "91"]
+
+
+def test_a_field_label_with_a_colon_belongs_to_the_figure_after_it() -> None:
+    # ttb-24002001000626, front: a table of "LABEL: value" pairs, where "80" is
+    # the barrels produced and "PROOF:" heads the proof, 96.
+    assert _values("PROD: 80 PROOF: 96") == ["96"]

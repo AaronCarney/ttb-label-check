@@ -164,3 +164,54 @@ def test_a_proof_with_no_alcohol_statement_is_kept_and_not_beside_one() -> None:
     payload = _abv(_box(0.0, 0.0, 200.0, 30.0, "90 PROOF", 0.99))
     assert payload["abv_pct"] is None
     assert [(p["value"], p["beside_abv"]) for p in payload["proof"]] == [("90", False)]
+
+
+# ---------------------------------------------------------------------------
+# A percentage that says what the drink is made of is not its alcohol content
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    "line",
+    [
+        # ttb-17123001000355, back
+        "75% CORN * 21% RYE * 4% BARLEY MALT",
+        # ttb-24002001000626, back
+        "at least 30% wheat. This small lot release is",
+        # ttb-24026001000735, back
+        "BOASTING A DISTINCTIVE MASH BILL OF 68% CORN,",
+        # ttb-23361001000563, back, with the full-width comma the OCR returned
+        "LED FROM 75% CORN\uff0c 21% RYE,AND 4% BARLEY",
+        "100% agave",
+        "85% Cabernet Sauvignon",
+        # A grain table printed as its own labels and values.
+        "WHEAT: 30%",
+    ],
+)
+def test_a_percentage_of_an_ingredient_is_not_read_as_the_alcohol_content(line: str) -> None:
+    payload = _abv(_box(0.0, 0.0, 600.0, 30.0, line, 0.99))
+    assert payload["abv_pct"] is None
+
+
+@pytest.mark.parametrize(
+    ("line", "figure"),
+    [
+        ("40% | 750 mL", 40.0),
+        ("45% (90 PROOF)", 45.0),
+        ("46%ABV", 46.0),
+        ("43% ALCOHOL", 43.0),
+        # ttb-21231001000368, front: "Alc." read as "Akc.", with "Vol." after it.
+        ("45% Akc. by Vol.", 45.0),
+    ],
+)
+def test_a_percentage_followed_by_no_ingredient_is_still_read(line: str, figure: float) -> None:
+    assert _abv(_box(0.0, 0.0, 400.0, 30.0, line, 0.99))["abv_pct"] == figure
+
+
+def test_the_statement_is_found_past_a_mash_bill_on_the_same_face() -> None:
+    # ttb-17123001000355, front: the mash bill is read before the statement.
+    payload = _abv(
+        _box(0.0, 0.0, 600.0, 30.0, "75% CORN * 21% RYE * 4% BARLEY MALT", 0.985),
+        _box(0.0, 40.0, 300.0, 70.0, "56% ALC. BY VOL.", 0.966),
+    )
+    assert payload["abv_pct"] == 56.0
