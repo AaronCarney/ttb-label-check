@@ -3472,3 +3472,83 @@ took it past five seconds on the deployed service is still spared: its strip rea
 type, including the one `#0036` was added for. *Retrying unless every strip reads cleanly.* Noisy
 strips that are not the warning score 0.54 to 0.75, so it re-reads the wine back label above.
 *Keeping the first frame with a heading.* It is the fault found.
+
+<a id="0055"></a>
+## 0055. The warning's wording found without its heading goes to a reviewer, and a reading error in the warning is not read as a different warning
+
+**Evidence:** `app/vision/local.py` (`_wording_without_heading`, `_WORDING_WITHOUT_HEADING_MIN`,
+`_thin_glyph_tolerant`, `_BLOCK_END_RE`); `app/vision/faces.py` (`_rank`);
+`app/rules/_validators/_helpers.py` (`heading_not_read_result`);
+`app/rules/_validators/verbatim_hash.py` (`_reader_doubts`, `_reader_prone`);
+`app/rules/_validators/heading_style_check.py`; `app/services/engine_meta.py`
+(`record_rule_done`); `rules/common/health_warning.yaml`; `rules/reason_codes.yaml`;
+`tests/test_warning_wording_without_heading.py`, `tests/test_warning_block_is_a_column.py`,
+`tests/rules/_validators/test_verbatim_hash.py`,
+`tests/rules/_validators/test_heading_style_check.py`,
+`tests/test_audit_keeps_every_reason_code.py`.
+
+**What was found.** Corpus label `26240001000573` prints the exact §16.21 statement and failed two
+warning checks. The reader returned the heading run together as "GOVERNMENTWARNING", read "HEALTH"
+as "HEAILTH", and, because the misread word no longer matched the block's end, swept the importer's
+line under the warning into the statement. Each of these is the reader's error, and each was
+reported as the label's. A second fault lay behind it. The reader finds and cuts the warning by its
+heading, so a face whose heading the OCR missed was reported as carrying no warning at all, which
+is a §16.21 mismatch, even where the statement's words were read. Held-out label `17237001000070`
+is that case: its back holds 14 of the statement's 18 body words and no heading.
+
+**Chosen.**
+- **The wording counts as evidence the warning is printed.** Where no heading is found, a frame
+  holding at least 9 of the 18 body words is reported as the statement's wording without its
+  heading. All three warning rules then give needs review under `WARNING.HEADING.NOT_READ`, which
+  the rule pack names on each rule (`heading_not_read_reason_code`). The statement is not checked
+  word for word, because without the heading the block cannot be cut. A face with neither heading
+  nor wording is still a missing warning. The threshold is measured over every frozen face of both
+  label sets: a face whose heading is read holds 13 to 18 of the 18 words, and a face with no
+  heading and no warning at most 4. The one face with no heading and many words is the one above.
+- **When faces are joined, a warning read from its heading outranks a face with only the wording**,
+  whatever the scores, because only the first can be judged.
+- **Three more kinds of difference count as reading errors**, alongside the lookalike glyphs,
+  accents and single punctuation mark already counted: a thin glyph (I, l, 1, |) added or dropped
+  between two letters of a word, text after the statement's last words, and a lookalike beside a
+  swapped mark. Each goes to needs review with its spot named, never to a match: the brief says the
+  warning "has to be exact". A different real word, such as "risks" for "risk",
+  is still a mismatch.
+- **The block ends at "HEALTH PROBLEMS" even when a thin glyph was added or lost in either word**, so
+  one misread no longer sweeps the next line in. The verbatim check still sees the misread and names
+  it.
+- **The heading's words are compared without their spaces**, as the verbatim check compares the
+  statement, so "GOVERNMENTWARNING" reads as the heading's two words.
+- **Rules that report the same reason code each keep it in the audit trail.** The audit timeline
+  stored each row under its name, and a reason-code row is named by its code. When the three warning
+  rules all reported `WARNING.HEADING.NOT_READ`, each row overwrote the one before and the record
+  kept the code for the last rule only. The same fault had hidden `LEGIBILITY.FIELD.NOT_READ`,
+  `ENGINE.EVIDENCE.BELOW_CONFIDENCE_FLOOR` and `WARNING.HEADING.NOT_READ` on 76 checks across both
+  label sets. A reason-code row is now stored under a key naming its rule. The reviewer's field
+  cards were not affected: they are built from each rule's own result.
+
+**Where the held-out set was used.** It is never tuned on, and one change came from it. There, "(1)"
+was read as "(I]", a lookalike next to a swapped bracket, and the matcher joins the two into a
+single difference, so the pair was a mismatch even though each half was already a reading error on
+its own. Counting a mark-for-mark swap inside a joined difference removes an artefact of how
+differences are grouped. It does not add a new kind of error. Another held-out case was checked
+and left alone: "impares" for "impairs" is a letter dropped and a letter added, not a thin glyph
+alone, so it stays a mismatch and a test pins it.
+
+**Measured.** Corpus: labels with a mismatch go from 4 to 3. On `26240001000573` the verbatim check
+goes from mismatch to needs review, and the heading check goes from mismatch to match, because its
+bold is measured with confidence. Held-out: labels with a mismatch go from 32 to 28, and mismatched
+checks from 33 to 28. Presence on `17237001000070` and verbatim on `19302001001122` go to needs
+review. The heading check on `20148001000280` becomes a match, and on `21035001000685` and
+`24009001000787` it goes to needs review on bold. No check on either set moved toward a mismatch.
+The audit-trail fix changed no outcome. It added a reason code to 4 corpus checks and 72 held-out
+checks that had none.
+
+**Cost.** No OCR pass is added. The wording search runs over boxes already read, only on a frame
+where no heading was found.
+
+**Rejected.** *Treating the wording alone as the warning and checking it word for word.* Without the
+heading the block's start is a guess, and a guessed start is how the wrong text reaches a
+comparison. *Accepting any single-character difference as a reading error.* That would let a
+changed word through. The thin-glyph kind is limited to a narrow glyph between two letters.
+*Recording the reason-code row under the rule's id instead of the code.* The trace entry names the
+code verbatim, and the scoreboard and existing readers of the trail depend on that.

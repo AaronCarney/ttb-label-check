@@ -34,6 +34,9 @@ ALCOHOL_FIELD_ID = "abv"
 # The field_id both readers give the brand reading.
 BRAND_FIELD_ID = "brand_name"
 
+# The field_id both readers give the government warning.
+WARNING_FIELD_ID = "gov_warning"
+
 
 def is_unreadable(reading: Sequence[FieldObservation]) -> bool:
     """Whether a face's reading is a refusal to read rather than a reading.
@@ -63,20 +66,26 @@ _ALCOHOL_WORDS_RE = re.compile(r"ALC|VOL", re.I)
 def _rank(observation: FieldObservation) -> tuple[bool, float]:
     """How strongly a face's reading of a field claims to be the label's.
 
-    The confidence, except for the alcohol content, where a statement printed
-    with the alcohol words ranks first: the words are what say the figure is
-    the alcohol content, and a bare percentage on another face — a mash bill's
-    "75% CORN" read more cleanly than "56% ALC. BY VOL." — says nothing of the
-    kind. The OCR score measures how cleanly characters were read, not which
-    text is the field.
+    The confidence, except for two fields where what was read ranks first. For
+    the alcohol content, a statement printed with the alcohol words: the words
+    are what say the figure is the alcohol content, and a bare percentage on
+    another face — a mash bill's "75% CORN" read more cleanly than "56% ALC. BY
+    VOL." — says nothing of the kind. For the government warning, a statement
+    read from its heading: a face where only the statement's words were read
+    cannot be judged, and one that can outranks it however cleanly it was read.
+    The OCR score measures how cleanly characters were read, not which text is
+    the field.
     """
     value = observation.observed_value
-    worded = (
-        observation.field_id == ALCOHOL_FIELD_ID
-        and isinstance(value, dict)
-        and bool(_ALCOHOL_WORDS_RE.search(str(value.get("alc_text") or "")))
-    )
-    return worded, _confidence(observation)
+    if not isinstance(value, dict):
+        return False, _confidence(observation)
+    if observation.field_id == ALCOHOL_FIELD_ID:
+        first = bool(_ALCOHOL_WORDS_RE.search(str(value.get("alc_text") or "")))
+    elif observation.field_id == WARNING_FIELD_ID:
+        first = bool(str(value.get("text") or "").strip())
+    else:
+        first = False
+    return first, _confidence(observation)
 
 
 def merge_readings(readings: Sequence[Sequence[FieldObservation]]) -> list[FieldObservation]:

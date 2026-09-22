@@ -88,7 +88,7 @@ class AuditRecorder:
     ) -> AuditRecord:
         per_rule = tuple(
             PerRuleTraceEntry(
-                rule_id=rid,
+                rule_id=timeline.per_rule_ids.get(rid, rid),
                 disposition=timeline.per_rule_dispositions.get(rid, "not_applicable"),  # type: ignore[arg-type]
                 evidence_ref=timeline.per_rule_evidence_refs.get(rid, ""),
             )

@@ -76,3 +76,12 @@ def test_a_label_that_prints_the_wrong_words_still_fails():
     text = _warning_text("26229001000034", "back").upper()
     assert "RISKS OF BIRTH DEFECTS" in text
     assert text != CANONICAL.upper()
+
+
+def test_the_block_ends_at_the_last_words_despite_a_thin_glyph_in_them():
+    """`26240001000573` reads "heailth problems." and the block used to run on
+    into the importer's name printed under it, which is no part of the
+    statement and was compared as though it were."""
+    text = _warning_text("26240001000573", "front")
+    assert text.endswith("heailth problems.")
+    assert "Imported" not in text

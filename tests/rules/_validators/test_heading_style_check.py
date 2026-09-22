@@ -321,6 +321,22 @@ def test_spacing_inside_the_heading_is_not_a_difference() -> None:
     assert res.outcome is Outcome.PASS
 
 
+def test_the_heading_read_as_one_word_is_the_two_words() -> None:
+    """ttb-26240001000573 prints the heading correctly and the engine returns
+    `GOVERNMENTWARNING:`. A missing space is spacing, which `common.warning.verbatim`
+    already takes out of its comparison, so the two rules read the same heading
+    the same way."""
+    res = _check(
+        {
+            "heading_text": "GOVERNMENTWARNING:",
+            "heading_all_caps": True,
+            "heading_bold": True,
+            "heading_bold_measured_confident": True,
+        }
+    )
+    assert res.outcome is Outcome.PASS
+
+
 def test_wrong_words_fail_however_well_they_are_printed() -> None:
     """The heading has to say what §16.21 says it says.
 

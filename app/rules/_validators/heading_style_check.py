@@ -33,9 +33,12 @@ is regular is describing a non-compliant label.
 
 Spacing inside the heading is not a difference: §16.21 fixes the words, and a
 label printing "GOVERNMENT  WARNING" or "GOVERNMENT WARNING   :" prints the
-mandated heading. Trailing punctuation goes the same way — the regulation
-sets the statement out as "GOVERNMENT WARNING: (1) …", so a compliant label
-carries a colon that the rule's own target phrase does not.
+mandated heading. A missing space counts too: the reader returns a correctly
+printed heading as "GOVERNMENTWARNING" where the gap between the words is
+narrow, so the words are compared without their spaces. Trailing punctuation
+goes the same way — the regulation sets the statement out as
+"GOVERNMENT WARNING: (1) …", so a compliant label carries a colon that the
+rule's own target phrase does not.
 
 Both payload shapes are read in one place, into `_HeadingReading`. They used
 to be told apart three separate times — once to decide whether the reader had
@@ -54,6 +57,7 @@ from app.rules._validators import ValidatorContext, register
 from app.rules._validators._helpers import (
     _build_meta,
     _conf,
+    heading_not_read_result,
     not_read_result,
     unlocated,
     unlocated_is_absent,
@@ -160,6 +164,11 @@ def heading_style_check(
     payload = obs.observed_value if isinstance(obs.observed_value, dict) else {}
     reading = _read_payload(payload)
 
+    # The warning's words were read and its heading was not.
+    heading_not_read = heading_not_read_result(obs, exp, rule, ctx)
+    if heading_not_read is not None:
+        return heading_not_read
+
     # The reader did not find this on the label. That is a question for a
     # reviewer, not a rejection - see `unlocated` in `_helpers.py`. A style
     # report with no characters in it still means the heading was found.
@@ -186,8 +195,11 @@ def heading_style_check(
         )
 
     # The words and the capitals first: both are read from the heading's own
-    # text, so a failure here is the label's, not the reader's.
-    if _heading_phrase(reading.text) != _heading_phrase(target):
+    # text, so a failure here is the label's, not the reader's. The words are
+    # compared without their spaces, as `common.warning.verbatim` compares the
+    # statement: the engine returns a correctly printed heading as
+    # "GOVERNMENTWARNING" where the gap between the words is narrow.
+    if _heading_phrase(reading.text).replace(" ", "") != _heading_phrase(target).replace(" ", ""):
         return result(Outcome.FAIL, rule.severity, rule.reason_code)
     if reading.case != required_case:
         return result(Outcome.FAIL, rule.severity, rule.reason_code)

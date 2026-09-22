@@ -18,6 +18,7 @@ from app.rules._validators import ValidatorContext, register
 from app.rules._validators._helpers import (
     _build_meta,
     _conf,
+    heading_not_read_result,
     not_read_result,
     project_reading,
     unlocated,
@@ -41,6 +42,11 @@ def presence_check(
     rule: RuleDefinition,
     ctx: ValidatorContext,
 ) -> ValidationResult:
+    # The warning's words were read and its heading was not.
+    heading_not_read = heading_not_read_result(obs, exp, rule, ctx)
+    if heading_not_read is not None:
+        return heading_not_read
+
     # The reader did not find this on the label. That is a question for a
     # reviewer, not a rejection - see `unlocated` in `_helpers.py`.
     if unlocated(obs) and not unlocated_is_absent(rule):

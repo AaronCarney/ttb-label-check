@@ -139,6 +139,23 @@ READER_MISREADS = [
     ("ttb-26239001000079", "General, women", "General women"),
     ("ttb-26240001000563", "not drink", "not orink"),
     ("ttb-26239001000081", "(1) According to", "(1). According _to"),
+    # A thin glyph added inside a word.
+    ("ttb-26240001000573", "cause health problems", "cause heailth problems"),
+    # The block swept in the importer's line printed under the statement.
+    (
+        "ttb-26240001000573",
+        "health problems.",
+        "health problems. Imported by: B&I Overseas Trading, Inc., Van Nuys",
+    ),
+]
+
+# Kinds the corpus shows one at a time, here in the combinations that follow
+# from them. Each is judged as the kinds it is made of: a lookalike beside a
+# swapped bracket is two misreads, not a changed word.
+READER_MISREAD_KINDS = [
+    ("thin glyph dropped", "alcoholic beverages impairs", "alcohoic beverages impairs"),
+    ("lookalike beside a swapped mark", "(1) According", "(I] According"),
+    ("text after a dropped full stop", "health problems.", "health problems Imported by"),
 ]
 
 
@@ -151,6 +168,11 @@ def test_a_difference_the_reader_invents_goes_to_a_reviewer(
     assert res.outcome is Outcome.INSUFFICIENT_EVIDENCE, label
     assert res.reason_code == "WARNING.VERBATIM.NOT_CONFIRMED"
     assert res.message is not None and "misread" in res.message
+
+
+@pytest.mark.parametrize(("kind", "printed", "read"), READER_MISREAD_KINDS)
+def test_combinations_of_misread_kinds_go_to_a_reviewer(kind: str, printed: str, read: str) -> None:
+    assert _outcome(CANONICAL.replace(printed, read)) is Outcome.INSUFFICIENT_EVIDENCE, kind
 
 
 def test_the_finding_names_where_the_reading_differs() -> None:
@@ -168,6 +190,14 @@ TRUE_DIFFERENCES = [
     ("ttb-26229001000034", "the risk of", "the risks of"),
     ("ttb-26212001000085", "beverages impairs", "beverage impairs"),
     ("var-warning-wording", "beverages impairs", "beverages may impair"),
+    # A thin glyph is not a licence for any change near one: "impares" drops an
+    # i and adds an e, and the e is a letter the reader has no pattern of adding.
+    ("var-thin-glyph-and-letter", "beverages impairs", "beverages impares"),
+    ("var-letters-for-one", "alcoholic beverages impairs", "alcohouc beverages impairs"),
+    # Text added inside the statement is not text after it.
+    ("var-text-inside", "(2) Consumption", "TM & (c) 2024 (2) Consumption"),
+    # A thin glyph standing alone, not inside a word, is an added character.
+    ("var-thin-glyph-between-sentences", "defects. (2)", "defects. l (2)"),
 ]
 
 

@@ -311,6 +311,46 @@ def not_read_result(
     )
 
 
+def heading_not_read_result(
+    obs: FieldObservation,
+    exp: ExpectedValue,
+    rule: RuleDefinition,
+    ctx: ValidatorContext,
+) -> ValidationResult | None:
+    """The finding for a warning whose wording was read and whose heading was
+    not, where the rule pack names a code for it; None otherwise.
+
+    The reader finds and cuts the warning by its heading, so without one it
+    reports the statement's words as evidence the warning is printed and
+    nothing more (`wording_without_heading`). Taken as a missing warning, that
+    rejects a label for a heading the reader could not make out. Which code
+    the finding carries is the rule pack's to say, as `unlocated_is_absent`
+    is; a rule naming none keeps its own answer.
+    """
+    code = rule.parameters.get("heading_not_read_reason_code")
+    value = obs.observed_value
+    if not code or not isinstance(value, dict) or not value.get("wording_without_heading"):
+        return None
+    return ValidationResult(
+        rule_id=rule.rule_id,
+        cfr_citation=rule.cfr_citation,
+        beverage_class=obs.beverage_class,
+        outcome=Outcome.INSUFFICIENT_EVIDENCE,
+        severity=Severity.WARN,
+        reason_code=code,
+        aggregated_confidence=_conf(obs),
+        evidence=obs.evidence,
+        expected=exp,
+        observed=obs,
+        engine_meta=_build_meta(rule, ctx),
+        message=(
+            "The reader found the government warning's wording on this label but "
+            'could not read its "GOVERNMENT WARNING" heading, so this check was not '
+            "made. Check the heading and the statement on the label yourself."
+        ),
+    )
+
+
 def verdict_result(
     obs: FieldObservation,
     exp: ExpectedValue,

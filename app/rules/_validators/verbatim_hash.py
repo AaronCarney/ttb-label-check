@@ -61,6 +61,7 @@ from app.rules._validators import ValidatorContext, register
 from app.rules._validators._helpers import (
     _build_meta,
     _conf,
+    heading_not_read_result,
     not_read_result,
     project_reading,
     unlocated,
@@ -112,6 +113,11 @@ def verbatim_hash(
     rule: RuleDefinition,
     ctx: ValidatorContext,
 ) -> ValidationResult:
+    # The warning's words were read and its heading was not.
+    heading_not_read = heading_not_read_result(obs, exp, rule, ctx)
+    if heading_not_read is not None:
+        return heading_not_read
+
     # The reader did not find this on the label. That is a question for a
     # reviewer, not a rejection - see `unlocated` in `_helpers.py`.
     if unlocated(obs) and not unlocated_is_absent(rule):
@@ -186,6 +192,11 @@ def _mandated_text(asset: AssetRef, ops: Sequence[str]) -> str | None:
 # in the capitals most warnings are printed in.
 _LOOKALIKES = (frozenset("1il|"), frozenset("0od"))
 
+# Glyphs a single narrow stroke makes. The reader adds one inside a word where
+# two letters sit close ("heailth" for "health") and loses one where a letter
+# is thin ("alcohoic").
+_THIN_GLYPHS = frozenset("1il|")
+
 
 def _base_letter(ch: str) -> str:
     return "".join(c for c in unicodedata.normalize("NFKD", ch) if not unicodedata.combining(c))
@@ -202,22 +213,56 @@ def _reader_prone(expected: str, read: str) -> bool:
             continue  # the same letter, or it with an accent the label lacks
         if any(e in group and r in group for group in _LOOKALIKES):
             continue
+        if not e.isalnum() and not r.isalnum():
+            # One mark swapped for another. The matcher joins neighbouring
+            # differences into one span, so "(I]" for "(1)" arrives as a single
+            # difference made of a lookalike and a swapped bracket, each of
+            # which is a misread on its own.
+            continue
         return False
     return True
 
 
+def _thin_glyph_in_a_word(text: str, start: int, end: int) -> bool:
+    """Is text[start:end] one thin glyph with a letter on either side of it?"""
+    return (
+        end - start == 1
+        and text[start] in _THIN_GLYPHS
+        and start > 0
+        and end < len(text)
+        and text[start - 1].isalpha()
+        and text[end].isalpha()
+    )
+
+
 def _reader_doubts(expected: str, observed: str) -> list[str] | None:
     """Each difference, described for a reviewer, when every one of them is a
-    kind the reader invents; None when any is not, which leaves a mismatch."""
+    kind the reader invents; None when any is not, which leaves a mismatch.
+
+    Three kinds are judged by where they fall rather than by the characters
+    alone: a thin glyph added or dropped inside a word, and text after the
+    statement's last words, which is the block running on into the next line
+    printed under it rather than a change to the statement."""
     matcher = difflib.SequenceMatcher(None, expected, observed, autojunk=False)
     doubts: list[str] = []
     for tag, i1, i2, j1, j2 in matcher.get_opcodes():
         if tag == "equal":
             continue
         want, got = expected[i1:i2], observed[j1:j2]
+        where = observed[max(0, j1 - 8) : j2 + 8]
+        if got and (i1 == len(expected) or (i2 == len(expected) and _reader_prone(want, ""))):
+            # After the statement ends, or its closing mark dropped and text
+            # after it.
+            doubts.append(f'text after the statement\'s last words, "{got[:40]}"')
+            continue
+        if not want and _thin_glyph_in_a_word(observed, j1, j2):
+            doubts.append(f'"{got}" added in "{where}"')
+            continue
+        if not got and _thin_glyph_in_a_word(expected, i1, i2):
+            doubts.append(f'"{want}" missing in "{where}"')
+            continue
         if not _reader_prone(want, got):
             return None
-        where = observed[max(0, j1 - 8) : j2 + 8]
         if not want:
             doubts.append(f'"{got}" added in "{where}"')
         elif not got:

@@ -126,6 +126,21 @@ date: the release's git tag records when it was cut. Versions follow
 
 ### Fixed
 
+- A government warning the reader misread is no longer reported as a wrong warning. Where the
+  statement's words are read but its "GOVERNMENT WARNING" heading is not, the three warning checks
+  go to a reviewer under `WARNING.HEADING.NOT_READ` instead of reporting the warning missing. A thin
+  glyph added or dropped inside a word ("HEAILTH"), text after the statement's last words, and a
+  lookalike beside a swapped mark ("(I]" for "(1)") go to a reviewer with each spot named, never to
+  a match. The warning block ends at "health problems" even when those words are misread, and a
+  heading read as "GOVERNMENTWARNING" counts as the heading's two words. On the 30 corpus labels,
+  labels with a mismatch go from 4 to 3; on the 98 held-out labels, mismatched checks go from 33 to
+  28, and no check on either set moved toward a mismatch. See `docs/decisions.md#0055`.
+
+- The audit trail keeps every rule's reason code. Where two rules reported the same code, the
+  record kept it for the last rule only, and the others read as sent to a reviewer for no stated
+  reason. 76 checks across both label sets had lost their code this way. The reviewer's field cards
+  were not affected.
+
 - A government warning printed sideways in small type is read again on its side instead of being
   reported missing. The check that decides whether to read a label again on its side counted a strip
   read as noise as proof the strip was not the warning; a strip read that poorly now counts as unread.

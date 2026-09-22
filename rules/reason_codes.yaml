@@ -179,13 +179,17 @@ codes:
     description: "Warning is not separate and apart from other label information."
     cfr_anchors: ["27 CFR §16.21"]
     severity: reject
-  # The six codes below say what the product could not settle, as against
+  # The seven codes below say what the product could not settle, as against
   # the codes above, which say what the label got wrong. A finding carrying
   # one of these is insufficient evidence: it sends the label to a reviewer
   # and never rejects it.
   WARNING.VERBATIM.NOT_CONFIRMED:
     description: "The warning as read differs from the §16.21 statement only in ways the reader is known to misread, so a reviewer checks those spots on the label."
     cfr_anchors: ["27 CFR §16.21"]
+    severity: warn
+  WARNING.HEADING.NOT_READ:
+    description: "The warning's wording was read on this label but its GOVERNMENT WARNING heading was not, so the statement was not checked; a reviewer checks the heading and the statement on the label."
+    cfr_anchors: ["27 CFR §16.21", "27 CFR §16.22(a)(2)"]
     severity: warn
   WARNING.STYLE.BOLD_NOT_MEASURED:
     description: "Heading capitals were checked; its bold weight could not be measured from this image, so a reviewer decides whether §16.22(a)(2) is met."

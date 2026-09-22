@@ -9,7 +9,7 @@ from app.services.engine_meta import EvaluationTimeline
 class MetricsBuilder:
     def build(self, timeline: EvaluationTimeline) -> Metrics:
         per_rule = tuple(
-            PerRuleDurationEntry(rule_id=rid, duration_ms=ms)
+            PerRuleDurationEntry(rule_id=timeline.per_rule_ids.get(rid, rid), duration_ms=ms)
             for rid, ms in timeline.per_rule_durations.items()
         )
         return Metrics(

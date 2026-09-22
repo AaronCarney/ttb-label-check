@@ -346,7 +346,25 @@ _WARNING_COLUMN_OVERLAP_MIN = 0.5
 _WARNING_LINE_HEIGHT_MAX = 2.5
 _HEADING_WORD1_RE = re.compile(r"^\W*GOVERNMENT\W*$", re.I)
 _HEADING_WORD2_RE = re.compile(r"^\W*WARNING\b", re.I)
-_BLOCK_END_RE = re.compile(r"HEALTH\s*PROBLEMS\s*[.,]?", re.I)
+
+
+def _thin_glyph_tolerant(word: str) -> str:
+    """A pattern for `word` that survives a thin glyph added or lost.
+
+    The engine adds a narrow stroke between close letters ("HEAILTH") and
+    drops a thin letter, and the statement's last words are what end the
+    block: missed, the block runs on into whatever is printed under it.
+    `common.warning.verbatim` still sees the misread and names it.
+    """
+    thin = "[IL1|]"
+    parts = [f"{thin}?" if ch in "IL" else re.escape(ch) for ch in word]
+    return f"{thin}?".join(parts)
+
+
+_BLOCK_END_RE = re.compile(
+    _thin_glyph_tolerant("HEALTH") + r"\s*" + _thin_glyph_tolerant("PROBLEMS") + r"\s*[.,]?",
+    re.I,
+)
 
 # A barcode's digits sit beside justified warning text often enough to be
 # swept into the block, and the engine reads its bars as stray punctuation.
@@ -1020,6 +1038,41 @@ def _warning_reach(boxes: list[_Box]) -> tuple[bool, int]:
     )
 
 
+# The statement's content words other than its heading's, and how many of them
+# a frame with no heading must hold before its wording counts as the statement.
+# Measured over every frozen face of both label sets: a face whose heading is
+# read holds 13 to 18 of the 18, a face with no heading and no warning at most
+# 4. Half of them sits clear of both. Decision 0055.
+_WARNING_BODY_WORDS = _WARNING_SCREEN_WORDS - {"government", "warning"}
+_WORDING_WITHOUT_HEADING_MIN = len(_WARNING_BODY_WORDS) // 2
+
+
+def _wording_without_heading(boxes: list[_Box]) -> list[_Box] | None:
+    """The boxes carrying the statement's words, in reading order, where the
+    frame holds enough of them to be the statement; None where it does not.
+
+    Called only where no heading was found. The heading is how the block is
+    found and cut, so without it this is evidence the warning is printed, not
+    a reading of it."""
+    carriers = [b for b in boxes if _WARNING_BODY_WORDS.intersection(normalize_words(b.text))]
+    words: set[str] = set()
+    for box in carriers:
+        words |= _WARNING_BODY_WORDS.intersection(normalize_words(box.text))
+    if len(words) < _WORDING_WITHOUT_HEADING_MIN:
+        return None
+    return _reading_order(carriers)
+
+
+def _union_bbox(boxes: list[_Box]) -> tuple[int, int, int, int]:
+    """The smallest box around all of these."""
+    return (
+        int(min(b.x0 for b in boxes)),
+        int(min(b.y0 for b in boxes)),
+        int(max(b.x1 for b in boxes)),
+        int(max(b.y1 for b in boxes)),
+    )
+
+
 def _find_heading(boxes: list[_Box]) -> tuple[_Box, list[_Box]] | None:
     """The government-warning heading, and the boxes that spell it.
 
@@ -1662,19 +1715,30 @@ def _parse(
 
     # -- the government warning ------------------------------------------
     block = _warning_block(warning_boxes)
+    wording = _wording_without_heading(warning_boxes) if block is None else None
     if block is None:
-        out["gov_warning"] = (
-            {
-                "text": "",
-                "heading_text": "",
-                "heading_all_caps": False,
-                "heading_bold": False,
-                "type_size_pt": 0.0,
-                "confidence": 0.0,
-            },
-            None,
-            None,
-        )
+        absent = {
+            "text": "",
+            "heading_text": "",
+            "heading_all_caps": False,
+            "heading_bold": False,
+            "type_size_pt": 0.0,
+            "confidence": 0.0,
+        }
+        if wording is None:
+            out["gov_warning"] = (absent, None, None)
+        else:
+            # The statement's words with no heading read. `text` stays empty,
+            # because the warning as a statement was not read, and the rules
+            # are told why rather than left to take it as absent.
+            factor = _ROTATED_FRAME_PENALTY if rotation else 1.0
+            wording_text = " ".join(b.text for b in wording)
+            payload = {
+                **absent,
+                "wording_without_heading": True,
+                "confidence": _confidence("gov_warning", wording, factor=factor),
+            }
+            out["gov_warning"] = (payload, _union_bbox(wording), wording_text)
     else:
         text, heading_text, heading_box, block_boxes = block
         letters = [c for c in heading_text if c.isalpha()]

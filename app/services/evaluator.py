@@ -427,6 +427,7 @@ class Evaluator:
                     duration_ms=0,
                     disposition=disposition_label,
                     evidence_ref=f"reason_code/{vr.rule_id}",
+                    row_key=f"reason_code/{vr.rule_id}",
                 )
 
     def _new_timeline(self, application: Application):

@@ -47,14 +47,6 @@ WRONG_MISMATCHES = {
         "ttb-26240001000454",
         "malt.class_type.matches_application",
     ): "'Double India Pale Ale' is handwritten and not read; another collar line is picked",
-    (
-        "ttb-26240001000573",
-        "common.warning.heading_caps_bold",
-    ): "the heading was read run together, 'GOVERNMENTWARNING'",
-    (
-        "ttb-26240001000573",
-        "common.warning.verbatim",
-    ): "'HEALTH' read as 'HEAILTH', and the importer's line swept into the statement",
 }
 
 

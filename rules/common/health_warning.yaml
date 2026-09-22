@@ -26,6 +26,11 @@ rules:
       # photograph is the known one — is rejected under §16.21 for carrying no
       # warning it may in fact carry.
       unlocated_is_absent: true
+      # Not finding the heading is not the same as not finding the warning.
+      # Where the reader read the statement's words and no heading, the label
+      # goes to a reviewer on all three warning rules rather than being
+      # rejected for a heading the reader could not make out (decision 0055).
+      heading_not_read_reason_code: WARNING.HEADING.NOT_READ
     evidence_required: [warning_block]
     confidence_floor: 0.50
     effective_date: "1989-11-18"
@@ -40,6 +45,7 @@ rules:
     validator: verbatim_hash
     parameters:
       asset_key: govt_warning_16_21
+      heading_not_read_reason_code: WARNING.HEADING.NOT_READ
     asset:
       path: assets/warnings/govt_warning_16_21.txt
       sha256_pin: "ea1f4ec004131487df4848a557370cf7312d49ee0da911ff14cbd4e85c82d3e1"
@@ -77,6 +83,7 @@ rules:
       # comes back low, the rule reports this code and the label goes to a
       # reviewer on that point. See docs/decisions.md#0037.
       unmeasured_weight_reason_code: WARNING.STYLE.BOLD_NOT_MEASURED
+      heading_not_read_reason_code: WARNING.HEADING.NOT_READ
     evidence_required: [warning_block]
     confidence_floor: 0.50
     effective_date: "1989-11-18"
