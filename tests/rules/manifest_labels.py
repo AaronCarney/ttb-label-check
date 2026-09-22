@@ -27,8 +27,8 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
-from app.schemas.application_record import ApplicationRecord, DeclaredQuantity
 from app.schemas.extracted import FieldObservation
+from eval.corpus_check import application_record
 from tests.rules.fixtures import make_obs
 
 MANIFEST_PATH = Path(__file__).resolve().parents[1] / "fixtures" / "labels" / "manifest.json"
@@ -44,25 +44,6 @@ def manifest() -> dict[str, Any]:
 @lru_cache(maxsize=1)
 def entries_by_id() -> dict[str, dict[str, Any]]:
     return {entry["id"]: entry for entry in manifest()["labels"]}
-
-
-def application_record(entry: dict[str, Any]) -> ApplicationRecord:
-    app = entry["application"]
-    alcohol = app.get("alcohol_content") or {}
-    net = app.get("net_contents") or {}
-    source = app.get("source_of_product")
-    return ApplicationRecord(
-        beverage_type=entry["beverage_type"],
-        brand_name=app.get("brand_name"),
-        fanciful_name=app.get("fanciful_name"),
-        class_type=app.get("class_type"),
-        alcohol_content=DeclaredQuantity(text=alcohol.get("value"), amount=alcohol.get("percent")),
-        net_contents=DeclaredQuantity(text=net.get("value"), amount=net.get("ml")),
-        applicant_name_address=app.get("applicant_name_address"),
-        source_of_product=source.lower() if source else None,
-        origin=app.get("origin"),
-        wine_appellation=app.get("wine_appellation"),
-    )
 
 
 def label_observations(entry: dict[str, Any]) -> tuple[FieldObservation, ...]:

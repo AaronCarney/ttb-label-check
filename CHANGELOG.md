@@ -9,6 +9,14 @@ date: the release's git tag records when it was cut. Versions follow
 
 ### Added
 
+- `uv run python -m eval.corpus_check` runs every real corpus label through the production evaluator,
+  rule pack and disposition, with only the OCR replaced by frozen readings, and prints what the
+  product reports: match, mismatch or needs review per label and per check, the reason code behind
+  each mismatch and review, and how many checks it settled without a person. Today all 30 approved
+  labels come out 0 match, 9 mismatch, 21 needs review. Of the 11 mismatches, 2 are genuine: those
+  labels' warnings differ from 27 CFR 16.21 by a word. `tests/test_corpus_outcomes.py` pins every
+  outcome and lists each of the other 9 with its cause.
+
 - `uv run python -m eval.fetch_registry_corpus` fetches an application's record and every label image
   from the Public COLA Registry, for a list of TTB IDs, into `eval/data/` (not committed). The registry
   now answers plain HTTP with a bot-defence challenge, so it drives a real browser and fetches each

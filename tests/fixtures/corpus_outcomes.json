@@ -1,0 +1,2102 @@
+{
+ "labels": {
+  "ttb-26212001000085": {
+   "disposition": "fail",
+   "rules": {
+    "common.warning.heading_caps_bold": [
+     "needs_review",
+     "WARNING.STYLE.BOLD_NOT_MEASURED"
+    ],
+    "common.warning.present": [
+     "pass",
+     ""
+    ],
+    "common.warning.verbatim": [
+     "fail",
+     "WARNING.VERBATIM.MISMATCH"
+    ],
+    "spirits.alcohol.format": [
+     "pass",
+     ""
+    ],
+    "spirits.alcohol.matches_application": [
+     "pass",
+     ""
+    ],
+    "spirits.alcohol.present": [
+     "pass",
+     ""
+    ],
+    "spirits.alcohol.proof_agrees": [
+     "not_applicable",
+     ""
+    ],
+    "spirits.brand.matches_application": [
+     "fail",
+     "BRAND.NAME.MISMATCH"
+    ],
+    "spirits.brand.present": [
+     "pass",
+     ""
+    ],
+    "spirits.class_type.matches_application": [
+     "needs_review",
+     "CLASS_TYPE.MATCH.NEEDS_REVIEW"
+    ],
+    "spirits.class_type.matches_soi": [
+     "needs_review",
+     "CLASS_TYPE.SOI.NO_MATCH"
+    ],
+    "spirits.class_type.present": [
+     "pass",
+     ""
+    ],
+    "spirits.name_address.matches_application": [
+     "pass",
+     ""
+    ],
+    "spirits.name_address.present": [
+     "pass",
+     ""
+    ],
+    "spirits.net_contents.matches_application": [
+     "pass",
+     ""
+    ],
+    "spirits.net_contents.present": [
+     "pass",
+     ""
+    ],
+    "spirits.origin.matches_application": [
+     "pass",
+     ""
+    ]
+   }
+  },
+  "ttb-26218001000369": {
+   "disposition": "fail",
+   "rules": {
+    "common.warning.heading_caps_bold": [
+     "needs_review",
+     "WARNING.STYLE.BOLD_NOT_MEASURED"
+    ],
+    "common.warning.present": [
+     "pass",
+     ""
+    ],
+    "common.warning.verbatim": [
+     "pass",
+     ""
+    ],
+    "spirits.alcohol.format": [
+     "pass",
+     ""
+    ],
+    "spirits.alcohol.matches_application": [
+     "pass",
+     ""
+    ],
+    "spirits.alcohol.present": [
+     "pass",
+     ""
+    ],
+    "spirits.alcohol.proof_agrees": [
+     "pass",
+     ""
+    ],
+    "spirits.brand.matches_application": [
+     "fail",
+     "BRAND.NAME.MISMATCH"
+    ],
+    "spirits.brand.present": [
+     "pass",
+     ""
+    ],
+    "spirits.class_type.matches_application": [
+     "pass",
+     ""
+    ],
+    "spirits.class_type.matches_soi": [
+     "pass",
+     ""
+    ],
+    "spirits.class_type.present": [
+     "pass",
+     ""
+    ],
+    "spirits.name_address.matches_application": [
+     "needs_review",
+     "NAME_ADDRESS.MATCH.NEEDS_REVIEW"
+    ],
+    "spirits.name_address.present": [
+     "pass",
+     ""
+    ],
+    "spirits.net_contents.matches_application": [
+     "pass",
+     ""
+    ],
+    "spirits.net_contents.present": [
+     "pass",
+     ""
+    ],
+    "spirits.origin.matches_application": [
+     "needs_review",
+     "ENGINE.EVIDENCE.BELOW_CONFIDENCE_FLOOR"
+    ]
+   }
+  },
+  "ttb-26229001000034": {
+   "disposition": "fail",
+   "rules": {
+    "common.warning.heading_caps_bold": [
+     "needs_review",
+     "WARNING.STYLE.BOLD_NOT_MEASURED"
+    ],
+    "common.warning.present": [
+     "pass",
+     ""
+    ],
+    "common.warning.verbatim": [
+     "fail",
+     "WARNING.VERBATIM.MISMATCH"
+    ],
+    "spirits.alcohol.format": [
+     "needs_review",
+     ""
+    ],
+    "spirits.alcohol.matches_application": [
+     "needs_review",
+     "ALCOHOL_CONTENT.MATCH.NEEDS_REVIEW"
+    ],
+    "spirits.alcohol.present": [
+     "needs_review",
+     ""
+    ],
+    "spirits.alcohol.proof_agrees": [
+     "not_applicable",
+     ""
+    ],
+    "spirits.brand.matches_application": [
+     "pass",
+     ""
+    ],
+    "spirits.brand.present": [
+     "pass",
+     ""
+    ],
+    "spirits.class_type.matches_application": [
+     "pass",
+     ""
+    ],
+    "spirits.class_type.matches_soi": [
+     "pass",
+     ""
+    ],
+    "spirits.class_type.present": [
+     "pass",
+     ""
+    ],
+    "spirits.name_address.matches_application": [
+     "pass",
+     ""
+    ],
+    "spirits.name_address.present": [
+     "pass",
+     ""
+    ],
+    "spirits.net_contents.matches_application": [
+     "needs_review",
+     "NET_CONTENTS.MATCH.NEEDS_REVIEW"
+    ],
+    "spirits.net_contents.present": [
+     "needs_review",
+     "LEGIBILITY.FIELD.NOT_READ"
+    ],
+    "spirits.origin.matches_application": [
+     "not_applicable",
+     ""
+    ]
+   }
+  },
+  "ttb-26229001000513": {
+   "disposition": "needs_review",
+   "rules": {
+    "common.warning.heading_caps_bold": [
+     "needs_review",
+     "WARNING.STYLE.BOLD_NOT_MEASURED"
+    ],
+    "common.warning.present": [
+     "pass",
+     ""
+    ],
+    "common.warning.verbatim": [
+     "pass",
+     ""
+    ],
+    "spirits.alcohol.format": [
+     "needs_review",
+     "ALCOHOL_CONTENT.FORMAT.NEEDS_REVIEW"
+    ],
+    "spirits.alcohol.matches_application": [
+     "pass",
+     ""
+    ],
+    "spirits.alcohol.present": [
+     "pass",
+     ""
+    ],
+    "spirits.alcohol.proof_agrees": [
+     "not_applicable",
+     ""
+    ],
+    "spirits.brand.matches_application": [
+     "pass",
+     ""
+    ],
+    "spirits.brand.present": [
+     "pass",
+     ""
+    ],
+    "spirits.class_type.matches_application": [
+     "pass",
+     ""
+    ],
+    "spirits.class_type.matches_soi": [
+     "pass",
+     ""
+    ],
+    "spirits.class_type.present": [
+     "pass",
+     ""
+    ],
+    "spirits.name_address.matches_application": [
+     "needs_review",
+     "NAME_ADDRESS.MATCH.NEEDS_REVIEW"
+    ],
+    "spirits.name_address.present": [
+     "pass",
+     ""
+    ],
+    "spirits.net_contents.matches_application": [
+     "needs_review",
+     "NET_CONTENTS.MATCH.NEEDS_REVIEW"
+    ],
+    "spirits.net_contents.present": [
+     "needs_review",
+     "LEGIBILITY.FIELD.NOT_READ"
+    ],
+    "spirits.origin.matches_application": [
+     "needs_review",
+     "ORIGIN.MATCH.APPLICATION_LABEL_DISAGREE"
+    ]
+   }
+  },
+  "ttb-26230001000420": {
+   "disposition": "needs_review",
+   "rules": {
+    "common.warning.heading_caps_bold": [
+     "pass",
+     ""
+    ],
+    "common.warning.present": [
+     "pass",
+     ""
+    ],
+    "common.warning.verbatim": [
+     "pass",
+     ""
+    ],
+    "malt.alcohol.conditional_required": [
+     "pass",
+     ""
+    ],
+    "malt.alcohol.format": [
+     "needs_review",
+     "ALCOHOL_CONTENT.FORMAT.NEEDS_REVIEW"
+    ],
+    "malt.alcohol.matches_application": [
+     "pass",
+     ""
+    ],
+    "malt.brand.matches_application": [
+     "pass",
+     ""
+    ],
+    "malt.brand.present": [
+     "pass",
+     ""
+    ],
+    "malt.class_type.matches_application": [
+     "pass",
+     ""
+    ],
+    "malt.class_type.present": [
+     "pass",
+     ""
+    ],
+    "malt.name_address.matches_application": [
+     "needs_review",
+     "NAME_ADDRESS.MATCH.NEEDS_REVIEW"
+    ],
+    "malt.name_address.present": [
+     "needs_review",
+     "LEGIBILITY.FIELD.NOT_READ"
+    ],
+    "malt.net_contents.matches_application": [
+     "pass",
+     ""
+    ],
+    "malt.net_contents.present": [
+     "pass",
+     ""
+    ],
+    "malt.origin.matches_application": [
+     "not_applicable",
+     ""
+    ]
+   }
+  },
+  "ttb-26230001000540": {
+   "disposition": "fail",
+   "rules": {
+    "common.warning.heading_caps_bold": [
+     "needs_review",
+     "WARNING.STYLE.BOLD_NOT_MEASURED"
+    ],
+    "common.warning.present": [
+     "pass",
+     ""
+    ],
+    "common.warning.verbatim": [
+     "pass",
+     ""
+    ],
+    "spirits.alcohol.format": [
+     "pass",
+     ""
+    ],
+    "spirits.alcohol.matches_application": [
+     "pass",
+     ""
+    ],
+    "spirits.alcohol.present": [
+     "pass",
+     ""
+    ],
+    "spirits.alcohol.proof_agrees": [
+     "pass",
+     ""
+    ],
+    "spirits.brand.matches_application": [
+     "pass",
+     ""
+    ],
+    "spirits.brand.present": [
+     "pass",
+     ""
+    ],
+    "spirits.class_type.matches_application": [
+     "pass",
+     ""
+    ],
+    "spirits.class_type.matches_soi": [
+     "pass",
+     ""
+    ],
+    "spirits.class_type.present": [
+     "pass",
+     ""
+    ],
+    "spirits.name_address.matches_application": [
+     "pass",
+     ""
+    ],
+    "spirits.name_address.present": [
+     "pass",
+     ""
+    ],
+    "spirits.net_contents.matches_application": [
+     "fail",
+     "NET_CONTENTS.MATCH.APPLICATION_LABEL_DISAGREE"
+    ],
+    "spirits.net_contents.present": [
+     "pass",
+     ""
+    ],
+    "spirits.origin.matches_application": [
+     "not_applicable",
+     ""
+    ]
+   }
+  },
+  "ttb-26231001000333": {
+   "disposition": "needs_review",
+   "rules": {
+    "common.warning.heading_caps_bold": [
+     "needs_review",
+     "WARNING.STYLE.BOLD_NOT_MEASURED"
+    ],
+    "common.warning.present": [
+     "pass",
+     ""
+    ],
+    "common.warning.verbatim": [
+     "pass",
+     ""
+    ],
+    "spirits.alcohol.format": [
+     "needs_review",
+     "ALCOHOL_CONTENT.FORMAT.NEEDS_REVIEW"
+    ],
+    "spirits.alcohol.matches_application": [
+     "pass",
+     ""
+    ],
+    "spirits.alcohol.present": [
+     "pass",
+     ""
+    ],
+    "spirits.alcohol.proof_agrees": [
+     "not_applicable",
+     ""
+    ],
+    "spirits.brand.matches_application": [
+     "pass",
+     ""
+    ],
+    "spirits.brand.present": [
+     "pass",
+     ""
+    ],
+    "spirits.class_type.matches_application": [
+     "pass",
+     ""
+    ],
+    "spirits.class_type.matches_soi": [
+     "pass",
+     ""
+    ],
+    "spirits.class_type.present": [
+     "pass",
+     ""
+    ],
+    "spirits.name_address.matches_application": [
+     "needs_review",
+     "NAME_ADDRESS.MATCH.NEEDS_REVIEW"
+    ],
+    "spirits.name_address.present": [
+     "pass",
+     ""
+    ],
+    "spirits.net_contents.matches_application": [
+     "needs_review",
+     "NET_CONTENTS.MATCH.NEEDS_REVIEW"
+    ],
+    "spirits.net_contents.present": [
+     "needs_review",
+     "LEGIBILITY.FIELD.NOT_READ"
+    ],
+    "spirits.origin.matches_application": [
+     "needs_review",
+     "ENGINE.EVIDENCE.BELOW_CONFIDENCE_FLOOR"
+    ]
+   }
+  },
+  "ttb-26231001000662": {
+   "disposition": "needs_review",
+   "rules": {
+    "common.warning.heading_caps_bold": [
+     "pass",
+     ""
+    ],
+    "common.warning.present": [
+     "pass",
+     ""
+    ],
+    "common.warning.verbatim": [
+     "pass",
+     ""
+    ],
+    "spirits.alcohol.format": [
+     "pass",
+     ""
+    ],
+    "spirits.alcohol.matches_application": [
+     "pass",
+     ""
+    ],
+    "spirits.alcohol.present": [
+     "pass",
+     ""
+    ],
+    "spirits.alcohol.proof_agrees": [
+     "pass",
+     ""
+    ],
+    "spirits.brand.matches_application": [
+     "needs_review",
+     "BRAND.NAME.NEEDS_REVIEW"
+    ],
+    "spirits.brand.present": [
+     "pass",
+     ""
+    ],
+    "spirits.class_type.matches_application": [
+     "needs_review",
+     "CLASS_TYPE.MATCH.NEEDS_REVIEW"
+    ],
+    "spirits.class_type.matches_soi": [
+     "needs_review",
+     "CLASS_TYPE.SOI.NO_MATCH"
+    ],
+    "spirits.class_type.present": [
+     "pass",
+     ""
+    ],
+    "spirits.name_address.matches_application": [
+     "pass",
+     ""
+    ],
+    "spirits.name_address.present": [
+     "pass",
+     ""
+    ],
+    "spirits.net_contents.matches_application": [
+     "pass",
+     ""
+    ],
+    "spirits.net_contents.present": [
+     "pass",
+     ""
+    ],
+    "spirits.origin.matches_application": [
+     "not_applicable",
+     ""
+    ]
+   }
+  },
+  "ttb-26232001000404": {
+   "disposition": "fail",
+   "rules": {
+    "common.warning.heading_caps_bold": [
+     "needs_review",
+     "WARNING.STYLE.BOLD_NOT_MEASURED"
+    ],
+    "common.warning.present": [
+     "pass",
+     ""
+    ],
+    "common.warning.verbatim": [
+     "pass",
+     ""
+    ],
+    "spirits.alcohol.format": [
+     "needs_review",
+     "ALCOHOL_CONTENT.FORMAT.NEEDS_REVIEW"
+    ],
+    "spirits.alcohol.matches_application": [
+     "pass",
+     ""
+    ],
+    "spirits.alcohol.present": [
+     "pass",
+     ""
+    ],
+    "spirits.alcohol.proof_agrees": [
+     "pass",
+     ""
+    ],
+    "spirits.brand.matches_application": [
+     "pass",
+     ""
+    ],
+    "spirits.brand.present": [
+     "pass",
+     ""
+    ],
+    "spirits.class_type.matches_application": [
+     "pass",
+     ""
+    ],
+    "spirits.class_type.matches_soi": [
+     "pass",
+     ""
+    ],
+    "spirits.class_type.present": [
+     "pass",
+     ""
+    ],
+    "spirits.name_address.matches_application": [
+     "needs_review",
+     "NAME_ADDRESS.MATCH.NEEDS_REVIEW"
+    ],
+    "spirits.name_address.present": [
+     "pass",
+     ""
+    ],
+    "spirits.net_contents.matches_application": [
+     "fail",
+     "NET_CONTENTS.MATCH.APPLICATION_LABEL_DISAGREE"
+    ],
+    "spirits.net_contents.present": [
+     "pass",
+     ""
+    ],
+    "spirits.origin.matches_application": [
+     "pass",
+     ""
+    ]
+   }
+  },
+  "ttb-26233001000189": {
+   "disposition": "needs_review",
+   "rules": {
+    "common.warning.heading_caps_bold": [
+     "needs_review",
+     "WARNING.STYLE.BOLD_NOT_MEASURED"
+    ],
+    "common.warning.present": [
+     "pass",
+     ""
+    ],
+    "common.warning.verbatim": [
+     "needs_review",
+     "WARNING.VERBATIM.NOT_CONFIRMED"
+    ],
+    "spirits.alcohol.format": [
+     "needs_review",
+     "ALCOHOL_CONTENT.FORMAT.NEEDS_REVIEW"
+    ],
+    "spirits.alcohol.matches_application": [
+     "pass",
+     ""
+    ],
+    "spirits.alcohol.present": [
+     "pass",
+     ""
+    ],
+    "spirits.alcohol.proof_agrees": [
+     "not_applicable",
+     ""
+    ],
+    "spirits.brand.matches_application": [
+     "pass",
+     ""
+    ],
+    "spirits.brand.present": [
+     "pass",
+     ""
+    ],
+    "spirits.class_type.matches_application": [
+     "needs_review",
+     "CLASS_TYPE.MATCH.NEEDS_REVIEW"
+    ],
+    "spirits.class_type.matches_soi": [
+     "needs_review",
+     "CLASS_TYPE.SOI.NO_MATCH"
+    ],
+    "spirits.class_type.present": [
+     "pass",
+     ""
+    ],
+    "spirits.name_address.matches_application": [
+     "pass",
+     ""
+    ],
+    "spirits.name_address.present": [
+     "pass",
+     ""
+    ],
+    "spirits.net_contents.matches_application": [
+     "needs_review",
+     "NET_CONTENTS.MATCH.NEEDS_REVIEW"
+    ],
+    "spirits.net_contents.present": [
+     "needs_review",
+     "LEGIBILITY.FIELD.NOT_READ"
+    ],
+    "spirits.origin.matches_application": [
+     "needs_review",
+     "ENGINE.EVIDENCE.BELOW_CONFIDENCE_FLOOR"
+    ]
+   }
+  },
+  "ttb-26233001000566": {
+   "disposition": "fail",
+   "rules": {
+    "common.warning.heading_caps_bold": [
+     "pass",
+     ""
+    ],
+    "common.warning.present": [
+     "pass",
+     ""
+    ],
+    "common.warning.verbatim": [
+     "needs_review",
+     "WARNING.VERBATIM.NOT_CONFIRMED"
+    ],
+    "wine.alcohol.format": [
+     "pass",
+     ""
+    ],
+    "wine.alcohol.matches_application": [
+     "pass",
+     ""
+    ],
+    "wine.alcohol.present_or_table": [
+     "pass",
+     ""
+    ],
+    "wine.brand.matches_application": [
+     "fail",
+     "BRAND.NAME.MISMATCH"
+    ],
+    "wine.brand.present": [
+     "pass",
+     ""
+    ],
+    "wine.class_type.matches_application": [
+     "pass",
+     ""
+    ],
+    "wine.class_type.present": [
+     "pass",
+     ""
+    ],
+    "wine.name_address.matches_application": [
+     "needs_review",
+     "NAME_ADDRESS.MATCH.NEEDS_REVIEW"
+    ],
+    "wine.name_address.present": [
+     "pass",
+     ""
+    ],
+    "wine.net_contents.matches_application": [
+     "needs_review",
+     "NET_CONTENTS.MATCH.NEEDS_REVIEW"
+    ],
+    "wine.net_contents.present": [
+     "needs_review",
+     "LEGIBILITY.FIELD.NOT_READ"
+    ],
+    "wine.origin.matches_application": [
+     "not_applicable",
+     ""
+    ]
+   }
+  },
+  "ttb-26233001000569": {
+   "disposition": "needs_review",
+   "rules": {
+    "common.warning.heading_caps_bold": [
+     "pass",
+     ""
+    ],
+    "common.warning.present": [
+     "pass",
+     ""
+    ],
+    "common.warning.verbatim": [
+     "needs_review",
+     "WARNING.VERBATIM.NOT_CONFIRMED"
+    ],
+    "wine.alcohol.format": [
+     "pass",
+     ""
+    ],
+    "wine.alcohol.matches_application": [
+     "pass",
+     ""
+    ],
+    "wine.alcohol.present_or_table": [
+     "pass",
+     ""
+    ],
+    "wine.brand.matches_application": [
+     "pass",
+     ""
+    ],
+    "wine.brand.present": [
+     "pass",
+     ""
+    ],
+    "wine.class_type.matches_application": [
+     "needs_review",
+     "CLASS_TYPE.MATCH.NEEDS_REVIEW"
+    ],
+    "wine.class_type.present": [
+     "pass",
+     ""
+    ],
+    "wine.name_address.matches_application": [
+     "pass",
+     ""
+    ],
+    "wine.name_address.present": [
+     "pass",
+     ""
+    ],
+    "wine.net_contents.matches_application": [
+     "pass",
+     ""
+    ],
+    "wine.net_contents.present": [
+     "pass",
+     ""
+    ],
+    "wine.origin.matches_application": [
+     "not_applicable",
+     ""
+    ]
+   }
+  },
+  "ttb-26236001000210": {
+   "disposition": "needs_review",
+   "rules": {
+    "common.warning.heading_caps_bold": [
+     "needs_review",
+     "WARNING.STYLE.BOLD_NOT_MEASURED"
+    ],
+    "common.warning.present": [
+     "pass",
+     ""
+    ],
+    "common.warning.verbatim": [
+     "needs_review",
+     "WARNING.VERBATIM.NOT_CONFIRMED"
+    ],
+    "spirits.alcohol.format": [
+     "needs_review",
+     ""
+    ],
+    "spirits.alcohol.matches_application": [
+     "needs_review",
+     "ALCOHOL_CONTENT.MATCH.NEEDS_REVIEW"
+    ],
+    "spirits.alcohol.present": [
+     "needs_review",
+     "LEGIBILITY.FIELD.NOT_READ"
+    ],
+    "spirits.alcohol.proof_agrees": [
+     "not_applicable",
+     ""
+    ],
+    "spirits.brand.matches_application": [
+     "needs_review",
+     "BRAND.NAME.NEEDS_REVIEW"
+    ],
+    "spirits.brand.present": [
+     "pass",
+     ""
+    ],
+    "spirits.class_type.matches_application": [
+     "pass",
+     ""
+    ],
+    "spirits.class_type.matches_soi": [
+     "needs_review",
+     "CLASS_TYPE.SOI.NO_MATCH"
+    ],
+    "spirits.class_type.present": [
+     "pass",
+     ""
+    ],
+    "spirits.name_address.matches_application": [
+     "pass",
+     ""
+    ],
+    "spirits.name_address.present": [
+     "pass",
+     ""
+    ],
+    "spirits.net_contents.matches_application": [
+     "pass",
+     ""
+    ],
+    "spirits.net_contents.present": [
+     "pass",
+     ""
+    ],
+    "spirits.origin.matches_application": [
+     "not_applicable",
+     ""
+    ]
+   }
+  },
+  "ttb-26236001000448": {
+   "disposition": "fail",
+   "rules": {
+    "common.warning.heading_caps_bold": [
+     "needs_review",
+     "WARNING.STYLE.BOLD_NOT_MEASURED"
+    ],
+    "common.warning.present": [
+     "pass",
+     ""
+    ],
+    "common.warning.verbatim": [
+     "pass",
+     ""
+    ],
+    "spirits.alcohol.format": [
+     "needs_review",
+     "ALCOHOL_CONTENT.FORMAT.NEEDS_REVIEW"
+    ],
+    "spirits.alcohol.matches_application": [
+     "pass",
+     ""
+    ],
+    "spirits.alcohol.present": [
+     "pass",
+     ""
+    ],
+    "spirits.alcohol.proof_agrees": [
+     "not_applicable",
+     ""
+    ],
+    "spirits.brand.matches_application": [
+     "pass",
+     ""
+    ],
+    "spirits.brand.present": [
+     "pass",
+     ""
+    ],
+    "spirits.class_type.matches_application": [
+     "pass",
+     ""
+    ],
+    "spirits.class_type.matches_soi": [
+     "pass",
+     ""
+    ],
+    "spirits.class_type.present": [
+     "pass",
+     ""
+    ],
+    "spirits.name_address.matches_application": [
+     "pass",
+     ""
+    ],
+    "spirits.name_address.present": [
+     "pass",
+     ""
+    ],
+    "spirits.net_contents.matches_application": [
+     "fail",
+     "NET_CONTENTS.MATCH.APPLICATION_LABEL_DISAGREE"
+    ],
+    "spirits.net_contents.present": [
+     "pass",
+     ""
+    ],
+    "spirits.origin.matches_application": [
+     "not_applicable",
+     ""
+    ]
+   }
+  },
+  "ttb-26236001000652": {
+   "disposition": "needs_review",
+   "rules": {
+    "common.warning.heading_caps_bold": [
+     "pass",
+     ""
+    ],
+    "common.warning.present": [
+     "pass",
+     ""
+    ],
+    "common.warning.verbatim": [
+     "pass",
+     ""
+    ],
+    "wine.alcohol.format": [
+     "pass",
+     ""
+    ],
+    "wine.alcohol.matches_application": [
+     "pass",
+     ""
+    ],
+    "wine.alcohol.present_or_table": [
+     "pass",
+     ""
+    ],
+    "wine.brand.matches_application": [
+     "pass",
+     ""
+    ],
+    "wine.brand.present": [
+     "pass",
+     ""
+    ],
+    "wine.class_type.matches_application": [
+     "needs_review",
+     "CLASS_TYPE.MATCH.NEEDS_REVIEW"
+    ],
+    "wine.class_type.present": [
+     "pass",
+     ""
+    ],
+    "wine.name_address.matches_application": [
+     "pass",
+     ""
+    ],
+    "wine.name_address.present": [
+     "pass",
+     ""
+    ],
+    "wine.net_contents.matches_application": [
+     "pass",
+     ""
+    ],
+    "wine.net_contents.present": [
+     "pass",
+     ""
+    ],
+    "wine.origin.matches_application": [
+     "not_applicable",
+     ""
+    ]
+   }
+  },
+  "ttb-26236001000716": {
+   "disposition": "needs_review",
+   "rules": {
+    "common.warning.heading_caps_bold": [
+     "needs_review",
+     "WARNING.STYLE.BOLD_NOT_MEASURED"
+    ],
+    "common.warning.present": [
+     "pass",
+     ""
+    ],
+    "common.warning.verbatim": [
+     "pass",
+     ""
+    ],
+    "wine.alcohol.format": [
+     "pass",
+     ""
+    ],
+    "wine.alcohol.matches_application": [
+     "pass",
+     ""
+    ],
+    "wine.alcohol.present_or_table": [
+     "pass",
+     ""
+    ],
+    "wine.brand.matches_application": [
+     "pass",
+     ""
+    ],
+    "wine.brand.present": [
+     "pass",
+     ""
+    ],
+    "wine.class_type.matches_application": [
+     "pass",
+     ""
+    ],
+    "wine.class_type.present": [
+     "pass",
+     ""
+    ],
+    "wine.name_address.matches_application": [
+     "pass",
+     ""
+    ],
+    "wine.name_address.present": [
+     "pass",
+     ""
+    ],
+    "wine.net_contents.matches_application": [
+     "pass",
+     ""
+    ],
+    "wine.net_contents.present": [
+     "pass",
+     ""
+    ],
+    "wine.origin.matches_application": [
+     "not_applicable",
+     ""
+    ]
+   }
+  },
+  "ttb-26237001000107": {
+   "disposition": "needs_review",
+   "rules": {
+    "common.warning.heading_caps_bold": [
+     "needs_review",
+     "WARNING.STYLE.BOLD_NOT_MEASURED"
+    ],
+    "common.warning.present": [
+     "pass",
+     ""
+    ],
+    "common.warning.verbatim": [
+     "needs_review",
+     "WARNING.VERBATIM.NOT_CONFIRMED"
+    ],
+    "spirits.alcohol.format": [
+     "pass",
+     ""
+    ],
+    "spirits.alcohol.matches_application": [
+     "pass",
+     ""
+    ],
+    "spirits.alcohol.present": [
+     "pass",
+     ""
+    ],
+    "spirits.alcohol.proof_agrees": [
+     "pass",
+     ""
+    ],
+    "spirits.brand.matches_application": [
+     "pass",
+     ""
+    ],
+    "spirits.brand.present": [
+     "pass",
+     ""
+    ],
+    "spirits.class_type.matches_application": [
+     "pass",
+     ""
+    ],
+    "spirits.class_type.matches_soi": [
+     "pass",
+     ""
+    ],
+    "spirits.class_type.present": [
+     "pass",
+     ""
+    ],
+    "spirits.name_address.matches_application": [
+     "pass",
+     ""
+    ],
+    "spirits.name_address.present": [
+     "pass",
+     ""
+    ],
+    "spirits.net_contents.matches_application": [
+     "pass",
+     ""
+    ],
+    "spirits.net_contents.present": [
+     "pass",
+     ""
+    ],
+    "spirits.origin.matches_application": [
+     "pass",
+     ""
+    ]
+   }
+  },
+  "ttb-26237001000196": {
+   "disposition": "needs_review",
+   "rules": {
+    "common.warning.heading_caps_bold": [
+     "pass",
+     ""
+    ],
+    "common.warning.present": [
+     "pass",
+     ""
+    ],
+    "common.warning.verbatim": [
+     "pass",
+     ""
+    ],
+    "wine.alcohol.format": [
+     "pass",
+     ""
+    ],
+    "wine.alcohol.matches_application": [
+     "pass",
+     ""
+    ],
+    "wine.alcohol.present_or_table": [
+     "pass",
+     ""
+    ],
+    "wine.brand.matches_application": [
+     "pass",
+     ""
+    ],
+    "wine.brand.present": [
+     "pass",
+     ""
+    ],
+    "wine.class_type.matches_application": [
+     "needs_review",
+     "CLASS_TYPE.MATCH.NEEDS_REVIEW"
+    ],
+    "wine.class_type.present": [
+     "pass",
+     ""
+    ],
+    "wine.name_address.matches_application": [
+     "needs_review",
+     "NAME_ADDRESS.MATCH.NEEDS_REVIEW"
+    ],
+    "wine.name_address.present": [
+     "pass",
+     ""
+    ],
+    "wine.net_contents.matches_application": [
+     "pass",
+     ""
+    ],
+    "wine.net_contents.present": [
+     "pass",
+     ""
+    ],
+    "wine.origin.matches_application": [
+     "not_applicable",
+     ""
+    ]
+   }
+  },
+  "ttb-26238001000795": {
+   "disposition": "needs_review",
+   "rules": {
+    "common.warning.heading_caps_bold": [
+     "needs_review",
+     "WARNING.STYLE.BOLD_NOT_MEASURED"
+    ],
+    "common.warning.present": [
+     "pass",
+     ""
+    ],
+    "common.warning.verbatim": [
+     "pass",
+     ""
+    ],
+    "malt.alcohol.conditional_required": [
+     "pass",
+     ""
+    ],
+    "malt.alcohol.format": [
+     "needs_review",
+     "ALCOHOL_CONTENT.FORMAT.NEEDS_REVIEW"
+    ],
+    "malt.alcohol.matches_application": [
+     "pass",
+     ""
+    ],
+    "malt.brand.matches_application": [
+     "needs_review",
+     "BRAND.NAME.NEEDS_REVIEW"
+    ],
+    "malt.brand.present": [
+     "pass",
+     ""
+    ],
+    "malt.class_type.matches_application": [
+     "pass",
+     ""
+    ],
+    "malt.class_type.present": [
+     "pass",
+     ""
+    ],
+    "malt.name_address.matches_application": [
+     "needs_review",
+     "NAME_ADDRESS.MATCH.NEEDS_REVIEW"
+    ],
+    "malt.name_address.present": [
+     "pass",
+     ""
+    ],
+    "malt.net_contents.matches_application": [
+     "needs_review",
+     "NET_CONTENTS.MATCH.NEEDS_REVIEW"
+    ],
+    "malt.net_contents.present": [
+     "needs_review",
+     "LEGIBILITY.FIELD.NOT_READ"
+    ],
+    "malt.origin.matches_application": [
+     "pass",
+     ""
+    ]
+   }
+  },
+  "ttb-26239001000079": {
+   "disposition": "needs_review",
+   "rules": {
+    "common.warning.heading_caps_bold": [
+     "pass",
+     ""
+    ],
+    "common.warning.present": [
+     "pass",
+     ""
+    ],
+    "common.warning.verbatim": [
+     "needs_review",
+     "WARNING.VERBATIM.NOT_CONFIRMED"
+    ],
+    "spirits.alcohol.format": [
+     "pass",
+     ""
+    ],
+    "spirits.alcohol.matches_application": [
+     "pass",
+     ""
+    ],
+    "spirits.alcohol.present": [
+     "pass",
+     ""
+    ],
+    "spirits.alcohol.proof_agrees": [
+     "pass",
+     ""
+    ],
+    "spirits.brand.matches_application": [
+     "pass",
+     ""
+    ],
+    "spirits.brand.present": [
+     "pass",
+     ""
+    ],
+    "spirits.class_type.matches_application": [
+     "pass",
+     ""
+    ],
+    "spirits.class_type.matches_soi": [
+     "pass",
+     ""
+    ],
+    "spirits.class_type.present": [
+     "pass",
+     ""
+    ],
+    "spirits.name_address.matches_application": [
+     "pass",
+     ""
+    ],
+    "spirits.name_address.present": [
+     "pass",
+     ""
+    ],
+    "spirits.net_contents.matches_application": [
+     "pass",
+     ""
+    ],
+    "spirits.net_contents.present": [
+     "pass",
+     ""
+    ],
+    "spirits.origin.matches_application": [
+     "not_applicable",
+     ""
+    ]
+   }
+  },
+  "ttb-26239001000081": {
+   "disposition": "needs_review",
+   "rules": {
+    "common.warning.heading_caps_bold": [
+     "pass",
+     ""
+    ],
+    "common.warning.present": [
+     "pass",
+     ""
+    ],
+    "common.warning.verbatim": [
+     "needs_review",
+     "WARNING.VERBATIM.NOT_CONFIRMED"
+    ],
+    "spirits.alcohol.format": [
+     "pass",
+     ""
+    ],
+    "spirits.alcohol.matches_application": [
+     "pass",
+     ""
+    ],
+    "spirits.alcohol.present": [
+     "pass",
+     ""
+    ],
+    "spirits.alcohol.proof_agrees": [
+     "pass",
+     ""
+    ],
+    "spirits.brand.matches_application": [
+     "pass",
+     ""
+    ],
+    "spirits.brand.present": [
+     "pass",
+     ""
+    ],
+    "spirits.class_type.matches_application": [
+     "pass",
+     ""
+    ],
+    "spirits.class_type.matches_soi": [
+     "pass",
+     ""
+    ],
+    "spirits.class_type.present": [
+     "pass",
+     ""
+    ],
+    "spirits.name_address.matches_application": [
+     "pass",
+     ""
+    ],
+    "spirits.name_address.present": [
+     "pass",
+     ""
+    ],
+    "spirits.net_contents.matches_application": [
+     "pass",
+     ""
+    ],
+    "spirits.net_contents.present": [
+     "pass",
+     ""
+    ],
+    "spirits.origin.matches_application": [
+     "not_applicable",
+     ""
+    ]
+   }
+  },
+  "ttb-26239001000132": {
+   "disposition": "needs_review",
+   "rules": {
+    "common.warning.heading_caps_bold": [
+     "needs_review",
+     "WARNING.STYLE.BOLD_NOT_MEASURED"
+    ],
+    "common.warning.present": [
+     "pass",
+     ""
+    ],
+    "common.warning.verbatim": [
+     "pass",
+     ""
+    ],
+    "wine.alcohol.format": [
+     "pass",
+     ""
+    ],
+    "wine.alcohol.matches_application": [
+     "pass",
+     ""
+    ],
+    "wine.alcohol.present_or_table": [
+     "pass",
+     ""
+    ],
+    "wine.brand.matches_application": [
+     "pass",
+     ""
+    ],
+    "wine.brand.present": [
+     "pass",
+     ""
+    ],
+    "wine.class_type.matches_application": [
+     "pass",
+     ""
+    ],
+    "wine.class_type.present": [
+     "pass",
+     ""
+    ],
+    "wine.name_address.matches_application": [
+     "needs_review",
+     "NAME_ADDRESS.MATCH.NEEDS_REVIEW"
+    ],
+    "wine.name_address.present": [
+     "pass",
+     ""
+    ],
+    "wine.net_contents.matches_application": [
+     "pass",
+     ""
+    ],
+    "wine.net_contents.present": [
+     "pass",
+     ""
+    ],
+    "wine.origin.matches_application": [
+     "pass",
+     ""
+    ]
+   }
+  },
+  "ttb-26239001000217": {
+   "disposition": "needs_review",
+   "rules": {
+    "common.warning.heading_caps_bold": [
+     "needs_review",
+     "WARNING.STYLE.BOLD_NOT_MEASURED"
+    ],
+    "common.warning.present": [
+     "pass",
+     ""
+    ],
+    "common.warning.verbatim": [
+     "pass",
+     ""
+    ],
+    "malt.alcohol.conditional_required": [
+     "pass",
+     ""
+    ],
+    "malt.alcohol.format": [
+     "pass",
+     ""
+    ],
+    "malt.alcohol.matches_application": [
+     "pass",
+     ""
+    ],
+    "malt.brand.matches_application": [
+     "pass",
+     ""
+    ],
+    "malt.brand.present": [
+     "pass",
+     ""
+    ],
+    "malt.class_type.matches_application": [
+     "pass",
+     ""
+    ],
+    "malt.class_type.present": [
+     "pass",
+     ""
+    ],
+    "malt.name_address.matches_application": [
+     "needs_review",
+     "NAME_ADDRESS.MATCH.NEEDS_REVIEW"
+    ],
+    "malt.name_address.present": [
+     "pass",
+     ""
+    ],
+    "malt.net_contents.matches_application": [
+     "pass",
+     ""
+    ],
+    "malt.net_contents.present": [
+     "pass",
+     ""
+    ],
+    "malt.origin.matches_application": [
+     "pass",
+     ""
+    ]
+   }
+  },
+  "ttb-26239001000239": {
+   "disposition": "needs_review",
+   "rules": {
+    "common.warning.heading_caps_bold": [
+     "needs_review",
+     "WARNING.STYLE.BOLD_NOT_MEASURED"
+    ],
+    "common.warning.present": [
+     "pass",
+     ""
+    ],
+    "common.warning.verbatim": [
+     "needs_review",
+     "WARNING.VERBATIM.NOT_CONFIRMED"
+    ],
+    "wine.alcohol.format": [
+     "pass",
+     ""
+    ],
+    "wine.alcohol.matches_application": [
+     "pass",
+     ""
+    ],
+    "wine.alcohol.present_or_table": [
+     "pass",
+     ""
+    ],
+    "wine.brand.matches_application": [
+     "pass",
+     ""
+    ],
+    "wine.brand.present": [
+     "pass",
+     ""
+    ],
+    "wine.class_type.matches_application": [
+     "pass",
+     ""
+    ],
+    "wine.class_type.present": [
+     "pass",
+     ""
+    ],
+    "wine.name_address.matches_application": [
+     "pass",
+     ""
+    ],
+    "wine.name_address.present": [
+     "pass",
+     ""
+    ],
+    "wine.net_contents.matches_application": [
+     "pass",
+     ""
+    ],
+    "wine.net_contents.present": [
+     "pass",
+     ""
+    ],
+    "wine.origin.matches_application": [
+     "pass",
+     ""
+    ]
+   }
+  },
+  "ttb-26239001000279": {
+   "disposition": "needs_review",
+   "rules": {
+    "common.warning.heading_caps_bold": [
+     "needs_review",
+     "WARNING.STYLE.BOLD_NOT_MEASURED"
+    ],
+    "common.warning.present": [
+     "pass",
+     ""
+    ],
+    "common.warning.verbatim": [
+     "pass",
+     ""
+    ],
+    "malt.alcohol.conditional_required": [
+     "pass",
+     ""
+    ],
+    "malt.alcohol.format": [
+     "pass",
+     ""
+    ],
+    "malt.alcohol.matches_application": [
+     "pass",
+     ""
+    ],
+    "malt.brand.matches_application": [
+     "pass",
+     ""
+    ],
+    "malt.brand.present": [
+     "pass",
+     ""
+    ],
+    "malt.class_type.matches_application": [
+     "pass",
+     ""
+    ],
+    "malt.class_type.present": [
+     "pass",
+     ""
+    ],
+    "malt.name_address.matches_application": [
+     "needs_review",
+     "NAME_ADDRESS.MATCH.NEEDS_REVIEW"
+    ],
+    "malt.name_address.present": [
+     "pass",
+     ""
+    ],
+    "malt.net_contents.matches_application": [
+     "pass",
+     ""
+    ],
+    "malt.net_contents.present": [
+     "pass",
+     ""
+    ],
+    "malt.origin.matches_application": [
+     "not_applicable",
+     ""
+    ]
+   }
+  },
+  "ttb-26239001000331": {
+   "disposition": "needs_review",
+   "rules": {
+    "common.warning.heading_caps_bold": [
+     "needs_review",
+     "WARNING.STYLE.BOLD_NOT_MEASURED"
+    ],
+    "common.warning.present": [
+     "pass",
+     ""
+    ],
+    "common.warning.verbatim": [
+     "pass",
+     ""
+    ],
+    "wine.alcohol.format": [
+     "needs_review",
+     "ALCOHOL_CONTENT.FORMAT.NEEDS_REVIEW"
+    ],
+    "wine.alcohol.matches_application": [
+     "pass",
+     ""
+    ],
+    "wine.alcohol.present_or_table": [
+     "pass",
+     ""
+    ],
+    "wine.brand.matches_application": [
+     "pass",
+     ""
+    ],
+    "wine.brand.present": [
+     "pass",
+     ""
+    ],
+    "wine.class_type.matches_application": [
+     "pass",
+     ""
+    ],
+    "wine.class_type.present": [
+     "pass",
+     ""
+    ],
+    "wine.name_address.matches_application": [
+     "pass",
+     ""
+    ],
+    "wine.name_address.present": [
+     "pass",
+     ""
+    ],
+    "wine.net_contents.matches_application": [
+     "pass",
+     ""
+    ],
+    "wine.net_contents.present": [
+     "pass",
+     ""
+    ],
+    "wine.origin.matches_application": [
+     "pass",
+     ""
+    ]
+   }
+  },
+  "ttb-26240001000454": {
+   "disposition": "fail",
+   "rules": {
+    "common.warning.heading_caps_bold": [
+     "needs_review",
+     "WARNING.STYLE.BOLD_NOT_MEASURED"
+    ],
+    "common.warning.present": [
+     "pass",
+     ""
+    ],
+    "common.warning.verbatim": [
+     "needs_review",
+     "WARNING.VERBATIM.NOT_CONFIRMED"
+    ],
+    "malt.alcohol.conditional_required": [
+     "needs_review",
+     ""
+    ],
+    "malt.alcohol.format": [
+     "needs_review",
+     "LEGIBILITY.FIELD.NOT_READ"
+    ],
+    "malt.alcohol.matches_application": [
+     "needs_review",
+     "ALCOHOL_CONTENT.MATCH.NEEDS_REVIEW"
+    ],
+    "malt.brand.matches_application": [
+     "pass",
+     ""
+    ],
+    "malt.brand.present": [
+     "pass",
+     ""
+    ],
+    "malt.class_type.matches_application": [
+     "fail",
+     "CLASS_TYPE.MATCH.APPLICATION_LABEL_DISAGREE"
+    ],
+    "malt.class_type.present": [
+     "pass",
+     ""
+    ],
+    "malt.name_address.matches_application": [
+     "needs_review",
+     "NAME_ADDRESS.MATCH.NEEDS_REVIEW"
+    ],
+    "malt.name_address.present": [
+     "needs_review",
+     "ENGINE.EVIDENCE.BELOW_CONFIDENCE_FLOOR"
+    ],
+    "malt.net_contents.matches_application": [
+     "needs_review",
+     "NET_CONTENTS.MATCH.NEEDS_REVIEW"
+    ],
+    "malt.net_contents.present": [
+     "pass",
+     ""
+    ],
+    "malt.origin.matches_application": [
+     "not_applicable",
+     ""
+    ]
+   }
+  },
+  "ttb-26240001000563": {
+   "disposition": "needs_review",
+   "rules": {
+    "common.warning.heading_caps_bold": [
+     "pass",
+     ""
+    ],
+    "common.warning.present": [
+     "pass",
+     ""
+    ],
+    "common.warning.verbatim": [
+     "needs_review",
+     "WARNING.VERBATIM.NOT_CONFIRMED"
+    ],
+    "malt.alcohol.conditional_required": [
+     "pass",
+     ""
+    ],
+    "malt.alcohol.format": [
+     "pass",
+     ""
+    ],
+    "malt.alcohol.matches_application": [
+     "pass",
+     ""
+    ],
+    "malt.brand.matches_application": [
+     "pass",
+     ""
+    ],
+    "malt.brand.present": [
+     "pass",
+     ""
+    ],
+    "malt.class_type.matches_application": [
+     "pass",
+     ""
+    ],
+    "malt.class_type.present": [
+     "pass",
+     ""
+    ],
+    "malt.name_address.matches_application": [
+     "pass",
+     ""
+    ],
+    "malt.name_address.present": [
+     "pass",
+     ""
+    ],
+    "malt.net_contents.matches_application": [
+     "pass",
+     ""
+    ],
+    "malt.net_contents.present": [
+     "pass",
+     ""
+    ],
+    "malt.origin.matches_application": [
+     "not_applicable",
+     ""
+    ]
+   }
+  },
+  "ttb-26240001000573": {
+   "disposition": "fail",
+   "rules": {
+    "common.warning.heading_caps_bold": [
+     "fail",
+     "WARNING.STYLE.HEADING_NOT_BOLD_CAPS"
+    ],
+    "common.warning.present": [
+     "pass",
+     ""
+    ],
+    "common.warning.verbatim": [
+     "fail",
+     "WARNING.VERBATIM.MISMATCH"
+    ],
+    "malt.alcohol.conditional_required": [
+     "pass",
+     ""
+    ],
+    "malt.alcohol.format": [
+     "pass",
+     ""
+    ],
+    "malt.alcohol.matches_application": [
+     "pass",
+     ""
+    ],
+    "malt.brand.matches_application": [
+     "pass",
+     ""
+    ],
+    "malt.brand.present": [
+     "pass",
+     ""
+    ],
+    "malt.class_type.matches_application": [
+     "pass",
+     ""
+    ],
+    "malt.class_type.present": [
+     "pass",
+     ""
+    ],
+    "malt.name_address.matches_application": [
+     "needs_review",
+     "NAME_ADDRESS.MATCH.NEEDS_REVIEW"
+    ],
+    "malt.name_address.present": [
+     "pass",
+     ""
+    ],
+    "malt.net_contents.matches_application": [
+     "pass",
+     ""
+    ],
+    "malt.net_contents.present": [
+     "pass",
+     ""
+    ],
+    "malt.origin.matches_application": [
+     "pass",
+     ""
+    ]
+   }
+  },
+  "ttb-26242001000088": {
+   "disposition": "needs_review",
+   "rules": {
+    "common.warning.heading_caps_bold": [
+     "needs_review",
+     "WARNING.STYLE.BOLD_NOT_MEASURED"
+    ],
+    "common.warning.present": [
+     "pass",
+     ""
+    ],
+    "common.warning.verbatim": [
+     "pass",
+     ""
+    ],
+    "malt.alcohol.conditional_required": [
+     "pass",
+     ""
+    ],
+    "malt.alcohol.format": [
+     "pass",
+     ""
+    ],
+    "malt.alcohol.matches_application": [
+     "pass",
+     ""
+    ],
+    "malt.brand.matches_application": [
+     "pass",
+     ""
+    ],
+    "malt.brand.present": [
+     "pass",
+     ""
+    ],
+    "malt.class_type.matches_application": [
+     "pass",
+     ""
+    ],
+    "malt.class_type.present": [
+     "pass",
+     ""
+    ],
+    "malt.name_address.matches_application": [
+     "needs_review",
+     "NAME_ADDRESS.MATCH.NEEDS_REVIEW"
+    ],
+    "malt.name_address.present": [
+     "pass",
+     ""
+    ],
+    "malt.net_contents.matches_application": [
+     "pass",
+     ""
+    ],
+    "malt.net_contents.present": [
+     "pass",
+     ""
+    ],
+    "malt.origin.matches_application": [
+     "needs_review",
+     "ORIGIN.MATCH.APPLICATION_LABEL_DISAGREE"
+    ]
+   }
+  }
+ },
+ "scoreboard": {
+  "check_outcomes": {
+   "fail": 11,
+   "needs_review": 94,
+   "pass": 350
+  },
+  "checks": 455,
+  "decided_without_a_person": 0.793,
+  "label_outcomes": {
+   "fail": 9,
+   "needs_review": 21
+  },
+  "labels": 30,
+  "mismatch_causes": {
+   "BRAND.NAME.MISMATCH": 3,
+   "CLASS_TYPE.MATCH.APPLICATION_LABEL_DISAGREE": 1,
+   "NET_CONTENTS.MATCH.APPLICATION_LABEL_DISAGREE": 3,
+   "WARNING.STYLE.HEADING_NOT_BOLD_CAPS": 1,
+   "WARNING.VERBATIM.MISMATCH": 3
+  },
+  "review_causes": {
+   "": 4,
+   "ALCOHOL_CONTENT.FORMAT.NEEDS_REVIEW": 8,
+   "ALCOHOL_CONTENT.MATCH.NEEDS_REVIEW": 3,
+   "BRAND.NAME.NEEDS_REVIEW": 3,
+   "CLASS_TYPE.MATCH.NEEDS_REVIEW": 6,
+   "CLASS_TYPE.SOI.NO_MATCH": 4,
+   "ENGINE.EVIDENCE.BELOW_CONFIDENCE_FLOOR": 4,
+   "LEGIBILITY.FIELD.NOT_READ": 9,
+   "NAME_ADDRESS.MATCH.NEEDS_REVIEW": 14,
+   "NET_CONTENTS.MATCH.NEEDS_REVIEW": 7,
+   "ORIGIN.MATCH.APPLICATION_LABEL_DISAGREE": 2,
+   "WARNING.STYLE.BOLD_NOT_MEASURED": 20,
+   "WARNING.VERBATIM.NOT_CONFIRMED": 10
+  }
+ }
+}
