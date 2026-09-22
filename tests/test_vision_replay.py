@@ -591,7 +591,8 @@ def test_a_boldness_that_could_not_be_measured_is_absent_not_false() -> None:
     The payload used to record that as `heading_bold: False`, which is a claim
     about the label rather than about the reading, and it disagreed with
     `app/vision/cloud.py`, which leaves the key alone on the same signal.
-    `26230001000420/back.jpg` is the other side of it: measured, and bold.
+    `26230001000420/back.jpg` is the other side of it: measured, so the weight
+    it measured is reported.
     """
     unmeasured = parse_reading(
         thaw_reading(json.loads(_recording("26240001000454/front.jpg").read_text()))
@@ -603,7 +604,7 @@ def test_a_boldness_that_could_not_be_measured_is_absent_not_false() -> None:
         thaw_reading(json.loads(_recording("26230001000420/back.jpg").read_text()))
     )["gov_warning"]
     assert measured["heading_bold_measured_confident"] is True
-    assert measured["heading_bold"] is True
+    assert measured["heading_bold"] is measured["heading_bold_measured"]
 
 
 def test_the_alcohol_statement_is_returned_as_the_label_prints_it() -> None:

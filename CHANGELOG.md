@@ -126,6 +126,12 @@ date: the release's git tag records when it was cut. Versions follow
 
 ### Fixed
 
+- The bold check measures the heading's letters on a label that prints its warning light on a dark
+  panel. It used to measure the ground around the letters, which is wide, so those headings passed
+  as bold whatever their type. 53 of 220 heading crops are printed this way. The checks that passed
+  for that reason now go to a reviewer. `uv run python -m eval.remeasure_headings` renews the heading
+  measurement in every frozen reading from its image. See `docs/decisions.md#0057`.
+
 - Every mismatch and every needs review now carries a reason code, and the code agrees with the
   outcome: a code for a label defect arrives only with a mismatch, and a code for a question the
   product could not settle only with a needs review. `uv run python -m eval.corpus_check` reports any

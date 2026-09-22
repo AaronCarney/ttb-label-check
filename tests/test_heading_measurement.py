@@ -139,3 +139,24 @@ def test_single_noise_speck_returns_unconfident():
         f"got is_bold={m.is_bold} ratio={m.width_height_ratio:.3f} "
         f"mean_h={m.mean_character_height:.2f}"
     )
+
+
+def test_light_text_on_a_dark_ground_measures_the_letters_not_the_gaps():
+    """A label printing its warning white on black is measured the same as
+    black on white.
+
+    The threshold took the dark side of the crop as ink. On a light-on-dark
+    label that is the ground, and the measurement reported the width of the
+    spaces between the letters as their stroke width.
+    """
+    png = _png_text("GOVERNMENT WARNING", size=24, weight="bold")
+    inverted = BytesIO()
+    Image.eval(Image.open(BytesIO(png)), lambda v: 255 - v).save(inverted, "PNG")
+    bbox = (0, 0, 260, 80)
+
+    dark_on_light = measure_heading_bold(png, bbox)
+    light_on_dark = measure_heading_bold(inverted.getvalue(), bbox)
+
+    assert light_on_dark.confident
+    assert light_on_dark.mean_stroke_width == dark_on_light.mean_stroke_width
+    assert light_on_dark.mean_character_height == dark_on_light.mean_character_height

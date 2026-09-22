@@ -3580,3 +3580,36 @@ severity in other words, and the two could then disagree.
 `WARNING.STYLE.BOLD_NOT_MEASURED` says the weight "could not be measured" even when it was measured
 and came back low; the bold step splits it. `ENGINE.EVIDENCE.BELOW_CONFIDENCE_FLOOR` names no
 element; the confidence gate replaces it with a code for each element.
+
+<a id="0057"></a>
+## 0057. The heading's weight is measured on its letters, whichever way round the label is printed
+
+**Evidence:** `app/vision/heading_measure.py` (`_swt_on_crop`); `app/vision/local.py`
+(`remeasure_heading`); `eval/remeasure_headings.py`; `tests/test_heading_measurement.py`.
+
+**What was found.** The stroke-width measurement thresholds the heading's crop and takes the dark
+side as ink. Many labels print the warning light on a dark panel: grey on charcoal, white on black.
+On those the dark side is the ground, and the measurement reported the width of the spaces around
+the letters as their stroke width. The spaces are wide, so these headings measured heavy and
+passed the bold check for a reason that had nothing to do with their type.
+
+**Chosen.** The ground is what the crop's edges run through. Where most of the edge pixels fall on
+the dark side, the crop is inverted before it is measured. Counting the whole crop instead, and
+calling the larger side the ground, was tried first and rejected. On heavy capitals cropped tight,
+the letters really do cover more than half the box. On one held-out label, light grey capitals on
+white, that rule inverted a correct crop.
+
+The measurement is taken from pixels after the OCR, so it can be renewed without reading any text
+again. `eval/remeasure_headings.py` measures the heading again in every frozen reading, from its
+image, through `remeasure_heading`, the same code `look` runs. Before the fix it reproduced all 220
+stored measurements exactly, which shows it rebuilds the frame the reader measured on.
+
+**Measured.** 53 of 220 heading crops are light on dark. On the corpus, 7 bold checks move from
+pass to needs review, and the labels stay at 3 mismatch, 27 needs review, 0 match. On the held-out
+labels, 30 bold checks move the same way, and the labels go from 28 mismatch, 65 needs review,
+5 match to 28, 70, 0. All five held-out matches rested on this fault. No check moved toward a
+mismatch.
+
+**What it leaves.** Every approved label now goes to a reviewer on the bold check. The fixed cut of
+`#0037` was only letting some through by measuring the wrong pixels. The next decision replaces the
+fixed cut.

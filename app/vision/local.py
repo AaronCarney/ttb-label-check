@@ -36,7 +36,7 @@ import time
 import unicodedata
 from collections import deque
 from collections.abc import Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import UTC, datetime
 from functools import lru_cache
 from importlib import metadata
@@ -774,9 +774,7 @@ class LocalVisionExtractor:
         to three times on a label photographed on its side. Separated from the
         parsing so a reading can be frozen and replayed — see `_Reading`.
         """
-        image = Image.open(BytesIO(image_bytes)).convert("RGB")
-        if max(image.size) > MAX_EDGE_PX:
-            image.thumbnail((MAX_EDGE_PX, MAX_EDGE_PX))
+        image = _frame(image_bytes)
         boxes = self._boxes(image)
 
         # A label photographed on its side reads as nothing at all, and some
@@ -849,11 +847,7 @@ class LocalVisionExtractor:
         # it the original full-size image would crop the wrong part of a label
         # that was downscaled on the way in and report a real stroke width about
         # the wrong pixels.
-        heading_measurement = (
-            measure_heading_bold_image(warning_image, found[0].as_bbox())
-            if found is not None
-            else None
-        )
+        heading_measurement = _measure_heading(warning_image, warning_boxes)
 
         return _Reading(
             boxes=boxes,
@@ -1171,6 +1165,39 @@ def _boxes_spanning(parts: list[str], cutoff: int) -> int:
         if len(running) >= cutoff:
             return index + 1
     return len(parts)
+
+
+def _frame(image_bytes: bytes) -> Image.Image:
+    """The image the detector reads: decoded, in RGB, and no larger than
+    `MAX_EDGE_PX` on its longer edge. Every box is in this frame's pixels."""
+    image = Image.open(BytesIO(image_bytes)).convert("RGB")
+    if max(image.size) > MAX_EDGE_PX:
+        image.thumbnail((MAX_EDGE_PX, MAX_EDGE_PX))
+    return image
+
+
+def _measure_heading(
+    warning_image: Image.Image, warning_boxes: list[_Box]
+) -> HeadingMeasurement | None:
+    """The heading's weight, measured on the frame its boxes came from, or None
+    where no heading was found."""
+    found = _find_heading(warning_boxes)
+    return measure_heading_bold_image(warning_image, found[0].as_bbox()) if found else None
+
+
+def remeasure_heading(image_bytes: bytes, reading: _Reading) -> _Reading:
+    """A frozen reading with its heading measured again from the image.
+
+    The measurement is the one part of a reading taken from pixels after the
+    OCR, so a change to it can be applied to frozen readings without reading
+    the text again. The frame is rebuilt as `look` built it: the detector's
+    frame, turned by the reading's rotation where the warning was read on its
+    side.
+    """
+    image = _frame(image_bytes)
+    if reading.rotation:
+        image = image.rotate(reading.rotation, expand=True)
+    return replace(reading, heading_measurement=_measure_heading(image, reading.warning_boxes))
 
 
 def _warning_block(boxes: list[_Box]) -> tuple[str, str, _Box, list[_Box]] | None:

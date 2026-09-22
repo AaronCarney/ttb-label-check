@@ -181,6 +181,15 @@ def _resolve_crop(
 def _swt_on_crop(crop: Image.Image) -> HeadingMeasurement:
     gray = np.asarray(crop)
     _, binary = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
+    # The threshold takes the dark side as ink. A label printing its warning
+    # light on dark puts the ground on that side. The ground is what the
+    # crop's edges run through, so the side holding most of the edge pixels is
+    # the ground whichever way round the label is printed. Counting the whole
+    # crop instead fails on heavy capitals cropped tight, where the letters do
+    # cover more than half the box.
+    edges = np.concatenate([binary[0], binary[-1], binary[:, 0], binary[:, -1]])
+    if np.count_nonzero(edges) * 2 > edges.size:
+        binary = cv2.bitwise_not(binary)
     n_labels, _, stats, _ = cv2.connectedComponentsWithStats(binary, connectivity=8)
     dist = cv2.distanceTransform(binary, cv2.DIST_L2, 5)
 

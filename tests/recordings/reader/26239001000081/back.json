@@ -231,10 +231,10 @@
   }
  ],
  "heading_measurement": {
-  "is_bold": true,
-  "mean_stroke_width": 2.8639,
-  "mean_character_height": 5.6389,
-  "width_height_ratio": 0.5079,
+  "is_bold": false,
+  "mean_stroke_width": 2.1249,
+  "mean_character_height": 9.6055,
+  "width_height_ratio": 0.2212,
   "confident": true
  }
 }
