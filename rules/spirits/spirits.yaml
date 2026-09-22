@@ -303,9 +303,13 @@ rules:
     # The application answers domestic or imported before it names a place.
     # Domestic means no country-of-origin statement is required, so the
     # check does not apply; the place a domestic application names is a
-    # State, which is not what an origin statement carries.
-    reason_code: ORIGIN.PRESENCE.MISSING
-    severity: reject
+    # State, which is not what an origin statement carries. An import on
+    # which no origin statement was read goes to a reviewer, never to a
+    # mismatch: the reader may have missed it, or the label may state it in a
+    # form 19 CFR 134.45 accepts and this check does not read (FR-3;
+    # docs/decisions.md#0059).
+    reason_code: ORIGIN.PRESENCE.NOT_READ
+    severity: warn
     match_policy: normalized
     validator: origin_match
     parameters:

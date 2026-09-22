@@ -961,6 +961,8 @@ the answer harder to defend and admitting pairs that are genuinely different nam
 <a id="0016"></a>
 ## 0016. The country-of-origin abbreviation table is not built
 
+**Superseded in part by** [0059](#0059): an import with no origin statement read now goes to a
+reviewer rather than failing. The rest stands.
 **Chosen.** The country-of-origin check reads one form of the country's name: the English name the
 application declares, appearing as whole words inside whatever wording the label wraps around it —
 "PRODUCT OF LITHUANIA", "DISTILLED IN IRELAND". It does not read the other forms customs marking rules
@@ -3696,3 +3698,42 @@ set on rendered warnings and the 30 corpus labels. The held-out labels are repor
 - 16.22(a)(2) also forbids bold in the rest of the statement. A body as heavy as the heading comes
   out as "not clearly heavier" and goes to a reviewer, but nothing checks the body's own weight,
   before this decision or after it.
+
+<a id="0059"></a>
+## 0059. An import with no origin statement read goes to a reviewer, under an origin code
+
+**Evidence:** `app/rules/_validators/origin_match.py`; the three `*.origin.matches_application`
+rules in `rules/`; `rules/reason_codes.yaml`; `tests/rules/test_unread_origin_goes_to_review.py`;
+`eval/corpus_check.py`, on the corpus and with `--registry`.
+
+**What was found.** `#0016` let an import whose label carries no origin statement fail at reject
+severity under `ORIGIN.PRESENCE.MISSING`. The origin check cannot tell that label from one whose
+statement the reader missed, or one that states the country in a form 19 CFR 134.45 accepts and
+the check does not read, and FR-3 now says all three go to needs review. They did, but by accident:
+the check failed on a reading of nothing, and the engine's confidence floor turned that failure into
+a review under `ENGINE.EVIDENCE.BELOW_CONFIDENCE_FLOOR`, which names no element and tells the
+reviewer the reading was poor. Three corpus labels came out this way. All three print an origin
+statement.
+
+**Chosen.** The origin check itself returns needs review under a new code,
+`ORIGIN.PRESENCE.NOT_READ`, whose words say no statement was read and why that is not proof there
+is none. It never returns a mismatch. The three rules carry that code at warn severity, as the brand
+rule does (`#0052`). `ORIGIN.PRESENCE.MISSING` stays as a code a reviewer can apply, and moves to
+the registry's reviewer vocabulary. This supersedes the sentence of `#0016` that an import with no
+origin statement "still fails"; the rest of `#0016` stands.
+
+**Measured.** On the corpus, the three findings change code from
+`ENGINE.EVIDENCE.BELOW_CONFIDENCE_FLOOR` to `ORIGIN.PRESENCE.NOT_READ`, and nothing else changes:
+labels stay at 3 mismatch, 27 needs review, 0 match, and checks settled without a person at 80.4%.
+The held-out labels are all domestic, so the origin check does not apply to any of them, and
+nothing changes there. Reason codes that contradict their outcome stay at 0 on both.
+
+**Rejected.** *The shared `LEGIBILITY.FIELD.NOT_READ`,* which the other checks use for an element
+the reader did not find. Its words say only that the reader did not find the element. For origin
+there is a second reason a reviewer needs, a statement in a form the check does not read, and the
+code is the only place that sentence can go.
+
+**What it leaves.** Why the reader missed the three statements, from the replay suite's list:
+on `26218001000369` "DISTILLED" and "IN IRELAND" are separate boxes, and the origin finder reads
+one box at a time; on `26231001000333` the only statement is "Scotland" inside the bottler's
+address; on `26233001000189` "Product of Barbados" was never read as one line.

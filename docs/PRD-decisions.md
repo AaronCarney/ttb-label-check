@@ -101,9 +101,10 @@ by a later decision the PRD never caught up with.
   PRD sentence contradicted it. The rule packs select by beverage type ([decision 0010](decisions.md#0010)).
 - FR-3: every validator sends an element the reader did not locate to needs review
   (`app/rules/_validators/_helpers.py`, `not_read_result`), and only the warning rule sets
-  `unlocated_is_absent` (`rules/common/health_warning.yaml`). An import with no origin statement is
-  rejected under `ORIGIN.PRESENCE.MISSING` ([decision 0016](decisions.md#0016)). A reader miss
-  treated as absence rejected labels that carry the element.
+  `unlocated_is_absent` (`rules/common/health_warning.yaml`). An import with no origin statement was
+  rejected under `ORIGIN.PRESENCE.MISSING` ([decision 0016](decisions.md#0016)) until
+  [decision 0059](decisions.md#0059). A reader miss treated as absence rejected labels that carry the
+  element.
 - FR-10: the glare gate was removed because it turned away readable labels, and nothing measures
   skew or light ([decision 0026](decisions.md#0026)). The gates that remain, low resolution and camera
   blur (`app/vision/quality.py`), stop the whole label before any rule runs.

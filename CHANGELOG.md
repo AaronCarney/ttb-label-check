@@ -71,6 +71,14 @@ date: the release's git tag records when it was cut. Versions follow
 
 ### Changed
 
+- An import on which no country-of-origin statement was read goes to a reviewer under
+  `ORIGIN.PRESENCE.NOT_READ`, which says the reader may have missed it or the label may state the
+  country in a form 19 CFR 134.45 accepts and the check does not read. It used to fail, and reached
+  review only because the confidence floor caught the failure, under a code that named no element.
+  The origin check never reports a mismatch; `ORIGIN.PRESENCE.MISSING` stays as a code a reviewer
+  can apply. On the corpus three findings change code and no outcome moves
+  (`docs/decisions.md#0059`).
+
 - The bold check measures the heading's strokes against the warning's own body, which 27 CFR
   16.22(a)(2) requires to be regular, instead of against a fixed cut that followed the photograph
   rather than the type. A heading at least 1.125 times as heavy as its body passes. One measured and

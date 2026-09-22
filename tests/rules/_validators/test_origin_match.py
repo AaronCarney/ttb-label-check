@@ -13,8 +13,9 @@ rules accept the country's name in the language of the country, an
 abbreviation that unmistakably indicates it, and the adjectival form (19 CFR
 134.45(b) and (c)), none of which are built here. The cost is stated plainly
 in the tests below — a label that genuinely names the wrong country reaches a
-reviewer rather than being rejected outright. A label carrying no origin
-statement at all is a different matter, and that branch does reject.
+reviewer rather than being rejected outright. A label on which the reader
+found no origin statement also goes to a reviewer (FR-3): the reader may have
+missed it, or the label may state it in a form this product does not read.
 """
 
 from __future__ import annotations
@@ -31,8 +32,8 @@ def _rule():
         rule_id="wine.origin.matches_application",
         cfr_citation="27 CFR §4.35(e), 19 CFR §134.45",
         validator="origin_match",
-        reason_code="ORIGIN.PRESENCE.MISSING",
-        severity=Severity.REJECT,
+        reason_code="ORIGIN.PRESENCE.NOT_READ",
+        severity=Severity.WARN,
         match_policy=MatchPolicy.NORMALIZED,
         parameters={
             "source_field": "source_of_product",
@@ -74,12 +75,13 @@ def test_a_domestic_application_has_no_country_check() -> None:
     assert res.reason_code is None
 
 
-def test_an_import_with_no_origin_statement_is_rejected() -> None:
-    """Nothing was stated, so there is nothing to interpret."""
+def test_an_import_with_no_origin_statement_read_goes_to_a_reviewer() -> None:
+    """The reader not finding a statement does not show the label lacks one,
+    and a statement in the country's own language may be what it missed."""
     res = _verdict("", "LITHUANIA")
-    assert res.outcome is Outcome.FAIL
-    assert res.severity is Severity.REJECT
-    assert res.reason_code == "ORIGIN.PRESENCE.MISSING"
+    assert res.outcome is Outcome.INSUFFICIENT_EVIDENCE
+    assert res.severity is Severity.WARN
+    assert res.reason_code == "ORIGIN.PRESENCE.NOT_READ"
 
 
 # ---------------------------------------------------------------------------

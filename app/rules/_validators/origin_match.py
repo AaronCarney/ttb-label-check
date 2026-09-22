@@ -29,9 +29,11 @@ docs/decisions.md#0016.
 
 The cost of that is real and is the cost this product chooses: a label that
 genuinely names the wrong country reaches a reviewer rather than being
-rejected outright. An import whose label carries no origin statement at all is
-a different matter — nothing was stated, so there is nothing to interpret, and
-that branch does reject under the rule's own reason code.
+rejected outright. An import on which the reader found no origin statement
+goes to a reviewer too, under the rule's own reason code (FR-3): the reader
+may have missed the statement, or the label may state it in one of those
+other forms, and the product cannot tell either from a label that carries
+none. docs/decisions.md#0059 records the change.
 """
 
 from __future__ import annotations
@@ -94,9 +96,11 @@ def origin_match(
             rule.parameters.get("needs_review_reason_code", rule.reason_code),
         )
 
+    # No origin statement was read. That is not evidence the label lacks one:
+    # see the note above.
     observed = project_reading(obs).strip()
     if not observed:
-        return result(Outcome.FAIL, rule.severity, rule.reason_code)
+        return result(Outcome.INSUFFICIENT_EVIDENCE, Severity.WARN, rule.reason_code)
 
     if word_run_present(normalize_words(observed), normalize_words(country)):
         return result(Outcome.PASS, rule.severity, None)

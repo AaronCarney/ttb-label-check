@@ -142,7 +142,7 @@
     ],
     "spirits.origin.matches_application": [
      "needs_review",
-     "ENGINE.EVIDENCE.BELOW_CONFIDENCE_FLOOR"
+     "ORIGIN.PRESENCE.NOT_READ"
     ]
    }
   },
@@ -499,7 +499,7 @@
     ],
     "spirits.origin.matches_application": [
      "needs_review",
-     "ENGINE.EVIDENCE.BELOW_CONFIDENCE_FLOOR"
+     "ORIGIN.PRESENCE.NOT_READ"
     ]
    }
   },
@@ -718,7 +718,7 @@
     ],
     "spirits.origin.matches_application": [
      "needs_review",
-     "ENGINE.EVIDENCE.BELOW_CONFIDENCE_FLOOR"
+     "ORIGIN.PRESENCE.NOT_READ"
     ]
    }
   },
@@ -2087,11 +2087,12 @@
    "BRAND.NAME.NEEDS_REVIEW": 1,
    "CLASS_TYPE.MATCH.NEEDS_REVIEW": 6,
    "CLASS_TYPE.SOI.NO_MATCH": 4,
-   "ENGINE.EVIDENCE.BELOW_CONFIDENCE_FLOOR": 4,
+   "ENGINE.EVIDENCE.BELOW_CONFIDENCE_FLOOR": 1,
    "LEGIBILITY.FIELD.NOT_READ": 13,
    "NAME_ADDRESS.MATCH.NEEDS_REVIEW": 14,
    "NET_CONTENTS.MATCH.NEEDS_REVIEW": 7,
    "ORIGIN.MATCH.APPLICATION_LABEL_DISAGREE": 2,
+   "ORIGIN.PRESENCE.NOT_READ": 3,
    "WARNING.STYLE.BOLD_NOT_CLEAR": 6,
    "WARNING.STYLE.BOLD_NOT_MEASURED": 8,
    "WARNING.VERBATIM.NOT_CONFIRMED": 11

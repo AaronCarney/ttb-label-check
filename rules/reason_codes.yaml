@@ -126,9 +126,15 @@ codes:
 
   # ---- ORIGIN ----
   ORIGIN.PRESENCE.MISSING:
-    description: "Imported product, and the label carries no country-of-origin statement."
+    # Nothing emits this; the reason it stays is in `reviewer_vocabulary:` at
+    # the foot of this file, which is checked. See docs/decisions.md#0059.
+    description: "Reviewer confirmed the imported product's label carries no country-of-origin statement."
     cfr_anchors: ["27 CFR §4.35(e)", "27 CFR §5.69", "27 CFR §7.69", "19 CFR §134.45(a)(1)"]
     severity: reject
+  ORIGIN.PRESENCE.NOT_READ:
+    description: "Imported product, and no country-of-origin statement was read on the label. The reader may have missed it, or the label may state the country in its own language, as an abbreviation or in adjectival form, which 19 CFR §134.45 accepts and this check does not read; a reviewer decides."
+    cfr_anchors: ["27 CFR §4.35(e)", "27 CFR §5.69", "27 CFR §7.69", "19 CFR §134.45(a)(1)"]
+    severity: warn
   ORIGIN.MATCH.APPLICATION_LABEL_DISAGREE:
     description: "Label origin statement does not carry the country the application declared in a form this check reads — it may name another country, or the same one in a language, abbreviation or adjectival form the check does not recognise (19 CFR §134.45(b), (c)); a reviewer decides."
     cfr_anchors: ["19 CFR §134.45(b)", "19 CFR §134.45(c)"]
@@ -406,6 +412,12 @@ reviewer_vocabulary:
   ENGINE.RULESET.VERSION_NOT_FOUND:
     "One rule-set version ships, and the loader takes its version from this
      file, so there is no version to fail to find."
+  ORIGIN.PRESENCE.MISSING:
+    "The origin check sends an import on which no origin statement was read
+     to a reviewer under ORIGIN.PRESENCE.NOT_READ: the reader may have missed
+     it, or the label may state the country in a form it does not read. A
+     reviewer who finds no statement on the label has this code to say so.
+     See docs/decisions.md#0059."
   WARNING.LEGIBILITY.GLARE:
     "Nothing measures glare. The gate that did counted bright pixels, which
      counts light label stock: it turned away seven faces of five sharp,

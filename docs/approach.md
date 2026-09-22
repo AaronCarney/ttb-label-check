@@ -111,8 +111,9 @@ abbreviation that unmistakably indicates a country, a warning standing separate 
 readily legible, a designation similarly conspicuous — each is a test a person applies, and nothing
 says which abbreviations qualify or how far apart is apart. So the origin check passes the plain
 English name and sends every other form to review, which costs coverage rather than correctness: a
-compliant Spanish-marked import becomes work for a reviewer, not a wrong answer. A label carrying no
-origin statement at all is still rejected, because an absence is a fact rather than a judgement.
+compliant Spanish-marked import becomes work for a reviewer, not a wrong answer. An import on which
+no origin statement was read goes to review as well: the reader not finding one does not show the
+label lacks it, and it may be in a form the check does not read.
 
 **Two sets of requirements are not covered at all, and were not on the record as choices.** Most
 would have ended where the rules above did, so no verdict is wrong because of this. What is wrong is
