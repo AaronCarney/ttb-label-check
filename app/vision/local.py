@@ -1911,6 +1911,8 @@ def _parse(
 
     # -- country of origin ------------------------------------------------
     origin_box, origin_match = _first_match(body, _ORIGIN_RE, reject=_names_a_state)
+    if not origin_match:
+        origin_box, origin_match = _origin_across_lines(body)
     if origin_match:
         # Reported as the label writes it, not tidied: what the label says is
         # the evidence, and the rule pack settles whether it agrees with the
@@ -2113,6 +2115,78 @@ def _first_match(boxes: list[_Box], pattern: re.Pattern, *, reject=None):
             if reject is not None and reject(match):
                 continue
             return box, match
+    return None, None
+
+
+# How much of the narrower of two stacked boxes' widths they must share, and
+# how far below the upper box's foot the lower may start, in lines of the
+# taller box. Enough for a centred statement set on two lines; not enough to
+# join two columns, or two paragraphs.
+_STACKED_OVERLAP_MIN = 0.5
+_STACKED_GAP_MAX = 0.6
+
+
+def _stacked_pairs(boxes: list[_Box]) -> list[tuple[_Box, int]]:
+    """Each box joined to the box set directly under it, as one box, with the
+    offset in the joined text where the lower box's text starts.
+
+    A centred label stacks a short statement over two lines ("DISTILLED" over
+    "IN IRELAND"), and the engine returns each line as a box of its own, so a
+    phrase read one box at a time is never whole. The joined box spans both
+    and scores as the weaker of the two. Only the nearest box under each is
+    taken, so a pair never reaches past the next line.
+    """
+    pairs: list[tuple[_Box, int]] = []
+    for upper in boxes:
+        below = [
+            b
+            for b in boxes
+            if b is not upper
+            and b.cy > upper.cy
+            and b.y0 - upper.y1 <= _STACKED_GAP_MAX * max(upper.height, b.height)
+            and min(upper.x1, b.x1) - max(upper.x0, b.x0)
+            >= _STACKED_OVERLAP_MIN * min(upper.width, b.width)
+        ]
+        if not below:
+            continue
+        lower = min(below, key=lambda b: b.y0)
+        joined = _Box(
+            x0=min(upper.x0, lower.x0),
+            y0=min(upper.y0, lower.y0),
+            x1=max(upper.x1, lower.x1),
+            y1=max(upper.y1, lower.y1),
+            text=f"{upper.text} {lower.text}",
+            score=min(upper.score, lower.score),
+        )
+        pairs.append((joined, len(upper.text) + 1))
+    return pairs
+
+
+def _origin_across_lines(boxes: list[_Box]) -> tuple[_Box | None, re.Match | None]:
+    """An origin statement set on two stacked lines of its own.
+
+    Only for the case one box cannot hold, and only where the two lines hold
+    the statement and nothing else: the lead-in starts the upper line, the
+    country lies wholly on the lower, and nothing follows it. That is how a
+    label sets a short statement on two lines. Two lines of running prose
+    also stack, and a lead-in at the end of one ("…bourbon, distilled in")
+    takes the start of the next as its country; the words around the match
+    are what show it is prose. Any match reaching back onto the upper line
+    is text one box already held, run on: "DISTILLED IN INDIANA" with the
+    web address under it joined on is no longer a State.
+    """
+    pairs = _stacked_pairs(boxes)
+    split_at = {id(joined): split for joined, split in pairs}
+    for joined in _reading_order([joined for joined, _split in pairs]):
+        split = split_at[id(joined)]
+        for match in _ORIGIN_RE.finditer(joined.text):
+            if (
+                match.start() == 0
+                and split <= match.start(1)
+                and not joined.text[match.end() :].strip(" .,")
+                and not _names_a_state(match)
+            ):
+                return joined, match
     return None, None
 
 

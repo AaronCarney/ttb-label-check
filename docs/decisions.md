@@ -3737,3 +3737,37 @@ code is the only place that sentence can go.
 on `26218001000369` "DISTILLED" and "IN IRELAND" are separate boxes, and the origin finder reads
 one box at a time; on `26231001000333` the only statement is "Scotland" inside the bottler's
 address; on `26233001000189` "Product of Barbados" was never read as one line.
+
+<a id="0060"></a>
+## 0060. An origin statement set on two lines of its own is read as one
+
+**Evidence:** `app/vision/local.py` (`_stacked_pairs`, `_origin_across_lines`);
+`tests/test_reader_origin.py`; `tests/test_vision_replay.py`; `eval/corpus_check.py`, on the corpus
+and with `--registry`.
+
+**What was found.** A centred label sets a short statement over two lines, and the engine returns
+each line as a box of its own. On `26218001000369` "DISTILLED" sits over "IN IRELAND", and the origin
+finder, reading one box at a time, never saw the statement whole ([0059](#0059), what it leaves).
+
+**Chosen.** Where no single box holds an origin statement, the reader joins each box to the nearest
+box set directly under it (sharing at least half the narrower width, no more than 0.6 of a line
+below) and looks for the statement in the joined text. A match is taken only where the two lines
+hold the statement and nothing else: the lead-in starts the upper line, the country lies wholly on
+the lower, and nothing follows it. The joined box spans both lines and scores as the weaker.
+
+**Rejected.** *Any match whose lead-in starts on the upper line and whose country lies on the
+lower.* On a held-out label's marketing paragraph one line of prose ends "…bourbon, distilled in"
+and the next starts "small atches on copper pot stills…", which that rule reads as a country. Prose
+runs on past the match; a statement set on its own lines does not. *Any match in the joined text.*
+"DISTILLED IN INDIANA" with the web address under it joined on is no longer a State, and slips past
+the State filter.
+
+**Measured.** Every frozen reading, 220 faces, was scanned for a statement the join reads and one
+box does not. Two are found: "DISTILLED IN IRELAND" on `26218001000369`, and "BOTTLED IN BOZEMAN"
+on a held-out label, which one line reading the same words would also report. On the corpus the
+origin check on `26218001000369` moves from needs review under `ORIGIN.PRESENCE.NOT_READ` to a
+match, and checks settled without a person move from 80.4% to 80.7%. Nothing else moves on either
+set. Reason codes that contradict their outcome stay at 0 on both.
+
+**What it leaves.** A statement split across three lines, or across two lines with other text on
+either, is still not read, and goes to a reviewer as [0059](#0059) sets out.

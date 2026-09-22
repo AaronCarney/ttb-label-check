@@ -144,6 +144,11 @@ date: the release's git tag records when it was cut. Versions follow
 
 ### Fixed
 
+- A country-of-origin statement set on two lines of its own, such as "DISTILLED" over
+  "IN IRELAND", is read. The reader took each line on its own and never saw the statement whole.
+  Two lines of running prose are not joined this way. On the corpus one origin check moves from
+  needs review to a match, and nothing else moves on either set. See `docs/decisions.md#0060`.
+
 - The bold check measures the heading's letters on a label that prints its warning light on a dark
   panel. It used to measure the ground around the letters, which is wide, so those headings passed
   as bold whatever their type. 53 of 220 heading crops are printed this way. The checks that passed

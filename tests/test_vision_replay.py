@@ -250,10 +250,6 @@ KNOWN_MISSES: dict[tuple[str, str], str] = {
     ): "B — returned the origin line 'DISTILLED IN IRELAND IRISH' for the brand 'AODH'",
     ("ttb-26218001000369", "class_type"): "C — returned 'WHISKEY' for 'IRISH WHISKEY'",
     ("ttb-26218001000369", "name_address"): "A — returned the distiller",
-    (
-        "ttb-26218001000369",
-        "origin",
-    ): "returned nothing; 'DISTILLED IN IRELAND' was taken as the brand",
     ("ttb-26233001000569", "warning_exact"): "W — 'WOMEN' read 'WOMÈN'",
     ("ttb-26233001000566", "brand"): "B — 'Red Blend' is set larger than 'THE UGLY'",
     ("ttb-26233001000566", "net_contents"): "M — read '750ML' as '75OML'",

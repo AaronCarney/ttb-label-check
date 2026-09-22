@@ -141,8 +141,8 @@
      ""
     ],
     "spirits.origin.matches_application": [
-     "needs_review",
-     "ORIGIN.PRESENCE.NOT_READ"
+     "pass",
+     ""
     ]
    }
   },
@@ -2066,11 +2066,11 @@
  "scoreboard": {
   "check_outcomes": {
    "fail": 3,
-   "needs_review": 89,
-   "pass": 363
+   "needs_review": 88,
+   "pass": 364
   },
   "checks": 455,
-  "decided_without_a_person": 0.804,
+  "decided_without_a_person": 0.807,
   "label_outcomes": {
    "fail": 3,
    "needs_review": 27
@@ -2092,7 +2092,7 @@
    "NAME_ADDRESS.MATCH.NEEDS_REVIEW": 14,
    "NET_CONTENTS.MATCH.NEEDS_REVIEW": 7,
    "ORIGIN.MATCH.APPLICATION_LABEL_DISAGREE": 2,
-   "ORIGIN.PRESENCE.NOT_READ": 3,
+   "ORIGIN.PRESENCE.NOT_READ": 2,
    "WARNING.STYLE.BOLD_NOT_CLEAR": 6,
    "WARNING.STYLE.BOLD_NOT_MEASURED": 8,
    "WARNING.VERBATIM.NOT_CONFIRMED": 11
