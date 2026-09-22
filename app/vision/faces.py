@@ -30,6 +30,9 @@ QUALITY_FIELD_ID = "quality"
 # The field_id both readers give the alcohol content reading.
 ALCOHOL_FIELD_ID = "abv"
 
+# The field_id both readers give the brand reading.
+BRAND_FIELD_ID = "brand_name"
+
 
 def is_unreadable(reading: Sequence[FieldObservation]) -> bool:
     """Whether a face's reading is a refusal to read rather than a reading.
@@ -68,6 +71,10 @@ def merge_readings(readings: Sequence[Sequence[FieldObservation]]) -> list[Field
     figures on the alcohol reading. A label may print its proof on a face that
     does not carry the ABV statement, and taking the alcohol reading from one
     face would drop it. The proof rule compares every figure the label states.
+
+    The other is the list of lines the local reader hands over with its brand
+    pick. The brand rule searches it for the declared name, and the name may be
+    printed on a face whose pick lost the merge.
     """
     best: dict[str, FieldObservation] = {}
     for reading in readings:
@@ -78,7 +85,34 @@ def merge_readings(readings: Sequence[Sequence[FieldObservation]]) -> list[Field
     alcohol = best.get(ALCOHOL_FIELD_ID)
     if alcohol is not None:
         best[ALCOHOL_FIELD_ID] = _with_every_proof(alcohol, readings)
+    brand = best.get(BRAND_FIELD_ID)
+    if brand is not None:
+        best[BRAND_FIELD_ID] = _with_every_candidate(brand, readings)
     return list(best.values())
+
+
+def _with_every_candidate(
+    brand: FieldObservation, readings: Sequence[Sequence[FieldObservation]]
+) -> FieldObservation:
+    """The chosen brand reading, carrying every face's candidate lines in face
+    order. A reader that lists none leaves the reading as it was."""
+    if not isinstance(brand.observed_value, dict):
+        return brand
+    candidates: list[dict] = []
+    listed = False
+    for reading in readings:
+        for observation in reading:
+            value = observation.observed_value
+            if observation.field_id != BRAND_FIELD_ID or not isinstance(value, dict):
+                continue
+            if isinstance(value.get("candidates"), list):
+                listed = True
+                candidates.extend(value["candidates"])
+    if not listed:
+        return brand
+    return brand.model_copy(
+        update={"observed_value": {**brand.observed_value, "candidates": candidates}}
+    )
 
 
 def _with_every_proof(

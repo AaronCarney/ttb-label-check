@@ -297,6 +297,13 @@ def face_observations(
     observations: list[FieldObservation] = []
     for field_name in _FIELD_NAMES:
         payload, bbox, text = payloads[field_name]
+        if "candidates" in payload:
+            # The face is known here and not in `_parse`, and the merge carries
+            # every face's lines into one list, so each line says where it was.
+            payload = {
+                **payload,
+                "candidates": [{**c, "face": face_tag} for c in payload["candidates"]],
+            }
         observations.append(
             FieldObservation(
                 field_id=field_name,
@@ -1725,6 +1732,9 @@ def _parse(
             and len(t.strip()) > 2
         ),
     )
+    # The pick is a guess, so every line read goes with it: the brand rule
+    # searches them for the name the application declares.
+    candidates = _brand_candidates(boxes)
     if brand_box is not None:
         brand_block = _display_block(body, brand_box, taken)
         text = " ".join(b.text.strip() for b in brand_block if b.text.strip())
@@ -1732,12 +1742,17 @@ def _parse(
             {
                 "brand_name": text,
                 "confidence": _confidence("brand_name", brand_block),
+                "candidates": candidates,
             },
             _block_bbox(brand_block),
             text,
         )
     else:
-        out["brand_name"] = ({"brand_name": "", "confidence": 0.0}, None, None)
+        out["brand_name"] = (
+            {"brand_name": "", "confidence": 0.0, "candidates": candidates},
+            None,
+            None,
+        )
 
     # -- name and address -------------------------------------------------
     out["name_address"] = _name_address(body, joined)
@@ -1933,6 +1948,43 @@ def _display_block(boxes: list[_Box], anchor: _Box, exclude: set[str]) -> list[_
                 grew = True
 
     return _reading_order(block)
+
+
+# The most boxes one candidate joins. A brand mark runs to a few words, and
+# the engine returns a line as one box more often than not, so four boxes
+# covers a mark split word by word without listing whole paragraphs twice.
+_CANDIDATE_MAX_BOXES = 4
+
+
+def _brand_candidates(boxes: list[_Box]) -> list[dict]:
+    """Every line of text read on this face, for the brand rule to search.
+
+    Each box on its own, then runs of neighbouring boxes along one line
+    ("LONE" beside "RIDER"), then runs of lines set as one display block with
+    each box ("Hop" over "Butcher"), because the engine returns a mark in as
+    many pieces as it has lines or words. A text is listed once, where it first
+    appears in that order, and the order is fixed by position, so the same
+    reading always gives the same list.
+
+    Only the listing is done here. Whether a line shows the declared brand is
+    the rule pack's question (`fuzzy_brand`).
+    """
+    runs: list[list[_Box]] = [[b] for b in _reading_order(boxes)]
+    groups = [*_lines(boxes), *(_display_block(boxes, b, set()) for b in _reading_order(boxes))]
+    for group in groups:
+        for start in range(len(group)):
+            for end in range(start + 2, min(len(group), start + _CANDIDATE_MAX_BOXES) + 1):
+                runs.append(group[start:end])
+    listed: dict[str, dict] = {}
+    for run in runs:
+        text = " ".join(b.text.strip() for b in run if b.text.strip())
+        if text and text not in listed:
+            listed[text] = {
+                "text": text,
+                "bbox": list(_block_bbox(run)),
+                "confidence": _mean_score(run),
+            }
+    return list(listed.values())
 
 
 def _only_a_lead_in(text: str) -> bool:

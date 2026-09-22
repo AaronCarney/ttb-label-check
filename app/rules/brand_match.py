@@ -43,7 +43,7 @@ from __future__ import annotations
 import re
 import unicodedata
 
-from rapidfuzz.distance import JaroWinkler
+from rapidfuzz.distance import JaroWinkler, Levenshtein
 
 from app.rules._validators._helpers import normalize_words, word_run_present
 
@@ -160,3 +160,98 @@ def stage_b_first_letter_variant(observed: str, expected: str) -> float:
     if len(a) < 2 or len(b) < 2 or a[0] == b[0]:
         return 0.0
     return JaroWinkler.normalized_similarity(a[1:], b[1:])
+
+
+# ---------------------------------------------------------------------------
+# Searching the label's text for a declared name
+# ---------------------------------------------------------------------------
+#
+# The stages above compare one reading against one name. A search compares a
+# name against every line the reader read, which is hundreds of comparisons on
+# one label, so a test that is safe once is not safe here: "SOUTHERN" scores
+# above the pass threshold against "SOUTHERN CROSS", because Jaro-Winkler
+# rewards a shared start, and a label can print both. The search routes below
+# are each stricter than the stage they come from, and each says in its name
+# what it found.
+
+SEARCH_EXACT = "exact"
+SEARCH_PUNCTUATION = "punctuation"
+SEARCH_WITHIN = "within"
+SEARCH_SHORTENED = "shortened"
+SEARCH_MISREAD = "misread"
+
+# Strongest first. A search reports the first route any line satisfies, so an
+# exact line beats one that only contains the name, wherever each sits.
+SEARCH_ROUTES = (
+    SEARCH_EXACT,
+    SEARCH_PUNCTUATION,
+    SEARCH_WITHIN,
+    SEARCH_SHORTENED,
+    SEARCH_MISREAD,
+)
+
+
+def shortened(name: str, trailing: frozenset[str]) -> tuple[str, ...]:
+    """The name's words with its trailing business and class words dropped.
+
+    "VIKRE DISTILLERY" is "VIKRE", "THREE DOCTORS BOURBON" is "THREE DOCTORS".
+    Only trailing words go, and only the ones `trailing` lists, so a name is
+    never cut in its middle. Empty when nothing was dropped or nothing is left.
+    """
+    words = list(_run_words(name))
+    full = len(words)
+    while words and words[-1] in trailing:
+        words.pop()
+    return tuple(words) if 0 < len(words) < full else ()
+
+
+def search_route(
+    line: str,
+    name: str,
+    *,
+    trailing: frozenset[str],
+    min_length: int,
+    within_min_length: int,
+    misread_min_length: int,
+) -> str | None:
+    """Which search route finds `name` in one line of the label, or None.
+
+    Lengths count the letters and digits of the name once punctuation and
+    spacing are out, because that is what a reader can get wrong.
+
+      exact        — the line is the name, once normalised.
+      punctuation  — the line is the name once punctuation and spacing are out.
+      within       — the name's whole words sit in the line as a run, and the
+                     name is at least `within_min_length` long or two words: a
+                     short one-word name is a word in any sentence.
+      shortened    — the line is the name less its trailing business and class
+                     words, whole: a shortened name is often a place or a
+                     common word, so it only counts as a line of its own.
+      misread      — the line is the name, or its shortened form, with one
+                     character different, and that name is at least
+                     `misread_min_length` long, so one character is a small
+                     part of it.
+
+    A name shorter than `min_length` is not searched for at all.
+    """
+    target = _skeleton(name)
+    if len(target) < min_length:
+        return None
+    if stage_a_normalized(line, name):
+        return SEARCH_EXACT
+    seen = _skeleton(line)
+    if seen == target:
+        return SEARCH_PUNCTUATION
+    name_words = _run_words(name)
+    if (len(name_words) >= 2 or len(target) >= within_min_length) and word_run_present(
+        _run_words(line), name_words
+    ):
+        return SEARCH_WITHIN
+    short = shortened(name, trailing)
+    short_target = "".join(short)
+    if len(short_target) >= min_length and seen == short_target:
+        return SEARCH_SHORTENED
+    for form in (target, short_target):
+        if len(form) >= misread_min_length and Levenshtein.distance(seen, form) <= 1:
+            return SEARCH_MISREAD
+    return None
