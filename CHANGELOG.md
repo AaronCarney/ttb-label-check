@@ -144,6 +144,12 @@ date: the release's git tag records when it was cut. Versions follow
 
 ### Fixed
 
+- A photo the reader finds no text on stops the label under `LEGIBILITY.PHOTO.NO_TEXT`,
+  and the "Needs better photo" card says which photo to retake and how. It used to be called low
+  resolution, then lost on the way to the page, which showed no reason and told the agent to submit
+  the label on its own. Every photo stop now names its face, and a label nothing was checked on is
+  sent to be checked by hand. See `docs/decisions.md#0062`.
+
 - A wine or malt beverage whose application declares no alcohol content can match without an
   alcohol statement on its label; the format check used to send it to review for want of one. A
   statement the label prints anyway is still checked for its form. The spirits field-of-vision rule

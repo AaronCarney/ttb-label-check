@@ -97,6 +97,26 @@ describe("a check that did not finish", () => {
   });
 });
 
+describe("a photo the reader found no text on", () => {
+  it("asks for a better photo of that face, not a resubmission", () => {
+    const { getByText, getByRole, queryByText } = renderWithProviders(
+      <LabelResult
+        envelope={_envelope([], [
+          {
+            rule_id: "LEGIBILITY.PHOTO.NO_TEXT",
+            disposition: "needs_review",
+            evidence_ref: "engine_failure/LEGIBILITY.PHOTO.NO_TEXT/back",
+          },
+        ])}
+      />,
+    );
+    expect(getByRole("region", { name: "Needs better photo" })).toBeTruthy();
+    expect(getByText(/No text could be found on the back photo/)).toBeTruthy();
+    expect(queryByText(/was not checked/i)).toBeNull();
+    expect(queryByText(/on its own/i)).toBeNull();
+  });
+});
+
 describe("the photographs the check was made from", () => {
   it("shows every face the server says it holds, each named", async () => {
     vi.stubGlobal(

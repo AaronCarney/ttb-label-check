@@ -12,6 +12,16 @@ describe("IncompleteCheckCard", () => {
     expect(getByText("ENGINE.INPUT.LABEL_IMAGE_MISSING")).toBeTruthy();
   });
 
+  it("asks for the label to be checked by hand, not submitted again on its own", () => {
+    // Submitting the label alone runs the same check on the same photos and
+    // shows the reviewer nothing this card does not.
+    const { container, getByText } = renderWithProviders(
+      <IncompleteCheckCard reasonCode="ENGINE.EXTRACTION.UNAVAILABLE" fieldCount={0} />,
+    );
+    expect(getByText(/check this label by hand/i)).toBeTruthy();
+    expect(container.textContent).not.toMatch(/on its own/i);
+  });
+
   it("warns that a partial result is partial when some fields did come back", () => {
     // The guard now returns what a stopped check had finished. Seven field
     // cards with nothing above them would read as a completed check.

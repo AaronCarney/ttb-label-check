@@ -233,6 +233,13 @@ codes:
     description: "The reader did not find this element on the label, so the check was not made; a reviewer settles it."
     cfr_anchors: []
     severity: warn
+  LEGIBILITY.PHOTO.NO_TEXT:
+    # The reader found no text on a photo, at any rotation it tries, so nothing
+    # on the label was checked. Not a resolution or a blur finding: the cause is
+    # not known, and the advice to the sender does not depend on it.
+    description: "No text could be found on this photo, so nothing on the label was checked; a new photo is needed."
+    cfr_anchors: []
+    severity: warn
   LEGIBILITY.FIELD_OF_VISION.SPLIT:
     description: "Required spirits fields are not in the same field of vision (§5.63(a))."
     cfr_anchors: ["27 CFR §5.63(a)"]

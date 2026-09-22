@@ -5,7 +5,7 @@ import type { DispositionEnvelope } from "../types/envelopes";
 /** An envelope shaped like the one the image-quality gate short-circuits into:
  *  no fields, the reason code carried only by a synthetic audit-trail entry.
  *  Mirrors build_short_circuit_envelope in app/services/envelope_builder.py. */
-function shortCircuitEnvelope(reasonCode: string): DispositionEnvelope {
+function shortCircuitEnvelope(reasonCode: string, faceTag?: string): DispositionEnvelope {
   return {
     evaluation_id: "ev-1",
     label_ref: "lbl.jpg",
@@ -25,7 +25,7 @@ function shortCircuitEnvelope(reasonCode: string): DispositionEnvelope {
         {
           rule_id: reasonCode,
           disposition: "needs_review",
-          evidence_ref: `engine_failure/${reasonCode}`,
+          evidence_ref: `engine_failure/${reasonCode}` + (faceTag ? `/${faceTag}` : ""),
         },
       ],
       overrides: [],
@@ -39,6 +39,7 @@ describe("needsBetterPhotoFrom", () => {
     "WARNING.LEGIBILITY.LOW_RESOLUTION",
     "WARNING.LEGIBILITY.GLARE",
     "WARNING.LEGIBILITY.MOTION_BLUR",
+    "LEGIBILITY.PHOTO.NO_TEXT",
   ])("finds %s on a fields-less short-circuit envelope", (code) => {
     const found = needsBetterPhotoFrom(shortCircuitEnvelope(code));
     expect(found?.reasonCode).toBe(code);
@@ -50,8 +51,30 @@ describe("needsBetterPhotoFrom", () => {
       "WARNING.LEGIBILITY.LOW_RESOLUTION",
       "WARNING.LEGIBILITY.GLARE",
       "WARNING.LEGIBILITY.MOTION_BLUR",
+      "LEGIBILITY.PHOTO.NO_TEXT",
     ].map((c) => needsBetterPhotoFrom(shortCircuitEnvelope(c))!.applicantMessage);
-    expect(new Set(messages).size).toBe(3);
+    expect(new Set(messages).size).toBe(4);
+  });
+
+  it("tells the applicant how to retake a photo with no text on it, and which one", () => {
+    const found = needsBetterPhotoFrom(shortCircuitEnvelope("LEGIBILITY.PHOTO.NO_TEXT", "back"));
+    expect(found?.applicantMessage).toMatch(/back photo/);
+    expect(found?.applicantMessage).toMatch(/straight on/);
+    expect(found?.applicantMessage).toMatch(/even light/);
+    expect(found?.applicantMessage).toMatch(/whole label/);
+    expect(found?.applicantMessage).not.toMatch(/resolution/i);
+  });
+
+  it("names the face for every photo code the result carries one for", () => {
+    const found = needsBetterPhotoFrom(
+      shortCircuitEnvelope("WARNING.LEGIBILITY.MOTION_BLUR", "neck"),
+    );
+    expect(found?.applicantMessage).toMatch(/neck photo/);
+  });
+
+  it("says 'the photo' when the result names no face", () => {
+    const found = needsBetterPhotoFrom(shortCircuitEnvelope("LEGIBILITY.PHOTO.NO_TEXT"));
+    expect(found?.applicantMessage).toMatch(/^No text could be found on the photo/);
   });
 
   it("stays silent on an envelope with no quality problem", () => {

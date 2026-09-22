@@ -704,30 +704,7 @@ class LocalVisionExtractor:
         # it does not depend on guessing the cause from the pixels. The gates in
         # `app/vision/quality.py` run before the read and cannot see this.
         if not meta.get("boxes_found"):
-            return [
-                FieldObservation(
-                    field_id=QUALITY_FIELD_ID,
-                    beverage_class=BeverageClass.SPIRITS,
-                    observed_value=None,
-                    evidence=(
-                        Evidence(
-                            field_id=QUALITY_FIELD_ID,
-                            source=EvidenceSource.DERIVED,
-                            panel=face.face_tag,
-                            bbox=None,
-                            extracted_text="WARNING.LEGIBILITY.LOW_RESOLUTION",
-                            match_kind=MatchKind.NONE,
-                            confidence=0.0,
-                        ),
-                    ),
-                    upstream_meta={
-                        "disposition": "needs_better_photo",
-                        "reason_code": "WARNING.LEGIBILITY.LOW_RESOLUTION",
-                        "face_tag": face.face_tag,
-                        **meta,
-                    },
-                )
-            ]
+            return _no_text_reading(face, meta)
 
         return face_observations(payloads, face_tag=face.face_tag, meta=meta)
 
@@ -2188,6 +2165,41 @@ def _origin_across_lines(boxes: list[_Box]) -> tuple[_Box | None, re.Match | Non
             ):
                 return joined, match
     return None, None
+
+
+# The reader's code for a photo it found no text on. Not a resolution or a
+# blur finding: the cause is not known, only that nothing could be read, and
+# the advice to the sender follows from that alone.
+_NO_TEXT = "LEGIBILITY.PHOTO.NO_TEXT"
+
+
+def _no_text_reading(face: Face, meta: dict) -> list[FieldObservation]:
+    """The reading of a face the detector found no text on: one quality
+    observation carrying the code and the face, which stops the label."""
+    return [
+        FieldObservation(
+            field_id=QUALITY_FIELD_ID,
+            beverage_class=BeverageClass.SPIRITS,
+            observed_value=None,
+            evidence=(
+                Evidence(
+                    field_id=QUALITY_FIELD_ID,
+                    source=EvidenceSource.DERIVED,
+                    panel=face.face_tag,
+                    bbox=None,
+                    extracted_text=_NO_TEXT,
+                    match_kind=MatchKind.NONE,
+                    confidence=0.0,
+                ),
+            ),
+            upstream_meta={
+                "disposition": "needs_better_photo",
+                "reason_code": _NO_TEXT,
+                "face_tag": face.face_tag,
+                **meta,
+            },
+        )
+    ]
 
 
 def _largest_matching(boxes: list[_Box], predicate) -> _Box | None:

@@ -29,6 +29,7 @@ from app.services.audit import _output_hash, faces_fingerprint
 from app.services.cache import SessionCache
 from app.services.headline import headline_reason_code
 from app.vision.base import VisionExtractor
+from app.vision.faces import is_unreadable
 from app.vision.quality import assess as assess_quality
 
 if TYPE_CHECKING:
@@ -309,24 +310,25 @@ class Evaluator:
             quality = assess_quality(face)
             if quality.disposition != "needs_better_photo":
                 continue
-            timeline.record_failure(
-                reason_code=quality.reason_code,
-                message=(
-                    f"image quality insufficient on the {face.face_tag} face: {quality.reason_code}"
-                ),
-                exception_class="N/A",
+            return self._stop_for_photo(
+                application,
+                label,
+                timeline,
+                t_total,
+                reason_code=quality.failure_reason_code(),
+                face_tag=face.face_tag,
             )
-            _logger.info(
-                "engine_failure_routed",
-                extra={
-                    "reason_code": quality.reason_code,
-                    "evaluation_id": application.evaluation_id,
-                    "face_tag": face.face_tag,
-                    "error_class": "N/A",
-                },
-            )
-            return self._short_circuit(
-                application, label, timeline, quality.failure_reason_code(), t_total
+        # The reader's own verdict, which the pixel gates cannot reach: it found
+        # no text on a face. Its code and the face go to the result as they are.
+        if is_unreadable(observations):
+            meta = observations[0].upstream_meta
+            return self._stop_for_photo(
+                application,
+                label,
+                timeline,
+                t_total,
+                reason_code=str(meta["reason_code"]),
+                face_tag=meta.get("face_tag"),
             )
 
         # Step 3-4: rules
@@ -484,7 +486,45 @@ class Evaluator:
             evidence_ref=f"rule_pack/{beverage_class.value}",
         )
 
-    def _short_circuit(self, application, label, timeline, reason_code: str, t_total: float):
+    def _stop_for_photo(
+        self,
+        application: Application,
+        label: Label,
+        timeline: EvaluationTimeline,
+        t_total: float,
+        *,
+        reason_code: str,
+        face_tag: str | None,
+    ) -> DispositionEnvelope:
+        """Check nothing on a label with a photo nobody can check, and say why."""
+        timeline.record_failure(
+            reason_code=reason_code,
+            message=f"image quality insufficient on the {face_tag} face: {reason_code}",
+            exception_class="N/A",
+        )
+        _logger.info(
+            "engine_failure_routed",
+            extra={
+                "reason_code": reason_code,
+                "evaluation_id": application.evaluation_id,
+                "face_tag": face_tag,
+                "error_class": "N/A",
+            },
+        )
+        return self._short_circuit(
+            application, label, timeline, reason_code, t_total, face_tag=face_tag
+        )
+
+    def _short_circuit(
+        self,
+        application,
+        label,
+        timeline,
+        reason_code: str,
+        t_total: float,
+        *,
+        face_tag: str | None = None,
+    ):
         from app.services.audit import AuditRecorder
         from app.services.envelope_builder import build_short_circuit_envelope
         from app.services.metrics_builder import MetricsBuilder
@@ -492,12 +532,17 @@ class Evaluator:
         # Surface every prior failure (e.g. an upstream vision exception
         # before the legibility gate fired) into per_rule_trace so the audit
         # is complete. Mirrors _timeout_envelope's surfacing loop.
+        # The stop's own entry names its code, and the photo where there is
+        # one, so the page can say which photo to retake.
+        stop_ref = f"engine_failure/{reason_code}" + (f"/{face_tag}" if face_tag else "")
         for failure in timeline.failures:
             timeline.record_rule_done(
                 rule_id=failure.reason_code,
                 duration_ms=0,
                 disposition="needs_review",
-                evidence_ref=f"engine_failure/{failure.exception_class}",
+                evidence_ref=stop_ref
+                if failure.reason_code == reason_code
+                else f"engine_failure/{failure.exception_class}",
             )
         timeline.finish(total_duration_ms=int((time.monotonic() - t_total) * 1000))
         envelope_for_hash = {
@@ -519,6 +564,7 @@ class Evaluator:
             reason_code=reason_code,
             audit=audit,
             metrics=metrics,
+            face_tag=face_tag,
         )
 
     def _timeout_envelope(

@@ -56,8 +56,8 @@ export function IncompleteCheckCard({
         </p>
       ) : (
         <p className="text-sm">
-          No field on this label was checked. Anything else submitted with it was checked as
-          usual. Submit this label on its own to see what went wrong with it.
+          No field on this label was checked, so nothing here is a verdict: check this label by
+          hand. Anything else submitted with it was checked as usual.
         </p>
       )}
     </section>

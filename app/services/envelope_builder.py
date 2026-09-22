@@ -248,6 +248,7 @@ def build_short_circuit_envelope(
     audit: AuditRecord,
     metrics: Metrics,
     fields: Iterable[FieldFindingWire] = (),
+    face_tag: str | None = None,
 ) -> DispositionEnvelope:
     """Assemble a needs_review envelope when an upstream short-circuit fired
     (legibility, whole-eval timeout, total engine failure). Surfaces the
@@ -263,6 +264,9 @@ def build_short_circuit_envelope(
     how much to trust *this disposition*, and the disposition is needs_review
     precisely because the evaluation did not finish. Each field card still
     carries the reader's own confidence in what it read.
+
+    `face_tag` names the photo a legibility stop was about, as the last part
+    of the entry's `evidence_ref`, so the page can say which one to retake.
     """
     # Augment audit trail with the short-circuit reason if not already present.
     existing_ids = {e.rule_id for e in audit.per_rule_trace}
@@ -270,7 +274,7 @@ def build_short_circuit_envelope(
         synthetic = PerRuleTraceEntry(
             rule_id=reason_code,
             disposition="needs_review",
-            evidence_ref=f"engine_failure/{reason_code}",
+            evidence_ref=f"engine_failure/{reason_code}" + (f"/{face_tag}" if face_tag else ""),
         )
         augmented = audit.model_copy(update={"per_rule_trace": (*audit.per_rule_trace, synthetic)})
     else:

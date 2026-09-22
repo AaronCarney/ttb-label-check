@@ -3796,3 +3796,38 @@ That would pass over a printed statement in a form the regulation does not give.
 
 **Measured.** Nothing moves on the corpus or the held-out set: no label there declares no alcohol
 content, and no reader yet produces the layout reading the field-of-vision rule judges.
+
+<a id="0062"></a>
+## 0062. A photo with no text on it stops the label under a code of its own
+
+**Evidence:** `app/vision/local.py` (`_no_text_reading`); `app/services/evaluator.py`
+(`_stop_for_photo`); `app/services/envelope_builder.py`; `rules/reason_codes.yaml`;
+`frontend/src/lib/needsBetterPhoto.ts`; `frontend/src/components/IncompleteCheckCard.tsx`;
+`tests/test_photo_with_no_text.py`; `tests/test_needs_better_photo_codes.py`.
+
+**What was found.** When the detector found no text on a photo, the reader said so under
+`WARNING.LEGIBILITY.LOW_RESOLUTION`, which claims a cause nobody measured. The evaluator then
+ignored the reader's verdict: it runs its own pixel gates, a sharp photo with no text passes them,
+and every rule was handed an observation none of them takes. The result was needs review with no
+field cards and no reason code, and the page told the agent to submit the label on its own, which
+runs the same check on the same photo.
+
+**Chosen.** The reader reports `LEGIBILITY.PHOTO.NO_TEXT` and the face. The evaluator honours a
+reader that calls a face unreadable as it honours its own pixel gates: it checks nothing on that
+label and records the code with the face, as `engine_failure/<code>/<face>` in the audit trail. The
+pixel gates now name the face the same way. The "Needs better photo" card says which photo to
+retake and how: straight on, in even light, with the whole label in frame. The card for a label
+nothing was checked on asks for it to be checked by hand instead of submitted again.
+
+**Rejected.** *Guessing the cause from the pixels.* Glare, a thumb over the lens and a blank page all
+leave the detector with nothing, and the advice to the sender is the same for each.
+
+**Measured.** Through the running app, a sharp photo of plain grain comes back needs review with no
+fields and one audit entry, `LEGIBILITY.PHOTO.NO_TEXT` on the front photo. Nothing moves on the
+corpus or the held-out set, where every photo carries text.
+
+**What it leaves.** FR-10 names two photo problems, low resolution and camera blur. This is a third,
+which FR-10 does not cover and does not forbid. A photo whose shapes the detector takes for text is
+read, finds nothing, and is judged on that: a picture of coloured shapes comes back a mismatch under
+`WARNING.PRESENCE.MISSING`, as `docs/PRD.md` FR-7 sets for a warning not found on faces
+that were read.

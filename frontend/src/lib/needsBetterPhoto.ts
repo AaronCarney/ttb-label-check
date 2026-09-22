@@ -9,7 +9,7 @@
  *  found it on exactly the envelopes that have one, and the card never rendered.
  *  Both places are read here.
  *
- *  The match is against these three codes by name, not against the
+ *  The match is against these codes by name, not against the
  *  `WARNING.LEGIBILITY.` prefix. Two other codes share that prefix —
  *  NO_CONTRAST and CONTRAST_NOT_MEASURED, emitted by
  *  rules/common/health_warning.yaml about the label's own printing — and a
@@ -19,16 +19,21 @@
  */
 import type { DispositionEnvelope } from "../types/envelopes";
 
-/** What the applicant is asked to do, per reason code the image-quality gate
- *  emits. Each names what is wrong with the photo and what to change, because
- *  "needs better photo" alone tells the applicant nothing they can act on. */
-const APPLICANT_MESSAGE: Record<string, string> = {
-  "WARNING.LEGIBILITY.LOW_RESOLUTION":
-    "The photo is not sharp enough to read the label text. Please send a new one taken closer to the label, or at a higher resolution, so the smallest print is legible.",
-  "WARNING.LEGIBILITY.GLARE":
-    "Reflections wash out part of the label, so the text under them cannot be read. Please send a new photo taken without flash and out of direct light.",
-  "WARNING.LEGIBILITY.MOTION_BLUR":
-    "The photo is blurred by camera movement. Please rest the camera on something steady and send a new one.",
+/** What the applicant is asked to do, per reason code that stops a label for
+ *  its photo. Each names what is wrong with the photo and what to change,
+ *  because "needs better photo" alone tells the applicant nothing they can act
+ *  on, and names the photo, where the result says which, because a label sent
+ *  as two photos has two to choose from. `photo` is "the back photo" or, where
+ *  no face is named, "the photo". */
+const APPLICANT_MESSAGE: Record<string, (photo: string) => string> = {
+  "WARNING.LEGIBILITY.LOW_RESOLUTION": (photo) =>
+    `${_capitalised(photo)} is not sharp enough to read the label text. Please send a new one taken closer to the label, or at a higher resolution, so the smallest print is legible.`,
+  "WARNING.LEGIBILITY.GLARE": (photo) =>
+    `Reflections wash out part of ${photo}, so the text under them cannot be read. Please send a new photo taken without flash and out of direct light.`,
+  "WARNING.LEGIBILITY.MOTION_BLUR": (photo) =>
+    `${_capitalised(photo)} is blurred by camera movement. Please rest the camera on something steady and send a new one.`,
+  "LEGIBILITY.PHOTO.NO_TEXT": (photo) =>
+    `No text could be found on ${photo}. Please send a new one taken straight on, in even light, with the whole label in frame.`,
 };
 
 export interface NeedsBetterPhoto {
@@ -36,20 +41,43 @@ export interface NeedsBetterPhoto {
   applicantMessage: string;
 }
 
+function _capitalised(text: string): string {
+  return text.charAt(0).toUpperCase() + text.slice(1);
+}
+
 function _isPhotoQualityCode(code: string): boolean {
   return Object.hasOwn(APPLICANT_MESSAGE, code);
+}
+
+/** The face an audit entry's `evidence_ref` names after the code, as
+ *  `build_short_circuit_envelope` writes it: `engine_failure/<code>/<face>`. */
+function _faceFromRef(ref: string, code: string): string | null {
+  const prefix = `engine_failure/${code}/`;
+  return ref.startsWith(prefix) && ref.length > prefix.length ? ref.slice(prefix.length) : null;
 }
 
 /** The image-quality problem this envelope reports, or null if it reports none. */
 export function needsBetterPhotoFrom(
   envelope: DispositionEnvelope,
 ): NeedsBetterPhoto | null {
-  const fromFields = envelope.fields
-    .flatMap((f) => f.rule_findings)
-    .find((rf) => _isPhotoQualityCode(rf.reason_code))?.reason_code;
-  const fromAudit = envelope.audit_trail?.per_rule_trace
-    ?.find((e) => _isPhotoQualityCode(e.rule_id))?.rule_id;
-  const reasonCode = fromFields ?? fromAudit;
+  let reasonCode: string | undefined;
+  let face: string | null = null;
+  for (const f of envelope.fields) {
+    const finding = f.rule_findings.find((rf) => _isPhotoQualityCode(rf.reason_code));
+    if (finding !== undefined) {
+      reasonCode = finding.reason_code;
+      face = f.evidence.face_tag || null;
+      break;
+    }
+  }
+  if (reasonCode === undefined) {
+    const entry = envelope.audit_trail?.per_rule_trace?.find((e) => _isPhotoQualityCode(e.rule_id));
+    if (entry !== undefined) {
+      reasonCode = entry.rule_id;
+      face = _faceFromRef(entry.evidence_ref, entry.rule_id);
+    }
+  }
   if (reasonCode === undefined) return null;
-  return { reasonCode, applicantMessage: APPLICANT_MESSAGE[reasonCode]! };
+  const photo = face === null ? "the photo" : `the ${face} photo`;
+  return { reasonCode, applicantMessage: APPLICANT_MESSAGE[reasonCode]!(photo) };
 }
