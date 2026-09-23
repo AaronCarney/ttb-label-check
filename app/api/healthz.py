@@ -25,19 +25,31 @@ def host_facts(cpuinfo: Path = Path("/proc/cpuinfo")) -> dict[str, object]:
 
     A read's time depends on the processor, and Cloud Run does not say which one
     an instance got, so a live timing cannot be compared with another without
-    this (decision 0066). A processor that cannot be read is reported as
-    unknown rather than guessed.
+    this (decision 0066). Cloud Run's gVisor sandbox reports the model name as
+    unknown but passes the vendor, family, model and stepping through, and those
+    name the processor generation, so both are reported. ``cpus`` is what the
+    kernel shows; ``usable_cpus`` is what this process may be scheduled on.
+    Anything that cannot be read is reported as unknown rather than guessed.
     """
-    model = "unknown"
+    first: dict[str, str] = {}
     try:
         for line in cpuinfo.read_text(encoding="utf-8", errors="replace").splitlines():
+            if not line.strip():
+                if first:
+                    break
+                continue
             key, _, value = line.partition(":")
-            if key.strip() == "model name" and value.strip():
-                model = value.strip()
-                break
+            first.setdefault(key.strip(), value.strip())
     except OSError:
         pass
-    return {"cpu_model": model, "cpus": os.cpu_count()}
+    parts = [first.get(key) for key in ("vendor_id", "cpu family", "model", "stepping")]
+    cpu_id = "{} family {} model {} stepping {}".format(*parts) if all(parts) else "unknown"
+    return {
+        "cpu_model": first.get("model name") or "unknown",
+        "cpu_id": cpu_id,
+        "cpus": os.cpu_count(),
+        "usable_cpus": len(os.sched_getaffinity(0)),
+    }
 
 
 # Two paths, one handler. Cloud Run's front end answers /healthz itself with
