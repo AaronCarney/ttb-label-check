@@ -7,6 +7,14 @@ date: the release's git tag records when it was cut. Versions follow
 
 ## [Unreleased]
 
+## [0.4.3]
+
+### Added
+
+- `/api/health` reports the processor model and core count the service is running on, and the live
+  timing record reads it before and after each run, so every timing names the processor that
+  produced it. See `docs/decisions.md#0066`.
+
 ## [0.4.2]
 
 ### Changed
