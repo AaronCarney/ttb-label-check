@@ -5,8 +5,8 @@ separate a bold heading from a regular one, on labels TTB approved and on
 warnings rendered with a known weight, and does a worse photograph ever move a
 heading to the wrong side of it?
 
-    nice -n 19 taskset -c 0-3 uv run python -m eval.heading_bold_ratios
-    nice -n 19 taskset -c 0-3 uv run python -m eval.heading_bold_ratios --synthetic
+    uv run python -m eval.heading_bold_ratios
+    uv run python -m eval.heading_bold_ratios --synthetic
 
 No OCR runs. The boxes come from frozen readings (`tests/recordings/reader/`,
 and `eval/data/registry-readings/` where it has been fetched), and each

@@ -2,7 +2,7 @@
 
 Run from the repository root, on the core count the service has:
 
-    OCR_NUM_THREADS=4 nice -n 19 taskset -c 0-3 uv run python -m tools.measure_read_scaling
+    OCR_NUM_THREADS=4 taskset -c 0-3 uv run python -m tools.measure_read_scaling
 
 **The question.** A check of a two-faced label reads one face and then the
 other, and a running copy reads one image at a time: it holds a single OCR

@@ -7,10 +7,9 @@ Outside that window it drops the setting with no error and no log line, and the
 engine then runs on every core the machine has. So "the argument was passed" is
 not evidence: what counts is what the built session reports back.
 
-Most of this file loads no model. The last test does — it is the only way to
-read a live ``InferenceSession``'s options — so it is skipped unless
-``TTB_OCR_MODELS`` is set, the shape ``tests/test_deploy_healthz.py`` already
-uses. A default ``pytest`` run, including one from a clean clone, loads nothing.
+Most of this file loads no model. The last test does, because it is the only
+way to read a live ``InferenceSession``'s options. The models ship in the
+installed package, so a clean clone runs it too.
 """
 
 from __future__ import annotations
@@ -95,10 +94,6 @@ def test_load_caps_opencv_as_well(monkeypatch) -> None:
         cv2.setNumThreads(before)
 
 
-@pytest.mark.skipif(
-    not os.environ.get("TTB_OCR_MODELS"),
-    reason="TTB_OCR_MODELS not set; skipping the OCR model load (rung 3)",
-)
 def test_every_built_session_reports_the_cap() -> None:
     """The proof: the three sessions are asked what they were built with.
 

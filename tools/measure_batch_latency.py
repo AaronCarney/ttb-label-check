@@ -9,7 +9,7 @@ deployed service is 4 vCPU with `OCR_NUM_THREADS=4`, reading one image at a time
 (`README.md`), so a local run that is going to be read against it is started the
 same way:
 
-    OCR_NUM_THREADS=4 nice -n 19 taskset -c 0-3 uv run uvicorn app.main:app --port 8123
+    OCR_NUM_THREADS=4 taskset -c 0-3 uv run uvicorn app.main:app --port 8123
 
 **The two numbers.** They are different questions and they need different runs.
 *Alone* is what a reviewer waits for after pressing check on one label: one

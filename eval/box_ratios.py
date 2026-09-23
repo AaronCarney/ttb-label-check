@@ -4,8 +4,7 @@ What it answers: over the label corpus, how tall-and-thin do the detector's
 boxes get, and does that separate the labels whose warning reads upright from
 the one whose warning is printed up the edge?
 
-    OCR_NUM_THREADS=6 OPENBLAS_NUM_THREADS=6 \\
-      nice -n 19 taskset -c 0-5 uv run python -m eval.box_ratios
+    uv run python -m eval.box_ratios
 
 `_has_sideways_text` decides whether to pay for a rotated re-read, and it
 decides on shape alone: a box's height over its width. `_SIDEWAYS_RATIO`,
@@ -18,11 +17,6 @@ justification since. This re-derives it from the images that actually exist.
 Every image in the corpus is read, not just the faces carrying a warning: the
 gate runs on every frame the reader is handed, so a front label that produces a
 tall box costs a re-read exactly as a back one does.
-
-The run is held to the CPU budget in CLAUDE.local.md -- six threads, and a
-two-second pause between images -- because this machine has a thermal fault and
-a corpus read is the heaviest thing here. The pause is applied here rather than
-left to the caller so that running the documented command is enough.
 """
 
 from __future__ import annotations
@@ -49,11 +43,6 @@ from app.vision.local import (
 
 CORPUS = Path("tests/fixtures/labels")
 MANIFEST = CORPUS / "manifest.json"
-
-# The pause between images, in seconds. The owner set this budget:
-# "it is safe to run the OCR on six threads and with a two second
-# pause between each image."
-PAUSE_SECONDS = 2.0
 
 
 def _warning_faces() -> set[str]:
@@ -100,9 +89,7 @@ async def _run(json_out: Path | None) -> int:
 
     rows: list[dict[str, Any]] = []
     started = time.monotonic()
-    for index, path in enumerate(images):
-        if index:
-            time.sleep(PAUSE_SECONDS)
+    for path in images:
         row = _measure(extractor, path)
         row["carries_warning"] = row["image"] in warning_faces
         rows.append(row)

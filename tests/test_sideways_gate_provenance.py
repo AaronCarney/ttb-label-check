@@ -39,7 +39,7 @@ def test_the_sideways_comment_cites_the_corpus_it_was_measured_over() -> None:
     assert cited == len(images), (
         f"{SOURCE} says the sideways thresholds were measured over {cited} images; "
         f"the corpus holds {len(images)}. Re-run `uv run python -m eval.box_ratios` "
-        f"under the CPU budget and rewrite the comment from what it reports."
+        f"and rewrite the comment from what it reports."
     )
 
 

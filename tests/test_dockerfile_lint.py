@@ -1,9 +1,9 @@
 """Lint the container build and the deploy script without invoking docker.
 
-`docker build` is not run here — it is minutes of CPU and this machine has a
-thermal fault — so everything provable by reading the build inputs is proved by
-reading them. Three of these checks exist because the failure they catch is only
-visible at deploy time, when the reviewer is already looking at the URL:
+`docker build` is not run here, so everything provable by reading the build
+inputs is proved by reading them, in a suite that needs no Docker daemon. Three
+of these checks exist because the failure they catch is only visible at deploy
+time, when the reviewer is already looking at the URL:
 
 * a `COPY` whose source is not in the tree, which fails the build;
 * a `COPY` whose source `.dockerignore` excludes, which succeeds and ships an
