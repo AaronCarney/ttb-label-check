@@ -306,7 +306,14 @@ class Evaluator:
         # government warning as the one carrying the brand, so there is nothing
         # to be gained by judging the label on the faces that did come out. The
         # message names the face so the applicant knows which one to retake.
-        for face in label.faces:
+        #
+        # Both readers run these gates on every face before reading it and
+        # answer the first refused face with that refusal, which the check
+        # after this loop stops on. So the gates run here only where the reader
+        # answered nothing — it failed — and a blurred photograph is still
+        # named as one. Running them again on a reading paid a full-resolution
+        # decode and transform per photograph for an answer already given.
+        for face in label.faces if not observations else ():
             quality = assess_quality(face)
             if quality.disposition != "needs_better_photo":
                 continue
