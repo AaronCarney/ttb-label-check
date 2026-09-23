@@ -19,9 +19,10 @@ reader's own output, taken by `eval/read_accuracy.py --freeze`.
 Every corpus label was approved, so a mismatch here is either a genuine
 difference the label carries or the product reading the label wrong. The
 scoreboard says how many of each outcome there were, why each review was
-sent to a person, and how many checks the product settled without one — the
-figure that shows whether a change cut mismatches by sending everything to
-review.
+sent to a person, and what share of checks came out with a clear result, a
+match or a mismatch. That share shows whether a change cut mismatches by
+sending everything to review. It is not a share decided without a person:
+the agent still reviews every label.
 
 The held-out labels are Public COLA Registry records fetched by
 `eval/fetch_registry_corpus.py` into `eval/data/registry/`, which is not in
@@ -298,7 +299,7 @@ def scoreboard(outcomes: list[LabelOutcome]) -> dict[str, Any]:
         "label_outcomes": dict(Counter(o.disposition for o in outcomes)),
         "checks": len(checks),
         "check_outcomes": dict(by_check),
-        "decided_without_a_person": round(decided / len(checks), 3) if checks else 0.0,
+        "clear_result_share": round(decided / len(checks), 3) if checks else 0.0,
         "review_causes": dict(
             Counter(r.reason_code for r in checks if r.disposition == "needs_review").most_common()
         ),
@@ -363,7 +364,7 @@ def _print(outcomes: list[LabelOutcome]) -> None:
     print(f"{board['checks']} checks that applied")
     for key in ("pass", "fail", "needs_review"):
         print(f"  {words[key]:<13} {board['check_outcomes'].get(key, 0)}")
-    print(f"  settled without a person: {board['decided_without_a_person']:.1%}")
+    print(f"  with a clear result, match or mismatch: {board['clear_result_share']:.1%}")
     for title, key in (("mismatches", "mismatch_causes"), ("sent to review", "review_causes")):
         print(f"Reason codes, {title}:")
         for code, count in board[key].items():

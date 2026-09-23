@@ -190,8 +190,8 @@ Coverage comes with the suite:
 uv run pytest --cov            # branch coverage over app/
 ```
 
-**The measured figure is 93% branch coverage over `app/`**, from a run of the whole suite bar the
-two slow performance tests; the lowest-covered module is the rule-pack loader at 82%. It is reported
+**The measured figure is 95% branch coverage over `app/`**, from a run of the whole suite bar the
+three tests marked slow; the lowest-covered module is the rule-pack loader at 82%. It is reported
 rather than gated, because a threshold set before anyone had measured the real number shapes the
 suite to the threshold rather than to the product.
 
@@ -255,7 +255,10 @@ Adding a check is a YAML edit, and the tables the rules read are data files rath
 not just what. The citation opens: pressing it fills a column beside the finding with the wording of
 the section, which the product holds for all 24 sections its rules cite, fetched once from the eCFR
 and committed with a hash. Nothing is fetched while the service runs
-([decision 0046](docs/decisions.md#0046)).
+([decision 0046](docs/decisions.md#0046)). A result stands until the agent says it is wrong: each
+field card carries a *This result is wrong* button that offers the other two results, the label's
+result then follows the corrected fields by the same rule, and the audit trail keeps each correction
+([decision 0064](docs/decisions.md#0064)).
 
 **No model decides a verdict.** A model may read a label — no deterministic code can — but the
 comparison is rules over the text it produced, so the same label and application give the same
@@ -378,7 +381,7 @@ are not in the repository, so that second figure cannot be reproduced from a clo
 |---|---|---|---|---|
 | Labels: match / mismatch / needs review | 0 / 9 / 21 | 0 / 2 / 28 | 0 / 63 / 35 | 6 / 11 / 81 |
 | Checks: match / mismatch / needs review | 350 / 11 / 94 | 365 / 2 / 88 | 998 / 88 / 379 | 1,090 / 11 / 364 |
-| Checks settled without a person | 79.3% | 80.7% | 74.1% | 75.2% |
+| Checks with a clear result, match or mismatch | 79.3% | 80.7% | 74.1% | 75.2% |
 
 "Before" is the product until the reader and rules were reworked to tell a reading error from a
 label defect ([decisions 0052 to 0063](docs/decisions.md#0052)). On the held-out set that took the
@@ -393,9 +396,9 @@ but not found, a proof one "1" away from twice the ABV. Those kinds of signal we
 the held-out failures, and the corpus also supports the word-list rule with misreads such as
 "ORINK", "HEAILTH" and "ALCOHOIC".
 
-The share settled without a person barely moved because a wrong mismatch counts as settled too: most
-of them became matches and the rest go to a reviewer, so what changed is how many settled checks
-are right. The most common reasons a check goes to a person are a field the reader did not find, a
+A clear result is not a check decided without a person: the agent still reviews every label. The
+share barely moved because a wrong mismatch is a clear result too: most of them became matches and
+the rest go to a reviewer, so what changed is how many clear results are right. The most common reasons a check goes to a person are a field the reader did not find, a
 name and address it could not match, a class designation it could not confirm, and a heading whose
 bold weight it could not establish.
 

@@ -9,7 +9,9 @@ application takes five to ten minutes by eye, and in peak season importers file 
 
 This app does the matching and leaves the deciding to the agent. It reads a photograph of a label,
 compares it to the application filed for it, and returns one result per element — pass, fail, or
-needs review — with the regulation behind it. It never approves and never rejects.
+needs review — with the regulation behind it. It never approves and never rejects. A result that is
+right asks nothing of the agent; one that is wrong takes three clicks to correct, and the label's
+result follows the correction (`docs/decisions.md#0064`).
 
 ## What we were asked, and what we decided it meant
 
@@ -285,9 +287,10 @@ their figures are published apart ([decision 0051](decisions.md#0051)). TTB acce
 each mismatch the product reported was read against the images by eye. The first run found 88
 mismatches and 77 of them were the product's fault, most of them a brand guessed from the largest
 type rather than searched for. The reader and rules were reworked against that list until the
-product's own mismatches fell to 17 of 28; the README's *Outcomes on real labels* has the figures
-before and after. The set is one beverage class, so it tests photo variety, not wine, malt or
-imports.
+product caused none of the 11 left: 3 are warnings that genuinely differ from 27 CFR 16.21, and 8
+are warnings printed only on an image the upload does not take. The README's *Outcomes on real
+labels* has the figures before and after. The set is one beverage class, so it tests photo variety,
+not wine, malt or imports.
 
 **That corpus caught four failures that unit tests called green.** A class-and-type rule that failed
 thirteen genuinely approved labels. A format check that matched a string it had built itself. An

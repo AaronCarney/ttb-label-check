@@ -22,7 +22,7 @@ date: the release's git tag records when it was cut. Versions follow
 - `uv run python -m eval.corpus_check` runs every real corpus label through the production evaluator,
   rule pack and disposition, with only the OCR replaced by frozen readings, and prints what the
   product reports: match, mismatch or needs review per label and per check, the reason code behind
-  each mismatch and review, and how many checks it settled without a person. Today all 30 approved
+  each mismatch and review, and what share of checks came out with a clear result, match or mismatch. Today all 30 approved
   labels come out 0 match, 9 mismatch, 21 needs review. Of the 11 mismatches, 2 are genuine: those
   labels' warnings differ from 27 CFR 16.21 by a word. `tests/test_corpus_outcomes.py` pins every
   outcome and lists each of the other 9 with its cause.
@@ -30,7 +30,7 @@ date: the release's git tag records when it was cut. Versions follow
 - `uv run python -m eval.corpus_check --registry` runs the fetched Public COLA Registry records through
   the same production path, from each record's front and back images, and `--freeze` first runs the
   OCR on every image with no frozen reading. On 98 bourbon records nothing was tuned on: 0 match, 63
-  mismatch, 35 needs review; 74.1% of checks settled without a person. Of the 88 mismatched checks, 3
+  mismatch, 35 needs review; 74.1% of checks with a clear result. Of the 88 mismatched checks, 3
   are warnings that genuinely differ from 27 CFR 16.21, 8 are warnings printed only on an image the
   upload does not take, and 77 are the product reading the label wrong, including a new cause: a
   mash-bill grain percentage read as the alcohol content (`docs/decisions.md#0051`).
@@ -81,6 +81,11 @@ date: the release's git tag records when it was cut. Versions follow
 
 ### Changed
 
+- `eval.corpus_check` reports the share of checks with a clear result, match or mismatch, under
+  the key `clear_result_share`, where it said `decided_without_a_person`. The old name read as checks
+  no person looks at, and the agent still reviews every label. The README's outcome table and coverage
+  figure (95% branch coverage over `app/`) are brought up to date.
+
 - A check rejects a label only where the difference it found shows the label differs; a difference
   the reader could have made goes to a reviewer under a code that says why. The confidence floor now
   guards only a rejection, and reports it under the element's own code (`BRAND.READ.UNCERTAIN` and
@@ -110,7 +115,7 @@ date: the release's git tag records when it was cut. Versions follow
   not clearly heavier goes to a reviewer under a new code, `WARNING.STYLE.BOLD_NOT_CLEAR`, and
   `WARNING.STYLE.BOLD_NOT_MEASURED` now means only that the weight could not be measured: the type
   too small, the photo too blurred, or too little of the warning read. A measured weight still never
-  rejects a label. Checks settled without a person rise from 77.6% to 80.4% on the corpus and from
+  rejects a label. Checks with a clear result rise from 77.6% to 80.4% on the corpus and from
   72.4% to 75.2% on the held-out registry labels, where 6 labels now match; no check moves toward a
   mismatch (`docs/decisions.md#0058`).
 
