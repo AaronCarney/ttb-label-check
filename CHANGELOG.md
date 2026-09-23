@@ -7,6 +7,16 @@ date: the release's git tag records when it was cut. Versions follow
 
 ## [Unreleased]
 
+## [0.4.1]
+
+### Changed
+
+- A face with no upright government warning is turned to 270° before 90°, the side sideways
+  warnings are printed on, so most such faces are read in two OCR passes instead of three. The
+  warning read is the same on every face measured. See `docs/decisions.md#0066`.
+- Each photograph passes the image-quality gates once per check. The evaluator ran them a second
+  time after the reader had already run them on every face.
+
 ## [0.4.0]
 
 ### Added
