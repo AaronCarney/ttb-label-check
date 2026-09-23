@@ -7,6 +7,14 @@ date: the release's git tag records when it was cut. Versions follow
 
 ## [Unreleased]
 
+## [0.4.4]
+
+### Fixed
+
+- `/api/health` names the processor on Cloud Run too. The sandbox there reports the model name as
+  unknown, so the vendor, family, model and stepping are reported beside it, along with the cores
+  the process may actually use.
+
 ## [0.4.3]
 
 ### Added
