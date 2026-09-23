@@ -62,4 +62,6 @@ def test_every_field_correction_code_is_in_the_registry() -> None:
     assert set(codes) == {"pass", "fail", "needs_review"}
     registered = set((yaml.safe_load(REGISTRY.read_text(encoding="utf-8")) or {}).get("codes", {}))
     unknown = [code for code in codes.values() if code not in registered]
-    assert not unknown, "field correction sends codes the endpoint will refuse: " + ", ".join(unknown)
+    assert not unknown, "field correction sends codes the endpoint will refuse: " + ", ".join(
+        unknown
+    )
