@@ -16,7 +16,8 @@ date: the release's git tag records when it was cut. Versions follow
   label's header and the batch table all show the corrected result. The card still says what the check
   reported, and the audit trail keeps each correction. A mismatch can now be corrected to a match,
   which the `O` drawer could not do. A correction to a field the check produced no result for is
-  refused. New reason codes `REVIEWER.CORRECTION.PASS`, `.FAIL` and `.NEEDS_REVIEW`. See
+  refused. A decision on the whole label from the `O` drawer can hold a label back but never passes
+  one with a failed field. New reason codes `REVIEWER.CORRECTION.PASS`, `.FAIL` and `.NEEDS_REVIEW`. See
   `docs/decisions.md#0064`.
 
 - `uv run python -m eval.corpus_check` runs every real corpus label through the production evaluator,

@@ -99,35 +99,40 @@ def disposition_after_overrides(envelope: DispositionEnvelope) -> Disposition:
     read — keep their say, so correcting every field of an unfinished check does
     not make it a pass.
 
-    A correction to the whole label (`field_name` empty) is the reviewer
-    deciding the label outright, and the latest one stands over the fields.
-    The latest correction to a field is that field's answer.
+    A correction to the whole label (`field_name` empty) counts as one more
+    verdict beside the fields, and the latest one is the one that counts. It
+    can hold a label back, but it cannot lift one: a label with a failed field
+    fails whatever the whole-label correction said, because one element that
+    does not match rejects the application. The latest correction to a field
+    is that field's answer.
     """
     overrides = envelope.audit_trail.overrides
-    whole_label = [o for o in overrides if o.field_name is None]
-    if whole_label:
-        return whole_label[-1].applied_disposition
-    corrected = {o.field_name: o.applied_disposition for o in overrides}
+    whole_label = [o.applied_disposition for o in overrides if o.field_name is None]
+    corrected = {o.field_name: o.applied_disposition for o in overrides if o.field_name is not None}
     if not corrected:
-        return envelope.disposition
-
-    # The trace carries one row per rule, and one more per rule that named a
-    # reason code (`evidence_ref` "reason_code/<rule_id>"). A corrected field's
-    # rules leave through both.
-    replaced = {
-        rf.rule_id for f in envelope.fields if f.field_name in corrected for rf in f.rule_findings
-    }
-    return _combine(
-        [
-            *(
-                row.disposition
-                for row in envelope.audit_trail.per_rule_trace
-                if row.rule_id not in replaced
-                and row.evidence_ref.removeprefix("reason_code/") not in replaced
-            ),
-            *corrected.values(),
-        ]
-    )
+        from_fields: Disposition = envelope.disposition
+    else:
+        # The trace carries one row per rule, and one more per rule that named a
+        # reason code (`evidence_ref` "reason_code/<rule_id>"). A corrected
+        # field's rules leave through both.
+        replaced = {
+            rf.rule_id
+            for f in envelope.fields
+            if f.field_name in corrected
+            for rf in f.rule_findings
+        }
+        from_fields = _combine(
+            [
+                *(
+                    row.disposition
+                    for row in envelope.audit_trail.per_rule_trace
+                    if row.rule_id not in replaced
+                    and row.evidence_ref.removeprefix("reason_code/") not in replaced
+                ),
+                *corrected.values(),
+            ]
+        )
+    return _combine([from_fields, whole_label[-1]]) if whole_label else from_fields
 
 
 def _combine(verdicts: Iterable[RuleDisposition]) -> Disposition:

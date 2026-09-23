@@ -130,10 +130,16 @@ def test_a_stopped_check_is_not_passed_by_correcting_its_fields() -> None:
     assert disposition_after_overrides(_corrected(env, ("brand_name", "pass"))) == "needs_review"
 
 
-def test_a_correction_to_the_whole_label_stands_over_the_fields() -> None:
+def test_a_correction_to_the_whole_label_holds_while_the_fields_pass() -> None:
     env = _envelope({"brand_name": "pass"}, disposition="pass")
     corrected = _corrected(env, (None, "needs_review"), ("brand_name", "pass"))
     assert disposition_after_overrides(corrected) == "needs_review"
+
+
+def test_one_failed_field_fails_the_label_whatever_the_whole_label_said() -> None:
+    env = _envelope({"brand_name": "pass"}, disposition="pass")
+    corrected = _corrected(env, (None, "needs_review"), ("brand_name", "fail"))
+    assert disposition_after_overrides(corrected) == "fail"
 
 
 def test_a_field_no_rule_checked_has_no_result_to_correct() -> None:

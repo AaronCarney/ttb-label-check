@@ -3947,8 +3947,9 @@ label's header and in the batch table. The card still shows what the check repor
 trail keeps every correction with what it replaced. A correction to a field the check produced no
 result for is refused, because it would move the label on a check that never ran. Rows that belong
 to no field, such as a stopped check or a photo too poor to read, keep their say, so correcting
-every field of an unfinished check does not pass it. The `O` drawer still decides the whole label,
-and its latest decision stands over the fields.
+every field of an unfinished check does not pass it. The `O` drawer still records a decision on
+the whole label, which can hold the label back but not lift it: one failed field fails the label
+whatever the drawer said, because one element that does not match rejects the application.
 
 **Why this shape.** A person who only watches an automated system gets worse at stepping in at the
 moment it matters (Bainbridge 1983), and people shown an AI's answer tend to follow it (Buçinca et
