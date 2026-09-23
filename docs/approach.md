@@ -333,9 +333,9 @@ one run and 16 of 37 in a second minutes later, against a requirement of 95 perc
 5.60 and 5.46 seconds, most of it reading the images. Nothing was stopped early and nothing came out
 of the cache, so these are slow checks rather than blank ones. The build before 0.4.0 made 23 and 33
 of 37, and reading on the service is about 1.3 seconds slower than it was, although the reading
-code timed on its own is not. An earlier attempt found a defect instead: a second instance of the service did not know
-the first one's batches, so a check could be shown no result at all. The service now runs one
-instance ([decision 0048](decisions.md#0048)).
+code timed on its own is not. An earlier attempt found a defect instead: a second instance of the
+service did not know the first one's batches, so a check could be shown no result at all. The
+service now runs one instance ([decision 0048](decisions.md#0048)).
 
 **The cost is the second face, and it bought a correct answer.** Until 2026-09-19 the page took one
 image and the same set measured 35 of 37 inside five seconds — but the warning is on the back of 20
