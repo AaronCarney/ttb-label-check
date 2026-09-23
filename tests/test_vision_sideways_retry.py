@@ -126,7 +126,7 @@ def test_the_warning_the_re_read_recovers_is_still_recovered() -> None:
     reading = reader.look(_blank_label())
 
     assert len(calls) == 2, "the first angle read the whole statement; the second must not run"
-    assert reading.rotation == 90
+    assert reading.rotation == 270, "270° is tried first"
     assert reading.warning_boxes == rotated
     # The other six fields are cut from the upright pass, untouched by the turn.
     assert reading.boxes == upright
@@ -144,8 +144,8 @@ def test_a_label_lying_on_its_side_is_still_turned() -> None:
 
 
 def test_a_heading_alone_does_not_stop_the_other_angle() -> None:
-    """A 90° frame can find the heading line and nothing under it, while the
-    270° frame reads the whole statement: on four held-out labels the loop
+    """One frame can find the heading line and nothing under it, while the
+    other angle reads the whole statement: on four held-out labels the loop
     stopped at the heading and the warning was checked against one line of it.
     A frame is final only when its block reaches the statement's last words;
     otherwise the other angle is read and the more complete block is kept."""
@@ -156,8 +156,8 @@ def test_a_heading_alone_does_not_stop_the_other_angle() -> None:
 
     reading = reader.look(_blank_label())
 
-    assert len(calls) == 3, "the 270° pass must run when 90° read only the heading"
-    assert reading.rotation == 270
+    assert len(calls) == 3, "the 90° pass must run when 270° read only the heading"
+    assert reading.rotation == 90
     assert reading.warning_boxes == whole
 
 
@@ -173,8 +173,8 @@ def test_neither_angle_complete_keeps_the_one_that_read_more() -> None:
     reading = reader.look(_blank_label())
 
     assert len(calls) == 3
-    assert reading.rotation == 90
+    assert reading.rotation == 270
     assert reading.warning_boxes == more
 
     reader, _ = _reader_returning(upright, less, less)
-    assert reader.look(_blank_label()).rotation == 90, "a tie keeps the first angle"
+    assert reader.look(_blank_label()).rotation == 270, "a tie keeps the first angle"

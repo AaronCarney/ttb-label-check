@@ -130,6 +130,22 @@ Produced one shape per invocation, each in a fresh process:
 tools.measure_read_scaling --images N --threads 4 --only '<shape>'`, which is
 what the file's own `notes.how_it_was_produced` records. Cited by decision 0047.
 
+### `2026-09-23-reader-stage-profile-0.4.0.json` and `2026-09-23-reader-stage-profile-78b3710.json`
+
+Every face of the 37 submissions `tests/test_deploy_healthz.py` sends, read
+through `LocalVisionExtractor._extract_face` at the four engine threads the
+service runs, on 0.4.0 and on the commit before its reader fixes, with a
+two-second pause between images. Each row carries the face's total and, per
+stage, how many times it ran and how long it took: `boxes` is one OCR pass,
+`strip` one recognition-only strip read, `quality` the image-quality gates.
+Cited by decision 0066.
+
+### `2026-09-23-live-read-time-by-label.json`
+
+`vision_duration_ms` for each of the 37 live checks: two runs on the service
+built from `34cc275` and three on 0.4.0 (`ab796ef`), with the ratio of the two
+medians per label. Cited by decision 0066.
+
 ## Re-measuring
 
 Every run here reads the corpus in `tests/fixtures/labels/` and the

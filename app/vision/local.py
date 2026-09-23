@@ -97,6 +97,10 @@ _PICK_CERTAINTY = {
 # weaker result than reading it as it lay, so it is reported as one.
 _ROTATED_FRAME_PENALTY = 0.90
 
+# The angles a face with no upright heading is turned to, in the order tried.
+# `look` explains the order.
+_ROTATION_ORDER = (270, 90)
+
 # A brand mark is routinely set over several lines, and the engine returns one
 # box per line. These say which neighbouring lines are part of the same mark:
 # a line set below a third of the tallest line's height is subordinate text
@@ -791,8 +795,17 @@ class LocalVisionExtractor:
                 # read too and the block holding more of the statement is kept.
                 # A tie keeps the first angle. This never costs more than the
                 # two passes a frame with no heading already paid for.
+                #
+                # 270° goes first because that is where sideways warnings are
+                # found: text printed bottom to top, which `rotate(270)` turns
+                # upright. Of the 12 faces whose warning the reader recovers on
+                # its side, 10 read it at 270°, among them the seven held-out
+                # faces of `docs/decisions.md#0054`, four of which find only the
+                # heading at 90°. Trying 270° first saves a full pass on those
+                # faces; the order decides nothing else except which frame wins
+                # a tie (`docs/decisions.md#0066`).
                 best: tuple[bool, int] | None = None
-                for angle in (90, 270):
+                for angle in _ROTATION_ORDER:
                     rotated = image.rotate(angle, expand=True)
                     candidate = self._boxes(rotated)
                     candidate_heading = _find_heading(candidate)

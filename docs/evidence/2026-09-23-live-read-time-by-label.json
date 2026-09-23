@@ -1,0 +1,486 @@
+{
+ "what": "vision_duration_ms per live check on the deployed service, two runs on revision ttb-label-check-00015-mfr (commit 34cc275) and three on ttb-label-check-00017-tks (commit ab796ef, 0.4.0), from tests/test_deploy_healthz.py records",
+ "rows": [
+  {
+   "label_id": "ttb-26212001000085",
+   "vision_ms_34cc275": [
+    4542,
+    4349
+   ],
+   "vision_ms_ab796ef": [
+    5703,
+    5253,
+    5176
+   ],
+   "ratio_of_medians": 1.18
+  },
+  {
+   "label_id": "ttb-26218001000369",
+   "vision_ms_34cc275": [
+    4859,
+    4045
+   ],
+   "vision_ms_ab796ef": [
+    6220,
+    5208,
+    5404
+   ],
+   "ratio_of_medians": 1.21
+  },
+  {
+   "label_id": "ttb-26229001000034",
+   "vision_ms_34cc275": [
+    1970,
+    1958
+   ],
+   "vision_ms_ab796ef": [
+    3298,
+    3001,
+    3123
+   ],
+   "ratio_of_medians": 1.59
+  },
+  {
+   "label_id": "ttb-26229001000513",
+   "vision_ms_34cc275": [
+    2452,
+    2650
+   ],
+   "vision_ms_ab796ef": [
+    3947,
+    3620,
+    3619
+   ],
+   "ratio_of_medians": 1.42
+  },
+  {
+   "label_id": "ttb-26230001000420",
+   "vision_ms_34cc275": [
+    5043,
+    5453
+   ],
+   "vision_ms_ab796ef": [
+    7681,
+    6851,
+    7112
+   ],
+   "ratio_of_medians": 1.36
+  },
+  {
+   "label_id": "ttb-26230001000540",
+   "vision_ms_34cc275": [
+    3691,
+    3774
+   ],
+   "vision_ms_ab796ef": [
+    6929,
+    5330,
+    5957
+   ],
+   "ratio_of_medians": 1.6
+  },
+  {
+   "label_id": "ttb-26231001000333",
+   "vision_ms_34cc275": [
+    3701,
+    3746
+   ],
+   "vision_ms_ab796ef": [
+    4294,
+    3816,
+    4135
+   ],
+   "ratio_of_medians": 1.11
+  },
+  {
+   "label_id": "ttb-26232001000404",
+   "vision_ms_34cc275": [
+    3272,
+    3093
+   ],
+   "vision_ms_ab796ef": [
+    4567,
+    4573,
+    4284
+   ],
+   "ratio_of_medians": 1.44
+  },
+  {
+   "label_id": "ttb-26233001000189",
+   "vision_ms_34cc275": [
+    2435,
+    2568
+   ],
+   "vision_ms_ab796ef": [
+    2954,
+    3137,
+    2798
+   ],
+   "ratio_of_medians": 1.18
+  },
+  {
+   "label_id": "ttb-26233001000566",
+   "vision_ms_34cc275": [
+    3931,
+    3092
+   ],
+   "vision_ms_ab796ef": [
+    4439,
+    4702,
+    4509
+   ],
+   "ratio_of_medians": 1.28
+  },
+  {
+   "label_id": "ttb-26233001000569",
+   "vision_ms_34cc275": [
+    1898,
+    2064
+   ],
+   "vision_ms_ab796ef": [
+    2694,
+    2716,
+    2529
+   ],
+   "ratio_of_medians": 1.36
+  },
+  {
+   "label_id": "ttb-26236001000210",
+   "vision_ms_34cc275": [
+    5990,
+    5686
+   ],
+   "vision_ms_ab796ef": [
+    8779,
+    7959,
+    7865
+   ],
+   "ratio_of_medians": 1.36
+  },
+  {
+   "label_id": "ttb-26236001000448",
+   "vision_ms_34cc275": [
+    2803,
+    2991
+   ],
+   "vision_ms_ab796ef": [
+    4668,
+    3246,
+    3769
+   ],
+   "ratio_of_medians": 1.3
+  },
+  {
+   "label_id": "ttb-26236001000652",
+   "vision_ms_34cc275": [
+    4349,
+    3550
+   ],
+   "vision_ms_ab796ef": [
+    6610,
+    6411,
+    6057
+   ],
+   "ratio_of_medians": 1.62
+  },
+  {
+   "label_id": "ttb-26236001000716",
+   "vision_ms_34cc275": [
+    4246,
+    4103
+   ],
+   "vision_ms_ab796ef": [
+    6058,
+    5423,
+    5732
+   ],
+   "ratio_of_medians": 1.37
+  },
+  {
+   "label_id": "ttb-26237001000107",
+   "vision_ms_34cc275": [
+    4255,
+    4154
+   ],
+   "vision_ms_ab796ef": [
+    5871,
+    5993,
+    5949
+   ],
+   "ratio_of_medians": 1.41
+  },
+  {
+   "label_id": "ttb-26237001000196",
+   "vision_ms_34cc275": [
+    2091,
+    2275
+   ],
+   "vision_ms_ab796ef": [
+    2746,
+    2597,
+    2762
+   ],
+   "ratio_of_medians": 1.26
+  },
+  {
+   "label_id": "ttb-26238001000795",
+   "vision_ms_34cc275": [
+    2798,
+    2871
+   ],
+   "vision_ms_ab796ef": [
+    3386,
+    3953,
+    3567
+   ],
+   "ratio_of_medians": 1.26
+  },
+  {
+   "label_id": "ttb-26239001000079",
+   "vision_ms_34cc275": [
+    2740,
+    2787
+   ],
+   "vision_ms_ab796ef": [
+    4834,
+    3984,
+    4536
+   ],
+   "ratio_of_medians": 1.64
+  },
+  {
+   "label_id": "ttb-26239001000081",
+   "vision_ms_34cc275": [
+    2668,
+    2686
+   ],
+   "vision_ms_ab796ef": [
+    4419,
+    4352,
+    3963
+   ],
+   "ratio_of_medians": 1.63
+  },
+  {
+   "label_id": "ttb-26239001000132",
+   "vision_ms_34cc275": [
+    3874,
+    3040
+   ],
+   "vision_ms_ab796ef": [
+    5457,
+    4888,
+    4690
+   ],
+   "ratio_of_medians": 1.41
+  },
+  {
+   "label_id": "ttb-26239001000217",
+   "vision_ms_34cc275": [
+    3302,
+    3428
+   ],
+   "vision_ms_ab796ef": [
+    3853,
+    4056,
+    3866
+   ],
+   "ratio_of_medians": 1.15
+  },
+  {
+   "label_id": "ttb-26239001000239",
+   "vision_ms_34cc275": [
+    2017,
+    2042
+   ],
+   "vision_ms_ab796ef": [
+    2431,
+    2633,
+    2907
+   ],
+   "ratio_of_medians": 1.3
+  },
+  {
+   "label_id": "ttb-26239001000279",
+   "vision_ms_34cc275": [
+    1806,
+    1877
+   ],
+   "vision_ms_ab796ef": [
+    2403,
+    2148,
+    2248
+   ],
+   "ratio_of_medians": 1.22
+  },
+  {
+   "label_id": "ttb-26239001000331",
+   "vision_ms_34cc275": [
+    1894,
+    1901
+   ],
+   "vision_ms_ab796ef": [
+    2673,
+    2601,
+    2481
+   ],
+   "ratio_of_medians": 1.37
+  },
+  {
+   "label_id": "ttb-26240001000454",
+   "vision_ms_34cc275": [
+    2156,
+    2391
+   ],
+   "vision_ms_ab796ef": [
+    2848,
+    2461,
+    2295
+   ],
+   "ratio_of_medians": 1.08
+  },
+  {
+   "label_id": "ttb-26240001000563",
+   "vision_ms_34cc275": [
+    1803,
+    1698
+   ],
+   "vision_ms_ab796ef": [
+    2397,
+    2400,
+    2217
+   ],
+   "ratio_of_medians": 1.37
+  },
+  {
+   "label_id": "ttb-26240001000573",
+   "vision_ms_34cc275": [
+    2646,
+    2851
+   ],
+   "vision_ms_ab796ef": [
+    3344,
+    3890,
+    4131
+   ],
+   "ratio_of_medians": 1.42
+  },
+  {
+   "label_id": "ttb-26242001000088",
+   "vision_ms_34cc275": [
+    4401,
+    3793
+   ],
+   "vision_ms_ab796ef": [
+    6929,
+    5432,
+    5597
+   ],
+   "ratio_of_medians": 1.37
+  },
+  {
+   "label_id": "var-abv-mismatch",
+   "vision_ms_34cc275": [
+    4196,
+    4069
+   ],
+   "vision_ms_ab796ef": [
+    5874,
+    6350,
+    5606
+   ],
+   "ratio_of_medians": 1.42
+  },
+  {
+   "label_id": "var-blur",
+   "vision_ms_34cc275": [
+    1604,
+    1651
+   ],
+   "vision_ms_ab796ef": [
+    2282,
+    2470,
+    2499
+   ],
+   "ratio_of_medians": 1.52
+  },
+  {
+   "label_id": "var-brand-case-punctuation",
+   "vision_ms_34cc275": [
+    4051,
+    3975
+   ],
+   "vision_ms_ab796ef": [
+    5262,
+    6527,
+    5994
+   ],
+   "ratio_of_medians": 1.49
+  },
+  {
+   "label_id": "var-glare",
+   "vision_ms_34cc275": [
+    3835,
+    3818
+   ],
+   "vision_ms_ab796ef": [
+    6666,
+    5970,
+    6042
+   ],
+   "ratio_of_medians": 1.58
+  },
+  {
+   "label_id": "var-heading-title-case",
+   "vision_ms_34cc275": [
+    3477,
+    3168
+   ],
+   "vision_ms_ab796ef": [
+    4962,
+    5041,
+    4663
+   ],
+   "ratio_of_medians": 1.49
+  },
+  {
+   "label_id": "var-low-light",
+   "vision_ms_34cc275": [
+    3764,
+    3755
+   ],
+   "vision_ms_ab796ef": [
+    4935,
+    5892,
+    5757
+   ],
+   "ratio_of_medians": 1.53
+  },
+  {
+   "label_id": "var-skew",
+   "vision_ms_34cc275": [
+    5164,
+    4553
+   ],
+   "vision_ms_ab796ef": [
+    6280,
+    6347,
+    6161
+   ],
+   "ratio_of_medians": 1.29
+  },
+  {
+   "label_id": "var-warning-wording",
+   "vision_ms_34cc275": [
+    3333,
+    3246
+   ],
+   "vision_ms_ab796ef": [
+    5055,
+    5292,
+    4823
+   ],
+   "ratio_of_medians": 1.54
+  }
+ ]
+}

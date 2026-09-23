@@ -4069,3 +4069,55 @@ AI-assisted decision making. *Proc. FAT\* 2020*. https://doi.org/10.1145/3351095
 S., et al. (2019). Guidelines for human-AI interaction. *Proc. CHI 2019*.
 https://doi.org/10.1145/3290605.3300233. TTB. eApplication Statuses in COLAs Online.
 https://www.ttb.gov/system/files/images/pdfs/labeling_colas-docs/eapplication-statuses-in-colas.pdf.
+
+<a id="0066"></a>
+## 0066. The slower read on the service is not in the reading code; two repeated pieces of work are removed
+
+**Evidence:** `docs/evidence/2026-09-23-reader-stage-profile-0.4.0.json`,
+`docs/evidence/2026-09-23-reader-stage-profile-78b3710.json`,
+`docs/evidence/2026-09-23-live-read-time-by-label.json`; `app/vision/local.py` (`look`,
+`_ROTATION_ORDER`); `app/services/evaluator.py`; `tests/test_vision_sideways_retry.py`,
+`tests/test_evaluator_gates_each_photo_once.py`.
+
+**What was found.** On the deployed service, reading took about 1.3 seconds longer per check on 0.4.0
+than on the build before it. Four measurements place the cause outside the code.
+
+- **Every label slowed, by a similar share.** Across the 37 live checks the median read grew by 1.08
+  to 1.64 times, median 1.37. Extra rotated passes would slow the few labels that pay for them and
+  leave the rest alone.
+- **The code does the same work.** Every face of the same 37 submissions, read through the reader
+  the service runs at its four threads, costs 73 OCR passes on 0.4.0 and 73 on the commit before its
+  reader fixes. Both turn the same two faces on their side. The steps outside the OCR added about
+  8 ms a face. Three faces that differed on one run read within 10 percent of each other when timed
+  three times on each build.
+- **The libraries are the same.** The image installs from the committed `uv.lock`, which changed
+  only in the project's own version number.
+- **The service is configured the same.** Both revisions run 4 CPUs, 4 GiB, one instance and 16
+  requests at a time. A third live run, ten hours after the first two on 0.4.0, read at the same
+  slower pace, so the slowdown is steady, not momentary.
+
+What is left is the machine the instance runs on. Cloud Run does not report which processor an
+instance got, so this cause is inferred from what the evidence rules out. Nobody observed it
+directly.
+
+**Chosen.** The profile also showed two pieces of work done twice, and both are removed.
+
+1. **The rotated re-read tries 270° first.** Text printed bottom to top, which `rotate(270)` turns
+   upright, is how sideways warnings are printed here. Of the 12 faces whose warning the reader
+   recovers on its side, 10 read it at 270°, among them the seven held-out faces of [0054](#0054),
+   four of which find only the heading at 90°. The rule that a frame is final only when it reaches
+   the statement's end is unchanged, so a face that needs both angles still gets both. On those 12
+   faces the passes fall from 34 to 26 and the read time from 23.1 to 17.6 seconds, with the same
+   frame and the same warning text on every face.
+2. **The image-quality gates run once a photograph.** Both readers run them on every face before
+   reading it, and they stop at the first refused face and return the refusal. The evaluator ran
+   them again after the read, a full-resolution decode and Fourier transform per photograph, about
+   63 ms each on the development box, to reach an answer the reading already carried. It now runs
+   them only where the reader returned nothing, so a failed reader on a blurred photograph still
+   names the photograph.
+
+**Rejected.** *Reading a label's two faces at once* on two engines of two threads each. Over 16
+two-faced submissions on four cores, the median check took 927 ms read one face after the other and
+937 ms read together. The engine already uses every core it has for one image. *Cheaper quality
+gates on a downscaled image.* Their thresholds are measured on the full image, so they would decide
+differently.
