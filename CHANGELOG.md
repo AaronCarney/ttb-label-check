@@ -7,6 +7,8 @@ date: the release's git tag records when it was cut. Versions follow
 
 ## [Unreleased]
 
+## [0.4.0]
+
 ### Added
 
 - A check the product cannot settle now shows its best answer, match or mismatch, with a *Needs
