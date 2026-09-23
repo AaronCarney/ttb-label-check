@@ -177,17 +177,36 @@ def test_3_a_missing_decision_table_leaves_the_pairing_unpermitted() -> None:
 
 
 def test_4a_two_different_recognised_classes_is_a_disagreement() -> None:
-    result = _run("LONDON DRY GIN", "VODKA")
+    result = _run("GIN", "VODKA")
     assert result.outcome is Outcome.FAIL
     assert result.severity is Severity.REJECT
     assert result.reason_code == _DISAGREE
+
+
+def test_4a_a_line_of_class_names_only_is_a_disagreement() -> None:
+    rule = _rule(recognised=("Gin", "London Dry Gin", "Vodka"))
+    assert _run("LONDON DRY GIN", "VODKA", rule=rule).outcome is Outcome.FAIL
+
+
+def test_4a_a_line_carrying_other_words_goes_to_a_reviewer() -> None:
+    """The reader's pick is the largest line that names a class, which is a
+    guess at which line is the designation. ttb-26240001000454, a keg, had
+    its designation misread and a line of its tapping instructions picked:
+    "RETAILER OR LOCAL BEER" against an application for ale. A line that is
+    nothing but class names is a designation whatever else the label says;
+    one carrying other words may not be one, so a reviewer decides."""
+    result = _run("RETAILER OR LOCAL BEER", "ALE")
+    assert result.outcome is Outcome.INSUFFICIENT_EVIDENCE
+    assert result.severity is Severity.WARN
+    assert result.reason_code == _NEEDS_REVIEW
+    assert result.message is not None and '"Beer"' in result.message and '"ALE"' in result.message
 
 
 def test_4a_the_disagreement_carries_the_severity_the_pack_set() -> None:
     # Every pack sets reject today, so this changes no outcome now. It says the
     # pack decides, the way it does on every other branch that reports against
     # the label, so a pack can pilot this rule as a warning.
-    result = _run("LONDON DRY GIN", "VODKA", rule=_rule(severity=Severity.WARN))
+    result = _run("GIN", "VODKA", rule=_rule(severity=Severity.WARN))
     assert result.outcome is Outcome.FAIL
     assert result.severity is Severity.WARN
 

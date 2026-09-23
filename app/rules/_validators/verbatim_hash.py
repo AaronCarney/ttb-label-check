@@ -161,6 +161,18 @@ def verbatim_hash(
             "those spots on the label: if the label prints them, it does not carry the "
             "statement as prescribed.",
         )
+    lexicon = _word_list(rule)
+    unsure = _unsure_spots(mandated, reading, ops, lexicon) if mandated and lexicon else None
+    if unsure:
+        return _needs_review(
+            obs,
+            exp,
+            rule,
+            ctx,
+            "The reading differs from the §16.21 statement, but not in a way that shows the "
+            f"label does: {'; '.join(unsure)}. Check those spots on the label: if the label "
+            "prints them, it does not carry the statement as prescribed.",
+        )
     return verdict_result(obs, exp, rule, ctx, ok=False)
 
 
@@ -243,33 +255,160 @@ def _reader_doubts(expected: str, observed: str) -> list[str] | None:
     alone: a thin glyph added or dropped inside a word, and text after the
     statement's last words, which is the block running on into the next line
     printed under it rather than a change to the statement."""
-    matcher = difflib.SequenceMatcher(None, expected, observed, autojunk=False)
     doubts: list[str] = []
-    for tag, i1, i2, j1, j2 in matcher.get_opcodes():
-        if tag == "equal":
-            continue
-        want, got = expected[i1:i2], observed[j1:j2]
-        where = observed[max(0, j1 - 8) : j2 + 8]
-        if got and (i1 == len(expected) or (i2 == len(expected) and _reader_prone(want, ""))):
-            # After the statement ends, or its closing mark dropped and text
-            # after it.
-            doubts.append(f'text after the statement\'s last words, "{got[:40]}"')
-            continue
-        if not want and _thin_glyph_in_a_word(observed, j1, j2):
-            doubts.append(f'"{got}" added in "{where}"')
-            continue
-        if not got and _thin_glyph_in_a_word(expected, i1, i2):
-            doubts.append(f'"{want}" missing in "{where}"')
-            continue
-        if not _reader_prone(want, got):
+    for i1, i2, j1, j2 in _differences(expected, observed):
+        doubt = _prone_doubt(expected, observed, i1, i2, j1, j2)
+        if doubt is None:
             return None
-        if not want:
-            doubts.append(f'"{got}" added in "{where}"')
-        elif not got:
-            doubts.append(f'"{want}" missing in "{where}"')
-        else:
-            doubts.append(f'"{got}" for "{want}" in "{where}"')
+        doubts.append(doubt)
     return doubts or None
+
+
+def _differences(expected: str, observed: str) -> list[tuple[int, int, int, int]]:
+    matcher = difflib.SequenceMatcher(None, expected, observed, autojunk=False)
+    return [(i1, i2, j1, j2) for tag, i1, i2, j1, j2 in matcher.get_opcodes() if tag != "equal"]
+
+
+def _prone_doubt(expected: str, observed: str, i1: int, i2: int, j1: int, j2: int) -> str | None:
+    """One difference described for a reviewer, when it is a kind the reader
+    invents; None when it is not."""
+    want, got = expected[i1:i2], observed[j1:j2]
+    where = observed[max(0, j1 - 8) : j2 + 8]
+    if got and (i1 == len(expected) or (i2 == len(expected) and _reader_prone(want, ""))):
+        # After the statement ends, or its closing mark dropped and text
+        # after it.
+        return f'text after the statement\'s last words, "{got[:40]}"'
+    if not want and _thin_glyph_in_a_word(observed, j1, j2):
+        return f'"{got}" added in "{where}"'
+    if not got and _thin_glyph_in_a_word(expected, i1, i2):
+        return f'"{want}" missing in "{where}"'
+    if not _reader_prone(want, got):
+        return None
+    if not want:
+        return f'"{got}" added in "{where}"'
+    if not got:
+        return f'"{want}" missing in "{where}"'
+    return f'"{got}" for "{want}" in "{where}"'
+
+
+# A word, as the reading and the statement are split into them: each piece of
+# a whitespace-separated token between marks, so "machinery,5" is "machinery"
+# and "5".
+_PIECE = re.compile(r"[^\W_]+")
+
+# The two words of one letter English has. Every other letter the word list
+# carries is there as the name of a letter, which a printed statement never
+# uses as a word.
+_ONE_LETTER_WORDS = frozenset({"a", "i"})
+
+
+def _words(text: str, ops: Sequence[str]) -> tuple[str, list[tuple[int, int, str]]] | None:
+    """The canonical form of `text`, with where each of its words lies in it.
+
+    The canonical form drops every space, so the words are taken before that
+    op and their offsets counted in the string it leaves. None where the ops
+    do not allow that, which leaves the plain comparison.
+    """
+    spaced = canonicalize_text(text, ops=[op for op in ops if op != "drop_whitespace"])
+    words, at = [], 0
+    for token in spaced.split():
+        words.append((at, at + len(token), token))
+        at += len(token)
+    joined = "".join(w for _s, _e, w in words)
+    return (joined, words) if joined == canonicalize_text(text, ops=ops) else None
+
+
+def _is_word(token: str, lexicon: frozenset[str], statement_numbers: frozenset[str]) -> bool:
+    """Is every piece of this token a word, or a number the statement carries?"""
+    for piece in _PIECE.findall(token):
+        if any(c.isdigit() for c in piece):
+            if piece not in statement_numbers:
+                return False
+        elif len(piece) == 1:
+            if piece not in _ONE_LETTER_WORDS:
+                return False
+        elif piece not in lexicon:
+            return False
+    return True
+
+
+def _unsure_spots(
+    mandated: str, reading: str, ops: Sequence[str], lexicon: frozenset[str]
+) -> list[str] | None:
+    """Each spot where the reading differs and the difference does not show
+    the label differs; None when any difference is a plain one-word change
+    between real words and the reading lost or moved no run of words, which
+    is a mismatch.
+
+    Two kinds do not show it. A difference that leaves a word no dictionary
+    holds: the statement is English, and a lookup is how misreads are told
+    from real-word changes (Kukich 1992, "non-word" errors; Nguyen et al.
+    2021). And a difference that loses, adds or moves more than one word,
+    which is the reader losing a line or taking a block's lines out of order.
+    Either can also be a misprint; a reviewer settles it, which is what FR-9
+    asks of a difference the product cannot defend. docs/decisions.md#0063.
+    """
+    expected_words = _words(mandated, ops)
+    observed_words = _words(reading, ops)
+    if expected_words is None or observed_words is None:
+        return None
+    expected, e_words = expected_words
+    observed, o_words = observed_words
+    numbers = frozenset(p for _s, _e, w in e_words for p in _PIECE.findall(w) if p.isdigit())
+    spots: list[str] = []
+    changes: list[str] = []
+    rearranged = False
+    for i1, i2, j1, j2 in _differences(expected, observed):
+        doubt = _prone_doubt(expected, observed, i1, i2, j1, j2)
+        if doubt is not None:
+            spots.append(doubt)
+            continue
+        # The reading's words the difference touches; for text dropped, the
+        # words either side of the gap.
+        touched = [w for s, e, w in o_words if (s < j2 and e > j1) or s == j1 or e == j1]
+        strange = [w for w in touched if not _is_word(w, lexicon, numbers)]
+        if strange:
+            spots.append(", ".join(f'"{w}"' for w in strange) + " is not an English word")
+            continue
+        # Words the difference reaches into, not only words it wholly covers:
+        # the matcher aligns on letters, so a moved phrase arrives with its
+        # edges shifted into the words beside it.
+        lost = sum(1 for s, e, _w in e_words if s < i2 and e > i1)
+        added = sum(1 for s, e, _w in o_words if s < j2 and e > j1)
+        if lost > 1 or added > 1:
+            what = observed[j1:j2] or expected[i1:i2]
+            spots.append(f'several words lost, added or moved at "{what[:40]}"')
+            rearranged = True
+            continue
+        changes.append(f'"{observed[j1:j2]}" for "{expected[i1:i2]}"')
+    # Where the reader lost or moved words, aligning what is left letter by
+    # letter leaves small differences between real words that the moved text
+    # made, so a one-word change beside them is not shown to be the label's.
+    if changes and not rearranged:
+        return None
+    return spots + changes or None
+
+
+def _word_list(rule: RuleDefinition) -> frozenset[str] | None:
+    """The English word list the rule pack names, checked against its pin."""
+    path = rule.parameters.get("word_list")
+    pin = rule.parameters.get("word_list_sha256")
+    if not path or not pin:
+        return None
+    return _load_word_list(str(path), str(pin))
+
+
+@lru_cache(maxsize=2)
+def _load_word_list(path: str, pin: str) -> frozenset[str]:
+    """The words of a SCOWL list, below the licence header its `---` line ends.
+
+    A file that does not hash to the pin is refused rather than used: a
+    different list would change which differences reject a label."""
+    data = (_ROOT / path).read_bytes()
+    if hashlib.sha256(data).hexdigest() != pin:
+        raise ValueError(f"word list {path} does not match its pin")
+    _header, _rule, body = data.decode("utf-8").partition("\n---\n")
+    return frozenset(line.strip().casefold() for line in body.splitlines() if line.strip())
 
 
 _SURGEON_GENERAL = re.compile(r"surgeon\s*general", re.IGNORECASE)

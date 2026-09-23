@@ -22,7 +22,10 @@ Each figure is compared in `Decimal`, built from the printed string:
   - otherwise, elsewhere on the label: a reviewer decides, because a number
     away from the statement may be something the reader could not tell apart
     from a proof;
-  - above 200, which no proof can be: unreadable, and a reviewer decides.
+  - above 200, which no proof can be: unreadable, and a reviewer decides;
+  - twice the ABV but for one "1" dropped or added ("17" against 117): the
+    reader drops and adds that thin figure as it does thin letters inside a
+    word, so a reviewer decides. docs/decisions.md#0063.
 
 The worst figure decides. `docs/decisions.md#0050` records why only a proof
 beside the ABV may reject.
@@ -61,11 +64,23 @@ def _entries(payload: Mapping[str, Any], confidence: float) -> list[dict[str, An
     return proofs_in_statement(statement, confidence)
 
 
+def _thin_one_apart(proof: Decimal, twice: Decimal) -> bool:
+    """Is one figure the other with a single "1" dropped or added?"""
+    shorter, longer = sorted((_text(proof), _text(twice)), key=len)
+    if len(longer) != len(shorter) + 1:
+        return False
+    return any(
+        longer[i] == "1" and longer[:i] + longer[i + 1 :] == shorter for i in range(len(longer))
+    )
+
+
 def _judge(proof: Decimal | None, twice: Decimal, beside: bool) -> int:
     if proof is None or proof > PROOF_CEILING:
         return _REVIEW
     if proof == twice:
         return _AGREES
+    if _thin_one_apart(proof, twice):
+        return _REVIEW
     unit = Decimal(1).scaleb(proof.as_tuple().exponent)  # type: ignore[arg-type]
     if abs(proof - twice) < unit:
         return _REVIEW
@@ -162,6 +177,9 @@ def proof_agreement(
             f"The label reads as {worst_entry['value']} proof, which no proof can be: "
             f"{PROOF_CEILING} is pure alcohol. The figure was probably misread."
         )
+    elif _thin_one_apart(figure, twice):
+        message += ' The two differ by one "1", which the reader may have misread.'
+
     if worst == _DISAGREES:
         return result(
             Outcome.FAIL,

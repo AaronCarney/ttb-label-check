@@ -1803,7 +1803,7 @@
    }
   },
   "ttb-26240001000454": {
-   "disposition": "fail",
+   "disposition": "needs_review",
    "rules": {
     "common.warning.heading_caps_bold": [
      "needs_review",
@@ -1838,8 +1838,8 @@
      ""
     ],
     "malt.class_type.matches_application": [
-     "fail",
-     "CLASS_TYPE.MATCH.APPLICATION_LABEL_DISAGREE"
+     "needs_review",
+     "CLASS_TYPE.MATCH.NEEDS_REVIEW"
     ],
     "malt.class_type.present": [
      "pass",
@@ -1850,8 +1850,8 @@
      "NAME_ADDRESS.MATCH.NEEDS_REVIEW"
     ],
     "malt.name_address.present": [
-     "needs_review",
-     "ENGINE.EVIDENCE.BELOW_CONFIDENCE_FLOOR"
+     "pass",
+     ""
     ],
     "malt.net_contents.matches_application": [
      "needs_review",
@@ -2065,19 +2065,18 @@
  },
  "scoreboard": {
   "check_outcomes": {
-   "fail": 3,
+   "fail": 2,
    "needs_review": 88,
-   "pass": 364
+   "pass": 365
   },
   "checks": 455,
   "decided_without_a_person": 0.807,
   "label_outcomes": {
-   "fail": 3,
-   "needs_review": 27
+   "fail": 2,
+   "needs_review": 28
   },
   "labels": 30,
   "mismatch_causes": {
-   "CLASS_TYPE.MATCH.APPLICATION_LABEL_DISAGREE": 1,
    "WARNING.VERBATIM.MISMATCH": 2
   },
   "review_causes": {
@@ -2085,9 +2084,8 @@
    "ALCOHOL_CONTENT.MATCH.NEEDS_REVIEW": 3,
    "BRAND.IDENTIFY.UNCERTAIN": 2,
    "BRAND.NAME.NEEDS_REVIEW": 1,
-   "CLASS_TYPE.MATCH.NEEDS_REVIEW": 6,
+   "CLASS_TYPE.MATCH.NEEDS_REVIEW": 7,
    "CLASS_TYPE.SOI.NO_MATCH": 4,
-   "ENGINE.EVIDENCE.BELOW_CONFIDENCE_FLOOR": 1,
    "LEGIBILITY.FIELD.NOT_READ": 13,
    "NAME_ADDRESS.MATCH.NEEDS_REVIEW": 14,
    "NET_CONTENTS.MATCH.NEEDS_REVIEW": 7,

@@ -190,7 +190,11 @@ codes:
   # one of these is insufficient evidence: it sends the label to a reviewer
   # and never rejects it.
   WARNING.VERBATIM.NOT_CONFIRMED:
-    description: "The warning as read differs from the §16.21 statement only in ways the reader is known to misread, so a reviewer checks those spots on the label."
+    description: "The warning as read differs from the §16.21 statement, but only in ways that do not show the label differs: a kind of misread the reader is known to make, a word no English dictionary holds, or several words lost, added or moved. A reviewer checks those spots on the label."
+    cfr_anchors: ["27 CFR §16.21"]
+    severity: warn
+  WARNING.PRESENCE.NOT_CONFIRMED:
+    description: "The reader did not find the government warning, but read some of the statement's words on the label, so the warning may be printed and missed; a reviewer checks whether the label carries it."
     cfr_anchors: ["27 CFR §16.21"]
     severity: warn
   WARNING.HEADING.NOT_READ:
@@ -284,8 +288,36 @@ codes:
     description: "Two or more rules emit conflicting dispositions for the same field."
     cfr_anchors: []
     severity: reject
-  ENGINE.EVIDENCE.BELOW_CONFIDENCE_FLOOR:
-    description: "The label reading this check rests on scored below the confidence the rule requires, so the check could not be settled; a reviewer reads the label."
+  AGE_STATEMENT.READ.UNCERTAIN:
+    description: "The age statement as read differs from what is required, but the reader scored that reading below the confidence a rejection needs, so a reviewer checks the age statement on the label."
+    cfr_anchors: []
+    severity: warn
+  ALCOHOL_CONTENT.READ.UNCERTAIN:
+    description: "The alcohol content as read differs from what is required, but the reader scored that reading below the confidence a rejection needs, so a reviewer checks the alcohol content on the label."
+    cfr_anchors: []
+    severity: warn
+  BRAND.READ.UNCERTAIN:
+    description: "The brand name as read differs from what is required, but the reader scored that reading below the confidence a rejection needs, so a reviewer checks the brand name on the label."
+    cfr_anchors: []
+    severity: warn
+  CLASS_TYPE.READ.UNCERTAIN:
+    description: "The class or type designation as read differs from what is required, but the reader scored that reading below the confidence a rejection needs, so a reviewer checks the class or type designation on the label."
+    cfr_anchors: []
+    severity: warn
+  LEGIBILITY.READ.UNCERTAIN:
+    description: "The text this legibility check measures as read differs from what is required, but the reader scored that reading below the confidence a rejection needs, so a reviewer checks the text this legibility check measures on the label."
+    cfr_anchors: []
+    severity: warn
+  NAME_ADDRESS.READ.UNCERTAIN:
+    description: "The name and address as read differs from what is required, but the reader scored that reading below the confidence a rejection needs, so a reviewer checks the name and address on the label."
+    cfr_anchors: []
+    severity: warn
+  NET_CONTENTS.READ.UNCERTAIN:
+    description: "The net contents as read differs from what is required, but the reader scored that reading below the confidence a rejection needs, so a reviewer checks the net contents on the label."
+    cfr_anchors: []
+    severity: warn
+  WARNING.READ.UNCERTAIN:
+    description: "The government warning as read differs from what is required, but the reader scored that reading below the confidence a rejection needs, so a reviewer checks the government warning on the label."
     cfr_anchors: []
     severity: warn
   ENGINE.OBSERVATION.AMBIGUOUS:

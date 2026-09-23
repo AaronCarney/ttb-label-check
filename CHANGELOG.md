@@ -71,6 +71,13 @@ date: the release's git tag records when it was cut. Versions follow
 
 ### Changed
 
+- A check rejects a label only where the difference it found shows the label differs; a difference
+  the reader could have made goes to a reviewer under a code that says why. The confidence floor now
+  guards only a rejection, and reports it under the element's own code (`BRAND.READ.UNCERTAIN` and
+  seven more) in place of `ENGINE.EVIDENCE.BELOW_CONFIDENCE_FLOOR`, which is removed. A match no
+  longer goes to review for a low reading score, because a misread rarely equals the application's
+  value. See `docs/decisions.md#0063`.
+
 - `README.md` publishes what a reviewer receives on the corpus and on the held-out registry labels,
   before and after the reader and rules were reworked, in a new *Outcomes on real labels* section:
   held-out mismatches fell from 88 to 28, and the ones the product caused from 77 to 17. The
@@ -151,6 +158,15 @@ date: the release's git tag records when it was cut. Versions follow
   `docs/decisions.md#0011`.
 
 ### Fixed
+
+- Approved labels the product misread no longer come back a mismatch: on the held-out registry
+  labels, mismatched checks fell from 28 to 11, none of them a misread, and on the corpus from 3 to
+  2, both genuine. A warning reading that leaves a word no English word list holds, or loses or
+  moves several words, goes to review under `WARNING.VERBATIM.NOT_CONFIRMED`. A warning not found on
+  a label where words of it were read goes to review under `WARNING.PRESENCE.NOT_CONFIRMED`. A proof
+  one "1" away from twice the ABV, and a class read from a line that carries more than class names,
+  go to review. The word list (ESDB size 50, wordlist.aspell.net) ships with its licence notice. See
+  `docs/decisions.md#0063`.
 
 - A photo the reader finds no text on stops the label under `LEGIBILITY.PHOTO.NO_TEXT`,
   and the "Needs better photo" card says which photo to retake and how. It used to be called low

@@ -22,7 +22,7 @@ from pathlib import Path
 import pytest
 
 from app.rules.loader import YamlRuleLoader
-from app.rules.yaml_engine import BELOW_CONFIDENCE_FLOOR, YamlRuleEngine
+from app.rules.yaml_engine import YamlRuleEngine
 from app.schemas.expected import BeverageClass
 from app.schemas.extracted import Evidence, EvidenceSource, FieldObservation, MatchKind
 from app.schemas.rejection import Outcome, Severity
@@ -96,7 +96,6 @@ async def test_an_unread_origin_on_an_import_is_a_review_under_an_origin_code(
     assert result.outcome is Outcome.INSUFFICIENT_EVIDENCE
     assert result.severity is Severity.WARN
     assert result.reason_code == "ORIGIN.PRESENCE.NOT_READ"
-    assert result.reason_code != BELOW_CONFIDENCE_FLOOR
     assert rule_disposition(result) == "needs_review"
     assert "134.45" in (result.message or "")
 

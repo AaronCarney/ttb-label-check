@@ -45,6 +45,8 @@ from types import SimpleNamespace
 import yaml
 
 from app.rules.loader import YamlRuleLoader
+from app.rules.yaml_engine import read_uncertain_code
+from app.schemas.rejection import Severity
 from tests.rules.fixtures import load_all_validators
 
 # The loader refuses a pack naming a validator the registry has not got, and a
@@ -216,6 +218,9 @@ def test_every_registered_code_is_emitted_or_declared() -> None:
         set(rule_reason_codes(ruleset))
         | set(rule_parameter_reason_codes(ruleset))
         | set(source_reason_codes(data["bins"], _source_files()))
+        # The engine builds the confidence floor's code from each rejecting
+        # rule's own, so none is written out as a literal.
+        | {read_uncertain_code(r) for r in ruleset.rules if r.severity is Severity.REJECT}
     )
     orphans = unreachable(data["codes"], emitted, data["reviewer_vocabulary"])
     assert not orphans, (

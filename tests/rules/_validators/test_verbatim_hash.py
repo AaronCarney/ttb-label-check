@@ -33,6 +33,7 @@ CANONICAL = (
     "machinery, and may cause health problems."
 )
 SHA = hashlib.sha256(canonicalize_text(CANONICAL).encode("utf-8")).hexdigest()
+WORD_LIST_SHA = "5811aea8a28c1286f855ef842263e1a9b12380437d1dbf4bd82c1e33065121ce"
 
 
 def _rule():
@@ -42,7 +43,11 @@ def _rule():
         validator="verbatim_hash",
         reason_code="WARNING.VERBATIM.MISMATCH",
         match_policy=MatchPolicy.VERBATIM_HASH,
-        parameters={"asset_key": "govt_warning_16_21"},
+        parameters={
+            "asset_key": "govt_warning_16_21",
+            "word_list": "assets/wordlists/en_scowl_50.txt",
+            "word_list_sha256": WORD_LIST_SHA,
+        },
     )
 
 
@@ -158,6 +163,78 @@ READER_MISREAD_KINDS = [
     ("text after a dropped full stop", "health problems.", "health problems Imported by"),
 ]
 
+# A difference that leaves a word no English dictionary holds, or that loses,
+# adds or moves more than one word. Neither is evidence about the label: the
+# printed statement is English, so a non-word is the reader's (Kukich 1992
+# separates these "non-word" errors from "real-word" ones for this reason), and
+# the reader loses and reorders whole lines of a block. docs/decisions.md#0063.
+READER_UNSURE = [
+    ("letters for one", "alcoholic beverages impairs", "alcohouc beverages impairs"),
+    ("letters changed", "beverages impairs", "beverages impares"),
+    ("letters added", "Surgeon General,", "Surgeon Genereral,"),
+    ("a word's letter changed", "the risk of birth", "the risk af birth"),
+    ("a digit inside the statement", "machinery, and", "machinery, 5 and"),
+    ("a stray letter", "defects. (2)", "defects. l (2)"),
+    ("a phrase dropped", "WARNING: (1) According to the Surgeon", "WARNING: Surgeon"),
+    ("text inside", "(2) Consumption", "TM & (c) 2024 (2) Consumption"),
+    (
+        "lines out of order",
+        "because of the risk of birth defects.",
+        "birth defects. because of the risk of",
+    ),
+]
+
+
+@pytest.mark.parametrize(("kind", "printed", "read"), READER_UNSURE)
+def test_a_non_word_or_a_lost_phrase_goes_to_a_reviewer(kind: str, printed: str, read: str) -> None:
+    obs = make_obs(field_id="warning_block", value=CANONICAL.replace(printed, read))
+    res = verbatim_hash(obs, make_expected(field_id="warning_block"), _rule(), _ctx())
+    assert res.outcome is Outcome.INSUFFICIENT_EVIDENCE, kind
+    assert res.reason_code == "WARNING.VERBATIM.NOT_CONFIRMED"
+
+
+# Readings the reader made of TTB-approved labels, with the statement's lines
+# taken out of order. Aligned letter by letter, the rearranged text leaves small
+# differences between real words ("the" before "risk" for "Surgeon"), which are
+# the alignment's and not the label's.
+READER_REORDERED = [
+    (
+        "ttb-24002001000626",
+        "GOVERNMENT WARNING: (1)ACCORDING TO THE SURGEON GENERAL, L, WOMEN SHOULO NOT T DRINK "
+        "ALCOHOLIC BECAUSE OF THE RISK O BIRTH CON- SUMPTION OF TO ORIVE A CAR OR OPERATE MA- "
+        "FALCOHOLIC B BEVERAGES IMPAIRS CHINERY, AND MAY CAUSE HEALTH PROBLEMS.",
+    ),
+    (
+        "ttb-24032001000260",
+        "GOVERNMENT WARNING: (1)ACCORDING TO BIRTH DEFECTS. (2) CONSUMPTION OF ALC- PREGNANCY "
+        "BECAUSE OF THE RISK OF NOT DRINK ALCOHOLIC BEVERAGES DURING AND MAY CAUSE HEALTH "
+        "PROBLEMS.",
+    ),
+]
+
+
+@pytest.mark.parametrize(("label", "read"), READER_REORDERED)
+def test_lines_out_of_order_go_to_a_reviewer(label: str, read: str) -> None:
+    obs = make_obs(field_id="warning_block", value=read)
+    res = verbatim_hash(obs, make_expected(field_id="warning_block"), _rule(), _ctx())
+    assert res.outcome is Outcome.INSUFFICIENT_EVIDENCE, label
+    assert res.reason_code == "WARNING.VERBATIM.NOT_CONFIRMED"
+
+
+def test_a_real_word_difference_beside_a_non_word_is_still_a_mismatch() -> None:
+    text = CANONICAL.replace("the risk of", "the risks of").replace("impairs", "impares")
+    assert _outcome(text) is Outcome.FAIL
+
+
+def test_the_unsure_finding_names_the_word() -> None:
+    res = verbatim_hash(
+        make_obs(field_id="warning_block", value=CANONICAL.replace("impairs", "impares")),
+        make_expected(field_id="warning_block"),
+        _rule(),
+        _ctx(),
+    )
+    assert res.message is not None and '"impares"' in res.message
+
 
 @pytest.mark.parametrize(("label", "printed", "read"), READER_MISREADS)
 def test_a_difference_the_reader_invents_goes_to_a_reviewer(
@@ -190,14 +267,10 @@ TRUE_DIFFERENCES = [
     ("ttb-26229001000034", "the risk of", "the risks of"),
     ("ttb-26212001000085", "beverages impairs", "beverage impairs"),
     ("var-warning-wording", "beverages impairs", "beverages may impair"),
-    # A thin glyph is not a licence for any change near one: "impares" drops an
-    # i and adds an e, and the e is a letter the reader has no pattern of adding.
-    ("var-thin-glyph-and-letter", "beverages impairs", "beverages impares"),
-    ("var-letters-for-one", "alcoholic beverages impairs", "alcohouc beverages impairs"),
-    # Text added inside the statement is not text after it.
-    ("var-text-inside", "(2) Consumption", "TM & (c) 2024 (2) Consumption"),
-    # A thin glyph standing alone, not inside a word, is an added character.
-    ("var-thin-glyph-between-sentences", "defects. (2)", "defects. l (2)"),
+    ("var-word-dropped", "the risk of birth", "the risk birth"),
+    ("var-word-added", "and may cause", "and may also cause"),
+    ("var-word-shortened", "drink alcoholic beverages", "drink alcohol beverages"),
+    ("var-word-for-word", "birth defects", "birth complications"),
 ]
 
 

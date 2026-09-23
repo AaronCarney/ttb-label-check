@@ -63,7 +63,7 @@ def _confidence(observation: FieldObservation) -> float:
 _ALCOHOL_WORDS_RE = re.compile(r"ALC|VOL", re.I)
 
 
-def _rank(observation: FieldObservation) -> tuple[bool, float]:
+def _rank(observation: FieldObservation) -> tuple[bool, bool, float]:
     """How strongly a face's reading of a field claims to be the label's.
 
     The confidence, except for two fields where what was read ranks first. For
@@ -74,18 +74,22 @@ def _rank(observation: FieldObservation) -> tuple[bool, float]:
     read from its heading: a face where only the statement's words were read
     cannot be judged, and one that can outranks it however cleanly it was read.
     The OCR score measures how cleanly characters were read, not which text is
-    the field.
+    the field. Where no face found the warning, a face that read some of its
+    words ranks above one that read none, because those words are what keep
+    the label from being rejected for a warning the reader may have missed.
     """
     value = observation.observed_value
     if not isinstance(value, dict):
-        return False, _confidence(observation)
+        return False, False, _confidence(observation)
+    seen = False
     if observation.field_id == ALCOHOL_FIELD_ID:
         first = bool(_ALCOHOL_WORDS_RE.search(str(value.get("alc_text") or "")))
     elif observation.field_id == WARNING_FIELD_ID:
         first = bool(str(value.get("text") or "").strip())
+        seen = bool(value.get("wording_without_heading") or value.get("warning_words_seen"))
     else:
         first = False
-    return first, _confidence(observation)
+    return first, seen, _confidence(observation)
 
 
 def merge_readings(readings: Sequence[Sequence[FieldObservation]]) -> list[FieldObservation]:

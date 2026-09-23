@@ -24,6 +24,7 @@ from app.rules._validators._helpers import (
     unlocated,
     unlocated_is_absent,
     verdict_result,
+    words_seen_result,
 )
 from app.schemas.expected import ExpectedValue
 from app.schemas.extracted import FieldObservation
@@ -46,6 +47,11 @@ def presence_check(
     heading_not_read = heading_not_read_result(obs, exp, rule, ctx)
     if heading_not_read is not None:
         return heading_not_read
+
+    # No warning found, and some of its words read.
+    words_seen = words_seen_result(obs, exp, rule, ctx)
+    if words_seen is not None:
+        return words_seen
 
     # The reader did not find this on the label. That is a question for a
     # reviewer, not a rejection - see `unlocated` in `_helpers.py`.

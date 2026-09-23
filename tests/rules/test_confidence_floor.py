@@ -1,12 +1,13 @@
-"""The confidence floor: a verdict measured from a reading the reader was
-unsure of is reported as needs review, not as a match or a mismatch.
+"""The confidence floor: a mismatch measured from a reading the reader was
+unsure of is reported as needs review, under the element's own code.
 
-This is requirement R9, a P0 — *"an element that cannot be read with confidence
-is reported as needs review, not as match or mismatch"* — and the mechanism
+This is FR-9: a mismatch only where the product is confident it read the text
+correctly, and a match may rest on the value itself, because a misread rarely
+equals the application's value by chance. The mechanism
 behind it is `YamlRuleEngine._apply_confidence_floor`, which every result passes
 through on its way out of `_finish`. Until this file existed nothing in the suite
-exercised it: `ENGINE.EVIDENCE.BELOW_CONFIDENCE_FLOOR` appeared in
-`app/rules/yaml_engine.py` and nowhere in `tests/`. The rule tests that look like
+exercised it: the engine's floor code appeared in `app/rules/yaml_engine.py`
+and nowhere in `tests/`. The rule tests that look like
 they would cover it call the validator directly
 (`tests/rules/test_warning_rules.py`), which is the one path that skips `_finish`.
 
@@ -16,10 +17,16 @@ and not any validator's.
 
 from __future__ import annotations
 
+import importlib
+import pkgutil
+from pathlib import Path
+
 import pytest
 
+import app.rules._validators as _validators
 from app.rules._validators import VALIDATOR_REGISTRY, register
-from app.rules.yaml_engine import BELOW_CONFIDENCE_FLOOR, YamlRuleEngine
+from app.rules.loader import YamlRuleLoader
+from app.rules.yaml_engine import YamlRuleEngine, read_uncertain_code
 from app.schemas.expected import BeverageClass
 from app.schemas.rejection import Outcome, Severity, ValidationResult
 from app.schemas.rules import ReasonCodeEntry, RuleSet
@@ -34,9 +41,11 @@ from tests.rules.fixtures import (
 # The reason code's own description, as the shipped registry carries it, so one
 # case can prove the sentence reaches a reviewer and not just the code.
 _FLOOR_DESCRIPTION = (
-    "The label reading this check rests on scored below the confidence the rule "
-    "requires, so the check could not be settled; a reviewer reads the label."
+    "The brand name as read differs from what is required, but the reader scored "
+    "that reading below the confidence a rejection needs, so a reviewer checks the "
+    "brand name on the label."
 )
+_BRAND_READ_UNCERTAIN = "BRAND.READ.UNCERTAIN"
 
 
 def _validator_returning(outcome: Outcome, confidence: float, *, with_evidence: bool = True):
@@ -112,13 +121,12 @@ def run_one(request):
 
 
 @pytest.mark.asyncio
-async def test_a_pass_below_the_floor_becomes_needs_review(run_one) -> None:
-    """The case R9 names. A match the reader was unsure of is not a match."""
+async def test_a_pass_below_the_floor_stands(run_one) -> None:
+    """FR-9: finding the application's value on the label shows it was read,
+    whatever score the reader gave the characters."""
     result = await run_one(outcome=Outcome.PASS, confidence=0.40, floor=0.60)
-    assert result.outcome is Outcome.INSUFFICIENT_EVIDENCE
-    assert result.reason_code == BELOW_CONFIDENCE_FLOOR
-    # WARN, not REJECT: nothing was settled, so nothing is held against the label.
-    assert result.severity is Severity.WARN
+    assert result.outcome is Outcome.PASS
+    assert result.reason_code is None
 
 
 @pytest.mark.asyncio
@@ -128,7 +136,8 @@ async def test_a_fail_below_the_floor_becomes_needs_review(run_one) -> None:
     badly, and the rule's own severity here is `reject`."""
     result = await run_one(outcome=Outcome.FAIL, confidence=0.40, floor=0.60)
     assert result.outcome is Outcome.INSUFFICIENT_EVIDENCE
-    assert result.reason_code == BELOW_CONFIDENCE_FLOOR
+    assert result.reason_code == _BRAND_READ_UNCERTAIN
+    # WARN, not REJECT: nothing was settled, so nothing is held against the label.
     assert result.severity is Severity.WARN
 
 
@@ -179,14 +188,28 @@ async def test_the_downgrade_carries_the_sentence_a_reviewer_reads(run_one) -> N
     the code up in the pack's own registry, so a reviewer is told why the check
     could not be settled."""
     result = await run_one(
-        outcome=Outcome.PASS,
+        outcome=Outcome.FAIL,
         confidence=0.40,
         floor=0.60,
         reason_codes={
-            BELOW_CONFIDENCE_FLOOR: ReasonCodeEntry(
+            _BRAND_READ_UNCERTAIN: ReasonCodeEntry(
                 description=_FLOOR_DESCRIPTION, cfr_anchors=(), severity=Severity.WARN
             )
         },
     )
-    assert result.reason_code == BELOW_CONFIDENCE_FLOOR
+    assert result.reason_code == _BRAND_READ_UNCERTAIN
     assert result.message == _FLOOR_DESCRIPTION
+
+
+def test_every_rejecting_rule_has_its_element_code_registered() -> None:
+    """The floor's code is built from the rule's, so each rule that can reject
+    needs its element's code in the registry for a reviewer to read."""
+    for _, modname, _ in pkgutil.iter_modules(_validators.__path__):
+        importlib.import_module(f"{_validators.__name__}.{modname}")
+    ruleset = YamlRuleLoader().load(Path("rules"))
+    for rule in ruleset.rules:
+        if rule.severity is Severity.REJECT:
+            code = read_uncertain_code(rule)
+            entry = ruleset.reason_codes.get(code)
+            assert entry is not None, (rule.rule_id, code)
+            assert entry.severity is Severity.WARN, code

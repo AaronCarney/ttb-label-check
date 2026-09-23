@@ -351,6 +351,49 @@ def heading_not_read_result(
     )
 
 
+def words_seen_result(
+    obs: FieldObservation,
+    exp: ExpectedValue,
+    rule: RuleDefinition,
+    ctx: ValidatorContext,
+) -> ValidationResult | None:
+    """The finding for a warning the reader did not find on a label where it
+    read some of the statement's words, where the rule pack names a code for
+    it; None otherwise.
+
+    Reading no warning is evidence the label carries none only where nothing
+    of the statement was read. Words of it with no heading and too few to be
+    the statement (`warning_words_seen`) are a warning the reader may have
+    failed to find, so the label goes to a reviewer. docs/decisions.md#0063.
+    """
+    code = rule.parameters.get("words_seen_reason_code")
+    value = obs.observed_value
+    if not code or not isinstance(value, dict) or str(value.get("text") or "").strip():
+        return None
+    words = value.get("warning_words_seen")
+    if not words:
+        return None
+    named = ", ".join(f'"{w}"' for w in words)
+    return ValidationResult(
+        rule_id=rule.rule_id,
+        cfr_citation=rule.cfr_citation,
+        beverage_class=obs.beverage_class,
+        outcome=Outcome.INSUFFICIENT_EVIDENCE,
+        severity=Severity.WARN,
+        reason_code=code,
+        aggregated_confidence=_conf(obs),
+        evidence=obs.evidence,
+        expected=exp,
+        observed=obs,
+        engine_meta=_build_meta(rule, ctx),
+        message=(
+            "The reader did not find the government warning on this label, but read "
+            f"words of it: {named}. Check whether the "
+            "label carries the warning."
+        ),
+    )
+
+
 def verdict_result(
     obs: FieldObservation,
     exp: ExpectedValue,

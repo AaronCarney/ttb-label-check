@@ -31,6 +31,10 @@ rules:
       # goes to a reviewer on all three warning rules rather than being
       # rejected for a heading the reader could not make out (decision 0055).
       heading_not_read_reason_code: WARNING.HEADING.NOT_READ
+      # Nor is it the same where the reader read a few of the statement's
+      # words and no heading: the warning may be there and missed, so the
+      # label goes to a reviewer. docs/decisions.md#0063.
+      words_seen_reason_code: WARNING.PRESENCE.NOT_CONFIRMED
     evidence_required: [warning_block]
     confidence_floor: 0.50
     effective_date: "1989-11-18"
@@ -46,6 +50,11 @@ rules:
     parameters:
       asset_key: govt_warning_16_21
       heading_not_read_reason_code: WARNING.HEADING.NOT_READ
+      # An English word list (ESDB, formerly SCOWL, size 50, wordlist.aspell.net), pinned. A
+      # difference that leaves a word it does not hold is not evidence the
+      # label differs, and goes to a reviewer. docs/decisions.md#0063.
+      word_list: assets/wordlists/en_scowl_50.txt
+      word_list_sha256: "5811aea8a28c1286f855ef842263e1a9b12380437d1dbf4bd82c1e33065121ce"
     asset:
       path: assets/warnings/govt_warning_16_21.txt
       sha256_pin: "ea1f4ec004131487df4848a557370cf7312d49ee0da911ff14cbd4e85c82d3e1"

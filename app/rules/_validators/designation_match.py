@@ -16,8 +16,9 @@ Four ways they can agree, in order:
   3. The label's designation is one the decision table lists as falling within
      the application's class — a lager is a beer.
   4. Neither: the label names some other recognised class, which is a
-     disagreement to report; or it names none the list knows, which is a
-     judgement for a reviewer.
+     disagreement to report where the line read is nothing but class names
+     and a reviewer's question where it carries other words; or it names none
+     the list knows, which is a judgement for a reviewer.
 
 The recognised classes and the within-class table are rule-pack data, so
 adding a class is an edit to the rule pack and not to this file.
@@ -222,6 +223,23 @@ def designation_match(
     # label. All three packs set reject, so nothing moves today; hard-coding it
     # here meant a pack could not pilot this rule as a warning and said so
     # nowhere. 4b below is the deliberate exception and carries its reason.
+    #
+    # Only where the line is nothing but class names. The reader's pick is the
+    # largest line naming a class, a guess at which line is the designation, as
+    # a brand pick is (decision 0052); a line carrying other words may be one
+    # the guess took from running text, and a reviewer decides. Decision 0063.
+    class_words = set().union(*label_classes)
+    if label_classes and application_classes and not set(label_words) <= class_words:
+        on_label = _class_as_written(_longest(label_classes), recognised)
+        return result(
+            Outcome.INSUFFICIENT_EVIDENCE,
+            Severity.WARN,
+            rule.parameters.get("needs_review_reason_code", rule.reason_code),
+            f'The line read as the designation, "{observed}", names the class "{on_label}" '
+            f'and the application declares "{declared}", but the line carries other '
+            "words and may not be the label's designation. Check the designation on "
+            "the label.",
+        )
     if label_classes and application_classes:
         return result(
             Outcome.FAIL,

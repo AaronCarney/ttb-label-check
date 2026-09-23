@@ -3831,3 +3831,87 @@ which FR-10 does not cover and does not forbid. A photo whose shapes the detecto
 read, finds nothing, and is judged on that: a picture of coloured shapes comes back a mismatch under
 `WARNING.PRESENCE.MISSING`, as `docs/PRD.md` FR-7 sets for a warning not found on faces
 that were read.
+
+<a id="0063"></a>
+## 0063. A difference rejects a label only where it shows the label differs
+
+**Evidence:** `app/rules/_validators/verbatim_hash.py` (`_unsure_spots`, `_word_list`);
+`app/vision/local.py`; `app/vision/faces.py` (`_rank`); `app/rules/_validators/_helpers.py`
+(`words_seen_result`); `app/rules/_validators/proof_agreement.py` (`_thin_one_apart`);
+`app/rules/_validators/designation_match.py`; `app/rules/yaml_engine.py`
+(`_apply_confidence_floor`, `read_uncertain_code`); `rules/common/health_warning.yaml`;
+`rules/reason_codes.yaml`; `assets/wordlists/en_scowl_50.txt`;
+`tests/rules/_validators/test_verbatim_hash.py`; `tests/test_warning_words_seen.py`;
+`tests/rules/_validators/test_proof_agreement.py`; `tests/rules/_validators/test_designation_match.py`;
+`tests/rules/test_confidence_floor.py`.
+
+**What was found.** `docs/PRD.md` FR-9 allows a mismatch only where the product is confident it read
+the text and that the text is the element. After decisions 0052 to 0062, 17 of the 28 mismatches on
+the held-out set, and 1 of the 3 on the corpus, were still the product misreading a label TTB had
+approved. The confidence floor was meant to catch these and caught none. The OCR scores its own
+misreads, such as "CALISE", "ALCOHOUC" and "GENERERAL", at 0.95 to 0.99, and scores the genuine
+differences at the same level (0.950 to 0.987). Identification was not in doubt either, because a
+heading anchors every warning mismatch. What separated the misreads from the genuine
+differences was the difference itself. Every genuine difference in either set is one real English
+word changed ("beverage" for "beverages", "risks" for "risk", "alcohol" for "alcoholic", "also"
+added). Every misread leaves a non-word, a stray digit, or more than one word lost or moved.
+
+**Chosen.** Five parts, and none of them can move a check toward mismatch:
+
+1. **Warning wording.** A difference from the §16.21 statement that leaves a word missing from an
+   English word list, or that loses, adds or moves more than one word, goes to review under
+   `WARNING.VERBATIM.NOT_CONFIRMED` and names each spot. A clean one-word change between real words
+   stays a mismatch, unless the same reading also lost or moved several words: aligning rearranged
+   text letter by letter invents small clean differences beside the real damage. Checking words
+   against a lexicon is the standard way to detect non-word errors, and it cannot catch an error
+   that produces another real word (Kukich 1992; Nguyen et al. 2021, who note that lexicon-based
+   approaches cannot handle real-word errors). The gate relies on exactly that split: a real-word
+   change is the one kind a misprint and a misread share, so it is the one kind left to reject. The
+   list is ESDB (formerly SCOWL) size 50 from wordlist.aspell.net, bundled with its copyright and
+   permission notice in its header, as its licence requires, and pinned by SHA-256 in the rule pack.
+2. **Warning not found, but words of it read.** Where the reader finds no warning but reads a
+   distinctive word of the statement on any face, such as "drive" or "ability", it passes those
+   words on as `warning_words_seen`. The face merge ranks a face that carries them above one that
+   does not, and the presence rule sends the label to review under
+   `WARNING.PRESENCE.NOT_CONFIRMED` instead of rejecting it for a missing warning.
+3. **Proof one "1" away from twice the ABV.** "17" against 117 goes to review. The reader drops
+   and adds the thin figure "1" as it does thin letters inside a word.
+4. **Class disagreement.** A class named on the label that differs from the application's rejects
+   only where the line read is nothing but class names. Where the line carries other words it may
+   not be the designation, because the reader picks the largest line that names a class, which is a
+   guess of the same kind as the brand pick in decision 0052. That case goes to review and names the
+   class that was read.
+5. **Confidence floor.** The floor now guards only a rejecting mismatch, and reports it under the
+   element's own code, `<ELEMENT>.READ.UNCERTAIN`, so the reviewer is told which element to check.
+   The generic `ENGINE.EVIDENCE.BELOW_CONFIDENCE_FLOOR` is gone. A pass is left alone, because FR-9
+   lets a match rest on the value itself: a misread rarely equals the application's value by
+   chance.
+
+**Rejected.** *A higher box-score floor* (the original plan). The scores do not separate misreads
+from genuine differences at any threshold, so it moves no fault without also moving the genuine
+differences. *A class-word share* for the designation line (class words over all words): genuine
+designations score 0.25 to 0.33, the same range as the fault. *Paragraph geometry* for the
+designation line: it does not flag the keg collar line. *An edit-distance threshold* for the
+warning: "alcohol" for "alcoholic" is a genuine difference and a longer edit than "af" for "of",
+which is a misread.
+
+**Measured.** `uv run python -m eval.corpus_check`, and the same with `--registry`, both through
+the production path. Corpus: mismatched checks 3 to 2, both genuine warning differences; checks
+settled without a person unchanged at 80.7%. Held-out: mismatched checks 28 to 11, which are the 3
+genuine warning differences and the 8 warnings printed only on an image the upload does not take;
+none is the product misreading; settled without a person unchanged at 75.2%, and matched checks 1,074
+to 1,090. Both runs report no reason code that contradicts its outcome. Among the corpus's 26 faces
+that carry no warning, none carries a warning word, so part 2 moves no label that truly lacks one.
+
+**What it leaves.** The kinds of signal were found by reading the held-out failures, so the held-out
+figure is not a clean out-of-sample measurement. The word-list rule is also supported by misreads on
+the corpus ("ORINK", "HEAILTH", "ALCOHOIC", "GOVERNMENTWARNING"). A designation that genuinely names
+another class inside a longer line now goes to review instead of mismatch; none of the 124 class
+checks measured was a genuine disagreement. A misread that produces another real word in
+place of one word still rejects: the product cannot tell it from a misprint, and the warning must be
+exact.
+
+**References.** Kukich, K. (1992). Techniques for automatically correcting words in text. *ACM
+Computing Surveys* 24(4), 377–439. https://doi.org/10.1145/146370.146380. Nguyen, T. T. H.,
+Jatowt, A., Coustaty, M., Doucet, A. (2021). Survey of post-OCR processing approaches. *ACM
+Computing Surveys* 54(6). https://doi.org/10.1145/3453476.

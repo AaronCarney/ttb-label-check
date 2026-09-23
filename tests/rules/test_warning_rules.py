@@ -96,7 +96,7 @@ def test_warning_verbatim_pos(ruleset) -> None:
 def test_warning_verbatim_neg(ruleset) -> None:
     rule = _by_id(ruleset, "common.warning.verbatim")
     obs = make_obs(
-        field_id="warning_block", value=CANONICAL_WARNING.replace("birth defects", "complications")
+        field_id="warning_block", value=CANONICAL_WARNING.replace("birth defects", "birth problems")
     )
     res = VALIDATOR_REGISTRY[rule.validator](
         obs, make_expected(field_id="warning_block"), rule, _ctx(ruleset)

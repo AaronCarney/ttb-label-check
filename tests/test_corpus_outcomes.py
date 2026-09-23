@@ -42,12 +42,7 @@ GENUINE_MISMATCHES = {
 
 # The product reports a mismatch on an approved label because it read the
 # label wrong. Each line names the cause. When a fix lands, delete its line.
-WRONG_MISMATCHES = {
-    (
-        "ttb-26240001000454",
-        "malt.class_type.matches_application",
-    ): "'Double India Pale Ale' is handwritten and not read; another collar line is picked",
-}
+WRONG_MISMATCHES: dict[tuple[str, str], str] = {}
 
 
 @lru_cache(maxsize=1)

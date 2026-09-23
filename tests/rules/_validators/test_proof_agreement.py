@@ -91,6 +91,24 @@ def test_a_decimal_proof_equal_to_twice_a_decimal_abv_matches() -> None:
     assert result.outcome is Outcome.PASS
 
 
+@pytest.mark.parametrize(
+    ("abv", "read"),
+    [
+        (58.5, "17"),  # ttb-23335001000512: "(117 Proof)" read as "(17 Proof)"
+        (45.0, "910"),
+        (5.5, "111"),
+    ],
+)
+def test_a_proof_off_by_one_thin_one_goes_to_a_reviewer(abv: float, read: str) -> None:
+    """A "1" is the figure the reader drops or adds, as it drops and adds thin
+    letters inside a word, so a proof that is twice the ABV but for one of them
+    is not shown to disagree."""
+    result = _check(abv, _proof(read))
+    assert result.outcome is Outcome.INSUFFICIENT_EVIDENCE
+    assert result.reason_code == _REVIEW
+    assert result.message is not None and "misread" in result.message
+
+
 def test_a_proof_rounded_to_its_printed_precision_goes_to_a_reviewer() -> None:
     # Twice 42.8 is 85.6; a label printing "86" has rounded it, which the
     # regulation neither permits nor forbids in words.

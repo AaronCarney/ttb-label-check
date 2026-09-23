@@ -41,13 +41,13 @@ from app.schemas.rules import RuleSet
 
 PER_RULE_TIMEOUT_S = 0.25
 
-# The two outcomes that assert something about the label, and so are the two
-# the rule's confidence floor guards. The rest already say that no comparison
-# was reached.
-_ASSERTS_A_VERDICT = frozenset({Outcome.PASS, Outcome.FAIL})
 
-# What a rule reports when its reading scored below the rule's own floor.
-BELOW_CONFIDENCE_FLOOR = "ENGINE.EVIDENCE.BELOW_CONFIDENCE_FLOOR"
+def read_uncertain_code(rule) -> str:
+    """What a rule reports when its reading scored below the rule's own floor:
+    the element's own code, taken from the first part of the rule's, so a
+    reviewer is told which element could not be read with confidence (FR-9)."""
+    return f"{str(rule.reason_code).split('.')[0]}.READ.UNCERTAIN"
+
 
 # Three vocabularies name the same label element, and the engine sits between
 # all three. The reader emits physical field ids (`brand_name`, `abv`,
@@ -217,20 +217,24 @@ class YamlRuleEngine(RuleEngine):
 
     @staticmethod
     def _apply_confidence_floor(rule, result: ValidationResult) -> ValidationResult:
-        """A verdict is only as good as the reading it was measured from.
+        """A mismatch is only as good as the reading it was measured from.
 
-        Each rule declares the confidence its reading must reach before the
-        answer can be relied on (`confidence_floor`). Below it, the rule
-        reports that it could not be settled instead of passing or rejecting,
-        so a reading the reader is unsure of goes to a reviewer rather than
-        rejecting the label as a confident one would.
+        Each rule declares the confidence its reading must reach before a
+        rejection can be relied on (`confidence_floor`). Below it, the rule
+        reports that it could not be settled instead of rejecting, so a
+        reading the reader is unsure of goes to a reviewer rather than
+        rejecting the label as a confident one would. A pass is left alone:
+        a misread rarely equals the application's value by chance, so finding
+        the value shows it was read (FR-9). Decision 0063.
 
         The floor applies only where there was a reading to score — see
         `_scored_a_reading`. A required statement that is simply absent scores
         zero because nothing was read, not because the reading was poor, and
         the rule that found it missing is entitled to say so.
         """
-        if result.outcome not in _ASSERTS_A_VERDICT or not _scored_a_reading(rule, result):
+        if result.outcome is not Outcome.FAIL or result.severity is not Severity.REJECT:
+            return result
+        if not _scored_a_reading(rule, result):
             return result
         if result.aggregated_confidence >= rule.confidence_floor:
             return result
@@ -238,7 +242,7 @@ class YamlRuleEngine(RuleEngine):
             update={
                 "outcome": Outcome.INSUFFICIENT_EVIDENCE,
                 "severity": Severity.WARN,
-                "reason_code": BELOW_CONFIDENCE_FLOOR,
+                "reason_code": read_uncertain_code(rule),
             }
         )
 

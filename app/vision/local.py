@@ -1773,6 +1773,14 @@ def _parse(
             "confidence": 0.0,
         }
         if wording is None:
+            # Too few of the statement's words to be it, but any at all say the
+            # reader may have missed a warning that is there, so they are
+            # handed on for the presence rule rather than dropped.
+            seen: set[str] = set()
+            for box in warning_boxes:
+                seen |= _WARNING_BODY_WORDS.intersection(normalize_words(box.text))
+            if seen:
+                absent["warning_words_seen"] = sorted(seen)
             out["gov_warning"] = (absent, None, None)
         else:
             # The statement's words with no heading read. `text` stays empty,
