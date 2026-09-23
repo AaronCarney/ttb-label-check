@@ -67,26 +67,28 @@ needed to run the app; [Getting started](#getting-started) is.
 
 R15 in [the requirements](specs/0001-label-verification/requirements.md) and NFR-1 in
 [the PRD](docs/PRD.md) are one promise, and both mark it P0: 95 percent of single checks show
-results within five seconds of pressing check. Measured on the deployed service of version 0.4.0,
+results within five seconds of pressing check. Measured on the deployed service of version 0.4.4,
 from the moment a check is submitted to the moment its result reaches the page, sending every face
-of each label: **15 of 37 checks inside five seconds in one run and 16 of 37 in a second run
-minutes later** — 41% and 43% against a requirement of 95%. The median check took 5.60 and 5.46
-seconds; the slowest took 10.72. Nothing was stopped early and nothing was answered out of the
-cache. Thirty-six checks returned all seven fields; the thirty-seventh is the deliberately blurred
-sample, which the quality gate turns away.
+of each label: **19 of 37 checks inside five seconds** — 51% against a requirement of 95%. The
+median check took 4.90 seconds; the slowest took 9.32. Nothing was stopped early and nothing was
+answered out of the cache. Thirty-six checks returned all seven fields; the thirty-seventh is the
+deliberately blurred sample, which the quality gate turns away. Version 0.4.0 made 15 and 16 of 37
+in two runs, medians 5.60 and 5.46 seconds.
 
-**Most of the wait is reading the images.** Of the median check, reading its images took 4.57 and
-4.35 seconds, and submitting, opening the results page and receiving the result over its stream
-0.62 and 0.58. The 33 submissions carrying a back made 11 and 12 of 33 inside the budget, median
-6.27 and 6.01 seconds; the four with only a front made 4 of 4, median 3.35 and 3.04. The back is
-worth its cost: the government warning is printed on the back of 20 of the 30 corpus labels, so a
-check that skipped it would be faster and wrong.
+**Most of the wait is reading the images.** Of the median check, reading its images took 4.28
+seconds, and submitting, opening the results page and receiving the result over its stream about
+0.7. The 33 submissions carrying a back made 15 of 33 inside the budget, median 5.66 seconds; the
+four with only a front made 4 of 4, median 3.36. The back is worth its cost: the government warning
+is printed on the back of 20 of the 30 corpus labels, so a check that skipped it would be faster and
+wrong.
 
-**Reading on the deployed service is slower than it was, and the cause is not yet found.** The
-build before 0.4.0 made 23 and 33 of 37, with reading at 3.33 and 3.09 seconds for the median
-check, about 1.3 seconds less. Timed on its own on the same 12 labels on a development machine,
-the reading code takes the same time before and after 0.4.0's reader fixes (median 1.03 and 1.02
-seconds per label), so those fixes do not explain the difference there.
+**The speed depends on the processor the service is given, and that varies.** Cloud Run does not
+let a service choose its processor, so the same code can run on a faster or slower machine from
+one deployment to the next. The build before 0.4.0 made 23 and 33 of 37, with reading at 3.33 and
+3.09 seconds for the median check; the same reading code, timed on one machine, takes the same time
+before and after ([decision 0066](docs/decisions.md#0066)). Every figure above is therefore a
+measurement of this code on the processor it was given that day. `/api/health` reports that
+processor, and each timing record stores it beside the times.
 
 **An earlier measurement found a defect instead.** The service ran one request at a time
 on up to two instances, and a check's results stream held its instance for as long as the check

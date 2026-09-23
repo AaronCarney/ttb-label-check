@@ -328,12 +328,15 @@ flattering and they are the honest state of a processor-only reader on display t
 
 **The five-second requirement is measured on the deployed service, and it is missed.** It belongs to
 the deployed hardware, so we measure it there rather than on a developer's machine, from submitting
-a check to its result reaching the page: on version 0.4.0, 15 of 37 checks inside five seconds in
-one run and 16 of 37 in a second minutes later, against a requirement of 95 percent, with medians of
-5.60 and 5.46 seconds, most of it reading the images. Nothing was stopped early and nothing came out
-of the cache, so these are slow checks rather than blank ones. The build before 0.4.0 made 23 and 33
-of 37, and reading on the service is about 1.3 seconds slower than it was, although the reading
-code timed on its own is not. An earlier attempt found a defect instead: a second instance of the
+a check to its result reaching the page: on version 0.4.4, 19 of 37 checks inside five seconds,
+against a requirement of 95 percent, with a median of 4.90 seconds, most of it reading the images.
+Nothing was stopped early and nothing came out of the cache, so these are slow checks rather than
+blank ones. Measuring on the deployed hardware has a cost we name: Cloud Run does not let a service
+choose its processor, and the processor changes the speed. The build before 0.4.0 made 23 and 33 of
+37 and 0.4.0 made 15 and 16, a difference in reading of about 1.3 seconds that the reading code, timed
+on one machine, does not show ([decision 0066](decisions.md#0066)). So a figure here is this code on
+the processor it was given that day, and the service now reports that processor beside every
+timing. An earlier attempt found a defect instead: a second instance of the
 service did not know the first one's batches, so a check could be shown no result at all. The
 service now runs one instance ([decision 0048](decisions.md#0048)).
 

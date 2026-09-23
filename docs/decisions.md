@@ -4116,6 +4116,15 @@ directly.
    them only where the reader returned nothing, so a failed reader on a blurred photograph still
    names the photograph.
 
+**Measured live on 0.4.4** (`docs/evidence/2026-09-23-live-latency-0.4.4.json`), which carries
+both fixes: 19 of 37 checks inside five seconds, median 4.90 seconds, median read 4.28 seconds,
+against 15 and 16 of 37, median read 4.57 and 4.35, on 0.4.0. The read did not return to the 3.1-3.3
+seconds of the build before 0.4.0, so a fresh instance did not settle the question either way. The
+speed a check reaches depends on the processor Cloud Run assigns, which a service cannot choose, so
+`/api/health` now reports the processor and the live timing record stores it before and after each
+run. The sandbox hides the processor's name and stepping; on this run it reported an Intel family 6
+model 85 part, the same on both readings.
+
 **Rejected.** *Reading a label's two faces at once* on two engines of two threads each. Over 16
 two-faced submissions on four cores, the median check took 927 ms read one face after the other and
 937 ms read together. The engine already uses every core it has for one image. *Cheaper quality
