@@ -7,6 +7,13 @@ date: the release's git tag records when it was cut. Versions follow
 
 ## [Unreleased]
 
+### Changed
+
+- The lint, type check and whole suite run on the developer's machine through `scripts/ci.sh`,
+  which records a pass for the commit it checked. The pre-push hook and `scripts/deploy.sh` refuse a
+  commit without one, and no hosted pipeline runs. `TTB_SKIP_PIPELINE_CHECK` is replaced by
+  `TTB_SKIP_CI_CHECK`. See `docs/decisions.md#0067`.
+
 ## [0.4.1]
 
 ### Changed

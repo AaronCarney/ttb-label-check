@@ -4121,3 +4121,30 @@ two-faced submissions on four cores, the median check took 927 ms read one face 
 937 ms read together. The engine already uses every core it has for one image. *Cheaper quality
 gates on a downscaled image.* Their thresholds are measured on the full image, so they would decide
 differently.
+
+<a id="0067"></a>
+## 0067. The checks run on the developer's machine, and a push and a deploy need their pass
+
+**Evidence:** `scripts/ci.sh`, `.githooks/pre-push`, `scripts/deploy.sh`;
+`tests/test_ci_script_runs_the_checks.py`, `tests/test_deploy_ci_gate.py`.
+
+**What was found.** The lint, type check and whole suite ran on GitLab's shared runners on every
+push. In one month that spent 372 runner minutes over 94 pipelines, 308 of them in the test job, and
+GitLab then refused new pipelines for lack of quota. The deploy gate read GitLab's verdict for the
+commit, so with no pipeline it could only refuse or be overridden, and every deploy became an
+override.
+
+**Chosen.** `scripts/ci.sh` runs the same checks here, on a clean tree, and records a pass against
+the commit it checked, in the repository's git directory so the record never enters a commit. The
+pre-push hook refuses to push a commit with no recorded pass, running the checks first when the
+commit is the one checked out. `scripts/deploy.sh` refuses to deploy one. `.gitlab-ci.yml` is
+removed, so a push starts no pipeline. The script refuses to run without pnpm, because the browser
+tests skip without it and a green run would then prove nothing about the interface, the failure the
+pipeline file had guarded against.
+
+**Rejected.** *A self-hosted GitLab runner on this machine.* It runs the same commands on the same
+machine, and adds a registered service and a network round-trip to give GitLab a verdict nobody reads
+there. *Skipping the pipeline on pushes that change only documentation.* It spends fewer minutes but
+still spends them on every code push, and leaves the deploy gate hostage to the quota. *A pre-push
+hook alone.* `git push --no-verify` skips it, and a deploy is not a push, so the deploy reads the
+same record itself.

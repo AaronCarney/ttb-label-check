@@ -10,12 +10,11 @@
 #   scripts/deploy.sh --check   Run every preflight that needs no network, then
 #                               stop. Proves the repository is deployable
 #                               without making anything public.
-#   scripts/deploy.sh           Run the preflights, check that the pipeline for
-#                               this commit passed, then build and deploy.
+#   scripts/deploy.sh           Run the preflights, check that scripts/ci.sh
+#                               passed this commit, then build and deploy.
 #
-# A deploy refuses to proceed unless `.gitlab-ci.yml` has run and passed for the
-# exact commit being deployed. That includes a commit nobody has pushed, which
-# has been tested by nothing but the machine it was written on.
+# A deploy refuses to proceed unless `scripts/ci.sh` has run and passed for the
+# exact commit being deployed (decision 0067).
 #
 # The service keeps Cloud Run's invoker check enabled, so the URL Cloud Run
 # issues answers nothing without a Google-signed ID token. One service account
@@ -37,11 +36,11 @@
 #   TTB_SERVICE       Cloud Run service name. Defaults to ttb-label-check.
 #   TTB_INVOKER_SA    The service account permitted to invoke the service.
 #                     Defaults to ttb-edge-invoker in TTB_GCP_PROJECT.
-#   TTB_SKIP_PIPELINE_CHECK
-#                     Set to 1 to deploy without reading the pipeline's verdict
-#                     for this commit. For a deploy that has to go out while
-#                     GitLab is unreachable, and it says on the terminal that
-#                     nothing has tested what is being shipped.
+#   TTB_SKIP_CI_CHECK Set to 1 to deploy a commit scripts/ci.sh has not
+#                     passed. It says on the terminal that nothing has tested
+#                     what is being shipped.
+#   TTB_CI_RECORD_DIR Where scripts/ci.sh records its passes. Defaults to the
+#                     same place scripts/ci.sh writes them.
 #   TTB_ACCESS        Set to "keep" to pass no access flag at all, leaving the
 #                     service's existing IAM policy exactly as it is. Use this
 #                     for a deploy that ships code and is not meant to change
@@ -216,71 +215,29 @@ fi
 # probe against the live service to settle.
 COMMIT="$(git rev-parse HEAD)"
 
-# The pipeline for that commit must have passed.
+# scripts/ci.sh must have passed that commit.
 #
-# Until this existed, the only thing standing between a broken commit and the
-# live service was whether the person typing the command remembered to run the
-# suite. The preflights above check that the repository is *shippable* — a
-# Dockerfile, matching ports, a tracked bundle — and none of them runs a test.
-# `.gitlab-ci.yml` runs the lint, the formatter, the type check and the whole
-# suite, and its verdict is a fact about this exact SHA, which is the fact a
-# deploy needs.
+# The preflights above check that the repository is *shippable* — a Dockerfile,
+# matching ports, a tracked bundle — and none of them runs a test.
+# `scripts/ci.sh` runs the lint, the formatter, the type check and the whole
+# suite on a clean tree and records a pass against the commit it tested, so the
+# record is a fact about this exact SHA, which is the fact a deploy needs.
 #
-# This is the one gate that needs the network, which is why it sits below the
-# `--check` exit: `--check` is documented as the preflights that need none.
+# This sits below the `--check` exit because `--check` proves the repository is
+# deployable, which it can be before its checks have run.
 #
-# Refusing when there is no pipeline at all is deliberate and is the common
-# case, not an edge one — a commit that has not been pushed has never been
-# tested by anything but the machine it was written on. The message says to
-# push, because pushing is the fix.
-#
-# TTB_SKIP_PIPELINE_CHECK=1 is the escape hatch, for a deploy that has to go out
-# while GitLab is unreachable. It announces exactly what is unknown, so the
-# override appears in the terminal scrollback of whoever used it.
-if [ "${TTB_SKIP_PIPELINE_CHECK:-0}" = "1" ]; then
-    echo "  note  TTB_SKIP_PIPELINE_CHECK=1 — deploying ${COMMIT} without knowing" >&2
-    echo "        whether its pipeline passed. Nothing has tested this commit." >&2
+# TTB_SKIP_CI_CHECK=1 is the escape hatch. It announces exactly what is unknown,
+# so the override appears in the terminal scrollback of whoever used it.
+CI_RECORD_DIR="${TTB_CI_RECORD_DIR:-$(git rev-parse --git-path ci-passed)}"
+if [ "${TTB_SKIP_CI_CHECK:-0}" = "1" ]; then
+    echo "  note  TTB_SKIP_CI_CHECK=1 — deploying ${COMMIT} without a recorded" >&2
+    echo "        pass from scripts/ci.sh. Nothing has tested this commit." >&2
+elif [ -e "$CI_RECORD_DIR/$COMMIT" ]; then
+    echo "  ok    scripts/ci.sh passed ${COMMIT}"
 else
-    for tool in glab jq; do
-        if ! command -v "$tool" >/dev/null 2>&1; then
-            echo "$tool is not on PATH, so the pipeline for ${COMMIT} cannot be read." >&2
-            echo "Install it, or set TTB_SKIP_PIPELINE_CHECK=1 to deploy untested." >&2
-            exit 2
-        fi
-    done
-
-    PIPELINES="$(glab api "projects/:id/pipelines?sha=${COMMIT}" 2>/dev/null || true)"
-    if [ -z "$PIPELINES" ]; then
-        echo "Could not reach GitLab to read the pipeline for ${COMMIT}." >&2
-        echo "Check 'glab auth status', or set TTB_SKIP_PIPELINE_CHECK=1 to deploy untested." >&2
-        exit 1
-    fi
-
-    # Newest first, which is what the API returns, so a re-run that passed is
-    # the verdict rather than the failure it replaced.
-    PIPELINE_STATUS="$(printf '%s' "$PIPELINES" | jq -r '.[0].status // "none"')"
-    PIPELINE_URL="$(printf '%s' "$PIPELINES" | jq -r '.[0].web_url // ""')"
-
-    case "$PIPELINE_STATUS" in
-        success)
-            echo "  ok    the pipeline for ${COMMIT} passed: ${PIPELINE_URL}"
-            ;;
-        none)
-            echo "No pipeline has ever run for ${COMMIT}, so nothing has tested it." >&2
-            echo "Push the commit and let the pipeline finish, then deploy. Nothing was deployed." >&2
-            exit 1
-            ;;
-        running | pending | created | preparing | waiting_for_resource | scheduled)
-            echo "The pipeline for ${COMMIT} is still ${PIPELINE_STATUS}: ${PIPELINE_URL}" >&2
-            echo "Wait for it to finish, then deploy. Nothing was deployed." >&2
-            exit 1
-            ;;
-        *)
-            echo "The pipeline for ${COMMIT} is ${PIPELINE_STATUS}, not success: ${PIPELINE_URL}" >&2
-            echo "Nothing was deployed." >&2
-            exit 1
-            ;;
-    esac
+    echo "scripts/ci.sh has not passed ${COMMIT}, so nothing has tested it." >&2
+    echo "Run scripts/ci.sh, then deploy. Nothing was deployed." >&2
+    exit 1
 fi
 
 # Export the commit rather than the directory. This is what keeps an untracked

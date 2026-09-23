@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+#
+# Refuse to push a commit `scripts/ci.sh` has not passed (decision 0067).
+#
+# Enabled once per clone with `git config core.hooksPath .githooks`. Git passes
+# one line per ref being pushed on stdin; a commit being pushed with no recorded
+# pass is checked now if it is HEAD, and refused otherwise, because the checks
+# can only run against the checked-out tree.
+
+set -euo pipefail
+
+cd "$(git rev-parse --show-toplevel)"
+
+RECORD_DIR="${TTB_CI_RECORD_DIR:-$(git rev-parse --git-path ci-passed)}"
+ZERO=0000000000000000000000000000000000000000
+HEAD_COMMIT="$(git rev-parse HEAD)"
+
+while read -r _local_ref local_sha _remote_ref _remote_sha; do
+    # A deleted ref pushes no commit, and a tag names a commit already checked
+    # when its branch was pushed; only commits are held to the record.
+    [ "$local_sha" = "$ZERO" ] && continue
+    [ "$(git cat-file -t "$local_sha")" = "commit" ] || continue
+    [ -e "$RECORD_DIR/$local_sha" ] && continue
+
+    if [ "$local_sha" = "$HEAD_COMMIT" ]; then
+        echo "No local pass is recorded for ${local_sha}; running scripts/ci.sh." >&2
+        scripts/ci.sh </dev/null
+    else
+        echo "No local pass is recorded for ${local_sha}, and it is not HEAD, so it cannot" >&2
+        echo "be checked here. Check it out, run scripts/ci.sh, then push. Nothing was pushed." >&2
+        exit 1
+    fi
+done

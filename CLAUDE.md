@@ -18,6 +18,7 @@ outside the project environment and fails to import `app`, so every Python comma
 | Run the app | `uv run uvicorn app.main:app --port 8000` |
 | Run the app with reload | `uv run task demo` |
 | Run the tests | `uv run pytest -q` |
+| Run every check and record the pass a push and a deploy need | `scripts/ci.sh` |
 | Score the reader on real labels | `uv run python -m eval.read_accuracy` |
 | Install frontend dependencies | `cd frontend && pnpm install` |
 | Build the frontend island | `cd frontend && pnpm build` |

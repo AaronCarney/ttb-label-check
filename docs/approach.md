@@ -443,12 +443,13 @@ constant went stale, still saying 0.1.0 after the release that cut 0.2.0, which 
 identifying a running build the one field that lied. The deploy builds from an export of the
 committed revision rather than the working tree, so nothing uncommitted can reach the image.
 
-**The pipeline gates the deploy.** Until one existed, seven browser tests failed unnoticed for
-days; every push now runs the lint, the formatter, the types and the whole suite, and no job may
-be allowed to fail — a test reads the pipeline file and fails if one is, because a job that cannot
-fail the pipeline is the same defect as a test that cannot fail. `scripts/deploy.sh` reads that
-verdict for the exact commit it is about to ship and refuses anything short of a pass, so a proven
-commit and a deployed image are no longer two separate acts of remembering.
+**The checks gate the push and the deploy.** Until they did, seven browser tests failed unnoticed
+for days. `scripts/ci.sh` now runs the lint, the formatter, the types and the whole suite, stops at
+the first failure, and records a pass against the exact commit it checked. The pre-push hook and
+`scripts/deploy.sh` both read that record and refuse a commit without one, so a proven commit and a
+deployed image are no longer two separate acts of remembering. The checks run on the developer's
+machine rather than a hosted runner, whose free quota ran out
+([0067](decisions.md#0067)).
 
 ## Assumptions we made
 

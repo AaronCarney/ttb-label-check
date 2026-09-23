@@ -42,17 +42,17 @@ def test_package_json_does_not_hold_settings_pnpm_ignores() -> None:
 
 
 def test_the_pnpm_version_is_pinned() -> None:
-    """CI installed pnpm with `npm install --global pnpm`, which is whatever is
-    newest on the day the job runs. That is how a major version that changed
-    where settings live arrived without anyone choosing it. The version is
-    declared once, here, and CI installs that."""
+    """An unpinned pnpm is whatever is newest on the day it is installed. That
+    is how a major version that changed where settings live arrived without
+    anyone choosing it. The version is declared once, here, and `scripts/ci.sh`
+    refuses to run under any other."""
     package = json.loads((FRONTEND / "package.json").read_text(encoding="utf-8"))
     declared = package.get("packageManager", "")
     assert declared.startswith("pnpm@"), (
-        "frontend/package.json declares no `packageManager`, so nothing pins the pnpm CI installs"
+        "frontend/package.json declares no `packageManager`, so nothing pins pnpm"
     )
-    ci = (FRONTEND.parent / ".gitlab-ci.yml").read_text(encoding="utf-8")
-    assert declared in ci, (
-        f"the CI job does not install the declared package manager {declared!r}, so the version "
-        "CI runs can drift away from the version this repository was built against"
+    ci = (FRONTEND.parent / "scripts/ci.sh").read_text(encoding="utf-8")
+    assert '"packageManager"' in ci and "pnpm --version" in ci, (
+        "scripts/ci.sh does not hold pnpm to the declared package manager, so the version "
+        "the checks run can drift away from the version this repository was built against"
     )

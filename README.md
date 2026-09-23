@@ -254,6 +254,19 @@ three tests marked slow; the lowest-covered module is the rule-pack loader at 82
 rather than gated, because a threshold set before anyone had measured the real number shapes the
 suite to the threshold rather than to the product.
 
+### Before a push or a deploy
+
+```bash
+git config core.hooksPath .githooks   # once per clone
+scripts/ci.sh
+```
+
+`scripts/ci.sh` runs all of the above — lint, formatting, types, and the whole suite with coverage —
+on a clean tree, refuses to start without pnpm so the browser group cannot skip, and records a pass
+against the commit it checked. The pre-push hook and `scripts/deploy.sh` both refuse a commit with
+no recorded pass. The checks run on the developer's machine; no hosted pipeline runs them
+(`docs/decisions.md#0067`).
+
 ### The container path
 
 Same app, one command, if you would rather not install anything:
@@ -268,8 +281,8 @@ It serves the same <http://localhost:8000> and needs no secrets either.
 
 Every Python dependency resolves from `uv.lock`, hash for hash, and the container installs from it
 frozen. The built front-end bundle is committed, and `tests/test_island_build_clean.py` rebuilds it
-and fails if the result differs — that test is in the pnpm-gated group above, so it is the pipeline
-rather than a local run that holds the bundle to its source. The OCR models ship inside the
+and fails if the result differs — that test is in the pnpm-gated group above, and `scripts/ci.sh`
+refuses to run without pnpm, so the checks every push passes hold the bundle to its source. The OCR models ship inside the
 installed package; nothing is downloaded when the app runs.
 
 Two things are **not** pinned, and you should see them named rather than find them: the container's

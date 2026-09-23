@@ -12,8 +12,7 @@ ENV PYTHONUNBUFFERED=1 \
 # the one thread cap `LocalVisionEngine` cannot set for itself, and its docstring
 # says so: it belongs in the process environment, and this image is where the
 # deployed product sets it. Left unset, OpenBLAS runs one thread per core and
-# contends with the three onnxruntime sessions a read has already sized. 2 is
-# what `.gitlab-ci.yml` uses for the same reason.
+# contends with the three onnxruntime sessions a read has already sized.
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
         build-essential libgl1 libglib2.0-0 \
