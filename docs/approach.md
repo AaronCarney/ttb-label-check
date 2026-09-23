@@ -328,12 +328,14 @@ flattering and they are the honest state of a processor-only reader on display t
 
 **The five-second requirement is measured on the deployed service, and it is missed.** It belongs to
 the deployed hardware, so we measure it there rather than on a developer's machine, from submitting
-a check to its result reaching the page: 23 of 37 checks inside five seconds in one run and 33 of
-37 in a second minutes later, against a requirement of 95 percent, with medians of 4.19 and 3.73
-seconds, most of it reading the images. Nothing was stopped early and nothing came out of the cache,
-so these are slow checks rather than blank ones. The first attempt that morning found a defect
-instead: a second instance of the service did not know the first one's batches, so a check could be
-shown no result at all. The service now runs one instance ([decision 0048](decisions.md#0048)).
+a check to its result reaching the page: on version 0.4.0, 15 of 37 checks inside five seconds in
+one run and 16 of 37 in a second minutes later, against a requirement of 95 percent, with medians of
+5.60 and 5.46 seconds, most of it reading the images. Nothing was stopped early and nothing came out
+of the cache, so these are slow checks rather than blank ones. The build before 0.4.0 made 23 and 33
+of 37; 0.4.0 carries the reader fixes in `CHANGELOG.md`, and its median read is about 1.3 seconds
+longer. An earlier attempt found a defect instead: a second instance of the service did not know
+the first one's batches, so a check could be shown no result at all. The service now runs one
+instance ([decision 0048](decisions.md#0048)).
 
 **The cost is the second face, and it bought a correct answer.** Until 2026-09-19 the page took one
 image and the same set measured 35 of 37 inside five seconds — but the warning is on the back of 20
