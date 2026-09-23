@@ -17,17 +17,18 @@ application takes five to ten minutes by eye. In peak season importers file hund
 
 The requirements came from the four people in the brief, answered one at a time rather than
 averaged. The agent with 28 years in the job said "you need judgment", so nothing auto-rejects and
-anything the app cannot settle comes back labelled unsettled. The reviewer eight months in said it
-has to be exact, so the warning is compared word for word and a check that cannot be measured is
-visibly switched off rather than silently skipped. The deputy director wanted speed and batches, so
-results stream back as each one finishes. IT said don't do anything crazy, and the answer was to
-build nothing they have to operate.
+anything the app cannot settle comes back with its best answer and a flag asking the agent to
+confirm it. The reviewer eight months in said it has to be exact, so the warning is compared word
+for word and a check that cannot be measured is visibly switched off rather than silently skipped.
+The deputy director wanted speed and batches, so results stream back as each one finishes. IT said
+don't do anything crazy, and the answer was to build nothing they have to operate.
 
 This app does the matching. You give it an application's declared values and the label images filed
 with it; it reads the label, compares the two, and returns one verdict per element with the rule and
-the regulation behind it. Three outcomes only — **match**, **mismatch**, or **needs review**, which
-the interface labels Pass, Fail and Needs review — and the third is a real answer, used wherever the
-app can see the element but cannot honestly decide it.
+the regulation behind it. Every verdict is an answer, **match** or **mismatch**, which the interface
+labels Pass and Fail. Where the app cannot honestly decide an element, the answer is its best guess
+and carries a **Needs review** flag and a Confirm button; where it is sure, the answer stands with
+nothing to confirm ([decision 0065](docs/decisions.md#0065)).
 
 There is one way in and one way it works: a form that takes one label or three hundred, and a
 results page that streams verdicts back as each label finishes. A submission of one label is a batch
@@ -126,18 +127,71 @@ uv sync
 uv run task demo
 ```
 
-Then open <http://localhost:8000>. Upload the front of a label and, if the label has one, its back
-— the government warning is usually printed on the back, so a front on its own is checked for a
-warning that is not on it. Fill in the application fields beside the images and submit. The first
-label is slower than the rest: the OCR models are read off disk once, on first use, and kept for the
-life of the process.
+Then open <http://localhost:8000>, or the deployed URL above, and follow the steps below. The first
+label after the app starts is slower than the rest: the OCR models are read off disk once, on first
+use, and kept for the life of the process.
 
-**To try it with no labels of your own**, follow the **Download a 10-label sample** link on the
-entry page. It carries real approved labels and `applications.csv` beside them, one row per label
-holding the application actually filed for it. Unzip it and select the whole folder in the
-label-images picker: the CSV among the images is read as the applications, so nothing has to be
-typed and every label comes back checked against its own application. A batch with no CSV is still
-read and still checked for what every label must carry, and says so.
+### Checking one label
+
+1. Press **Label images** and pick the photographs of the label. Pick the back as well as the front:
+   the government warning is usually on the back, and a front on its own is checked for a warning
+   that is not on it. To pick more than one file, hold **Ctrl** (**Cmd** on a Mac) while you click.
+2. If the files are not named `something-front` and `something-back`, tick **These images are all
+   faces of one label**. Otherwise each photograph is checked as a label of its own.
+3. Choose the **Beverage type**. It is the one field you must fill in.
+4. Type the other fields as the application states them. A field left empty is not compared, and
+   the label is still checked for what every label must carry.
+5. Press **Check**. The results page opens, and the result appears on it as soon as it is ready.
+
+If something is wrong with the upload, the page comes back with a message at the top saying what
+to fix, and what you typed is still filled in.
+
+### Reading the result
+
+The top of the result shows the label's answer, **Pass** or **Fail**. Below it, one card per field
+shows what the app read on the label (**Extracted**), what the application says (**Expected**), its
+answer for that field, and a sentence saying why.
+
+- **Pass or Fail on its own** means the app is sure. There is nothing to do.
+- **Pass or Fail with a *Needs review* flag** is the app's best guess. Look at the photograph. If
+  the guess is right, press **Confirm Pass** or **Confirm Fail**. If it is wrong, press **This
+  result is wrong**, then the other answer. The top of the result counts how many fields are left
+  to confirm. Where the app had nothing to go on either way, the guess is Fail, because a label the
+  agent cannot read is sent back for a better image.
+- **Not checked** means the app did not check that field, so it has no answer to confirm.
+- **Needs better photo** means the photograph cannot be read. **Copy message** copies a note to send
+  the applicant asking for a new one.
+
+One Fail fails the whole label. Each finding names the regulation it rests on; press the citation to
+read that section beside the result.
+
+### Correcting a result
+
+Any field's answer can be changed. Press **This result is wrong** on its card; under *It should
+be:*, press the answer it should have. That is two clicks, and no reason has to be typed. The card
+then says *Corrected by the reviewer*, and the label's answer and the batch table follow. To undo a
+correction, correct the field back to what it was; both corrections stay on the record.
+
+To hold back the whole label rather than one field, press **O** while a result is showing. Type the
+first letters of a reason code (for example `BR` for the brand), pick the code with the arrow
+keys, and press **Enter** to save it. This can fail a label or send it back to review; it cannot
+pass a label that has a failed field. **Esc** closes it.
+
+### Checking many labels at once
+
+**To try it with no labels of your own**, press the **Download a 10-label sample** link on the
+entry page. It holds real approved labels and `applications.csv`, one row per label holding the
+application actually filed for it. Unzip it, open the unzipped folder in the **Label images**
+picker, press **Ctrl+A** (**Cmd+A** on a Mac) to pick every file, and press **Check**. The CSV among
+the images is read as the applications, so nothing has to be typed and every label is checked
+against its own application. A CSV can also go in the separate **Applications CSV (optional)**
+picker. A batch with no CSV is still read and still checked for what every label must carry, and
+says so.
+
+With more than one label, a table lists them as they finish, and the first one opens below it.
+Click a row, or move to it with **Tab** and press **Enter**, to open that label. Press **Sort by
+Position** or **Sort by Disposition** at the top of a column to sort by it; press it again to
+reverse the order. One upload takes up to 100 files, and one batch runs at a time.
 
 **To supply your own applications**, write the same CSV: a `filename` column, then
 `beverage_type`, `brand_name`, `fanciful_name`, `class_type`, `alcohol_content`, `net_contents`,
@@ -255,10 +309,11 @@ Adding a check is a YAML edit, and the tables the rules read are data files rath
 not just what. The citation opens: pressing it fills a column beside the finding with the wording of
 the section, which the product holds for all 24 sections its rules cite, fetched once from the eCFR
 and committed with a hash. Nothing is fetched while the service runs
-([decision 0046](docs/decisions.md#0046)). A result stands until the agent says it is wrong: each
-field card carries a *This result is wrong* button that offers the other two results, the label's
-result then follows the corrected fields by the same rule, and the audit trail keeps each correction
-([decision 0064](docs/decisions.md#0064)).
+([decision 0046](docs/decisions.md#0046)). A settled result stands until the agent says it is
+wrong: each field card carries a *This result is wrong* button, the label's result then follows the
+corrected fields by the same rule, and the audit trail keeps each correction
+([decision 0064](docs/decisions.md#0064)). A result flagged *Needs review* also carries a Confirm
+button, and confirming it is recorded the same way ([decision 0065](docs/decisions.md#0065)).
 
 **No model decides a verdict.** A model may read a label — no deterministic code can — but the
 comparison is rules over the text it produced, so the same label and application give the same
@@ -500,7 +555,7 @@ Both deliverables:
 ## Where to look next
 
 **To see it work,** follow Getting started above and check one label against an application with a
-field deliberately wrong. The three outcomes, the citation under each finding and the label image
+field deliberately wrong. The answer on each field, the *Needs review* flag, the citation under each finding and the label image
 beside the readings are the whole product in one screen.
 
 **To read the code,** open `rules/` first. Verdicts are decided there, in YAML, and every check

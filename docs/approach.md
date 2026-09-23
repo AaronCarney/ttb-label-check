@@ -8,10 +8,11 @@ figure the declared one. Is the government health warning present, and word for 
 application takes five to ten minutes by eye, and in peak season importers file hundreds at once.
 
 This app does the matching and leaves the deciding to the agent. It reads a photograph of a label,
-compares it to the application filed for it, and returns one result per element — pass, fail, or
-needs review — with the regulation behind it. It never approves and never rejects. A result that is
-right asks nothing of the agent; one that is wrong takes three clicks to correct, and the label's
-result follows the correction (`docs/decisions.md#0064`).
+compares it to the application filed for it, and returns one result per element — pass or fail —
+with the regulation behind it. It never approves and never rejects. A result the app is sure of asks
+nothing of the agent; one it is not sure of is its best guess, flagged needs review, with a button
+to confirm it. Any result that is wrong takes two clicks to correct, and the label's result follows
+the correction (`docs/decisions.md#0064`, `docs/decisions.md#0065`).
 
 ## What we were asked, and what we decided it meant
 
@@ -189,8 +190,12 @@ The image and each result are files on disk because a clone and the deployed con
 application. The seam we did not build is named as missing: no rule can say "this applies whatever
 the beverage is", which is why a label filed with no application is read and not checked.
 
-**Three outcomes, and the third is a real answer.** Pass, fail, and needs review, the third used
-wherever the app can see an element but cannot honestly settle it. Each result carries what was
+**Every result is an answer, and the unsure ones say so.** Each element is pass or fail. Where the
+app can see an element but cannot honestly settle it, that answer is its best guess, flagged needs
+review with a button to confirm it, so the reviewer starts from what the check found rather than
+from nothing. A guess shown ready to accept is faster to work from and also easier to accept when it
+is wrong, so the flag and the confirm step stay on every unsure result
+(`docs/decisions.md#0065`). Each result carries what was
 read, the application's value beside it, the rules that ran with their citations and a confidence
 level, next to the label image so a reviewer checks the answer rather than trusting it. The
 interface deliberately does not draw the region a reading came from: that box was measured in the
