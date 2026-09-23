@@ -347,7 +347,8 @@ against, so they measure verdicts rather than this table. The figure this matter
 `warning_present`, 30 of 30, because that is what licenses the one rule in the pack allowed to
 report a mismatch because the reader found nothing — `rules/common/health_warning.yaml` says so
 where the licence is granted. On the held-out labels the reader missed a warning printed on a face
-it was given 3 times in 98, and each of those came back a mismatch.
+it was given 3 times in 98; each of those read some of the warning's words, so each goes to a
+reviewer rather than coming back a mismatch.
 
 None of this is a verdict. The reader's output goes to a human reviewer who approves or rejects
 every finding, so a reading the reader is unsure of is returned as unsure rather than guessed at.
@@ -361,8 +362,8 @@ What a reviewer receives, measured on the production path: the real face merge, 
 verdict, with only the OCR replayed from recorded readings. Two sets, reported apart. The corpus is
 the 30 labels above, which every change was measured on. The held-out set is 98 bourbon records from
 TTB's public COLA Registry (53 approved, 42 surrendered, 3 expired) that nothing was tuned on
-([decision 0051](docs/decisions.md#0051)). Every one was accepted by TTB, so each mismatch the
-product reports was read against the label images by eye.
+([decision 0051](docs/decisions.md#0051)) until the last decision below. Every one was accepted by
+TTB, so each mismatch the product reports was read against the label images by eye.
 
 ```bash
 uv run python -m eval.corpus_check              # the corpus
@@ -375,24 +376,28 @@ are not in the repository, so that second figure cannot be reproduced from a clo
 
 | | Corpus, before | Corpus, now | Held-out, before | Held-out, now |
 |---|---|---|---|---|
-| Labels: match / mismatch / needs review | 0 / 9 / 21 | 0 / 3 / 27 | 0 / 63 / 35 | 6 / 28 / 64 |
-| Checks: match / mismatch / needs review | 350 / 11 / 94 | 364 / 3 / 88 | 998 / 88 / 379 | 1,074 / 28 / 363 |
+| Labels: match / mismatch / needs review | 0 / 9 / 21 | 0 / 2 / 28 | 0 / 63 / 35 | 6 / 11 / 81 |
+| Checks: match / mismatch / needs review | 350 / 11 / 94 | 365 / 2 / 88 | 998 / 88 / 379 | 1,090 / 11 / 364 |
 | Checks settled without a person | 79.3% | 80.7% | 74.1% | 75.2% |
 
 "Before" is the product until the reader and rules were reworked to tell a reading error from a
-label defect ([decisions 0052 to 0062](docs/decisions.md#0052)). On the held-out set that took the
-mismatches the product caused from 77 to 17. The 28 held-out mismatches now are 3 warnings that
-genuinely differ from 27 CFR 16.21, 8 warnings printed only on a neck or strip image the upload does
-not take, and 17 product faults: 13 warnings misread, 3 warnings on a face the app was given and not
-found, and one proof statement, "117 Proof", read as "17". On the corpus, 2 of the 3 mismatches are
-genuine warning differences; the third, a class designation handwritten on a keg collar, is an
-approved label the product fails and is not yet explained.
+label defect ([decisions 0052 to 0063](docs/decisions.md#0052)). On the held-out set that took the
+mismatches the product caused from 77 to none. The 11 held-out mismatches now are 3 warnings that
+genuinely differ from 27 CFR 16.21 and 8 warnings printed only on a neck or strip image the upload
+does not take. On the corpus, both mismatches are genuine warning differences.
+
+The held-out figure after the last of those decisions ([0063](docs/decisions.md#0063)) is not a
+clean held-out measurement. That decision sends a difference to a reviewer when it could be a
+misread: a word no dictionary holds, several words lost or moved, a warning whose words were read
+but not found, a proof one "1" away from twice the ABV. Those kinds of signal were found by reading
+the held-out failures, and the corpus also supports the word-list rule with misreads such as
+"ORINK", "HEAILTH" and "ALCOHOIC".
 
 The share settled without a person barely moved because a wrong mismatch counts as settled too: most
-of them became matches, so what changed is how many settled checks are right. The most common
-reasons a check goes to a person are a field the reader did not find, a name and address it could
-not match, a class designation it could not confirm, and a heading whose bold weight it could not
-establish.
+of them became matches and the rest go to a reviewer, so what changed is how many settled checks
+are right. The most common reasons a check goes to a person are a field the reader did not find, a
+name and address it could not match, a class designation it could not confirm, and a heading whose
+bold weight it could not establish.
 
 ## Assumptions
 
