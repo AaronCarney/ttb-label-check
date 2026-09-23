@@ -139,11 +139,16 @@ and country of origin are each compared with the application where the applicati
 
 ### R9: Needs review when unsure
 **Implements**: FR-9
-**Description**: An element that cannot be read with confidence is reported as needs review, not as
-match or mismatch.
+**Description**: An element that cannot be read with confidence is flagged as needs review, and
+still shows the product's best answer, match or mismatch, for the agent to confirm or correct. Only
+an element the product is confident of shows its answer with nothing to confirm. See
+`docs/decisions.md#0065`.
 **Acceptance criteria**:
-- Given a label image with an element made illegible, when it is checked, then that element is needs
-  review.
+- Given a label image with an element made illegible, when it is checked, then that element is
+  flagged needs review, shows mismatch as its answer because nothing read points to a match, and
+  offers a Confirm control.
+- Given an element confirmed or corrected by the agent, when the result is shown, then it carries the
+  agent's answer and is no longer flagged.
 **Priority**: P0
 
 ### R10: Image problems named
