@@ -12,6 +12,7 @@ from pydantic import BaseModel, ConfigDict
 
 from app.api.ui.results import SingleResultStore, _get_result_store
 from app.schemas.audit import OverrideEntry
+from app.services.disposition import disposition_after_overrides, field_disposition
 
 router = APIRouter()
 _logger = logging.getLogger("app.api.overrides")
@@ -136,9 +137,26 @@ async def post_override(
             ),
         )
 
+    # A correction to one field is measured against what that field's card
+    # says, and only a field the check produced a result for can be corrected:
+    # a correction to anything else would move the label's result on the
+    # strength of a check that never ran.
+    if payload.field_name is None:
+        original = env.disposition
+    else:
+        original = field_disposition(env, payload.field_name)
+        if original is None:
+            raise HTTPException(
+                status_code=400,
+                detail=(
+                    f"field '{payload.field_name}' has no checked result on evaluation "
+                    f"{evaluation_id} to correct"
+                ),
+            )
+
     entry = OverrideEntry(
         field_name=payload.field_name,
-        original_disposition=env.disposition,
+        original_disposition=original,
         applied_disposition=payload.applied_disposition,
         reason_code=payload.reason_code,
         justification_text=payload.justification_text,
@@ -151,7 +169,12 @@ async def post_override(
             "overrides": (*env.audit_trail.overrides, entry),
         }
     )
+    # The label's result follows the correction, so the page, the batch table
+    # and anything that reads this record later show the corrected answer. The
+    # engine's own answer is not lost: the first entry's
+    # `original_disposition` is it, and the trace still carries every rule.
     new_env = env.model_copy(update={"audit_trail": new_audit})
+    new_env = new_env.model_copy(update={"disposition": disposition_after_overrides(new_env)})
     if in_flight is not None:
         in_flight.results[label_id] = new_env
     else:
@@ -174,6 +197,7 @@ async def post_override(
                     "batch_id": batch_id,
                     "evaluation_id": evaluation_id,
                     "entry": entry.model_dump(mode="json"),
+                    "label_disposition": new_env.disposition,
                 },
             }
         )
@@ -181,7 +205,7 @@ async def post_override(
     _logger.info(
         f"override_applied batch_id={batch_id or 'single'} evaluation_id={evaluation_id} "
         f"field={payload.field_name} {env.disposition}->{payload.applied_disposition} "
-        f"bus={bus_present}",
+        f"label={new_env.disposition} bus={bus_present}",
         extra={
             "batch_id": batch_id or "single",
             "evaluation_id": evaluation_id,
@@ -189,4 +213,4 @@ async def post_override(
         },
     )
 
-    return entry.model_dump(mode="json")
+    return {**entry.model_dump(mode="json"), "label_disposition": new_env.disposition}

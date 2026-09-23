@@ -1,6 +1,7 @@
 import * as React from "react";
 import { cn } from "../lib/cn";
-import type { FieldFindingWire } from "../types/envelopes";
+import type { Verdict } from "../lib/corrections";
+import type { FieldFindingWire, OverrideEntry } from "../types/envelopes";
 import { ConfidenceIndicator } from "./ConfidenceIndicator";
 import { CitationChip } from "./CitationChip";
 import { DispositionPill } from "./DispositionPill";
@@ -16,8 +17,19 @@ export interface FieldCardProps {
   openCitation?: string | null;
   /** The id of the panel the chips fill. */
   citationPanelId?: string;
+  /** The reviewer's latest correction to this field, which is then its result. */
+  correction?: OverrideEntry | null;
+  /** Records a correction to this field and says whether it was saved; the
+   * choices stay open when it was not. Absent, the card offers none. */
+  onCorrect?: (verdict: Verdict) => Promise<boolean>;
   className?: string;
 }
+
+const _VERDICT_WORDS: Record<Verdict, string> = {
+  pass: "Pass",
+  fail: "Fail",
+  needs_review: "Needs review",
+};
 
 // Null means no rule ran against this field — the application did not state a
 // value for it, or no rule covers it for this beverage. That is not a pass, and
@@ -62,9 +74,18 @@ export function FieldCard({
   onOpenCitation,
   openCitation,
   citationPanelId,
+  correction = null,
+  onCorrect,
   className,
 }: FieldCardProps): React.JSX.Element {
-  const fieldDisp = _fieldDisposition(field);
+  const checked = _fieldDisposition(field);
+  // A result stands until the reviewer says it is wrong, so the card needs no
+  // action when the check is right. When it is not, the reviewer's word is the
+  // field's result, and the check's own is still shown beside it.
+  const fieldDisp = correction ? correction.applied_disposition : checked;
+  const [correcting, setCorrecting] = React.useState(false);
+  const [saving, setSaving] = React.useState(false);
+  const choicesId = React.useId();
   return (
     <section
       role="region"
@@ -81,6 +102,11 @@ export function FieldCard({
           <DispositionPill disposition={fieldDisp} />
         )}
       </header>
+      {correction && checked !== null && (
+        <p className="text-sm text-muted-foreground">
+          Corrected by the reviewer. The check reported {_VERDICT_WORDS[checked]}.
+        </p>
+      )}
       <dl className="grid grid-cols-1 gap-2 text-sm sm:grid-cols-2">
         <div>
           <dt className="font-medium text-muted-foreground">Extracted</dt>
@@ -118,7 +144,58 @@ export function FieldCard({
             />
           ))}
         </div>
+        {onCorrect && fieldDisp !== null && (
+          // Offered on every checked field and never pre-selected: the
+          // reviewer names what the field should be, and no choice is made
+          // for them (docs/decisions.md#0064).
+          <button
+            type="button"
+            aria-expanded={correcting}
+            aria-controls={choicesId}
+            onClick={() => setCorrecting((open) => !open)}
+            className="ml-auto rounded-md border border-border bg-background px-3 py-1 text-sm text-foreground hover:bg-muted"
+          >
+            This result is wrong
+          </button>
+        )}
       </footer>
+      {onCorrect && fieldDisp !== null && correcting && (
+        <div
+          id={choicesId}
+          role="group"
+          aria-label={`Correct the result for ${_fieldLabel(field.field_name)}`}
+          className="flex flex-wrap items-center gap-2 rounded-md border border-border bg-muted p-2 text-sm"
+        >
+          <span>It should be:</span>
+          {(Object.keys(_VERDICT_WORDS) as Verdict[])
+            .filter((v) => v !== fieldDisp)
+            .map((v) => (
+              <button
+                key={v}
+                type="button"
+                disabled={saving}
+                onClick={async () => {
+                  setSaving(true);
+                  try {
+                    if (await onCorrect(v)) setCorrecting(false);
+                  } finally {
+                    setSaving(false);
+                  }
+                }}
+                className="rounded-md border border-border bg-background px-3 py-1 text-foreground hover:bg-background/80 disabled:opacity-50"
+              >
+                {_VERDICT_WORDS[v]}
+              </button>
+            ))}
+          <button
+            type="button"
+            onClick={() => setCorrecting(false)}
+            className="rounded-md px-3 py-1 text-foreground underline"
+          >
+            Cancel
+          </button>
+        </div>
+      )}
     </section>
   );
 }

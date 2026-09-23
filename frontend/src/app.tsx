@@ -16,7 +16,7 @@ import { useBatchStream } from "./sse/useBatchStream";
 const CITATION_PANEL_ID = "citation-panel";
 
 export function ResultsApp({ batchId }: { batchId: string }): React.JSX.Element {
-  const { events, error, total, done } = useBatchStream(batchId);
+  const { events, error, total, done, applyOverride } = useBatchStream(batchId);
   const latest = events[events.length - 1];
 
   // Which label the reviewer has open, held by label_ref rather than by index,
@@ -87,6 +87,7 @@ export function ResultsApp({ batchId }: { batchId: string }): React.JSX.Element 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] lg:items-start">
         <LabelResult
           envelope={selected}
+          onOverrideApplied={applyOverride}
           onOpenCitation={setOpenCitation}
           openCitation={openCitation}
           citationPanelId={CITATION_PANEL_ID}

@@ -21,6 +21,7 @@ bins:
   LEGIBILITY: "Legibility / readability"
   ENGINE: "Engine-internal failure modes"
   AGE_STATEMENT: "Age statements (spirits-deep)"
+  REVIEWER: "A reviewer's correction of a result the check reported"
 
 codes:
   # ---- BRAND ----
@@ -393,6 +394,23 @@ codes:
     cfr_anchors: []
     severity: warn
 
+  # ---- REVIEWER ----
+  # The result page's "this result is wrong" control sends one of these with a
+  # correction to one field, naming what the reviewer found the field to be.
+  # See docs/decisions.md#0064.
+  REVIEWER.CORRECTION.PASS:
+    description: "Reviewer found this field matches, where the check reported otherwise."
+    cfr_anchors: []
+    severity: info
+  REVIEWER.CORRECTION.FAIL:
+    description: "Reviewer found this field does not match, where the check reported otherwise."
+    cfr_anchors: []
+    severity: reject
+  REVIEWER.CORRECTION.NEEDS_REVIEW:
+    description: "Reviewer found this field cannot be settled from the label as photographed."
+    cfr_anchors: []
+    severity: warn
+
 # Codes nothing emits, and why each one stays.
 #
 # `codes:` above is the vocabulary; this block is the part of it that no rule
@@ -482,3 +500,12 @@ reviewer_vocabulary:
   WARNING.TYPE_SIZE.UNDER_MIN:
     "As above: the rule answers WARNING.TYPE_SIZE.HEIGHT_NOT_MEASURED
      (rules/common/health_warning.yaml:132)."
+  REVIEWER.CORRECTION.PASS:
+    "A reviewer's word on one field, sent by the result page's correction
+     control (frontend/src/components/LabelResult.tsx). The engine reports what
+     it read; only a person says it read wrong. See docs/decisions.md#0064."
+  REVIEWER.CORRECTION.FAIL:
+    "As REVIEWER.CORRECTION.PASS, for a field the reviewer finds does not match."
+  REVIEWER.CORRECTION.NEEDS_REVIEW:
+    "As REVIEWER.CORRECTION.PASS, for a field the reviewer cannot settle from
+     the photograph."

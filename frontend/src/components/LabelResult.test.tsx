@@ -1,5 +1,6 @@
 /** @vitest-environment jsdom */
 import { describe, it, expect, beforeEach, vi } from "vitest";
+import { fireEvent, waitFor } from "@testing-library/react";
 import { axe } from "vitest-axe";
 import { renderWithProviders } from "../test/render";
 import { LabelResult } from "./LabelResult";
@@ -171,5 +172,96 @@ describe("before the first result arrives", () => {
       <LabelResult envelope={_envelope([_brandField], [])} />,
     );
     expect(await axe(container)).toHaveNoViolations();
+  });
+});
+
+// --- Correcting one field ---
+//
+// The reviewer corrects the one field the check got wrong, and the label's
+// result shown is then the one the server works out from the corrected fields.
+describe("correcting one field", () => {
+  const _failingBrand: DispositionEnvelope["fields"][number] = {
+    ..._brandField,
+    rule_findings: [
+      {
+        rule_id: "common.brand.exact_or_normalized",
+        cfr_citation: "27 CFR §5.64",
+        disposition: "fail",
+        reason_code: "BRAND.NAME.DISAGREE",
+        plain_language_explanation: "Differs",
+        matched_value: "",
+      },
+    ],
+  };
+  const _failed = (): DispositionEnvelope => ({ ..._envelope([_failingBrand], []), disposition: "fail" });
+
+  it("posts the field and its registered code, and shows the corrected result", async () => {
+    const posted: unknown[] = [];
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (url: string, init?: RequestInit) => {
+        if (!url.endsWith("/overrides")) return { ok: true, json: async () => ({ faces: [] }) };
+        const body = JSON.parse(String(init?.body));
+        posted.push(body);
+        return {
+          ok: true,
+          json: async () => ({
+            field_name: body.field_name,
+            original_disposition: "fail",
+            applied_disposition: body.applied_disposition,
+            reason_code: body.reason_code,
+            justification_text: null,
+            reviewer_id: "session-a",
+            timestamp: "2026-09-22T00:00:00Z",
+            label_disposition: "pass",
+          }),
+        };
+      }),
+    );
+    const onOverrideApplied = vi.fn();
+    const { getByRole, getAllByRole, getByText } = renderWithProviders(
+      <LabelResult envelope={_failed()} onOverrideApplied={onOverrideApplied} />,
+    );
+    // The label, the field, and the rule's own finding.
+    expect(getAllByRole("status", { name: "Disposition: Fail" })).toHaveLength(3);
+
+    fireEvent.click(getByRole("button", { name: "This result is wrong" }));
+    fireEvent.click(getByRole("button", { name: "Pass" }));
+
+    // The label and the field follow the correction; the rule's finding still
+    // says what the rule found.
+    await waitFor(() => expect(getAllByRole("status", { name: "Disposition: Pass" })).toHaveLength(2));
+    expect(getAllByRole("status", { name: "Disposition: Fail" })).toHaveLength(1);
+    expect(posted).toEqual([
+      {
+        field_name: "brand_name",
+        applied_disposition: "pass",
+        reason_code: "REVIEWER.CORRECTION.PASS",
+        justification_text: null,
+      },
+    ]);
+    expect(getByText("Corrected by the reviewer")).toBeInTheDocument();
+    expect(onOverrideApplied).toHaveBeenCalledWith(
+      "ev-1",
+      expect.objectContaining({ labelDisposition: "pass" }),
+    );
+  });
+
+  it("keeps the check's result and says why when the correction is refused", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (url: string) =>
+        url.endsWith("/overrides")
+          ? { ok: false, json: async () => ({ detail: "field 'brand_name' has no checked result" }) }
+          : { ok: true, json: async () => ({ faces: [] }) },
+      ),
+    );
+    const { getByRole, getAllByRole, findByText } = renderWithProviders(
+      <LabelResult envelope={_failed()} />,
+    );
+    fireEvent.click(getByRole("button", { name: "This result is wrong" }));
+    fireEvent.click(getByRole("button", { name: "Pass" }));
+    expect(await findByText(/has no checked result/)).toBeInTheDocument();
+    expect(getAllByRole("status", { name: "Disposition: Fail" })).toHaveLength(3);
   });
 });

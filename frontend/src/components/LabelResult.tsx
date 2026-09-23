@@ -1,6 +1,6 @@
 import * as React from "react";
 import { cn } from "../lib/cn";
-import type { DispositionEnvelope } from "../types/envelopes";
+import type { DispositionEnvelope, OverrideEntry } from "../types/envelopes";
 import { AISuggestionBlock } from "./AISuggestionBlock";
 import { ConfidenceIndicator } from "./ConfidenceIndicator";
 import { DispositionPill } from "./DispositionPill";
@@ -13,6 +13,7 @@ import { ProcessingTime } from "./ProcessingTime";
 import { RawJSONDrawer } from "./RawJSONDrawer";
 import { RuleVerdict } from "./RuleVerdict";
 import { Toast } from "./Toast";
+import { CORRECTION_CODES, fieldCorrection, withOverride, type OverrideApplied, type Verdict } from "../lib/corrections";
 import { decidingFinding } from "../lib/decidingFinding";
 import { engineFailureCode, wasStoppedEarly } from "../lib/incompleteCheck";
 import { needsBetterPhotoFrom } from "../lib/needsBetterPhoto";
@@ -67,6 +68,9 @@ export interface LabelResultProps {
   envelope: DispositionEnvelope | null;
   /** True while the override control should be offered. */
   overridable?: boolean;
+  /** Told of each override the endpoint records, so whatever holds the
+   * envelope (the batch table's rows) shows the corrected result too. */
+  onOverrideApplied?: (evaluationId: string, applied: OverrideApplied) => void;
   /** Opens a finding's citation in the regulation panel beside this result. */
   onOpenCitation?: (citation: string) => void;
   /** The citation the panel is showing. */
@@ -83,8 +87,9 @@ export interface LabelResultProps {
 // differently (docs/PRD.md FR-12).
 
 export function LabelResult({
-  envelope,
+  envelope: received,
   overridable = true,
+  onOverrideApplied,
   onOpenCitation,
   openCitation,
   citationPanelId,
@@ -95,7 +100,60 @@ export function LabelResult({
   const [overrideOpen, setOverrideOpen] = React.useState(false);
   const [announcement, setAnnouncement] = React.useState("");
   const [toast, setToast] = React.useState<{ kind: "error" | "success"; message: string } | null>(null);
-  const evaluationId = envelope?.evaluation_id ?? null;
+  const evaluationId = received?.evaluation_id ?? null;
+  // Overrides recorded from this page, kept here as well as handed up, so the
+  // page shows its own correction whether or not its holder passes it back.
+  // Applying one the envelope already carries changes nothing.
+  const [applied, setApplied] = React.useState<{ evaluationId: string; entries: OverrideApplied[] }>({
+    evaluationId: "",
+    entries: [],
+  });
+  const envelope = React.useMemo(() => {
+    if (received === null || applied.evaluationId !== received.evaluation_id) return received;
+    return applied.entries.reduce(withOverride, received);
+  }, [received, applied]);
+
+  // Records one override and reports whether it was saved. A refusal is shown
+  // in the reviewer's words, from the endpoint's own detail.
+  const postOverride = React.useCallback(
+    async (body: {
+      field_name: string | null;
+      applied_disposition: Verdict;
+      reason_code: string;
+      justification_text: string | null;
+    }): Promise<boolean> => {
+      if (evaluationId === null) return false;
+      try {
+        const res = await fetch(`/labels/${encodeURIComponent(evaluationId)}/overrides`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
+        if (!res.ok) {
+          const errBody = await res.json().catch(() => ({ detail: "Override request failed" }));
+          const detail = Array.isArray(errBody.detail)
+            ? errBody.detail.map((d: { msg?: string }) => d.msg).filter(Boolean).join("; ")
+            : (errBody.detail ?? "Override request failed");
+          setToast({ kind: "error", message: detail });
+          return false;
+        }
+        const { label_disposition: labelDisposition, ...entry } = (await res.json()) as OverrideEntry & {
+          label_disposition?: Verdict;
+        };
+        const done: OverrideApplied = { entry, labelDisposition };
+        setApplied((prev) => ({
+          evaluationId,
+          entries: prev.evaluationId === evaluationId ? [...prev.entries, done] : [done],
+        }));
+        onOverrideApplied?.(evaluationId, done);
+        return true;
+      } catch {
+        setToast({ kind: "error", message: "Network error — override not saved" });
+        return false;
+      }
+    },
+    [evaluationId, onOverrideApplied],
+  );
 
   // `O` opens the override, Escape closes it. Registered here rather than on
   // the island because the drawer's open state belongs to the label on show.
@@ -185,6 +243,11 @@ export function LabelResult({
         </div>
         <div className="flex flex-wrap items-center gap-3">
           <DispositionPill disposition={envelope.disposition} />
+          {envelope.audit_trail.overrides.length > 0 && (
+            // The result on show is no longer only the check's, and the
+            // reviewer who opens this label later needs to know that.
+            <span className="text-sm text-muted-foreground">Corrected by the reviewer</span>
+          )}
           <ConfidenceIndicator
             band={envelope.disposition_confidence.band}
             numeric={envelope.disposition_confidence.numeric}
@@ -236,6 +299,21 @@ export function LabelResult({
                 return deciding ? <RuleVerdict finding={deciding} /> : null;
               })()}
               aiSuggestion={<AISuggestionBlock suggestion={field.ai_suggestion} />}
+              correction={fieldCorrection(envelope, field.field_name)}
+              onCorrect={
+                overridable
+                  ? async (verdict) => {
+                      const saved = await postOverride({
+                        field_name: field.field_name,
+                        applied_disposition: verdict,
+                        reason_code: CORRECTION_CODES[verdict],
+                        justification_text: null,
+                      });
+                      if (saved) setAnnouncement(`Correction saved: ${field.field_name} is now ${verdict.replace("_", " ")}`);
+                      return saved;
+                    }
+                  : undefined
+              }
               onOpenCitation={onOpenCitation}
               openCitation={openCitation}
               citationPanelId={citationPanelId}
@@ -250,29 +328,15 @@ export function LabelResult({
           onOpenChange={setOverrideOpen}
           codes={REASON_CODES}
           onSubmit={async (p) => {
-            const body = {
+            const saved = await postOverride({
               field_name: null,
               applied_disposition: dispositionFor(p.reasonCode),
               reason_code: p.reasonCode,
               justification_text: p.justification || null,
-            };
-            try {
-              const res = await fetch(
-                `/labels/${encodeURIComponent(envelope.evaluation_id)}/overrides`,
-                { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) },
-              );
-              if (!res.ok) {
-                const errBody = await res.json().catch(() => ({ detail: "Override request failed" }));
-                const detail = Array.isArray(errBody.detail)
-                  ? errBody.detail.map((d: { msg?: string }) => d.msg).filter(Boolean).join("; ")
-                  : (errBody.detail ?? "Override request failed");
-                setToast({ kind: "error", message: detail });
-                return;
-              }
+            });
+            if (saved) {
               setAnnouncement(`Override saved: ${p.reasonCode}`);
               setOverrideOpen(false);
-            } catch {
-              setToast({ kind: "error", message: "Network error — override not saved" });
             }
           }}
         />

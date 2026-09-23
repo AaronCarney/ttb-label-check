@@ -1,5 +1,6 @@
 import * as React from "react";
-import type { DispositionEnvelope } from "../types/envelopes";
+import { withOverride, type OverrideApplied, type Verdict } from "../lib/corrections";
+import type { DispositionEnvelope, OverrideEntry } from "../types/envelopes";
 import type { BatchSSEEvent } from "../types/sse";
 
 export interface BatchStreamState {
@@ -18,6 +19,7 @@ type _Action =
   | { type: "push"; event: BatchSSEEvent }
   | { type: "error"; message: string }
   | { type: "end"; total: number | null }
+  | { type: "override"; evaluationId: string; applied: OverrideApplied }
   | { type: "reset" };
 
 function _reducer(state: BatchStreamState, action: _Action): BatchStreamState {
@@ -31,16 +33,31 @@ function _reducer(state: BatchStreamState, action: _Action): BatchStreamState {
       return { ...state, error: action.message };
     case "end":
       return { ...state, total: action.total, done: true };
+    case "override":
+      return {
+        ...state,
+        events: state.events.map((e) =>
+          e.evaluation_id === action.evaluationId ? { ...e, ...withOverride(e, action.applied) } : e,
+        ),
+      };
     case "reset":
       return { events: [], error: null, total: null, done: false };
   }
 }
 
+export interface BatchStream extends BatchStreamState {
+  /** Puts a reviewer's correction on the label it corrects, so the batch table
+   * and the result page show the corrected result. The page calls this with
+   * the endpoint's answer, because a finished batch has closed its stream and
+   * will not hear the broadcast. */
+  applyOverride: (evaluationId: string, applied: OverrideApplied) => void;
+}
+
 // The batch stream carries four named SSE events: label-result,
 // anomaly-advisory and stream-end from the worker, and override-applied from
-// the override endpoint. This hook consumes only label-result and stream-end;
-// the other two are not surfaced in the interface yet.
-export function useBatchStream(batchId: string): BatchStreamState {
+// the override endpoint. This hook consumes all but anomaly-advisory, which is
+// not surfaced in the interface yet.
+export function useBatchStream(batchId: string): BatchStream {
   const [state, dispatch] = React.useReducer(_reducer, { events: [], error: null, total: null, done: false });
 
   React.useEffect(() => {
@@ -78,16 +95,39 @@ export function useBatchStream(batchId: string): BatchStreamState {
       es.close();
     };
 
+    const _onOverrideApplied = (msg: MessageEvent) => {
+      try {
+        const payload = JSON.parse(msg.data as string) as {
+          evaluation_id: string;
+          entry: OverrideEntry;
+          label_disposition?: Verdict;
+        };
+        dispatch({
+          type: "override",
+          evaluationId: payload.evaluation_id,
+          applied: { entry: payload.entry, labelDisposition: payload.label_disposition },
+        });
+      } catch {
+        dispatch({ type: "error", message: "Malformed SSE payload" });
+      }
+    };
+
     es.addEventListener("label-result", _onLabelResult);
     es.addEventListener("stream-end", _onStreamEnd);
+    es.addEventListener("override-applied", _onOverrideApplied);
     es.onerror = () => dispatch({ type: "error", message: "SSE connection error" });
 
     return () => {
       es.removeEventListener("label-result", _onLabelResult);
       es.removeEventListener("stream-end", _onStreamEnd);
+      es.removeEventListener("override-applied", _onOverrideApplied);
       es.close();
     };
   }, [batchId]);
 
-  return state;
+  const applyOverride = React.useCallback(
+    (evaluationId: string, applied: OverrideApplied) => dispatch({ type: "override", evaluationId, applied }),
+    [],
+  );
+  return { ...state, applyOverride };
 }

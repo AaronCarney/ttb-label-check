@@ -124,4 +124,43 @@ describe("useBatchStream", () => {
 
     expect(result.current.error).toBe("Malformed SSE payload");
   });
+
+  // A reviewer's correction moves the label's row in the batch table, whether
+  // it arrives on the stream or, once the batch has finished and the stream is
+  // closed, from the page's own request. Hearing it both ways applies it once.
+  it("applies a correction to its label, once, from either source", () => {
+    const { result } = renderHook(() => useBatchStream("B-005"));
+    const es = FakeEventSource.instances[0]!;
+    const entry = {
+      field_name: "brand_name",
+      original_disposition: "fail",
+      applied_disposition: "pass",
+      reason_code: "REVIEWER.CORRECTION.PASS",
+      justification_text: null,
+      reviewer_id: "session-a",
+      timestamp: "2026-09-22T00:00:00Z",
+    } as const;
+
+    act(() => {
+      es.fire("label-result", { batch_id: "B-005", queue_position: 1, envelope: _envelope("lbl-1", "fail") });
+      es.fire("label-result", { batch_id: "B-005", queue_position: 2, envelope: _envelope("lbl-2", "fail") });
+    });
+    act(() => {
+      es.fire("override-applied", {
+        batch_id: "B-005",
+        evaluation_id: "EV-lbl-1",
+        entry,
+        label_disposition: "pass",
+      });
+    });
+    act(() => {
+      result.current.applyOverride("EV-lbl-1", { entry, labelDisposition: "pass" });
+    });
+
+    const [first, second] = result.current.events;
+    expect(first!.disposition).toBe("pass");
+    expect(first!.audit_trail.overrides).toHaveLength(1);
+    expect(first!.batch_id).toBe("B-005");
+    expect(second!.disposition).toBe("fail");
+  });
 });

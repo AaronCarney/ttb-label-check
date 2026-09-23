@@ -80,9 +80,16 @@ def test_post_override_rejects_unknown_evaluation_id():
 
 
 def test_post_override_with_field_name_records_field_specific_entry():
+    from tests.conftest import _stub_field_finding
+
     app = create_app()
     app.state.batches = {}
     env = _seed_a_batch_with_one_completed_item(app)
+    # A field correction needs a field the check produced a result for.
+    env = env.model_copy(
+        update={"fields": (_stub_field_finding("brand_name", "R-brand", "needs_review"),)}
+    )
+    app.state.batches["B-OV"].results["lbl-0"] = env
     client = TestClient(app)
 
     payload = {

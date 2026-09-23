@@ -3915,3 +3915,61 @@ exact.
 Computing Surveys* 24(4), 377–439. https://doi.org/10.1145/146370.146380. Nguyen, T. T. H.,
 Jatowt, A., Coustaty, M., Doucet, A. (2021). Survey of post-OCR processing approaches. *ACM
 Computing Surveys* 54(6). https://doi.org/10.1145/3453476.
+
+<a id="0064"></a>
+## 0064. A result stands until the reviewer corrects it, one field at a time
+
+**Evidence:** `app/services/disposition.py` (`field_disposition`, `disposition_after_overrides`);
+`app/api/overrides.py`; `rules/reason_codes.yaml` (`REVIEWER` bin);
+`frontend/src/components/FieldCard.tsx`; `frontend/src/components/LabelResult.tsx`;
+`frontend/src/lib/corrections.ts`; `frontend/src/sse/useBatchStream.ts`;
+`tests/test_override_corrects_result.py`; `tests/test_field_correction_browser.py`;
+`tests/test_override_picker_codes_registered.py`.
+
+**What was found.** The product never asked the agent to confirm a result, and it should not start:
+most results are right, and a step on every result costs time on every label to catch the few that
+are wrong. What it lacked was the opposite: a quick way to say one result is wrong. The only override
+was a label-level drawer opened by the `O` key. It offered only mismatch and needs-review codes, so a
+check reported as a mismatch could not be corrected to a match. The endpoint already took a field
+name and a pass, but nothing on the page sent them. After an override nothing on the page changed,
+and the batch table did not change either. The endpoint announced the override on the batch stream,
+and the page did not listen for it.
+
+**Chosen.** A result stands with no action. Every field card with a result carries a *This result is
+wrong* button. It opens the two results the field does not have (pass, fail, needs review, less the
+current one), with none chosen, and a third click sends the choice. The request names the field
+and one of three new registered codes, `REVIEWER.CORRECTION.PASS`, `.FAIL` and `.NEEDS_REVIEW`,
+so the chosen result is itself the recorded reason. The server then works out the label's result
+by the rule it already used (`docs/PRD.md` FR-11): the corrected field's rule verdicts are replaced
+with the reviewer's, and one failed field fails the label. It stores that result on the label's
+record, returns it, and announces it on the batch stream. The page shows it on the field card, in the
+label's header and in the batch table. The card still shows what the check reported, and the audit
+trail keeps every correction with what it replaced. A correction to a field the check produced no
+result for is refused, because it would move the label on a check that never ran. Rows that belong
+to no field, such as a stopped check or a photo too poor to read, keep their say, so correcting
+every field of an unfinished check does not pass it. The `O` drawer still decides the whole label,
+and its latest decision stands over the fields.
+
+**Why this shape.** A person who only watches an automated system gets worse at stepping in at the
+moment it matters (Bainbridge 1983), and people shown an AI's answer tend to follow it (Buçinca et
+al. 2021). A confirm step on every result does not fix this. It teaches the agent to click through.
+What helps is making disagreement cheap and recording it (Amershi et al. 2019, G8 efficient
+dismissal and G15 granular feedback). So correcting one field takes three clicks and needs no
+free-text reason.
+
+**Rejected.** *A confirm button on every result* costs every label a step to catch the few that are
+wrong. *Working out the label's result in the page* would put a second copy of the rule in a second
+language. The page shows what the server returns. *Choosing the likely correction in advance*
+would put the product's answer in front of the agent at the moment they are disagreeing with it.
+
+**What it leaves.** A correction lasts as long as the label's record does: the batch until the next
+one starts, a single label for the retention window in C-2. There is no undo as such; correcting a
+field back to what the check said is the undo, and both corrections stay on the audit trail. The
+agent's decision on the application is still made in COLAs Online, outside the product.
+
+**References.** Bainbridge, L. (1983). Ironies of automation. *Automatica* 19(6), 775–779.
+https://doi.org/10.1016/0005-1098(83)90046-8. Buçinca, Z., Malaya, M. B., Gajos, K. Z. (2021). To
+trust or to think: cognitive forcing functions can reduce overreliance on AI in AI-assisted
+decision-making. *Proc. ACM Hum.-Comput. Interact.* 5(CSCW1), 188.
+https://doi.org/10.1145/3449287. Amershi, S., et al. (2019). Guidelines for human-AI interaction.
+*Proc. CHI 2019*. https://doi.org/10.1145/3290605.3300233.

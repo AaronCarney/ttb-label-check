@@ -1,4 +1,5 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
+import { fireEvent, waitFor, within } from "@testing-library/react";
 import { axe } from "vitest-axe";
 import { renderWithProviders } from "../test/render";
 import { FieldCard } from "./FieldCard";
@@ -61,6 +62,82 @@ describe("FieldCard", () => {
 
   it("has no axe violations", async () => {
     const { container } = renderWithProviders(<FieldCard field={_stub} />);
+    expect(await axe(container)).toHaveNoViolations();
+  });
+});
+
+// A result stands until the reviewer says it is wrong. The card asks nothing
+// of them when it is right, offers the correction on every checked field, and
+// never makes the choice for them (docs/decisions.md#0064).
+describe("correcting a field's result", () => {
+  const _failing: FieldFindingWire = {
+    ..._stub,
+    rule_findings: [{ ..._stub.rule_findings[0]!, disposition: "fail" }],
+  };
+
+  it("offers no correction where the page has nowhere to send one", () => {
+    const { queryByRole } = renderWithProviders(<FieldCard field={_stub} />);
+    expect(queryByRole("button", { name: "This result is wrong" })).toBeNull();
+  });
+
+  it("offers the other two results, none of them chosen, only once asked", () => {
+    const { getByRole, queryByRole } = renderWithProviders(
+      <FieldCard field={_failing} onCorrect={async () => true} />,
+    );
+    expect(queryByRole("group", { name: /Correct the result/ })).toBeNull();
+    const open = getByRole("button", { name: "This result is wrong" });
+    expect(open.getAttribute("aria-expanded")).toBe("false");
+    fireEvent.click(open);
+    expect(open.getAttribute("aria-expanded")).toBe("true");
+    const group = getByRole("group", { name: "Correct the result for Brand name" });
+    const choices = within(group)
+      .getAllByRole("button")
+      .map((b) => b.textContent);
+    expect(choices).toEqual(["Pass", "Needs review", "Cancel"]);
+  });
+
+  it("sends the chosen result and closes once it is saved", async () => {
+    const onCorrect = vi.fn(async () => true);
+    const { getByRole, queryByRole } = renderWithProviders(
+      <FieldCard field={_failing} onCorrect={onCorrect} />,
+    );
+    fireEvent.click(getByRole("button", { name: "This result is wrong" }));
+    fireEvent.click(getByRole("button", { name: "Pass" }));
+    await waitFor(() => expect(queryByRole("group", { name: /Correct the result/ })).toBeNull());
+    expect(onCorrect).toHaveBeenCalledWith("pass");
+  });
+
+  it("stays open when the correction was not saved", async () => {
+    const onCorrect = vi.fn(async () => false);
+    const { getByRole } = renderWithProviders(<FieldCard field={_failing} onCorrect={onCorrect} />);
+    fireEvent.click(getByRole("button", { name: "This result is wrong" }));
+    fireEvent.click(getByRole("button", { name: "Pass" }));
+    await waitFor(() => expect(onCorrect).toHaveBeenCalled());
+    expect(getByRole("group", { name: /Correct the result/ })).toBeInTheDocument();
+  });
+
+  it("shows the reviewer's result, and what the check had said", () => {
+    const correction = {
+      field_name: "brand_name",
+      original_disposition: "fail" as const,
+      applied_disposition: "pass" as const,
+      reason_code: "REVIEWER.CORRECTION.PASS",
+      justification_text: null,
+      reviewer_id: "session-a",
+      timestamp: "2026-09-22T00:00:00Z",
+    };
+    const { getByRole, getByText } = renderWithProviders(
+      <FieldCard field={_failing} correction={correction} onCorrect={async () => true} />,
+    );
+    expect(getByRole("status", { name: "Disposition: Pass" })).toBeInTheDocument();
+    expect(getByText("Corrected by the reviewer. The check reported Fail.")).toBeInTheDocument();
+  });
+
+  it("has no axe violations with the choices open", async () => {
+    const { container, getByRole } = renderWithProviders(
+      <FieldCard field={_failing} onCorrect={async () => true} />,
+    );
+    fireEvent.click(getByRole("button", { name: "This result is wrong" }));
     expect(await axe(container)).toHaveNoViolations();
   });
 });

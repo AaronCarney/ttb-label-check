@@ -6,6 +6,7 @@ from collections.abc import Iterable
 from typing import Literal
 
 from app.schemas.rejection import Outcome, Severity, ValidationResult
+from app.schemas.wire.disposition import DispositionEnvelope
 
 Disposition = Literal["pass", "fail", "needs_review"]
 
@@ -61,5 +62,81 @@ def compute_disposition(results: Iterable[ValidationResult]) -> Disposition:
     if any(_rejects(r) for r in results):
         return "fail"
     if all(r.outcome in _PASS_LIKE for r in results):
+        return "pass"
+    return "needs_review"
+
+
+def field_disposition(envelope: DispositionEnvelope, field_name: str) -> Disposition | None:
+    """What one field's card says now: the reviewer's latest correction to it,
+    else the worst of its rule verdicts. None when the field is not on the
+    label's result or no rule checked it, since a check that never ran has no
+    result to correct."""
+    field = next((f for f in envelope.fields if f.field_name == field_name), None)
+    if field is None:
+        return None
+    for override in reversed(envelope.audit_trail.overrides):
+        if override.field_name == field_name:
+            return override.applied_disposition
+    verdicts = {rf.disposition for rf in field.rule_findings}
+    if not verdicts:
+        return None
+    if "fail" in verdicts:
+        return "fail"
+    if "needs_review" in verdicts:
+        return "needs_review"
+    return "pass"
+
+
+def disposition_after_overrides(envelope: DispositionEnvelope) -> Disposition:
+    """The label's result once a reviewer's corrections are applied.
+
+    A result stands until someone says it is wrong, so with no correction this
+    is the engine's own answer. A correction to one field replaces that field's
+    rule verdicts with the reviewer's, and the label is then decided by the same
+    rule as `compute_disposition`: one failed field fails the label, every field
+    passing passes it, and anything else goes to a reviewer. The rows the check
+    recorded that belong to no field — a stopped evaluation, a photo too poor to
+    read — keep their say, so correcting every field of an unfinished check does
+    not make it a pass.
+
+    A correction to the whole label (`field_name` empty) is the reviewer
+    deciding the label outright, and the latest one stands over the fields.
+    The latest correction to a field is that field's answer.
+    """
+    overrides = envelope.audit_trail.overrides
+    whole_label = [o for o in overrides if o.field_name is None]
+    if whole_label:
+        return whole_label[-1].applied_disposition
+    corrected = {o.field_name: o.applied_disposition for o in overrides}
+    if not corrected:
+        return envelope.disposition
+
+    # The trace carries one row per rule, and one more per rule that named a
+    # reason code (`evidence_ref` "reason_code/<rule_id>"). A corrected field's
+    # rules leave through both.
+    replaced = {
+        rf.rule_id for f in envelope.fields if f.field_name in corrected for rf in f.rule_findings
+    }
+    return _combine(
+        [
+            *(
+                row.disposition
+                for row in envelope.audit_trail.per_rule_trace
+                if row.rule_id not in replaced
+                and row.evidence_ref.removeprefix("reason_code/") not in replaced
+            ),
+            *corrected.values(),
+        ]
+    )
+
+
+def _combine(verdicts: Iterable[RuleDisposition]) -> Disposition:
+    """`compute_disposition` over verdicts already read, as the trace holds them."""
+    verdicts = tuple(verdicts)
+    if not verdicts:
+        return "needs_review"
+    if "fail" in verdicts:
+        return "fail"
+    if all(v in ("pass", "not_applicable") for v in verdicts):
         return "pass"
     return "needs_review"

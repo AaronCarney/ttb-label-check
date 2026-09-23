@@ -9,6 +9,16 @@ date: the release's git tag records when it was cut. Versions follow
 
 ### Added
 
+- A reviewer corrects one field's result where the check got it wrong, and a result that is right
+  needs no action. Every field card with a result carries a *This result is wrong* button, which
+  offers the other two results with none chosen. The label's overall result then follows the
+  corrected fields by the same rule, so one failed field still fails the label. The field card, the
+  label's header and the batch table all show the corrected result. The card still says what the check
+  reported, and the audit trail keeps each correction. A mismatch can now be corrected to a match,
+  which the `O` drawer could not do. A correction to a field the check produced no result for is
+  refused. New reason codes `REVIEWER.CORRECTION.PASS`, `.FAIL` and `.NEEDS_REVIEW`. See
+  `docs/decisions.md#0064`.
+
 - `uv run python -m eval.corpus_check` runs every real corpus label through the production evaluator,
   rule pack and disposition, with only the OCR replaced by frozen readings, and prints what the
   product reports: match, mismatch or needs review per label and per check, the reason code behind

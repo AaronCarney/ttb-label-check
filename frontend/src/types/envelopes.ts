@@ -77,7 +77,8 @@ export interface PerRuleTraceEntry {
 }
 
 export interface OverrideEntry {
-  field_name: string;
+  /** Null when the override is to the whole label rather than one field. */
+  field_name: string | null;
   original_disposition: "pass" | "fail" | "needs_review";
   applied_disposition: "pass" | "fail" | "needs_review";
   reason_code: string;

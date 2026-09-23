@@ -151,6 +151,35 @@ def _stub_disposition_envelope(idx: int = 0, *, disposition: str = "pass") -> Di
     )
 
 
+def _stub_field_finding(name: str, rule_id: str, verdict: str):
+    """One field card whose single rule gave `verdict`."""
+    from app.schemas.wire.disposition import (
+        AISuggestionWire,
+        ConfidenceBand,
+        FieldEvidenceWire,
+        FieldFindingWire,
+        RuleFindingWire,
+    )
+
+    return FieldFindingWire(
+        field_name=name,  # type: ignore[arg-type]
+        extracted_value="x",
+        expected_value="x",
+        evidence=FieldEvidenceWire(bbox=(0, 0, 0, 0), crop_ref="", extraction_confidence=0.9),
+        rule_findings=(
+            RuleFindingWire(
+                rule_id=rule_id,
+                cfr_citation="27 CFR §x",
+                disposition=verdict,  # type: ignore[arg-type]
+                reason_code="",
+                plain_language_explanation="",
+            ),
+        ),
+        ai_suggestion=AISuggestionWire(present=False),
+        field_confidence=ConfidenceBand(band="high", numeric=0.9),
+    )
+
+
 def _fake_evaluator(
     plan: Iterable[tuple[float, DispositionEnvelope]] | None = None,
     *,
