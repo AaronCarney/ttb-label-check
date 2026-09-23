@@ -35,7 +35,7 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from decimal import Decimal, InvalidOperation
-from typing import Any
+from typing import Any, Literal
 
 from app.rules._validators import ValidatorContext, register
 from app.rules._validators._helpers import _build_meta, _conf
@@ -111,6 +111,7 @@ def proof_agreement(
         severity: Severity,
         reason_code: str | None,
         message: str | None = None,
+        lean: Literal["pass", "fail"] | None = None,
     ) -> ValidationResult:
         confidences = [_conf(obs), *(float(e.get("confidence", 0.0)) for e in entries)]
         return ValidationResult(
@@ -126,6 +127,7 @@ def proof_agreement(
             observed=obs,
             engine_meta=meta,
             message=message,
+            lean=lean,
         )
 
     review_code = rule.parameters.get("needs_review_reason_code", rule.reason_code)
@@ -187,4 +189,14 @@ def proof_agreement(
             rule.parameters.get("disagreement_reason_code", rule.reason_code),
             message,
         )
-    return result(Outcome.INSUFFICIENT_EVIDENCE, Severity.WARN, review_code, message)
+    # A figure no proof can be, one "1" from twice the ABV, or within its last
+    # printed digit is most likely a misread of an agreeing proof. A clear
+    # difference printed away from the ABV is still a difference.
+    misread = _judge(figure, twice, beside=True) != _DISAGREES
+    return result(
+        Outcome.INSUFFICIENT_EVIDENCE,
+        Severity.WARN,
+        review_code,
+        message,
+        lean="pass" if misread else "fail",
+    )

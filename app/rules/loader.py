@@ -160,6 +160,7 @@ class YamlRuleLoader:
                     description=entry["description"],
                     cfr_anchors=tuple(entry.get("cfr_anchors", [])),
                     severity=entry["severity"],
+                    lean=entry.get("lean", "fail"),
                 )
             except (KeyError, ValidationError) as e:
                 acc.errors.append(f"{path}/{code}: invalid registry entry: {e}")

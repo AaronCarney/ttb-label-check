@@ -1,6 +1,6 @@
 import * as React from "react";
 import { withOverride, type OverrideApplied, type Verdict } from "../lib/corrections";
-import type { DispositionEnvelope, OverrideEntry } from "../types/envelopes";
+import type { DispositionEnvelope, Lean, OverrideEntry } from "../types/envelopes";
 import type { BatchSSEEvent } from "../types/sse";
 
 export interface BatchStreamState {
@@ -101,11 +101,16 @@ export function useBatchStream(batchId: string): BatchStream {
           evaluation_id: string;
           entry: OverrideEntry;
           label_disposition?: Verdict;
+          label_lean?: Lean;
         };
         dispatch({
           type: "override",
           evaluationId: payload.evaluation_id,
-          applied: { entry: payload.entry, labelDisposition: payload.label_disposition },
+          applied: {
+            entry: payload.entry,
+            labelDisposition: payload.label_disposition,
+            labelLean: payload.label_lean,
+          },
         });
       } catch {
         dispatch({ type: "error", message: "Malformed SSE payload" });

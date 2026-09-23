@@ -8,6 +8,12 @@
 # this file, with the reason it stays. tests/rules/test_reason_code_registry.py
 # fails on a registered code that is neither emitted nor listed there, and on a
 # listed code that something does emit.
+#
+# A code that sends a result to review may carry `lean: pass`: what the check found
+# makes a match the likelier answer, so the reviewer is shown a match pre-filled to
+# confirm. Every other review code leans to a mismatch, either because its evidence
+# points that way or because it points nowhere and an element that cannot be read
+# is sent back. See docs/decisions.md#0065.
 version: "0.1.0"
 
 bins:
@@ -21,7 +27,7 @@ bins:
   LEGIBILITY: "Legibility / readability"
   ENGINE: "Engine-internal failure modes"
   AGE_STATEMENT: "Age statements (spirits-deep)"
-  REVIEWER: "A reviewer's correction of a result the check reported"
+  REVIEWER: "A reviewer's correction or confirmation of a result the check reported"
 
 codes:
   # ---- BRAND ----
@@ -39,6 +45,7 @@ codes:
     description: "Brand match falls in the borderline band — a reviewer decides."
     cfr_anchors: ["27 CFR §4.33", "27 CFR §5.64", "27 CFR §7.64"]
     severity: warn
+    lean: pass
   BRAND.IDENTIFY.UNCERTAIN:
     description: "No line read on the label shows the application brand; the reader's largest text is shown and a reviewer decides."
     cfr_anchors: ["27 CFR §4.33", "27 CFR §5.64", "27 CFR §7.64"]
@@ -116,6 +123,7 @@ codes:
     description: "Label name and address cannot be lined up with the applicant, its trade names or its city and State; a reviewer decides."
     cfr_anchors: []
     severity: warn
+    lean: pass
   NET_CONTENTS.MATCH.APPLICATION_LABEL_DISAGREE:
     description: "Label net contents are not the net contents the application declared."
     cfr_anchors: []
@@ -194,18 +202,22 @@ codes:
     description: "The warning as read differs from the §16.21 statement, but only in ways that do not show the label differs: a kind of misread the reader is known to make, a word no English dictionary holds, or several words lost, added or moved. A reviewer checks those spots on the label."
     cfr_anchors: ["27 CFR §16.21"]
     severity: warn
+    lean: pass
   WARNING.PRESENCE.NOT_CONFIRMED:
     description: "The reader did not find the government warning, but read some of the statement's words on the label, so the warning may be printed and missed; a reviewer checks whether the label carries it."
     cfr_anchors: ["27 CFR §16.21"]
     severity: warn
+    lean: pass
   WARNING.HEADING.NOT_READ:
     description: "The warning's wording was read on this label but its GOVERNMENT WARNING heading was not, so the statement was not checked; a reviewer checks the heading and the statement on the label."
     cfr_anchors: ["27 CFR §16.21", "27 CFR §16.22(a)(2)"]
     severity: warn
+    lean: pass
   WARNING.STYLE.BOLD_NOT_MEASURED:
     description: "Heading capitals were checked; its bold weight could not be measured from this image (the type is too small, the photo too blurred, or too little of the warning was read to compare against), so a reviewer decides whether §16.22(a)(2) is met."
     cfr_anchors: ["27 CFR §16.22(a)(2)"]
     severity: warn
+    lean: pass
   WARNING.STYLE.BOLD_NOT_CLEAR:
     description: "Heading capitals were checked; its strokes were measured against the rest of the warning and are not clearly heavier, so a reviewer decides whether the heading is bold and the statement below it is not, as §16.22(a)(2) requires."
     cfr_anchors: ["27 CFR §16.22(a)(2)"]
@@ -410,6 +422,17 @@ codes:
     description: "Reviewer found this field cannot be settled from the label as photographed."
     cfr_anchors: []
     severity: warn
+  # The result page's "Confirm" button sends one of these for a field the check
+  # sent to review, agreeing with the answer it showed pre-filled.
+  # See docs/decisions.md#0065.
+  REVIEWER.CONFIRMATION.PASS:
+    description: "Reviewer confirmed this field matches, as the check's pre-filled answer said."
+    cfr_anchors: []
+    severity: info
+  REVIEWER.CONFIRMATION.FAIL:
+    description: "Reviewer confirmed this field does not match, as the check's pre-filled answer said."
+    cfr_anchors: []
+    severity: reject
 
 # Codes nothing emits, and why each one stays.
 #
@@ -509,3 +532,9 @@ reviewer_vocabulary:
   REVIEWER.CORRECTION.NEEDS_REVIEW:
     "As REVIEWER.CORRECTION.PASS, for a field the reviewer cannot settle from
      the photograph."
+  REVIEWER.CONFIRMATION.PASS:
+    "A reviewer's word on one field, sent by the result page's Confirm button
+     (frontend/src/components/FieldCard.tsx) when they agree with the answer the
+     check showed pre-filled. See docs/decisions.md#0065."
+  REVIEWER.CONFIRMATION.FAIL:
+    "As REVIEWER.CONFIRMATION.PASS, for a pre-filled mismatch."

@@ -14,6 +14,7 @@ function finding(
     reason_code: "",
     plain_language_explanation,
     matched_value: "",
+    lean: disposition === "pass" ? "pass" : "fail",
   };
 }
 

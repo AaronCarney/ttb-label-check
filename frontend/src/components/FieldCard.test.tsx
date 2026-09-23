@@ -3,7 +3,7 @@ import { fireEvent, waitFor, within } from "@testing-library/react";
 import { axe } from "vitest-axe";
 import { renderWithProviders } from "../test/render";
 import { FieldCard } from "./FieldCard";
-import type { FieldFindingWire } from "../types/envelopes";
+import type { FieldFindingWire, RuleFindingWire } from "../types/envelopes";
 
 const _stub: FieldFindingWire = {
   field_name: "brand_name",
@@ -18,10 +18,12 @@ const _stub: FieldFindingWire = {
       reason_code: "BRAND.NAME.MATCH",
       plain_language_explanation: "OK",
       matched_value: "",
+      lean: "pass",
     },
   ],
   ai_suggestion: { present: false, task: null, text: null, model_disposition: null },
   field_confidence: { band: "high", numeric: 0.94 },
+  lean: "pass",
 };
 
 describe("FieldCard", () => {
@@ -138,6 +140,69 @@ describe("correcting a field's result", () => {
       <FieldCard field={_failing} onCorrect={async () => true} />,
     );
     fireEvent.click(getByRole("button", { name: "This result is wrong" }));
+    expect(await axe(container)).toHaveNoViolations();
+  });
+});
+
+describe("a field the check could not settle", () => {
+  const _unsure: FieldFindingWire = {
+    ..._stub,
+    rule_findings: [{ ...(_stub.rule_findings[0] as RuleFindingWire), disposition: "needs_review", lean: "pass" }],
+    lean: "pass",
+  };
+
+  it("shows its best guess, flagged for review, with a Confirm button", () => {
+    const { getByRole, getByText } = renderWithProviders(
+      <FieldCard field={_unsure} onCorrect={async () => true} onConfirm={async () => true} />,
+    );
+    expect(getByRole("status", { name: "Disposition: Pass" })).toBeInTheDocument();
+    expect(getByText("Needs review")).toBeInTheDocument();
+    expect(getByRole("button", { name: "Confirm Pass" })).toBeInTheDocument();
+  });
+
+  it("confirms the guess it shows", async () => {
+    const onConfirm = vi.fn(async () => true);
+    const { getByRole } = renderWithProviders(<FieldCard field={_unsure} onConfirm={onConfirm} />);
+    fireEvent.click(getByRole("button", { name: "Confirm Pass" }));
+    await waitFor(() => expect(onConfirm).toHaveBeenCalledWith("pass"));
+  });
+
+  it("offers the answer it does not show as the correction", () => {
+    const { getByRole } = renderWithProviders(
+      <FieldCard field={_unsure} onCorrect={async () => true} onConfirm={async () => true} />,
+    );
+    fireEvent.click(getByRole("button", { name: "This result is wrong" }));
+    const group = getByRole("group", { name: "Correct the result for Brand name" });
+    expect(within(group).getAllByRole("button").map((b) => b.textContent)).toEqual(["Fail", "Cancel"]);
+  });
+
+  it("asks nothing more once confirmed", () => {
+    const confirmation = {
+      field_name: "brand_name",
+      original_disposition: "needs_review" as const,
+      applied_disposition: "pass" as const,
+      reason_code: "REVIEWER.CONFIRMATION.PASS",
+      justification_text: null,
+      reviewer_id: "session-a",
+      timestamp: "2026-09-22T00:00:00Z",
+    };
+    const { getByText, queryByRole, queryByText } = renderWithProviders(
+      <FieldCard field={_unsure} correction={confirmation} onConfirm={async () => true} />,
+    );
+    expect(getByText("Confirmed by the reviewer.")).toBeInTheDocument();
+    expect(queryByText("Needs review")).toBeNull();
+    expect(queryByRole("button", { name: /Confirm/ })).toBeNull();
+  });
+
+  it("has no Confirm button on a settled result", () => {
+    const { queryByRole } = renderWithProviders(<FieldCard field={_stub} onConfirm={async () => true} />);
+    expect(queryByRole("button", { name: /Confirm/ })).toBeNull();
+  });
+
+  it("has no axe violations", async () => {
+    const { container } = renderWithProviders(
+      <FieldCard field={_unsure} onCorrect={async () => true} onConfirm={async () => true} />,
+    );
     expect(await axe(container)).toHaveNoViolations();
   });
 });

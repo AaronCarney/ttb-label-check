@@ -145,3 +145,48 @@ def _combine(verdicts: Iterable[RuleDisposition]) -> Disposition:
     if all(v in ("pass", "not_applicable") for v in verdicts):
         return "pass"
     return "needs_review"
+
+
+Lean = Literal["pass", "fail"]
+
+
+def field_lean(envelope: DispositionEnvelope, field_name: str) -> Lean | None:
+    """The answer one field's card shows pre-filled.
+
+    The reviewer's latest word on the field, where it is a match or a
+    mismatch. Otherwise the check's own lean (`FieldFindingWire.lean`), which
+    a field sent back to review returns to. None when no rule checked the
+    field, since a check that never ran has no answer.
+    """
+    field = next((f for f in envelope.fields if f.field_name == field_name), None)
+    if field is None:
+        return None
+    latest = next(
+        (o for o in reversed(envelope.audit_trail.overrides) if o.field_name == field_name), None
+    )
+    if latest is not None and latest.applied_disposition != "needs_review":
+        return latest.applied_disposition
+    return field.lean
+
+
+def label_lean(envelope: DispositionEnvelope) -> Lean:
+    """The answer the label shows pre-filled.
+
+    A settled label is its own answer. A label still under review leans to a
+    mismatch if any field does, or if a check that belongs to no field card
+    went to review — a stopped evaluation, a photo too poor to read, a field
+    the reader found nothing for — since nothing there points to a match.
+    Otherwise it leans to a match.
+    """
+    if envelope.disposition != "needs_review":
+        return envelope.disposition
+    if any(field_lean(envelope, f.field_name) == "fail" for f in envelope.fields):
+        return "fail"
+    on_cards = {rf.rule_id for f in envelope.fields for rf in f.rule_findings}
+    for row in envelope.audit_trail.per_rule_trace:
+        if row.disposition != "needs_review":
+            continue
+        if row.rule_id in on_cards or row.evidence_ref.removeprefix("reason_code/") in on_cards:
+            continue
+        return "fail"
+    return "pass"

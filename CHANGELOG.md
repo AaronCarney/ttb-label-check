@@ -9,6 +9,16 @@ date: the release's git tag records when it was cut. Versions follow
 
 ### Added
 
+- A check the product cannot settle now shows its best answer, match or mismatch, with a *Needs
+  review* flag beside it and a **Confirm** button, instead of showing *needs review* in place of an
+  answer. Confirming records the answer under the new codes `REVIEWER.CONFIRMATION.PASS` or `.FAIL`,
+  and *This result is wrong* offers the other answer. A settled result still asks nothing. The
+  label's header shows the label's answer and how many fields are left to confirm, and the batch
+  table shows each label's answer. Which way a result leans comes from its reason code
+  (`rules/reason_codes.yaml`, `lean`) or from the check's own evidence. A field or label leans to a
+  mismatch if any part of it does. One confirmed mismatch fails the label, and the other fields stay
+  open to confirm. See `docs/decisions.md#0065`.
+
 - A reviewer corrects one field's result where the check got it wrong, and a result that is right
   needs no action. Every field card with a result carries a *This result is wrong* button, which
   offers the other two results with none chosen. The label's overall result then follows the

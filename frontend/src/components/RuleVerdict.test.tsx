@@ -11,6 +11,7 @@ const _rf: RuleFindingWire = {
   reason_code: "WARNING.STYLE.HEADING_NOT_BOLD_CAPS",
   plain_language_explanation: "Heading not in bold caps.",
   matched_value: "",
+  lean: "fail",
 };
 
 describe("RuleVerdict", () => {
@@ -29,5 +30,15 @@ describe("RuleVerdict", () => {
   it("has no axe violations", async () => {
     const { container } = renderWithProviders(<RuleVerdict finding={_rf} />);
     expect(await axe(container)).toHaveNoViolations();
+  });
+});
+
+describe("a rule sent to review", () => {
+  it("shows the way it leans, flagged for review", () => {
+    const { getByRole, getByText } = renderWithProviders(
+      <RuleVerdict finding={{ ..._rf, disposition: "needs_review", lean: "pass" }} />,
+    );
+    expect(getByRole("status", { name: "Disposition: Pass" })).toBeInTheDocument();
+    expect(getByText("Needs review")).toBeInTheDocument();
   });
 });

@@ -213,3 +213,26 @@ def test_every_rejecting_rule_has_its_element_code_registered() -> None:
             entry = ruleset.reason_codes.get(code)
             assert entry is not None, (rule.rule_id, code)
             assert entry.severity is Severity.WARN, code
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    ("confidence", "floor", "lean"),
+    [(0.40, 0.60, "pass"), (0.55, 0.60, "fail")],
+)
+async def test_a_fail_sent_to_review_leans_by_even_odds_on_its_reading(
+    run_one, confidence: float, floor: float, lean: str
+) -> None:
+    """The reviewer is shown the likelier answer pre-filled. The check found a
+    difference, so past even odds that it read right the difference is the
+    likelier answer, and below them a misread is (docs/decisions.md#0065)."""
+    result = await run_one(outcome=Outcome.FAIL, confidence=confidence, floor=floor)
+    assert result.outcome is Outcome.INSUFFICIENT_EVIDENCE
+    assert result.lean == lean
+
+
+@pytest.mark.asyncio
+async def test_a_settled_result_carries_no_lean(run_one) -> None:
+    result = await run_one(outcome=Outcome.FAIL, confidence=0.95, floor=0.60)
+    assert result.outcome is Outcome.FAIL
+    assert result.lean is None

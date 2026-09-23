@@ -12,7 +12,11 @@ from pydantic import BaseModel, ConfigDict
 
 from app.api.ui.results import SingleResultStore, _get_result_store
 from app.schemas.audit import OverrideEntry
-from app.services.disposition import disposition_after_overrides, field_disposition
+from app.services.disposition import (
+    disposition_after_overrides,
+    field_disposition,
+    label_lean,
+)
 
 router = APIRouter()
 _logger = logging.getLogger("app.api.overrides")
@@ -175,6 +179,7 @@ async def post_override(
     # `original_disposition` is it, and the trace still carries every rule.
     new_env = env.model_copy(update={"audit_trail": new_audit})
     new_env = new_env.model_copy(update={"disposition": disposition_after_overrides(new_env)})
+    new_env = new_env.model_copy(update={"lean": label_lean(new_env)})
     if in_flight is not None:
         in_flight.results[label_id] = new_env
     else:
@@ -198,6 +203,7 @@ async def post_override(
                     "evaluation_id": evaluation_id,
                     "entry": entry.model_dump(mode="json"),
                     "label_disposition": new_env.disposition,
+                    "label_lean": new_env.lean,
                 },
             }
         )
@@ -213,4 +219,8 @@ async def post_override(
         },
     )
 
-    return {**entry.model_dump(mode="json"), "label_disposition": new_env.disposition}
+    return {
+        **entry.model_dump(mode="json"),
+        "label_disposition": new_env.disposition,
+        "label_lean": new_env.lean,
+    }

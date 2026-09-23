@@ -1,4 +1,4 @@
-import type { DispositionEnvelope, OverrideEntry } from "../types/envelopes";
+import type { DispositionEnvelope, Lean, OverrideEntry } from "../types/envelopes";
 
 export type Verdict = "pass" | "fail" | "needs_review";
 
@@ -9,6 +9,7 @@ export type Verdict = "pass" | "fail" | "needs_review";
 export interface OverrideApplied {
   entry: OverrideEntry;
   labelDisposition?: Verdict;
+  labelLean?: Lean;
 }
 
 function _sameEntry(a: OverrideEntry, b: OverrideEntry): boolean {
@@ -25,6 +26,7 @@ export function withOverride(envelope: DispositionEnvelope, applied: OverrideApp
   return {
     ...envelope,
     disposition: applied.labelDisposition ?? envelope.disposition,
+    lean: applied.labelLean ?? envelope.lean,
     audit_trail: known ? envelope.audit_trail : { ...envelope.audit_trail, overrides: [...overrides, applied.entry] },
   };
 }
@@ -41,3 +43,33 @@ export const CORRECTION_CODES: Record<Verdict, string> = {
   fail: "REVIEWER.CORRECTION.FAIL",
   needs_review: "REVIEWER.CORRECTION.NEEDS_REVIEW",
 };
+
+/** The registered reason code a confirmation carries, one per answer the check
+ * can show pre-filled (`rules/reason_codes.yaml`, REVIEWER bin). */
+export const CONFIRMATION_CODES: Record<Lean, string> = {
+  pass: "REVIEWER.CONFIRMATION.PASS",
+  fail: "REVIEWER.CONFIRMATION.FAIL",
+};
+
+/** Was this override the reviewer agreeing with the pre-filled answer? */
+export function isConfirmation(entry: OverrideEntry): boolean {
+  return Object.values(CONFIRMATION_CODES).includes(entry.reason_code);
+}
+
+/** The answer shown for a result: the result itself once it is settled, and
+ * the server's lean while it waits on a reviewer. A result sent to review with
+ * no lean shows a mismatch, as the server does. */
+export function preFilled(disposition: Verdict, lean: Lean | null): Lean {
+  return disposition === "needs_review" ? (lean ?? "fail") : disposition;
+}
+
+/** How many field cards still wait on the reviewer: sent to review by the
+ * check, or by a correction, and not yet confirmed or corrected. */
+export function fieldsToConfirm(envelope: DispositionEnvelope): number {
+  return envelope.fields.filter((f) => {
+    const latest = fieldCorrection(envelope, f.field_name);
+    if (latest) return latest.applied_disposition === "needs_review";
+    return f.rule_findings.some((r) => r.disposition === "needs_review") &&
+      !f.rule_findings.some((r) => r.disposition === "fail");
+  }).length;
+}

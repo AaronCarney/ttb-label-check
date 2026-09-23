@@ -30,6 +30,7 @@ import asyncio
 import logging
 import time
 from collections.abc import Sequence
+from typing import Literal
 
 from app.rules._validators import VALIDATOR_REGISTRY, ValidatorContext
 from app.rules._validators._helpers import unlocated, unlocated_is_absent
@@ -38,6 +39,7 @@ from app.schemas.expected import ExpectedValue
 from app.schemas.extracted import FieldObservation
 from app.schemas.rejection import EngineMeta, Outcome, Severity, ValidationResult
 from app.schemas.rules import RuleSet
+from app.services.disposition import rule_disposition
 
 PER_RULE_TIMEOUT_S = 0.25
 
@@ -213,7 +215,29 @@ class YamlRuleEngine(RuleEngine):
         """Every result leaves the engine through here, carrying its timing,
         the rule's confidence floor and the sentence a reviewer reads."""
         result = self._apply_confidence_floor(rule, result)
-        return result.model_copy(update={"engine_meta": meta, "message": self._explain(result)})
+        return result.model_copy(
+            update={
+                "engine_meta": meta,
+                "message": self._explain(result),
+                "lean": self._lean(result),
+            }
+        )
+
+    def _lean(self, result: ValidationResult) -> Literal["pass", "fail"] | None:
+        """Which way a result sent to review leans, from what the check found.
+
+        A validator that set its own lean keeps it. Otherwise the reason code's
+        registered lean decides: the review codes whose check found the value,
+        or nearly, lean to a match, and the rest to a mismatch. A mismatch the
+        confidence floor sent to review has its lean set there, by whether its
+        reading is past even odds. A settled result needs no lean.
+        """
+        if rule_disposition(result) != "needs_review":
+            return None
+        if result.lean is not None:
+            return result.lean
+        entry = self._ruleset.reason_codes.get(result.reason_code or "")
+        return entry.lean if entry is not None else "fail"
 
     @staticmethod
     def _apply_confidence_floor(rule, result: ValidationResult) -> ValidationResult:
@@ -238,11 +262,15 @@ class YamlRuleEngine(RuleEngine):
             return result
         if result.aggregated_confidence >= rule.confidence_floor:
             return result
+        # The check found a difference; whether it is real turns on whether the
+        # reading was right. Past even odds the difference is the likelier
+        # answer, and below them a misread of a matching label is.
         return result.model_copy(
             update={
                 "outcome": Outcome.INSUFFICIENT_EVIDENCE,
                 "severity": Severity.WARN,
                 "reason_code": read_uncertain_code(rule),
+                "lean": "fail" if result.aggregated_confidence > 0.5 else "pass",
             }
         )
 

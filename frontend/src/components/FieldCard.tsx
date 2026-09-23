@@ -1,10 +1,11 @@
 import * as React from "react";
 import { cn } from "../lib/cn";
-import type { Verdict } from "../lib/corrections";
-import type { FieldFindingWire, OverrideEntry } from "../types/envelopes";
+import { isConfirmation, preFilled, type Verdict } from "../lib/corrections";
+import type { FieldFindingWire, Lean, OverrideEntry } from "../types/envelopes";
 import { ConfidenceIndicator } from "./ConfidenceIndicator";
 import { CitationChip } from "./CitationChip";
 import { DispositionPill } from "./DispositionPill";
+import { NeedsReviewFlag } from "./NeedsReviewFlag";
 
 export interface FieldCardProps {
   field: FieldFindingWire;
@@ -22,6 +23,9 @@ export interface FieldCardProps {
   /** Records a correction to this field and says whether it was saved; the
    * choices stay open when it was not. Absent, the card offers none. */
   onCorrect?: (verdict: Verdict) => Promise<boolean>;
+  /** Records the reviewer's agreement with the pre-filled answer of a field
+   * the check sent to review. Absent, the card offers no Confirm button. */
+  onConfirm?: (answer: Lean) => Promise<boolean>;
   className?: string;
 }
 
@@ -76,13 +80,18 @@ export function FieldCard({
   citationPanelId,
   correction = null,
   onCorrect,
+  onConfirm,
   className,
 }: FieldCardProps): React.JSX.Element {
   const checked = _fieldDisposition(field);
-  // A result stands until the reviewer says it is wrong, so the card needs no
-  // action when the check is right. When it is not, the reviewer's word is the
-  // field's result, and the check's own is still shown beside it.
+  // A settled result stands until the reviewer says it is wrong, so the card
+  // asks nothing of them. A result the check could not settle shows its best
+  // guess pre-filled, flagged for review, with a Confirm button beside the
+  // correction (docs/decisions.md#0065). The reviewer's word, once given, is
+  // the field's result, and the check's own is still shown beside it.
   const fieldDisp = correction ? correction.applied_disposition : checked;
+  const toConfirm = fieldDisp === "needs_review";
+  const answer = fieldDisp === null ? null : preFilled(fieldDisp, field.lean);
   const [correcting, setCorrecting] = React.useState(false);
   const [saving, setSaving] = React.useState(false);
   const choicesId = React.useId();
@@ -94,17 +103,24 @@ export function FieldCard({
     >
       <header className="flex items-center justify-between gap-3">
         <h3 className="text-base font-semibold">{_fieldLabel(field.field_name)}</h3>
-        {fieldDisp === null ? (
+        {answer === null ? (
           <span className="inline-flex items-center rounded-md border border-border bg-muted px-3 py-1 text-sm font-semibold text-muted-foreground">
             Not checked
           </span>
         ) : (
-          <DispositionPill disposition={fieldDisp} />
+          <div className="flex flex-wrap items-center gap-2">
+            {toConfirm && <NeedsReviewFlag />}
+            <DispositionPill disposition={answer} />
+          </div>
         )}
       </header>
       {correction && checked !== null && (
         <p className="text-sm text-muted-foreground">
-          Corrected by the reviewer. The check reported {_VERDICT_WORDS[checked]}.
+          {isConfirmation(correction)
+            ? "Confirmed by the reviewer."
+            : checked === "needs_review"
+              ? `Corrected by the reviewer. The check was unsure and suggested ${_VERDICT_WORDS[preFilled(checked, field.lean)]}.`
+              : `Corrected by the reviewer. The check reported ${_VERDICT_WORDS[checked]}.`}
         </p>
       )}
       <dl className="grid grid-cols-1 gap-2 text-sm sm:grid-cols-2">
@@ -144,16 +160,35 @@ export function FieldCard({
             />
           ))}
         </div>
+        {onConfirm && toConfirm && answer !== null && (
+          <button
+            type="button"
+            disabled={saving}
+            onClick={async () => {
+              setSaving(true);
+              try {
+                await onConfirm(answer);
+              } finally {
+                setSaving(false);
+              }
+            }}
+            className="ml-auto rounded-md bg-primary px-3 py-1 text-sm font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+          >
+            Confirm {_VERDICT_WORDS[answer]}
+          </button>
+        )}
         {onCorrect && fieldDisp !== null && (
-          // Offered on every checked field and never pre-selected: the
-          // reviewer names what the field should be, and no choice is made
-          // for them (docs/decisions.md#0064).
+          // Offered on every checked field: the reviewer names what the field
+          // should be (docs/decisions.md#0064).
           <button
             type="button"
             aria-expanded={correcting}
             aria-controls={choicesId}
             onClick={() => setCorrecting((open) => !open)}
-            className="ml-auto rounded-md border border-border bg-background px-3 py-1 text-sm text-foreground hover:bg-muted"
+            className={cn(
+              "rounded-md border border-border bg-background px-3 py-1 text-sm text-foreground hover:bg-muted",
+              !(onConfirm && toConfirm) && "ml-auto",
+            )}
           >
             This result is wrong
           </button>
@@ -168,7 +203,9 @@ export function FieldCard({
         >
           <span>It should be:</span>
           {(Object.keys(_VERDICT_WORDS) as Verdict[])
-            .filter((v) => v !== fieldDisp)
+            // A field waiting on review is already flagged, so its choice is
+            // the answer it does not show.
+            .filter((v) => v !== fieldDisp && !(toConfirm && v === answer))
             .map((v) => (
               <button
                 key={v}

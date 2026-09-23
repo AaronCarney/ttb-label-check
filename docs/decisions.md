@@ -3919,6 +3919,8 @@ Computing Surveys* 54(6). https://doi.org/10.1145/3453476.
 <a id="0064"></a>
 ## 0064. A result stands until the reviewer corrects it, one field at a time
 
+**Superseded in part by** [0065](#0065): a result the check could not settle now shows its best
+answer and a Confirm button. A settled result still asks nothing. The rest stands.
 **Evidence:** `app/services/disposition.py` (`field_disposition`, `disposition_after_overrides`);
 `app/api/overrides.py`; `rules/reason_codes.yaml` (`REVIEWER` bin);
 `frontend/src/components/FieldCard.tsx`; `frontend/src/components/LabelResult.tsx`;
@@ -3974,3 +3976,96 @@ trust or to think: cognitive forcing functions can reduce overreliance on AI in 
 decision-making. *Proc. ACM Hum.-Comput. Interact.* 5(CSCW1), 188.
 https://doi.org/10.1145/3449287. Amershi, S., et al. (2019). Guidelines for human-AI interaction.
 *Proc. CHI 2019*. https://doi.org/10.1145/3290605.3300233.
+
+<a id="0065"></a>
+## 0065. A result the check cannot settle shows its best answer, for the reviewer to confirm
+
+**Evidence:** `app/rules/yaml_engine.py` (`_lean`, `_apply_confidence_floor`);
+`app/rules/_validators/proof_agreement.py`; `app/schemas/rejection.py`; `app/schemas/rules.py`;
+`app/schemas/wire/disposition.py`; `app/services/disposition.py` (`field_lean`, `label_lean`);
+`app/api/overrides.py`; `rules/reason_codes.yaml`; `frontend/src/components/FieldCard.tsx`;
+`frontend/src/components/LabelResult.tsx`; `frontend/src/components/BatchTable.tsx`;
+`frontend/src/components/RuleVerdict.tsx`; `frontend/src/lib/corrections.ts`;
+`tests/test_pre_filled_answer.py`; `tests/rules/test_confidence_floor.py`;
+`tests/rules/_validators/test_proof_agreement.py`.
+
+**What was found.** A check the product could not settle showed *needs review* in place of an
+answer. The reviewer started from nothing, although the check usually had evidence pointing one
+way: a brand one letter from the application's, a warning whose only differences are non-words, a
+proof one "1" from twice the ABV. Needs review said a person had to look. It did not say what the
+product had found.
+
+**Chosen.** Every checked field shows an answer, match or mismatch. Separately, the card shows
+whether a person must confirm it.
+
+1. **A settled result** shows its verdict and only the *This result is wrong* control of
+   [0064](#0064). Nothing is asked of the reviewer.
+2. **An unsettled result** shows the answer it leans to, a *Needs review* flag beside that answer,
+   and a **Confirm** button. Confirming records the answer under `REVIEWER.CONFIRMATION.PASS` or
+   `.FAIL`, so the audit trail tells an agreement apart from a correction. *This result is wrong*
+   offers the other answer.
+3. **Which way a result leans.** A reason code that sends a result to review carries a registered
+   lean in `rules/reason_codes.yaml`. Six codes lean to a match, because what their check found
+   makes a match the likelier answer:
+   - `BRAND.NAME.NEEDS_REVIEW`: the brand read falls in the near-match band;
+   - `NAME_ADDRESS.MATCH.NEEDS_REVIEW`: the label need not print every name the application
+     carries;
+   - `WARNING.VERBATIM.NOT_CONFIRMED`: in [0063](#0063) every such difference measured was a misread;
+   - `WARNING.PRESENCE.NOT_CONFIRMED`: words of the statement were read on the label;
+   - `WARNING.HEADING.NOT_READ`: the statement was read and only its heading was missed;
+   - `WARNING.STYLE.BOLD_NOT_MEASURED`: the heading was read in capitals, and only its weight could
+     not be measured from the photograph.
+
+   Every other review code leans to a mismatch. Either its evidence points that way, or it points
+   nowhere: a field not read, a stopped check, a photograph too poor to read. For those the answer
+   is the agent's own practice today: "if an agent can't read the label they just reject it and ask
+   for a better image" (`specs/0001-label-verification/PRD.md`). Two checks set the lean from their
+   own evidence. A mismatch that the confidence floor sent to review leans to a mismatch when its
+   reading scores above 0.5, and to a match below that, because below even odds a misread of a
+   matching label is the likelier story. A proof sent to review leans to a match when the figure
+   cannot be a proof, is one "1" from twice the ABV, or is within its last printed digit. It leans
+   to a mismatch when it is a clear difference printed away from the ABV.
+4. **The field and the label.** A field leans to a mismatch if any of its rules does. A label under
+   review leans to a mismatch if any field does, or if a check outside the field cards is unfinished.
+   One element that does not match rejects the application (`docs/PRD.md` FR-11). The server works
+   out both leans and sends them with the result. The page, the header ("Needs review: 2 fields to
+   confirm") and the batch table show them. The page does not work them out a second time.
+5. **One confirmed mismatch fails the label at once**, as [0064](#0064) and FR-11 already required.
+   The fields still waiting keep their Confirm buttons. TTB returns an e-filed application "with a
+   list of corrections that need to be made to either the application or to the label itself", and
+   an application "may be rejected if all the necessary corrections are not made" (TTB, eApplication
+   Statuses in COLAs Online, p. 6). A reviewer who stops at the first mismatch sends back an
+   incomplete list.
+
+**Why this shape.** Pre-filled suggestions make people faster when the suggestion is right. They
+also make people accept wrong suggestions and take less initiative. In Levy et al. (2021),
+clinicians with suggestions were about 30% faster at choosing a label, were slower than annotators
+starting from scratch when the suggestion was wrong, and accepted wrong suggestions unmodified 17%
+of the time. So the lean is shown only where a person must look anyway. A result the check settled
+asks nothing, and an unsettled one is flagged beside its answer rather than made to look settled.
+Showing where the system is unsure is what calibrates trust in it: displaying confidence
+"increased people's willingness to rely on AI's prediction in high-confidence cases" and lowered
+reliance where confidence was low (Zhang et al. 2020). Engaging the person when in doubt, and
+making correction cheap, are Amershi et al.'s (2019) G10 and G9.
+
+**Rejected.** *Needs review in place of an answer* (the previous page). It asks the reviewer to
+redo work the check had already done. *A confirm button on every result*, rejected in
+[0064](#0064), stays rejected: a settled result still asks nothing. *A third answer for "unsure"*:
+the reviewer's decision is match or mismatch, so the page offers only those. *A lean by base rate
+alone*, match because most labels submitted are approved: where the check has no evidence, a match
+would be a claim the product cannot support, and the agent's own practice for an unreadable label
+is to send it back.
+
+**What it leaves.** The lean is a documented rule, not a measured probability. How often each
+code's lean is right has not been measured on the corpus or the held-out set. The per-code split
+rests on what each check found, and for `WARNING.VERBATIM.NOT_CONFIRMED` on [0063](#0063)'s
+count. The Levy et al. study measured clinical annotation, not label review.
+
+**References.** Levy, A., Agrawal, M., Satyanarayan, A., Sontag, D. (2021). Assessing the impact of
+automated suggestions on decision making: domain experts mediate model errors but take less
+initiative. *Proc. CHI 2021*. https://doi.org/10.1145/3411764.3445522. Zhang, Y., Liao, Q. V.,
+Bellamy, R. K. E. (2020). Effect of confidence and explanation on accuracy and trust calibration in
+AI-assisted decision making. *Proc. FAT\* 2020*. https://doi.org/10.1145/3351095.3372852. Amershi,
+S., et al. (2019). Guidelines for human-AI interaction. *Proc. CHI 2019*.
+https://doi.org/10.1145/3290605.3300233. TTB. eApplication Statuses in COLAs Online.
+https://www.ttb.gov/system/files/images/pdfs/labeling_colas-docs/eapplication-statuses-in-colas.pdf.

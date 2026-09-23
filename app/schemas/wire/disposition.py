@@ -12,7 +12,7 @@ from __future__ import annotations
 
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from app.schemas.audit import AuditRecord
 from app.schemas.metrics import Metrics
@@ -57,6 +57,18 @@ class RuleFindingWire(BaseModel):
     # "Expected FABIO SIGNORELLI / Found Rossastro / PASS", which contradicts
     # itself: the rule matched the fanciful name the same application declares.
     matched_value: str = ""
+    # The answer shown pre-filled: the verdict itself when the check settled
+    # it, and which way it leans when it went to review. A reviewer confirms a
+    # lean or corrects it; a settled verdict asks nothing of them.
+    lean: Literal["pass", "fail"] | None = None
+
+    @model_validator(mode="after")
+    def _settled_verdict_is_its_own_lean(self) -> RuleFindingWire:
+        if self.disposition != "needs_review":
+            self.lean = self.disposition
+        elif self.lean is None:
+            self.lean = "fail"
+        return self
 
 
 class AISuggestionWire(BaseModel):
@@ -93,6 +105,20 @@ class FieldFindingWire(BaseModel):
     rule_findings: tuple[RuleFindingWire, ...]
     ai_suggestion: AISuggestionWire
     field_confidence: ConfidenceBand
+    # The check's own answer for the field, shown pre-filled: a mismatch if any
+    # of its rules leans that way, because one element that does not match
+    # rejects the label, and a match if every rule does. None when no rule
+    # checked the field. A reviewer's correction is kept apart, on the audit
+    # trail, so this stays what the check found.
+    lean: Literal["pass", "fail"] | None = None
+
+    @model_validator(mode="after")
+    def _lean_from_rules(self) -> FieldFindingWire:
+        if self.rule_findings:
+            self.lean = "fail" if any(rf.lean == "fail" for rf in self.rule_findings) else "pass"
+        else:
+            self.lean = None
+        return self
 
 
 class DispositionEnvelope(BaseModel):
@@ -109,5 +135,20 @@ class DispositionEnvelope(BaseModel):
     disposition: Disposition
     disposition_confidence: ConfidenceBand
     fields: tuple[FieldFindingWire, ...]
+    # The label's pre-filled answer. The disposition when that is settled;
+    # when it is needs_review, a mismatch if any field or unfinished check
+    # leans that way, else a match. Worked out by
+    # `app.services.disposition.label_lean` and kept with every correction.
+    lean: Literal["pass", "fail"] | None = None
     audit_trail: AuditRecord
     metrics: Metrics
+
+    @model_validator(mode="after")
+    def _fill_lean(self) -> DispositionEnvelope:
+        if self.lean is None:
+            # Imported here because the rule lives with the other disposition
+            # rules, and that module imports this one.
+            from app.services.disposition import label_lean
+
+            self.lean = label_lean(self)
+        return self

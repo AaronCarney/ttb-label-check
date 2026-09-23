@@ -1,9 +1,10 @@
 import * as React from "react";
 import { cn } from "../lib/cn";
-import type { DispositionEnvelope, OverrideEntry } from "../types/envelopes";
+import type { DispositionEnvelope, Lean, OverrideEntry } from "../types/envelopes";
 import { AISuggestionBlock } from "./AISuggestionBlock";
 import { ConfidenceIndicator } from "./ConfidenceIndicator";
 import { DispositionPill } from "./DispositionPill";
+import { NeedsReviewFlag } from "./NeedsReviewFlag";
 import { FieldCard } from "./FieldCard";
 import { IncompleteCheckCard } from "./IncompleteCheckCard";
 import { LiveRegion } from "./LiveRegion";
@@ -13,7 +14,17 @@ import { ProcessingTime } from "./ProcessingTime";
 import { RawJSONDrawer } from "./RawJSONDrawer";
 import { RuleVerdict } from "./RuleVerdict";
 import { Toast } from "./Toast";
-import { CORRECTION_CODES, fieldCorrection, withOverride, type OverrideApplied, type Verdict } from "../lib/corrections";
+import {
+  CONFIRMATION_CODES,
+  CORRECTION_CODES,
+  fieldCorrection,
+  fieldsToConfirm,
+  isConfirmation,
+  preFilled,
+  withOverride,
+  type OverrideApplied,
+  type Verdict,
+} from "../lib/corrections";
 import { decidingFinding } from "../lib/decidingFinding";
 import { engineFailureCode, wasStoppedEarly } from "../lib/incompleteCheck";
 import { needsBetterPhotoFrom } from "../lib/needsBetterPhoto";
@@ -50,6 +61,13 @@ export const REASON_CODES: ReasonCodeEntry[] = [
   { code: "ALCOHOL_CONTENT.TOLERANCE.OUT_OF_BAND", description: "ABV out of band", disposition: "fail" },
   { code: "CLASS_TYPE.SOI.NO_MATCH", description: "Class/Type SOI mismatch", disposition: "fail" },
 ];
+
+// "1 field to confirm", "3 fields to confirm". Nothing when no field card is
+// waiting, as when only a stopped check keeps the label with a reviewer.
+function _toConfirmWords(n: number): string | undefined {
+  if (n === 0) return undefined;
+  return `${n} ${n === 1 ? "field" : "fields"} to confirm`;
+}
 
 function dispositionFor(code: string): "fail" | "needs_review" {
   const entry = REASON_CODES.find((e) => e.code === code);
@@ -137,10 +155,12 @@ export function LabelResult({
           setToast({ kind: "error", message: detail });
           return false;
         }
-        const { label_disposition: labelDisposition, ...entry } = (await res.json()) as OverrideEntry & {
-          label_disposition?: Verdict;
-        };
-        const done: OverrideApplied = { entry, labelDisposition };
+        const {
+          label_disposition: labelDisposition,
+          label_lean: labelLean,
+          ...entry
+        } = (await res.json()) as OverrideEntry & { label_disposition?: Verdict; label_lean?: Lean };
+        const done: OverrideApplied = { entry, labelDisposition, labelLean };
         setApplied((prev) => ({
           evaluationId,
           entries: prev.evaluationId === evaluationId ? [...prev.entries, done] : [done],
@@ -242,11 +262,18 @@ export function LabelResult({
           <p className="break-words font-mono text-xs text-muted-foreground">{envelope.evaluation_id}</p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
-          <DispositionPill disposition={envelope.disposition} />
+          {envelope.disposition === "needs_review" && (
+            <NeedsReviewFlag detail={_toConfirmWords(fieldsToConfirm(envelope))} />
+          )}
+          <DispositionPill disposition={preFilled(envelope.disposition, envelope.lean)} />
           {envelope.audit_trail.overrides.length > 0 && (
             // The result on show is no longer only the check's, and the
             // reviewer who opens this label later needs to know that.
-            <span className="text-sm text-muted-foreground">Corrected by the reviewer</span>
+            <span className="text-sm text-muted-foreground">
+              {envelope.audit_trail.overrides.every(isConfirmation)
+                ? "Confirmed by the reviewer"
+                : "Corrected by the reviewer"}
+            </span>
           )}
           <ConfidenceIndicator
             band={envelope.disposition_confidence.band}
@@ -310,6 +337,20 @@ export function LabelResult({
                         justification_text: null,
                       });
                       if (saved) setAnnouncement(`Correction saved: ${field.field_name} is now ${verdict.replace("_", " ")}`);
+                      return saved;
+                    }
+                  : undefined
+              }
+              onConfirm={
+                overridable
+                  ? async (answer) => {
+                      const saved = await postOverride({
+                        field_name: field.field_name,
+                        applied_disposition: answer,
+                        reason_code: CONFIRMATION_CODES[answer],
+                        justification_text: null,
+                      });
+                      if (saved) setAnnouncement(`Confirmed: ${field.field_name} is ${answer}`);
                       return saved;
                     }
                   : undefined

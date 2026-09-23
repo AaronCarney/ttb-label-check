@@ -10,6 +10,7 @@ function shortCircuitEnvelope(reasonCode: string, faceTag?: string): Disposition
     evaluation_id: "ev-1",
     label_ref: "lbl.jpg",
     disposition: "needs_review",
+    lean: "fail",
     disposition_confidence: { band: "low", numeric: 0.0 },
     fields: [],
     audit_trail: {
@@ -109,10 +110,12 @@ describe("needsBetterPhotoFrom", () => {
             reason_code: "WARNING.LEGIBILITY.GLARE",
             plain_language_explanation: "",
             matched_value: "",
+            lean: "fail",
           },
         ],
         ai_suggestion: { present: false, task: null, text: null, model_disposition: null },
         field_confidence: { band: "low", numeric: 0.1 },
+        lean: "fail",
       },
     ];
     expect(needsBetterPhotoFrom(envelope)?.reasonCode).toBe("WARNING.LEGIBILITY.GLARE");

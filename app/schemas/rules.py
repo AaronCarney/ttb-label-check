@@ -39,6 +39,11 @@ class ReasonCodeEntry(BaseModel):
     description: str
     cfr_anchors: tuple[str, ...]
     severity: Severity
+    # For a code that sends a result to review, which way the result leans: the
+    # answer shown pre-filled for the reviewer to confirm. Mismatch unless the
+    # evidence behind the code points to a match, because one element that does
+    # not match rejects the application and a reviewer confirms either way.
+    lean: Literal["pass", "fail"] = "fail"
 
 
 class AssetRef(BaseModel):

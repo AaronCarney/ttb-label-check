@@ -187,6 +187,7 @@ def build_field_findings(
                     reason_code=vr.reason_code or "",
                     plain_language_explanation=vr.message or "",
                     matched_value=vr.matched_value or "",
+                    lean=vr.lean,
                 )
             )
             confidences.append(vr.aggregated_confidence)

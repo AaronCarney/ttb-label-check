@@ -107,6 +107,7 @@ def test_a_proof_off_by_one_thin_one_goes_to_a_reviewer(abv: float, read: str) -
     assert result.outcome is Outcome.INSUFFICIENT_EVIDENCE
     assert result.reason_code == _REVIEW
     assert result.message is not None and "misread" in result.message
+    assert result.lean == "pass"
 
 
 def test_a_proof_rounded_to_its_printed_precision_goes_to_a_reviewer() -> None:
@@ -116,6 +117,7 @@ def test_a_proof_rounded_to_its_printed_precision_goes_to_a_reviewer() -> None:
     assert result.outcome is Outcome.INSUFFICIENT_EVIDENCE
     assert result.severity is Severity.WARN
     assert result.reason_code == _REVIEW
+    assert result.lean == "pass"
 
 
 def test_one_wrong_proof_beside_the_abv_among_right_ones_is_a_mismatch() -> None:
@@ -127,6 +129,8 @@ def test_a_disagreeing_proof_away_from_the_abv_goes_to_a_reviewer() -> None:
     result = _check(45.0, _proof("80", beside=False))
     assert result.outcome is Outcome.INSUFFICIENT_EVIDENCE
     assert result.reason_code == _REVIEW
+    # A clear difference is still a difference, wherever it is printed.
+    assert result.lean == "fail"
 
 
 def test_no_proof_on_the_label_means_the_check_does_not_apply() -> None:
@@ -146,6 +150,7 @@ def test_a_figure_above_two_hundred_is_unreadable_and_goes_to_a_reviewer() -> No
     result = _check(43.0, _proof("860"))
     assert result.outcome is Outcome.INSUFFICIENT_EVIDENCE
     assert result.reason_code == _REVIEW
+    assert result.lean == "pass"
 
 
 def test_the_result_is_as_confident_as_its_least_confident_proof() -> None:

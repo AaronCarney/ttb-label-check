@@ -35,6 +35,7 @@ const _envelope = (
   evaluation_id: "ev-1",
   label_ref: "lbl-1",
   disposition: "needs_review",
+  lean: "fail",
   disposition_confidence: { band: "low", numeric: 0 },
   fields,
   audit_trail: _auditTrail(trace),
@@ -59,6 +60,7 @@ const _brandField: DispositionEnvelope["fields"][number] = {
   rule_findings: [],
   ai_suggestion: { present: false, task: null, text: null, model_disposition: null },
   field_confidence: { band: "high", numeric: 0.9 },
+  lean: null,
 };
 
 // --- What the page says when a check did not finish ---
@@ -190,6 +192,7 @@ describe("correcting one field", () => {
         reason_code: "BRAND.NAME.DISAGREE",
         plain_language_explanation: "Differs",
         matched_value: "",
+        lean: "fail",
       },
     ],
   };
@@ -263,5 +266,68 @@ describe("correcting one field", () => {
     fireEvent.click(getByRole("button", { name: "Pass" }));
     expect(await findByText(/has no checked result/)).toBeInTheDocument();
     expect(getAllByRole("status", { name: "Disposition: Fail" })).toHaveLength(3);
+  });
+});
+
+describe("confirming a pre-filled answer", () => {
+  const _unsureBrand: DispositionEnvelope["fields"][number] = {
+    ..._brandField,
+    rule_findings: [
+      {
+        rule_id: "common.brand.exact_or_normalized",
+        cfr_citation: "27 CFR §5.64",
+        disposition: "needs_review",
+        reason_code: "BRAND.NAME.NEEDS_REVIEW",
+        plain_language_explanation: "Close",
+        matched_value: "",
+        lean: "pass",
+      },
+    ],
+    lean: "pass",
+  };
+  const _unsure = (): DispositionEnvelope => ({ ..._envelope([_unsureBrand], []), lean: "pass" });
+
+  it("shows the label's guess and how many fields are left, then settles on confirming", async () => {
+    const posted: unknown[] = [];
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (url: string, init?: RequestInit) => {
+        if (!url.endsWith("/overrides")) return { ok: true, json: async () => ({ faces: [] }) };
+        const body = JSON.parse(String(init?.body));
+        posted.push(body);
+        return {
+          ok: true,
+          json: async () => ({
+            field_name: body.field_name,
+            original_disposition: "needs_review",
+            applied_disposition: body.applied_disposition,
+            reason_code: body.reason_code,
+            justification_text: null,
+            reviewer_id: "session-a",
+            timestamp: "2026-09-22T00:00:00Z",
+            label_disposition: "pass",
+            label_lean: "pass",
+          }),
+        };
+      }),
+    );
+    const { getByRole, getByText, queryByText } = renderWithProviders(<LabelResult envelope={_unsure()} />);
+    expect(getByText("Needs review: 1 field to confirm")).toBeInTheDocument();
+
+    fireEvent.click(getByRole("button", { name: "Confirm Pass" }));
+
+    await waitFor(() => expect(queryByText(/field to confirm/)).toBeNull());
+    expect(posted).toEqual([
+      {
+        field_name: "brand_name",
+        applied_disposition: "pass",
+        reason_code: "REVIEWER.CONFIRMATION.PASS",
+        justification_text: null,
+      },
+    ]);
+    expect(getByText("Confirmed by the reviewer.")).toBeInTheDocument();
+    // The header does not call an agreement a correction.
+    expect(getByText("Confirmed by the reviewer")).toBeInTheDocument();
+    expect(queryByText("Corrected by the reviewer")).toBeNull();
   });
 });

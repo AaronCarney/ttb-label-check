@@ -151,8 +151,8 @@ def _stub_disposition_envelope(idx: int = 0, *, disposition: str = "pass") -> Di
     )
 
 
-def _stub_field_finding(name: str, rule_id: str, verdict: str):
-    """One field card whose single rule gave `verdict`."""
+def _stub_field_finding(name: str, rule_id: str, verdict: str, lean: str | None = None):
+    """One field card whose single rule gave `verdict`, leaning to `lean`."""
     from app.schemas.wire.disposition import (
         AISuggestionWire,
         ConfidenceBand,
@@ -173,6 +173,7 @@ def _stub_field_finding(name: str, rule_id: str, verdict: str):
                 disposition=verdict,  # type: ignore[arg-type]
                 reason_code="",
                 plain_language_explanation="",
+                lean=lean,  # type: ignore[arg-type]
             ),
         ),
         ai_suggestion=AISuggestionWire(present=False),

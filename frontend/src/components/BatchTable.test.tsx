@@ -11,6 +11,7 @@ const _stubRow = (i: number, disposition: "pass" | "fail" | "needs_review"): Bat
   evaluation_id: `e${i}`,
   label_ref: `lbl-${i}`,
   disposition,
+  lean: disposition === "pass" ? "pass" : "fail",
   disposition_confidence: { band: "high", numeric: 0.9 },
   fields: [],
   audit_trail: {
@@ -42,6 +43,15 @@ describe("BatchTable", () => {
     );
     // 1 header row + 3 data rows = 4.
     expect(getAllByRole("row")).toHaveLength(4);
+  });
+
+  it("shows each label's pre-filled answer, flagged while it waits on review", () => {
+    const { getAllByRole, getAllByText } = renderWithProviders(
+      <BatchTable rows={rows} onSelect={() => {}} />,
+    );
+    // Row 3 waits on review and leans to a mismatch, so two rows show Fail.
+    expect(getAllByRole("status", { name: "Disposition: Fail" })).toHaveLength(2);
+    expect(getAllByText("Needs review")).toHaveLength(1);
   });
 
   it("sorts by queue position ascending by default; toggles on header click", async () => {

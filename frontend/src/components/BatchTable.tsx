@@ -1,7 +1,9 @@
 import * as React from "react";
 import { cn } from "../lib/cn";
 import type { BatchSSEEvent } from "../types/sse";
+import { preFilled } from "../lib/corrections";
 import { DispositionPill } from "./DispositionPill";
+import { NeedsReviewFlag } from "./NeedsReviewFlag";
 
 export type SortKey = "position" | "disposition";
 export type SortDir = "asc" | "desc";
@@ -90,7 +92,14 @@ export function BatchTable({ rows, onSelect, selectedRef = null, className }: Ba
           >
             <td data-col="position" className="p-2 tabular-nums">{row.queue_position}</td>
             <td className="p-2 font-mono text-xs">{row.label_ref}</td>
-            <td className="p-2"><DispositionPill disposition={row.disposition} /></td>
+            <td className="p-2">
+              {/* The pre-filled answer, flagged while a reviewer has yet to
+                  confirm it (docs/decisions.md#0065). */}
+              <div className="flex flex-wrap items-center gap-2">
+                <DispositionPill disposition={preFilled(row.disposition, row.lean)} />
+                {row.disposition === "needs_review" && <NeedsReviewFlag />}
+              </div>
+            </td>
           </tr>
         ))}
       </tbody>

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import re
 from enum import StrEnum
+from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -88,4 +89,10 @@ class ValidationResult(BaseModel):
     # showing a label reading that differs from the expected value beside a
     # pass. Naming it here is what lets the page say which one was matched.
     matched_value: str | None = None
+    # Which way a result the rule could not settle leans: the answer a reviewer
+    # is shown pre-filled, to confirm or correct. None leaves it to the reason
+    # code's registered lean (`rules/reason_codes.yaml`), set by the engine.
+    # A validator sets it only where its own evidence points one way while its
+    # reason code covers both, such as a proof one "1" from twice the ABV.
+    lean: Literal["pass", "fail"] | None = None
     engine_meta: EngineMeta

@@ -4,6 +4,9 @@
 export type Band = "high" | "medium" | "low";
 export type Disposition = "pass" | "fail" | "needs_review";
 export type RuleDisposition = "pass" | "fail" | "needs_review";
+// The answer shown pre-filled: a settled verdict, or which way a result sent
+// to review leans for the reviewer to confirm or correct.
+export type Lean = "pass" | "fail";
 
 export interface ConfidenceBand {
   band: Band;
@@ -28,6 +31,7 @@ export interface RuleFindingWire {
   // Which of the application's values this rule matched, when it was not the
   // one shown as expected. Empty otherwise.
   matched_value: string;
+  lean: Lean | null;
 }
 
 export type AISuggestionTask =
@@ -68,6 +72,8 @@ export interface FieldFindingWire {
   rule_findings: RuleFindingWire[];
   ai_suggestion: AISuggestionWire;
   field_confidence: ConfidenceBand;
+  // The check's own answer for the field; null when no rule checked it.
+  lean: Lean | null;
 }
 
 export interface PerRuleTraceEntry {
@@ -123,6 +129,7 @@ export interface DispositionEnvelope {
   disposition: Disposition;
   disposition_confidence: ConfidenceBand;
   fields: FieldFindingWire[];
+  lean: Lean | null;
   audit_trail: AuditRecord;
   metrics: Metrics;
 }
