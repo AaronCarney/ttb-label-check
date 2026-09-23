@@ -7,6 +7,8 @@ date: the release's git tag records when it was cut. Versions follow
 
 ## [Unreleased]
 
+## [0.4.2]
+
 ### Changed
 
 - The lint, type check and whole suite run on the developer's machine through `scripts/ci.sh`,
