@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import logging
+import os
+from pathlib import Path
 
 from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
@@ -16,6 +18,26 @@ _warmed: dict[str, bool] = {"done": False}
 
 def _get_settings() -> Settings:
     return Settings()
+
+
+def host_facts(cpuinfo: Path = Path("/proc/cpuinfo")) -> dict[str, object]:
+    """The processor this process runs on, as the kernel reports it.
+
+    A read's time depends on the processor, and Cloud Run does not say which one
+    an instance got, so a live timing cannot be compared with another without
+    this (decision 0066). A processor that cannot be read is reported as
+    unknown rather than guessed.
+    """
+    model = "unknown"
+    try:
+        for line in cpuinfo.read_text(encoding="utf-8", errors="replace").splitlines():
+            key, _, value = line.partition(":")
+            if key.strip() == "model name" and value.strip():
+                model = value.strip()
+                break
+    except OSError:
+        pass
+    return {"cpu_model": model, "cpus": os.cpu_count()}
 
 
 # Two paths, one handler. Cloud Run's front end answers /healthz itself with
@@ -55,6 +77,7 @@ async def healthz(settings: Settings = Depends(_get_settings)) -> JSONResponse:
         "version": settings.app_version,
         "commit": settings.git_commit or "unknown",
         "mode": {"vision": settings.vision_mode},
+        "host": host_facts(),
         "warmup_ran": False,
     }
     if not _warmed["done"]:

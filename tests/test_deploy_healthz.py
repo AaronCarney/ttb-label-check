@@ -211,7 +211,23 @@ def _summarise(rows: list[dict]) -> dict:
     }
 
 
-def _write_record(deploy_url: str, rows: list[dict]) -> Path:
+def _host(deploy_url: str) -> dict | None:
+    """The processor the service reports, or None if it did not answer.
+
+    Read before and after the run: the service runs one instance, but one that
+    is replaced mid-run can land on a different processor, and the two readings
+    show whether that happened.
+    """
+    try:
+        response = httpx.get(f"{deploy_url}/api/health", timeout=_REQUEST_TIMEOUT_SECONDS)
+        return response.json().get("host")
+    except (httpx.HTTPError, ValueError):
+        return None
+
+
+def _write_record(
+    deploy_url: str, rows: list[dict], hosts: tuple[dict | None, dict | None] = (None, None)
+) -> Path:
     _RECORD_DIR.mkdir(parents=True, exist_ok=True)
     stamp = datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")
     path = _RECORD_DIR / f"{stamp}.json"
@@ -220,6 +236,8 @@ def _write_record(deploy_url: str, rows: list[dict]) -> Path:
             {
                 "url": deploy_url,
                 "measured_at": datetime.now(UTC).isoformat(),
+                "host_before": hosts[0],
+                "host_after": hosts[1],
                 "summary": _summarise(rows),
                 "rows": rows,
             },
@@ -326,13 +344,14 @@ def test_deployed_single_check_meets_the_five_second_budget(deploy_url):
     # load, and it leaves the service holding this submission's answer.
     _warm_id, warm_faces, warm_form = submissions[0]
     _check_once(deploy_url, warm_faces, warm_form)
+    host_before = _host(deploy_url)
 
     measured: list[dict] = []
     for label_id, faces, form in submissions[1:]:
         status, elapsed, envelope = _check_once(deploy_url, faces, form)
         measured.append(_row_from_result(label_id, status, elapsed, envelope, len(faces)))
 
-    record = _write_record(deploy_url, measured)
+    record = _write_record(deploy_url, measured, (host_before, _host(deploy_url)))
     summary = _summarise(measured)
     slowest = sorted(measured, key=lambda row: row["wall_seconds"], reverse=True)[:5]
     where = f"Rows for this run are in {record}."
