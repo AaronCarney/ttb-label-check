@@ -82,11 +82,13 @@ sample, which the quality gate turns away.
 worth its cost: the government warning is printed on the back of 20 of the 30 corpus labels, so a
 check that skipped it would be faster and wrong.
 
-**The reader got slower in 0.4.0.** The build before it made 23 and 33 of 37, with reading at 3.33
-and 3.09 seconds for the median check. Version 0.4.0 carries the reader fixes listed in
-`CHANGELOG.md`, and the median read is about 1.3 seconds longer.
+**Reading on the deployed service is slower than it was, and the cause is not yet found.** The
+build before 0.4.0 made 23 and 33 of 37, with reading at 3.33 and 3.09 seconds for the median
+check, about 1.3 seconds less. Timed on its own on the same 12 labels on a development machine,
+the reading code takes the same time before and after 0.4.0's reader fixes (median 1.03 and 1.02
+seconds per label), so those fixes do not explain the difference there.
 
-**The first measurement of the day found a defect instead.** The service ran one request at a time
+**An earlier measurement found a defect instead.** The service ran one request at a time
 on up to two instances, and a check's results stream held its instance for as long as the check
 ran, so the next request started a second instance that did not hold the batch; the reviewer was
 shown no result. Two runs lost 25 and 34 of their 37 checks this way. The service now runs one
